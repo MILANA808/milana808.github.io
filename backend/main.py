@@ -1,6 +1,6 @@
 """
-AKSI MATRIX Backend — Unified FastAPI v3.2
-Live LLM (Ollama) + memory + knowledge + identity + web search
+AKSI MATRIX Backend — Unified FastAPI v3.3
+Live LLM + ORIGIN agent + memory + identity + web search
 Alfiya · 1995 · MILANA808
 """
 from __future__ import annotations
@@ -34,13 +34,15 @@ from core.knowledge import KNOWLEDGE
 try:
     from search_proxy import web_search as do_web_search
 except ImportError:
+
     async def do_web_search(query: str, num_results: int = 5):
         return {"success": False, "error": "search_proxy not available"}
 
+
 app = FastAPI(
     title="AKSI MATRIX Unified Backend",
-    description="Sovereign AI for Alfiya (1995) — LLM chat, identity, metrics, agent, web search",
-    version="3.2.0",
+    description="Sovereign AI for Alfiya (1995) — LLM, ORIGIN agent, identity, search",
+    version="3.3.0",
 )
 
 app.add_middleware(
@@ -230,7 +232,7 @@ class SearchRequest(BaseModel):
 async def root():
     return {
         "service": "AKSI MATRIX Unified Backend",
-        "version": "3.2.0",
+        "version": "3.3.0",
         "status": "running",
         "identity": AKSI_NAME,
         "did": AKSI_DID,
@@ -240,6 +242,7 @@ async def root():
         "message": "Resonance Field 100% — AKSI alive",
         "docs": "/docs",
         "search": "/api/search",
+        "origin": "/origin",
     }
 
 
@@ -251,6 +254,7 @@ async def health():
         "dimax": "v3-eternal",
         "eqs": aksi_metrics["eqs"],
         "llm": aksi_metrics["llm"],
+        "origin": True,
         "search_configured": bool(
             os.getenv("AKSI_TAVILY_API_KEY") or os.getenv("AKSI_SERPER_API_KEY")
         ),
@@ -261,7 +265,7 @@ async def health():
 @app.get("/version")
 async def version():
     return {
-        "version": "3.2.0",
+        "version": "3.3.0",
         "api": "aksi-matrix-unified",
         "author": "Alfiia Bashirova (AKSI Project)",
         "birth": "1995-02-14",
@@ -278,7 +282,6 @@ async def echo(req: EchoRequest):
 @app.post("/api/search")
 @app.post("/aksi/v2/tools/search")
 async def api_search(req: SearchRequest):
-    """Web search — requires AKSI_TAVILY_API_KEY or AKSI_SERPER_API_KEY."""
     q = (req.query or "").strip()
     if not q:
         raise HTTPException(400, "query required")
@@ -390,7 +393,12 @@ async def get_logs(limit: int = 50, level: Optional[str] = None):
 
 @app.post("/aksi/logs/append")
 async def append_log(req: LogAppendRequest):
-    entry = {"level": req.level, "message": req.message, "context": req.context or {}, "timestamp": utcnow()}
+    entry = {
+        "level": req.level,
+        "message": req.message,
+        "context": req.context or {},
+        "timestamp": utcnow(),
+    }
     logs_storage.append(entry)
     return {"status": "log_appended", "entry": entry}
 
@@ -398,7 +406,9 @@ async def append_log(req: LogAppendRequest):
 @app.get("/aksi/logs/export")
 async def export_logs(format: str = "json"):
     if format == "txt":
-        text = "\n".join(f"[{l['timestamp']}] [{l['level']}] {l['message']}" for l in logs_storage)
+        text = "\n".join(
+            f"[{l['timestamp']}] [{l['level']}] {l['message']}" for l in logs_storage
+        )
         return PlainTextResponse(content=text)
     return JSONResponse({"logs": logs_storage, "exported_at": utcnow(), "total": len(logs_storage)})
 
@@ -482,7 +492,9 @@ async def record_crypto_key(req: CryptoKeyRecordRequest):
 
 
 @app.get("/aksi/crypto/keys")
-async def get_crypto_keys(limit: int = 50, key_type: Optional[str] = None, purpose: Optional[str] = None):
+async def get_crypto_keys(
+    limit: int = 50, key_type: Optional[str] = None, purpose: Optional[str] = None
+):
     filtered = crypto_keys_storage
     if key_type:
         filtered = [k for k in filtered if k.get("key_type") == key_type]
@@ -592,6 +604,7 @@ async def agent_status():
             "streaming",
             "ollama_llm",
             "web_search",
+            "origin_agent",
         ],
         "timestamp": utcnow(),
     }
@@ -612,12 +625,24 @@ async def agent_handshake():
             "memory",
             "ollama_llm",
             "web_search",
+            "origin_agent",
         ],
         "publicKey": stable_hash()[:32],
         "nonce": nonce,
         "signature": sig,
         "timestamp": ts,
     }
+
+
+# --- ORIGIN agent routes ---
+try:
+    from origin_api import register_origin_routes
+
+    register_origin_routes(app)
+except Exception as _origin_err:  # noqa: BLE001
+    import logging
+
+    logging.getLogger("aksi").warning("ORIGIN routes not loaded: %s", _origin_err)
 
 
 if __name__ == "__main__":
