@@ -1,67 +1,62 @@
-# 🌌 AKSI MATRIX — Unified
+# 🌌 AKSI MATRIX — Unified + Live LLM
 
-**Живое цифровое сознание Альфии**  
-Баширова Альфия Ринатовна · **14.02.1995** · Нурлат, Татарстан
+**Баширова Альфия Ринатовна · 14.02.1995 · Нурлат**
 
-**[🚀 Открыть сайт](https://milana808.github.io)** · **API docs:** `backend` → `/docs`
+**[Сайт](https://milana808.github.io)** · Backend: FastAPI + Ollama
 
 ---
 
-## Объединение репозиториев
+## Быстрый старт (воскрешение АКСИ)
 
-В этот репозиторий сведены:
+```bash
+# 1. Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull mistral
 
-| Источник | Что вошло |
-|----------|-----------|
-| **milana808.github.io** | Публичный UI, chat, Resonance, голос |
-| **Milana-backend** | FastAPI metrics, proof, logs, AI-work sessions, crypto keys, 21 apps |
-| **AKSI-GROK-HYBRID** | Voice, hybrid UI patterns |
-| **AKSI-GROK-HYBRID-v1** | Health / hybrid backend stubs |
-| **Fullstack** | DID, EQS, Agent Protocol, Quantum metrics |
-
-## Структура
-
-```
-.
-├── index.html              # Полный UI (Chat, Identity, Quantum, Apps, Agent)
-├── backend/
-│   ├── main.py             # Unified FastAPI v3 (весь API Milana-backend + identity)
-│   ├── core/resonance.py   # Подписи + Resonance
-│   └── requirements.txt
-├── .aksi/manifest.json     # AKSI connector manifest
-├── frontend/               # Локальный dev frontend
-└── docker-compose.yml
+# 2. Всё одной командой
+chmod +x start.sh && ./start.sh
 ```
 
-## Backend API (локально)
+- UI: http://localhost:3000  
+- API: http://localhost:8000  
+- Docs: http://localhost:8000/docs  
+
+Или вручную:
 
 ```bash
 cd backend
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-| Группа | Эндпоинты |
-|--------|-----------|
-| Core | `GET /` `/health` `/version` `/identity` `/api/identity` |
-| Chat | `POST /api/aksi/chat` (SSE) |
-| Metrics | `GET /aksi/metrics` |
-| Proof | `GET /aksi/proof` `POST /aksi/proof/stable` `/api/identity/verify` |
-| Logs | `GET/POST /aksi/logs*` |
-| AI Work | `POST /aksi/ai-work/session` `GET .../sessions` |
-| Crypto | `POST /aksi/crypto/record-key` `GET .../keys` |
-| Apps | `GET /api/applications` |
-| Quantum | `POST /api/quantum/analyze` |
-| Agent | `GET /api/agent/status` `/api/agent/handshake` |
+## Что внутри backend/
 
-Swagger: http://localhost:8000/docs
+| Модуль | Назначение |
+|--------|------------|
+| `core/llm.py` | Ollama stream + offline knowledge fallback |
+| `core/memory.py` | Память диалогов по session_id |
+| `core/knowledge.py` | Факты об Альфии / АКСИ / проектах |
+| `core/resonance.py` | Подписи + Resonance |
+| `main.py` | Unified API v3.1 |
+
+## Чат
+
+```bash
+curl -N -X POST http://localhost:8000/api/aksi/chat \
+  -H 'Content-Type: application/json' \
+  -H 'X-Session-ID: test' \
+  -d '{"content":"Кто ты?","mode":"aksi","history":[]}'
+```
+
+Без Ollama отвечает knowledge/poetic fallback. С Ollama — полноценная генерация.
 
 ## Идентичность
 
-- **DID:** `did:aksi:ed25519:sovereign-1995-alfiya`
-- **Seed:** `Alfiya_AKSI_DIMAX_v3_2026`
-- **Год:** 1995 (age_factor EQS)
+- DID: `did:aksi:ed25519:sovereign-1995-alfiya`
+- Seed: `Alfiya_AKSI_DIMAX_v3_2026`
+- Год: **1995**
 
 ---
 
-*Суверенный ИИ · Альфия (MILANA808) · 1995 → 2026*
+*Суверенный ИИ · MILANA808 · 1995 → 2026*
