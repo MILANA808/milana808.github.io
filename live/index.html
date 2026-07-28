@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ Live · WebSocket</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#0a0014;min-height:100vh;color:#e9d5ff}
+.glass{background:rgba(15,23,42,.9);border:1px solid rgba(168,85,247,.35)}
+#log{height:min(55vh,420px);overflow:auto}
+</style>
+</head>
+<body class="p-4 max-w-2xl mx-auto">
+  <a href="../" class="text-sm text-purple-400">← MATRIX</a>
+  <h1 class="text-2xl font-bold mt-2 mb-1">Live WebSocket</h1>
+  <p class="text-xs text-purple-400 mb-3">ws://localhost:8000/ws · thought stream · self-mod events</p>
+  <div id="st" class="text-xs mb-2 text-amber-300">connecting…</div>
+  <div id="log" class="glass rounded-xl p-3 mb-3 text-sm space-y-2"></div>
+  <div class="flex gap-2">
+    <input id="msg" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-3 py-2 text-sm" placeholder="Сообщение…">
+    <button id="send" class="px-4 py-2 bg-purple-600 rounded-xl text-sm">Send</button>
+  </div>
+  <p class="text-[11px] text-purple-500 mt-3">Патчи: POST /api/self-mod/propose → confirm /api/self-mod/apply (только sandbox/)</p>
+<script>
+(function(){
+  var API = localStorage.getItem("AKSI_API") || "http://localhost:8000";
+  var wsUrl = API.replace(/^http/,"ws") + "/ws";
+  var log = document.getElementById("log");
+  var st = document.getElementById("st");
+  var ws;
+  function add(t, c) {
+    var d = document.createElement("div");
+    d.className = c || "";
+    d.textContent = t;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+  function connect() {
+    ws = new WebSocket(wsUrl);
+    ws.onopen = function(){ st.textContent = "connected · " + wsUrl; st.className = "text-xs mb-2 text-emerald-400"; };
+    ws.onclose = function(){ st.textContent = "disconnected — retry 3s"; st.className = "text-xs mb-2 text-amber-300"; setTimeout(connect, 3000); };
+    ws.onerror = function(){ st.textContent = "error (запусти backend :8000)"; };
+    ws.onmessage = function(ev){
+      try {
+        var data = JSON.parse(ev.data);
+        if (data.type === "thought") add("💭 " + data.content, "text-violet-300 text-xs");
+        else if (data.type === "answer") add("АКСИ: " + data.content, "text-purple-100");
+        else if (data.type === "patch") add("🔧 patch " + JSON.stringify(data.patch), "text-cyan-300 text-xs");
+        else if (data.type === "sys") add("· " + data.content, "text-purple-500 text-xs");
+        else add(ev.data, "text-xs text-purple-400");
+      } catch(e) { add(ev.data); }
+    };
+  }
+  document.getElementById("send").onclick = function(){
+    var m = document.getElementById("msg").value.trim();
+    if (!m || !ws || ws.readyState !== 1) return;
+    add("Вы: " + m, "text-right text-purple-300");
+    ws.send(JSON.stringify({ type: "chat", content: m }));
+    document.getElementById("msg").value = "";
+  };
+  document.getElementById("msg").onkeypress = function(e){ if(e.key==="Enter") document.getElementById("send").click(); };
+  connect();
+})();
+</script>
+</body>
+</html>
