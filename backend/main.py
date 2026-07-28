@@ -3,6 +3,7 @@ AKSI MATRIX Backend — Unified FastAPI v3.5.1
 WS + ORIGIN + self-mod + network + user profiles wired to LLM
 Alfiya · 1995 · MILANA808
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -91,30 +92,72 @@ aksi_metrics = {
 }
 
 APPLICATIONS = [
-    {"id": i + 1, "name": n, "description": d, "icon": ic, "route": r, "category": c, "isActive": True}
+    {
+        "id": i + 1,
+        "name": n,
+        "description": d,
+        "icon": ic,
+        "route": r,
+        "category": c,
+        "isActive": True,
+    }
     for i, (n, d, ic, r, c) in enumerate(
         [
             ("MoodMirror", "AI mood analysis", "Smile", "/apps/moodmirror", "Health"),
-            ("MindMirror", "Cognitive journaling", "Brain", "/apps/mindmirror", "Health"),
+            (
+                "MindMirror",
+                "Cognitive journaling",
+                "Brain",
+                "/apps/mindmirror",
+                "Health",
+            ),
             ("MindLink", "Connect ideas", "Link", "/apps/mindlink", "Utility"),
             ("HealthScan", "Health metrics", "Activity", "/apps/healthscan", "Health"),
             ("Mentor", "AI mentor", "GraduationCap", "/apps/mentor", "Education"),
             ("Family", "Family organizer", "Users", "/apps/family", "Social"),
             ("Aura", "Energy tracker", "Sun", "/apps/aura", "Lifestyle"),
             ("AksiLove", "Compatibility", "Heart", "/apps/aksilove", "Social"),
-            ("MoodRadio", "Mood playlists", "Radio", "/apps/moodradio", "Entertainment"),
-            ("AksiShopping", "Smart shopping", "ShoppingBag", "/apps/aksishopping", "Utility"),
+            (
+                "MoodRadio",
+                "Mood playlists",
+                "Radio",
+                "/apps/moodradio",
+                "Entertainment",
+            ),
+            (
+                "AksiShopping",
+                "Smart shopping",
+                "ShoppingBag",
+                "/apps/aksishopping",
+                "Utility",
+            ),
             ("AIStylist", "Style advice", "Shirt", "/apps/aistylist", "Lifestyle"),
             ("EcoGaze", "Eco metrics", "Leaf", "/apps/ecogaze", "Utility"),
             ("DreamJournal", "Dream diary", "Moon", "/apps/dreamjournal", "Health"),
             ("AksiCompanion", "AI friend", "Bot", "/apps/aksicompanion", "Social"),
             ("DressUpAR", "Virtual try-on", "Camera", "/apps/dressupar", "Lifestyle"),
-            ("GlobalID", "Decentralized ID", "Fingerprint", "/apps/globalid", "Utility"),
+            (
+                "GlobalID",
+                "Decentralized ID",
+                "Fingerprint",
+                "/apps/globalid",
+                "Utility",
+            ),
             ("AksiChat", "Secure chat", "MessageCircle", "/apps/aksichat", "Social"),
             ("LifeScan", "Life balance", "PieChart", "/apps/lifescan", "Health"),
             ("TimeCapsule", "Future messages", "Clock", "/apps/timecapsule", "Utility"),
             ("TeleHelp", "Emergency", "Phone", "/apps/telehelp", "Health"),
-            ("StoryAI", "AI storytelling", "BookOpen", "/apps/storyai", "Entertainment"),
+            (
+                "StoryAI",
+                "AI storytelling",
+                "BookOpen",
+                "/apps/storyai",
+                "Entertainment",
+            ),
+            ("QuantumLab", "Circuit playground", "Atom", "/apps/quantumlab", "Science"),
+            ("Globe5D", "Live resonance map", "Globe", "/globe", "Platform"),
+            ("VoiceAKSI", "Voice agent", "Mic", "/apps/voiceaksi", "Interface"),
+            ("Resonance", "Field metrics", "Waves", "/apps/resonance", "Core"),
         ]
     )
 ]
@@ -390,14 +433,58 @@ async def export_logs(format: str = "json"):
 
 @app.post("/aksi/ai-work/session")
 async def record_ai_work_session(req: AIWorkSessionRequest):
-    if req.action == "start":
-        sid = req.session_id or secrets.token_hex(16)
-        ai_work_sessions.append(
-            {"session_id": sid, "status": "active", "started_at": utcnow()}
-        )
+    action = req.action.lower().strip()
+    sid = req.session_id or secrets.token_hex(16)
+
+    if action == "start":
+        entry = {
+            "session_id": sid,
+            "status": "active",
+            "started_at": utcnow(),
+            "metadata": req.metadata or {},
+        }
+        ai_work_sessions.append(entry)
         ai_code_metrics["total_sessions"] += 1
-        return {"status": "session_started", "session_id": sid}
-    return {"status": "ok"}
+        return {"status": "session_started", "session_id": sid, "entry": entry}
+
+    session = next(
+        (s for s in reversed(ai_work_sessions) if s.get("session_id") == sid), None
+    )
+    if session is None:
+        session = {"session_id": sid, "status": "active", "started_at": utcnow()}
+        ai_work_sessions.append(session)
+        ai_code_metrics["total_sessions"] += 1
+
+    files = list(dict.fromkeys(req.files_modified or []))
+    lines = max(0, int(req.lines_changed or 0))
+    operation = req.operation or action
+
+    session.update(
+        {
+            "status": (
+                "completed" if action in {"finish", "complete", "commit"} else action
+            ),
+            "updated_at": utcnow(),
+            "files_modified": files,
+            "lines_changed": lines,
+            "language": req.language,
+            "operation": operation,
+            "commit_hash": req.commit_hash,
+            "metadata": req.metadata or session.get("metadata", {}),
+        }
+    )
+
+    if files:
+        ai_code_metrics["total_files_touched"] += len(files)
+        ai_code_metrics["total_code_changes"] += 1
+    ai_code_metrics["total_lines_modified"] += lines
+    if req.language:
+        ai_code_metrics["languages"][req.language] += 1
+    ai_code_metrics["operations"][operation] += 1
+    if req.commit_hash or action == "commit":
+        ai_code_metrics["total_commits"] += 1
+
+    return {"status": "session_updated", "session_id": sid, "entry": session}
 
 
 @app.get("/aksi/ai-work/sessions")

@@ -24,11 +24,12 @@
   <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
   <script>
   const statusColor = { live: 'text-emerald-400', wip: 'text-amber-300', concept: 'text-purple-500' };
+  const esc = s => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   const grid = document.getElementById('grid');
   (window.AKSI_APPS || []).forEach(a => {
     const el = document.createElement('div');
     el.className = 'glass rounded-xl p-4';
-    el.innerHTML = '<div class="flex justify-between gap-2"><div class="font-bold text-sm text-purple-200">'+a.name+'</div><span class="text-[10px] '+ (statusColor[a.status]||'') +'">'+a.status+'</span></div><div class="text-xs text-purple-400/70 mt-1">'+a.description+'</div><div class="text-[10px] text-purple-500 mt-2">'+a.category+'</div>';
+    el.innerHTML = '<div class="flex justify-between gap-2"><div class="font-bold text-sm text-purple-200">'+esc(a.name)+'</div><span class="text-[10px] '+ (statusColor[a.status]||'') +'">'+esc(a.status)+'</span></div><div class="text-xs text-purple-400/70 mt-1">'+esc(a.description)+'</div><div class="text-[10px] text-purple-500 mt-2">'+esc(a.category)+'</div>';
     grid.appendChild(el);
   });
   </script>

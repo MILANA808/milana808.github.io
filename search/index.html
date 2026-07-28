@@ -27,13 +27,14 @@
 
   <script>
   const API = localStorage.getItem('AKSI_API') || 'http://localhost:8000';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   const out = document.getElementById('out');
   document.getElementById('btn-local').onclick = () => {
     const q = document.getElementById('q').value;
     const hits = window.AKSI_localSearch(q);
     if (!hits.length) { out.innerHTML = '<p class="text-purple-500">Ничего не найдено в каталоге приложений</p>'; return; }
     out.innerHTML = hits.map(a =>
-      '<div class="glass rounded-xl p-3"><b class="text-purple-200">'+a.name+'</b> <span class="text-[10px] text-purple-500">'+a.status+'</span><div class="text-xs text-purple-400">'+a.description+' · '+a.category+'</div></div>'
+      '<div class="glass rounded-xl p-3"><b class="text-purple-200">'+esc(a.name)+'</b> <span class="text-[10px] text-purple-500">'+esc(a.status)+'</span><div class="text-xs text-purple-400">'+esc(a.description)+' · '+esc(a.category)+'</div></div>'
     ).join('');
   };
   document.getElementById('btn-web').onclick = async () => {
@@ -43,16 +44,16 @@
     try {
       const data = await window.AKSI_webSearch(API, q);
       if (!data.success) {
-        out.innerHTML = '<p class="text-amber-300">'+ (data.error || 'Поиск недоступен') +'</p><p class="text-xs text-purple-500 mt-2">Запусти backend, добавь AKSI_TAVILY_API_KEY в .env — см. DEPLOY.md</p>';
+        out.innerHTML = '<p class="text-amber-300">'+ esc(data.error || 'Поиск недоступен') +'</p><p class="text-xs text-purple-500 mt-2">Запусти backend, добавь AKSI_TAVILY_API_KEY в .env — см. DEPLOY.md</p>';
         return;
       }
-      let html = data.answer ? '<p class="text-emerald-300 mb-2">'+data.answer+'</p>' : '';
+      let html = data.answer ? '<p class="text-emerald-300 mb-2">'+esc(data.answer)+'</p>' : '';
       (data.results || []).forEach(r => {
-        html += '<div class="glass rounded-xl p-3"><a class="text-cyan-300 text-sm" href="'+r.url+'" target="_blank" rel="noopener">'+r.title+'</a><div class="text-xs text-purple-400 mt-1">'+(r.content||'').slice(0,200)+'</div></div>';
+        html += '<div class="glass rounded-xl p-3"><a class="text-cyan-300 text-sm" href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.title)+'</a><div class="text-xs text-purple-400 mt-1">'+esc((r.content||'').slice(0,200))+'</div></div>';
       });
       out.innerHTML = html || '<p class="text-purple-500">Пустой ответ</p>';
     } catch (e) {
-      out.innerHTML = '<p class="text-red-300">Ошибка: '+e.message+'</p>';
+      out.innerHTML = '<p class="text-red-300">Ошибка: '+esc(e.message)+'</p>';
     }
   };
   document.getElementById('q').onkeypress = e => { if (e.key === 'Enter') document.getElementById('btn-local').click(); };
