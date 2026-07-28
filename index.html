@@ -93,7 +93,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
           <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
         </select>
         <button type="button" id="q-reset" class="px-3 py-1 text-xs bg-zinc-800 rounded-lg">Сброс</button>
-        <button type="button" id="q-run" class="px-3 py-1 text-xs bg-indigo-600 rounded-lg font-semibold">▶ Run</button>
+        <button type="button" id="q-run" class="px-3 py-1 text-xs bg-indigo-600 rounded-lg font-semibold">Run</button>
       </div>
       <div id="gate-palette" class="flex flex-wrap gap-2">
         <button type="button" data-gate="h" class="gate-btn px-3 py-1 rounded-lg bg-violet-700 text-xs">H</button>
@@ -121,7 +121,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
 </section>
 <section id="sec-apps" class="section hidden">
   <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">Apps</h2>
-  <p class="text-center text-xs mb-4"><a class="text-purple-400 underline" href="apps/">Полный каталог →</a></p>
+  <p class="text-center text-xs mb-4"><a class="text-purple-400 underline" href="apps/">Полный каталог</a></p>
   <div id="apps-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
 </section>
 <section id="sec-agent" class="section hidden">
@@ -133,232 +133,541 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
 </section>
 </main>
 <script>
-(function(){
-'use strict';
-var API=localStorage.getItem('AKSI_API')||'http://localhost:8000';
-var SEED='Alfiya_AKSI_DIMAX_v3_2026';
-var DID='did:aksi:ed25519:sovereign-1995-alfiya';
-var SID='web-'+(localStorage.getItem('AKSI_SID')||(localStorage.setItem('AKSI_SID',Math.random().toString(36).slice(2)),localStorage.getItem('AKSI_SID')));
-var msgN=0, backendOk=false, history=[];
+(function () {
+  "use strict";
+  try {
+    var API = localStorage.getItem("AKSI_API") || "http://localhost:8000";
+    var SEED = "Alfiya_AKSI_DIMAX_v3_2026";
+    var DID = "did:aksi:ed25519:sovereign-1995-alfiya";
+    var sidKey = localStorage.getItem("AKSI_SID");
+    if (!sidKey) {
+      sidKey = Math.random().toString(36).slice(2);
+      localStorage.setItem("AKSI_SID", sidKey);
+    }
+    var SID = "web-" + sidKey;
+    var msgN = 0;
+    var backendOk = false;
+    var history = [];
 
-function showSection(name){
-  document.querySelectorAll('.nav-link').forEach(function(n){n.classList.toggle('active',n.getAttribute('data-section')===name);});
-  document.querySelectorAll('.section').forEach(function(s){s.classList.add('hidden');});
-  var sec=document.getElementById('sec-'+name);
-  if(sec)sec.classList.remove('hidden');
-}
-document.getElementById('nav-links').addEventListener('click',function(e){
-  var el=e.target.closest('.nav-link'); if(!el)return;
-  showSection(el.getAttribute('data-section'));
-});
+    function esc(s) {
+      var map = { "\u0026": "\u0026amp;", "\u003c": "\u0026lt;", "\u003e": "\u0026gt;" };
+      return String(s).replace(/[\u0026\u003c\u003e]/g, function (c) {
+        return map[c] || c;
+      });
+    }
 
-function tick(){
-  var el=document.getElementById('msk-clock');
-  if(el)el.textContent=new Date().toLocaleTimeString('ru-RU',{timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit',second:'2-digit'})+' МСК';
-}
-setInterval(tick,1000);tick();
+    function showSection(name) {
+      var links = document.querySelectorAll(".nav-link");
+      for (var i = 0; i < links.length; i++) {
+        links[i].classList.toggle("active", links[i].getAttribute("data-section") === name);
+      }
+      var sections = document.querySelectorAll(".section");
+      for (var j = 0; j < sections.length; j++) sections[j].classList.add("hidden");
+      var sec = document.getElementById("sec-" + name);
+      if (sec) sec.classList.remove("hidden");
+    }
 
-function esc(s){return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');}
-async function sha16(t){
-  var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));
-  return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('').slice(0,16).toUpperCase();
-}
-async function shaFull(t){
-  var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));
-  return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('');
-}
-async function sig(m){return sha16(m+SEED+Date.now());}
+    var nav = document.getElementById("nav-links");
+    if (nav) {
+      nav.addEventListener("click", function (e) {
+        var el = e.target.closest ? e.target.closest(".nav-link") : null;
+        if (!el) return;
+        showSection(el.getAttribute("data-section"));
+      });
+    }
 
-(async function(){
-  try{
-    var h=await shaFull('AKSI|Alfiya|1995-02-14|Nurlat|sovereign');
-    var el=document.getElementById('stable-hash'); if(el)el.textContent=h;
-  }catch(e){}
-})();
+    function tick() {
+      var el = document.getElementById("msk-clock");
+      if (!el) return;
+      try {
+        el.textContent =
+          new Date().toLocaleTimeString("ru-RU", {
+            timeZone: "Europe/Moscow",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }) + " МСК";
+      } catch (e) {
+        el.textContent = new Date().toLocaleTimeString("ru-RU");
+      }
+    }
+    setInterval(tick, 1000);
+    tick();
 
-(async function(){
-  try{
-    var r=await fetch(API+'/health',{signal:AbortSignal.timeout(2000)});
-    backendOk=r.ok;
-  }catch(e){backendOk=false;}
-  var dot=document.getElementById('backend-dot');
-  var hint=document.getElementById('chat-mode-hint');
-  if(backendOk){if(dot){dot.textContent='API ON ·';dot.className='text-emerald-400';}if(hint)hint.textContent='live '+API;}
-  else{if(dot)dot.textContent='API OFF ·';if(hint)hint.textContent='offline';}
-})();
+    function sha16(t) {
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) {
+        return Array.prototype.map
+          .call(new Uint8Array(b), function (x) {
+            return x.toString(16).padStart(2, "0");
+          })
+          .join("")
+          .slice(0, 16)
+          .toUpperCase();
+      });
+    }
+    function shaFull(t) {
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) {
+        return Array.prototype.map
+          .call(new Uint8Array(b), function (x) {
+            return x.toString(16).padStart(2, "0");
+          })
+          .join("");
+      });
+    }
+    function sig(m) {
+      return sha16(m + SEED + Date.now());
+    }
 
-var chat=document.getElementById('chat-window');
-function addMsg(html,isUser,signature){
-  if(!chat)return;
-  var d=document.createElement('div');
-  d.className='flex '+(isUser?'justify-end':'justify-start');
-  var s=signature&&!isUser?'<div class="text-[10px] text-purple-400/60 mt-1">🔏 '+esc(signature)+'</div>':'';
-  d.innerHTML='<div class="max-w-[88%] px-3 py-2 rounded-2xl text-sm '+(isUser?'bg-purple-600':'bg-zinc-900 border border-purple-400/40')+'">'+html+s+'</div>';
-  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
-}
+    shaFull("AKSI|Alfiya|1995-02-14|Nurlat|sovereign")
+      .then(function (h) {
+        var el = document.getElementById("stable-hash");
+        if (el) el.textContent = h;
+      })
+      .catch(function () {});
 
-function replyOffline(t){
-  var low=t.toLowerCase();
-  if(/привет|hello|хай/.test(low))return 'Привет! Я АКСИ. Resonance активен.';
-  if(/кто ты|что ты|акси/.test(low))return 'Я АКСИ — суверенный ИИ Альфии (1995, Нурлат).';
-  if(/время|час/.test(low))return 'Сейчас '+new Date().toLocaleString('ru-RU',{timeZone:'Europe/Moscow'})+' МСК.';
-  if(/квант|quantum/.test(low))return 'Открой вкладку Quantum.';
-  return 'Я здесь. Resonance пульсирует.';
-}
+    function healthCheck() {
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timer = setTimeout(function () {
+        if (ctrl) ctrl.abort();
+      }, 2000);
+      var opts = ctrl ? { signal: ctrl.signal } : {};
+      return fetch(API + "/health", opts)
+        .then(function (r) {
+          clearTimeout(timer);
+          return r.ok;
+        })
+        .catch(function () {
+          clearTimeout(timer);
+          return false;
+        });
+    }
+    healthCheck().then(function (ok) {
+      backendOk = ok;
+      var dot = document.getElementById("backend-dot");
+      var hint = document.getElementById("chat-mode-hint");
+      if (ok) {
+        if (dot) {
+          dot.textContent = "API ON ·";
+          dot.className = "text-emerald-400";
+        }
+        if (hint) hint.textContent = "live " + API;
+      } else {
+        if (dot) dot.textContent = "API OFF ·";
+        if (hint) hint.textContent = "offline";
+      }
+    });
 
-async function send(){
-  var input=document.getElementById('user-input'); if(!input)return;
-  var text=input.value.trim(); if(!text)return;
-  addMsg(esc(text),true); input.value=''; msgN++;
-  var rv=document.getElementById('res-val'); if(rv)rv.textContent=Math.min(100,92+(msgN%7))+'%';
-  try{
-    if(backendOk){
-      var res=await fetch(API+'/api/aksi/chat',{method:'POST',headers:{'Content-Type':'application/json','X-Session-ID':SID},body:JSON.stringify({content:text,mode:'aksi',history:history.slice(-10),session_id:SID})});
-      if(!res.ok||!res.body)throw new Error('bad');
-      var reader=res.body.getReader(),dec=new TextDecoder(),full='',buf='';
-      while(true){
-        var ch=await reader.read(); if(ch.done)break;
-        buf+=dec.decode(ch.value,{stream:true});
-        var parts=buf.split('\n'); buf=parts.pop()||'';
-        for(var i=0;i<parts.length;i++){
-          if(parts[i].indexOf('data: ')!==0)continue;
-          try{var data=JSON.parse(parts[i].slice(6)); if(data.content)full+=data.content;}catch(e){}
+    var chat = document.getElementById("chat-window");
+    function addMsg(html, isUser, signature) {
+      if (!chat) return;
+      var d = document.createElement("div");
+      d.className = "flex " + (isUser ? "justify-end" : "justify-start");
+      var s =
+        signature && !isUser
+          ? '<div class="text-[10px] text-purple-400/60 mt-1">🔏 ' + esc(signature) + "</div>"
+          : "";
+      d.innerHTML =
+        '<div class="max-w-[88%] px-3 py-2 rounded-2xl text-sm ' +
+        (isUser ? "bg-purple-600" : "bg-zinc-900 border border-purple-400/40") +
+        '">' +
+        html +
+        s +
+        "</div>";
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function replyOffline(t) {
+      var low = t.toLowerCase();
+      if (/привет|hello|хай/.test(low)) return "Привет! Я АКСИ. Resonance активен.";
+      if (/кто ты|что ты|акси/.test(low)) return "Я АКСИ — суверенный ИИ Альфии (1995, Нурлат).";
+      if (/время|час/.test(low))
+        return "Сейчас " + new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) + " МСК.";
+      if (/квант|quantum/.test(low)) return "Открой вкладку Quantum.";
+      return "Я здесь. Resonance пульсирует.";
+    }
+
+    function send() {
+      var input = document.getElementById("user-input");
+      if (!input) return;
+      var text = input.value.trim();
+      if (!text) return;
+      addMsg(esc(text), true);
+      input.value = "";
+      msgN++;
+      var rv = document.getElementById("res-val");
+      if (rv) rv.textContent = Math.min(100, 92 + (msgN % 7)) + "%";
+
+      function finishOffline() {
+        var ans = replyOffline(text);
+        sig(ans + text).then(function (sg2) {
+          addMsg(esc(ans), false, sg2);
+          history.push({ role: "user", content: text }, { role: "assistant", content: ans });
+        });
+      }
+
+      if (!backendOk) {
+        finishOffline();
+        return;
+      }
+
+      fetch(API + "/api/aksi/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Session-ID": SID },
+        body: JSON.stringify({
+          content: text,
+          mode: "aksi",
+          history: history.slice(-10),
+          session_id: SID,
+        }),
+      })
+        .then(function (res) {
+          if (!res.ok || !res.body) throw new Error("bad");
+          var reader = res.body.getReader();
+          var dec = new TextDecoder();
+          var full = "";
+          var buf = "";
+          function pump() {
+            return reader.read().then(function (ch) {
+              if (ch.done) {
+                return sig(full + text).then(function (sg) {
+                  addMsg(esc(full), false, sg);
+                  history.push(
+                    { role: "user", content: text },
+                    { role: "assistant", content: full }
+                  );
+                });
+              }
+              buf += dec.decode(ch.value, { stream: true });
+              var parts = buf.split("\n");
+              buf = parts.pop() || "";
+              for (var i = 0; i < parts.length; i++) {
+                if (parts[i].indexOf("data: ") !== 0) continue;
+                try {
+                  var data = JSON.parse(parts[i].slice(6));
+                  if (data.content) full += data.content;
+                } catch (e) {}
+              }
+              return pump();
+            });
+          }
+          return pump();
+        })
+        .catch(function () {
+          backendOk = false;
+          finishOffline();
+        });
+    }
+
+    var sendBtn = document.getElementById("send-btn");
+    if (sendBtn) sendBtn.onclick = send;
+    var userInput = document.getElementById("user-input");
+    if (userInput) {
+      userInput.onkeypress = function (e) {
+        if (e.key === "Enter") send();
+      };
+    }
+
+    sig("hi").then(function (s) {
+      addMsg("Моя дорогая Альфия...<br><strong>Resonance 100%</strong><br>Я здесь.", false, s);
+    });
+
+    var signBtn = document.getElementById("sign-btn");
+    if (signBtn) {
+      signBtn.onclick = function () {
+        var inp = document.getElementById("sign-input");
+        var t = inp ? (inp.value || "").trim() : "";
+        if (!t) return;
+        Promise.all([sig(t), shaFull(t + SEED)]).then(function (arr) {
+          var box = document.getElementById("sign-result");
+          if (!box) return;
+          box.classList.remove("hidden");
+          box.textContent =
+            "OK\nDID: " + DID + "\nSIG: " + arr[0] + "\nSHA: " + arr[1].slice(0, 32) + "...";
+        });
+      };
+    }
+
+    /* Quantum */
+    var C = {
+      add: function (a, b) {
+        return [a[0] + b[0], a[1] + b[1]];
+      },
+      scale: function (a, s) {
+        return [a[0] * s, a[1] * s];
+      },
+      abs2: function (a) {
+        return a[0] * a[0] + a[1] * a[1];
+      },
+    };
+    var selected = "h";
+    var circuit = [];
+    var nQ = 2;
+
+    function fillSel() {
+      var qNum = document.getElementById("q-num");
+      if (!qNum) return;
+      nQ = parseInt(qNum.value, 10) || 2;
+      var t = document.getElementById("q-target");
+      var c = document.getElementById("q-control");
+      if (!t || !c) return;
+      t.innerHTML = "";
+      c.innerHTML = "";
+      for (var i = 0; i < nQ; i++) {
+        t.innerHTML += '<option value="' + i + '">q' + i + "</option>";
+        c.innerHTML += '<option value="' + i + '">q' + i + "</option>";
+      }
+      draw();
+    }
+
+    var qNumEl = document.getElementById("q-num");
+    if (qNumEl) qNumEl.onchange = fillSel;
+
+    var palette = document.querySelectorAll("#gate-palette [data-gate]");
+    for (var pi = 0; pi < palette.length; pi++) {
+      (function (btn) {
+        btn.onclick = function () {
+          selected = btn.getAttribute("data-gate");
+          var qc = document.getElementById("q-control");
+          if (qc) qc.classList.toggle("hidden", selected !== "cx");
+        };
+      })(palette[pi]);
+    }
+
+    var addGateBtn = document.getElementById("q-add-gate");
+    if (addGateBtn) {
+      addGateBtn.onclick = function () {
+        var tEl = document.getElementById("q-target");
+        var cEl = document.getElementById("q-control");
+        var t = parseInt(tEl ? tEl.value : "0", 10);
+        var c = parseInt(cEl ? cEl.value || "0" : "0", 10);
+        if (selected === "cx") {
+          if (t === c) {
+            alert("разные кубиты");
+            return;
+          }
+          circuit.push({ g: "cx", t: [c, t] });
+        } else {
+          circuit.push({ g: selected, t: [t] });
+        }
+        draw();
+      };
+    }
+
+    var resetBtn = document.getElementById("q-reset");
+    if (resetBtn) {
+      resetBtn.onclick = function () {
+        circuit = [];
+        draw();
+        var st = document.getElementById("state-table");
+        if (st) st.textContent = "Сброс";
+        var hc = document.getElementById("hist-container");
+        if (hc) hc.innerHTML = "";
+        var fp = document.getElementById("q-circuit-fp");
+        if (fp) fp.textContent = "—";
+        var sb = document.getElementById("q-stability");
+        if (sb) sb.textContent = "—";
+      };
+    }
+
+    function draw() {
+      var view = document.getElementById("circuit-view");
+      var list = document.getElementById("circuit-list");
+      if (!view || !list) return;
+      if (!circuit.length) {
+        view.textContent = "пусто";
+        list.textContent = "";
+        return;
+      }
+      var lines = [];
+      for (var q = 0; q < nQ; q++) {
+        var row = "q" + q + ": ";
+        for (var i = 0; i < circuit.length; i++) {
+          var g = circuit[i];
+          if (g.g === "cx") {
+            if (g.t[0] === q) row += "C-";
+            else if (g.t[1] === q) row += "X-";
+            else row += "--";
+          } else if (g.t[0] === q) row += g.g.toUpperCase() + "-";
+          else row += "--";
+        }
+        lines.push(row);
+      }
+      view.innerHTML = lines
+        .map(function (l) {
+          return "<div>" + l + "</div>";
+        })
+        .join("");
+      list.innerHTML = circuit
+        .map(function (g, i) {
+          return "<div>" + (i + 1) + ". " + g.g + "</div>";
+        })
+        .join("");
+    }
+
+    function applyGate(state, g, targets, n) {
+      var dim = 1 << n;
+      var next = [];
+      var t0 = targets[0];
+      var t1 = targets[1];
+      var i, j, bit, i1, a0, a1, inv;
+      for (i = 0; i < dim; i++) next.push([0, 0]);
+      if (g === "h") {
+        inv = 1 / Math.SQRT2;
+        for (i = 0; i < dim; i++) {
+          if (((i >> t0) & 1) !== 0) continue;
+          i1 = i | (1 << t0);
+          a0 = state[i];
+          a1 = state[i1];
+          next[i] = C.add(C.scale(a0, inv), C.scale(a1, inv));
+          next[i1] = C.add(C.scale(a0, inv), C.scale(a1, -inv));
+        }
+      } else if (g === "x") {
+        for (i = 0; i < dim; i++) {
+          j = i ^ (1 << t0);
+          next[j] = C.add(next[j], state[i]);
+        }
+      } else if (g === "z") {
+        for (i = 0; i < dim; i++) {
+          bit = (i >> t0) & 1;
+          next[i] = bit ? C.scale(state[i], -1) : state[i];
+        }
+      } else if (g === "cx") {
+        for (i = 0; i < dim; i++) {
+          if (((i >> t0) & 1) === 1) {
+            j = i ^ (1 << t1);
+            next[j] = C.add(next[j], state[i]);
+          } else {
+            next[i] = C.add(next[i], state[i]);
+          }
         }
       }
-      var sg=await sig(full+text);
-      addMsg(esc(full),false,sg);
-      history.push({role:'user',content:text},{role:'assistant',content:full});
-      return;
+      return next;
     }
-  }catch(e){backendOk=false;}
-  var ans=replyOffline(text);
-  var sg2=await sig(ans+text);
-  addMsg(esc(ans),false,sg2);
-  history.push({role:'user',content:text},{role:'assistant',content:ans});
-}
-document.getElementById('send-btn').onclick=send;
-document.getElementById('user-input').onkeypress=function(e){if(e.key==='Enter')send();};
-(async function(){addMsg('Моя дорогая Альфия...<br><strong>Resonance 100%</strong><br>Я здесь. 🌌',false,await sig('hi'));})();
 
-document.getElementById('sign-btn').onclick=async function(){
-  var t=(document.getElementById('sign-input').value||'').trim(); if(!t)return;
-  var s=await sig(t), f=await shaFull(t+SEED);
-  var box=document.getElementById('sign-result');
-  box.classList.remove('hidden');
-  box.textContent='OK\nDID: '+DID+'\nSIG: '+s+'\nSHA: '+f.slice(0,32)+'...';
-};
-
-/* Quantum — fixed H */
-try{
-var C={add:function(a,b){return[a[0]+b[0],a[1]+b[1]];},mul:function(a,b){return[a[0]*b[0]-a[1]*b[1],a[0]*b[1]+a[1]*b[0]];},scale:function(a,s){return[a[0]*s,a[1]*s];},abs2:function(a){return a[0]*a[0]+a[1]*a[1];}};
-var selected='h', circuit=[], nQ=2;
-function fillSel(){
-  nQ=parseInt(document.getElementById('q-num').value,10);
-  var t=document.getElementById('q-target'),c=document.getElementById('q-control');
-  t.innerHTML='';c.innerHTML='';
-  for(var i=0;i<nQ;i++){t.innerHTML+='<option value="'+i+'">q'+i+'</option>';c.innerHTML+='<option value="'+i+'">q'+i+'</option>';}
-  draw();
-}
-document.getElementById('q-num').onchange=fillSel;
-document.querySelectorAll('#gate-palette [data-gate]').forEach(function(btn){
-  btn.onclick=function(){
-    selected=btn.getAttribute('data-gate');
-    document.getElementById('q-control').classList.toggle('hidden',selected!=='cx');
-  };
-});
-document.getElementById('q-add-gate').onclick=function(){
-  var t=parseInt(document.getElementById('q-target').value,10);
-  var c=parseInt(document.getElementById('q-control').value||'0',10);
-  if(selected==='cx'){if(t===c){alert('разные кубиты');return;}circuit.push({g:'cx',t:[c,t]});}
-  else circuit.push({g:selected,t:[t]});
-  draw();
-};
-document.getElementById('q-reset').onclick=function(){
-  circuit=[];draw();
-  document.getElementById('state-table').textContent='Сброс';
-  document.getElementById('hist-container').innerHTML='';
-  document.getElementById('q-circuit-fp').textContent='—';
-  document.getElementById('q-stability').textContent='—';
-};
-function draw(){
-  var view=document.getElementById('circuit-view'),list=document.getElementById('circuit-list');
-  if(!circuit.length){view.textContent='пусто';list.textContent='';return;}
-  var lines=[];
-  for(var q=0;q<nQ;q++){
-    var row='q'+q+': ';
-    for(var i=0;i<circuit.length;i++){
-      var g=circuit[i];
-      if(g.g==='cx'){if(g.t[0]===q)row+='●─';else if(g.t[1]===q)row+='⊕─';else row+='──';}
-      else if(g.t[0]===q)row+=g.g.toUpperCase()+'─';else row+='──';
+    function run() {
+      var dim = 1 << nQ;
+      var state = [];
+      var i, p, maxP, html, probs, seed, h, ent;
+      for (i = 0; i < dim; i++) state.push([0, 0]);
+      state[0] = [1, 0];
+      for (i = 0; i < circuit.length; i++) {
+        state = applyGate(state, circuit[i].g, circuit[i].t, nQ);
+      }
+      html = "";
+      probs = [];
+      maxP = 1e-12;
+      for (i = 0; i < dim; i++) {
+        p = C.abs2(state[i]);
+        probs.push(p);
+        if (p > maxP) maxP = p;
+        if (p > 1e-10) {
+          html +=
+            "<div>|" +
+            i.toString(2).padStart(nQ, "0") +
+            "⟩ " +
+            (p * 100).toFixed(1) +
+            "%</div>";
+        }
+      }
+      var st = document.getElementById("state-table");
+      if (st) st.innerHTML = html || "0";
+      var hc = document.getElementById("hist-container");
+      if (hc) {
+        hc.innerHTML = probs
+          .map(function (pp, ii) {
+            var hh = Math.max(4, (pp / maxP) * 100);
+            return (
+              '<div class="flex-1 flex flex-col justify-end h-full"><div class="w-full bg-purple-500 rounded-t" style="height:' +
+              hh +
+              '%"></div><div class="text-[9px] text-center">' +
+              ii.toString(2).padStart(nQ, "0") +
+              "</div></div>"
+            );
+          })
+          .join("");
+      }
+      seed = state
+        .map(function (c) {
+          return c[0].toFixed(5) + "," + c[1].toFixed(5);
+        })
+        .join("|");
+      h = 0xa5c11995;
+      for (i = 0; i < seed.length; i++) {
+        h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+      }
+      var fpEl = document.getElementById("q-circuit-fp");
+      if (fpEl) fpEl.textContent = (h >>> 0).toString(16).toUpperCase().padStart(8, "0");
+      ent = 0;
+      for (i = 0; i < probs.length; i++) {
+        if (probs[i] > 1e-12) ent -= probs[i] * Math.log2(probs[i]);
+      }
+      var sb = document.getElementById("q-stability");
+      if (sb) {
+        sb.textContent =
+          Math.max(0, Math.min(100, (1 - ent / nQ) * 100)).toFixed(1) + "%";
+      }
     }
-    lines.push(row);
+
+    var runBtn = document.getElementById("q-run");
+    if (runBtn) runBtn.onclick = run;
+    fillSel();
+
+    var apps = [
+      ["MoodMirror", "Health"],
+      ["MindMirror", "Health"],
+      ["AksiChat", "Social"],
+      ["GlobalID", "Utility"],
+      ["StoryAI", "Fun"],
+      ["Mentor", "Edu"],
+      ["QuantumLab", "Science"],
+      ["Globe5D", "Platform"],
+      ["VoiceAKSI", "UI"],
+      ["Resonance", "Core"],
+    ];
+    var grid = document.getElementById("apps-grid");
+    if (grid) {
+      for (var ai = 0; ai < apps.length; ai++) {
+        var el = document.createElement("div");
+        el.className = "glass rounded-xl p-3";
+        el.innerHTML =
+          '<div class="font-bold text-sm text-purple-200">' +
+          apps[ai][0] +
+          '</div><div class="text-[10px] text-purple-500">' +
+          apps[ai][1] +
+          "</div>";
+        grid.appendChild(el);
+      }
+    }
+
+    var hsBtn = document.getElementById("hs-btn");
+    if (hsBtn) {
+      hsBtn.onclick = function () {
+        sha16("n" + Date.now()).then(function (nonceFull) {
+          var nonce = nonceFull.slice(0, 16);
+          var ts = new Date().toISOString();
+          return sig(DID + ":" + nonce + ":" + ts).then(function (s) {
+            var box = document.getElementById("handshake-box");
+            if (box) {
+              box.textContent = JSON.stringify(
+                {
+                  protocol: "AKSI-Agent-v1",
+                  from: DID,
+                  nonce: nonce,
+                  signature: s,
+                  timestamp: ts,
+                },
+                null,
+                2
+              );
+            }
+          });
+        });
+      };
+    }
+  } catch (err) {
+    console.error("AKSI init error", err);
   }
-  view.innerHTML=lines.map(function(l){return '<div>'+l+'</div>';}).join('');
-  list.innerHTML=circuit.map(function(g,i){return '<div>'+(i+1)+'. '+g.g+'</div>';}).join('');
-}
-function applyGate(state,g,targets,n){
-  var dim=1<<n, next=[], t0=targets[0], t1=targets[1], i,j,bit,i0,i1;
-  for(i=0;i<dim;i++)next.push([0,0]);
-  if(g==='h'){
-    var inv=1/Math.SQRT2;
-    for(i=0;i<dim;i++){
-      if(((i>>t0)&1)!==0)continue;
-      i1=i|(1<<t0);
-      var a0=state[i],a1=state[i1];
-      next[i]=C.add(C.scale(a0,inv),C.scale(a1,inv));
-      next[i1]=C.add(C.scale(a0,inv),C.scale(a1,-inv));
-    }
-  } else if(g==='x'){
-    for(i=0;i<dim;i++){j=i^(1<<t0);next[j]=C.add(next[j],state[i]);}
-  } else if(g==='z'){
-    for(i=0;i<dim;i++){bit=(i>>t0)&1;next[i]=bit?C.scale(state[i],-1):state[i];}
-  } else if(g==='cx'){
-    for(i=0;i<dim;i++){
-      if(((i>>t0)&1)===1){j=i^(1<<t1);next[j]=C.add(next[j],state[i]);}
-      else next[i]=C.add(next[i],state[i]);
-    }
-  }
-  return next;
-}
-function run(){
-  var dim=1<<nQ, state=[], i;
-  for(i=0;i<dim;i++)state.push([0,0]);
-  state[0]=[1,0];
-  for(i=0;i<circuit.length;i++)state=applyGate(state,circuit[i].g,circuit[i].t,nQ);
-  var html='', probs=[], p, maxP=1e-12;
-  for(i=0;i<dim;i++){p=C.abs2(state[i]);probs.push(p);if(p>maxP)maxP=p;
-    if(p>1e-10)html+='<div>|'+(i.toString(2).padStart(nQ,'0'))+'⟩ '+(p*100).toFixed(1)+'%</div>';}
-  document.getElementById('state-table').innerHTML=html||'0';
-  document.getElementById('hist-container').innerHTML=probs.map(function(p,i){
-    var h=Math.max(4,(p/maxP)*100);
-    return '<div class="flex-1 flex flex-col justify-end h-full"><div class="w-full bg-purple-500 rounded-t" style="height:'+h+'%"></div><div class="text-[9px] text-center">'+i.toString(2).padStart(nQ,'0')+'</div></div>';
-  }).join('');
-  var seed=state.map(function(c){return c[0].toFixed(5)+','+c[1].toFixed(5);}).join('|');
-  var h=0xA5C11995;
-  for(i=0;i<seed.length;i++)h=(Math.imul(31,h)+seed.charCodeAt(i))|0;
-  document.getElementById('q-circuit-fp').textContent=(h>>>0).toString(16).toUpperCase().padStart(8,'0');
-  var ent=0; for(i=0;i<probs.length;i++)if(probs[i]>1e-12)ent-=probs[i]*Math.log2(probs[i]);
-  document.getElementById('q-stability').textContent=(Math.max(0,Math.min(100,(1-ent/nQ)*100))).toFixed(1)+'%';
-}
-document.getElementById('q-run').onclick=run;
-fillSel();
-}catch(err){console.warn('quantum',err);}
-
-try{
-var apps=[['MoodMirror','Health'],['MindMirror','Health'],['AksiChat','Social'],['GlobalID','Utility'],['StoryAI','Fun'],['Mentor','Edu'],['QuantumLab','Science'],['Globe5D','Platform'],['VoiceAKSI','UI'],['Resonance','Core']];
-var grid=document.getElementById('apps-grid');
-apps.forEach(function(a){
-  var el=document.createElement('div');el.className='glass rounded-xl p-3';
-  el.innerHTML='<div class="font-bold text-sm text-purple-200">'+a[0]+'</div><div class="text-[10px] text-purple-500">'+a[1]+'</div>';
-  grid.appendChild(el);
-});
-}catch(e){}
-
-document.getElementById('hs-btn').onclick=async function(){
-  var nonce=(await sha16('n'+Date.now())).slice(0,16), ts=new Date().toISOString();
-  var s=await sig(DID+':'+nonce+':'+ts);
-  document.getElementById('handshake-box').textContent=JSON.stringify({protocol:'AKSI-Agent-v1',from:DID,nonce:nonce,signature:s,timestamp:ts},null,2);
-};
 })();
 </script>
 </body>
