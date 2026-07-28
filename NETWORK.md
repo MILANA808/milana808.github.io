@@ -1,50 +1,45 @@
-# Сеть АКСИ — статус и честная дорожная карта
+# Сеть АКСИ — статус
 
-Дата: **28.07.2026**
+**28.07.2026b**
 
-## Что уже работает (прототип)
+## Работает
 
-| Компонент | Статус | Где |
-|-----------|--------|-----|
-| Чат + ход мыслей + 🔏 | ✅ | MATRIX + `/api/aksi/chat` + offline brain |
-| Identity / DID | ✅ | `/identity` |
-| Quantum statevector UI | ✅ | вкладка Quantum |
-| ORIGIN agent | ✅ | `/origin`, UI `origin/` |
-| WebSocket live | ✅ | `/ws`, UI `live/` |
-| Self-mod (sandbox only) | ✅ | `/api/self-mod/*` |
-| User profiles | ✅ | `GET/POST /user/status|config` |
-| Node registry (bootstrap) | ✅ | `/network/nodes`, `/network/register` |
-| Complexity classifier | ✅ | `/network/classify` (классический) |
-| Grover-style demo | ✅ | `/network/grover-search` (**симуляция**, не hardware) |
-| Globe offline | ✅ | `globe/` |
+| Компонент | API / UI |
+|-----------|---------|
+| Чат + мысли + 🔏 | `/api/aksi/chat`, offline brain |
+| WebSocket | `/ws` · [live/](./live/) |
+| ORIGIN | `/origin` · [origin/](./origin/) |
+| Self-mod sandbox | `/api/self-mod/*` |
+| User config → LLM model/temp/prompt | `/user/config` · `/user/status` |
+| Реестр узлов | `/network/nodes` · register · heartbeat |
+| Classify / Grover-demo | `/network/classify` · `grover-search` |
+| **Peer HTTP relay/forward** | `/network/relay` · `/network/forward` |
+| Панель | [network/](./network/) |
 
-## Что ещё не готово (и не стоит врать)
-
-- Реальный **libp2p / WebRTC mesh** между узлами
-- Hardware quantum speedup (QPU)
-- Federated learning / LoRA online
-- Полный React+Monaco IDE
-- Автопатчи ядра без sandbox
-
-Теоремы (Байес, Нётер, Белл) используются как **рамки проектирования** и эвристики, не как «доказанный AGI».
-
-## Запуск узла
+## Два узла (локально)
 
 ```bash
-cd backend
-uvicorn main:app --port 8000
-# второй узел: --port 8001 и POST /network/register
+# терминал 1
+cd backend && uvicorn main:app --port 8000
+
+# терминал 2
+uvicorn main:app --port 8001
+
+# зарегистрировать второй узел на первом
+curl -X POST http://localhost:8000/network/register \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"node-b","endpoint":"http://localhost:8001","skills":["chat"]}'
+
+# делегировать сложный запрос
+curl -X POST http://localhost:8000/network/forward \
+  -H 'Content-Type: application/json' \
+  -d '{"content":"Спроектируй архитектуру федеративной сети АКСИ с P2P"}'
 ```
 
-UI: [network/](./network/) · Live WS: [live/](./live/) · MATRIX: [./](./)
+## Ещё не сделано
 
-## API сети
+- libp2p / WebRTC mesh  
+- hardware quantum  
+- federated learning  
 
-- `GET /network/nodes`
-- `POST /network/register` `{ "name", "endpoint", "skills" }`
-- `POST /network/heartbeat` `{ "node_id", "load" }`
-- `POST /network/classify` `{ "text" }`
-- `POST /network/grover-search` `{ "query", "items"? }`
-- `POST /network/route?skill=chat`
-- `GET /user/status?user_id=`
-- `POST /user/config`
+См. [ecosystem.json](./ecosystem.json) · `status`.
