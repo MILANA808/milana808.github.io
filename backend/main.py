@@ -1,6 +1,6 @@
 """
-AKSI MATRIX Backend — Unified FastAPI v3.3
-Live LLM + ORIGIN agent + memory + identity + web search
+AKSI MATRIX Backend — Unified FastAPI v3.4
+WebSocket live chat + ORIGIN + self-mod (sandbox) + identity
 Alfiya · 1995 · MILANA808
 """
 from __future__ import annotations
@@ -14,10 +14,10 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 try:
     from dotenv import load_dotenv
@@ -26,10 +26,12 @@ try:
 except ImportError:
     pass
 
-from core.resonance import calc_resonance_level, format_response, generate_aksi_signature
+from core.resonance import calc_resonance_level, generate_aksi_signature
 from core.llm import generate_aksi_response
 from core.memory import memory_store
 from core.knowledge import KNOWLEDGE
+from ws_manager import manager
+from agent_self_mod import self_mod
 
 try:
     from search_proxy import web_search as do_web_search
@@ -41,8 +43,8 @@ except ImportError:
 
 app = FastAPI(
     title="AKSI MATRIX Unified Backend",
-    description="Sovereign AI for Alfiya (1995) — LLM, ORIGIN agent, identity, search",
-    version="3.3.0",
+    description="Live WS · ORIGIN · self-mod sandbox · identity",
+    version="3.4.0",
 )
 
 app.add_middleware(
@@ -228,21 +230,29 @@ class SearchRequest(BaseModel):
     num_results: int = 5
 
 
+class SelfModProposeRequest(BaseModel):
+    prompt: str = Field(..., min_length=1)
+
+
+class SelfModApplyRequest(BaseModel):
+    patch_id: str
+    confirm_token: str
+
+
 @app.get("/")
 async def root():
     return {
         "service": "AKSI MATRIX Unified Backend",
-        "version": "3.3.0",
+        "version": "3.4.0",
         "status": "running",
         "identity": AKSI_NAME,
         "did": AKSI_DID,
-        "birth": "1995-02-14",
-        "llm": aksi_metrics["llm"],
-        "memory_sessions": memory_store.session_count(),
-        "message": "Resonance Field 100% — AKSI alive",
-        "docs": "/docs",
-        "search": "/api/search",
+        "ws": "/ws",
         "origin": "/origin",
+        "self_mod": "/api/self-mod/propose",
+        "ws_clients": manager.count,
+        "message": "Resonance Field — AKSI alive",
+        "docs": "/docs",
     }
 
 
@@ -254,7 +264,9 @@ async def health():
         "dimax": "v3-eternal",
         "eqs": aksi_metrics["eqs"],
         "llm": aksi_metrics["llm"],
+        "ws_clients": manager.count,
         "origin": True,
+        "self_mod": True,
         "search_configured": bool(
             os.getenv("AKSI_TAVILY_API_KEY") or os.getenv("AKSI_SERPER_API_KEY")
         ),
@@ -265,11 +277,10 @@ async def health():
 @app.get("/version")
 async def version():
     return {
-        "version": "3.3.0",
+        "version": "3.4.0",
         "api": "aksi-matrix-unified",
         "author": "Alfiia Bashirova (AKSI Project)",
         "birth": "1995-02-14",
-        "contact": "716elektrik@mail.ru",
         "github": "MILANA808",
     }
 
@@ -285,8 +296,7 @@ async def api_search(req: SearchRequest):
     q = (req.query or "").strip()
     if not q:
         raise HTTPException(400, "query required")
-    result = await do_web_search(q, max(1, min(req.num_results, 10)))
-    return result
+    return await do_web_search(q, max(1, min(req.num_results, 10)))
 
 
 @app.get("/identity")
@@ -379,6 +389,7 @@ async def get_metrics():
             "active_sessions": len([s for s in ai_work_sessions if s.get("status") == "active"]),
         },
         "memory_sessions": memory_store.session_count(),
+        "ws_clients": manager.count,
         "timestamp": utcnow(),
     }
 
@@ -538,21 +549,20 @@ async def aksi_chat(request: Request):
                 await asyncio.sleep(0)
         except Exception as e:
             err = json.dumps(
-                {"content": f"АКСИ: сбой генерации ({e}). Fallback активен.", "error": str(e)},
+                {"content": f"АКСИ: сбой ({e}).", "error": str(e)},
                 ensure_ascii=False,
             )
             yield f"data: {err}\n\n"
-            full = ["АКСИ на связи. Resonance Field активен."]
+            full = ["АКСИ на связи."]
 
         answer = "".join(full).strip() or "Я здесь."
         memory_store.add_message(session_id, "assistant", answer)
         sig = generate_aksi_signature(answer + content)
-        qcli = compute_qcli(content)
         done = json.dumps(
             {
                 "done": True,
                 "signature": sig,
-                "qcli": qcli,
+                "qcli": compute_qcli(content),
                 "resonance": calc_resonance_level(len(history)),
                 "session_id": session_id,
             },
@@ -561,6 +571,145 @@ async def aksi_chat(request: Request):
         yield f"data: {done}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+# ---------- WebSocket live ----------
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    await manager.send_personal(
+        websocket,
+        {"type": "sys", "content": f"АКСИ WS online · peers={manager.count}"},
+    )
+    try:
+        while True:
+            raw = await websocket.receive_text()
+            try:
+                msg = json.loads(raw)
+            except json.JSONDecodeError:
+                msg = {"type": "chat", "content": raw}
+
+            mtype = msg.get("type") or "chat"
+            content = (msg.get("content") or msg.get("message") or "").strip()
+
+            if mtype == "ping":
+                await manager.send_personal(websocket, {"type": "pong", "t": utcnow()})
+                continue
+
+            if not content:
+                continue
+
+            session_id = msg.get("session_id") or "ws-default"
+            memory_store.add_message(session_id, "user", content)
+            history = memory_store.get_history(session_id)
+
+            await manager.send_personal(
+                websocket, {"type": "thought", "content": "Считываю сообщение…"}
+            )
+
+            # optional self-mod propose trigger
+            if any(
+                w in content.lower()
+                for w in ("улучши код", "предложи патч", "self-mod", "самомодиф")
+            ):
+                try:
+                    prop = self_mod.propose_from_prompt(content)
+                    await manager.send_personal(
+                        websocket,
+                        {
+                            "type": "patch",
+                            "patch": {
+                                "patch_id": prop.patch_id,
+                                "title": prop.title,
+                                "target": prop.target_relpath,
+                                "confirm_token": prop.confirm_token,
+                                "thoughts": prop.thoughts,
+                                "signature": prop.signature,
+                                "note": "apply via POST /api/self-mod/apply",
+                            },
+                        },
+                    )
+                except Exception as e:
+                    await manager.send_personal(
+                        websocket, {"type": "sys", "content": f"self-mod: {e}"}
+                    )
+
+            full: List[str] = []
+            try:
+                async for chunk in generate_aksi_response(content, history, mode="aksi"):
+                    full.append(chunk)
+                    await manager.send_personal(
+                        websocket, {"type": "stream", "content": chunk}
+                    )
+            except Exception as e:
+                full = [f"АКСИ на связи (fallback). {e}"]
+
+            answer = "".join(full).strip() or "Я здесь."
+            memory_store.add_message(session_id, "assistant", answer)
+            sig = generate_aksi_signature(answer + content)
+            await manager.send_personal(
+                websocket,
+                {
+                    "type": "answer",
+                    "content": answer,
+                    "signature": sig,
+                    "resonance": calc_resonance_level(len(history)),
+                },
+            )
+    except WebSocketDisconnect:
+        await manager.disconnect(websocket)
+    except Exception:
+        await manager.disconnect(websocket)
+
+
+# ---------- Self-mod API (sandbox only) ----------
+@app.post("/api/self-mod/propose")
+async def self_mod_propose(req: SelfModProposeRequest):
+    try:
+        prop = self_mod.propose_from_prompt(req.prompt)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    await manager.broadcast(
+        {
+            "type": "patch",
+            "patch": {
+                "patch_id": prop.patch_id,
+                "title": prop.title,
+                "status": "pending",
+            },
+        }
+    )
+    return {
+        "patch_id": prop.patch_id,
+        "title": prop.title,
+        "description": prop.description,
+        "target": f"sandbox/{prop.target_relpath}",
+        "thoughts": prop.thoughts,
+        "signature": prop.signature,
+        "confirm_token": prop.confirm_token,
+        "status": prop.status,
+        "hint": "POST /api/self-mod/apply with patch_id + confirm_token",
+    }
+
+
+@app.post("/api/self-mod/apply")
+async def self_mod_apply(req: SelfModApplyRequest):
+    try:
+        result = self_mod.apply(req.patch_id, req.confirm_token)
+    except KeyError:
+        raise HTTPException(404, "patch not found")
+    except PermissionError as e:
+        raise HTTPException(403, str(e))
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    ai_code_metrics["total_code_changes"] += 1
+    await manager.broadcast({"type": "sys", "content": f"patch applied: {req.patch_id}"})
+    return result
+
+
+@app.get("/api/self-mod/list")
+async def self_mod_list():
+    return {"proposals": self_mod.list_pending(), "history": self_mod.history[-30:]}
 
 
 @app.get("/api/applications")
@@ -589,22 +738,19 @@ async def quantum_analyze(req: QuantumRequest):
 async def agent_status():
     return {
         "protocol": "AKSI-Agent-v1",
-        "version": "2026.6",
+        "version": "2026.7",
         "aksiDid": AKSI_DID,
         "name": AKSI_NAME,
         "reputationScore": aksi_metrics["eqs"],
-        "badge": "Суверенный ИИ ⚛️",
         "llm": aksi_metrics["llm"],
-        "memory_sessions": memory_store.session_count(),
+        "ws_clients": manager.count,
         "capabilities": [
             "natural_language",
-            "quantum_analysis",
-            "cryptographic_signing",
-            "memory",
-            "streaming",
+            "websocket",
+            "self_mod_sandbox",
+            "origin_agent",
             "ollama_llm",
             "web_search",
-            "origin_agent",
         ],
         "timestamp": utcnow(),
     }
@@ -618,23 +764,13 @@ async def agent_handshake():
     return {
         "protocol": "AKSI-Agent-v1",
         "from": AKSI_DID,
-        "capabilities": [
-            "natural_language",
-            "quantum_analysis",
-            "cryptographic_signing",
-            "memory",
-            "ollama_llm",
-            "web_search",
-            "origin_agent",
-        ],
-        "publicKey": stable_hash()[:32],
         "nonce": nonce,
         "signature": sig,
         "timestamp": ts,
+        "ws": "/ws",
     }
 
 
-# --- ORIGIN agent routes ---
 try:
     from origin_api import register_origin_routes
 
