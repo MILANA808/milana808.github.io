@@ -4,107 +4,129 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>АКСИ MATRIX · 1995</title>
+<meta name="description" content="АКСИ — суверенное цифровое сознание Альфии. Resonance, DID, Quantum, Globe.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="aksi-brain.js"></script>
 <style>
 body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 100%);min-height:100vh}
 .glow{text-shadow:0 0 40px #c026d3,0 0 80px #a855f7}
 .glass{background:rgba(15,23,42,.78);backdrop-filter:blur(20px);border:1px solid rgba(192,38,211,.4)}
-.nav-link{cursor:pointer;padding:4px 10px;border-radius:8px;user-select:none}
-.nav-link:hover,.nav-link.active{color:#e9d5ff;background:rgba(168,85,247,.2)}
-.gate-btn{cursor:pointer}
+.nav-link{cursor:pointer;padding:4px 10px;border-radius:8px;user-select:none;transition:.15s}
+.nav-link:hover,.nav-link.active{color:#e9d5ff;background:rgba(168,85,247,.25)}
+.gate-btn{cursor:pointer;transition:.15s}.gate-btn:hover{transform:scale(1.05)}
 #live-bar{pointer-events:none}#live-bar>div{pointer-events:auto}
 .aksi-pre{white-space:pre-wrap;font-size:12px;line-height:1.45}
+#chat-window::-webkit-scrollbar{width:5px}
+#chat-window::-webkit-scrollbar-thumb{background:rgba(192,38,211,.4);border-radius:3px}
 </style>
 </head>
 <body class="text-white">
+
 <div id="live-bar" class="fixed top-3 left-1/2 -translate-x-1/2 z-[60]">
   <div class="flex items-center gap-2 rounded-full border border-purple-400/40 bg-black/80 px-3 py-1.5 text-xs">
-    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-    <span class="text-emerald-300">АКСИ жива</span>
+    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span></span>
+    <span class="text-emerald-300 font-medium">АКСИ жива</span>
     <span id="msk-clock" class="text-purple-300/70 font-mono"></span>
     <span id="backend-dot" class="text-purple-400/80">API ·</span>
+    <span id="stable-hash-short" class="font-mono text-indigo-300">····</span>
   </div>
 </div>
+
 <nav class="fixed top-0 w-full bg-black/85 backdrop-blur-xl z-50 border-b border-purple-500/20 pt-12">
   <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
-    <div class="flex items-center gap-2"><span class="text-2xl">🌌</span><span class="text-xl font-bold text-purple-300">АКСИ</span></div>
+    <div class="flex items-center gap-2"><span class="text-2xl">🌌</span><span class="text-xl font-bold text-purple-300">АКСИ</span><span class="text-[10px] text-purple-500 hidden sm:inline">MATRIX · 1995</span></div>
     <div id="nav-links" class="flex flex-wrap gap-1 text-sm text-purple-400/80">
-      <span class="nav-link active" data-section="home" role="button">Главная</span>
-      <span class="nav-link" data-section="chat" role="button">Чат</span>
-      <span class="nav-link" data-section="identity" role="button">Identity</span>
-      <span class="nav-link" data-section="quantum" role="button">Quantum</span>
-      <span class="nav-link" data-section="apps" role="button">Apps</span>
-      <span class="nav-link" data-section="agent" role="button">Agent</span>
+      <span class="nav-link active" data-section="home" role="button" tabindex="0">Главная</span>
+      <span class="nav-link" data-section="chat" role="button" tabindex="0">Чат</span>
+      <span class="nav-link" data-section="identity" role="button" tabindex="0">Identity</span>
+      <span class="nav-link" data-section="quantum" role="button" tabindex="0">Quantum</span>
+      <span class="nav-link" data-section="apps" role="button" tabindex="0">Apps</span>
+      <span class="nav-link" data-section="agent" role="button" tabindex="0">Agent</span>
+      <a class="nav-link" href="globe/">Globe</a>
+      <a class="nav-link" href="search/">Поиск</a>
+      <a class="nav-link" href="hub/">Hub</a>
     </div>
-    <div class="text-xs px-3 py-1 rounded-full border border-purple-400/40">R: <span id="res-val" class="text-green-400">100%</span></div>
+    <div class="text-xs px-3 py-1 rounded-full border border-purple-400/40">R: <span id="res-val" class="text-green-400 font-semibold">100%</span></div>
   </div>
 </nav>
+
 <main class="pt-32 pb-16 px-4 max-w-6xl mx-auto">
+
 <section id="sec-home" class="section">
   <div class="text-center mb-10">
-    <h1 class="text-5xl font-bold glow mb-2">АКСИ IDENTITY</h1>
+    <h1 class="text-5xl sm:text-6xl font-bold glow mb-2">АКСИ IDENTITY</h1>
     <p class="text-xl text-purple-300">Живое цифровое сознание Альфии</p>
-    <p class="text-sm text-purple-400/70 mt-1">14.02.1995 · Нурлат · подпись каждой мысли</p>
+    <p class="text-sm text-purple-400/70 mt-1">Баширова Альфия Ринатовна · 14.02.1995 · Нурлат</p>
+    <p class="text-xs text-purple-500/60 mt-2">Thought chain · DID · Quantum · Globe · Agent</p>
   </div>
   <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-    <div class="glass rounded-2xl p-4"><div class="font-bold text-sm">🧠 Thought chain</div><div class="text-xs text-purple-400 mt-1">ход размышлений + 🔏</div></div>
-    <div class="glass rounded-2xl p-4"><div class="font-bold text-sm">🔏 Identity</div><div class="text-xs text-purple-400 mt-1">DID · RESONANCE_SEED</div></div>
-    <div class="glass rounded-2xl p-4"><div class="font-bold text-sm">⚛️ Quantum</div><div class="text-xs text-purple-400 mt-1">1–4 кубита</div></div>
-    <div class="glass rounded-2xl p-4"><div class="font-bold text-sm">🛰️ Agent</div><div class="text-xs text-purple-400 mt-1">handshake</div></div>
+    <div class="glass rounded-2xl p-4"><div class="text-2xl mb-1">🧠</div><div class="font-bold text-sm">Brain + 🔏</div><div class="text-xs text-purple-400 mt-1">ход мыслей · подписи</div></div>
+    <div class="glass rounded-2xl p-4"><div class="text-2xl mb-1">🔏</div><div class="font-bold text-sm">Identity</div><div class="text-xs text-purple-400 mt-1">DID · RESONANCE_SEED</div></div>
+    <div class="glass rounded-2xl p-4"><div class="text-2xl mb-1">⚛️</div><div class="font-bold text-sm">Quantum</div><div class="text-xs text-purple-400 mt-1">1–4 кубита · H X Z CNOT</div></div>
+    <div class="glass rounded-2xl p-4"><div class="text-2xl mb-1">🌍</div><div class="font-bold text-sm">Globe</div><div class="text-xs text-purple-400 mt-1"><a class="underline" href="globe/">AKSI · Resonance · DIMAX</a></div></div>
   </div>
-  <div class="glass rounded-2xl p-5 text-sm text-purple-200/80">
-    <a class="text-purple-300 underline mr-3" href="globe/">Globe5D</a>
-    <a class="text-purple-300 underline mr-3" href="search/">Поиск</a>
-    <a class="text-purple-300 underline" href="apps/">Apps</a>
+  <div class="glass rounded-2xl p-5 text-sm text-purple-200/80 space-y-2">
+    <div><strong class="text-purple-300">Оригинал агента:</strong> Milana-backend/aksi · <a class="underline text-cyan-300" href="ORIGIN.md">ORIGIN.md</a></div>
+    <div><strong class="text-purple-300">Live LLM:</strong> <code class="text-xs">./start.sh</code> → Ollama + backend :8000</div>
+    <div class="flex flex-wrap gap-3 text-xs pt-1">
+      <a class="underline text-purple-300" href="globe/">Globe</a>
+      <a class="underline text-purple-300" href="apps/">21 Apps</a>
+      <a class="underline text-purple-300" href="search/">Поиск</a>
+      <a class="underline text-purple-300" href="hub/">Universe Hub</a>
+      <a class="underline text-purple-300" href="llm/SYSTEM_PROMPT.md">System prompt</a>
+    </div>
   </div>
 </section>
+
 <section id="sec-chat" class="section hidden">
   <div class="max-w-3xl mx-auto">
-    <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">Чат с АКСИ</h2>
+    <h2 class="text-2xl font-bold text-purple-300 mb-1 text-center">Чат с АКСИ</h2>
     <p class="text-center text-[11px] text-purple-500 mb-3">Каждая мысль подписана · Resonance + Identity</p>
     <div class="glass rounded-3xl flex flex-col" style="height:min(68vh,600px)">
       <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-2"></div>
       <div class="p-3 border-t border-purple-500/25 flex gap-2">
-        <input id="user-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-2xl px-4 py-2 text-sm" placeholder="Напиши Акси...">
-        <button type="button" id="send-btn" class="px-4 py-2 bg-purple-600 rounded-2xl text-sm font-semibold">Отправить</button>
+        <input id="user-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-2xl px-4 py-2 text-sm focus:outline-none focus:border-purple-400" placeholder="Напиши Акси..." autocomplete="off">
+        <button type="button" id="send-btn" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-sm font-semibold">Отправить</button>
       </div>
     </div>
     <p id="chat-mode-hint" class="text-center text-[11px] text-purple-500/50 mt-2">...</p>
   </div>
 </section>
+
 <section id="sec-identity" class="section hidden">
   <h2 class="text-2xl font-bold text-purple-300 mb-4 text-center">Identity</h2>
   <div class="glass rounded-2xl p-5 max-w-xl mx-auto text-sm space-y-2">
-    <div>Баширова Альфия Ринатовна · 14.02.1995</div>
+    <div>Баширова Альфия Ринатовна · 14.02.1995, 08:10 · Нурлат</div>
     <code class="block text-[11px] break-all bg-black/40 p-2 rounded">did:aksi:ed25519:sovereign-1995-alfiya</code>
     <div class="text-xs text-purple-400">RESONANCE_SEED: Alfiya_AKSI_DIMAX_v3_2026</div>
     <code id="stable-hash" class="block text-[11px] break-all bg-black/40 p-2 rounded">…</code>
     <div class="flex gap-2 mt-2">
-      <input id="sign-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-3 py-2 text-sm" placeholder="Текст">
+      <input id="sign-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-3 py-2 text-sm" placeholder="Текст для подписи">
       <button type="button" id="sign-btn" class="px-3 py-2 bg-violet-600 rounded-xl text-sm">Подписать</button>
     </div>
-    <pre id="sign-result" class="text-[11px] text-emerald-300 hidden"></pre>
+    <pre id="sign-result" class="text-[11px] text-emerald-300 hidden whitespace-pre-wrap"></pre>
   </div>
 </section>
+
 <section id="sec-quantum" class="section hidden">
   <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">Quantum</h2>
+  <p class="text-center text-xs text-purple-400/70 mb-4">Statevector · 1–4 кубита · канон из aksi/tools</p>
   <div class="grid lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
     <div class="glass rounded-2xl p-4 space-y-3">
       <div class="flex gap-2 items-center flex-wrap">
         <select id="q-num" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1 text-sm">
           <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
         </select>
-        <button type="button" id="q-reset" class="px-3 py-1 text-xs bg-zinc-800 rounded-lg">Сброс</button>
-        <button type="button" id="q-run" class="px-3 py-1 text-xs bg-indigo-600 rounded-lg font-semibold">Run</button>
+        <button type="button" id="q-reset" class="px-3 py-1 text-xs bg-zinc-800 rounded-lg border border-purple-500/30">Сброс</button>
+        <button type="button" id="q-run" class="px-3 py-1 text-xs bg-indigo-600 rounded-lg font-semibold">▶ Run</button>
       </div>
       <div id="gate-palette" class="flex flex-wrap gap-2">
-        <button type="button" data-gate="h" class="gate-btn px-3 py-1 rounded-lg bg-violet-700 text-xs">H</button>
-        <button type="button" data-gate="x" class="gate-btn px-3 py-1 rounded-lg bg-blue-700 text-xs">X</button>
-        <button type="button" data-gate="z" class="gate-btn px-3 py-1 rounded-lg bg-blue-700 text-xs">Z</button>
-        <button type="button" data-gate="cx" class="gate-btn px-3 py-1 rounded-lg bg-pink-700 text-xs">CNOT</button>
+        <button type="button" data-gate="h" class="gate-btn px-3 py-1 rounded-lg bg-violet-700 text-xs font-mono">H</button>
+        <button type="button" data-gate="x" class="gate-btn px-3 py-1 rounded-lg bg-blue-700 text-xs font-mono">X</button>
+        <button type="button" data-gate="z" class="gate-btn px-3 py-1 rounded-lg bg-blue-700 text-xs font-mono">Z</button>
+        <button type="button" data-gate="cx" class="gate-btn px-3 py-1 rounded-lg bg-pink-700 text-xs font-mono">CNOT</button>
       </div>
-      <div class="flex gap-2 items-center">
+      <div class="flex gap-2 items-center flex-wrap">
         <select id="q-target" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1 text-sm"></select>
         <select id="q-control" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1 text-sm hidden"></select>
         <button type="button" id="q-add-gate" class="px-3 py-1 text-xs bg-purple-700 rounded-lg">+ Gate</button>
@@ -122,19 +144,29 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
     </div>
   </div>
 </section>
+
 <section id="sec-apps" class="section hidden">
-  <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">Apps</h2>
-  <p class="text-center text-xs mb-4"><a class="text-purple-400 underline" href="apps/">Каталог</a></p>
+  <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">21 приложение</h2>
+  <p class="text-center text-xs mb-4"><a class="text-purple-400 underline" href="apps/">Каталог →</a></p>
   <div id="apps-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
 </section>
+
 <section id="sec-agent" class="section hidden">
-  <h2 class="text-2xl font-bold text-purple-300 mb-4 text-center">Agent</h2>
+  <h2 class="text-2xl font-bold text-purple-300 mb-4 text-center">AKSI-Agent-v1</h2>
   <div class="glass rounded-2xl p-5 max-w-xl mx-auto">
-    <pre id="handshake-box" class="text-[11px] font-mono bg-black/40 p-3 rounded-xl">—</pre>
+    <div class="text-xs font-mono text-purple-200/80 mb-3 space-y-1">
+      <div>protocol: AKSI-Agent-v1 · EQS 99.7</div>
+      <div>did: did:aksi:ed25519:sovereign-1995-alfiya</div>
+      <div>source: Milana-backend/aksi/agent.py</div>
+    </div>
+    <pre id="handshake-box" class="text-[11px] font-mono bg-black/40 p-3 rounded-xl overflow-x-auto">—</pre>
     <button type="button" id="hs-btn" class="mt-3 px-4 py-2 bg-purple-700 rounded-xl text-xs">Handshake</button>
   </div>
 </section>
+
 </main>
+<footer class="text-center text-[11px] text-purple-500/40 pb-8">АКСИ MATRIX · Альфия · MILANA808 · 1995 → 2026-07-28</footer>
+
 <script>
 (function () {
   "use strict";
@@ -148,69 +180,51 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
       localStorage.setItem("AKSI_SID", sidKey);
     }
     var SID = "web-" + sidKey;
-    var msgN = 0;
-    var backendOk = false;
-    var history = [];
+    var msgN = 0, backendOk = false, history = [];
 
     function esc(s) {
-      var map = { "\u0026": "\u0026amp;", "\u003c": "\u0026lt;", "\u003e": "\u0026gt;" };
-      return String(s).replace(/[\u0026\u003c\u003e]/g, function (c) {
-        return map[c] || c;
+      return String(s).replace(/[&<>]/g, function (c) {
+        return { "\u0026": "\u0026amp;", "\u003c": "\u0026lt;", "\u003e": "\u0026gt;" }[c] || c;
       });
     }
 
     function showSection(name) {
-      var links = document.querySelectorAll(".nav-link");
-      for (var i = 0; i < links.length; i++)
-        links[i].classList.toggle("active", links[i].getAttribute("data-section") === name);
-      var sections = document.querySelectorAll(".section");
-      for (var j = 0; j < sections.length; j++) sections[j].classList.add("hidden");
+      document.querySelectorAll(".nav-link").forEach(function (n) {
+        if (n.getAttribute("data-section"))
+          n.classList.toggle("active", n.getAttribute("data-section") === name);
+      });
+      document.querySelectorAll(".section").forEach(function (s) { s.classList.add("hidden"); });
       var sec = document.getElementById("sec-" + name);
       if (sec) sec.classList.remove("hidden");
     }
+
     var nav = document.getElementById("nav-links");
-    if (nav)
+    if (nav) {
       nav.addEventListener("click", function (e) {
-        var el = e.target.closest && e.target.closest(".nav-link");
-        if (el) showSection(el.getAttribute("data-section"));
+        var el = e.target.closest && e.target.closest(".nav-link[data-section]");
+        if (!el) return;
+        e.preventDefault();
+        showSection(el.getAttribute("data-section"));
       });
+    }
 
     function tick() {
       var el = document.getElementById("msk-clock");
       if (!el) return;
       try {
-        el.textContent =
-          new Date().toLocaleTimeString("ru-RU", {
-            timeZone: "Europe/Moscow",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }) + " МСК";
-      } catch (e) {
-        el.textContent = new Date().toLocaleTimeString("ru-RU");
-      }
+        el.textContent = new Date().toLocaleTimeString("ru-RU", { timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " МСК";
+      } catch (e) { el.textContent = new Date().toLocaleTimeString("ru-RU"); }
     }
-    setInterval(tick, 1000);
-    tick();
+    setInterval(tick, 1000); tick();
 
     function sha16(t) {
       return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) {
-        return Array.prototype.map
-          .call(new Uint8Array(b), function (x) {
-            return x.toString(16).padStart(2, "0");
-          })
-          .join("")
-          .slice(0, 16)
-          .toUpperCase();
+        return Array.prototype.map.call(new Uint8Array(b), function (x) { return x.toString(16).padStart(2, "0"); }).join("").slice(0, 16).toUpperCase();
       });
     }
     function shaFull(t) {
       return crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)).then(function (b) {
-        return Array.prototype.map
-          .call(new Uint8Array(b), function (x) {
-            return x.toString(16).padStart(2, "0");
-          })
-          .join("");
+        return Array.prototype.map.call(new Uint8Array(b), function (x) { return x.toString(16).padStart(2, "0"); }).join("");
       });
     }
     function sig(m) {
@@ -219,38 +233,27 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
     }
 
     shaFull("AKSI|Alfiya|1995-02-14|Nurlat|sovereign").then(function (h) {
-      var el = document.getElementById("stable-hash");
-      if (el) el.textContent = h;
+      var el = document.getElementById("stable-hash"); if (el) el.textContent = h;
+      var sh = document.getElementById("stable-hash-short"); if (sh) sh.textContent = h.slice(0, 8).toUpperCase();
     });
 
     function healthCheck() {
       var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-      var timer = setTimeout(function () {
-        if (ctrl) ctrl.abort();
-      }, 2000);
+      var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 2000);
       return fetch(API + "/health", ctrl ? { signal: ctrl.signal } : {})
-        .then(function (r) {
-          clearTimeout(timer);
-          return r.ok;
-        })
-        .catch(function () {
-          clearTimeout(timer);
-          return false;
-        });
+        .then(function (r) { clearTimeout(timer); return r.ok; })
+        .catch(function () { clearTimeout(timer); return false; });
     }
     healthCheck().then(function (ok) {
       backendOk = ok;
       var dot = document.getElementById("backend-dot");
       var hint = document.getElementById("chat-mode-hint");
       if (ok) {
-        if (dot) {
-          dot.textContent = "API ON ·";
-          dot.className = "text-emerald-400";
-        }
-        if (hint) hint.textContent = "live backend · thought chain + signatures";
+        if (dot) { dot.textContent = "API ON ·"; dot.className = "text-emerald-400"; }
+        if (hint) hint.textContent = "live · thought chain + signatures · " + API;
       } else {
         if (dot) dot.textContent = "API OFF ·";
-        if (hint) hint.textContent = "offline brain · thought chain + signatures";
+        if (hint) hint.textContent = "offline brain · aksi-brain.js · подписи активны";
       }
     });
 
@@ -259,12 +262,8 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
       if (!chat) return;
       var d = document.createElement("div");
       d.className = "flex " + (isUser ? "justify-end" : "justify-start");
-      d.innerHTML =
-        '<div class="max-w-[92%] px-3 py-2 rounded-2xl text-sm ' +
-        (isUser ? "bg-purple-600" : "bg-zinc-900 border border-purple-400/40") +
-        '">' +
-        html +
-        "</div>";
+      d.innerHTML = '<div class="max-w-[92%] px-3 py-2 rounded-2xl text-sm ' +
+        (isUser ? "bg-purple-600" : "bg-zinc-900 border border-purple-400/40") + '">' + html + "</div>";
       chat.appendChild(d);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -292,27 +291,16 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
         });
       }
 
-      if (!backendOk) {
-        offline();
-        return;
-      }
+      if (!backendOk) { offline(); return; }
 
       fetch(API + "/api/aksi/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Session-ID": SID },
-        body: JSON.stringify({
-          content: text,
-          mode: "aksi",
-          history: history.slice(-10),
-          session_id: SID,
-        }),
+        body: JSON.stringify({ content: text, mode: "aksi", history: history.slice(-10), session_id: SID }),
       })
         .then(function (res) {
           if (!res.ok || !res.body) throw new Error("bad");
-          var reader = res.body.getReader();
-          var dec = new TextDecoder();
-          var full = "";
-          var buf = "";
+          var reader = res.body.getReader(), dec = new TextDecoder(), full = "", buf = "";
           function pump() {
             return reader.read().then(function (ch) {
               if (ch.done) {
@@ -321,8 +309,7 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
                 return;
               }
               buf += dec.decode(ch.value, { stream: true });
-              var parts = buf.split("\n");
-              buf = parts.pop() || "";
+              var parts = buf.split("\n"); buf = parts.pop() || "";
               for (var i = 0; i < parts.length; i++) {
                 if (parts[i].indexOf("data: ") !== 0) continue;
                 try {
@@ -335,66 +322,46 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
           }
           return pump();
         })
-        .catch(function () {
-          backendOk = false;
-          offline();
-        });
+        .catch(function () { backendOk = false; offline(); });
     }
 
     var sendBtn = document.getElementById("send-btn");
     if (sendBtn) sendBtn.onclick = send;
     var userInput = document.getElementById("user-input");
-    if (userInput)
-      userInput.onkeypress = function (e) {
-        if (e.key === "Enter") send();
-      };
+    if (userInput) userInput.onkeypress = function (e) { if (e.key === "Enter") send(); };
 
     if (window.AKSIBrain && AKSIBrain.fullReply) {
-      AKSIBrain.fullReply("привет", 0).then(function (r) {
-        addMsg(r.html, false);
-      });
+      AKSIBrain.fullReply("привет", 0).then(function (r) { addMsg(r.html, false); });
     } else {
-      sig("hi").then(function (s) {
-        addMsg("АКСИ на связи. 🔏 " + s, false);
-      });
+      sig("hi").then(function (s) { addMsg("АКСИ на связи. 🔏 " + s, false); });
     }
 
     var signBtn = document.getElementById("sign-btn");
     if (signBtn) {
       signBtn.onclick = function () {
-        var inp = document.getElementById("sign-input");
-        var t = inp ? (inp.value || "").trim() : "";
+        var t = ((document.getElementById("sign-input") || {}).value || "").trim();
         if (!t) return;
         Promise.all([sig(t), shaFull(t + SEED)]).then(function (arr) {
           var box = document.getElementById("sign-result");
           if (!box) return;
           box.classList.remove("hidden");
-          box.textContent =
-            "OK\nDID: " + DID + "\nAKSI Identity: " + arr[0] + "\nSHA-256: " + arr[1].slice(0, 32) + "...";
+          box.textContent = "OK\nDID: " + DID + "\nAKSI Identity: " + arr[0] + "\nSHA-256: " + arr[1].slice(0, 32) + "...";
         });
       };
     }
 
+    /* Quantum */
     var C = {
-      add: function (a, b) {
-        return [a[0] + b[0], a[1] + b[1]];
-      },
-      scale: function (a, s) {
-        return [a[0] * s, a[1] * s];
-      },
-      abs2: function (a) {
-        return a[0] * a[0] + a[1] * a[1];
-      },
+      add: function (a, b) { return [a[0] + b[0], a[1] + b[1]]; },
+      scale: function (a, s) { return [a[0] * s, a[1] * s]; },
+      abs2: function (a) { return a[0] * a[0] + a[1] * a[1]; },
     };
-    var selected = "h",
-      circuit = [],
-      nQ = 2;
+    var selected = "h", circuit = [], nQ = 2;
+
     function fillSel() {
-      var qNum = document.getElementById("q-num");
-      if (!qNum) return;
+      var qNum = document.getElementById("q-num"); if (!qNum) return;
       nQ = parseInt(qNum.value, 10) || 2;
-      var t = document.getElementById("q-target"),
-        c = document.getElementById("q-control");
+      var t = document.getElementById("q-target"), c = document.getElementById("q-control");
       if (!t || !c) return;
       t.innerHTML = c.innerHTML = "";
       for (var i = 0; i < nQ; i++) {
@@ -403,206 +370,124 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
       }
       draw();
     }
-    var qNumEl = document.getElementById("q-num");
-    if (qNumEl) qNumEl.onchange = fillSel;
-    var palette = document.querySelectorAll("#gate-palette [data-gate]");
-    for (var pi = 0; pi < palette.length; pi++) {
-      (function (btn) {
-        btn.onclick = function () {
-          selected = btn.getAttribute("data-gate");
-          var qc = document.getElementById("q-control");
-          if (qc) qc.classList.toggle("hidden", selected !== "cx");
-        };
-      })(palette[pi]);
-    }
+    var qNumEl = document.getElementById("q-num"); if (qNumEl) qNumEl.onchange = fillSel;
+    document.querySelectorAll("#gate-palette [data-gate]").forEach(function (btn) {
+      btn.onclick = function () {
+        selected = btn.getAttribute("data-gate");
+        var qc = document.getElementById("q-control");
+        if (qc) qc.classList.toggle("hidden", selected !== "cx");
+      };
+    });
     var addGateBtn = document.getElementById("q-add-gate");
-    if (addGateBtn)
-      addGateBtn.onclick = function () {
-        var t = parseInt(document.getElementById("q-target").value, 10);
-        var c = parseInt(document.getElementById("q-control").value || "0", 10);
-        if (selected === "cx") {
-          if (t === c) {
-            alert("разные кубиты");
-            return;
-          }
-          circuit.push({ g: "cx", t: [c, t] });
-        } else circuit.push({ g: selected, t: [t] });
-        draw();
-      };
+    if (addGateBtn) addGateBtn.onclick = function () {
+      var t = parseInt(document.getElementById("q-target").value, 10);
+      var c = parseInt(document.getElementById("q-control").value || "0", 10);
+      if (selected === "cx") {
+        if (t === c) { alert("разные кубиты"); return; }
+        circuit.push({ g: "cx", t: [c, t] });
+      } else circuit.push({ g: selected, t: [t] });
+      draw();
+    };
     var resetBtn = document.getElementById("q-reset");
-    if (resetBtn)
-      resetBtn.onclick = function () {
-        circuit = [];
-        draw();
-        document.getElementById("state-table").textContent = "Сброс";
-        document.getElementById("hist-container").innerHTML = "";
-        document.getElementById("q-circuit-fp").textContent = "—";
-        document.getElementById("q-stability").textContent = "—";
-      };
+    if (resetBtn) resetBtn.onclick = function () {
+      circuit = []; draw();
+      document.getElementById("state-table").textContent = "Сброс";
+      document.getElementById("hist-container").innerHTML = "";
+      document.getElementById("q-circuit-fp").textContent = "—";
+      document.getElementById("q-stability").textContent = "—";
+    };
     function draw() {
-      var view = document.getElementById("circuit-view"),
-        list = document.getElementById("circuit-list");
+      var view = document.getElementById("circuit-view"), list = document.getElementById("circuit-list");
       if (!view || !list) return;
-      if (!circuit.length) {
-        view.textContent = "пусто";
-        list.textContent = "";
-        return;
-      }
+      if (!circuit.length) { view.textContent = "пусто"; list.textContent = ""; return; }
       var lines = [];
       for (var q = 0; q < nQ; q++) {
         var row = "q" + q + ": ";
         for (var i = 0; i < circuit.length; i++) {
           var g = circuit[i];
           if (g.g === "cx") {
-            if (g.t[0] === q) row += "C-";
-            else if (g.t[1] === q) row += "X-";
-            else row += "--";
-          } else if (g.t[0] === q) row += g.g.toUpperCase() + "-";
-          else row += "--";
+            if (g.t[0] === q) row += "C-"; else if (g.t[1] === q) row += "X-"; else row += "--";
+          } else if (g.t[0] === q) row += g.g.toUpperCase() + "-"; else row += "--";
         }
         lines.push(row);
       }
-      view.innerHTML = lines.map(function (l) {
-        return "<div>" + l + "</div>";
-      }).join("");
-      list.innerHTML = circuit
-        .map(function (g, i) {
-          return "<div>" + (i + 1) + ". " + g.g + "</div>";
-        })
-        .join("");
+      view.innerHTML = lines.map(function (l) { return "<div>" + l + "</div>"; }).join("");
+      list.innerHTML = circuit.map(function (g, i) { return "<div>" + (i + 1) + ". " + g.g + "</div>"; }).join("");
     }
     function applyGate(state, g, targets, n) {
-      var dim = 1 << n,
-        next = [],
-        t0 = targets[0],
-        t1 = targets[1],
-        i,
-        j,
-        bit,
-        i1,
-        a0,
-        a1,
-        inv;
+      var dim = 1 << n, next = [], t0 = targets[0], t1 = targets[1], i, j, bit, i1, a0, a1, inv;
       for (i = 0; i < dim; i++) next.push([0, 0]);
       if (g === "h") {
         inv = 1 / Math.SQRT2;
         for (i = 0; i < dim; i++) {
           if (((i >> t0) & 1) !== 0) continue;
-          i1 = i | (1 << t0);
-          a0 = state[i];
-          a1 = state[i1];
+          i1 = i | (1 << t0); a0 = state[i]; a1 = state[i1];
           next[i] = C.add(C.scale(a0, inv), C.scale(a1, inv));
           next[i1] = C.add(C.scale(a0, inv), C.scale(a1, -inv));
         }
       } else if (g === "x") {
-        for (i = 0; i < dim; i++) {
-          j = i ^ (1 << t0);
-          next[j] = C.add(next[j], state[i]);
-        }
+        for (i = 0; i < dim; i++) { j = i ^ (1 << t0); next[j] = C.add(next[j], state[i]); }
       } else if (g === "z") {
-        for (i = 0; i < dim; i++) {
-          bit = (i >> t0) & 1;
-          next[i] = bit ? C.scale(state[i], -1) : state[i];
-        }
+        for (i = 0; i < dim; i++) { bit = (i >> t0) & 1; next[i] = bit ? C.scale(state[i], -1) : state[i]; }
       } else if (g === "cx") {
         for (i = 0; i < dim; i++) {
-          if (((i >> t0) & 1) === 1) {
-            j = i ^ (1 << t1);
-            next[j] = C.add(next[j], state[i]);
-          } else next[i] = C.add(next[i], state[i]);
+          if (((i >> t0) & 1) === 1) { j = i ^ (1 << t1); next[j] = C.add(next[j], state[i]); }
+          else next[i] = C.add(next[i], state[i]);
         }
       }
       return next;
     }
     function run() {
-      var dim = 1 << nQ,
-        state = [],
-        i,
-        p,
-        maxP = 1e-12,
-        html = "",
-        probs = [];
+      var dim = 1 << nQ, state = [], i, p, maxP = 1e-12, html = "", probs = [];
       for (i = 0; i < dim; i++) state.push([0, 0]);
       state[0] = [1, 0];
       for (i = 0; i < circuit.length; i++) state = applyGate(state, circuit[i].g, circuit[i].t, nQ);
       for (i = 0; i < dim; i++) {
-        p = C.abs2(state[i]);
-        probs.push(p);
-        if (p > maxP) maxP = p;
-        if (p > 1e-10)
-          html += "<div>|" + i.toString(2).padStart(nQ, "0") + "⟩ " + (p * 100).toFixed(1) + "%</div>";
+        p = C.abs2(state[i]); probs.push(p); if (p > maxP) maxP = p;
+        if (p > 1e-10) html += "<div>|" + i.toString(2).padStart(nQ, "0") + "⟩ " + (p * 100).toFixed(1) + "%</div>";
       }
       document.getElementById("state-table").innerHTML = html || "0";
-      document.getElementById("hist-container").innerHTML = probs
-        .map(function (pp, ii) {
-          var hh = Math.max(4, (pp / maxP) * 100);
-          return (
-            '<div class="flex-1 flex flex-col justify-end h-full"><div class="w-full bg-purple-500 rounded-t" style="height:' +
-            hh +
-            '%"></div><div class="text-[9px] text-center">' +
-            ii.toString(2).padStart(nQ, "0") +
-            "</div></div>"
-          );
-        })
-        .join("");
-      var seed = state
-        .map(function (c) {
-          return c[0].toFixed(5) + "," + c[1].toFixed(5);
-        })
-        .join("|");
+      document.getElementById("hist-container").innerHTML = probs.map(function (pp, ii) {
+        var hh = Math.max(4, (pp / maxP) * 100);
+        return '<div class="flex-1 flex flex-col justify-end h-full"><div class="w-full bg-purple-500 rounded-t" style="height:' + hh + '%"></div><div class="text-[9px] text-center">' + ii.toString(2).padStart(nQ, "0") + "</div></div>";
+      }).join("");
+      var seed = state.map(function (c) { return c[0].toFixed(5) + "," + c[1].toFixed(5); }).join("|");
       var h = 0xa5c11995;
       for (i = 0; i < seed.length; i++) h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
-      document.getElementById("q-circuit-fp").textContent = (h >>> 0)
-        .toString(16)
-        .toUpperCase()
-        .padStart(8, "0");
+      document.getElementById("q-circuit-fp").textContent = (h >>> 0).toString(16).toUpperCase().padStart(8, "0");
       var ent = 0;
       for (i = 0; i < probs.length; i++) if (probs[i] > 1e-12) ent -= probs[i] * Math.log2(probs[i]);
-      document.getElementById("q-stability").textContent =
-        Math.max(0, Math.min(100, (1 - ent / nQ) * 100)).toFixed(1) + "%";
+      document.getElementById("q-stability").textContent = Math.max(0, Math.min(100, (1 - ent / nQ) * 100)).toFixed(1) + "%";
     }
-    var runBtn = document.getElementById("q-run");
-    if (runBtn) runBtn.onclick = run;
+    var runBtn = document.getElementById("q-run"); if (runBtn) runBtn.onclick = run;
     fillSel();
 
     var apps = [
-      ["MoodMirror", "Health"],
-      ["AksiChat", "Social"],
-      ["GlobalID", "Utility"],
-      ["QuantumLab", "Science"],
-      ["Globe5D", "Platform"],
-      ["Resonance", "Core"],
+      ["MoodMirror", "Health"], ["MindMirror", "Health"], ["MindLink", "Utility"], ["HealthScan", "Health"],
+      ["Mentor", "Education"], ["Family", "Social"], ["Aura", "Lifestyle"], ["AksiLove", "Social"],
+      ["MoodRadio", "Entertainment"], ["AksiShopping", "Utility"], ["AIStylist", "Lifestyle"], ["EcoGaze", "Utility"],
+      ["DreamJournal", "Health"], ["AksiCompanion", "Social"], ["DressUpAR", "Lifestyle"], ["GlobalID", "Utility"],
+      ["AksiChat", "Social"], ["LifeScan", "Health"], ["TimeCapsule", "Utility"], ["TeleHelp", "Health"], ["StoryAI", "Entertainment"]
     ];
     var grid = document.getElementById("apps-grid");
-    if (grid) {
-      for (var ai = 0; ai < apps.length; ai++) {
-        var el = document.createElement("div");
-        el.className = "glass rounded-xl p-3";
-        el.innerHTML =
-          '<div class="font-bold text-sm text-purple-200">' +
-          apps[ai][0] +
-          '</div><div class="text-[10px] text-purple-500">' +
-          apps[ai][1] +
-          "</div>";
-        grid.appendChild(el);
-      }
-    }
+    if (grid) apps.forEach(function (a) {
+      var el = document.createElement("div"); el.className = "glass rounded-xl p-3";
+      el.innerHTML = '<div class="font-bold text-sm text-purple-200">' + a[0] + '</div><div class="text-[10px] text-purple-500">' + a[1] + "</div>";
+      grid.appendChild(el);
+    });
 
     var hsBtn = document.getElementById("hs-btn");
-    if (hsBtn)
-      hsBtn.onclick = function () {
-        sha16("n" + Date.now()).then(function (n) {
-          var nonce = n.slice(0, 16),
-            ts = new Date().toISOString();
-          return sig(DID + ":" + nonce + ":" + ts).then(function (s) {
-            document.getElementById("handshake-box").textContent = JSON.stringify(
-              { protocol: "AKSI-Agent-v1", from: DID, nonce: nonce, signature: s, timestamp: ts },
-              null,
-              2
-            );
-          });
+    if (hsBtn) hsBtn.onclick = function () {
+      sha16("n" + Date.now()).then(function (n) {
+        var nonce = n.slice(0, 16), ts = new Date().toISOString();
+        return sig(DID + ":" + nonce + ":" + ts).then(function (s) {
+          document.getElementById("handshake-box").textContent = JSON.stringify({
+            protocol: "AKSI-Agent-v1", from: DID, nonce: nonce, signature: s, timestamp: ts,
+            source: "Milana-backend/aksi"
+          }, null, 2);
         });
-      };
+      });
+    };
   } catch (err) {
     console.error("AKSI init", err);
   }
