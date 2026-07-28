@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ Network</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#050010;color:#e9d5ff;min-height:100vh}
+.glass{background:rgba(15,23,42,.88);border:1px solid rgba(139,92,246,.35)}
+</style>
+</head>
+<body class="p-4 max-w-3xl mx-auto">
+  <div class="flex justify-between text-sm mb-4">
+    <a href="../" class="text-purple-400">← MATRIX</a>
+    <a href="../NETWORK.md" class="text-purple-500 text-xs">NETWORK.md</a>
+  </div>
+  <h1 class="text-2xl font-bold mb-1">Сеть АКСИ</h1>
+  <p class="text-xs text-purple-400 mb-4">реестр узлов · профиль · classify (без иллюзий про QPU)</p>
+
+  <div class="glass rounded-xl p-4 mb-4">
+    <h2 class="font-semibold text-sm mb-2">Настройки агента</h2>
+    <div class="grid gap-2 text-sm">
+      <label>user_id <input id="uid" class="w-full bg-zinc-900 border border-purple-500/40 rounded px-2 py-1" value="default"></label>
+      <label>model <input id="model" class="w-full bg-zinc-900 border border-purple-500/40 rounded px-2 py-1" value="mistral"></label>
+      <label>temperature <input id="temp" type="number" step="0.1" min="0" max="1.5" class="w-full bg-zinc-900 border border-purple-500/40 rounded px-2 py-1" value="0.7"></label>
+      <label>system prompt<textarea id="sp" rows="3" class="w-full bg-zinc-900 border border-purple-500/40 rounded px-2 py-1 text-xs">Ты — АКСИ. Отвечай с ходом мыслей.</textarea></label>
+      <button id="save" class="px-3 py-2 bg-purple-600 rounded-lg text-sm">Сохранить config</button>
+      <pre id="cfg-out" class="text-[11px] text-emerald-300 whitespace-pre-wrap"></pre>
+    </div>
+  </div>
+
+  <div class="glass rounded-xl p-4 mb-4">
+    <h2 class="font-semibold text-sm mb-2">Узлы</h2>
+    <button id="refresh" class="text-xs px-2 py-1 bg-zinc-800 rounded mb-2">Обновить</button>
+    <pre id="nodes" class="text-[11px] font-mono text-purple-200/90 whitespace-pre-wrap">—</pre>
+  </div>
+
+  <div class="glass rounded-xl p-4">
+    <h2 class="font-semibold text-sm mb-2">Classify + Grover demo</h2>
+    <input id="q" class="w-full bg-zinc-900 border border-purple-500/40 rounded px-2 py-1 text-sm mb-2" placeholder="Текст для classify / search">
+    <div class="flex gap-2 mb-2">
+      <button id="cls" class="px-3 py-1 bg-indigo-600 rounded text-xs">Classify</button>
+      <button id="gr" class="px-3 py-1 bg-violet-700 rounded text-xs">Grover search</button>
+    </div>
+    <pre id="out" class="text-[11px] whitespace-pre-wrap text-cyan-200/90"></pre>
+  </div>
+
+<script>
+(function(){
+  var API = localStorage.getItem("AKSI_API") || "http://localhost:8000";
+  function j(u, opt){ return fetch(API+u, opt).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
+  document.getElementById("save").onclick = function(){
+    j("/user/config", { method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        user_id: document.getElementById("uid").value,
+        model: document.getElementById("model").value,
+        temperature: parseFloat(document.getElementById("temp").value),
+        system_prompt: document.getElementById("sp").value
+      })
+    }).then(function(d){ document.getElementById("cfg-out").textContent = JSON.stringify(d,null,2); })
+     .catch(function(e){ document.getElementById("cfg-out").textContent = "API offline: "+e+" · запусти backend"; });
+  };
+  function loadNodes(){
+    j("/network/nodes").then(function(d){
+      document.getElementById("nodes").textContent = JSON.stringify(d,null,2);
+    }).catch(function(){ document.getElementById("nodes").textContent = "backend offline"; });
+  }
+  document.getElementById("refresh").onclick = loadNodes;
+  document.getElementById("cls").onclick = function(){
+    var t = document.getElementById("q").value || "привет";
+    j("/network/classify", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text:t}) })
+      .then(function(d){ document.getElementById("out").textContent = JSON.stringify(d,null,2); })
+      .catch(function(e){ document.getElementById("out").textContent = String(e); });
+  };
+  document.getElementById("gr").onclick = function(){
+    var t = document.getElementById("q").value || "quantum";
+    j("/network/grover-search", { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({query:t}) })
+      .then(function(d){ document.getElementById("out").textContent = JSON.stringify(d,null,2); })
+      .catch(function(e){ document.getElementById("out").textContent = String(e); });
+  };
+  loadNodes();
+})();
+</script>
+</body>
+</html>
