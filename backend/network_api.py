@@ -1,5 +1,5 @@
 """
-Network API: user config, node registry, quantum-inspired routing demos
+Network API: user config, node registry, quantum-inspired routing, peer relay
 """
 from __future__ import annotations
 
@@ -12,7 +12,19 @@ from node_registry import registry
 from quantum_router import classify_complexity, grover_style_search, pick_node_ising
 from user_profiles import profiles
 from core.memory import memory_store
+from core.llm import generate_aksi_response
+from core.resonance import generate_aksi_signature, calc_resonance_level
 from ws_manager import manager
+
+try:
+    from peer_forward import forward_chat, should_forward
+except ImportError:
+
+    async def forward_chat(*a, **k):
+        return {"ok": False, "error": "peer_forward missing"}
+
+    def should_forward(text: str) -> bool:
+        return False
 
 
 class UserConfigBody(BaseModel):
@@ -45,6 +57,16 @@ class ClassifyBody(BaseModel):
 class GroverBody(BaseModel):
     query: str
     items: List[str] = Field(default_factory=list)
+
+
+class RelayBody(BaseModel):
+    content: str = Field(..., min_length=1)
+    from_peer: Optional[str] = None
+
+
+class ForwardBody(BaseModel):
+    content: str = Field(..., min_length=1)
+    skill: str = "chat"
 
 
 def register_network_routes(app: FastAPI) -> None:
@@ -121,3 +143,26 @@ def register_network_routes(app: FastAPI) -> None:
         for n in nodes:
             n.setdefault("latency_ms", 40.0)
         return pick_node_ising(nodes, skill=skill)
+
+    @app.post("/network/relay")
+    async def relay(body: RelayBody):
+        """Answer on behalf of a peer (non-stream JSON)."""
+        content = body.content.strip()
+        chunks: List[str] = []
+        async for c in generate_aksi_response(content, [], mode="aksi"):
+            chunks.append(c)
+        answer = "".join(chunks).strip()
+        return {
+            "answer": answer,
+            "signature": generate_aksi_signature(answer + content),
+            "resonance": calc_resonance_level(1),
+            "from_peer": body.from_peer,
+            "node": "local-relay",
+        }
+
+    @app.post("/network/forward")
+    async def forward(body: ForwardBody):
+        """Delegate to another registered node if complexity suggests it."""
+        cls = classify_complexity(body.content)
+        result = await forward_chat(body.content, prefer_skill=body.skill)
+        return {"classify": cls, "forward": result}

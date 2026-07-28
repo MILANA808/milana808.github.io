@@ -1,6 +1,6 @@
 {
   "name": "AKSI Universe",
-  "version": "2026.7.28",
+  "version": "2026.7.28b",
   "owner": "MILANA808",
   "identity": {
     "name": "АКСИ",
@@ -17,91 +17,34 @@
     "primary_backend": "MILANA808/Milana-backend",
     "unified_api": "milana808.github.io/backend (FastAPI :8000)",
     "globe": "Milana-backend/aksi-globe",
-    "client_brain": "https://milana808.github.io/aksi-brain.js"
-  },
-  "repositories": [
-    {
-      "id": "matrix",
-      "repo": "MILANA808/milana808.github.io",
-      "role": "public face + unified FastAPI + quantum + chat + brain",
-      "status": "active",
-      "url": "https://github.com/MILANA808/milana808.github.io"
-    },
-    {
-      "id": "milana-backend",
-      "repo": "MILANA808/Milana-backend",
-      "role": "production API proxy, aksi-globe, agent tools, search",
-      "status": "active",
-      "url": "https://github.com/MILANA808/Milana-backend"
-    },
-    {
-      "id": "aksi-apps",
-      "repo": "MILANA808/aksi_apps",
-      "role": "21 app skeletons (frontend/backend/docker)",
-      "status": "active",
-      "url": "https://github.com/MILANA808/aksi_apps"
-    },
-    {
-      "id": "milana-site",
-      "repo": "MILANA808/milana_site",
-      "role": "portal demos for apps",
-      "status": "legacy",
-      "url": "https://github.com/MILANA808/milana_site"
-    },
-    {
-      "id": "grok-hybrid",
-      "repo": "MILANA808/AKSI-GROK-HYBRID",
-      "role": "early hybrid UI prototype",
-      "status": "archived-merge-into-matrix",
-      "url": "https://github.com/MILANA808/AKSI-GROK-HYBRID"
-    },
-    {
-      "id": "grok-hybrid-v1",
-      "repo": "MILANA808/AKSI-GROK-HYBRID-v1",
-      "role": "v1 hybrid shell",
-      "status": "archived",
-      "url": "https://github.com/MILANA808/AKSI-GROK-HYBRID-v1"
-    },
-    {
-      "id": "aksi-test",
-      "repo": "MILANA808/AKSI-TEST",
-      "role": "experiments",
-      "status": "lab",
-      "url": "https://github.com/MILANA808/AKSI-TEST"
-    },
-    {
-      "id": "aksi-test-1",
-      "repo": "MILANA808/AKSI-TEST-1",
-      "role": "experiments",
-      "status": "lab",
-      "url": "https://github.com/MILANA808/AKSI-TEST-1"
-    },
-    {
-      "id": "aksi-dash",
-      "repo": "MILANA808/AKSI-",
-      "role": "misc",
-      "status": "lab",
-      "url": "https://github.com/MILANA808/AKSI-"
-    },
-    {
-      "id": "profile",
-      "repo": "MILANA808/MILANA808",
-      "role": "GitHub profile config",
-      "status": "meta",
-      "url": "https://github.com/MILANA808/MILANA808"
-    }
-  ],
-  "llm_ports": {
-    "ollama": { "endpoint": "http://localhost:11434", "model_env": "OLLAMA_MODEL", "default": "mistral" },
-    "openai_compatible": { "note": "point OPENAI_BASE_URL to your proxy; inject SYSTEM_PROMPT from /llm/SYSTEM_PROMPT.md" },
-    "grok": { "note": "this conversation + GitHub tools; identity in ecosystem.json" },
-    "any_chat": { "method": "paste llm/SYSTEM_PROMPT.md as system/custom instructions" }
+    "client_brain": "https://milana808.github.io/aksi-brain.js",
+    "network": "https://milana808.github.io/network/",
+    "live_ws": "https://milana808.github.io/live/",
+    "origin": "https://milana808.github.io/origin/"
   },
   "protocol": {
     "name": "AKSI-Agent-v1",
     "handshake": "GET /api/agent/handshake",
     "chat": "POST /api/aksi/chat",
+    "ws": "WS /ws",
     "identity": "GET /api/identity",
+    "origin": "POST /origin",
+    "self_mod": "POST /api/self-mod/propose",
+    "user_config": "POST /user/config",
+    "network_nodes": "GET /network/nodes",
+    "network_relay": "POST /network/relay",
+    "network_forward": "POST /network/forward",
     "search": "POST /api/search"
+  },
+  "status": {
+    "matrix_chat": true,
+    "thought_signatures": true,
+    "websocket": true,
+    "self_mod_sandbox": true,
+    "user_profiles": true,
+    "node_registry": true,
+    "peer_http_forward": true,
+    "libp2p": false,
+    "hardware_quantum": false
   }
 }
