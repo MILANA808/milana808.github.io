@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>АКСИ Globe5D · Demo</title>
+  <style>
+    * { margin: 0; box-sizing: border-box; }
+    body { background: #0a0a1a; color: #e9d5ff; font-family: system-ui, sans-serif; overflow: hidden; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    #hud {
+      position: fixed; top: 12px; left: 12px; z-index: 10;
+      background: rgba(15,23,42,.85); border: 1px solid rgba(192,38,211,.4);
+      border-radius: 16px; padding: 14px 18px; max-width: 280px;
+      backdrop-filter: blur(12px); font-size: 13px;
+    }
+    #hud h1 { font-size: 15px; color: #e9d5ff; margin-bottom: 6px; }
+    #hud .m { color: #a78bfa; font-size: 11px; margin: 3px 0; }
+    #hud .v { color: #34d399; font-family: ui-monospace, monospace; }
+    a.back {
+      position: fixed; top: 12px; right: 12px; z-index: 10;
+      padding: 8px 14px; border-radius: 12px; text-decoration: none;
+      background: rgba(124,58,237,.5); color: #fff; font-size: 12px;
+      border: 1px solid rgba(192,38,211,.5);
+    }
+    #note {
+      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+      font-size: 11px; color: rgba(167,139,250,.7); text-align: center;
+      max-width: 90%;
+    }
+  </style>
+</head>
+<body>
+  <a class="back" href="../">← АКСИ MATRIX</a>
+  <div id="hud">
+    <h1>🌍 Globe5D · Demo</h1>
+    <div class="m">Resonance: <span class="v" id="r">—</span></div>
+    <div class="m">Objects: <span class="v" id="n">—</span></div>
+    <div class="m">AKSI idx: <span class="v" id="a">—</span></div>
+    <div class="m" style="margin-top:8px;opacity:.7">Статический демо-режим.<br>Realtime: aksi-globe :3000</div>
+  </div>
+  <canvas id="globe"></canvas>
+  <div id="note">Полный Socket.IO + AI objects — в Milana-backend/aksi-globe</div>
+  <script>
+(function(){
+  const roleColors = {
+    scout:{fill:"#00ff88",glow:"rgba(0,255,136,.9)"},
+    trader:{fill:"#00ccff",glow:"rgba(0,204,255,.9)"},
+    cluster:{fill:"#ffaa00",glow:"rgba(255,170,0,.9)"},
+    signal:{fill:"#ff44ff",glow:"rgba(255,68,255,.9)"}
+  };
+  const roles = Object.keys(roleColors);
+  let objects = [], resonance = 0.55, aksi = 0.42, t0 = Date.now();
+
+  function spawn() {
+    objects = [];
+    for (let i = 0; i < 28; i++) {
+      objects.push({
+        lat: (Math.random() - 0.5) * 140,
+        lng: (Math.random() - 0.5) * 360,
+        role: roles[i % roles.length],
+        dlat: (Math.random() - 0.5) * 0.15,
+        dlng: (Math.random() - 0.5) * 0.25
+      });
+    }
+  }
+  spawn();
+
+  function latLngToXY(lat, lng, cx, cy, rx, ry) {
+    const normLng = (lng + 180) / 360;
+    const normLat = (90 - lat) / 180;
+    const angle = normLng * Math.PI * 2 - Math.PI;
+    const latFrac = normLat * 2 - 1;
+    const cosA = Math.cos(angle);
+    if (cosA < 0) return null;
+    return {
+      x: cx + Math.cos(angle) * rx * Math.cos(latFrac * Math.PI / 2),
+      y: cy + latFrac * ry
+    };
+  }
+
+  function frame() {
+    const canvas = document.getElementById("globe");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const cx = canvas.width / 2, cy = canvas.height / 2;
+    const rx = Math.min(canvas.width, canvas.height) * 0.38;
+    const ry = rx * 0.9;
+
+    // drift
+    objects.forEach(o => {
+      o.lat = Math.max(-70, Math.min(70, o.lat + o.dlat));
+      o.lng += o.dlng;
+      if (o.lng > 180) o.lng -= 360;
+      if (o.lng < -180) o.lng += 360;
+      if (Math.random() < 0.01) { o.dlat *= -1; o.dlng *= -1; }
+    });
+    const age = (Date.now() - t0) / 1000;
+    resonance = 0.45 + 0.35 * (0.5 + 0.5 * Math.sin(age * 0.4));
+    aksi = 0.3 + 0.4 * (0.5 + 0.5 * Math.sin(age * 0.25 + 1));
+
+    ctx.fillStyle = "#0a0a1a";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < 120; i++) {
+      ctx.beginPath();
+      ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*1.2, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,255,255,"+(Math.random()*0.6+0.2)+")";
+      ctx.fill();
+    }
+
+    const g = ctx.createRadialGradient(cx-rx*0.3, cy-ry*0.3, rx*0.1, cx, cy, rx);
+    g.addColorStop(0, "#1a6fa0"); g.addColorStop(0.5, "#0d4a73"); g.addColorStop(1, "#071e30");
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2); ctx.fillStyle = g; ctx.fill();
+
+    if (resonance > 0.4) {
+      const hue = Math.round(resonance * 240);
+      const alpha = (resonance - 0.4) * 0.35;
+      const ag = ctx.createRadialGradient(cx, cy, rx*0.95, cx, cy, rx*1.25);
+      ag.addColorStop(0, "hsla("+hue+",80%,60%,"+alpha+")");
+      ag.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.beginPath(); ctx.ellipse(cx, cy, rx*1.25, ry*1.25, 0, 0, Math.PI*2); ctx.fillStyle = ag; ctx.fill();
+    }
+
+    ctx.strokeStyle = "rgba(0,200,255,0.12)"; ctx.lineWidth = 0.5;
+    for (let lat = -60; lat <= 60; lat += 30) {
+      const yOff = (lat/90)*ry;
+      const xScale = Math.sqrt(Math.max(0, 1 - (yOff/ry)**2));
+      ctx.beginPath(); ctx.ellipse(cx, cy+yOff, rx*xScale, ry*0.1, 0, 0, Math.PI*2); ctx.stroke();
+    }
+
+    objects.forEach(o => {
+      const pos = latLngToXY(o.lat, o.lng, cx, cy, rx, ry);
+      if (!pos) return;
+      const c = roleColors[o.role];
+      const gr = resonance > 0.7 ? 16 : 10;
+      const glow = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, gr);
+      glow.addColorStop(0, c.glow); glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.beginPath(); ctx.arc(pos.x, pos.y, gr, 0, Math.PI*2); ctx.fillStyle = glow; ctx.fill();
+      ctx.beginPath(); ctx.arc(pos.x, pos.y, 3, 0, Math.PI*2);
+      ctx.fillStyle = c.fill; ctx.shadowColor = c.fill; ctx.shadowBlur = 12; ctx.fill(); ctx.shadowBlur = 0;
+    });
+
+    document.getElementById("r").textContent = (resonance*100).toFixed(1) + "%";
+    document.getElementById("n").textContent = objects.length;
+    document.getElementById("a").textContent = aksi.toFixed(3);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  window.addEventListener("resize", () => {});
+})();
+  </script>
+</body>
+</html>
