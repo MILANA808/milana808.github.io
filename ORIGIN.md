@@ -1,43 +1,52 @@
-# Где живёт оригинальная АКСИ / Милана
+# ORIGIN — источник правды АКСИ / Милана
 
-Дата восстановления: **28.07.2026**
+Дата: **28.07.2026** · статус: **живой агент** (не только Markdown)
 
-## Источник правды (твой ИИ)
+## Живой API (backend MATRIX)
+
+База: `http://localhost:8000` (или твой `AKSI_API`)
+
+| Метод | Путь | Назначение |
+|-------|------|------------|
+| GET | `/origin` | Инфо об агенте |
+| POST | `/origin` | JSON: `{ "prompt": "..." }` → ответ + мысли + 🔏 |
+| POST | `/origin/chat` | SSE stream (как `/api/aksi/chat`) |
+
+### Пример
+
+```bash
+curl -s -X POST http://localhost:8000/origin \
+  -H 'Content-Type: application/json' \
+  -d '{"prompt":"Где живёт агент АКСИ?"}'
+```
+
+Ответ содержит: `answer`, `thoughts[]` (text + signature), `signature`, `resonance`, `source`.
+
+UI: [origin/](./origin/) · MATRIX: [index](./) · Hub: [hub/](./hub/)
+
+## Источник правды (репозитории)
 
 | Компонент | Репозиторий | Путь |
 |-----------|-------------|------|
 | **Агент АКСИ** | `MILANA808/Milana-backend` | `aksi/agent.py`, `aksi/api.py`, `aksi/tools/*` |
 | **Память** | `MILANA808/Milana-backend` | `aksi/memory/vector_memory.py` |
-| **Quantum tool** | `MILANA808/Milana-backend` | `aksi/tools/quantum_tool.py` |
-| **Web search** | `MILANA808/Milana-backend` | `aksi/tools/web_search.py` |
-| **AKSI Globe** | `MILANA808/Milana-backend` | `aksi-globe/` (полный realtime + Socket.IO) |
-| **Публичное лицо** | `MILANA808/milana808.github.io` | MATRIX + offline brain + Globe demo |
+| **Quantum** | `MILANA808/Milana-backend` | `aksi/tools/quantum_tool.py` |
+| **AKSI Globe** | `MILANA808/Milana-backend` | `aksi-globe/` |
+| **MATRIX + ORIGIN API** | `MILANA808/milana808.github.io` | `backend/`, `origin/` |
 
-## Формулы (канон из aksi-globe)
+## Формулы (aksi-globe)
 
-- **AKSI** = `(A × I × S) × (1 + γ√n)`  
-  A=внимание, I=искренность, S=согласие, γ=0.4
+- **AKSI** = `(A × I × S) × (1 + γ√n)`, γ=0.4
 - **Resonance** = `entropy × (AKSI/max) × diversity`
-- **DIMAX v3** = см. `aksi-globe/backend/metrics.js`
+- **DIMAX v3** — `aksi-globe/backend/metrics.js`
 
-## Как запустить «как часы»
+## Запуск
 
-### A) Сайт (уже online)
-https://milana808.github.io — чат + quantum + globe demo
-
-### B) Полный Globe (realtime)
 ```bash
-cd Milana-backend/aksi-globe/backend
-npm install && npm start
-# http://localhost:3000
+# LLM + ORIGIN API
+./start.sh
+# или
+cd backend && uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
-### C) Агент + API (Milana-backend)
-```bash
-cd Milana-backend
-# ключи только в локальном .env — НЕ в git
-pip install -r requirements.txt
-# см. README репозитория
-```
-
-Секреты (Tavily/Serper/JWT/private keys) **никогда не коммитить**.
+Секреты только в локальном `.env` — **не коммитить**.
