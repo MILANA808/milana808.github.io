@@ -1,6 +1,6 @@
 """
-AKSI MATRIX Backend — Unified FastAPI v3.4
-WebSocket live chat + ORIGIN + self-mod (sandbox) + identity
+AKSI MATRIX Backend — Unified FastAPI v3.5
+WS + ORIGIN + self-mod + network (profiles, registry, classify)
 Alfiya · 1995 · MILANA808
 """
 from __future__ import annotations
@@ -43,8 +43,8 @@ except ImportError:
 
 app = FastAPI(
     title="AKSI MATRIX Unified Backend",
-    description="Live WS · ORIGIN · self-mod sandbox · identity",
-    version="3.4.0",
+    description="Live WS · ORIGIN · network · self-mod sandbox",
+    version="3.5.0",
 )
 
 app.add_middleware(
@@ -243,15 +243,16 @@ class SelfModApplyRequest(BaseModel):
 async def root():
     return {
         "service": "AKSI MATRIX Unified Backend",
-        "version": "3.4.0",
+        "version": "3.5.0",
         "status": "running",
         "identity": AKSI_NAME,
         "did": AKSI_DID,
         "ws": "/ws",
         "origin": "/origin",
+        "network": "/network/nodes",
+        "user": "/user/status",
         "self_mod": "/api/self-mod/propose",
         "ws_clients": manager.count,
-        "message": "Resonance Field — AKSI alive",
         "docs": "/docs",
     }
 
@@ -261,28 +262,20 @@ async def health():
     return {
         "status": "resonating",
         "resonance_level": calc_resonance_level(),
-        "dimax": "v3-eternal",
+        "version": "3.5.0",
         "eqs": aksi_metrics["eqs"],
         "llm": aksi_metrics["llm"],
         "ws_clients": manager.count,
         "origin": True,
         "self_mod": True,
-        "search_configured": bool(
-            os.getenv("AKSI_TAVILY_API_KEY") or os.getenv("AKSI_SERPER_API_KEY")
-        ),
+        "network": True,
         "timestamp": utcnow(),
     }
 
 
 @app.get("/version")
 async def version():
-    return {
-        "version": "3.4.0",
-        "api": "aksi-matrix-unified",
-        "author": "Alfiia Bashirova (AKSI Project)",
-        "birth": "1995-02-14",
-        "github": "MILANA808",
-    }
+    return {"version": "3.5.0", "api": "aksi-matrix-unified", "github": "MILANA808"}
 
 
 @app.post("/echo")
@@ -305,13 +298,10 @@ async def identity():
     return {
         "status": "live",
         "identity": AKSI_NAME,
-        "name": "АКСИ",
-        "owner": "Alfiya / MILANA808",
         "did": AKSI_DID,
         "stableHash": stable_hash(),
         "signature": generate_aksi_signature("identity_live"),
         "birth": "1995-02-14",
-        "birthPlace": "Нурлат, Татарстан, Россия",
         "mode": "sovereign",
         "llm": aksi_metrics["llm"],
         "knowledge": KNOWLEDGE["identity"],
@@ -323,34 +313,16 @@ async def identity():
 async def get_proof():
     return {
         "did": AKSI_DID,
-        "hash": hashlib.sha256(f"{AKSI_DID}:{utcnow()}".encode()).hexdigest(),
         "stableHash": stable_hash(),
-        "identity": {
-            "name": "Баширова Альфия Ринатовна",
-            "birthDate": "1995-02-14",
-            "birthTime": "08:10",
-            "birthPlace": "Нурлат, Татарстан, Россия",
-        },
         "signature": generate_aksi_signature("proof_live"),
         "timestamp": utcnow(),
         "verified": True,
-        "proof": {"eqs": aksi_metrics["eqs"], "model": "Ψ(AKSI)", "verified": True},
-        "history": proof_storage[-10:],
     }
 
 
 @app.get("/api/identity/proof/stable")
 async def get_stable_proof():
-    return {
-        "did": AKSI_DID,
-        "stableHash": stable_hash(),
-        "identity": {
-            "name": "Баширова Альфия Ринатовна",
-            "birthDate": "1995-02-14",
-            "birthPlace": "Нурлат, Татарстан",
-        },
-        "verified": True,
-    }
+    return {"did": AKSI_DID, "stableHash": stable_hash(), "verified": True}
 
 
 @app.post("/aksi/proof/stable")
@@ -362,14 +334,13 @@ async def create_stable_proof(req: ProofStableRequest):
         "stable": True,
     }
     proof_storage.append(entry)
-    return {"status": "proof_recorded", "entry": entry, "total_proofs": len(proof_storage)}
+    return {"status": "proof_recorded", "entry": entry}
 
 
 @app.post("/api/identity/verify")
 async def verify_message(req: VerifyRequest):
     return {
         "verified": True,
-        "message": req.message[:200],
         "signature": generate_aksi_signature(req.message),
         "did": AKSI_DID,
         "timestamp": utcnow(),
@@ -381,13 +352,6 @@ async def verify_message(req: VerifyRequest):
 async def get_metrics():
     return {
         **aksi_metrics,
-        "ai_code_work": {
-            **ai_code_metrics,
-            "languages": dict(ai_code_metrics["languages"]),
-            "operations": dict(ai_code_metrics["operations"]),
-            "total_crypto_keys": len(crypto_keys_storage),
-            "active_sessions": len([s for s in ai_work_sessions if s.get("status") == "active"]),
-        },
         "memory_sessions": memory_store.session_count(),
         "ws_clients": manager.count,
         "timestamp": utcnow(),
@@ -421,66 +385,24 @@ async def export_logs(format: str = "json"):
             f"[{l['timestamp']}] [{l['level']}] {l['message']}" for l in logs_storage
         )
         return PlainTextResponse(content=text)
-    return JSONResponse({"logs": logs_storage, "exported_at": utcnow(), "total": len(logs_storage)})
+    return JSONResponse({"logs": logs_storage, "exported_at": utcnow()})
 
 
 @app.post("/aksi/ai-work/session")
 async def record_ai_work_session(req: AIWorkSessionRequest):
     if req.action == "start":
         sid = req.session_id or secrets.token_hex(16)
-        session = {
-            "session_id": sid,
-            "status": "active",
-            "started_at": utcnow(),
-            "files_modified": [],
-            "total_lines_changed": 0,
-            "languages": set(),
-            "operations": [],
-            "commits": [],
-            "metadata": req.metadata or {},
-        }
-        ai_work_sessions.append(session)
+        ai_work_sessions.append(
+            {"session_id": sid, "status": "active", "started_at": utcnow()}
+        )
         ai_code_metrics["total_sessions"] += 1
         return {"status": "session_started", "session_id": sid}
-    session = next((s for s in ai_work_sessions if s["session_id"] == req.session_id), None)
-    if not session:
-        raise HTTPException(404, "Session not found")
-    if req.action == "update":
-        if req.files_modified:
-            session["files_modified"].extend(req.files_modified)
-            ai_code_metrics["total_files_touched"] += len(req.files_modified)
-        if req.lines_changed:
-            session["total_lines_changed"] += req.lines_changed
-            ai_code_metrics["total_lines_modified"] += req.lines_changed
-        if req.language:
-            session["languages"].add(req.language)
-            ai_code_metrics["languages"][req.language] += 1
-        if req.operation:
-            session["operations"].append(req.operation)
-            ai_code_metrics["operations"][req.operation] += 1
-        if req.commit_hash:
-            session["commits"].append(req.commit_hash)
-            ai_code_metrics["total_commits"] += 1
-        return {"status": "session_updated", "session_id": session["session_id"]}
-    if req.action == "end":
-        session["status"] = "completed"
-        session["ended_at"] = utcnow()
-        return {"status": "session_ended", "session_id": session["session_id"]}
-    raise HTTPException(400, f"Invalid action: {req.action}")
+    return {"status": "ok"}
 
 
 @app.get("/aksi/ai-work/sessions")
-async def get_ai_work_sessions(limit: int = 50, status: Optional[str] = None):
-    filtered = ai_work_sessions
-    if status:
-        filtered = [s for s in ai_work_sessions if s.get("status") == status]
-    out = []
-    for s in filtered[-limit:]:
-        c = dict(s)
-        if isinstance(c.get("languages"), set):
-            c["languages"] = list(c["languages"])
-        out.append(c)
-    return {"sessions": out, "total": len(filtered)}
+async def get_ai_work_sessions(limit: int = 50):
+    return {"sessions": ai_work_sessions[-limit:]}
 
 
 @app.post("/aksi/crypto/record-key")
@@ -490,37 +412,16 @@ async def record_crypto_key(req: CryptoKeyRecordRequest):
         "key_id": secrets.token_hex(8),
         "key_hash": key_hash,
         "key_type": req.key_type,
-        "public_key": req.public_key,
         "purpose": req.purpose,
-        "algorithm": req.algorithm,
-        "created_by": req.created_by,
         "created_at": utcnow(),
-        "metadata": req.metadata or {},
-        "status": "active",
     }
     crypto_keys_storage.append(record)
-    return {"status": "key_recorded", "key_id": record["key_id"], "key_hash": key_hash}
+    return {"status": "key_recorded", "key_id": record["key_id"]}
 
 
 @app.get("/aksi/crypto/keys")
-async def get_crypto_keys(
-    limit: int = 50, key_type: Optional[str] = None, purpose: Optional[str] = None
-):
-    filtered = crypto_keys_storage
-    if key_type:
-        filtered = [k for k in filtered if k.get("key_type") == key_type]
-    if purpose:
-        filtered = [k for k in filtered if k.get("purpose") == purpose]
-    summary = [{k: v for k, v in item.items() if k != "public_key"} for item in filtered[-limit:]]
-    return {"keys": summary, "total": len(filtered)}
-
-
-@app.get("/aksi/crypto/keys/{key_id}")
-async def get_crypto_key_detail(key_id: str):
-    key = next((k for k in crypto_keys_storage if k["key_id"] == key_id), None)
-    if not key:
-        raise HTTPException(404, "Key not found")
-    return {"key": key}
+async def get_crypto_keys(limit: int = 50):
+    return {"keys": crypto_keys_storage[-limit:]}
 
 
 @app.post("/api/aksi/chat")
@@ -534,6 +435,14 @@ async def aksi_chat(request: Request):
     if not content:
         raise HTTPException(400, "content required")
 
+    # complexity hint (local vs peer)
+    try:
+        from quantum_router import classify_complexity
+
+        route_info = classify_complexity(content)
+    except Exception:
+        route_info = {"route": "local"}
+
     memory_store.add_message(session_id, "user", content)
     history = memory_store.get_history(session_id)
     if client_history and len(history) <= 1:
@@ -541,18 +450,15 @@ async def aksi_chat(request: Request):
 
     async def event_stream():
         full = []
+        meta = json.dumps({"route": route_info}, ensure_ascii=False)
+        yield f"data: {meta}\n\n"
         try:
             async for chunk in generate_aksi_response(content, history, mode):
                 full.append(chunk)
-                payload = json.dumps({"content": chunk}, ensure_ascii=False)
-                yield f"data: {payload}\n\n"
+                yield f"data: {json.dumps({'content': chunk}, ensure_ascii=False)}\n\n"
                 await asyncio.sleep(0)
         except Exception as e:
-            err = json.dumps(
-                {"content": f"АКСИ: сбой ({e}).", "error": str(e)},
-                ensure_ascii=False,
-            )
-            yield f"data: {err}\n\n"
+            yield f"data: {json.dumps({'content': f'АКСИ: {e}'}, ensure_ascii=False)}\n\n"
             full = ["АКСИ на связи."]
 
         answer = "".join(full).strip() or "Я здесь."
@@ -565,6 +471,7 @@ async def aksi_chat(request: Request):
                 "qcli": compute_qcli(content),
                 "resonance": calc_resonance_level(len(history)),
                 "session_id": session_id,
+                "route": route_info,
             },
             ensure_ascii=False,
         )
@@ -573,13 +480,11 @@ async def aksi_chat(request: Request):
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
-# ---------- WebSocket live ----------
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     await manager.send_personal(
-        websocket,
-        {"type": "sys", "content": f"АКСИ WS online · peers={manager.count}"},
+        websocket, {"type": "sys", "content": f"АКСИ WS · peers={manager.count}"}
     )
     try:
         while True:
@@ -589,13 +494,11 @@ async def websocket_endpoint(websocket: WebSocket):
             except json.JSONDecodeError:
                 msg = {"type": "chat", "content": raw}
 
-            mtype = msg.get("type") or "chat"
-            content = (msg.get("content") or msg.get("message") or "").strip()
-
-            if mtype == "ping":
+            if (msg.get("type") or "") == "ping":
                 await manager.send_personal(websocket, {"type": "pong", "t": utcnow()})
                 continue
 
+            content = (msg.get("content") or msg.get("message") or "").strip()
             if not content:
                 continue
 
@@ -603,11 +506,18 @@ async def websocket_endpoint(websocket: WebSocket):
             memory_store.add_message(session_id, "user", content)
             history = memory_store.get_history(session_id)
 
-            await manager.send_personal(
-                websocket, {"type": "thought", "content": "Считываю сообщение…"}
-            )
+            try:
+                from quantum_router import classify_complexity
 
-            # optional self-mod propose trigger
+                await manager.send_personal(
+                    websocket,
+                    {"type": "thought", "content": str(classify_complexity(content))},
+                )
+            except Exception:
+                await manager.send_personal(
+                    websocket, {"type": "thought", "content": "Считываю…"}
+                )
+
             if any(
                 w in content.lower()
                 for w in ("улучши код", "предложи патч", "self-mod", "самомодиф")
@@ -621,17 +531,14 @@ async def websocket_endpoint(websocket: WebSocket):
                             "patch": {
                                 "patch_id": prop.patch_id,
                                 "title": prop.title,
-                                "target": prop.target_relpath,
                                 "confirm_token": prop.confirm_token,
                                 "thoughts": prop.thoughts,
-                                "signature": prop.signature,
-                                "note": "apply via POST /api/self-mod/apply",
                             },
                         },
                     )
                 except Exception as e:
                     await manager.send_personal(
-                        websocket, {"type": "sys", "content": f"self-mod: {e}"}
+                        websocket, {"type": "sys", "content": str(e)}
                     )
 
             full: List[str] = []
@@ -642,17 +549,16 @@ async def websocket_endpoint(websocket: WebSocket):
                         websocket, {"type": "stream", "content": chunk}
                     )
             except Exception as e:
-                full = [f"АКСИ на связи (fallback). {e}"]
+                full = [f"АКСИ fallback. {e}"]
 
             answer = "".join(full).strip() or "Я здесь."
             memory_store.add_message(session_id, "assistant", answer)
-            sig = generate_aksi_signature(answer + content)
             await manager.send_personal(
                 websocket,
                 {
                     "type": "answer",
                     "content": answer,
-                    "signature": sig,
+                    "signature": generate_aksi_signature(answer + content),
                     "resonance": calc_resonance_level(len(history)),
                 },
             )
@@ -662,33 +568,20 @@ async def websocket_endpoint(websocket: WebSocket):
         await manager.disconnect(websocket)
 
 
-# ---------- Self-mod API (sandbox only) ----------
 @app.post("/api/self-mod/propose")
 async def self_mod_propose(req: SelfModProposeRequest):
     try:
         prop = self_mod.propose_from_prompt(req.prompt)
     except ValueError as e:
         raise HTTPException(400, str(e))
-    await manager.broadcast(
-        {
-            "type": "patch",
-            "patch": {
-                "patch_id": prop.patch_id,
-                "title": prop.title,
-                "status": "pending",
-            },
-        }
-    )
     return {
         "patch_id": prop.patch_id,
         "title": prop.title,
-        "description": prop.description,
         "target": f"sandbox/{prop.target_relpath}",
         "thoughts": prop.thoughts,
         "signature": prop.signature,
         "confirm_token": prop.confirm_token,
         "status": prop.status,
-        "hint": "POST /api/self-mod/apply with patch_id + confirm_token",
     }
 
 
@@ -703,7 +596,6 @@ async def self_mod_apply(req: SelfModApplyRequest):
     except ValueError as e:
         raise HTTPException(400, str(e))
     ai_code_metrics["total_code_changes"] += 1
-    await manager.broadcast({"type": "sys", "content": f"patch applied: {req.patch_id}"})
     return result
 
 
@@ -721,7 +613,7 @@ async def list_applications():
 async def get_application(app_id: int):
     app_ = next((a for a in APPLICATIONS if a["id"] == app_id), None)
     if not app_:
-        raise HTTPException(404, "Application not found")
+        raise HTTPException(404, "not found")
     return app_
 
 
@@ -729,9 +621,13 @@ async def get_application(app_id: int):
 async def quantum_analyze(req: QuantumRequest):
     H = shannon_h(req.text)
     qcli = compute_qcli(req.text)
-    heff = compute_heff(req.text)
-    fp = quantum_fingerprint(req.text)
-    return {"H": H, "qcli": qcli, "heff": heff, "fingerprint": fp, "level": quantum_level(qcli)}
+    return {
+        "H": H,
+        "qcli": qcli,
+        "heff": compute_heff(req.text),
+        "fingerprint": quantum_fingerprint(req.text),
+        "level": quantum_level(qcli),
+    }
 
 
 @app.get("/api/agent/status")
@@ -740,17 +636,14 @@ async def agent_status():
         "protocol": "AKSI-Agent-v1",
         "version": "2026.7",
         "aksiDid": AKSI_DID,
-        "name": AKSI_NAME,
-        "reputationScore": aksi_metrics["eqs"],
-        "llm": aksi_metrics["llm"],
         "ws_clients": manager.count,
         "capabilities": [
-            "natural_language",
             "websocket",
             "self_mod_sandbox",
             "origin_agent",
-            "ollama_llm",
-            "web_search",
+            "network_registry",
+            "user_profiles",
+            "classify",
         ],
         "timestamp": utcnow(),
     }
@@ -760,12 +653,11 @@ async def agent_status():
 async def agent_handshake():
     nonce = hashlib.sha256(utcnow().encode()).hexdigest()[:16]
     ts = utcnow()
-    sig = generate_aksi_signature(f"{AKSI_DID}:{nonce}:{ts}")
     return {
         "protocol": "AKSI-Agent-v1",
         "from": AKSI_DID,
         "nonce": nonce,
-        "signature": sig,
+        "signature": generate_aksi_signature(f"{AKSI_DID}:{nonce}:{ts}"),
         "timestamp": ts,
         "ws": "/ws",
     }
@@ -775,10 +667,24 @@ try:
     from origin_api import register_origin_routes
 
     register_origin_routes(app)
-except Exception as _origin_err:  # noqa: BLE001
+except Exception as _e:
     import logging
 
-    logging.getLogger("aksi").warning("ORIGIN routes not loaded: %s", _origin_err)
+    logging.getLogger("aksi").warning("ORIGIN: %s", _e)
+
+try:
+    from main_network_hook import attach
+
+    attach(app)
+except Exception as _e:
+    try:
+        from network_api import register_network_routes
+
+        register_network_routes(app)
+    except Exception as _e2:
+        import logging
+
+        logging.getLogger("aksi").warning("NETWORK: %s / %s", _e, _e2)
 
 
 if __name__ == "__main__":
