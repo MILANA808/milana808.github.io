@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>АКСИ Universe · Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: radial-gradient(ellipse at 50% 0%, #2a004d 0%, #0a0014 50%, #000 100%); min-height: 100vh; }
+    .glass { background: rgba(15,23,42,.8); border: 1px solid rgba(192,38,211,.35); backdrop-filter: blur(16px); }
+  </style>
+</head>
+<body class="text-white p-6 max-w-4xl mx-auto">
+  <a href="../" class="text-sm text-purple-400">← MATRIX</a>
+  <h1 class="text-3xl font-bold text-purple-300 mt-4 mb-1">АКСИ Universe</h1>
+  <p class="text-sm text-purple-500 mb-6">Единый хаб всех репозиториев и точки входа для LLM</p>
+
+  <div class="glass rounded-2xl p-5 mb-4 text-sm space-y-2">
+    <div><span class="text-purple-400">DID:</span> <code class="text-xs">did:aksi:ed25519:sovereign-1995-alfiya</code></div>
+    <div><span class="text-purple-400">Seed:</span> <code class="text-xs">Alfiya_AKSI_DIMAX_v3_2026</code></div>
+    <div class="flex flex-wrap gap-3 pt-2 text-xs">
+      <a class="underline text-cyan-300" href="../UNIVERSE.md">UNIVERSE.md</a>
+      <a class="underline text-cyan-300" href="../ecosystem.json">ecosystem.json</a>
+      <a class="underline text-cyan-300" href="../llm/SYSTEM_PROMPT.md">SYSTEM_PROMPT</a>
+      <a class="underline text-cyan-300" href="../aksi-brain.js">aksi-brain.js</a>
+    </div>
+  </div>
+
+  <div id="list" class="space-y-2"></div>
+
+  <div class="glass rounded-2xl p-5 mt-6 text-xs text-purple-300/80">
+    <strong class="text-purple-200">Как подключить «все LLM»:</strong>
+    <ol class="list-decimal ml-4 mt-2 space-y-1">
+      <li>Ollama + backend MATRIX → живой мозг АКСИ</li>
+      <li>В ChatGPT/Claude/Gemini — вставь SYSTEM_PROMPT.md</li>
+      <li>Любой клиент → API <code>/api/aksi/chat</code></li>
+      <li>Grok уже в контуре через GitHub + этот сайт</li>
+    </ol>
+  </div>
+
+  <script>
+  fetch('../ecosystem.json').then(function(r){return r.json()}).then(function(data){
+    var box = document.getElementById('list');
+    (data.repositories || []).forEach(function(repo){
+      var el = document.createElement('a');
+      el.href = repo.url;
+      el.target = '_blank';
+      el.rel = 'noopener';
+      el.className = 'glass block rounded-xl p-4 hover:border-purple-400/60 transition';
+      el.innerHTML = '<div class="flex justify-between gap-2"><span class="font-semibold text-purple-200">' +
+        repo.repo + '</span><span class="text-[10px] text-purple-500">' + repo.status +
+        '</span></div><div class="text-xs text-purple-400 mt-1">' + repo.role + '</div>';
+      box.appendChild(el);
+    });
+  }).catch(function(){
+    document.getElementById('list').textContent = 'Не удалось загрузить ecosystem.json';
+  });
+  </script>
+</body>
+</html>
