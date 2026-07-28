@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>АКСИ · 21+ Apps</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../search.js"></script>
+  <style>
+    body { background: radial-gradient(ellipse at 50% 10%, #2a004d 0%, #0a0014 45%, #000 100%); min-height: 100vh; }
+    .glass { background: rgba(15,23,42,0.78); backdrop-filter: blur(20px); border: 1px solid rgba(192,38,211,0.4); }
+  </style>
+</head>
+<body class="text-white p-6 max-w-5xl mx-auto">
+  <div class="flex flex-wrap justify-between gap-2 items-center mb-6">
+    <a href="../" class="text-sm text-purple-400 hover:text-purple-200">← АКСИ MATRIX</a>
+    <div class="flex gap-2 text-xs">
+      <a href="../search/" class="px-3 py-1 rounded-lg bg-purple-900/50 border border-purple-500/30">Поиск</a>
+      <a href="../globe/" class="px-3 py-1 rounded-lg bg-purple-900/50 border border-purple-500/30">Globe5D</a>
+    </div>
+  </div>
+  <h1 class="text-2xl font-bold text-purple-300 mb-1">Приложения АКСИ</h1>
+  <p class="text-xs text-purple-500 mb-6">Каталог 21+ · live / wip / concept</p>
+  <div id="grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+  <script>
+  const statusColor = { live: 'text-emerald-400', wip: 'text-amber-300', concept: 'text-purple-500' };
+  const grid = document.getElementById('grid');
+  (window.AKSI_APPS || []).forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'glass rounded-xl p-4';
+    el.innerHTML = '<div class="flex justify-between gap-2"><div class="font-bold text-sm text-purple-200">'+a.name+'</div><span class="text-[10px] '+ (statusColor[a.status]||'') +'">'+a.status+'</span></div><div class="text-xs text-purple-400/70 mt-1">'+a.description+'</div><div class="text-[10px] text-purple-500 mt-2">'+a.category+'</div>';
+    grid.appendChild(el);
+  });
+  </script>
+</body>
+</html>

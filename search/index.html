@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>АКСИ · Поиск</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../search.js"></script>
+  <style>
+    body { background: radial-gradient(ellipse at 50% 10%, #2a004d 0%, #0a0014 45%, #000 100%); min-height: 100vh; }
+    .glass { background: rgba(15,23,42,0.78); backdrop-filter: blur(20px); border: 1px solid rgba(192,38,211,0.4); }
+  </style>
+</head>
+<body class="text-white p-6 max-w-3xl mx-auto">
+  <a href="../" class="text-sm text-purple-400 hover:text-purple-200">← АКСИ MATRIX</a>
+  <h1 class="text-2xl font-bold text-purple-300 mt-4 mb-2">Поиск</h1>
+  <p class="text-xs text-purple-500 mb-4">Локально — приложения. Интернет — через backend + API-ключ (Tavily/Serper).</p>
+
+  <div class="glass rounded-2xl p-4 space-y-3">
+    <div class="flex gap-2">
+      <input id="q" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-4 py-2 text-sm" placeholder="Запрос...">
+      <button id="btn-local" class="px-4 py-2 bg-violet-700 rounded-xl text-sm">Apps</button>
+      <button id="btn-web" class="px-4 py-2 bg-indigo-700 rounded-xl text-sm">Web</button>
+    </div>
+    <div id="out" class="text-sm space-y-2 min-h-[120px] text-purple-100/90"></div>
+  </div>
+
+  <script>
+  const API = localStorage.getItem('AKSI_API') || 'http://localhost:8000';
+  const out = document.getElementById('out');
+  document.getElementById('btn-local').onclick = () => {
+    const q = document.getElementById('q').value;
+    const hits = window.AKSI_localSearch(q);
+    if (!hits.length) { out.innerHTML = '<p class="text-purple-500">Ничего не найдено в каталоге приложений</p>'; return; }
+    out.innerHTML = hits.map(a =>
+      '<div class="glass rounded-xl p-3"><b class="text-purple-200">'+a.name+'</b> <span class="text-[10px] text-purple-500">'+a.status+'</span><div class="text-xs text-purple-400">'+a.description+' · '+a.category+'</div></div>'
+    ).join('');
+  };
+  document.getElementById('btn-web').onclick = async () => {
+    const q = document.getElementById('q').value.trim();
+    if (!q) return;
+    out.innerHTML = '<p class="text-purple-400">Ищу через backend...</p>';
+    try {
+      const data = await window.AKSI_webSearch(API, q);
+      if (!data.success) {
+        out.innerHTML = '<p class="text-amber-300">'+ (data.error || 'Поиск недоступен') +'</p><p class="text-xs text-purple-500 mt-2">Запусти backend, добавь AKSI_TAVILY_API_KEY в .env — см. DEPLOY.md</p>';
+        return;
+      }
+      let html = data.answer ? '<p class="text-emerald-300 mb-2">'+data.answer+'</p>' : '';
+      (data.results || []).forEach(r => {
+        html += '<div class="glass rounded-xl p-3"><a class="text-cyan-300 text-sm" href="'+r.url+'" target="_blank" rel="noopener">'+r.title+'</a><div class="text-xs text-purple-400 mt-1">'+(r.content||'').slice(0,200)+'</div></div>';
+      });
+      out.innerHTML = html || '<p class="text-purple-500">Пустой ответ</p>';
+    } catch (e) {
+      out.innerHTML = '<p class="text-red-300">Ошибка: '+e.message+'</p>';
+    }
+  };
+  document.getElementById('q').onkeypress = e => { if (e.key === 'Enter') document.getElementById('btn-local').click(); };
+  </script>
+</body>
+</html>
