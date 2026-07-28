@@ -1,6 +1,6 @@
 """
-AKSI MATRIX Backend — Unified FastAPI v3.5
-WS + ORIGIN + self-mod + network (profiles, registry, classify)
+AKSI MATRIX Backend — Unified FastAPI v3.5.1
+WS + ORIGIN + self-mod + network + user profiles wired to LLM
 Alfiya · 1995 · MILANA808
 """
 from __future__ import annotations
@@ -43,8 +43,8 @@ except ImportError:
 
 app = FastAPI(
     title="AKSI MATRIX Unified Backend",
-    description="Live WS · ORIGIN · network · self-mod sandbox",
-    version="3.5.0",
+    description="Live WS · ORIGIN · network · self-mod · profiles",
+    version="3.5.1",
 )
 
 app.add_middleware(
@@ -243,7 +243,7 @@ class SelfModApplyRequest(BaseModel):
 async def root():
     return {
         "service": "AKSI MATRIX Unified Backend",
-        "version": "3.5.0",
+        "version": "3.5.1",
         "status": "running",
         "identity": AKSI_NAME,
         "did": AKSI_DID,
@@ -262,7 +262,7 @@ async def health():
     return {
         "status": "resonating",
         "resonance_level": calc_resonance_level(),
-        "version": "3.5.0",
+        "version": "3.5.1",
         "eqs": aksi_metrics["eqs"],
         "llm": aksi_metrics["llm"],
         "ws_clients": manager.count,
@@ -275,7 +275,7 @@ async def health():
 
 @app.get("/version")
 async def version():
-    return {"version": "3.5.0", "api": "aksi-matrix-unified", "github": "MILANA808"}
+    return {"version": "3.5.1", "api": "aksi-matrix-unified", "github": "MILANA808"}
 
 
 @app.post("/echo")
@@ -430,12 +430,16 @@ async def aksi_chat(request: Request):
     content = (data.get("content") or data.get("message") or "").strip()
     mode = data.get("mode") or "aksi"
     client_history = data.get("history") or []
-    session_id = request.headers.get("X-Session-ID") or data.get("session_id") or "default"
+    session_id = (
+        request.headers.get("X-Session-ID")
+        or data.get("session_id")
+        or data.get("user_id")
+        or "default"
+    )
 
     if not content:
         raise HTTPException(400, "content required")
 
-    # complexity hint (local vs peer)
     try:
         from quantum_router import classify_complexity
 
@@ -450,10 +454,11 @@ async def aksi_chat(request: Request):
 
     async def event_stream():
         full = []
-        meta = json.dumps({"route": route_info}, ensure_ascii=False)
-        yield f"data: {meta}\n\n"
+        yield f"data: {json.dumps({'route': route_info}, ensure_ascii=False)}\n\n"
         try:
-            async for chunk in generate_aksi_response(content, history, mode):
+            async for chunk in generate_aksi_response(
+                content, history, mode, user_id=session_id
+            ):
                 full.append(chunk)
                 yield f"data: {json.dumps({'content': chunk}, ensure_ascii=False)}\n\n"
                 await asyncio.sleep(0)
@@ -502,7 +507,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if not content:
                 continue
 
-            session_id = msg.get("session_id") or "ws-default"
+            session_id = msg.get("session_id") or msg.get("user_id") or "ws-default"
             memory_store.add_message(session_id, "user", content)
             history = memory_store.get_history(session_id)
 
@@ -543,7 +548,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
             full: List[str] = []
             try:
-                async for chunk in generate_aksi_response(content, history, mode="aksi"):
+                async for chunk in generate_aksi_response(
+                    content, history, mode="aksi", user_id=session_id
+                ):
                     full.append(chunk)
                     await manager.send_personal(
                         websocket, {"type": "stream", "content": chunk}
@@ -634,7 +641,7 @@ async def quantum_analyze(req: QuantumRequest):
 async def agent_status():
     return {
         "protocol": "AKSI-Agent-v1",
-        "version": "2026.7",
+        "version": "2026.7.1",
         "aksiDid": AKSI_DID,
         "ws_clients": manager.count,
         "capabilities": [
@@ -643,6 +650,7 @@ async def agent_status():
             "origin_agent",
             "network_registry",
             "user_profiles",
+            "peer_forward",
             "classify",
         ],
         "timestamp": utcnow(),
