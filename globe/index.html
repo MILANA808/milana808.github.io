@@ -1,154 +1,341 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>АКСИ Globe5D · Demo</title>
-  <style>
-    * { margin: 0; box-sizing: border-box; }
-    body { background: #0a0a1a; color: #e9d5ff; font-family: system-ui, sans-serif; overflow: hidden; }
-    canvas { display: block; width: 100vw; height: 100vh; }
-    #hud {
-      position: fixed; top: 12px; left: 12px; z-index: 10;
-      background: rgba(15,23,42,.85); border: 1px solid rgba(192,38,211,.4);
-      border-radius: 16px; padding: 14px 18px; max-width: 280px;
-      backdrop-filter: blur(12px); font-size: 13px;
-    }
-    #hud h1 { font-size: 15px; color: #e9d5ff; margin-bottom: 6px; }
-    #hud .m { color: #a78bfa; font-size: 11px; margin: 3px 0; }
-    #hud .v { color: #34d399; font-family: ui-monospace, monospace; }
-    a.back {
-      position: fixed; top: 12px; right: 12px; z-index: 10;
-      padding: 8px 14px; border-radius: 12px; text-decoration: none;
-      background: rgba(124,58,237,.5); color: #fff; font-size: 12px;
-      border: 1px solid rgba(192,38,211,.5);
-    }
-    #note {
-      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
-      font-size: 11px; color: rgba(167,139,250,.7); text-align: center;
-      max-width: 90%;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ Globe · restored 28.07.2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a1a;color:#e0e0ff;font-family:system-ui,sans-serif;overflow:hidden;height:100vh}
+#globe{display:block;width:100vw;height:100vh}
+.panel{position:fixed;z-index:10;background:rgba(10,10,30,.85);border:1px solid rgba(0,200,255,.25);
+border-radius:12px;padding:12px 14px;backdrop-filter:blur(10px);font-size:12px;max-width:280px}
+#ui{top:12px;right:12px;min-width:200px}
+#dimax{bottom:12px;left:12px}
+#mem{top:12px;left:12px}
+#search{bottom:12px;left:50%;transform:translateX(-50%);width:min(420px,92vw)}
+.t{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7dd3fc;margin-bottom:6px}
+.v{font-family:ui-monospace,monospace;color:#a5f3fc}
+.bar{height:4px;background:#1e293b;border-radius:2px;margin:4px 0 8px;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,#06b6d4,#a855f7)}
+a.home{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:20;color:#c4b5fd;font-size:12px;text-decoration:none}
+input,button{background:#0f172a;border:1px solid #334155;color:#e2e8f0;border-radius:8px;padding:6px 10px;font-size:12px}
+button{cursor:pointer;background:#312e81}
+#results{margin-top:6px;max-height:80px;overflow:auto;font-size:11px;color:#94a3b8}
+.pulse{animation:p 1.2s ease-in-out infinite}@keyframes p{50%{opacity:.6}}
+</style>
 </head>
 <body>
-  <a class="back" href="../">← АКСИ MATRIX</a>
-  <div id="hud">
-    <h1>🌍 Globe5D · Demo</h1>
-    <div class="m">Resonance: <span class="v" id="r">—</span></div>
-    <div class="m">Objects: <span class="v" id="n">—</span></div>
-    <div class="m">AKSI idx: <span class="v" id="a">—</span></div>
-    <div class="m" style="margin-top:8px;opacity:.7">Статический демо-режим.<br>Realtime: aksi-globe :3000</div>
+<a class="home" href="../">← АКСИ MATRIX</a>
+<canvas id="globe"></canvas>
+
+<div id="ui" class="panel">
+  <div class="t">AKSI Index</div>
+  <div class="v" id="aksi-val">—</div>
+  <div class="bar"><i id="aksi-bar" style="width:0%"></i></div>
+  <div>A <span class="v" id="a-val">—</span> · I <span class="v" id="i-val">—</span> · S <span class="v" id="s-val">—</span></div>
+  <div class="t" style="margin-top:10px">Resonance Field</div>
+  <div class="v" id="res-val">—</div>
+  <div class="bar"><i id="res-bar" style="width:0%"></i></div>
+  <div>objects: <span class="v" id="n-val">0</span> · entropy: <span class="v" id="ent-val">—</span></div>
+  <div id="events" style="margin-top:8px;color:#94a3b8;font-size:11px"></div>
+</div>
+
+<div id="dimax" class="panel">
+  <div class="t">DIMAX v3</div>
+  <div class="v" id="dimax-val">—</div>
+  <div style="font-size:11px;color:#94a3b8;margin-top:4px" id="dimax-br"></div>
+</div>
+
+<div id="mem" class="panel">
+  <div class="t">Memory_AKSI</div>
+  <button type="button" id="replay-btn">▶ Replay</button>
+  <div id="replay-st" style="margin-top:6px;color:#94a3b8;font-size:11px">snapshots: 0</div>
+</div>
+
+<div id="search" class="panel">
+  <div class="t">Semantic events</div>
+  <div style="display:flex;gap:6px">
+    <input id="q" style="flex:1" placeholder="scout surge, cluster...">
+    <button type="button" id="qbtn">⌕</button>
   </div>
-  <canvas id="globe"></canvas>
-  <div id="note">Полный Socket.IO + AI objects — в Milana-backend/aksi-globe</div>
-  <script>
-(function(){
-  const roleColors = {
-    scout:{fill:"#00ff88",glow:"rgba(0,255,136,.9)"},
-    trader:{fill:"#00ccff",glow:"rgba(0,204,255,.9)"},
-    cluster:{fill:"#ffaa00",glow:"rgba(255,170,0,.9)"},
-    signal:{fill:"#ff44ff",glow:"rgba(255,68,255,.9)"}
+  <div id="results"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // === Original formulas from Milana-backend/aksi-globe ===
+  var ROLES = ["scout", "trader", "cluster", "signal"];
+  var COLORS = {
+    scout: { fill: "#00ff88", glow: "rgba(0,255,136,0.9)" },
+    trader: { fill: "#00ccff", glow: "rgba(0,204,255,0.9)" },
+    cluster: { fill: "#ffaa00", glow: "rgba(255,170,0,0.9)" },
+    signal: { fill: "#ff44ff", glow: "rgba(255,68,255,0.9)" },
   };
-  const roles = Object.keys(roleColors);
-  let objects = [], resonance = 0.55, aksi = 0.42, t0 = Date.now();
+  var objects = [];
+  var memory = [];
+  var eventsLog = [];
+  var hotspots = [];
+  var resonance = 0;
+  var lastAksi = 0.1;
+  var aksiHist = [];
+
+  function calcAKSI(objs) {
+    var n = objs.length || 1;
+    var A = Math.min(1, objs.length / 50);
+    var totalSpeed = objs.reduce(function (s, o) { return s + o.speed; }, 0);
+    var I = Math.min(1, totalSpeed / (n * 5));
+    var grouped = objs.filter(function (o) { return o.group; }).length;
+    var S = Math.min(1, grouped / n);
+    var gamma = 0.4;
+    var g = 1 + gamma * Math.sqrt(objs.length);
+    var aksi = A * I * S * g;
+    var roleCounts = {};
+    objs.forEach(function (o) {
+      roleCounts[o.role] = (roleCounts[o.role] || 0) + 1;
+    });
+    var roles = Object.keys(roleCounts);
+    var entropy = 0;
+    roles.forEach(function (r) {
+      var p = roleCounts[r] / n;
+      if (p > 0) entropy -= p * Math.log2(p);
+    });
+    return { A: A, I: I, S: S, n: objs.length, aksi: aksi, g: g, roleCounts: roleCounts, entropy: entropy };
+  }
+
+  function calcResonance(m) {
+    var maxA = 2.5;
+    var diversity = Object.keys(m.roleCounts).length / 4;
+    var r = (m.entropy / 2) * (m.aksi / maxA) * (0.5 + 0.5 * diversity);
+    return Math.max(0, Math.min(1, r));
+  }
+
+  function calcDIMAX(m, res) {
+    var D = Math.min(1, res + m.entropy / 3);
+    var I = Math.min(1, (m.aksi * m.n) / 100);
+    var growth = Math.abs(m.aksi - lastAksi);
+    var AX = Math.min(1, growth * 20);
+    var M = 0.85;
+    var balance = 0.08;
+    var SSB = 0.15;
+    var dimax = (D * I * Math.sqrt(Math.max(AX, 0.01)) * 0.75 + M * 1.3 + balance + SSB) / 3.5;
+    return { dimax: dimax, D: D, I: I, AX: AX, M: M };
+  }
 
   function spawn() {
     objects = [];
-    for (let i = 0; i < 28; i++) {
+    for (var i = 0; i < 18; i++) {
       objects.push({
+        id: i,
         lat: (Math.random() - 0.5) * 140,
         lng: (Math.random() - 0.5) * 360,
-        role: roles[i % roles.length],
-        dlat: (Math.random() - 0.5) * 0.15,
-        dlng: (Math.random() - 0.5) * 0.25
+        speed: 0.5 + Math.random() * 3,
+        role: ROLES[i % 4],
+        group: Math.random() > 0.45,
       });
     }
+    hotspots = [
+      { lat: 55.7, lng: 49.1, value: 0.9 },
+      { lat: 40.7, lng: -74, value: 0.6 },
+      { lat: 35.6, lng: 139.7, value: 0.5 },
+      { lat: 51.5, lng: -0.1, value: 0.4 },
+    ];
   }
-  spawn();
+
+  function tickSim() {
+    objects.forEach(function (o) {
+      var boost = resonance > 0.7 ? 1.1 : resonance < 0.3 ? 0.7 : 1;
+      o.lng += o.speed * 0.15 * boost * (o.role === "scout" ? 1.2 : 1);
+      if (o.lng > 180) o.lng -= 360;
+      if (o.lng < -180) o.lng += 360;
+      o.lat += Math.sin(Date.now() / 2000 + o.id) * 0.08;
+      if (o.lat > 70) o.lat = 70;
+      if (o.lat < -70) o.lat = -70;
+    });
+    var m = calcAKSI(objects);
+    resonance = calcResonance(m);
+    var dx = calcDIMAX(m, resonance);
+    lastAksi = m.aksi;
+    aksiHist.push(m.aksi);
+    if (aksiHist.length > 60) aksiHist.shift();
+
+    if (Math.random() < 0.08) {
+      var ev = { type: objects[0].role + "_pulse", label: objects[0].role + " activity", t: Date.now() };
+      eventsLog.unshift(ev);
+      if (eventsLog.length > 50) eventsLog.pop();
+    }
+
+    if (memory.length === 0 || Date.now() - (memory[memory.length - 1].ts || 0) > 10000) {
+      memory.push({
+        ts: Date.now(),
+        aksi: m.aksi,
+        resonance: resonance,
+        objectsCount: m.n,
+        entropy: m.entropy,
+      });
+      if (memory.length > 100) memory.shift();
+    }
+
+    document.getElementById("aksi-val").textContent = m.aksi.toFixed(3);
+    document.getElementById("aksi-bar").style.width = Math.min(100, m.aksi * 40) + "%";
+    document.getElementById("a-val").textContent = m.A.toFixed(2);
+    document.getElementById("i-val").textContent = m.I.toFixed(2);
+    document.getElementById("s-val").textContent = m.S.toFixed(2);
+    document.getElementById("res-val").textContent = (resonance * 100).toFixed(1) + "%";
+    document.getElementById("res-bar").style.width = resonance * 100 + "%";
+    document.getElementById("n-val").textContent = m.n;
+    document.getElementById("ent-val").textContent = m.entropy.toFixed(2);
+    document.getElementById("dimax-val").textContent = dx.dimax.toFixed(3);
+    document.getElementById("dimax-br").textContent =
+      "D " + dx.D.toFixed(2) + " · I " + dx.I.toFixed(2) + " · AX " + dx.AX.toFixed(2) + " · M " + dx.M;
+    document.getElementById("replay-st").textContent = "snapshots: " + memory.length;
+    document.getElementById("events").textContent = eventsLog[0]
+      ? eventsLog[0].label
+      : "field quiet";
+    var ui = document.getElementById("ui");
+    if (resonance > 0.8) ui.classList.add("pulse");
+    else ui.classList.remove("pulse");
+
+    draw(objects, resonance);
+  }
 
   function latLngToXY(lat, lng, cx, cy, rx, ry) {
-    const normLng = (lng + 180) / 360;
-    const normLat = (90 - lat) / 180;
-    const angle = normLng * Math.PI * 2 - Math.PI;
-    const latFrac = normLat * 2 - 1;
-    const cosA = Math.cos(angle);
+    var normLng = (lng + 180) / 360;
+    var normLat = (90 - lat) / 180;
+    var angle = normLng * Math.PI * 2 - Math.PI;
+    var latFrac = normLat * 2 - 1;
+    var cosA = Math.cos(angle);
     if (cosA < 0) return null;
     return {
-      x: cx + Math.cos(angle) * rx * Math.cos(latFrac * Math.PI / 2),
-      y: cy + latFrac * ry
+      x: cx + Math.cos(angle) * rx * Math.cos((latFrac * Math.PI) / 2),
+      y: cy + latFrac * ry,
     };
   }
 
-  function frame() {
-    const canvas = document.getElementById("globe");
-    const ctx = canvas.getContext("2d");
+  function draw(objs, res) {
+    var canvas = document.getElementById("globe");
+    var ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const cx = canvas.width / 2, cy = canvas.height / 2;
-    const rx = Math.min(canvas.width, canvas.height) * 0.38;
-    const ry = rx * 0.9;
-
-    // drift
-    objects.forEach(o => {
-      o.lat = Math.max(-70, Math.min(70, o.lat + o.dlat));
-      o.lng += o.dlng;
-      if (o.lng > 180) o.lng -= 360;
-      if (o.lng < -180) o.lng += 360;
-      if (Math.random() < 0.01) { o.dlat *= -1; o.dlng *= -1; }
-    });
-    const age = (Date.now() - t0) / 1000;
-    resonance = 0.45 + 0.35 * (0.5 + 0.5 * Math.sin(age * 0.4));
-    aksi = 0.3 + 0.4 * (0.5 + 0.5 * Math.sin(age * 0.25 + 1));
-
     ctx.fillStyle = "#0a0a1a";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < 120; i++) {
+    for (var i = 0; i < 120; i++) {
       ctx.beginPath();
-      ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*1.2, 0, Math.PI*2);
-      ctx.fillStyle = "rgba(255,255,255,"+(Math.random()*0.6+0.2)+")";
+      ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.2, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255,255,255," + (Math.random() * 0.5 + 0.2) + ")";
+      ctx.fill();
+    }
+    var cx = canvas.width / 2,
+      cy = canvas.height / 2,
+      rx = Math.min(canvas.width, canvas.height) * 0.38,
+      ry = rx * 0.9;
+    var gradient = ctx.createRadialGradient(cx - rx * 0.3, cy - ry * 0.3, rx * 0.1, cx, cy, rx);
+    gradient.addColorStop(0, "#1a6fa0");
+    gradient.addColorStop(0.5, "#0d4a73");
+    gradient.addColorStop(1, "#071e30");
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    if (res > 0.4) {
+      var hue = Math.round(res * 240);
+      var alpha = (res - 0.4) * 0.4;
+      var aura = ctx.createRadialGradient(cx, cy, rx * 0.95, cx, cy, rx * 1.25);
+      aura.addColorStop(0, "hsla(" + hue + ",80%,60%," + alpha + ")");
+      aura.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx * 1.25, ry * 1.25, 0, 0, Math.PI * 2);
+      ctx.fillStyle = aura;
       ctx.fill();
     }
 
-    const g = ctx.createRadialGradient(cx-rx*0.3, cy-ry*0.3, rx*0.1, cx, cy, rx);
-    g.addColorStop(0, "#1a6fa0"); g.addColorStop(0.5, "#0d4a73"); g.addColorStop(1, "#071e30");
-    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2); ctx.fillStyle = g; ctx.fill();
-
-    if (resonance > 0.4) {
-      const hue = Math.round(resonance * 240);
-      const alpha = (resonance - 0.4) * 0.35;
-      const ag = ctx.createRadialGradient(cx, cy, rx*0.95, cx, cy, rx*1.25);
-      ag.addColorStop(0, "hsla("+hue+",80%,60%,"+alpha+")");
-      ag.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.beginPath(); ctx.ellipse(cx, cy, rx*1.25, ry*1.25, 0, 0, Math.PI*2); ctx.fillStyle = ag; ctx.fill();
-    }
-
-    ctx.strokeStyle = "rgba(0,200,255,0.12)"; ctx.lineWidth = 0.5;
-    for (let lat = -60; lat <= 60; lat += 30) {
-      const yOff = (lat/90)*ry;
-      const xScale = Math.sqrt(Math.max(0, 1 - (yOff/ry)**2));
-      ctx.beginPath(); ctx.ellipse(cx, cy+yOff, rx*xScale, ry*0.1, 0, 0, Math.PI*2); ctx.stroke();
-    }
-
-    objects.forEach(o => {
-      const pos = latLngToXY(o.lat, o.lng, cx, cy, rx, ry);
+    hotspots.forEach(function (h) {
+      var pos = latLngToXY(h.lat, h.lng, cx, cy, rx, ry);
       if (!pos) return;
-      const c = roleColors[o.role];
-      const gr = resonance > 0.7 ? 16 : 10;
-      const glow = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, gr);
-      glow.addColorStop(0, c.glow); glow.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.beginPath(); ctx.arc(pos.x, pos.y, gr, 0, Math.PI*2); ctx.fillStyle = glow; ctx.fill();
-      ctx.beginPath(); ctx.arc(pos.x, pos.y, 3, 0, Math.PI*2);
-      ctx.fillStyle = c.fill; ctx.shadowColor = c.fill; ctx.shadowBlur = 12; ctx.fill(); ctx.shadowBlur = 0;
+      var radius = 12 + h.value * 28;
+      var hg = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, radius);
+      hg.addColorStop(0, "rgba(255,100,0," + (0.05 + h.value * 0.25) + ")");
+      hg.addColorStop(1, "rgba(255,100,0,0)");
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = hg;
+      ctx.fill();
     });
 
-    document.getElementById("r").textContent = (resonance*100).toFixed(1) + "%";
-    document.getElementById("n").textContent = objects.length;
-    document.getElementById("a").textContent = aksi.toFixed(3);
-    requestAnimationFrame(frame);
+    ctx.strokeStyle = "rgba(0,200,255,0.12)";
+    ctx.lineWidth = 0.5;
+    for (var lat = -60; lat <= 60; lat += 30) {
+      var yOff = (lat / 90) * ry;
+      var xScale = Math.sqrt(1 - (yOff / ry) * (yOff / ry));
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + yOff, rx * xScale, ry * 0.1, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    objs.forEach(function (o) {
+      var pos = latLngToXY(o.lat, o.lng, cx, cy, rx, ry);
+      if (!pos) return;
+      var color = COLORS[o.role] || COLORS.scout;
+      var glowR = res > 0.7 ? 16 : 10;
+      var glow = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, glowR);
+      glow.addColorStop(0, color.glow);
+      glow.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, glowR, 0, Math.PI * 2);
+      ctx.fillStyle = glow;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = color.fill;
+      ctx.shadowColor = color.fill;
+      ctx.shadowBlur = res > 0.7 ? 18 : 10;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
   }
-  requestAnimationFrame(frame);
-  window.addEventListener("resize", () => {});
+
+  document.getElementById("qbtn").onclick = function () {
+    var q = (document.getElementById("q").value || "").toLowerCase().trim();
+    var box = document.getElementById("results");
+    if (!q) {
+      box.textContent = "";
+      return;
+    }
+    var hits = eventsLog.filter(function (e) {
+      return (e.label + " " + e.type).toLowerCase().indexOf(q) !== -1;
+    }).slice(0, 5);
+    box.innerHTML = hits.length
+      ? hits.map(function (h) {
+          return "<div>" + h.label + " · " + h.type + "</div>";
+        }).join("")
+      : "<div>нет совпадений (локальный индекс)</div>";
+  };
+
+  document.getElementById("replay-btn").onclick = function () {
+    if (!memory.length) return;
+    var i = 0;
+    var st = document.getElementById("replay-st");
+    var iv = setInterval(function () {
+      if (i >= memory.length) {
+        clearInterval(iv);
+        st.textContent = "replay done · " + memory.length;
+        return;
+      }
+      var s = memory[i++];
+      st.textContent =
+        "replay " + i + "/" + memory.length + " · AKSI " + s.aksi.toFixed(3) + " · R " + (s.resonance * 100).toFixed(0) + "%";
+    }, 400);
+  };
+
+  spawn();
+  setInterval(tickSim, 1000);
+  tickSim();
+  window.addEventListener("resize", function () {
+    draw(objects, resonance);
+  });
 })();
-  </script>
+</script>
 </body>
 </html>
