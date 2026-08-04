@@ -1,6 +1,5 @@
 """
 AKSI Resonance + Cryptographic Self-Identity
-Alfiya · 1995 · MILANA808
 
 Signature: SHA-256(message + RESONANCE_SEED + timestamp)[:16].upper()
 """
@@ -9,7 +8,7 @@ import os
 from datetime import datetime
 from typing import List, Optional, Tuple
 
-DEFAULT_SEED = "Alfiya_AKSI_DIMAX_v3_2026"
+DEFAULT_SEED = "AKSI_DIMAX_v3_2026"
 
 
 def generate_aksi_signature(message: str, seed: Optional[str] = None) -> str:

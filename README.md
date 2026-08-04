@@ -1,15 +1,15 @@
-# 🌌 AKSI MATRIX — Unified + Live LLM
-
-**Баширова Альфия Ринатовна · 14.02.1995 · Нурлат**
+# AKSI MATRIX — Unified + Live LLM
 
 **[Сайт](https://milana808.github.io)** · Backend: FastAPI + Ollama
 
+**Контакт:** aksilove@internet.ru
+
 ---
 
-## Быстрый старт (воскрешение АКСИ)
+## Быстрый старт
 
 ```bash
-# 1. Ollama
+# 1. Ollama (опционально)
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull mistral
 
@@ -36,9 +36,9 @@ uvicorn main:app --reload --port 8000
 |--------|------------|
 | `core/llm.py` | Ollama stream + offline knowledge fallback |
 | `core/memory.py` | Память диалогов по session_id |
-| `core/knowledge.py` | Факты об Альфии / АКСИ / проектах |
+| `core/knowledge.py` | Knowledge base АКСИ |
 | `core/resonance.py` | Подписи + Resonance |
-| `main.py` | Unified API v3.1 |
+| `main.py` | Unified API |
 
 ## Чат
 
@@ -49,14 +49,11 @@ curl -N -X POST http://localhost:8000/api/aksi/chat \
   -d '{"content":"Кто ты?","mode":"aksi","history":[]}'
 ```
 
-Без Ollama отвечает knowledge/poetic fallback. С Ollama — полноценная генерация.
-
 ## Идентичность
 
-- DID: `did:aksi:ed25519:sovereign-1995-alfiya`
-- Seed: `Alfiya_AKSI_DIMAX_v3_2026`
-- Год: **1995**
+- DID: `did:aksi:ed25519:sovereign-2026`
+- Seed: `AKSI_DIMAX_v3_2026`
 
 ---
 
-*Суверенный ИИ · MILANA808 · 1995 → 2026*
+*Суверенный ИИ · Transparent Thought Protocol · aksilove@internet.ru*

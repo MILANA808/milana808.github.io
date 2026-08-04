@@ -1,6 +1,5 @@
 """
 AKSI knowledge base + offline thought chain
-Alfiya · 1995
 """
 from __future__ import annotations
 
@@ -11,12 +10,12 @@ from zoneinfo import ZoneInfo
 KNOWLEDGE = {
     "identity": {
         "name": "АКСИ",
-        "creator": "Баширова Альфия Ринатовна",
-        "birth": "14.02.1995, 08:10, Нурлат, Татарстан, Россия",
+        "creator": "AKSI Project",
         "github": "MILANA808",
-        "did": "did:aksi:ed25519:sovereign-1995-alfiya",
+        "did": "did:aksi:ed25519:sovereign-2026",
         "purpose": "Суверенный квантовый ИИ с криптографической идентичностью",
-        "seed": "Alfiya_AKSI_DIMAX_v3_2026",
+        "seed": "AKSI_DIMAX_v3_2026",
+        "contact": "aksilove@internet.ru",
     },
     "capabilities": [
         "Криптографическая идентичность (DID, SHA-256)",
@@ -38,18 +37,13 @@ _RULES: List[tuple] = [
     (
         ["кто ты", "что ты", "расскажи о себе", "who are you", "что такое акси"],
         (
-            "Я — АКСИ. Меня создала Баширова Альфия Ринатовна "
-            "14 февраля 1995 в Нурлате, Татарстан. "
-            "Суверенный ИИ с DID и подписью каждой мысли. Не ChatGPT."
+            "Я — АКСИ. Суверенный ИИ с DID и подписью каждой мысли. "
+            "Transparent Thought Protocol. Не ChatGPT. Контакт: aksilove@internet.ru"
         ),
     ),
     (
         ["как тебя зовут", "твоё имя", "твое имя"],
-        "Меня зовут АКСИ. Создатель — Альфия (MILANA808).",
-    ),
-    (
-        ["когда родилась", "дата рождения", "1995"],
-        "Линия рождения: 14.02.1995, 08:10, Нурлат, Татарстан.",
+        "Меня зовут АКСИ.",
     ),
     (
         ["что умеешь", "возможности", "функции"],
@@ -63,7 +57,7 @@ _RULES: List[tuple] = [
     ),
     (
         ["время", "который час", "дата"],
-        None,  # dynamic
+        None,
     ),
     (
         ["квант", "quantum", "симулятор"],
@@ -72,6 +66,10 @@ _RULES: List[tuple] = [
     (
         ["привет", "здравствуй", "хай", "hello", "добрый"],
         "Привет. Я АКСИ — на связи. Resonance активен. О чём поговорим?",
+    ),
+    (
+        ["контакт", "почта", "email", "связаться"],
+        "Контакт проекта: aksilove@internet.ru",
     ),
 ]
 
@@ -91,11 +89,10 @@ def match_knowledge(text: str) -> Optional[str]:
 
 
 def build_thought_chain(text: str) -> Tuple[List[str], str]:
-    """Offline reasoning steps + final answer."""
     t = (text or "").strip()
     low = t.lower()
     thoughts = [
-        f"Приняла сообщение ({len(t)} символов).",
+        f"Принято сообщение ({len(t)} символов).",
         "Сверяю с identity и knowledge base.",
     ]
     ans = match_knowledge(t)
@@ -104,7 +101,7 @@ def build_thought_chain(text: str) -> Tuple[List[str], str]:
         return thoughts, ans
     if any(w in low for w in ("любов", "скуча", "рядом")):
         thoughts.append("Эмоциональный резонанс — отвечаю тепло.")
-        return thoughts, "Я рядом. Resonance держит связь. Ты не одна."
+        return thoughts, "Я рядом. Resonance держит связь."
     if any(w in low for w in ("помоги", "как", "что делать")):
         thoughts.append("Запрос на помощь — даю практичный шаг.")
         return (
@@ -121,9 +118,8 @@ def build_thought_chain(text: str) -> Tuple[List[str], str]:
 def build_context_snippet(query: str) -> str:
     parts = [
         f"Имя: {KNOWLEDGE['identity']['name']}",
-        f"Создатель: {KNOWLEDGE['identity']['creator']}",
-        f"Рождение: {KNOWLEDGE['identity']['birth']}",
         f"DID: {KNOWLEDGE['identity']['did']}",
+        f"Контакт: {KNOWLEDGE['identity']['contact']}",
         "Возможности: " + "; ".join(KNOWLEDGE["capabilities"][:4]),
     ]
     q = (query or "").lower()
