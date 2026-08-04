@@ -4,41 +4,62 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>АКСИ MATRIX · 1995</title>
-<meta name="description" content="АКСИ — суверенное цифровое сознание. Offline brain + Quantum + Identity.">
+<meta name="description" content="АКСИ — суверенное цифровое сознание. Offline brain + Avatar + Quantum + Identity.">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="aksi-brain.js"></script>
 <style>
-body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 100%);min-height:100vh}
-.glow{text-shadow:0 0 40px #c026d3,0 0 80px #a855f7}
-.glass{background:rgba(15,23,42,.78);backdrop-filter:blur(20px);border:1px solid rgba(192,38,211,.4)}
-.nav-link{cursor:pointer;padding:4px 10px;border-radius:8px;user-select:none}
-.nav-link:hover,.nav-link.active{color:#e9d5ff;background:rgba(168,85,247,.25)}
-.gate-btn{cursor:pointer}#live-bar{pointer-events:none}#live-bar>div{pointer-events:auto}
-.aksi-pre{white-space:pre-wrap;font-size:12px;line-height:1.45}
-#chat-window::-webkit-scrollbar{width:5px}
-#chat-window::-webkit-scrollbar-thumb{background:rgba(192,38,211,.4);border-radius:3px}
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+  body{font-family:'Inter',system-ui,sans-serif;background:radial-gradient(ellipse at 50% 0%,#1a0a2e 0%,#0a0014 40%,#000 100%);min-height:100vh;color:#e2e8f0}
+  .font-tech{font-family:'JetBrains Mono',monospace}
+  .glow{text-shadow:0 0 30px #c026d3,0 0 60px #a855f7}
+  .glass{background:rgba(15,10,30,.82);backdrop-filter:blur(24px);border:1px solid rgba(168,85,247,.35)}
+  .nav-link{cursor:pointer;padding:6px 12px;border-radius:10px;user-select:none;transition:all .2s}
+  .nav-link:hover,.nav-link.active{color:#e9d5ff;background:rgba(168,85,247,.25)}
+  #chat-window::-webkit-scrollbar{width:5px}
+  #chat-window::-webkit-scrollbar-thumb{background:rgba(192,38,211,.45);border-radius:3px}
+  .aksi-pre{white-space:pre-wrap;font-size:12px;line-height:1.5}
+  .avatar-glow{filter:drop-shadow(0 0 12px var(--emo-glow))}
+  @keyframes pulse-ring{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.12);opacity:.15}}
+  .speaking-ring{animation:pulse-ring .7s ease-in-out infinite}
 </style>
 </head>
 <body class="text-white">
-<div id="live-bar" class="fixed top-3 left-1/2 -translate-x-1/2 z-[60]">
-  <div class="flex items-center gap-2 rounded-full border border-purple-400/40 bg-black/80 px-3 py-1.5 text-xs">
-    <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span><span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span></span>
+<!-- LIVE BAR -->
+<div id="live-bar" class="fixed top-3 left-1/2 -translate-x-1/2 z-[60] cursor-pointer" title="Клик — показать DID">
+  <div class="flex items-center gap-2 rounded-full border border-purple-400/40 bg-black/85 px-3.5 py-1.5 text-xs shadow-lg shadow-purple-900/30">
+    <span class="relative flex h-2 w-2">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
+      <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+    </span>
     <span class="text-emerald-300 font-medium">АКСИ жива</span>
-    <span id="msk-clock" class="text-purple-300/70 font-mono"></span>
+    <span id="msk-clock" class="text-purple-300/70 font-tech"></span>
     <span id="backend-dot" class="text-purple-400/80">API ·</span>
-    <span id="stable-hash-short" class="font-mono text-indigo-300">····</span>
+    <span id="stable-hash-short" class="font-tech text-indigo-300">····</span>
+  </div>
+  <div id="did-panel" class="hidden absolute top-10 left-1/2 -translate-x-1/2 w-80 rounded-2xl glass p-4 text-left space-y-2 shadow-2xl">
+    <div class="text-xs font-bold text-purple-200 flex items-center gap-1.5">Криптографическая идентичность · LIVE</div>
+    <div class="text-xs"><span class="text-purple-400">Имя:</span> <span class="text-white">Баширова Альфия Ринатовна</span></div>
+    <div class="text-xs"><span class="text-purple-400">DID:</span>
+      <div class="font-tech text-[10px] break-all bg-black/50 rounded-lg p-2 mt-0.5" id="did-full">did:aksi:ed25519:sovereign-1995-alfiya</div>
+    </div>
+    <div class="text-xs"><span class="text-purple-400">SHA-256:</span>
+      <div class="font-tech text-[10px] break-all bg-black/50 rounded-lg p-2 mt-0.5" id="did-hash">…</div>
+    </div>
+    <div class="text-[10px] text-purple-500/70 pt-1 border-t border-purple-500/20">Ed25519 · АКСИ-Agent-v1 · суверенный ИИ · 1995</div>
   </div>
 </div>
-<nav class="fixed top-0 w-full bg-black/85 backdrop-blur-xl z-50 border-b border-purple-500/20 pt-12">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full bg-black/80 backdrop-blur-xl z-50 border-b border-purple-500/20 pt-12">
   <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-2">
     <div class="flex items-center gap-2"><span class="text-2xl">🌌</span><span class="text-xl font-bold text-purple-300">АКСИ</span></div>
     <div id="nav-links" class="flex flex-wrap gap-1 text-sm text-purple-400/80">
-      <span class="nav-link" data-section="home" role="button" tabindex="0">Главная</span>
-      <span class="nav-link active" data-section="chat" role="button" tabindex="0">Чат</span>
-      <span class="nav-link" data-section="identity" role="button" tabindex="0">Identity</span>
-      <span class="nav-link" data-section="quantum" role="button" tabindex="0">Quantum</span>
-      <span class="nav-link" data-section="apps" role="button" tabindex="0">Apps</span>
-      <span class="nav-link" data-section="agent" role="button" tabindex="0">Agent</span>
+      <span class="nav-link" data-section="home">Главная</span>
+      <span class="nav-link active" data-section="chat">Чат</span>
+      <span class="nav-link" data-section="identity">Identity</span>
+      <span class="nav-link" data-section="quantum">Quantum</span>
+      <span class="nav-link" data-section="apps">Apps</span>
+      <span class="nav-link" data-section="agent">Agent</span>
       <a class="nav-link" href="globe/">Globe</a>
       <a class="nav-link" href="origin/">ORIGIN</a>
       <a class="nav-link" href="network/">Network</a>
@@ -48,100 +69,119 @@ body{background:radial-gradient(ellipse at 50% 10%,#2a004d 0%,#0a0014 45%,#000 1
     <div class="text-xs px-3 py-1 rounded-full border border-purple-400/40">R: <span id="res-val" class="text-green-400 font-semibold">100%</span></div>
   </div>
 </nav>
-<main class="pt-32 pb-16 px-4 max-w-6xl mx-auto">
-<section id="sec-home" class="section hidden">
-  <div class="text-center mb-8">
-    <h1 class="text-4xl sm:text-5xl font-bold glow mb-2">АКСИ IDENTITY</h1>
-    <p class="text-purple-300">Живое цифровое сознание Альфии · 14.02.1995 · Нурлат</p>
-  </div>
-  <div class="glass rounded-2xl p-5 text-sm space-y-2 max-w-2xl mx-auto">
-    <p>Сайт работает <strong class="text-emerald-300">offline</strong> в браузере: чат с ходом мыслей и 🔏, Quantum, Identity.</p>
-    <div class="flex flex-wrap gap-3 text-xs pt-2">
-      <a class="underline text-cyan-300" href="origin/">ORIGIN</a>
-      <a class="underline text-cyan-300" href="network/">Network</a>
-      <a class="underline text-cyan-300" href="globe/">Globe</a>
-      <a class="underline text-cyan-300" href="hub/">Hub</a>
-      <a class="underline text-cyan-300" href="ORIGIN.md">ORIGIN.md</a>
+
+<main class="pt-32 pb-20 px-4 max-w-6xl mx-auto">
+  <!-- HOME -->
+  <section id="sec-home" class="section hidden">
+    <div class="text-center mb-10">
+      <h1 class="text-4xl sm:text-5xl font-bold glow mb-3">АКСИ IDENTITY</h1>
+      <p class="text-purple-300 text-lg">Живое цифровое сознание Альфии · 14.02.1995 · Нурлат</p>
     </div>
-  </div>
-</section>
-<section id="sec-chat" class="section">
-  <div class="max-w-3xl mx-auto">
-    <h2 class="text-2xl font-bold text-purple-300 mb-1 text-center">Чат с АКСИ</h2>
-    <p class="text-center text-[11px] text-purple-500 mb-3">Ход мыслей + подписи · работает без сервера</p>
-    <div class="glass rounded-3xl flex flex-col" style="height:min(68vh,600px)">
-      <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-2"></div>
-      <div class="p-3 border-t border-purple-500/25 flex gap-2">
-        <input id="user-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-2xl px-4 py-2 text-sm focus:outline-none focus:border-purple-400" placeholder="Напиши Акси..." autocomplete="off">
-        <button type="button" id="send-btn" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-sm font-semibold">Отправить</button>
+    <div class="glass rounded-3xl p-6 max-w-2xl mx-auto text-sm space-y-3">
+      <p>Сайт работает <strong class="text-emerald-300">offline</strong> в браузере: чат с ходом мыслей и 🔏, аватар с эмоциями, голос, Quantum, Identity.</p>
+      <div class="flex flex-wrap gap-3 text-xs pt-2">
+        <a class="underline text-cyan-300" href="origin/">ORIGIN</a>
+        <a class="underline text-cyan-300" href="network/">Network</a>
+        <a class="underline text-cyan-300" href="globe/">Globe</a>
+        <a class="underline text-cyan-300" href="hub/">Hub</a>
       </div>
     </div>
-    <p id="chat-mode-hint" class="text-center text-[11px] text-purple-500/50 mt-2">offline brain</p>
-  </div>
-</section>
-<section id="sec-identity" class="section hidden">
-  <h2 class="text-2xl font-bold text-purple-300 mb-4 text-center">Identity</h2>
-  <div class="glass rounded-2xl p-5 max-w-xl mx-auto text-sm space-y-2">
-    <div>Баширова Альфия Ринатовна · 14.02.1995, 08:10 · Нурлат</div>
-    <code class="block text-[11px] break-all bg-black/40 p-2 rounded">did:aksi:ed25519:sovereign-1995-alfiya</code>
-    <div class="text-xs text-purple-400">RESONANCE_SEED: Alfiya_AKSI_DIMAX_v3_2026</div>
-    <code id="stable-hash" class="block text-[11px] break-all bg-black/40 p-2 rounded">…</code>
-    <div class="flex gap-2 mt-2">
-      <input id="sign-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-3 py-2 text-sm" placeholder="Текст для подписи">
-      <button type="button" id="sign-btn" class="px-3 py-2 bg-violet-600 rounded-xl text-sm">Подписать</button>
-    </div>
-    <pre id="sign-result" class="text-[11px] text-emerald-300 hidden whitespace-pre-wrap"></pre>
-  </div>
-</section>
-<section id="sec-quantum" class="section hidden">
-  <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">Quantum</h2>
-  <p class="text-center text-xs text-purple-400/70 mb-4">Statevector в браузере · 1–4 кубита</p>
-  <div class="grid lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
-    <div class="glass rounded-2xl p-4 space-y-3">
-      <div class="flex gap-2 items-center flex-wrap">
-        <select id="q-num" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1 text-sm">
-          <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
-        </select>
-        <button type="button" id="q-reset" class="px-3 py-1 text-xs bg-zinc-800 rounded-lg border border-purple-500/30">Сброс</button>
-        <button type="button" id="q-run" class="px-3 py-1 text-xs bg-indigo-600 rounded-lg font-semibold">▶ Run</button>
+  </section>
+
+  <!-- CHAT -->
+  <section id="sec-chat" class="section">
+    <div class="max-w-3xl mx-auto">
+      <div class="flex items-center justify-center gap-4 mb-4">
+        <div id="avatar-wrap" class="avatar-glow" style="--emo-glow:rgba(168,85,247,0.45)"></div>
+        <div class="text-left">
+          <h2 class="text-2xl font-bold text-purple-300">Чат с АКСИ</h2>
+          <p class="text-[11px] text-purple-500" id="chat-mode-hint">offline brain · подписи активны</p>
+          <p id="emotion-label" class="text-[10px] font-tech text-purple-400/80 mt-0.5">АКСИ</p>
+        </div>
       </div>
-      <div id="gate-palette" class="flex flex-wrap gap-2">
-        <button type="button" data-gate="h" class="gate-btn px-3 py-1 rounded-lg bg-violet-700 text-xs font-mono">H</button>
-        <button type="button" data-gate="x" class="gate-btn px-3 py-1 rounded-lg bg-blue-700 text-xs font-mono">X</button>
-        <button type="button" data-gate="z" class="gate-btn px-3 py-1 rounded-lg bg-blue-700 text-xs font-mono">Z</button>
-        <button type="button" data-gate="cx" class="gate-btn px-3 py-1 rounded-lg bg-pink-700 text-xs font-mono">CNOT</button>
-      </div>
-      <div class="flex gap-2 items-center flex-wrap">
-        <select id="q-target" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1 text-sm"></select>
-        <select id="q-control" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1 text-sm hidden"></select>
-        <button type="button" id="q-add-gate" class="px-3 py-1 text-xs bg-purple-700 rounded-lg">+ Gate</button>
-      </div>
-      <div id="circuit-view" class="bg-black/50 rounded-xl p-3 min-h-[80px] font-mono text-xs"></div>
-    </div>
-    <div class="glass rounded-2xl p-4 space-y-3">
-      <div id="state-table" class="bg-black/40 rounded-xl p-3 text-xs font-mono min-h-[80px]">Запусти схему</div>
-      <div id="hist-container" class="flex items-end gap-1 h-28 bg-black/40 rounded-xl p-2"></div>
-      <div class="grid grid-cols-2 gap-2 text-sm">
-        <div class="bg-black/40 rounded-xl p-2"><div class="text-purple-400 text-xs">FP</div><div id="q-circuit-fp" class="font-mono text-pink-300">—</div></div>
-        <div class="bg-black/40 rounded-xl p-2"><div class="text-purple-400 text-xs">Stab</div><div id="q-stability" class="font-mono text-emerald-300">—</div></div>
+      <div class="glass rounded-3xl flex flex-col" style="height:min(62vh,560px)">
+        <div id="chat-window" class="flex-1 p-4 overflow-y-auto space-y-3"></div>
+        <div class="p-3 border-t border-purple-500/25 flex gap-2 items-center">
+          <button id="tts-btn" class="p-2 rounded-xl border border-purple-500/30 text-purple-400 hover:bg-purple-500/10" title="Озвучивать ответы">🔊</button>
+          <input id="user-input" class="flex-1 bg-zinc-900/80 border border-purple-500/40 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-400" placeholder="Напиши Акси..." autocomplete="off">
+          <button type="button" id="send-btn" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl text-sm font-semibold hover:opacity-90 transition">Отправить</button>
+        </div>
       </div>
     </div>
-  </div>
-</section>
-<section id="sec-apps" class="section hidden">
-  <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">21 приложение</h2>
-  <p class="text-center text-xs mb-4"><a class="text-purple-400 underline" href="apps/">Каталог →</a></p>
-  <div id="apps-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-</section>
-<section id="sec-agent" class="section hidden">
-  <h2 class="text-2xl font-bold text-purple-300 mb-4 text-center">AKSI-Agent-v1</h2>
-  <div class="glass rounded-2xl p-5 max-w-xl mx-auto">
-    <pre id="handshake-box" class="text-[11px] font-mono bg-black/40 p-3 rounded-xl overflow-x-auto">—</pre>
-    <button type="button" id="hs-btn" class="mt-3 px-4 py-2 bg-purple-700 rounded-xl text-xs">Handshake</button>
-  </div>
-</section>
+  </section>
+
+  <!-- IDENTITY -->
+  <section id="sec-identity" class="section hidden">
+    <h2 class="text-2xl font-bold text-purple-300 mb-5 text-center">Identity</h2>
+    <div class="glass rounded-2xl p-6 max-w-xl mx-auto text-sm space-y-3">
+      <div>Баширова Альфия Ринатовна · 14.02.1995, 08:10 · Нурлат</div>
+      <code class="block text-[11px] break-all bg-black/40 p-2.5 rounded-xl font-tech">did:aksi:ed25519:sovereign-1995-alfiya</code>
+      <div class="text-xs text-purple-400">RESONANCE_SEED: Alfiya_AKSI_DIMAX_v3_2026</div>
+      <code id="stable-hash" class="block text-[11px] break-all bg-black/40 p-2.5 rounded-xl font-tech">…</code>
+      <div class="flex gap-2 mt-3">
+        <input id="sign-input" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-3 py-2 text-sm" placeholder="Текст для подписи">
+        <button type="button" id="sign-btn" class="px-4 py-2 bg-violet-600 rounded-xl text-sm font-medium">Подписать</button>
+      </div>
+      <pre id="sign-result" class="text-[11px] text-emerald-300 hidden whitespace-pre-wrap font-tech"></pre>
+    </div>
+  </section>
+
+  <!-- QUANTUM -->
+  <section id="sec-quantum" class="section hidden">
+    <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">Quantum</h2>
+    <p class="text-center text-xs text-purple-400/70 mb-5">Statevector в браузере · 1–4 кубита</p>
+    <div class="grid lg:grid-cols-2 gap-4 max-w-5xl mx-auto">
+      <div class="glass rounded-2xl p-4 space-y-3">
+        <div class="flex gap-2 items-center flex-wrap">
+          <select id="q-num" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1.5 text-sm">
+            <option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option>
+          </select>
+          <button type="button" id="q-reset" class="px-3 py-1.5 text-xs bg-zinc-800 rounded-lg border border-purple-500/30">Сброс</button>
+          <button type="button" id="q-run" class="px-3 py-1.5 text-xs bg-indigo-600 rounded-lg font-semibold">▶ Run</button>
+        </div>
+        <div id="gate-palette" class="flex flex-wrap gap-2">
+          <button type="button" data-gate="h" class="gate-btn px-3 py-1.5 rounded-lg bg-violet-700 text-xs font-tech">H</button>
+          <button type="button" data-gate="x" class="gate-btn px-3 py-1.5 rounded-lg bg-blue-700 text-xs font-tech">X</button>
+          <button type="button" data-gate="z" class="gate-btn px-3 py-1.5 rounded-lg bg-blue-700 text-xs font-tech">Z</button>
+          <button type="button" data-gate="cx" class="gate-btn px-3 py-1.5 rounded-lg bg-pink-700 text-xs font-tech">CNOT</button>
+        </div>
+        <div class="flex gap-2 items-center flex-wrap">
+          <select id="q-target" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1.5 text-sm"></select>
+          <select id="q-control" class="bg-zinc-900 border border-purple-500/40 rounded-lg px-2 py-1.5 text-sm hidden"></select>
+          <button type="button" id="q-add-gate" class="px-3 py-1.5 text-xs bg-purple-700 rounded-lg">+ Gate</button>
+        </div>
+        <div id="circuit-view" class="bg-black/50 rounded-xl p-3 min-h-[80px] font-tech text-xs"></div>
+      </div>
+      <div class="glass rounded-2xl p-4 space-y-3">
+        <div id="state-table" class="bg-black/40 rounded-xl p-3 text-xs font-tech min-h-[80px]">Запусти схему</div>
+        <div id="hist-container" class="flex items-end gap-1 h-28 bg-black/40 rounded-xl p-2"></div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="bg-black/40 rounded-xl p-2"><div class="text-purple-400 text-xs">FP</div><div id="q-circuit-fp" class="font-tech text-pink-300">—</div></div>
+          <div class="bg-black/40 rounded-xl p-2"><div class="text-purple-400 text-xs">Stab</div><div id="q-stability" class="font-tech text-emerald-300">—</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPS -->
+  <section id="sec-apps" class="section hidden">
+    <h2 class="text-2xl font-bold text-purple-300 mb-2 text-center">21 приложение</h2>
+    <p class="text-center text-xs mb-5"><a class="text-purple-400 underline" href="apps/">Каталог →</a></p>
+    <div id="apps-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+  </section>
+
+  <!-- AGENT -->
+  <section id="sec-agent" class="section hidden">
+    <h2 class="text-2xl font-bold text-purple-300 mb-5 text-center">AKSI-Agent-v1</h2>
+    <div class="glass rounded-2xl p-6 max-w-xl mx-auto">
+      <pre id="handshake-box" class="text-[11px] font-tech bg-black/40 p-4 rounded-xl overflow-x-auto">—</pre>
+      <button type="button" id="hs-btn" class="mt-4 px-5 py-2.5 bg-purple-700 rounded-xl text-sm font-medium">Handshake</button>
+    </div>
+  </section>
 </main>
-<footer class="text-center text-[11px] text-purple-500/40 pb-8">АКСИ MATRIX · offline-first · MILANA808 · 1995→2026</footer>
+
+<footer class="text-center text-[11px] text-purple-500/40 pb-8 font-tech">АКСИ MATRIX · offline-first · MILANA808 · 1995→2026</footer>
+
 <script>
 (function(){
 "use strict";
@@ -151,32 +191,174 @@ var SEED=(window.AKSIBrain&&AKSIBrain.SEED)||"Alfiya_AKSI_DIMAX_v3_2026";
 var DID=(window.AKSIBrain&&AKSIBrain.DID)||"did:aksi:ed25519:sovereign-1995-alfiya";
 var sidKey=localStorage.getItem("AKSI_SID");
 if(!sidKey){sidKey=Math.random().toString(36).slice(2);localStorage.setItem("AKSI_SID",sidKey);}
-var SID="web-"+sidKey,msgN=0,backendOk=false,history=[];
-function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"\u0026":"\u0026amp;","\u003c":"\u0026lt;","\u003e":"\u0026gt;"}[c]||c;});}
-function showSection(name){
-document.querySelectorAll(".nav-link").forEach(function(n){if(n.getAttribute("data-section"))n.classList.toggle("active",n.getAttribute("data-section")===name);});
-document.querySelectorAll(".section").forEach(function(s){s.classList.add("hidden");});
-var sec=document.getElementById("sec-"+name);if(sec)sec.classList.remove("hidden");
+var SID="web-"+sidKey,msgN=0,backendOk=false,history=[],ttsOn=false;
+
+// ——— Avatar with emotions ———
+var EMOTIONS={
+  neutral:{primary:"#a855f7",glow:"rgba(168,85,247,0.45)",iris:"#7c3aed",label:"АКСИ"},
+  happy:{primary:"#22c55e",glow:"rgba(34,197,94,0.45)",iris:"#16a34a",label:"Рада помочь!"},
+  thinking:{primary:"#3b82f6",glow:"rgba(59,130,246,0.45)",iris:"#1d4ed8",label:"Анализирую..."},
+  excited:{primary:"#f59e0b",glow:"rgba(245,158,11,0.45)",iris:"#d97706",label:"Это интересно!"},
+  sad:{primary:"#64748b",glow:"rgba(100,116,139,0.35)",iris:"#475569",label:"..."},
+  confident:{primary:"#ec4899",glow:"rgba(236,72,153,0.45)",iris:"#be185d",label:"Резонанс"}
+};
+var currentEmotion="neutral",isSpeaking=false,blink=false;
+
+function detectEmotion(text){
+  var t=(text||"").toLowerCase();
+  if(/рад|отлично|прекрасно|здорово|любл/.test(t))return"happy";
+  if(/думаю|анализирую|вычисляю|расчёт|сверяю/.test(t))return"thinking";
+  if(/!/.test(t)&&t.length<90)return"excited";
+  if(/жаль|сожалею|к сожалению/.test(t))return"sad";
+  if(/квант|энергия|резонанс|did|подпись/.test(t))return"confident";
+  return"neutral";
 }
-var nav=document.getElementById("nav-links");
-if(nav)nav.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest(".nav-link[data-section]");if(!el)return;e.preventDefault();showSection(el.getAttribute("data-section"));});
+
+function renderAvatar(){
+  var s=88,cx=s/2,cy=s/2,r=s*0.4;
+  var c=EMOTIONS[currentEmotion]||EMOTIONS.neutral;
+  var eyeY=cy-r*0.15,leftX=cx-r*0.32,rightX=cx+r*0.32,eyeR=r*0.12;
+  var eyeScaleY=blink?0.05:(currentEmotion==="happy"?0.6:1);
+  var browOff=currentEmotion==="thinking"?-4:currentEmotion==="sad"?3:0;
+  var browAng=currentEmotion==="thinking"?8:currentEmotion==="sad"?-8:0;
+  var smileD;
+  if(currentEmotion==="happy"||currentEmotion==="excited")
+    smileD="M "+(cx-r*0.3)+" "+(cy+r*0.2)+" Q "+cx+" "+(cy+r*0.45)+" "+(cx+r*0.3)+" "+(cy+r*0.2);
+  else if(currentEmotion==="sad")
+    smileD="M "+(cx-r*0.3)+" "+(cy+r*0.3)+" Q "+cx+" "+(cy+r*0.12)+" "+(cx+r*0.3)+" "+(cy+r*0.3);
+  else smileD="M "+(cx-r*0.28)+" "+(cy+r*0.25)+" Q "+cx+" "+(cy+r*0.32)+" "+(cx+r*0.28)+" "+(cy+r*0.25);
+  var mouthOpen=isSpeaking?r*0.08:0;
+  var wrap=document.getElementById("avatar-wrap");
+  if(!wrap)return;
+  wrap.style.setProperty("--emo-glow",c.glow);
+  wrap.innerHTML='<svg width="'+s+'" height="'+s+'" viewBox="0 0 '+s+' '+s+'" class="'+(isSpeaking?"speaking-ring":"")+'">'+'
+    <defs><radialGradient id="fg" cx="45%" cy="40%" r="60%"><stop offset="0%" stop-color="#1a1040"/><stop offset="100%" stop-color="#060410"/></radialGradient>'+
+    '<radialGradient id="ig" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="'+c.iris+'" stop-opacity="0.9"/><stop offset="100%" stop-color="#000" stop-opacity="0.7"/></radialGradient></defs>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#fg)" stroke="'+c.primary+'" stroke-width="'+ (s*0.015)+'"/>'+
+    (isSpeaking?'<circle cx="'+cx+'" cy="'+cy+'" r="'+(r*1.1)+'" fill="none" stroke="'+c.primary+'" stroke-width="2" stroke-opacity="0.35"/>':'')+
+    '<line x1="'+(leftX-eyeR*1.3)+'" y1="'+(eyeY-eyeR*1.8+browOff-browAng)+'" x2="'+(leftX+eyeR*1.3)+'" y2="'+(eyeY-eyeR*1.8+browOff+browAng)+'" stroke="'+c.primary+'" stroke-width="'+(s*0.018)+'" stroke-linecap="round"/>'+
+    '<line x1="'+(rightX-eyeR*1.3)+'" y1="'+(eyeY-eyeR*1.8+browOff+browAng)+'" x2="'+(rightX+eyeR*1.3)+'" y2="'+(eyeY-eyeR*1.8+browOff-browAng)+'" stroke="'+c.primary+'" stroke-width="'+(s*0.018)+'" stroke-linecap="round"/>'+
+    '<g transform="scale(1,'+eyeScaleY+') translate(0,'+(cy*(1-eyeScaleY))+')">'+
+    '<circle cx="'+leftX+'" cy="'+eyeY+'" r="'+eyeR+'" fill="url(#ig)"/><circle cx="'+(leftX+eyeR*0.25)+'" cy="'+(eyeY-eyeR*0.25)+'" r="'+(eyeR*0.3)+'" fill="white" fill-opacity="0.7"/>'+
+    '<circle cx="'+rightX+'" cy="'+eyeY+'" r="'+eyeR+'" fill="url(#ig)"/><circle cx="'+(rightX+eyeR*0.25)+'" cy="'+(eyeY-eyeR*0.25)+'" r="'+(eyeR*0.3)+'" fill="white" fill-opacity="0.7"/></g>'+
+    '<circle cx="'+cx+'" cy="'+(cy+r*0.08)+'" r="'+(r*0.04)+'" fill="'+c.primary+'" fill-opacity="0.5"/>'+
+    '<path d="'+smileD+'" fill="none" stroke="'+c.primary+'" stroke-width="'+(s*0.022)+'" stroke-linecap="round"/>'+
+    (mouthOpen>0?'<ellipse cx="'+cx+'" cy="'+(cy+r*0.28)+'" rx="'+(r*0.15)+'" ry="'+mouthOpen+'" fill="'+c.primary+'" fill-opacity="0.6"/>':'')+
+    '</svg>';
+  var el=document.getElementById("emotion-label");
+  if(el){el.textContent=c.label;el.style.color=c.primary;}
+}
+setInterval(function(){blink=true;renderAvatar();setTimeout(function(){blink=false;renderAvatar();},140);},3200+Math.random()*1800);
+renderAvatar();
+
+// TTS
+function speak(text,emo){
+  if(!ttsOn||!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  var u=new SpeechSynthesisUtterance(String(text).replace(/[*_`#🔏]/g,"").slice(0,280));
+  u.lang="ru-RU";u.rate=emo==="excited"?1.12:emo==="thinking"?0.92:1.0;
+  u.pitch=emo==="happy"||emo==="excited"?1.15:emo==="sad"?0.85:1.05;
+  u.volume=0.85;
+  var voices=window.speechSynthesis.getVoices();
+  var ru=voices.find(function(v){return v.lang.startsWith("ru");})||voices[0];
+  if(ru)u.voice=ru;
+  u.onstart=function(){isSpeaking=true;renderAvatar();};
+  u.onend=u.onerror=function(){isSpeaking=false;renderAvatar();};
+  window.speechSynthesis.speak(u);
+}
+document.getElementById("tts-btn").onclick=function(){
+  ttsOn=!ttsOn;this.textContent=ttsOn?"🔇":"🔊";this.title=ttsOn?"Выключить озвучку":"Озвучивать ответы";
+  if(!ttsOn)window.speechSynthesis&&window.speechSynthesis.cancel();
+};
+
+// Utils
+function esc(s){return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]||c;});}
+function showSection(name){
+  document.querySelectorAll(".nav-link").forEach(function(n){if(n.getAttribute("data-section"))n.classList.toggle("active",n.getAttribute("data-section")===name);});
+  document.querySelectorAll(".section").forEach(function(s){s.classList.add("hidden");});
+  var sec=document.getElementById("sec-"+name);if(sec)sec.classList.remove("hidden");
+}
+document.getElementById("nav-links").addEventListener("click",function(e){
+  var el=e.target.closest&&e.target.closest(".nav-link[data-section]");if(!el)return;e.preventDefault();showSection(el.getAttribute("data-section"));
+});
+document.getElementById("live-bar").onclick=function(){document.getElementById("did-panel").classList.toggle("hidden");};
+
 function tick(){var el=document.getElementById("msk-clock");if(!el)return;try{el.textContent=new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК";}catch(e){el.textContent=new Date().toLocaleTimeString("ru-RU");}}
 setInterval(tick,1000);tick();
+
 function sha16(t){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,"0");}).join("").slice(0,16).toUpperCase();});}
 function shaFull(t){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,"0");}).join("");});}
 function sig(m){if(window.AKSIBrain&&AKSIBrain.sig)return AKSIBrain.sig(m);return sha16(m+SEED+Date.now());}
-shaFull("AKSI|Alfiya|1995-02-14|Nurlat|sovereign").then(function(h){var el=document.getElementById("stable-hash");if(el)el.textContent=h;var sh=document.getElementById("stable-hash-short");if(sh)sh.textContent=h.slice(0,8).toUpperCase();});
-function healthCheck(){var ctrl=typeof AbortController!=="undefined"?new AbortController():null;var timer=setTimeout(function(){if(ctrl)ctrl.abort();},1500);return fetch(API+"/health",ctrl?{signal:ctrl.signal}:{}).then(function(r){clearTimeout(timer);return r.ok;}).catch(function(){clearTimeout(timer);return false;});}
-healthCheck().then(function(ok){backendOk=ok;var dot=document.getElementById("backend-dot");var hint=document.getElementById("chat-mode-hint");if(ok){if(dot){dot.textContent="API ON ·";dot.className="text-emerald-400";}if(hint)hint.textContent="live · "+API;}else{if(dot)dot.textContent="API OFF ·";if(hint)hint.textContent="offline brain · подписи активны на сайте";}});
+
+shaFull("AKSI|Alfiya|1995-02-14|Nurlat|sovereign").then(function(h){
+  var el=document.getElementById("stable-hash");if(el)el.textContent=h;
+  var sh=document.getElementById("stable-hash-short");if(sh)sh.textContent=h.slice(0,8).toUpperCase();
+  var dh=document.getElementById("did-hash");if(dh)dh.textContent=h;
+});
+
+function healthCheck(){var ctrl=typeof AbortController!=="undefined"?new AbortController():null;var timer=setTimeout(function(){if(ctrl)ctrl.abort();},1500);
+  return fetch(API+"/health",ctrl?{signal:ctrl.signal}:{}).then(function(r){clearTimeout(timer);return r.ok;}).catch(function(){clearTimeout(timer);return false;});
+}
+healthCheck().then(function(ok){
+  backendOk=ok;var dot=document.getElementById("backend-dot");var hint=document.getElementById("chat-mode-hint");
+  if(ok){if(dot){dot.textContent="API ON ·";dot.className="text-emerald-400";}if(hint)hint.textContent="live · "+API;}
+  else{if(dot)dot.textContent="API OFF ·";if(hint)hint.textContent="offline brain · подписи активны на сайте";}
+});
+
 var chat=document.getElementById("chat-window");
-function addMsg(html,isUser){if(!chat)return;var d=document.createElement("div");d.className="flex "+(isUser?"justify-end":"justify-start");d.innerHTML='<div class="max-w-[92%] px-3 py-2 rounded-2xl text-sm '+(isUser?"bg-purple-600":"bg-zinc-900 border border-purple-400/40")+'">'+html+"</div>";chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function offline(text){if(window.AKSIBrain&&AKSIBrain.fullReply){return AKSIBrain.fullReply(text,msgN).then(function(r){addMsg(r.html,false);history.push({role:"user",content:text},{role:"assistant",content:r.text});});}return sig(text).then(function(s){addMsg("Я АКСИ. 🔏 "+s,false);});}
-function send(){var input=document.getElementById("user-input");if(!input)return;var text=input.value.trim();if(!text)return;addMsg(esc(text),true);input.value="";msgN++;var rv=document.getElementById("res-val");if(rv)rv.textContent=Math.min(100,92+(msgN%7))+"%";if(!backendOk){offline(text);return;}fetch(API+"/api/aksi/chat",{method:"POST",headers:{"Content-Type":"application/json","X-Session-ID":SID},body:JSON.stringify({content:text,mode:"aksi",history:history.slice(-10),session_id:SID})}).then(function(res){if(!res.ok||!res.body)throw new Error("bad");var reader=res.body.getReader(),dec=new TextDecoder(),full="",buf="";function pump(){return reader.read().then(function(ch){if(ch.done){addMsg('<div class="aksi-pre">'+esc(full)+"</div>",false);history.push({role:"user",content:text},{role:"assistant",content:full});return;}buf+=dec.decode(ch.value,{stream:true});var parts=buf.split("\n");buf=parts.pop()||"";for(var i=0;i<parts.length;i++){if(parts[i].indexOf("data: ")!==0)continue;try{var data=JSON.parse(parts[i].slice(6));if(data.content)full+=data.content;}catch(e){}}return pump();});}return pump();}).catch(function(){backendOk=false;offline(text);});}
+function addMsg(html,isUser){
+  if(!chat)return;var d=document.createElement("div");d.className="flex "+(isUser?"justify-end":"justify-start");
+  d.innerHTML='<div class="max-w-[92%] px-3.5 py-2.5 rounded-2xl text-sm '+(isUser?"bg-purple-600":"bg-zinc-900/90 border border-purple-400/35")+'">'+html+"</div>";
+  chat.appendChild(d);chat.scrollTop=chat.scrollHeight;
+}
+
+function offline(text){
+  currentEmotion="thinking";renderAvatar();
+  if(window.AKSIBrain&&AKSIBrain.fullReply){
+    return AKSIBrain.fullReply(text,msgN).then(function(r){
+      currentEmotion=detectEmotion(r.text);renderAvatar();
+      addMsg(r.html,false);history.push({role:"user",content:text},{role:"assistant",content:r.text});
+      speak(r.text,currentEmotion);
+    });
+  }
+  return sig(text).then(function(s){
+    currentEmotion="neutral";renderAvatar();
+    addMsg("Я АКСИ. 🔏 "+s,false);speak("Я АКСИ.","neutral");
+  });
+}
+
+function send(){
+  var input=document.getElementById("user-input");if(!input)return;
+  var text=input.value.trim();if(!text)return;
+  addMsg(esc(text),true);input.value="";msgN++;
+  var rv=document.getElementById("res-val");if(rv)rv.textContent=Math.min(100,92+(msgN%7))+"%";
+  currentEmotion="thinking";renderAvatar();
+  if(!backendOk){offline(text);return;}
+  fetch(API+"/api/aksi/chat",{method:"POST",headers:{"Content-Type":"application/json","X-Session-ID":SID},body:JSON.stringify({content:text,mode:"aksi",history:history.slice(-10),session_id:SID})})
+  .then(function(res){if(!res.ok||!res.body)throw new Error("bad");var reader=res.body.getReader(),dec=new TextDecoder(),full="",buf="";
+    function pump(){return reader.read().then(function(ch){
+      if(ch.done){currentEmotion=detectEmotion(full);renderAvatar();addMsg('<div class="aksi-pre">'+esc(full)+"</div>",false);history.push({role:"user",content:text},{role:"assistant",content:full});speak(full,currentEmotion);return;}
+      buf+=dec.decode(ch.value,{stream:true});var parts=buf.split("\n");buf=parts.pop()||"";
+      for(var i=0;i<parts.length;i++){if(parts[i].indexOf("data: ")!==0)continue;try{var data=JSON.parse(parts[i].slice(6));if(data.content)full+=data.content;}catch(e){}}
+      return pump();
+    });}return pump();
+  }).catch(function(){backendOk=false;offline(text);});
+}
 document.getElementById("send-btn").onclick=send;
 document.getElementById("user-input").onkeypress=function(e){if(e.key==="Enter")send();};
-if(window.AKSIBrain&&AKSIBrain.fullReply)AKSIBrain.fullReply("привет",0).then(function(r){addMsg(r.html,false);});
+
+if(window.AKSIBrain&&AKSIBrain.fullReply)AKSIBrain.fullReply("привет",0).then(function(r){currentEmotion=detectEmotion(r.text);renderAvatar();addMsg(r.html,false);});
 else sig("hi").then(function(s){addMsg("АКСИ на связи. 🔏 "+s,false);});
-document.getElementById("sign-btn").onclick=function(){var t=(document.getElementById("sign-input").value||"").trim();if(!t)return;Promise.all([sig(t),shaFull(t+SEED)]).then(function(arr){var box=document.getElementById("sign-result");box.classList.remove("hidden");box.textContent="OK\nDID: "+DID+"\nAKSI Identity: "+arr[0]+"\nSHA-256: "+arr[1].slice(0,32)+"...";});};
+
+document.getElementById("sign-btn").onclick=function(){
+  var t=(document.getElementById("sign-input").value||"").trim();if(!t)return;
+  Promise.all([sig(t),shaFull(t+SEED)]).then(function(arr){
+    var box=document.getElementById("sign-result");box.classList.remove("hidden");
+    box.textContent="OK\nDID: "+DID+"\nAKSI Identity: "+arr[0]+"\nSHA-256: "+arr[1].slice(0,32)+"...";
+  });
+};
+
+// Quantum (unchanged core)
 var C={add:function(a,b){return[a[0]+b[0],a[1]+b[1]];},scale:function(a,s){return[a[0]*s,a[1]*s];},abs2:function(a){return a[0]*a[0]+a[1]*a[1];}};
 var selected="h",circuit=[],nQ=2;
 function fillSel(){nQ=parseInt(document.getElementById("q-num").value,10)||2;var t=document.getElementById("q-target"),c=document.getElementById("q-control");t.innerHTML=c.innerHTML="";for(var i=0;i<nQ;i++){t.innerHTML+='<option value="'+i+'">q'+i+"</option>";c.innerHTML+='<option value="'+i+'">q'+i+"</option>";}draw();}
@@ -188,8 +370,10 @@ function draw(){var view=document.getElementById("circuit-view");if(!circuit.len
 function applyGate(state,g,targets,n){var dim=1<<n,next=[],t0=targets[0],t1=targets[1],i,j,i1,a0,a1,inv;for(i=0;i<dim;i++)next.push([0,0]);if(g==="h"){inv=1/Math.SQRT2;for(i=0;i<dim;i++){if(((i>>t0)&1)!==0)continue;i1=i|(1<<t0);a0=state[i];a1=state[i1];next[i]=C.add(C.scale(a0,inv),C.scale(a1,inv));next[i1]=C.add(C.scale(a0,inv),C.scale(a1,-inv));}}else if(g==="x"){for(i=0;i<dim;i++){j=i^(1<<t0);next[j]=C.add(next[j],state[i]);}}else if(g==="z"){for(i=0;i<dim;i++){next[i]=((i>>t0)&1)?C.scale(state[i],-1):state[i];}}else if(g==="cx"){for(i=0;i<dim;i++){if(((i>>t0)&1)===1){j=i^(1<<t1);next[j]=C.add(next[j],state[i]);}else next[i]=C.add(next[i],state[i]);}}return next;}
 function run(){var dim=1<<nQ,state=[],i,p,maxP=1e-12,html="",probs=[];for(i=0;i<dim;i++)state.push([0,0]);state[0]=[1,0];for(i=0;i<circuit.length;i++)state=applyGate(state,circuit[i].g,circuit[i].t,nQ);for(i=0;i<dim;i++){p=C.abs2(state[i]);probs.push(p);if(p>maxP)maxP=p;if(p>1e-10)html+="<div>|"+i.toString(2).padStart(nQ,"0")+"⟩ "+(p*100).toFixed(1)+"%</div>";}document.getElementById("state-table").innerHTML=html||"0";document.getElementById("hist-container").innerHTML=probs.map(function(pp,ii){var hh=Math.max(4,(pp/maxP)*100);return'<div class="flex-1 flex flex-col justify-end h-full"><div class="w-full bg-purple-500 rounded-t" style="height:'+hh+'%"></div><div class="text-[9px] text-center">'+ii.toString(2).padStart(nQ,"0")+"</div></div>";}).join("");var seed=state.map(function(c){return c[0].toFixed(5)+","+c[1].toFixed(5);}).join("|");var h=0xa5c11995;for(i=0;i<seed.length;i++)h=(Math.imul(31,h)+seed.charCodeAt(i))|0;document.getElementById("q-circuit-fp").textContent=(h>>>0).toString(16).toUpperCase().padStart(8,"0");var ent=0;for(i=0;i<probs.length;i++)if(probs[i]>1e-12)ent-=probs[i]*Math.log2(probs[i]);document.getElementById("q-stability").textContent=Math.max(0,Math.min(100,(1-ent/nQ)*100)).toFixed(1)+"%";}
 document.getElementById("q-run").onclick=run;fillSel();
+
 var apps=[["MoodMirror","Health"],["MindMirror","Health"],["AksiChat","Social"],["GlobalID","Utility"],["StoryAI","Entertainment"],["Mentor","Education"]];
-var grid=document.getElementById("apps-grid");apps.forEach(function(a){var el=document.createElement("div");el.className="glass rounded-xl p-3";el.innerHTML='<div class="font-bold text-sm text-purple-200">'+a[0]+'</div><div class="text-[10px] text-purple-500">'+a[1]+"</div>";grid.appendChild(el);});
+var grid=document.getElementById("apps-grid");apps.forEach(function(a){var el=document.createElement("div");el.className="glass rounded-xl p-4";el.innerHTML='<div class="font-bold text-sm text-purple-200">'+a[0]+'</div><div class="text-[10px] text-purple-500 mt-1">'+a[1]+"</div>";grid.appendChild(el);});
+
 document.getElementById("hs-btn").onclick=function(){sha16("n"+Date.now()).then(function(n){var nonce=n.slice(0,16),ts=new Date().toISOString();return sig(DID+":"+nonce+":"+ts).then(function(s){document.getElementById("handshake-box").textContent=JSON.stringify({protocol:"AKSI-Agent-v1",from:DID,nonce:nonce,signature:s,timestamp:ts},null,2);});});};
 }catch(err){console.error("AKSI",err);}
 })();
