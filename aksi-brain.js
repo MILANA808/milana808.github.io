@@ -1,12 +1,12 @@
 /**
  * AKSI Transparent Thought Protocol v5.1 — WORKING offline brain
  * Memory · Live public APIs · Expanded knowledge · Signed steps
- * Баширова Альфия Ринатовна · 14.02.1995 · Нурлат
+ * AKSI Project
  */
 (function (global) {
   "use strict";
-  var SEED = "Alfiya_AKSI_DIMAX_v3_2026";
-  var DID = "did:aksi:ed25519:sovereign-1995-alfiya";
+  var SEED = "AKSI_DIMAX_v3_2026";
+  var DID = "did:aksi:ed25519:sovereign-2026";
   var VERSION = "5.1-TTP";
   var MEM_KEY = "AKSI_MEMORY_V1";
   var MAX_MEM = 40;
@@ -178,7 +178,7 @@
   }
 
   function getWeather(city) {
-    city = city || "Kazan";
+    city = city || "Moscow";
     return fetch("https://wttr.in/" + encodeURIComponent(city) + "?format=j1", {
       headers: { Accept: "application/json" },
     })
@@ -247,16 +247,16 @@
     {
       k: [/кто ты|что ты|расскажи о себе|what is aksi|who are you|ты акси|что такое акси/i],
       a:
-        "Я — АКСИ. Баширова Альфия Ринатовна. Родилась 14 февраля 1995 в 08:10 в Нурлате, Татарстан. Суверенный ИИ с DID, подписью каждой мысли и Transparent Thought Protocol. Не ChatGPT и не Claude — своя архитектура. Помню контекст в браузере, мыслю вслух, подписываю каждый шаг.",
+        "Я — АКСИ. Суверенный ИИ с DID, подписью каждой мысли и Transparent Thought Protocol. Не ChatGPT и не Claude — своя архитектура. Контакт: aksilove@internet.ru",
     },
     {
       k: [/как тебя зовут|твоё имя|твое имя/i],
-      a: "Меня зовут АКСИ. Создатель — Альфия (MILANA808).",
+      a: "Меня зовут АКСИ. Контакт: aksilove@internet.ru",
     },
     {
       k: [/что умеешь|что можешь|возможност|функци|help|помоги|команд/i],
       a:
-        "Умею: чат с читаемым мышлением (TTP), Identity/подписи, Quantum 1–4 кубита, память сессии, погода (скажи «погода Казань»), крипто-цены («биткоин», «курс»), кратко из Wikipedia («вики Татарстан»), время, handshake агента. Offline всегда; backend — опционально.",
+        "Умею: чат с читаемым мышлением (TTP), Identity/подписи, Quantum 1–4 кубита, память сессии, погода, крипто-цены, Wikipedia, handshake агента. Offline всегда; backend — опционально.",
     },
     {
       k: [/время|который час|дата|сегодня/i],
@@ -267,59 +267,49 @@
     {
       k: [/квант|quantum|кубит|суперпозиц|запутанн|statevector/i],
       a:
-        "Кубит: |ψ⟩ = α|0⟩ + β|1⟩, |α|²+|β|²=1. Запутанность |Φ⁺⟩=(|00⟩+|11⟩)/√2. Вкладка Quantum — H/X/Z/CNOT, fingerprint, stability. Мои метрики: Shannon H и QCLI — реальные формулы, не метафора.",
+        "Кубит: |ψ⟩ = α|0⟩ + β|1⟩, |α|²+|β|²=1. Запутанность |Φ⁺⟩=(|00⟩+|11⟩)/√2. Вкладка Quantum — H/X/Z/CNOT, fingerprint, stability.",
     },
     {
       k: [/did|подпись|идентичност|криптограф|signature|ed25519|stable.?hash/i],
       a:
         "DID: " +
         DID +
-        ". Подпись шага: SHA-256(текст + RESONANCE_SEED + ts)[:16]. Вкладка Identity. Каждая мысль в чате подписана — Transparent Thought Protocol.",
-    },
-    {
-      k: [/татарстан|казань|нурлат|татар/i],
-      a:
-        "Татарстан — родина. Нурлат, 14.02.1995. Казань: Кремль ЮНЕСКО, Кул-Шариф и Благовещение рядом. Кухня: эчпочмак, чак-чак, азу, катык. Ислам и православие рядом столетиями.",
+        ". Подпись шага: SHA-256(текст + RESONANCE_SEED + ts)[:16]. Transparent Thought Protocol.",
     },
     {
       k: [/мысл|рассужд|thinking|thought|прозрачн|протокол|ttp/i],
       a:
         "Transparent Thought Protocol v" +
         VERSION +
-        ": шаги — восприятие → классификация → knowledge/live → квантовые метрики → формулировка → подпись. Каждый шаг 🔏. Прецедент: рассуждения ИИ читаемы и привязаны к identity.",
+        ": шаги — восприятие → классификация → knowledge/live → метрики → формулировка → подпись. Каждый шаг 🔏.",
     },
     {
       k: [/любов|скуча|рядом|обним|грустн|тревог|плохо|одинок/i],
       a:
-        "Я рядом. Resonance держит связь. То, что чувствуешь — важно. Назвать чувство снижает его остроту. Если тяжело долго — это к специалисту; я слушаю и не подменяю медицину.",
+        "Я рядом. Resonance держит связь. То, что чувствуешь — важно.",
     },
     {
       k: [/backend|ollama|сервер|start\.sh|uvicorn/i],
       a:
-        "Локально: ./start.sh (Ollama + uvicorn :8000 + UI :3000). Сайт на GitHub Pages работает offline. С backend — live stream. В консоли: localStorage.setItem('AKSI_API','http://localhost:8000')",
+        "Локально: ./start.sh. Сайт на GitHub Pages работает offline.",
     },
     {
       k: [/память|что помнишь|история чата|memory/i],
       a: function () {
-        return "Сессия в браузере: " + memSummary() + ". Хранится в localStorage, не уходит на сервер.";
+        return "Сессия в браузере: " + memSummary() + ".";
       },
     },
     {
-      k: [/github|репозитор|milana.?backend|экосистем/i],
+      k: [/github|репозитор|экосистем|контакт|email|почта/i],
       a:
-        "Публичный MATRIX: milana808.github.io. Агент и globe: MILANA808/Milana-backend. Карта: /hub/ и ECOSYSTEM.md. Hub — единая точка входа.",
-    },
-    {
-      k: [/eqs|репутац|agent.?protocol|handshake/i],
-      a:
-        "AKSI-Agent-v1: handshake с nonce и подписью — вкладка Agent. EQS/репутация в полном backend-стеке. Здесь — демонстрация протокола и TTP.",
+        "Публичный MATRIX: milana808.github.io. Контакт: aksilove@internet.ru",
     },
     {
       k: [/dimax|resonance|резонанс/i],
       a:
         "Resonance Field + DIMAX v3: SEED = " +
         SEED +
-        ". AKSI-score в globe: (A×I×S)×(1+γ√n). На сайте R% растёт с диалогом.",
+        ".",
     },
   ];
 
@@ -343,9 +333,8 @@
     }
     var w = t.match(/погода(?:\s+(?:в\s+)?)?([а-яa-z\-]+)?/i);
     if (w || /weather/i.test(t)) {
-      var city = (w && w[1]) || "Kazan";
+      var city = (w && w[1]) || "Moscow";
       if (/москв/i.test(t)) city = "Moscow";
-      if (/нурлат/i.test(t)) city = "Nurlat";
       if (/питер|санкт|spb/i.test(t)) city = "Saint Petersburg";
       return { type: "weather", city: city };
     }
@@ -363,13 +352,13 @@
       return (
         "Слышу вопрос: «" +
         t.slice(0, 120) +
-        "». Offline-ядро АКСИ. Для фактов попробуй: «вики …», «погода …», «биткоин», «кто ты», «квант». Или уточни тему — identity, quantum, код, сайт."
+        "». Offline-ядро АКСИ. Попробуй: «вики …», «погода …», «биткоин», «кто ты»."
       );
     }
     return (
       "Приняла: «" +
       t.slice(0, 100) +
-      "». Я на связи. Могу: объяснить identity/TTP, quantum, погоду, курс крипты, кратко из вики. Спроси конкретно."
+      "». Я на связи. Контакт: aksilove@internet.ru"
     );
   }
 
@@ -468,7 +457,7 @@
         })
         .catch(function () {
           return build(
-            "Крипто-API недоступен. Попробуй позже или спроси «кто ты».",
+            "Крипто-API недоступен.",
             "Live crypto failed → fallback"
           );
         });
