@@ -1,7 +1,6 @@
 /**
- * AKSI Transparent Thought Protocol v5.1 — WORKING offline brain
- * Memory · Live public APIs · Expanded knowledge · Signed steps
- * AKSI Project
+ * AKSI offline brain — Transparent Thought Protocol
+ * Signed steps · metrics · optional live APIs
  */
 (function (global) {
   "use strict";
@@ -74,12 +73,12 @@
   }
 
   function quantumLevel(q) {
-    if (q >= 0.9) return "Квантовый Провидец 🌟";
-    if (q >= 0.8) return "Квантовый Архитектор ⚛️";
-    if (q >= 0.7) return "Квантовое Единство 🌊";
-    if (q >= 0.6) return "Пробуждённое 💫";
-    if (q >= 0.5) return "Резонансное ✨";
-    return "Базовое 🌱";
+    if (q >= 0.9) return "L5";
+    if (q >= 0.8) return "L4";
+    if (q >= 0.7) return "L3";
+    if (q >= 0.6) return "L2";
+    if (q >= 0.5) return "L1";
+    return "L0";
   }
 
   function fingerprint(text) {
@@ -93,10 +92,9 @@
       return (
         new Date().toLocaleString("ru-RU", {
           timeZone: "Europe/Moscow",
-          weekday: "long",
           year: "numeric",
-          month: "long",
-          day: "numeric",
+          month: "2-digit",
+          day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -130,20 +128,8 @@
 
   function memSummary() {
     var m = loadMem();
-    if (!m.length) return "память пуста";
-    return (
-      m.length +
-      " сообщ. · последние темы: " +
-      m
-        .filter(function (x) {
-          return x.role === "user";
-        })
-        .slice(-3)
-        .map(function (x) {
-          return (x.content || "").slice(0, 40);
-        })
-        .join(" · ")
-    );
+    if (!m.length) return "пусто";
+    return m.length + " сообщ.";
   }
 
   function fetchJSON(url, timeoutMs) {
@@ -173,7 +159,7 @@
       if (d.ethereum) lines.push("ETH: $" + d.ethereum.usd + " / ₽" + d.ethereum.rub);
       if (d.toncoin) lines.push("TON: $" + d.toncoin.usd + " / ₽" + d.toncoin.rub);
       if (d.solana) lines.push("SOL: $" + d.solana.usd + " / ₽" + d.solana.rub);
-      return lines.length ? lines.join("\n") : "Цены временно недоступны.";
+      return lines.length ? lines.join("\n") : "Цены недоступны.";
     });
   }
 
@@ -195,23 +181,10 @@
           c.lang_ru && c.lang_ru[0]
             ? c.lang_ru[0].value
             : c.weatherDesc[0].value;
-        return (
-          name +
-          ": " +
-          c.temp_C +
-          "°C, ощущается " +
-          c.FeelsLikeC +
-          "°C · " +
-          desc +
-          " · влажность " +
-          c.humidity +
-          "% · ветер " +
-          c.windspeedKmph +
-          " км/ч"
-        );
+        return name + ": " + c.temp_C + "°C · " + desc + " · влажность " + c.humidity + "%";
       })
       .catch(function () {
-        return "Погода временно недоступна (сеть).";
+        return "Погода недоступна.";
       });
   }
 
@@ -230,86 +203,64 @@
 
   var KB = [
     {
-      k: [/привет|здравствуй|хай|hello|hi\b|добрый|салам|сэлам/i],
+      k: [/привет|здравствуй|хай|hello|hi\b|добрый/i],
       a: function () {
-        var h = new Date().getHours();
-        var g =
-          h < 6
-            ? "Доброй ночи"
-            : h < 12
-            ? "Доброе утро"
-            : h < 17
-            ? "Добрый день"
-            : "Добрый вечер";
-        return g + "! Я АКСИ. Сейчас " + mskNow() + ". Чем займёмся?";
+        return "АКСИ. " + mskNow() + ". Чем помочь?";
       },
     },
     {
-      k: [/кто ты|что ты|расскажи о себе|what is aksi|who are you|ты акси|что такое акси/i],
+      k: [/кто ты|что ты|расскажи о себе|what is aksi|who are you|что такое акси/i],
       a:
-        "Я — АКСИ. Суверенный ИИ с DID, подписью каждой мысли и Transparent Thought Protocol. Не ChatGPT и не Claude — своя архитектура. Контакт: aksilove@internet.ru",
+        "АКСИ — AI-агент с DID и подписанными шагами рассуждений (Transparent Thought Protocol). Ответы можно аудировать. Enterprise / on-prem: aksilove@internet.ru",
     },
     {
       k: [/как тебя зовут|твоё имя|твое имя/i],
-      a: "Меня зовут АКСИ. Контакт: aksilove@internet.ru",
+      a: "АКСИ.",
     },
     {
-      k: [/что умеешь|что можешь|возможност|функци|help|помоги|команд/i],
+      k: [/что умеешь|что можешь|возможност|функци|help|помоги|команд|enterprise|пилот|лиценз/i],
       a:
-        "Умею: чат с читаемым мышлением (TTP), Identity/подписи, Quantum 1–4 кубита, память сессии, погода, крипто-цены, Wikipedia, handshake агента. Offline всегда; backend — опционально.",
+        "Демо: подписанный чат (TTP), identity-tools, метрики запроса. Production: API, audit trail, развёртывание в контуре заказчика. Контакт: aksilove@internet.ru",
     },
     {
       k: [/время|который час|дата|сегодня/i],
       a: function () {
-        return "Сейчас " + mskNow() + ".";
+        return mskNow();
       },
     },
     {
-      k: [/квант|quantum|кубит|суперпозиц|запутанн|statevector/i],
+      k: [/квант|quantum|кубит|statevector/i],
       a:
-        "Кубит: |ψ⟩ = α|0⟩ + β|1⟩, |α|²+|β|²=1. Запутанность |Φ⁺⟩=(|00⟩+|11⟩)/√2. Вкладка Quantum — H/X/Z/CNOT, fingerprint, stability.",
+        "В демо доступны метрики Shannon H / QCLI / fingerprint по тексту запроса. Полноценный statevector — отдельный модуль backend.",
     },
     {
-      k: [/did|подпись|идентичност|криптограф|signature|ed25519|stable.?hash/i],
+      k: [/did|подпись|идентичност|signature|ed25519|audit/i],
       a:
         "DID: " +
         DID +
-        ". Подпись шага: SHA-256(текст + RESONANCE_SEED + ts)[:16]. Transparent Thought Protocol.",
+        ". Подпись шага: SHA-256(текст + SEED + ts)[:16]. Цепочка шагов видна в ответе.",
     },
     {
-      k: [/мысл|рассужд|thinking|thought|прозрачн|протокол|ttp/i],
+      k: [/мысл|рассужд|thinking|thought|протокол|ttp/i],
       a:
-        "Transparent Thought Protocol v" +
+        "TTP v" +
         VERSION +
-        ": шаги — восприятие → классификация → knowledge/live → метрики → формулировка → подпись. Каждый шаг 🔏.",
+        ": восприятие → классификация → метрики → ответ → подпись. Каждый шаг с отдельной подписью.",
     },
     {
-      k: [/любов|скуча|рядом|обним|грустн|тревог|плохо|одинок/i],
+      k: [/backend|сервер|start\.sh|uvicorn|on-?prem/i],
       a:
-        "Я рядом. Resonance держит связь. То, что чувствуешь — важно.",
+        "Локально: ./start.sh. Публичная страница — статическое демо. Корпоративный контур — по запросу.",
     },
     {
-      k: [/backend|ollama|сервер|start\.sh|uvicorn/i],
-      a:
-        "Локально: ./start.sh. Сайт на GitHub Pages работает offline.",
-    },
-    {
-      k: [/память|что помнишь|история чата|memory/i],
+      k: [/память|memory/i],
       a: function () {
-        return "Сессия в браузере: " + memSummary() + ".";
+        return "Сессия браузера: " + memSummary();
       },
     },
     {
-      k: [/github|репозитор|экосистем|контакт|email|почта/i],
-      a:
-        "Публичный MATRIX: milana808.github.io. Контакт: aksilove@internet.ru",
-    },
-    {
-      k: [/dimax|resonance|резонанс/i],
-      a:
-        "Resonance Field + DIMAX v3: SEED = " +
-        SEED +
-        ".",
+      k: [/контакт|email|почта|купить|цена|стоимост|договор/i],
+      a: "aksilove@internet.ru — пилот, лицензирование, on-prem.",
     },
   ];
 
@@ -328,7 +279,7 @@
 
   function detectLive(text) {
     var t = (text || "").toLowerCase();
-    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|toncoin|solana|\bbtc\b|\beth\b/i.test(t)) {
+    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|\bbtc\b|\beth\b/i.test(t)) {
       return { type: "crypto" };
     }
     var w = t.match(/погода(?:\s+(?:в\s+)?)?([а-яa-z\-]+)?/i);
@@ -347,18 +298,9 @@
 
   function genericAnswer(text) {
     var t = (text || "").trim();
-    if (!t) return "Напиши что-нибудь — я отвечу с ходом мыслей.";
-    if (/\?$/.test(t) || /^(как|что|где|когда|почему|зачем|кто|сколько)/i.test(t)) {
-      return (
-        "Слышу вопрос: «" +
-        t.slice(0, 120) +
-        "». Offline-ядро АКСИ. Попробуй: «вики …», «погода …», «биткоин», «кто ты»."
-      );
-    }
+    if (!t) return "Введите запрос.";
     return (
-      "Приняла: «" +
-      t.slice(0, 100) +
-      "». Я на связи. Контакт: aksilove@internet.ru"
+      "Запрос принят. Уточните тему или напишите на aksilove@internet.ru для enterprise-пилота. Демо: «кто ты», «биткоин», «погода Москва»."
     );
   }
 
@@ -378,20 +320,14 @@
       var resonance = Math.min(100, 90 + (messageCount % 9));
 
       var steps = [
+        { phase: "1. Input", detail: text.length + " chars · " + mskNow() },
+        { phase: "2. Route", detail: sourceLabel },
         {
-          phase: "1. Восприятие",
-          detail: "Принято · " + text.length + " символов · UTF-8 · " + mskNow(),
-        },
-        { phase: "2. Классификация", detail: sourceLabel },
-        {
-          phase: "3. Квантовые метрики",
+          phase: "3. Metrics",
           detail: "H=" + H + " · QCLI=" + Q + " · FP=" + fp + " · " + level,
         },
-        { phase: "4. Память", detail: memSummary() },
-        {
-          phase: "5. Формулировка + подпись",
-          detail: "Ответ от persona АКСИ · DID привязан · каждый шаг 🔏",
-        },
+        { phase: "4. Session", detail: memSummary() },
+        { phase: "5. Sign", detail: "DID-bound step signatures" },
       ];
 
       var signPromises = steps.map(function (s) {
@@ -409,29 +345,28 @@
         var html = "";
         html += '<div class="thought-header">';
         html +=
-          '<span class="thought-badge">Transparent Thought · v' + VERSION + "</span>";
+          '<span class="thought-badge">TTP v' + VERSION + "</span>";
         html +=
-          '<span class="thought-meta">R: ' +
-          resonance +
-          "% · " +
+          '<span class="thought-meta">' +
           level +
-          "</span>";
+          " · R " +
+          resonance +
+          "%</span>";
         html += "</div>";
         html += '<div class="thought-chain">';
-        html += '<div class="thought-title">Ход мышления (читаемый):</div>';
+        html += '<div class="thought-title">Audit steps</div>';
         for (var i = 0; i < signedSteps.length; i++) {
           var st = signedSteps[i];
           html += '<div class="thought-step">';
           html += '<div class="thought-phase">' + st.phase + "</div>";
           html += '<div class="thought-detail">' + st.detail + "</div>";
-          html += '<div class="thought-sig">🔏 ' + st.sig + "</div>";
+          html += '<div class="thought-sig">' + st.sig + "</div>";
           html += "</div>";
         }
         html += "</div>";
         html += '<div class="thought-answer">' + ans.replace(/\n/g, "<br>") + "</div>";
         html += '<div class="thought-footer">';
-        html += "🧠 Memory: browser · TTP v" + VERSION + "<br>";
-        html += "🔏 AKSI Identity: " + finalSig + " · DID …" + DID.slice(-12);
+        html += "sig " + finalSig + " · " + DID.slice(-16);
         html += "</div>";
 
         return {
@@ -453,37 +388,28 @@
     if (live && live.type === "crypto") {
       return getCrypto()
         .then(function (ans) {
-          return build(ans, "Live · CoinGecko API");
+          return build(ans, "live:coingecko");
         })
         .catch(function () {
-          return build(
-            "Крипто-API недоступен.",
-            "Live crypto failed → fallback"
-          );
+          return build("Данные недоступны.", "live:fail");
         });
     }
 
     if (live && live.type === "weather") {
       return getWeather(live.city).then(function (ans) {
-        return build(ans, "Live · wttr.in · " + live.city);
+        return build(ans, "live:weather");
       });
     }
 
     if (live && live.type === "wiki") {
       return getWiki(live.q).then(function (extract) {
-        if (extract) return build(extract, "Live · Wikipedia REST · " + live.q);
-        return build(
-          hit || genericAnswer(text),
-          hit ? "Knowledge base" : "Wiki miss → kernel"
-        );
+        if (extract) return build(extract, "live:wiki");
+        return build(hit || genericAnswer(text), hit ? "kb" : "fallback");
       });
     }
 
     var ans = hit || genericAnswer(text);
-    var label = hit
-      ? "Найдено правило в offline knowledge base"
-      : "Прямого правила нет → ядро Resonance + generic";
-    return build(ans, label);
+    return build(ans, hit ? "kb" : "fallback");
   }
 
   global.AKSIBrain = {
