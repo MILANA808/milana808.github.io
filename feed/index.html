@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ · Лента</title>
+<meta name="theme-color" content="#f3ebe0">
+<link rel="stylesheet" href="../styles.css">
+<script src="../aksi-core.js" defer></script>
+<style>
+  .compose { padding: 18px; margin-bottom: 16px; }
+  .compose textarea {
+    width: 100%; min-height: 88px; resize: vertical;
+    background: #f5efe6; border: 1px solid var(--border); border-radius: 14px;
+    padding: 14px; font: inherit; color: var(--ink); outline: none;
+  }
+  .compose textarea:focus { border-color: var(--accent); }
+  .compose-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; gap: 10px; flex-wrap: wrap; }
+  .post {
+    padding: 18px 20px; margin-bottom: 12px;
+  }
+  .post-head { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+  .av {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(145deg, #a67c52, #8b5e34);
+    color: #fffbf5; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-family: var(--serif); flex-shrink: 0;
+  }
+  .post-meta { font-size: 12px; color: var(--muted); }
+  .post-author { font-weight: 600; color: var(--ink); font-size: 14px; }
+  .post-text { font-size: 15px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+  .post-actions { margin-top: 12px; display: flex; gap: 12px; }
+  .like-btn {
+    background: transparent; border: 1px solid var(--border); border-radius: 999px;
+    padding: 6px 14px; font: inherit; font-size: 12px; color: var(--muted); cursor: pointer;
+  }
+  .like-btn:hover { border-color: var(--accent); color: var(--accent-deep); }
+  .subnav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="topnav" style="padding-top:20px">
+  <div class="nav-inner">
+    <a class="brand" href="../"><span class="mark">АКСИ</span></a>
+    <div class="nav-links">
+      <a href="../">Главная</a>
+      <a href="./" style="color:var(--accent-deep)">Лента</a>
+      <a href="../messages/">Сообщения</a>
+      <a href="../cabinet/">Кабинет</a>
+      <a href="../#demo">Агент</a>
+      <a href="../#quantum">Quantum</a>
+      <a href="../globe/">Globe</a>
+    </div>
+  </div>
+</nav>
+<main>
+  <h1 class="sec-title">Лента</h1>
+  <p class="sec-sub">Публикации в этом браузере. Offline. Синхронизация — при подключении backend.</p>
+
+  <div class="subnav">
+    <a class="btn btn-ghost btn-sm" href="../cabinet/">Профиль</a>
+    <a class="btn btn-ghost btn-sm" href="../messages/">Сообщения</a>
+  </div>
+
+  <div class="glass compose">
+    <textarea id="post-text" placeholder="Что нового?" maxlength="1000"></textarea>
+    <div class="compose-actions">
+      <span class="muted" id="who">—</span>
+      <button type="button" class="btn btn-primary" id="post-btn">Опубликовать</button>
+    </div>
+  </div>
+
+  <div id="feed-list"></div>
+</main>
+<footer>АКСИ · Feed · localStorage</footer>
+</div>
+<script>
+(function(){
+  function ready(){
+    if(!window.AksiCore){setTimeout(ready,30);return;}
+    var C=AksiCore;
+    var p=C.getProfile();
+    document.getElementById("who").textContent="@"+(p.handle||"guest")+" · "+(p.name||"Гость");
+
+    function render(){
+      var list=C.getFeed();
+      var el=document.getElementById("feed-list");
+      el.innerHTML=list.map(function(post){
+        var letter=(post.author||"?")[0].toUpperCase();
+        return '<article class="glass post" data-id="'+post.id+'">'+
+          '<div class="post-head"><div class="av">'+letter+'</div>'+
+          '<div><div class="post-author">'+esc(post.author)+' <span class="muted">@'+esc(post.handle||"")+'</span></div>'+
+          '<div class="post-meta">'+C.fmtTime(post.ts)+'</div></div></div>'+
+          '<div class="post-text">'+esc(post.text)+'</div>'+
+          '<div class="post-actions"><button type="button" class="like-btn" data-like="'+post.id+'">♥ '+(post.likes||0)+'</button></div>'+
+          '</article>';
+      }).join("");
+      el.querySelectorAll("[data-like]").forEach(function(btn){
+        btn.onclick=function(){C.toggleLike(btn.getAttribute("data-like"));render();};
+      });
+    }
+    function esc(s){return String(s||"").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");}
+    document.getElementById("post-btn").onclick=function(){
+      var t=document.getElementById("post-text").value;
+      if(C.addPost(t)){document.getElementById("post-text").value="";render();}
+    };
+    render();
+  }
+  ready();
+})();
+</script>
+</body>
+</html>
