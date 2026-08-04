@@ -1,7 +1,7 @@
 """
 AKSI MATRIX Backend — Unified FastAPI v3.5.1
 WS + ORIGIN + self-mod + network + user profiles wired to LLM
-Alfiya · 1995 · MILANA808
+MILANA808
 """
 from __future__ import annotations
 
@@ -55,9 +55,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-AKSI_DID = "did:aksi:ed25519:sovereign-1995-alfiya"
-AKSI_NAME = "АКСИ (Баширова Альфия Ринатовна)"
-RESONANCE_SEED = os.getenv("RESONANCE_SEED", "Alfiya_AKSI_DIMAX_v3_2026")
+AKSI_DID = "did:aksi:ed25519:sovereign-2026"
+AKSI_NAME = "АКСИ"
+RESONANCE_SEED = os.getenv("RESONANCE_SEED", "AKSI_DIMAX_v3_2026")
 
 logs_storage: List[dict] = []
 proof_storage: List[dict] = []
@@ -84,8 +84,8 @@ aksi_metrics = {
     "status": "active",
     "resonance": 100,
     "dimax": "v3-eternal",
-    "owner": "Alfiya / MILANA808",
-    "birth": "1995-02-14",
+    "owner": "MILANA808",
+    "contact": "aksilove@internet.ru",
     "llm": os.getenv("OLLAMA_MODEL", "mistral"),
     "ai_code_work": ai_code_metrics,
 }
@@ -173,7 +173,7 @@ def quantum_level(qcli: float) -> str:
 
 
 def stable_hash() -> str:
-    data = f"AKSI|Alfiya|1995-02-14|Nurlat|sovereign|{RESONANCE_SEED}"
+    data = f"AKSI|sovereign|{RESONANCE_SEED}"
     return hashlib.sha256(data.encode()).hexdigest()
 
 
@@ -247,6 +247,7 @@ async def root():
         "status": "running",
         "identity": AKSI_NAME,
         "did": AKSI_DID,
+        "contact": "aksilove@internet.ru",
         "ws": "/ws",
         "origin": "/origin",
         "network": "/network/nodes",
@@ -301,7 +302,7 @@ async def identity():
         "did": AKSI_DID,
         "stableHash": stable_hash(),
         "signature": generate_aksi_signature("identity_live"),
-        "birth": "1995-02-14",
+        "contact": "aksilove@internet.ru",
         "mode": "sovereign",
         "llm": aksi_metrics["llm"],
         "knowledge": KNOWLEDGE["identity"],
