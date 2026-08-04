@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ · Личный кабинет</title>
+<meta name="theme-color" content="#f3ebe0">
+<link rel="stylesheet" href="../styles.css">
+<script src="../aksi-core.js" defer></script>
+<style>
+  .profile-head {
+    display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+    padding: 28px; margin-bottom: 20px;
+  }
+  .big-av {
+    width: 88px; height: 88px; border-radius: 50%;
+    background: linear-gradient(145deg, #a67c52, #8b5e34);
+    color: #fffbf5; display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-family: var(--serif); font-weight: 700;
+    box-shadow: 0 8px 24px rgba(139,94,52,0.25);
+  }
+  .form-grid { display: grid; gap: 12px; padding: 24px; }
+  .form-grid label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-grid input, .form-grid textarea {
+    width: 100%; background: #f5efe6; border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; font: inherit; color: var(--ink); outline: none;
+  }
+  .form-grid input:focus, .form-grid textarea:focus { border-color: var(--accent); background: #fffbf5; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .stat { padding: 16px; text-align: center; }
+  .stat .n { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; color: var(--accent-deep); }
+  .stat .l { font-size: 11px; color: var(--muted); text-transform: uppercase; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="topnav" style="padding-top:20px">
+  <div class="nav-inner">
+    <a class="brand" href="../"><span class="mark">АКСИ</span></a>
+    <div class="nav-links">
+      <a href="../">Главная</a>
+      <a href="../feed/">Лента</a>
+      <a href="../messages/">Сообщения</a>
+      <a href="./" style="color:var(--accent-deep)">Кабинет</a>
+      <a href="../#demo">Агент</a>
+      <a href="../#tools">Identity</a>
+    </div>
+  </div>
+</nav>
+<main>
+  <h1 class="sec-title">Личный кабинет</h1>
+  <p class="sec-sub">Профиль в этом браузере. Данные не уходят на сервер, пока не подключён backend.</p>
+
+  <div class="glass profile-head" id="head">
+    <div class="big-av" id="av">А</div>
+    <div>
+      <div style="font-family:var(--serif);font-size:1.5rem;font-weight:600" id="disp-name">—</div>
+      <div class="muted" id="disp-handle">@—</div>
+      <div class="muted mono" style="margin-top:6px;font-size:11px" id="disp-did">—</div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="glass stat"><div class="n" id="st-posts">0</div><div class="l">Посты</div></div>
+    <div class="glass stat"><div class="n" id="st-msgs">0</div><div class="l">Диалоги</div></div>
+    <div class="glass stat"><div class="n" id="st-likes">0</div><div class="l">Лайки</div></div>
+  </div>
+
+  <div class="glass form-grid">
+    <div>
+      <label>Имя</label>
+      <input id="f-name" maxlength="48" placeholder="Как вас называть">
+    </div>
+    <div>
+      <label>Handle</label>
+      <input id="f-handle" maxlength="24" placeholder="username">
+    </div>
+    <div>
+      <label>О себе</label>
+      <textarea id="f-bio" maxlength="280" rows="3" placeholder="Коротко о себе"></textarea>
+    </div>
+    <div>
+      <label>API backend (опционально)</label>
+      <input id="f-api" placeholder="http://localhost:8000">
+    </div>
+    <div class="links">
+      <button type="button" class="btn btn-primary" id="save-btn">Сохранить</button>
+      <a class="btn btn-ghost" href="../feed/">Лента</a>
+      <a class="btn btn-ghost" href="../messages/">Сообщения</a>
+      <a class="btn btn-ghost" href="../#demo">Чат с АКСИ</a>
+    </div>
+    <p class="muted" id="save-status" style="margin:0;font-size:13px"></p>
+  </div>
+</main>
+<footer>АКСИ · Cabinet</footer>
+</div>
+<script>
+(function(){
+  function ready(){
+    if(!window.AksiCore){setTimeout(ready,30);return;}
+    var C=AksiCore;
+    function fill(){
+      var p=C.getProfile();
+      document.getElementById("av").textContent=(p.name||"?")[0].toUpperCase();
+      document.getElementById("disp-name").textContent=p.name||"Гость";
+      document.getElementById("disp-handle").textContent="@"+(p.handle||"guest");
+      document.getElementById("disp-did").textContent=p.did||localStorage.getItem("AKSI_GUEST_DID")||"DID появится после Identity tools";
+      document.getElementById("f-name").value=p.name||"";
+      document.getElementById("f-handle").value=p.handle||"";
+      document.getElementById("f-bio").value=p.bio||"";
+      document.getElementById("f-api").value=localStorage.getItem("AKSI_API")||"";
+      var feed=C.getFeed();
+      var my=feed.filter(function(x){return x.userId===p.id;});
+      var likes=feed.reduce(function(s,x){return s+(x.likes||0);},0);
+      document.getElementById("st-posts").textContent=my.length;
+      document.getElementById("st-msgs").textContent=C.listPeers().length;
+      document.getElementById("st-likes").textContent=likes;
+    }
+    document.getElementById("save-btn").onclick=function(){
+      var api=(document.getElementById("f-api").value||"").trim();
+      if(api) localStorage.setItem("AKSI_API",api);
+      else localStorage.removeItem("AKSI_API");
+      var did=localStorage.getItem("AKSI_GUEST_DID")||"";
+      C.setProfile({
+        name: document.getElementById("f-name").value,
+        handle: document.getElementById("f-handle").value,
+        bio: document.getElementById("f-bio").value,
+        did: did
+      });
+      document.getElementById("save-status").textContent="Сохранено · "+new Date().toLocaleTimeString("ru-RU");
+      fill();
+    };
+    fill();
+  }
+  ready();
+})();
+</script>
+</body>
+</html>
