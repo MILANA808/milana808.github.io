@@ -1,12 +1,13 @@
 /**
- * AKSI offline brain — Transparent Thought Protocol
- * Signed steps · metrics · optional live APIs
+ * AKSI brain — TTP + Wikipedia-grounded answers (CC BY-SA)
+ * Public sources only: Wikipedia REST, CoinGecko, wttr.in
+ * No private training data. Not a fine-tuned LLM — retrieval + rules.
  */
 (function (global) {
   "use strict";
   var SEED = "AKSI_DIMAX_v3_2026";
   var DID = "did:aksi:ed25519:sovereign-2026";
-  var VERSION = "5.1-TTP";
+  var VERSION = "5.2-RAG";
   var MEM_KEY = "AKSI_MEMORY_V1";
   var MAX_MEM = 40;
 
@@ -133,7 +134,7 @@
   }
 
   function fetchJSON(url, timeoutMs) {
-    timeoutMs = timeoutMs || 5000;
+    timeoutMs = timeoutMs || 6000;
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
     var t = setTimeout(function () {
       if (ctrl) ctrl.abort();
@@ -188,12 +189,24 @@
       });
   }
 
-  function getWiki(q) {
+  /** Wikipedia summary by title */
+  function getWikiSummary(title, lang) {
+    lang = lang || "ru";
     var url =
-      "https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(q);
+      "https://" +
+      lang +
+      ".wikipedia.org/api/rest_v1/page/summary/" +
+      encodeURIComponent(title);
     return fetchJSON(url)
       .then(function (d) {
-        if (d.extract) return d.title + ": " + d.extract.slice(0, 500);
+        if (d.type === "disambiguation") return null;
+        if (d.extract) {
+          return {
+            title: d.title,
+            text: d.extract.slice(0, 700),
+            url: (d.content_urls && d.content_urls.desktop && d.content_urls.desktop.page) || "",
+          };
+        }
         return null;
       })
       .catch(function () {
@@ -201,26 +214,66 @@
       });
   }
 
+  /** OpenSearch → first title → summary (CC BY-SA Wikipedia) */
+  function searchWiki(query) {
+    var q = String(query || "")
+      .replace(/^(что такое|кто такой|кто такая|расскажи про|объясни|what is|who is)\s+/i, "")
+      .replace(/[?!.]+$/g, "")
+      .trim();
+    if (q.length < 2) return Promise.resolve(null);
+
+    var searchUrl =
+      "https://ru.wikipedia.org/w/api.php?action=opensearch&search=" +
+      encodeURIComponent(q) +
+      "&limit=3&namespace=0&format=json&origin=*";
+
+    return fetchJSON(searchUrl)
+      .then(function (data) {
+        var titles = data && data[1];
+        if (!titles || !titles.length) {
+          return getWikiSummary(q, "ru").then(function (r) {
+            if (r) return r;
+            return getWikiSummary(q, "en");
+          });
+        }
+        return getWikiSummary(titles[0], "ru").then(function (r) {
+          if (r) return r;
+          if (titles[1]) return getWikiSummary(titles[1], "ru");
+          return getWikiSummary(q, "en");
+        });
+      })
+      .catch(function () {
+        return getWikiSummary(q, "en");
+      });
+  }
+
+  function formatWiki(hit) {
+    if (!hit) return null;
+    var s = hit.title + ". " + hit.text;
+    if (hit.url) s += "\n\nИсточник: Wikipedia (CC BY-SA) · " + hit.url;
+    return s;
+  }
+
   var KB = [
     {
       k: [/привет|здравствуй|хай|hello|hi\b|добрый/i],
       a: function () {
-        return "АКСИ. " + mskNow() + ". Чем помочь?";
+        return "Здравствуйте. Я АКСИ — агент с подписанными ответами. Могу объяснить факты (Wikipedia), курсы, погоду. Спросите что угодно.";
       },
     },
     {
       k: [/кто ты|что ты|расскажи о себе|what is aksi|who are you|что такое акси/i],
       a:
-        "АКСИ — AI-агент с DID и подписанными шагами рассуждений (Transparent Thought Protocol). Ответы можно аудировать. Enterprise / on-prem: aksilove@internet.ru",
+        "АКСИ — AI-агент с DID и Transparent Thought Protocol: шаги ответа подписываются. Факты подтягиваются из открытых источников (Wikipedia CC BY-SA и публичные API). Enterprise: aksilove@internet.ru",
     },
     {
       k: [/как тебя зовут|твоё имя|твое имя/i],
       a: "АКСИ.",
     },
     {
-      k: [/что умеешь|что можешь|возможност|функци|help|помоги|команд|enterprise|пилот|лиценз/i],
+      k: [/что умеешь|что можешь|возможност|функци|help|команд|enterprise|пилот|лиценз/i],
       a:
-        "Демо: подписанный чат (TTP), identity-tools, метрики запроса. Production: API, audit trail, развёртывание в контуре заказчика. Контакт: aksilove@internet.ru",
+        "Отвечаю на общие вопросы с опорой на Wikipedia; курсы (CoinGecko); погода (wttr.in); identity и audit-шаги. Для полноценной LLM в контуре компании — backend + ваша модель. Контакт: aksilove@internet.ru",
     },
     {
       k: [/время|который час|дата|сегодня/i],
@@ -229,28 +282,23 @@
       },
     },
     {
-      k: [/квант|quantum|кубит|statevector/i],
-      a:
-        "В демо доступны метрики Shannon H / QCLI / fingerprint по тексту запроса. Полноценный statevector — отдельный модуль backend.",
-    },
-    {
       k: [/did|подпись|идентичност|signature|ed25519|audit/i],
       a:
         "DID: " +
         DID +
-        ". Подпись шага: SHA-256(текст + SEED + ts)[:16]. Цепочка шагов видна в ответе.",
+        ". Подпись шага: SHA-256(текст + SEED + ts)[:16].",
     },
     {
       k: [/мысл|рассужд|thinking|thought|протокол|ttp/i],
       a:
         "TTP v" +
         VERSION +
-        ": восприятие → классификация → метрики → ответ → подпись. Каждый шаг с отдельной подписью.",
+        ": input → route → metrics → retrieval → sign. Каждый шаг с подписью.",
     },
     {
-      k: [/backend|сервер|start\.sh|uvicorn|on-?prem/i],
+      k: [/backend|сервер|start\.sh|uvicorn|on-?prem|обуч|train|модель/i],
       a:
-        "Локально: ./start.sh. Публичная страница — статическое демо. Корпоративный контур — по запросу.",
+        "Публичная страница не обучает нейросеть: ответы grounded в Wikipedia и API. Обучение своей модели — только на данных с лицензией, которую вы имеете право использовать (например CC, open data). Локально: ./start.sh + Ollama.",
     },
     {
       k: [/память|memory/i],
@@ -260,7 +308,11 @@
     },
     {
       k: [/контакт|email|почта|купить|цена|стоимост|договор/i],
-      a: "aksilove@internet.ru — пилот, лицензирование, on-prem.",
+      a: "aksilove@internet.ru",
+    },
+    {
+      k: [/спасибо|благодар/i],
+      a: "Пожалуйста. Если нужен пилот — aksilove@internet.ru",
     },
   ];
 
@@ -279,28 +331,38 @@
 
   function detectLive(text) {
     var t = (text || "").toLowerCase();
-    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|\bbtc\b|\beth\b/i.test(t)) {
+    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|\bbtc\b|\beth\b|solana|тонкоин/i.test(t)) {
       return { type: "crypto" };
     }
-    var w = t.match(/погода(?:\s+(?:в\s+)?)?([а-яa-z\-]+)?/i);
+    var w = t.match(/погода(?:\s+(?:в\s+)?)?([а-яёa-z\-]+)?/i);
     if (w || /weather/i.test(t)) {
       var city = (w && w[1]) || "Moscow";
       if (/москв/i.test(t)) city = "Moscow";
       if (/питер|санкт|spb/i.test(t)) city = "Saint Petersburg";
+      if (/казан/i.test(t)) city = "Kazan";
       return { type: "weather", city: city };
-    }
-    var wiki = t.match(/(?:вики|wikipedia|что такое|кто такой)\s+(.+)/i);
-    if (wiki && wiki[1] && wiki[1].length > 2) {
-      return { type: "wiki", q: wiki[1].replace(/[?!.]+$/, "").trim() };
     }
     return null;
   }
 
-  function genericAnswer(text) {
+  /** Should try Wikipedia for this utterance */
+  function shouldRetrieve(text) {
     var t = (text || "").trim();
-    if (!t) return "Введите запрос.";
+    if (t.length < 3) return false;
+    if (matchKB(t)) return false;
+    if (detectLive(t)) return false;
+    // questions / explain / define / long freeform
+    if (/[?]/.test(t)) return true;
+    if (/^(что|кто|где|когда|почему|зачем|как|сколько|какой|какая|какие|объясни|расскажи|what|who|where|when|why|how)\b/i.test(t)) return true;
+    if (t.split(/\s+/).length >= 3) return true;
+    return true;
+  }
+
+  function genericAnswer(text) {
     return (
-      "Запрос принят. Уточните тему или напишите на aksilove@internet.ru для enterprise-пилота. Демо: «кто ты», «биткоин», «погода Москва»."
+      "Не нашёл устойчивого факта в открытых источниках по запросу «" +
+      String(text).slice(0, 80) +
+      "». Переформулируйте или укажите термин. Для корпоративного пилота с вашей LLM: aksilove@internet.ru"
     );
   }
 
@@ -327,7 +389,7 @@
           detail: "H=" + H + " · QCLI=" + Q + " · FP=" + fp + " · " + level,
         },
         { phase: "4. Session", detail: memSummary() },
-        { phase: "5. Sign", detail: "DID-bound step signatures" },
+        { phase: "5. Sign", detail: "DID-bound signatures" },
       ];
 
       var signPromises = steps.map(function (s) {
@@ -344,14 +406,9 @@
 
         var html = "";
         html += '<div class="thought-header">';
+        html += '<span class="thought-badge">TTP v' + VERSION + "</span>";
         html +=
-          '<span class="thought-badge">TTP v' + VERSION + "</span>";
-        html +=
-          '<span class="thought-meta">' +
-          level +
-          " · R " +
-          resonance +
-          "%</span>";
+          '<span class="thought-meta">' + level + " · R " + resonance + "%</span>";
         html += "</div>";
         html += '<div class="thought-chain">';
         html += '<div class="thought-title">Audit steps</div>';
@@ -388,28 +445,32 @@
     if (live && live.type === "crypto") {
       return getCrypto()
         .then(function (ans) {
-          return build(ans, "live:coingecko");
+          return build(ans, "api:coingecko");
         })
         .catch(function () {
-          return build("Данные недоступны.", "live:fail");
+          return build("Данные недоступны.", "api:fail");
         });
     }
 
     if (live && live.type === "weather") {
       return getWeather(live.city).then(function (ans) {
-        return build(ans, "live:weather");
+        return build(ans, "api:wttr");
       });
     }
 
-    if (live && live.type === "wiki") {
-      return getWiki(live.q).then(function (extract) {
-        if (extract) return build(extract, "live:wiki");
-        return build(hit || genericAnswer(text), hit ? "kb" : "fallback");
+    if (hit) {
+      return build(hit, "kb");
+    }
+
+    if (shouldRetrieve(text)) {
+      return searchWiki(text).then(function (wikiHit) {
+        var formatted = formatWiki(wikiHit);
+        if (formatted) return build(formatted, "wikipedia:cc-by-sa");
+        return build(genericAnswer(text), "fallback");
       });
     }
 
-    var ans = hit || genericAnswer(text);
-    return build(ans, hit ? "kb" : "fallback");
+    return build(genericAnswer(text), "fallback");
   }
 
   global.AKSIBrain = {
@@ -420,6 +481,7 @@
     sha16: sha16,
     fullReply: fullReply,
     match: matchKB,
+    searchWiki: searchWiki,
     remember: remember,
     loadMem: loadMem,
     memSummary: memSummary,
