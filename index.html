@@ -3,37 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АКСИ — AI-агент с аудируемой идентичностью и подписью решений</title>
-<meta name="description" content="АКСИ: корпоративный AI-агент с DID, подписанными шагами рассуждений и прозрачным audit trail. Wikipedia-grounded демо. Для банков, госсектора и enterprise.">
-<meta name="keywords" content="АКСИ, enterprise AI, DID, audit trail, signed decisions, sovereign AI">
+<title>АКСИ — AI-агент с проверяемыми решениями</title>
+<meta name="description" content="АКСИ: агент с DID, подписанными шагами рассуждений и audit trail. Демо на открытых источниках. Enterprise on-prem.">
+<meta name="theme-color" content="#f3ebe0">
 <meta property="og:title" content="АКСИ — auditable AI agent">
-<meta property="og:description" content="Подписанные решения, прозрачный ход рассуждений, криптографическая идентичность агента.">
-<meta property="og:type" content="website">
+<meta property="og:description" content="Подписанные решения. Прозрачный ход рассуждений. Identity агента.">
 <meta property="og:url" content="https://milana808.github.io/">
-<meta name="theme-color" content="#f6f7fb">
 <link rel="stylesheet" href="styles.css">
 <script src="aksi-brain.js" defer></script>
 </head>
 <body>
-<canvas id="qx-field"></canvas>
-<div class="bg-glow a"></div>
-<div class="bg-glow b"></div>
+<canvas id="qx-field" aria-hidden="true"></canvas>
 
-<div class="live-bar" id="live-bar" title="Идентичность агента">
+<div class="live-bar" id="live-bar" title="Идентичность">
   <span class="pulse"></span>
-  <span style="color:#059669;font-weight:600">Online</span>
+  <span style="color:#5a8f6a;font-weight:600">Online</span>
   <span class="muted mono" id="msk-clock">—</span>
   <span class="muted" id="backend-dot">API ·</span>
   <span class="cyan mono" id="stable-hash-short">····</span>
 </div>
+
 <div class="glass" id="did-panel">
-  <div style="font-weight:700;margin-bottom:8px;color:#4f46e5">Agent identity</div>
-  <div class="muted">Agent: <span style="color:#0f172a;font-weight:600">АКСИ</span></div>
-  <div class="muted" style="margin-top:6px">DID</div>
-  <div class="mono" style="font-size:10px;word-break:break-all;background:#f1f5f9;padding:8px;border-radius:10px;margin-top:4px;color:#0f172a" id="did-full">did:aksi:ed25519:sovereign-2026</div>
-  <div class="muted" style="margin-top:6px">Stable hash</div>
-  <div class="mono" style="font-size:10px;word-break:break-all;background:#f1f5f9;padding:8px;border-radius:10px;margin-top:4px;color:#0f172a" id="did-hash">…</div>
-  <div class="muted" style="margin-top:10px;font-size:10px;border-top:1px solid rgba(99,102,241,.15);padding-top:8px">TTP · aksilove@internet.ru</div>
+  <div style="font-weight:700;margin-bottom:8px;color:#8b5e34;font-family:var(--serif);font-size:15px">Agent identity</div>
+  <div class="muted">Agent: <strong style="color:var(--ink)">АКСИ</strong></div>
+  <div class="muted" style="margin-top:8px">DID</div>
+  <div class="mono" style="font-size:10px;word-break:break-all;background:#f5efe6;padding:10px;border-radius:10px;margin-top:4px" id="did-full">did:aksi:ed25519:sovereign-2026</div>
+  <div class="muted" style="margin-top:8px">Stable hash</div>
+  <div class="mono" style="font-size:10px;word-break:break-all;background:#f5efe6;padding:10px;border-radius:10px;margin-top:4px" id="did-hash">…</div>
+  <div class="muted" style="margin-top:12px;font-size:11px;border-top:1px solid var(--border);padding-top:10px">aksilove@internet.ru</div>
 </div>
 
 <div class="shell">
@@ -47,20 +44,19 @@
       <a href="#demo">Демо</a>
       <a href="#tools">Identity</a>
       <a href="#enterprise">Enterprise</a>
-      <a href="hub/">Документация</a>
     </div>
-    <div class="res-pill">demo</div>
+    <div class="res-pill">v5.2</div>
   </div>
 </nav>
 
 <main>
   <section class="hero" id="hero">
-    <div class="hero-badge">Enterprise AI · audit-ready</div>
-    <h1>AI-агент, решения которого<br>можно проверить</h1>
-    <p class="sub">Подпись шагов рассуждений, DID агента, audit trail. Демо отвечает по открытым источникам (Wikipedia). Production — в вашем контуре.</p>
+    <div class="hero-badge">Enterprise · Audit-ready</div>
+    <h1>Решения ИИ,<br>которые можно проверить</h1>
+    <p class="sub">Подпись каждого шага. Стабильная идентичность агента. Журнал для compliance. Демо опирается на открытые источники.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#demo">Открыть демо</a>
-      <a class="btn btn-ghost" href="mailto:aksilove@internet.ru?subject=AKSI%20Enterprise">Запрос для корпораций</a>
+      <a class="btn btn-ghost" href="mailto:aksilove@internet.ru?subject=AKSI%20Enterprise">Корпоративный запрос</a>
     </div>
     <div class="metrics-grid">
       <div class="glass metric-card">
@@ -77,46 +73,46 @@
       </div>
       <div class="glass metric-card">
         <div class="label">Контакт</div>
-        <div class="value" style="color:#4f46e5;font-size:12px">aksilove@internet.ru</div>
+        <div class="value" style="color:#8b5e34;font-size:12px;font-family:var(--font);font-weight:600">aksilove@internet.ru</div>
       </div>
     </div>
   </section>
 
   <section id="product">
     <h2 class="sec-title">Продукт</h2>
-    <p class="sec-sub">Агент с криптографической привязкой ответов и прозрачным следом рассуждений.</p>
+    <p class="sec-sub">Агент для сред, где недостаточно «просто довериться модели».</p>
     <div class="feat-grid">
       <div class="glass feat">
         <div class="ico">🔐</div>
         <h3>Идентичность агента</h3>
-        <p>DID и контрольная сумма конфигурации — фиксируется, какой агент выдал ответ.</p>
+        <p>DID и контрольная сумма конфигурации. Фиксируется, кто именно выдал ответ.</p>
       </div>
       <div class="glass feat">
         <div class="ico">✍️</div>
-        <h3>Подписанный ход рассуждений</h3>
-        <p>Transparent Thought Protocol: шаги фиксируются и подписываются.</p>
+        <h3>Подписанные шаги</h3>
+        <p>Transparent Thought Protocol: маршрут обработки запроса виден и подписан.</p>
       </div>
       <div class="glass feat">
         <div class="ico">📚</div>
         <h3>Открытые источники</h3>
-        <p>Демо опирается на Wikipedia (CC BY-SA) и публичные API — без скрытого датасета.</p>
+        <p>Демо: Wikipedia (CC BY-SA), CoinGecko, wttr.in — без скрытого датасета.</p>
       </div>
       <div class="glass feat">
         <div class="ico">🏢</div>
-        <h3>Контур заказчика</h3>
-        <p>Production — backend и ваша модель on-prem / private cloud.</p>
+        <h3>Ваш контур</h3>
+        <p>Production — backend и модель on-prem или в private cloud.</p>
       </div>
     </div>
   </section>
 
   <section id="value">
-    <h2 class="sec-title">Зачем это корпорациям</h2>
-    <p class="sec-sub">Risk / compliance / IT.</p>
+    <h2 class="sec-title">Ценность для бизнеса</h2>
+    <p class="sec-sub">То, что обычно спрашивают risk и IT.</p>
     <div class="feat-grid">
-      <div class="glass feat"><h3>Меньше «чёрного ящика»</h3><p>Читаемая цепочка шагов рядом с ответом.</p></div>
-      <div class="glass feat"><h3>Подотчётность</h3><p>Связка ответа с identity и подписью.</p></div>
-      <div class="glass feat"><h3>Контроль поставщика</h3><p>On-prem и свои ключи вместо полной зависимости от SaaS.</p></div>
-      <div class="glass feat"><h3>Интеграция</h3><p>HTTP API и протокол агента для вашего стека.</p></div>
+      <div class="glass feat"><h3>Меньше чёрного ящика</h3><p>Цепочка шагов рядом с ответом, не только финальный текст.</p></div>
+      <div class="glass feat"><h3>Подотчётность</h3><p>Связка ответа с identity и криптографической подписью.</p></div>
+      <div class="glass feat"><h3>Контроль поставщика</h3><p>Возможность своих ключей и развёртывания без полной SaaS-зависимости.</p></div>
+      <div class="glass feat"><h3>Интеграция</h3><p>HTTP API и протокол агента для существующего стека.</p></div>
     </div>
   </section>
 
@@ -138,28 +134,35 @@
 
   <section id="demo">
     <h2 class="sec-title">Демонстрация</h2>
-    <p class="sec-sub">Спросите, например: «что такое машинное обучение», «биткоин», «погода Москва».</p>
-    <div class="chat-shell">
+    <p class="sec-sub">Спросите о факте, курсе или погоде — увидите audit-шаги.</p>
+    <div class="suggest-row" id="suggests">
+      <button type="button" class="suggest" data-q="что такое машинное обучение">машинное обучение</button>
+      <button type="button" class="suggest" data-q="биткоин">биткоин</button>
+      <button type="button" class="suggest" data-q="погода Москва">погода Москва</button>
+      <button type="button" class="suggest" data-q="кто ты">кто ты</button>
+      <button type="button" class="suggest" data-q="что такое блокчейн">блокчейн</button>
+    </div>
+    <div class="chat-shell" style="margin-top:20px">
       <div class="glass chat-side">
         <div class="avatar-box">
-          <div id="avatar-wrap" class="avatar-glow" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#0ea5e9);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px">А</div>
-          <div id="emotion-label" class="muted" style="font-size:12px">АКСИ</div>
+          <div class="avatar-mark">А</div>
+          <div class="muted" style="font-size:12px;font-weight:600">АКСИ</div>
         </div>
-        <h3>Метрики запроса</h3>
+        <h3>Метрики</h3>
         <div class="live-meter">
           <div class="row"><span>Shannon H</span><span class="mono" id="m-h">—</span></div>
           <div class="bar"><i id="bar-h"></i></div>
           <div class="row"><span>QCLI</span><span class="mono" id="m-q">—</span></div>
           <div class="bar"><i id="bar-q"></i></div>
           <div class="row"><span>Fingerprint</span><span class="mono cyan" id="m-fp">—</span></div>
-          <div class="row" style="margin-top:8px"><span>Уровень</span><span id="m-level" style="color:#4f46e5">—</span></div>
+          <div class="row" style="margin-top:8px"><span>Level</span><span id="m-level" style="color:#8b5e34;font-weight:600">—</span></div>
         </div>
       </div>
       <div class="glass chat-panel">
         <div id="chat-window"></div>
         <div class="chat-input">
-          <input id="user-input" placeholder="Задайте вопрос…" autocomplete="off">
-          <button type="button" class="btn btn-primary" id="send-btn" style="padding:12px 18px">Отправить</button>
+          <input id="user-input" placeholder="Задайте вопрос…" autocomplete="off" enterkeyhint="send">
+          <button type="button" class="btn btn-primary" id="send-btn">Отправить</button>
         </div>
       </div>
     </div>
@@ -167,11 +170,11 @@
 
   <section id="tools">
     <h2 class="sec-title">Identity tools</h2>
-    <p class="sec-sub">Подпись и проверка в браузере.</p>
+    <p class="sec-sub">Подпись и проверка прямо в браузере.</p>
     <div class="tools-grid">
       <div class="glass tool-card">
         <h3>Подписать сообщение</h3>
-        <input id="sign-input" placeholder="Текст">
+        <input id="sign-input" placeholder="Текст для подписи">
         <button type="button" class="btn btn-primary" id="sign-btn">Подписать</button>
         <pre id="sign-result">—</pre>
       </div>
@@ -184,6 +187,7 @@
       </div>
       <div class="glass tool-card">
         <h3>Сессионный DID</h3>
+        <p class="muted" style="font-size:13px;margin:0 0 12px">Локальный идентификатор гостя в браузере.</p>
         <button type="button" class="btn btn-ghost" id="temp-did-btn">Показать</button>
         <pre id="temp-did-result">—</pre>
       </div>
@@ -191,11 +195,12 @@
   </section>
 
   <section id="enterprise">
-    <h2 class="sec-title">Для корпораций и госсектора</h2>
+    <h2 class="sec-title">Для кого</h2>
+    <p class="sec-sub">Типовые сценарии пилота.</p>
     <div class="audience">
-      <div class="glass"><h4>Банки и финтех</h4><p>Журнал решений, identity</p></div>
+      <div class="glass"><h4>Банки</h4><p>Журнал решений ассистентов</p></div>
       <div class="glass"><h4>Госсектор</h4><p>Аудит и закрытый контур</p></div>
-      <div class="glass"><h4>Крупный бизнес</h4><p>Свой агент без полной SaaS-зависимости</p></div>
+      <div class="glass"><h4>Корпорации</h4><p>Свой агент без полной SaaS-зависимости</p></div>
       <div class="glass"><h4>Интеграторы</h4><p>API и встраивание в стек</p></div>
     </div>
   </section>
@@ -203,9 +208,9 @@
   <section>
     <div class="glass cta-box">
       <h2>Пилот или лицензирование</h2>
-      <p>Опишите задачу и контур. Ответ: aksilove@internet.ru</p>
+      <p>Опишите задачу и контур (on-prem / cloud).</p>
       <div class="hero-cta">
-        <a class="btn btn-primary" href="mailto:aksilove@internet.ru?subject=AKSI%20Enterprise%20pilot">Написать</a>
+        <a class="btn btn-primary" href="mailto:aksilove@internet.ru?subject=AKSI%20Enterprise">aksilove@internet.ru</a>
         <a class="btn btn-ghost" href="https://github.com/MILANA808" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
@@ -216,34 +221,322 @@
 </div>
 
 <script>
-(function(){
-if(window.__AKSI_PORTAL__)return;
-var API=localStorage.getItem("AKSI_API")||"http://localhost:8000";
-var DID="did:aksi:ed25519:sovereign-2026";
-var SEED="AKSI_DIMAX_v3_2026";
-var sidKey=localStorage.getItem("AKSI_SID");
-if(!sidKey){sidKey=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("AKSI_SID",sidKey);}
-var SID="web-"+sidKey,msgN=0,backendOk=false,history=[];
-document.getElementById("live-bar").onclick=function(){document.getElementById("did-panel").classList.toggle("open");};
-function tick(){var el=document.getElementById("msk-clock");try{el.textContent=new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК";}catch(e){el.textContent=new Date().toLocaleTimeString("ru-RU");}}setInterval(tick,1000);tick();
-function shaFull(t){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,"0");}).join("");});}
-shaFull("AKSI|sovereign|"+SEED).then(function(h){document.getElementById("stable-hash-short").textContent=h.slice(0,8).toUpperCase();document.getElementById("did-hash").textContent=h;document.getElementById("hero-hash").textContent=h.slice(0,24)+"…";});
-fetch(API+"/health").then(function(r){return r.ok;}).catch(function(){return false;}).then(function(ok){backendOk=ok;var dot=document.getElementById("backend-dot");if(ok){dot.textContent="API ON ·";dot.style.color="#059669";}else{dot.textContent="offline ·";}});
-var chat=document.getElementById("chat-window");
-function addUser(t){var d=document.createElement("div");d.className="msg user";d.textContent=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function addTyping(){var d=document.createElement("div");d.className="typing";d.id="typing-ind";d.innerHTML="<span></span><span></span><span></span>";chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function rmTyping(){var t=document.getElementById("typing-ind");if(t)t.remove();}
-function addBotHtml(html){rmTyping();var d=document.createElement("div");d.className="msg bot";d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function offline(text){addTyping();if(window.AKSIBrain&&AKSIBrain.fullReply){return AKSIBrain.fullReply(text,msgN).then(function(r){addBotHtml(r.html);history.push({role:"user",content:text},{role:"assistant",content:r.text});if(r.metrics){document.getElementById("m-h").textContent=r.metrics.H;document.getElementById("m-q").textContent=r.metrics.qcli;document.getElementById("m-fp").textContent=r.metrics.fingerprint;document.getElementById("m-level").textContent=r.metrics.level;document.getElementById("bar-h").style.width=Math.min(100,(r.metrics.H/5)*100)+"%";document.getElementById("bar-q").style.width=(r.metrics.qcli*100)+"%";}});}return Promise.resolve().then(function(){rmTyping();addBotHtml("Загрузка…");});}
-function send(){var input=document.getElementById("user-input");var text=(input.value||"").trim();if(!text)return;input.value="";msgN++;addUser(text);if(!backendOk){offline(text);return;}addTyping();fetch(API+"/api/aksi/chat",{method:"POST",headers:{"Content-Type":"application/json","X-Session-ID":SID},body:JSON.stringify({content:text,mode:"aksi",history:history.slice(-10),session_id:SID})}).then(function(res){if(!res.ok||!res.body)throw new Error("bad");var reader=res.body.getReader(),dec=new TextDecoder(),full="",buf="";function pump(){return reader.read().then(function(ch){if(ch.done){addBotHtml(String(full).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/\n/g,"<br>"));history.push({role:"user",content:text},{role:"assistant",content:full});return;}buf+=dec.decode(ch.value,{stream:true});var parts=buf.split("\n");buf=parts.pop()||"";for(var i=0;i<parts.length;i++){if(parts[i].indexOf("data: ")!==0)continue;try{var data=JSON.parse(parts[i].slice(6));if(data.content)full+=data.content;}catch(e){}}return pump();});}return pump();}).catch(function(){backendOk=false;offline(text);});}
-document.getElementById("send-btn").onclick=send;
-document.getElementById("user-input").onkeydown=function(e){if(e.key==="Enter")send();};
-document.getElementById("user-input").addEventListener("input",function(){if(!window.AKSIBrain||!AKSIBrain.metrics)return;var m=AKSIBrain.metrics(this.value||"");document.getElementById("m-h").textContent=m.H;document.getElementById("m-q").textContent=m.qcli;document.getElementById("m-fp").textContent=m.fingerprint;document.getElementById("m-level").textContent=m.level;document.getElementById("bar-h").style.width=Math.min(100,(m.H/5)*100)+"%";document.getElementById("bar-q").style.width=(m.qcli*100)+"%";});
-function boot(){if(window.AKSIBrain&&AKSIBrain.fullReply)AKSIBrain.fullReply("кто ты",0).then(function(r){addBotHtml(r.html);});else setTimeout(boot,40);}boot();
-document.getElementById("sign-btn").onclick=function(){var t=(document.getElementById("sign-input").value||"").trim();if(!t)return;var p=window.AKSIBrain&&AKSIBrain.sig?AKSIBrain.sig(t):shaFull(t+SEED).then(function(h){return h.slice(0,16).toUpperCase();});Promise.all([p,shaFull(t+SEED)]).then(function(arr){document.getElementById("sign-result").textContent="DID: "+DID+"\nSig: "+arr[0]+"\nSHA-256: "+arr[1].slice(0,40)+"…";});};
-document.getElementById("verify-btn").onclick=function(){var msg=(document.getElementById("verify-msg").value||"").trim();var sig=(document.getElementById("verify-sig").value||"").trim().toUpperCase();if(!msg||!sig){document.getElementById("verify-result").textContent="Нужны текст и подпись";return;}shaFull(msg+SEED).then(function(h){document.getElementById("verify-result").textContent="SHA(текст+SEED)[:16]: "+h.slice(0,16).toUpperCase()+"\nВведено: "+sig;});};
-document.getElementById("temp-did-btn").onclick=function(){var guest=localStorage.getItem("AKSI_GUEST_DID");if(!guest){shaFull("guest-"+SID+"-"+Date.now()).then(function(h){guest="did:aksi:guest:"+h.slice(0,24);localStorage.setItem("AKSI_GUEST_DID",guest);document.getElementById("temp-did-result").textContent=guest;});}else document.getElementById("temp-did-result").textContent=guest;};
-(function(){var c=document.getElementById("qx-field");if(!c)return;var ctx=c.getContext("2d"),pts=[],W,H,dpr;function resize(){dpr=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+"px";c.style.height=H+"px";ctx.setTransform(dpr,0,0,dpr,0,0);pts=[];for(var i=0;i<Math.min(40,Math.floor(W*H/28000));i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.2,vy:(Math.random()-0.5)*0.2,r:Math.random()*1.2+0.3});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<pts.length;i++){var p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle="rgba(99,102,241,0.25)";ctx.fill();}requestAnimationFrame(tick);}resize();tick();window.addEventListener("resize",resize);})();
+(function () {
+  "use strict";
+  var API = localStorage.getItem("AKSI_API") || "http://localhost:8000";
+  var DID = "did:aksi:ed25519:sovereign-2026";
+  var SEED = "AKSI_DIMAX_v3_2026";
+  var sidKey = localStorage.getItem("AKSI_SID");
+  if (!sidKey) {
+    sidKey = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem("AKSI_SID", sidKey);
+  }
+  var SID = "web-" + sidKey;
+  var msgN = 0;
+  var backendOk = false;
+  var history = [];
+  var busy = false;
+
+  document.getElementById("live-bar").onclick = function () {
+    document.getElementById("did-panel").classList.toggle("open");
+  };
+
+  function tick() {
+    var el = document.getElementById("msk-clock");
+    try {
+      el.textContent =
+        new Date().toLocaleTimeString("ru-RU", {
+          timeZone: "Europe/Moscow",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }) + " МСК";
+    } catch (e) {
+      el.textContent = new Date().toLocaleTimeString("ru-RU");
+    }
+  }
+  setInterval(tick, 1000);
+  tick();
+
+  function shaFull(t) {
+    return crypto.subtle
+      .digest("SHA-256", new TextEncoder().encode(t))
+      .then(function (b) {
+        return Array.prototype.map
+          .call(new Uint8Array(b), function (x) {
+            return x.toString(16).padStart(2, "0");
+          })
+          .join("");
+      });
+  }
+
+  shaFull("AKSI|sovereign|" + SEED).then(function (h) {
+    document.getElementById("stable-hash-short").textContent = h.slice(0, 8).toUpperCase();
+    document.getElementById("did-hash").textContent = h;
+    document.getElementById("hero-hash").textContent = h.slice(0, 24) + "…";
+  });
+
+  fetch(API + "/health")
+    .then(function (r) {
+      return r.ok;
+    })
+    .catch(function () {
+      return false;
+    })
+    .then(function (ok) {
+      backendOk = ok;
+      var dot = document.getElementById("backend-dot");
+      if (ok) {
+        dot.textContent = "API ON ·";
+        dot.style.color = "#5a8f6a";
+      } else {
+        dot.textContent = "offline ·";
+      }
+    });
+
+  var chat = document.getElementById("chat-window");
+
+  function addUser(t) {
+    var d = document.createElement("div");
+    d.className = "msg user";
+    d.textContent = t;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function addTyping() {
+    var d = document.createElement("div");
+    d.className = "typing";
+    d.id = "typing-ind";
+    d.innerHTML = "<span></span><span></span><span></span>";
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function rmTyping() {
+    var t = document.getElementById("typing-ind");
+    if (t) t.remove();
+  }
+  function addBotHtml(html) {
+    rmTyping();
+    var d = document.createElement("div");
+    d.className = "msg bot";
+    d.innerHTML = html;
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function applyMetrics(m) {
+    if (!m) return;
+    document.getElementById("m-h").textContent = m.H;
+    document.getElementById("m-q").textContent = m.qcli;
+    document.getElementById("m-fp").textContent = m.fingerprint;
+    document.getElementById("m-level").textContent = m.level;
+    document.getElementById("bar-h").style.width = Math.min(100, (m.H / 5) * 100) + "%";
+    document.getElementById("bar-q").style.width = m.qcli * 100 + "%";
+  }
+
+  function offline(text) {
+    addTyping();
+    if (window.AKSIBrain && AKSIBrain.fullReply) {
+      return AKSIBrain.fullReply(text, msgN).then(function (r) {
+        busy = false;
+        addBotHtml(r.html);
+        history.push({ role: "user", content: text }, { role: "assistant", content: r.text });
+        applyMetrics(r.metrics);
+      });
+    }
+    return Promise.resolve().then(function () {
+      busy = false;
+      rmTyping();
+      addBotHtml("Загрузка ядра…");
+    });
+  }
+
+  function sendText(text) {
+    text = (text || "").trim();
+    if (!text || busy) return;
+    busy = true;
+    msgN++;
+    addUser(text);
+    if (!backendOk) {
+      offline(text);
+      return;
+    }
+    addTyping();
+    fetch(API + "/api/aksi/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Session-ID": SID },
+      body: JSON.stringify({
+        content: text,
+        mode: "aksi",
+        history: history.slice(-10),
+        session_id: SID,
+      }),
+    })
+      .then(function (res) {
+        if (!res.ok || !res.body) throw new Error("bad");
+        var reader = res.body.getReader();
+        var dec = new TextDecoder();
+        var full = "";
+        var buf = "";
+        function pump() {
+          return reader.read().then(function (ch) {
+            if (ch.done) {
+              busy = false;
+              addBotHtml(
+                String(full)
+                  .replace(/&/g, "&")
+                  .replace(/</g, "<")
+                  .replace(/>/g, ">")
+                  .replace(/\n/g, "<br>")
+              );
+              history.push(
+                { role: "user", content: text },
+                { role: "assistant", content: full }
+              );
+              return;
+            }
+            buf += dec.decode(ch.value, { stream: true });
+            var parts = buf.split("\n");
+            buf = parts.pop() || "";
+            for (var i = 0; i < parts.length; i++) {
+              if (parts[i].indexOf("data: ") !== 0) continue;
+              try {
+                var data = JSON.parse(parts[i].slice(6));
+                if (data.content) full += data.content;
+              } catch (e) {}
+            }
+            return pump();
+          });
+        }
+        return pump();
+      })
+      .catch(function () {
+        backendOk = false;
+        document.getElementById("backend-dot").textContent = "offline ·";
+        offline(text);
+      });
+  }
+
+  function send() {
+    var input = document.getElementById("user-input");
+    var text = (input.value || "").trim();
+    input.value = "";
+    sendText(text);
+  }
+
+  document.getElementById("send-btn").onclick = send;
+  document.getElementById("user-input").onkeydown = function (e) {
+    if (e.key === "Enter") send();
+  };
+  document.getElementById("user-input").addEventListener("input", function () {
+    if (!window.AKSIBrain || !AKSIBrain.metrics) return;
+    applyMetrics(AKSIBrain.metrics(this.value || ""));
+  });
+
+  document.querySelectorAll(".suggest").forEach(function (btn) {
+    btn.onclick = function () {
+      sendText(btn.getAttribute("data-q"));
+    };
+  });
+
+  function boot() {
+    if (window.AKSIBrain && AKSIBrain.fullReply) {
+      AKSIBrain.fullReply("кто ты", 0).then(function (r) {
+        addBotHtml(r.html);
+        applyMetrics(r.metrics);
+      });
+    } else setTimeout(boot, 40);
+  }
+  boot();
+
+  document.getElementById("sign-btn").onclick = function () {
+    var t = (document.getElementById("sign-input").value || "").trim();
+    if (!t) return;
+    var p =
+      window.AKSIBrain && AKSIBrain.sig
+        ? AKSIBrain.sig(t)
+        : shaFull(t + SEED).then(function (h) {
+            return h.slice(0, 16).toUpperCase();
+          });
+    Promise.all([p, shaFull(t + SEED)]).then(function (arr) {
+      document.getElementById("sign-result").textContent =
+        "DID: " + DID + "\nSig: " + arr[0] + "\nSHA-256: " + arr[1].slice(0, 40) + "…";
+    });
+  };
+
+  document.getElementById("verify-btn").onclick = function () {
+    var msg = (document.getElementById("verify-msg").value || "").trim();
+    var sig = (document.getElementById("verify-sig").value || "").trim().toUpperCase();
+    if (!msg || !sig) {
+      document.getElementById("verify-result").textContent = "Нужны текст и подпись";
+      return;
+    }
+    shaFull(msg + SEED).then(function (h) {
+      document.getElementById("verify-result").textContent =
+        "SHA(текст+SEED)[:16]: " + h.slice(0, 16).toUpperCase() + "\nВведено: " + sig;
+    });
+  };
+
+  document.getElementById("temp-did-btn").onclick = function () {
+    var guest = localStorage.getItem("AKSI_GUEST_DID");
+    if (!guest) {
+      shaFull("guest-" + SID + "-" + Date.now()).then(function (h) {
+        guest = "did:aksi:guest:" + h.slice(0, 24);
+        localStorage.setItem("AKSI_GUEST_DID", guest);
+        document.getElementById("temp-did-result").textContent = guest;
+      });
+    } else {
+      document.getElementById("temp-did-result").textContent = guest;
+    }
+  };
+
+  /* soft particles */
+  (function () {
+    var c = document.getElementById("qx-field");
+    if (!c) return;
+    var ctx = c.getContext("2d");
+    var pts = [];
+    var W, H, dpr;
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      c.width = W * dpr;
+      c.height = H * dpr;
+      c.style.width = W + "px";
+      c.style.height = H + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pts = [];
+      var n = Math.min(36, Math.floor((W * H) / 32000));
+      for (var i = 0; i < n; i++) {
+        pts.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: (Math.random() - 0.5) * 0.15,
+          r: Math.random() * 1.4 + 0.4,
+        });
+      }
+    }
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < pts.length; i++) {
+        var p = pts[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(166,124,82,0.2)";
+        ctx.fill();
+      }
+      requestAnimationFrame(frame);
+    }
+    resize();
+    frame();
+    window.addEventListener("resize", resize);
+  })();
 })();
 </script>
 </body>
