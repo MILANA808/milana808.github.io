@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ · Импорт из Replit</title>
+<meta name="theme-color" content="#f3ebe0">
+<link rel="stylesheet" href="../styles.css">
+<script src="../aksi-auth.js"></script>
+<style>
+  .steps{display:grid;gap:16px;max-width:720px;margin:0 auto}
+  .step{padding:20px 22px}
+  .step h3{margin:0 0 8px;font-family:var(--serif);font-size:1.15rem}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:10px 0 6px}
+  input,textarea{width:100%;background:#f5efe6;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font:inherit}
+  textarea{min-height:120px;font-family:var(--mono);font-size:12px}
+  .file-list{font-size:12px;margin-top:10px}
+  .file-list li{margin:4px 0}
+  pre.out{background:#1a1520;color:#c4f0d4;padding:14px;border-radius:12px;font-size:11px;overflow:auto;max-height:200px}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="topnav" style="padding-top:20px">
+  <div class="nav-inner">
+    <a class="brand" href="../"><span class="mark">АКСИ</span></a>
+    <div class="nav-links">
+      <a href="../">Главная</a>
+      <a href="../auth/">Вход</a>
+      <a href="./" style="color:var(--accent-deep)">Replit</a>
+      <a href="../cabinet/">Кабинет</a>
+      <a href="https://github.com/MILANA808/milana808.github.io" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+<main>
+  <h1 class="sec-title">Перенос из Replit → АКСИ</h1>
+  <p class="sec-sub">Сохрани свои разработки в библиотеку АКСИ (браузер + экспорт на GitHub). Вход не обязателен, но с аккаунтом проекты привязаны к DID.</p>
+
+  <div class="steps">
+    <div class="glass step">
+      <h3>1. Открой Replit</h3>
+      <p class="muted" style="margin:0;font-size:14px">В Replit: <strong>⋯ → Download as ZIP</strong> или скопируй нужные файлы. Публичный URL вида <code>https://replit.com/@user/project</code>.</p>
+      <label>Ссылка на Replit (опционально)</label>
+      <input id="rep-url" placeholder="https://replit.com/@...">
+    </div>
+
+    <div class="glass step">
+      <h3>2. Вставь код / заметку</h3>
+      <label>Название проекта</label>
+      <input id="rep-title" placeholder="Мой агент / quantum demo">
+      <label>Файлы (можно несколько: имя + содержимое)</label>
+      <input id="f-name" placeholder="main.py или index.html">
+      <textarea id="f-body" placeholder="Вставь содержимое файла…"></textarea>
+      <button type="button" class="btn btn-ghost" id="add-file" style="margin-top:10px">+ Добавить файл в пакет</button>
+      <ul class="file-list" id="files"></ul>
+    </div>
+
+    <div class="glass step">
+      <h3>3. Сохранить в АКСИ</h3>
+      <p class="muted" style="font-size:13px" id="auth-hint">—</p>
+      <button type="button" class="btn btn-primary" id="save-btn">Сохранить в библиотеку</button>
+      <button type="button" class="btn btn-ghost" id="dl-btn">Скачать JSON-пакет</button>
+      <p class="muted" id="status" style="margin-top:12px;font-size:13px"></p>
+    </div>
+
+    <div class="glass step">
+      <h3>4. На GitHub (канон MATRIX)</h3>
+      <p class="muted" style="font-size:14px;margin:0 0 10px">После скачивания JSON или ZIP — положи файлы в <code>milana808.github.io</code> (папка <code>imports/</code> или свой модуль) и сделай commit. Либо открой issue / PR.</p>
+      <pre class="out"># пример
+mkdir -p imports/my-project
+# скопируй файлы из Replit ZIP
+git add imports/my-project
+git commit -m "import: from Replit"
+git push</pre>
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px">
+        <a class="btn btn-ghost" href="https://github.com/MILANA808/milana808.github.io" target="_blank" rel="noopener">Открыть MATRIX repo</a>
+        <a class="btn btn-ghost" href="https://github.com/MILANA808/Milana-backend" target="_blank" rel="noopener">Milana-backend</a>
+      </div>
+    </div>
+
+    <div class="glass step">
+      <h3>Твои импорты в этом браузере</h3>
+      <div id="plist" class="muted" style="font-size:13px">—</div>
+    </div>
+  </div>
+</main>
+<footer>АКСИ · Replit bridge · не хранит секреты Replit</footer>
+</div>
+<script>
+(function(){
+  var pack=[];
+  function renderFiles(){
+    var ul=document.getElementById("files");
+    ul.innerHTML=pack.map(function(f,i){
+      return "<li><strong>"+f.name+"</strong> · "+f.content.length+" симв. <button type=button data-i="+i+" class=rm>✕</button></li>";
+    }).join("")||"<li class=muted>пока пусто</li>";
+    ul.querySelectorAll(".rm").forEach(function(b){
+      b.onclick=function(){pack.splice(+b.getAttribute("data-i"),1);renderFiles();};
+    });
+  }
+  function refreshList(){
+    var list=AksiAuth.listProjects();
+    var el=document.getElementById("plist");
+    if(!list.length){el.textContent="Нет сохранённых пакетов (войди и сохрани)";return;}
+    el.innerHTML=list.map(function(p){
+      return "<div style=\"margin:8px 0;padding:10px;background:#f5efe6;border-radius:10px\"><strong>"+p.title+"</strong><div class=muted>"+p.source+" · "+(p.url||"")+" · файлов: "+(p.files&&p.files.length||0)+"</div></div>";
+    }).join("");
+  }
+  var s=AksiAuth.session();
+  document.getElementById("auth-hint").textContent=s
+    ? ("Сессия: @"+s.handle+" · "+s.did)
+    : "Без входа можно только скачать JSON. Для библиотеки: /auth/";
+
+  document.getElementById("add-file").onclick=function(){
+    var n=(document.getElementById("f-name").value||"snippet.txt").trim();
+    var c=document.getElementById("f-body").value||"";
+    if(!c.trim()){alert("Вставь содержимое");return;}
+    pack.push({name:n,content:c.slice(0,200000)});
+    document.getElementById("f-body").value="";
+    renderFiles();
+  };
+
+  document.getElementById("save-btn").onclick=function(){
+    var st=document.getElementById("status");
+    try{
+      if(!AksiAuth.session()){st.textContent="Сначала /auth/ — регистрация или вход";return;}
+      var title=(document.getElementById("rep-title").value||"Replit import").trim();
+      var p=AksiAuth.addProject({
+        title:title,
+        source:"replit",
+        url:document.getElementById("rep-url").value.trim(),
+        note:"imported via AKSI import/",
+        files:pack
+      });
+      st.textContent="Сохранено: "+p.id+" · "+p.title;
+      refreshList();
+    }catch(e){st.textContent=e.message||String(e);}
+  };
+
+  document.getElementById("dl-btn").onclick=function(){
+    var data={
+      aksi:"import-v1",
+      title:document.getElementById("rep-title").value||"replit",
+      url:document.getElementById("rep-url").value,
+      files:pack,
+      at:new Date().toISOString()
+    };
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="aksi-import-"+Date.now()+".json";
+    a.click();
+  };
+
+  renderFiles();refreshList();
+})();
+</script>
+</body>
+</html>

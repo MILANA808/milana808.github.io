@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АКСИ · Регистрация / Вход</title>
+<meta name="theme-color" content="#f3ebe0">
+<link rel="stylesheet" href="../styles.css">
+<script src="../aksi-auth.js"></script>
+<style>
+  .auth-box{max-width:420px;margin:0 auto;padding:28px}
+  .tabs{display:flex;gap:8px;margin-bottom:20px}
+  .tabs button{flex:1}
+  .tabs button.on{background:var(--accent);color:#fffbf5;border-color:var(--accent)}
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+  input{width:100%;background:#f5efe6;border:1px solid var(--border);border-radius:12px;padding:12px 14px;font:inherit}
+  .msg{margin-top:14px;font-size:13px;min-height:1.2em}
+  .msg.ok{color:#5a8f6a}.msg.err{color:#a33}
+  .did-line{font-family:var(--mono);font-size:11px;word-break:break-all;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="topnav" style="padding-top:20px">
+  <div class="nav-inner">
+    <a class="brand" href="../"><span class="mark">АКСИ</span></a>
+    <div class="nav-links">
+      <a href="../">Главная</a>
+      <a href="./" style="color:var(--accent-deep)">Вход</a>
+      <a href="../import/">Replit → AKSI</a>
+      <a href="../cabinet/">Кабинет</a>
+    </div>
+  </div>
+</nav>
+<main>
+  <h1 class="sec-title">Регистрация / Вход</h1>
+  <p class="sec-sub">Аккаунт в этом браузере + DID. Пароль хранится только как хэш (не на чужом сервере).</p>
+
+  <div class="glass auth-box">
+    <div class="tabs">
+      <button type="button" class="btn btn-ghost on" id="tab-reg">Регистрация</button>
+      <button type="button" class="btn btn-ghost" id="tab-in">Вход</button>
+    </div>
+
+    <div id="panel-reg">
+      <label>Имя</label>
+      <input id="r-name" placeholder="Альфия" maxlength="48">
+      <label>Handle</label>
+      <input id="r-handle" placeholder="alfiya" maxlength="24">
+      <label>Email (опционально)</label>
+      <input id="r-email" type="email" placeholder="you@mail.ru">
+      <label>Пароль</label>
+      <input id="r-pass" type="password" placeholder="минимум 6 символов">
+      <button type="button" class="btn btn-primary" id="btn-reg" style="width:100%;margin-top:18px">Создать аккаунт</button>
+    </div>
+
+    <div id="panel-in" style="display:none">
+      <label>Handle</label>
+      <input id="i-handle" placeholder="username">
+      <label>Пароль</label>
+      <input id="i-pass" type="password">
+      <button type="button" class="btn btn-primary" id="btn-in" style="width:100%;margin-top:18px">Войти</button>
+    </div>
+
+    <p class="msg" id="msg"></p>
+    <div id="sess" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div style="font-weight:600">Сессия активна</div>
+      <div id="sess-name" class="muted"></div>
+      <div class="did-line" id="sess-did"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+        <a class="btn btn-ghost" href="../import/">Импорт Replit</a>
+        <a class="btn btn-ghost" href="../cabinet/">Кабинет</a>
+        <button type="button" class="btn btn-ghost" id="btn-out">Выйти</button>
+      </div>
+    </div>
+  </div>
+</main>
+<footer>АКСИ · Auth · offline-first</footer>
+</div>
+<script>
+(function(){
+  var mode="reg";
+  function showSess(){
+    var s=AksiAuth.session();
+    var box=document.getElementById("sess");
+    if(!s){box.style.display="none";return;}
+    box.style.display="block";
+    document.getElementById("sess-name").textContent=s.name+" · @"+s.handle;
+    document.getElementById("sess-did").textContent=s.did;
+  }
+  document.getElementById("tab-reg").onclick=function(){
+    mode="reg";this.classList.add("on");document.getElementById("tab-in").classList.remove("on");
+    document.getElementById("panel-reg").style.display="";document.getElementById("panel-in").style.display="none";
+  };
+  document.getElementById("tab-in").onclick=function(){
+    mode="in";this.classList.add("on");document.getElementById("tab-reg").classList.remove("on");
+    document.getElementById("panel-in").style.display="";document.getElementById("panel-reg").style.display="none";
+  };
+  document.getElementById("btn-reg").onclick=function(){
+    var msg=document.getElementById("msg");msg.className="msg";
+    AksiAuth.register(
+      document.getElementById("r-name").value,
+      document.getElementById("r-handle").value,
+      document.getElementById("r-pass").value,
+      document.getElementById("r-email").value
+    ).then(function(u){
+      msg.className="msg ok";msg.textContent="Готово · DID создан";showSess();
+    }).catch(function(e){msg.className="msg err";msg.textContent=e.message||String(e);});
+  };
+  document.getElementById("btn-in").onclick=function(){
+    var msg=document.getElementById("msg");msg.className="msg";
+    AksiAuth.login(document.getElementById("i-handle").value,document.getElementById("i-pass").value)
+      .then(function(){msg.className="msg ok";msg.textContent="Вход выполнен";showSess();})
+      .catch(function(e){msg.className="msg err";msg.textContent=e.message||String(e);});
+  };
+  document.getElementById("btn-out").onclick=function(){AksiAuth.logout();showSess();document.getElementById("msg").textContent="Вы вышли";};
+  showSess();
+})();
+</script>
+</body>
+</html>
