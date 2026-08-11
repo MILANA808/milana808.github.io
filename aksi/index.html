@@ -10,10 +10,10 @@
 html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
 #field{position:fixed;inset:0;z-index:0}
 .ui{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;max-width:720px;margin:0 auto;padding:env(safe-area-inset-top,12px) 16px env(safe-area-inset-bottom,16px)}
-.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;gap:8px}
-.top a{color:#9b8ec4;text-decoration:none;font-size:13px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;gap:8px;flex-wrap:wrap}
+.top a{color:#9b8ec4;text-decoration:none;font-size:12px}
 .brand{font-weight:700;letter-spacing:.2em;font-size:13px;color:#c4b5fd}
-.langs{display:flex;gap:4px}
+.langs{display:flex;gap:4px;align-items:center}
 .langs button{background:transparent;border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer}
 .langs button.on{background:rgba(124,58,237,.35);color:#fff;border-color:#a78bfa}
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px 8px;min-height:0}
@@ -43,9 +43,10 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
 <canvas id="field"></canvas>
 <div class="ui">
   <div class="top">
-    <a href="../">← MATRIX</a>
+    <a href="../avatar/">3D</a>
     <span class="brand">АКСИ</span>
     <div class="langs">
+      <a href="../CODEX.md" style="margin-right:6px">Кодекс</a>
       <button type="button" data-lang="ru" class="on">RU</button>
       <button type="button" data-lang="en">EN</button>
       <button type="button" data-lang="tt">TT</button>
@@ -53,20 +54,22 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
   </div>
   <div class="stage">
     <div class="orb" id="orb"><div class="rings"></div><div class="rings"></div><span>Ψ</span></div>
-    <div class="status" id="status" data-i18n="online">Напиши или скажи — я здесь</div>
+    <div class="status" id="status">Напиши или скажи — я здесь</div>
     <div class="thoughts" id="thoughts"></div>
     <div class="answer" id="answer"></div>
     <div class="sig" id="sig"></div>
   </div>
-  <p class="hint" data-i18n="tagline">Личный ИИ с подписью</p>
+  <p class="hint">Кодекс · источники · резонанс</p>
   <div class="dock">
     <button type="button" class="mic" id="mic">🎙</button>
-    <textarea id="input" rows="1" data-i18n-placeholder="placeholder" placeholder="Скажи АКСИ…"></textarea>
+    <textarea id="input" rows="1" placeholder="Скажи АКСИ…"></textarea>
     <button type="button" id="send">↑</button>
   </div>
 </div>
 <script src="../i18n.js"></script>
 <script src="../aksi-math.js"></script>
+<script src="../codex.js"></script>
+<script src="../search-world.js"></script>
 <script src="../aksi-brain.js"></script>
 <script>
 (function(){
@@ -97,23 +100,47 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
   async function resonate(text){
     if(!text||busy)return;busy=true;n++;sendBtn.disabled=true;
     answer.classList.remove('show');answer.innerHTML='';thoughts.innerHTML='';sig.textContent='';
-    orb.classList.add('pulse');setStatus(t('listening'));await wait(250);setStatus(t('resonance'));
-    var route=window.AksiMath?AksiMath.route(text):'general';
-    var sc=window.AksiMath?AksiMath.scoreQuery(text,'акси identity quantum knowledge '+text,{identity:/акси|ты|who/i.test(text)}):null;
-    var steps=['route: '+route,sc?('score='+sc.score+' sim='+sc.sim):'score','identity · sign'];
-    for(var i=0;i<steps.length;i++){
-      var d=document.createElement('div');d.className='th';d.style.animationDelay=(i*.1)+'s';
-      d.textContent='['+(i+1)+'] '+steps[i]+' · '+(await hex16(steps[i]+text)).slice(0,8);
-      thoughts.appendChild(d);await wait(160);
+    orb.classList.add('pulse');setStatus(t('listening'));await wait(200);
+
+    if(window.AksiCodex){
+      var gate=AksiCodex.check(text);
+      if(!gate.ok){
+        setStatus('Кодекс');
+        answer.innerHTML=esc(gate.message);
+        answer.classList.add('show');
+        sig.textContent='Codex v'+(AksiCodex.VERSION||'1');
+        orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;
+        return;
+      }
     }
-    var replyText='';
+
+    setStatus(t('resonance'));
+    var route=window.AksiMath?AksiMath.route(text):'general';
+    var sc=window.AksiMath?AksiMath.scoreQuery(text,'акси knowledge '+text,{identity:/акси|ты|who/i.test(text)}):null;
+    var steps=['codex: ok','route: '+route,sc?('score='+sc.score):'score'];
+    for(var i=0;i<steps.length;i++){
+      var d=document.createElement('div');d.className='th';
+      d.textContent='['+(i+1)+'] '+steps[i]+' · '+(await hex16(steps[i]+text)).slice(0,8);
+      thoughts.appendChild(d);await wait(120);
+    }
+
+    var replyText='', sources=[];
     try{
-      if(window.AKSIBrain&&AKSIBrain.fullReply){
+      if(window.AksiWorld&&(route==='retrieve'||route==='general')){
+        var w=await AksiWorld.search(text);
+        if(w&&w.text){replyText=w.text;sources=w.sources||[];}
+      }
+      if(!replyText&&window.AKSIBrain&&AKSIBrain.fullReply){
         var r=await AKSIBrain.fullReply(text,n);
         replyText=r.text||'';
-        sig.textContent='🔏 '+(r.signature||'')+' · EQS '+(window.AksiMath?AksiMath.eqs():'—');
-      }else{replyText='АКСИ online.';}
-    }catch(e){replyText='Ошибка ответа — попробуй ещё.';}
+        sig.textContent='🔏 '+(r.signature||'')+' · EQS '+(window.AksiMath?AksiMath.eqs():'');
+      }
+      if(!replyText)replyText='Не нашла устойчивый ответ. Переформулируй вопрос.';
+      if(window.AksiCodex&&sources.length)replyText=AksiCodex.wrapAnswer(replyText,sources);
+      else if(sources.length)replyText+="\n\nИсточники: "+sources.join(' · ');
+      if(!sig.textContent)sig.textContent='🔏 '+(await hex16(replyText)).slice(0,16)+' · Codex';
+    }catch(e){replyText='Сбой поиска. Попробуй ещё раз.';}
+
     setStatus('АКСИ');
     answer.innerHTML=esc(replyText).replace(/\n/g,'<br>');
     answer.classList.add('show');orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;
