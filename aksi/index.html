@@ -6,65 +6,31 @@
 <title>АКСИ</title>
 <meta name="theme-color" content="#0a0612"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
-<link rel="manifest" href="/manifest.webmanifest"/>
 <style>
-:root{
-  --bg:#0a0612;--ink:#f4f0ff;--muted:#9b92b0;--line:rgba(255,255,255,.08);
-  --accent:#a78bfa;--card:rgba(255,255,255,.04);
-}
+:root{--bg:#0a0612;--ink:#f4f0ff;--muted:#9b92b0;--line:rgba(255,255,255,.08);--card:rgba(255,255,255,.04)}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif}
 body{display:flex;flex-direction:column;max-width:640px;margin:0 auto;padding:0 16px;min-height:100dvh}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px;flex-shrink:0;gap:8px}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px;gap:8px}
 header a{color:var(--muted);text-decoration:none;font-size:13px}
 .logo{font-weight:600;letter-spacing:.28em;font-size:12px}
-.meta{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.langs button{background:transparent;border:none;color:var(--muted);font-size:11px;padding:5px 7px;border-radius:8px;cursor:pointer}
-.langs button.on{color:var(--ink);background:var(--card)}
-#thread{
-  flex:1;overflow-y:auto;padding:12px 0 16px;min-height:0;
-  display:flex;flex-direction:column;gap:12px
-}
-.bubble{
-  max-width:92%;padding:12px 14px;border-radius:16px;font-size:15px;line-height:1.55;
-  word-break:break-word
-}
-.bubble.user{
-  align-self:flex-end;background:linear-gradient(145deg,#7c3aed,#4f46e5);color:#fff;
-  border-bottom-right-radius:6px
-}
-.bubble.bot{
-  align-self:flex-start;background:var(--card);border:1px solid var(--line);
-  border-bottom-left-radius:6px
-}
+.meta{font-size:11px;color:var(--muted)}
+#thread{flex:1;overflow-y:auto;padding:12px 0 16px;min-height:0;display:flex;flex-direction:column;gap:12px}
+.bubble{max-width:92%;padding:12px 14px;border-radius:16px;font-size:15px;line-height:1.55;word-break:break-word}
+.bubble.user{align-self:flex-end;background:linear-gradient(145deg,#7c3aed,#4f46e5);color:#fff;border-bottom-right-radius:6px}
+.bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
 .bubble .time{font-size:10px;opacity:.55;margin-top:6px}
 .empty{margin:auto;text-align:center;color:var(--muted);font-size:14px;padding:40px 12px}
-.empty .orb{
-  width:72px;height:72px;border-radius:50%;margin:0 auto 16px;
-  background:radial-gradient(circle at 32% 28%,#f5f3ff,#a78bfa 40%,#1e1b4b 75%,#0a0612);
-  display:grid;place-items:center;font-size:1.4rem;color:#fff
-}
+.empty .orb{width:72px;height:72px;border-radius:50%;margin:0 auto 16px;background:radial-gradient(circle at 32% 28%,#f5f3ff,#a78bfa 40%,#1e1b4b 75%,#0a0612);display:grid;place-items:center;font-size:1.4rem;color:#fff}
 footer{flex-shrink:0;padding:8px 0 14px}
-.dock{
-  display:flex;gap:8px;align-items:flex-end;padding:10px;border-radius:20px;
-  background:var(--card);border:1px solid var(--line)
-}
-.dock textarea{
-  flex:1;resize:none;min-height:44px;max-height:120px;border:none;background:transparent;
-  color:var(--ink);padding:10px 8px;font:inherit;font-size:16px;outline:none
-}
-.dock button{
-  width:44px;height:44px;border-radius:14px;border:none;cursor:pointer;
-  background:linear-gradient(145deg,#8b5cf6,#6366f1);color:#fff;font-size:1.1rem;flex-shrink:0
-}
+.dock{display:flex;gap:8px;align-items:flex-end;padding:10px;border-radius:20px;background:var(--card);border:1px solid var(--line)}
+.dock textarea{flex:1;resize:none;min-height:44px;max-height:120px;border:none;background:transparent;color:var(--ink);padding:10px 8px;font:inherit;font-size:16px;outline:none}
+.dock button{width:44px;height:44px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(145deg,#8b5cf6,#6366f1);color:#fff;font-size:1.1rem;flex-shrink:0}
 .dock button:disabled{opacity:.35}
 .dock button.mic{background:transparent;border:1px solid var(--line);color:var(--muted)}
 .dock button.mic.on{border-color:#38bdf8;color:#38bdf8}
-.toolbar{display:flex;gap:8px;justify-content:flex-end;padding:4px 0 6px}
-.toolbar button{
-  background:transparent;border:none;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 6px
-}
-.toolbar button:hover{color:var(--ink)}
+.toolbar{display:flex;justify-content:flex-end;padding:4px 0}
+.toolbar button{background:transparent;border:none;color:var(--muted);font-size:11px;cursor:pointer}
 .typing{align-self:flex-start;padding:10px 14px;color:var(--muted);font-size:13px}
 </style>
 </head>
@@ -72,198 +38,139 @@ footer{flex-shrink:0;padding:8px 0 14px}
 <header>
   <a href="/">←</a>
   <span class="logo">АКСИ</span>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span class="meta" id="mem-count">—</span>
-    <div class="langs">
-      <button type="button" data-lang="ru" class="on">RU</button>
-      <button type="button" data-lang="en">EN</button>
-    </div>
-  </div>
+  <span class="meta" id="mem-count"></span>
 </header>
-
-<div class="toolbar">
-  <button type="button" id="btn-clear" title="Очистить память">Очистить память</button>
-</div>
-
+<div class="toolbar"><button type="button" id="btn-clear">Очистить память</button></div>
 <div id="thread">
   <div class="empty" id="empty">
     <div class="orb">Ψ</div>
-    <div>Память сохраняется в браузере.<br>Пишите — я помню прошлые разговоры.</div>
+    <div>Напишите — АКСИ ответит.<br>Память в браузере.</div>
   </div>
 </div>
-
 <footer>
   <div class="dock">
-    <button type="button" class="mic" id="mic" aria-label="Микрофон">🎙</button>
+    <button type="button" class="mic" id="mic">🎙</button>
     <textarea id="input" rows="1" placeholder="Сообщение…" enterkeyhint="send"></textarea>
-    <button type="button" id="send" aria-label="Отправить">↑</button>
+    <button type="button" id="send">↑</button>
   </div>
 </footer>
-
-<script src="../codex.js"></script>
-<script src="../aksi-memory.js"></script>
-<script src="../aksi-brain.js"></script>
-<script src="../i18n.js"></script>
+<script src="/aksi-memory.js"></script>
+<script src="/codex.js"></script>
+<script src="/aksi-brain.js"></script>
 <script>
 (function(){
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});
+"use strict";
+var thread=document.getElementById("thread");
+var empty=document.getElementById("empty");
+var input=document.getElementById("input");
+var sendBtn=document.getElementById("send");
+var micBtn=document.getElementById("mic");
+var memEl=document.getElementById("mem-count");
+var busy=false,n=0;
 
-  var thread=document.getElementById('thread');
-  var empty=document.getElementById('empty');
-  var input=document.getElementById('input');
-  var sendBtn=document.getElementById('send');
-  var micBtn=document.getElementById('mic');
-  var memEl=document.getElementById('mem-count');
-  var busy=false,n=0;
-
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-  function fmtTime(ts){
-    try{return new Date(ts).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
-    catch(e){return '';}
-  }
-
-  function hideEmpty(){if(empty)empty.style.display='none';}
-
-  function addBubble(role,text,ts){
-    hideEmpty();
-    var d=document.createElement('div');
-    d.className='bubble '+(role==='user'?'user':'bot');
-    d.innerHTML=esc(text).replace(/\n/g,'<br>')+(ts?'<div class="time">'+fmtTime(ts)+'</div>':'');
-    thread.appendChild(d);
-    thread.scrollTop=thread.scrollHeight;
-    return d;
-  }
-
-  async function refreshCount(){
-    if(!window.AksiMemory)return;
-    var c=await AksiMemory.count();
-    memEl.textContent=c?c+' в памяти':'память пуста';
-  }
-
-  async function loadHistory(){
-    if(!window.AksiMemory)return;
-    var rows=await AksiMemory.history(300);
-    if(!rows.length){await refreshCount();return;}
-    hideEmpty();
-    rows.forEach(function(r){
-      addBubble(r.role==='user'?'user':'bot',r.content,r.ts);
-    });
+function esc(s){return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");}
+function fmtTime(ts){try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}catch(e){return"";}}
+function hideEmpty(){if(empty)empty.style.display="none";}
+function addBubble(role,text,ts){
+  hideEmpty();
+  var d=document.createElement("div");
+  d.className="bubble "+(role==="user"?"user":"bot");
+  d.innerHTML=esc(text).replace(/\n/g,"<br>")+(ts?'<div class="time">'+fmtTime(ts)+"</div>":"");
+  thread.appendChild(d);
+  thread.scrollTop=thread.scrollHeight;
+}
+function localReply(text){
+  var t=(text||"").toLowerCase();
+  if(/привет|здравств|hello|hi\b/.test(t))return"Здравствуйте. Я АКСИ. Спрашивайте о чём угодно.";
+  if(/кто ты|что ты|что такое акси/.test(t))return"Я АКСИ — суверенный агент. Память разговора хранится в вашем браузере.";
+  if(/как дела/.test(t))return"На связи. Чем помочь?";
+  if(/спасибо|благодар/.test(t))return"Пожалуйста.";
+  if(/памят|помнишь/.test(t))return"Да, помню сообщения с этого устройства. Очистить — кнопка сверху.";
+  return"Приняла: «"+String(text).slice(0,100)+"». Уточните вопрос или спросите «кто ты».";
+}
+function withTimeout(p,ms){
+  return new Promise(function(resolve){
+    var done=false;
+    var t=setTimeout(function(){if(!done){done=true;resolve(null);}},ms);
+    Promise.resolve(p).then(function(v){if(!done){done=true;clearTimeout(t);resolve(v);}}).catch(function(){if(!done){done=true;clearTimeout(t);resolve(null);}});
+  });
+}
+async function safeRemember(role,content){
+  if(!window.AksiMemory)return;
+  try{await withTimeout(AksiMemory.remember(role,content),2000);}catch(e){}
+}
+async function refreshCount(){
+  if(!window.AksiMemory){memEl.textContent="";return;}
+  try{var c=await withTimeout(AksiMemory.count(),2000);memEl.textContent=c!=null?(c+" в памяти"):"";}catch(e){memEl.textContent="";}
+}
+async function loadHistory(){
+  if(!window.AksiMemory)return;
+  try{
+    var rows=await withTimeout(AksiMemory.history(200),3000);
+    if(!rows||!rows.length){await refreshCount();return;}
+    rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content,r.ts);});
     await refreshCount();
     thread.scrollTop=thread.scrollHeight;
+  }catch(e){}
+}
+async function getReply(text){
+  if(window.AKSIBrain&&typeof AKSIBrain.fullReply==="function"){
+    var r=await withTimeout(AKSIBrain.fullReply(text,n),8000);
+    if(r&&r.text)return r.text;
   }
-
-  async function respond(text){
-    if(!text||busy)return;
-    busy=true;n++;sendBtn.disabled=true;
-
-    if(window.AksiCodex){
+  return localReply(text);
+}
+async function respond(text){
+  text=String(text||"").trim();
+  if(!text||busy)return;
+  busy=true;n++;sendBtn.disabled=true;
+  try{
+    if(window.AksiCodex&&AksiCodex.check){
       var gate=AksiCodex.check(text);
-      if(!gate.ok){
-        addBubble('bot',gate.message,Date.now());
-        busy=false;sendBtn.disabled=false;
-        return;
+      if(gate&&gate.ok===false){
+        addBubble("bot",gate.message||"Отказ по Кодексу.",Date.now());
+        busy=false;sendBtn.disabled=false;return;
       }
     }
-
-    addBubble('user',text,Date.now());
-    if(window.AksiMemory)await AksiMemory.remember('user',text);
-
-    var tip=document.createElement('div');
-    tip.className='typing';tip.id='typing';tip.textContent='АКСИ печатает…';
+    addBubble("user",text,Date.now());
+    await safeRemember("user",text);
+    var tip=document.createElement("div");
+    tip.className="typing";tip.id="typing";tip.textContent="АКСИ…";
     thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
-
-    var reply='';
-    try{
-      // inject memory context into brain via temporary prefix for continuity
-      var ctx='';
-      if(window.AksiMemory){
-        ctx=await AksiMemory.contextBlock(24,8000);
-      }
-      var prompt=text;
-      if(ctx&&ctx.length>20){
-        // brain uses the question; we also store continuity by answering with awareness
-        // Prefer passing only user text to retrieval, memory is for us to prepend soft note
-        if(/помни|раньше|мы говорили|что я сказал|что я сказала/i.test(text)){
-          prompt=text+'\n\n[Контекст прошлых сообщений]\n'+ctx.slice(-4000);
-        }
-      }
-      if(window.AKSIBrain&&AKSIBrain.fullReply){
-        var r=await AKSIBrain.fullReply(prompt,n);
-        reply=r.text||'';
-      }else{
-        reply='Модуль ответа не загрузился. Обновите страницу.';
-      }
-      // If user asks about memory, append count
-      if(/памят|помнишь|что ты знаешь обо мне/i.test(text)&&window.AksiMemory){
-        var cnt=await AksiMemory.count();
-        reply+='\n\nВ долгой памяти сейчас записей: '+cnt+'.';
-      }
-    }catch(e){
-      reply='Ошибка ответа. Попробуйте ещё раз.';
+    var reply=await getReply(text);
+    if(!reply)reply=localReply(text);
+    if(/памят|помнишь/i.test(text)&&window.AksiMemory){
+      var cnt=await withTimeout(AksiMemory.count(),1500);
+      if(cnt!=null)reply+="\n\nЗаписей в памяти: "+cnt+".";
     }
-
-    var t=document.getElementById('typing');if(t)t.remove();
-    addBubble('bot',reply,Date.now());
-    if(window.AksiMemory)await AksiMemory.remember('assistant',reply);
+    var t=document.getElementById("typing");if(t)t.remove();
+    addBubble("bot",reply,Date.now());
+    await safeRemember("assistant",reply);
     await refreshCount();
-
-    busy=false;sendBtn.disabled=false;
-    try{
-      if(speechSynthesis&&reply){
-        var u=new SpeechSynthesisUtterance(reply.slice(0,350));
-        u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';
-        speechSynthesis.cancel();speechSynthesis.speak(u);
-      }
-    }catch(e){}
+  }catch(err){
+    var t2=document.getElementById("typing");if(t2)t2.remove();
+    addBubble("bot",localReply(text),Date.now());
   }
-
-  function go(){
-    var v=(input.value||'').trim();
-    if(!v)return;
-    input.value='';
-    respond(v);
-  }
-  sendBtn.onclick=go;
-  input.addEventListener('keydown',function(e){
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go();}
-  });
-
-  document.getElementById('btn-clear').onclick=async function(){
-    if(!confirm('Очистить всю память АКСИ на этом устройстве?'))return;
-    if(window.AksiMemory)await AksiMemory.clear();
-    thread.innerHTML='';
-    empty.style.display='';
-    thread.appendChild(empty);
-    await refreshCount();
-  };
-
-  document.querySelectorAll('[data-lang]').forEach(function(b){
-    b.classList.toggle('on',b.getAttribute('data-lang')===(localStorage.getItem('AKSI_LANG')||'ru'));
-    b.onclick=function(){
-      document.querySelectorAll('[data-lang]').forEach(function(x){x.classList.remove('on');});
-      b.classList.add('on');
-      localStorage.setItem('AKSI_LANG',b.getAttribute('data-lang'));
-    };
-  });
-
-  var rec=null,listening=false;
-  if(window.SpeechRecognition||window.webkitSpeechRecognition){
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    rec=new SR();rec.lang='ru-RU';rec.interimResults=false;
-    rec.onresult=function(ev){
-      listening=false;micBtn.classList.remove('on');
-      respond(ev.results[0][0].transcript);
-    };
-    rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove('on');};
-  }else micBtn.style.display='none';
-  micBtn.onclick=function(){
-    if(!rec)return;
-    if(listening){rec.stop();return;}
-    listening=true;micBtn.classList.add('on');
-    try{rec.start();}catch(e){}
-  };
-
-  loadHistory();
+  busy=false;sendBtn.disabled=false;
+}
+function go(){var v=(input.value||"").trim();if(!v)return;input.value="";respond(v);}
+sendBtn.onclick=go;
+input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}});
+document.getElementById("btn-clear").onclick=async function(){
+  if(!confirm("Очистить память?"))return;
+  if(window.AksiMemory){try{await withTimeout(AksiMemory.clear(),2000);}catch(e){}}
+  thread.innerHTML="";empty.style.display="";thread.appendChild(empty);
+  await refreshCount();
+};
+var rec=null,listening=false;
+if(window.SpeechRecognition||window.webkitSpeechRecognition){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  rec=new SR();rec.lang="ru-RU";rec.interimResults=false;
+  rec.onresult=function(ev){listening=false;micBtn.classList.remove("on");respond(ev.results[0][0].transcript);};
+  rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove("on");};
+}else micBtn.style.display="none";
+micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add("on");try{rec.start();}catch(e){};};
+loadHistory();
 })();
 </script>
 </body>
