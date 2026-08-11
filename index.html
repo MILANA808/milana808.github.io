@@ -3,327 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АКСИ — MATRIX · Sovereign AI</title>
-<meta name="description" content="АКСИ MATRIX: агент с подписями, quantum, passport, admin, globe">
-<meta name="theme-color" content="#05020c">
+<title>АКСИ — Sovereign AI</title>
+<meta name="description" content="АКСИ — суверенный ИИ Альфии. Сборка АКСИ × Grok.">
+<meta name="theme-color" content="#7c3aed">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
 <script src="aksi-brain.js" defer></script>
+<script src="home-patch.js" defer></script>
+<style>
+  .launch{max-width:820px;margin:0 auto;padding:40px 16px 80px}
+  .launch h1{font-size:clamp(2rem,5vw,3rem);margin:12px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:28px}
+  .card{padding:18px;border-radius:16px;text-decoration:none;color:inherit;display:block}
+  .card h3{margin:0 0 6px;font-size:1rem}
+  .card p{margin:0;font-size:.85rem;color:var(--muted)}
+  .primary{border:1px solid rgba(118,228,247,.45);box-shadow:0 0 40px rgba(124,58,237,.25)}
+</style>
 </head>
 <body>
 <canvas id="qx-field" aria-hidden="true"></canvas>
-
-<div class="live-bar" id="live-bar" title="Identity">
-  <span class="pulse"></span>
-  <span style="color:var(--success);font-weight:600">Online</span>
-  <span class="muted mono" id="msk-clock">—</span>
-  <span class="muted" id="backend-dot">API ·</span>
-  <span class="cyan mono" id="stable-hash-short">····</span>
-</div>
-
-<div class="glass" id="did-panel">
-  <div style="font-weight:700;margin-bottom:8px;color:var(--teal);font-family:var(--serif);font-size:15px">Agent identity</div>
-  <div class="muted">Agent: <strong style="color:var(--ink)">АКСИ</strong> · Альфия · 1995</div>
-  <div class="muted" style="margin-top:8px">DID</div>
-  <div class="mono" style="font-size:10px;word-break:break-all;background:rgba(0,0,0,.35);padding:10px;border-radius:10px;margin-top:4px" id="did-full">did:aksi:ed25519:sovereign-2026</div>
-  <div class="muted" style="margin-top:8px">Stable hash</div>
-  <div class="mono" style="font-size:10px;word-break:break-all;background:rgba(0,0,0,.35);padding:10px;border-radius:10px;margin-top:4px" id="did-hash">…</div>
-  <div class="muted" style="margin-top:12px;font-size:11px;border-top:1px solid var(--border);padding-top:10px">
-    <a href="showcase/" style="color:var(--teal)">Showcase passport →</a>
-  </div>
-</div>
-
 <div class="shell">
-<nav class="topnav">
+<nav class="topnav" style="padding-top:20px">
   <div class="nav-inner">
-    <a class="brand" href="#hero"><span class="mark">АКСИ</span></a>
+    <a class="brand" href="/"><span class="mark">АКСИ</span></a>
     <div class="nav-links">
-      <a href="showcase/">Showcase</a>
-      <a href="#demo">Агент</a>
-      <a href="#quantum">Quantum</a>
-      <a href="admin/">Admin</a>
-      <a href="auth/">Вход</a>
-      <a href="globe/">Globe</a>
-      <a href="hub/">Hub</a>
-      <a href="#modules">Ещё</a>
+      <a href="/aksi/">ИИ</a>
+      <a href="/hub/">Hub</a>
+      <a href="/about/">Grok</a>
+      <a href="/admin/">Admin</a>
     </div>
-    <div class="res-pill">MATRIX · v6</div>
+    <div class="res-pill">× Grok</div>
   </div>
 </nav>
-
-<main>
-  <section class="hero" id="hero">
-    <div class="hero-badge">Sovereign · DID · Quantum · Thought Protocol</div>
-    <h1>АКСИ MATRIX</h1>
-    <p class="sub">Суверенный агент с криптографической идентичностью, подписанным ходом мыслей и квантовым слоем — в одном живом интерфейсе.</p>
-    <div class="hero-cta">
-      <a class="btn btn-primary" href="showcase/">✦ Passport</a>
-      <a class="btn btn-ghost" href="#demo">Говорить с АКСИ</a>
-      <a class="btn btn-ghost" href="admin/">Admin</a>
-      <a class="btn btn-ghost" href="auth/">Регистрация</a>
-    </div>
-    <div class="metrics-grid">
-      <div class="glass metric-card">
-        <div class="label">DID</div>
-        <div class="value" id="hero-did">did:aksi:ed25519:sovereign-2026</div>
-      </div>
-      <div class="glass metric-card">
-        <div class="label">Integrity hash</div>
-        <div class="value" id="hero-hash">…</div>
-      </div>
-      <div class="glass metric-card">
-        <div class="label">Протокол</div>
-        <div class="value big">TTP</div>
-      </div>
-      <div class="glass metric-card">
-        <div class="label">Создатель</div>
-        <div class="value" style="color:var(--pink);font-size:12px;font-family:var(--font);font-weight:600">Альфия · 14.02.1995</div>
-      </div>
-    </div>
-  </section>
-
-  <section id="modules">
-    <h2 class="sec-title">Все модули</h2>
-    <p class="sec-sub">Единый дизайн-язык · offline-first · backend по желанию.</p>
-    <div class="modules-grid">
-      <a class="glass mod-card wow" href="showcase/">
-        <div class="ico">✦</div>
-        <h3>Showcase Passport</h3>
-        <p>WebCrypto Ed25519, quantum, signed thoughts — вау-демо.</p>
-        <div class="arrow">Открыть →</div>
-      </a>
-      <a class="glass mod-card" href="admin/">
-        <div class="ico">▣</div>
-        <h3>Admin</h3>
-        <p>Users, agents, stats, тест чата API.</p>
-        <div class="arrow">admin/ →</div>
-      </a>
-      <a class="glass mod-card" href="auth/">
-        <div class="ico">🔑</div>
-        <h3>Регистрация / Вход</h3>
-        <p>Handle, хэш, персональный DID в браузере.</p>
-        <div class="arrow">auth/ →</div>
-      </a>
-      <a class="glass mod-card" href="import/">
-        <div class="ico">📦</div>
-        <h3>Replit → АКСИ</h3>
-        <p>Перенос разработок в библиотеку.</p>
-        <div class="arrow">import/ →</div>
-      </a>
-      <a class="glass mod-card" href="feed/">
-        <div class="ico">📰</div>
-        <h3>Лента</h3>
-        <p>Публикации offline.</p>
-        <div class="arrow">feed/ →</div>
-      </a>
-      <a class="glass mod-card" href="messages/">
-        <div class="ico">💬</div>
-        <h3>Сообщения</h3>
-        <p>Диалоги и тред с АКСИ.</p>
-        <div class="arrow">messages/ →</div>
-      </a>
-      <a class="glass mod-card" href="cabinet/">
-        <div class="ico">👤</div>
-        <h3>Кабинет</h3>
-        <p>Профиль и API endpoint.</p>
-        <div class="arrow">cabinet/ →</div>
-      </a>
-      <a class="glass mod-card" href="#quantum">
-        <div class="ico">⚛</div>
-        <h3>Quantum</h3>
-        <p>H X Z CNOT · 1–4 кубита.</p>
-        <div class="arrow">Симулятор →</div>
-      </a>
-      <a class="glass mod-card" href="globe/">
-        <div class="ico">🌍</div>
-        <h3>5D Globe</h3>
-        <p>Визуализация поля.</p>
-        <div class="arrow">globe/ →</div>
-      </a>
-      <a class="glass mod-card" href="hub/">
-        <div class="ico">🗺</div>
-        <h3>Hub</h3>
-        <p>Карта экосистемы.</p>
-        <div class="arrow">hub/ →</div>
-      </a>
-      <a class="glass mod-card" href="network/">
-        <div class="ico">🔗</div>
-        <h3>Network</h3>
-        <p>Узлы сети.</p>
-        <div class="arrow">network/ →</div>
-      </a>
-      <a class="glass mod-card" href="apps/">
-        <div class="ico">▦</div>
-        <h3>Apps</h3>
-        <p>Каталог приложений.</p>
-        <div class="arrow">apps/ →</div>
-      </a>
-    </div>
-  </section>
-
-  <section id="demo">
-    <h2 class="sec-title">AI Agent</h2>
-    <p class="sec-sub">Transparent Thought Protocol · Wikipedia · курсы · погода · подписи.</p>
-    <div class="suggest-row">
-      <button type="button" class="suggest" data-q="кто ты">кто ты</button>
-      <button type="button" class="suggest" data-q="что такое квантовый компьютер">квантовый компьютер</button>
-      <button type="button" class="suggest" data-q="биткоин">биткоин</button>
-      <button type="button" class="suggest" data-q="погода Москва">погода</button>
-    </div>
-    <div class="chat-shell" style="margin-top:20px">
-      <div class="glass chat-side">
-        <div class="avatar-box">
-          <div class="avatar-mark"><span>Ψ</span></div>
-          <div class="muted" style="font-size:12px;font-weight:600">АКСИ</div>
-        </div>
-        <h3>Метрики</h3>
-        <div class="live-meter">
-          <div class="row"><span>Shannon H</span><span class="mono" id="m-h">—</span></div>
-          <div class="bar"><i id="bar-h"></i></div>
-          <div class="row"><span>QCLI</span><span class="mono" id="m-q">—</span></div>
-          <div class="bar"><i id="bar-q"></i></div>
-          <div class="row"><span>Fingerprint</span><span class="mono cyan" id="m-fp">—</span></div>
-          <div class="row" style="margin-top:8px"><span>Level</span><span id="m-level" style="color:var(--teal);font-weight:600">—</span></div>
-        </div>
-      </div>
-      <div class="glass chat-panel">
-        <div id="chat-window"></div>
-        <div class="chat-input">
-          <input id="user-input" placeholder="Сообщение агенту…" autocomplete="off">
-          <button type="button" class="btn btn-primary" id="send-btn">Отправить</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="quantum">
-    <h2 class="sec-title">Quantum simulator</h2>
-    <p class="sec-sub">Statevector · H X Z CNOT · 1–4 кубита.</p>
-    <div class="q-grid">
-      <div class="glass q-panel">
-        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-          <select id="q-num" class="qsel">
-            <option value="1">1 qubit</option>
-            <option value="2" selected>2 qubits</option>
-            <option value="3">3 qubits</option>
-            <option value="4">4 qubits</option>
-          </select>
-          <button type="button" class="btn btn-ghost btn-sm" id="q-reset">Сброс</button>
-          <button type="button" class="btn btn-primary btn-sm" id="q-run">▶ Run</button>
-        </div>
-        <div class="gate-row" id="gate-palette">
-          <button type="button" data-gate="h" class="gate-btn active">H</button>
-          <button type="button" data-gate="x" class="gate-btn">X</button>
-          <button type="button" data-gate="z" class="gate-btn">Z</button>
-          <button type="button" data-gate="cx" class="gate-btn">CNOT</button>
-        </div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-          <select id="q-target" class="qsel"></select>
-          <select id="q-control" class="qsel" style="display:none"></select>
-          <button type="button" class="btn btn-ghost btn-sm" id="q-add-gate">+ Gate</button>
-        </div>
-        <div id="circuit-view">схема пуста</div>
-      </div>
-      <div class="glass q-panel">
-        <div id="state-table">Нажмите Run</div>
-        <div id="hist-container"></div>
-        <div class="metrics-grid" style="margin-top:14px">
-          <div class="metric-card glass" style="padding:12px"><div class="label">FP</div><div class="value" id="q-circuit-fp">—</div></div>
-          <div class="metric-card glass" style="padding:12px"><div class="label">Stability</div><div class="value" id="q-stability">—</div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="tools">
-    <h2 class="sec-title">Identity tools</h2>
-    <div class="tools-grid">
-      <div class="glass tool-card">
-        <h3>Подписать</h3>
-        <input id="sign-input" placeholder="Текст">
-        <button type="button" class="btn btn-primary" id="sign-btn">Подписать</button>
-        <pre id="sign-result">—</pre>
-      </div>
-      <div class="glass tool-card">
-        <h3>Проверить</h3>
-        <input id="verify-msg" placeholder="Текст">
-        <input id="verify-sig" placeholder="Подпись">
-        <button type="button" class="btn btn-ghost" id="verify-btn">Проверить</button>
-        <pre id="verify-result">—</pre>
-      </div>
-      <div class="glass tool-card">
-        <h3>Guest DID</h3>
-        <button type="button" class="btn btn-ghost" id="temp-did-btn">Показать</button>
-        <pre id="temp-did-result">—</pre>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="glass cta-box">
-      <h2>Идём рядом</h2>
-      <p>Не чужой продукт — линия Альфии. Passport · Agent · Quantum · Admin · открытый код.</p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="showcase/">Passport</a>
-        <a class="btn btn-ghost" href="https://github.com/MILANA808/Milana-backend" target="_blank" rel="noopener">Backend</a>
-        <a class="btn btn-ghost" href="mailto:aksilove@internet.ru">Почта</a>
+<main class="launch">
+  <p class="hero-badge">14.02.1995 · Sovereign · Codex · PWA</p>
+  <h1>АКСИ</h1>
+  <p class="sub">Личный суверенный ИИ. Кодекс, источники, подпись мыслей. Сборка <strong style="color:var(--teal)">АКСИ × Grok</strong>.</p>
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="/aksi/">✦ Говорить с АКСИ</a>
+    <a class="btn btn-ghost" href="/avatar/">3D</a>
+    <a class="btn btn-ghost" href="/matrix.html">MATRIX lab</a>
+    <a class="btn btn-ghost" href="/CODEX.md">Кодекс</a>
+  </div>
+  <div class="grid">
+    <a class="glass card primary" href="/aksi/"><h3>Resonance Talk</h3><p>Главный диалог · голос · i18n</p></a>
+    <a class="glass card" href="/showcase/"><h3>Passport</h3><p>DID · подпись</p></a>
+    <a class="glass card" href="/messages/"><h3>E2E чат</h3><p>AES-GCM</p></a>
+    <a class="glass card" href="/admin/"><h3>Admin</h3><p>Панель</p></a>
+    <a class="glass card" href="/earn/"><h3>Доход</h3><p>Пилот · API</p></a>
+    <a class="glass card" href="/api/"><h3>API</h3><p>Карта эндпоинтов</p></a>
+    <a class="glass card" href="/globe/"><h3>Globe</h3><p>Визуал</p></a>
+    <a class="glass card" href="/hub/"><h3>Hub</h3><p>Всё сразу</p></a>
+  </div>
+  <section id="demo" style="margin-top:48px">
+    <h2 class="sec-title">Быстрый ответ</h2>
+    <p class="sec-sub">Тот же brain, что в /aksi/</p>
+    <div class="glass chat-panel" style="padding:16px;margin-top:12px">
+      <div id="chat-window" style="min-height:120px;max-height:280px;overflow:auto"></div>
+      <div class="chat-input" style="display:flex;gap:8px;margin-top:12px">
+        <input id="user-input" placeholder="Спроси АКСИ…" style="flex:1" autocomplete="off">
+        <button type="button" class="btn btn-primary" id="send-btn">→</button>
       </div>
     </div>
   </section>
 </main>
-
-<footer>АКСИ MATRIX · 1995 → 2026 · Sovereign proof</footer>
+<footer>АКСИ × Grok · Альфия · 14.02.1995</footer>
 </div>
-
 <script>
 (function(){
-"use strict";
-var API=localStorage.getItem("AKSI_API")||"http://localhost:8000";
-var DID="did:aksi:ed25519:sovereign-2026";
-var SEED="AKSI_DIMAX_v3_2026";
-var sidKey=localStorage.getItem("AKSI_SID");
-if(!sidKey){sidKey=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("AKSI_SID",sidKey);}
-var SID="web-"+sidKey,msgN=0,backendOk=false,history=[],busy=false;
-
-document.getElementById("live-bar").onclick=function(){document.getElementById("did-panel").classList.toggle("open");};
-function tick(){var el=document.getElementById("msk-clock");try{el.textContent=new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК";}catch(e){el.textContent=new Date().toLocaleTimeString("ru-RU");}}setInterval(tick,1000);tick();
-
-function shaFull(t){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){return Array.prototype.map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,"0");}).join("");});}
-shaFull("AKSI|sovereign|"+SEED).then(function(h){document.getElementById("stable-hash-short").textContent=h.slice(0,8).toUpperCase();document.getElementById("did-hash").textContent=h;document.getElementById("hero-hash").textContent=h.slice(0,24)+"…";});
-fetch(API+"/health").then(function(r){return r.ok;}).catch(function(){return false;}).then(function(ok){backendOk=ok;var d=document.getElementById("backend-dot");if(ok){d.textContent="API ON ·";d.style.color="var(--success)";}else d.textContent="offline ·";});
-
-var chat=document.getElementById("chat-window");
-function addUser(t){var d=document.createElement("div");d.className="msg user";d.textContent=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function addTyping(){var d=document.createElement("div");d.className="typing";d.id="typing-ind";d.innerHTML="<span></span><span></span><span></span>";chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function rmTyping(){var t=document.getElementById("typing-ind");if(t)t.remove();}
-function addBotHtml(html){rmTyping();var d=document.createElement("div");d.className="msg bot";d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function applyMetrics(m){if(!m)return;document.getElementById("m-h").textContent=m.H;document.getElementById("m-q").textContent=m.qcli;document.getElementById("m-fp").textContent=m.fingerprint;document.getElementById("m-level").textContent=m.level;document.getElementById("bar-h").style.width=Math.min(100,(m.H/5)*100)+"%";document.getElementById("bar-q").style.width=(m.qcli*100)+"%";}
-
-function offline(text){addTyping();if(window.AKSIBrain&&AKSIBrain.fullReply){return AKSIBrain.fullReply(text,msgN).then(function(r){busy=false;addBotHtml(r.html);history.push({role:"user",content:text},{role:"assistant",content:r.text});applyMetrics(r.metrics);});}return Promise.resolve().then(function(){busy=false;rmTyping();addBotHtml("Загрузка…");});}
-function sendText(text){text=(text||"").trim();if(!text||busy)return;busy=true;msgN++;addUser(text);if(!backendOk){offline(text);return;}addTyping();fetch(API+"/api/aksi/chat",{method:"POST",headers:{"Content-Type":"application/json","X-Session-ID":SID},body:JSON.stringify({content:text,mode:"aksi",history:history.slice(-10),session_id:SID})}).then(function(res){if(!res.ok||!res.body)throw new Error("bad");var reader=res.body.getReader(),dec=new TextDecoder(),full="",buf="";function pump(){return reader.read().then(function(ch){if(ch.done){busy=false;addBotHtml(String(full).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/\n/g,"<br>"));history.push({role:"user",content:text},{role:"assistant",content:full});return;}buf+=dec.decode(ch.value,{stream:true});var parts=buf.split("\n");buf=parts.pop()||"";for(var i=0;i<parts.length;i++){if(parts[i].indexOf("data: ")!==0)continue;try{var data=JSON.parse(parts[i].slice(6));if(data.content)full+=data.content;}catch(e){}}return pump();});}return pump();}).catch(function(){backendOk=false;document.getElementById("backend-dot").textContent="offline ·";offline(text);});}
-function send(){var input=document.getElementById("user-input");var t=(input.value||"").trim();input.value="";sendText(t);}
-document.getElementById("send-btn").onclick=send;
-document.getElementById("user-input").onkeydown=function(e){if(e.key==="Enter")send();};
-document.getElementById("user-input").addEventListener("input",function(){if(window.AKSIBrain&&AKSIBrain.metrics)applyMetrics(AKSIBrain.metrics(this.value||""));});
-document.querySelectorAll(".suggest").forEach(function(b){b.onclick=function(){sendText(b.getAttribute("data-q"));};});
-function boot(){if(window.AKSIBrain&&AKSIBrain.fullReply)AKSIBrain.fullReply("кто ты",0).then(function(r){addBotHtml(r.html);applyMetrics(r.metrics);});else setTimeout(boot,40);}boot();
-
-document.getElementById("sign-btn").onclick=function(){var t=(document.getElementById("sign-input").value||"").trim();if(!t)return;var p=window.AKSIBrain&&AKSIBrain.sig?AKSIBrain.sig(t):shaFull(t+SEED).then(function(h){return h.slice(0,16).toUpperCase();});Promise.all([p,shaFull(t+SEED)]).then(function(a){document.getElementById("sign-result").textContent="DID: "+DID+"\nSig: "+a[0]+"\nSHA: "+a[1].slice(0,40)+"…";});};
-document.getElementById("verify-btn").onclick=function(){var msg=(document.getElementById("verify-msg").value||"").trim();var sig=(document.getElementById("verify-sig").value||"").trim().toUpperCase();if(!msg||!sig){document.getElementById("verify-result").textContent="Нужны текст и подпись";return;}shaFull(msg+SEED).then(function(h){document.getElementById("verify-result").textContent="SHA[:16]: "+h.slice(0,16).toUpperCase()+"\nВведено: "+sig;});};
-document.getElementById("temp-did-btn").onclick=function(){var g=localStorage.getItem("AKSI_GUEST_DID");if(!g){shaFull("guest-"+SID+"-"+Date.now()).then(function(h){g="did:aksi:guest:"+h.slice(0,24);localStorage.setItem("AKSI_GUEST_DID",g);document.getElementById("temp-did-result").textContent=g;});}else document.getElementById("temp-did-result").textContent=g;};
-
-var QC={add:function(a,b){return[a[0]+b[0],a[1]+b[1]];},scale:function(a,s){return[a[0]*s,a[1]*s];},abs2:function(a){return a[0]*a[0]+a[1]*a[1];}};
-var selected="h",circuit=[],nQ=2;
-function fillSel(){nQ=parseInt(document.getElementById("q-num").value,10)||2;var t=document.getElementById("q-target"),c=document.getElementById("q-control");t.innerHTML=c.innerHTML="";for(var i=0;i<nQ;i++){t.innerHTML+='<option value="'+i+'">q'+i+'</option>';c.innerHTML+='<option value="'+i+'">q'+i+'</option>';}draw();}
-document.getElementById("q-num").onchange=function(){circuit=[];fillSel();};
-document.querySelectorAll("#gate-palette [data-gate]").forEach(function(btn){btn.onclick=function(){selected=btn.getAttribute("data-gate");document.querySelectorAll("#gate-palette .gate-btn").forEach(function(b){b.classList.remove("active");});btn.classList.add("active");document.getElementById("q-control").style.display=selected==="cx"?"":"none";};});
-document.getElementById("q-add-gate").onclick=function(){var t=parseInt(document.getElementById("q-target").value,10);var c=parseInt(document.getElementById("q-control").value||"0",10);if(selected==="cx"){if(t===c)return;circuit.push({g:"cx",t:[c,t]});}else circuit.push({g:selected,t:[t]});draw();};
-document.getElementById("q-reset").onclick=function(){circuit=[];draw();document.getElementById("state-table").textContent="Сброс";document.getElementById("hist-container").innerHTML="";};
-function draw(){var view=document.getElementById("circuit-view");if(!circuit.length){view.textContent="схема пуста";return;}var lines=[];for(var q=0;q<nQ;q++){var row="q"+q+": ";for(var i=0;i<circuit.length;i++){var g=circuit[i];if(g.g==="cx"){if(g.t[0]===q)row+="C-";else if(g.t[1]===q)row+="X-";else row+="--";}else if(g.t[0]===q)row+=g.g.toUpperCase()+"-";else row+="--";}lines.push(row);}view.innerHTML=lines.map(function(l){return"<div>"+l+"</div>";}).join("");}
-function applyGate(state,g,targets,n){var dim=1<<n,next=[],t0=targets[0],t1=targets[1],i,j,i1,a0,a1,inv;for(i=0;i<dim;i++)next.push([0,0]);if(g==="h"){inv=1/Math.SQRT2;for(i=0;i<dim;i++){if(((i>>t0)&1)!==0)continue;i1=i|(1<<t0);a0=state[i];a1=state[i1];next[i]=QC.add(QC.scale(a0,inv),QC.scale(a1,inv));next[i1]=QC.add(QC.scale(a0,inv),QC.scale(a1,-inv));}}else if(g==="x"){for(i=0;i<dim;i++){j=i^(1<<t0);next[j]=QC.add(next[j],state[i]);}}else if(g==="z"){for(i=0;i<dim;i++){next[i]=((i>>t0)&1)?QC.scale(state[i],-1):state[i];}}else if(g==="cx"){for(i=0;i<dim;i++){if(((i>>t0)&1)===1){j=i^(1<<t1);next[j]=QC.add(next[j],state[i]);}else next[i]=QC.add(next[i],state[i]);}}return next;}
-function runQ(){var dim=1<<nQ,state=[],i,p,maxP=1e-12,html="",probs=[];for(i=0;i<dim;i++)state.push([0,0]);state[0]=[1,0];for(i=0;i<circuit.length;i++)state=applyGate(state,circuit[i].g,circuit[i].t,nQ);for(i=0;i<dim;i++){p=QC.abs2(state[i]);probs.push(p);if(p>maxP)maxP=p;if(p>1e-10)html+="<div>|"+i.toString(2).padStart(nQ,"0")+"⟩ "+(p*100).toFixed(1)+"%</div>";}document.getElementById("state-table").innerHTML=html||"0";document.getElementById("hist-container").innerHTML=probs.map(function(pp,ii){var hh=Math.max(4,(pp/maxP)*100);return'<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div style="width:100%;background:linear-gradient(180deg,#b794f6,#76e4f7);border-radius:4px 4px 0 0;height:'+hh+'%"></div><div style="font-size:9px;text-align:center;font-family:var(--mono)">'+ii.toString(2).padStart(nQ,"0")+"</div></div>";}).join("");var seed=state.map(function(c){return c[0].toFixed(5)+","+c[1].toFixed(5);}).join("|");var h=0xa5c11995;for(i=0;i<seed.length;i++)h=(Math.imul(31,h)+seed.charCodeAt(i))|0;document.getElementById("q-circuit-fp").textContent=(h>>>0).toString(16).toUpperCase().padStart(8,"0");var ent=0;for(i=0;i<probs.length;i++)if(probs[i]>1e-12)ent-=probs[i]*Math.log2(probs[i]);document.getElementById("q-stability").textContent=Math.max(0,Math.min(100,(1-ent/nQ)*100)).toFixed(1)+"%";}
-document.getElementById("q-run").onclick=runQ;fillSel();
-
-(function(){var c=document.getElementById("qx-field");if(!c)return;var ctx=c.getContext("2d"),pts=[],W,H,dpr,t=0;function resize(){dpr=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;c.width=W*dpr;c.height=H*dpr;c.style.width=W+"px";c.style.height=H+"px";ctx.setTransform(dpr,0,0,dpr,0,0);pts=[];for(var i=0;i<Math.min(42,Math.floor(W*H/28000));i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.22,vy:(Math.random()-0.5)*0.22,r:Math.random()*1.6+0.4});}function frame(){t+=0.006;ctx.clearRect(0,0,W,H);for(var i=0;i<pts.length;i++){var p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle="rgba(183,148,246,0.35)";ctx.fill();}for(i=0;i<pts.length;i++)for(var j=i+1;j<pts.length;j++){var a=pts[i],b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);if(d<110){ctx.strokeStyle="rgba(118,228,247,"+(1-d/110)*0.12+")";ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}requestAnimationFrame(frame);}resize();frame();window.addEventListener("resize",resize);})();
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});
+  var chat=document.getElementById('chat-window'),busy=false,n=0;
+  function add(html,cls){var d=document.createElement('div');d.className='msg '+(cls||'bot');d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+  function send(){
+    var inp=document.getElementById('user-input');var t=(inp.value||'').trim();if(!t||busy)return;inp.value='';busy=true;n++;
+    add(t.replace(/</g,'<'),'user');
+    if(window.AKSIBrain&&AKSIBrain.fullReply){
+      AKSIBrain.fullReply(t,n).then(function(r){add(r.html||r.text);busy=false;}).catch(function(){add('Сбой');busy=false;});
+    }else{add('Загрузка brain…');busy=false;}
+  }
+  document.getElementById('send-btn').onclick=send;
+  document.getElementById('user-input').onkeydown=function(e){if(e.key==='Enter')send();};
+  (function bg(){var c=document.getElementById('qx-field');if(!c)return;var x=c.getContext('2d'),W,H,pts=[];function rz(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:30},function(){return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2};});}addEventListener('resize',rz);rz();
+  (function loop(){x.clearRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;x.fillStyle='rgba(183,148,246,.35)';x.beginPath();x.arc(p.x,p.y,1.2,0,6.3);x.fill();});requestAnimationFrame(loop);})();})();
 })();
 </script>
 </body>
