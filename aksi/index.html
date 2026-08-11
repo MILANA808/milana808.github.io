@@ -4,7 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ</title>
-<meta name="theme-color" content="#03010a"/>
+<meta name="theme-color" content="#7c3aed"/>
+<meta name="description" content="АКСИ — суверенный ИИ. Сборка АКСИ × Grok"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
+<link rel="icon" href="/icon.svg" type="image/svg+xml"/>
 <style>
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
@@ -43,10 +46,10 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
 <canvas id="field"></canvas>
 <div class="ui">
   <div class="top">
-    <a href="../avatar/">3D</a>
+    <a href="../hub/">Hub</a>
     <span class="brand">АКСИ</span>
     <div class="langs">
-      <a href="../about/" style="margin-right:6px">о проекте</a>
+      <a href="../about/" style="margin-right:6px">Grok</a>
       <a href="../CODEX.md" style="margin-right:6px">Кодекс</a>
       <button type="button" data-lang="ru" class="on">RU</button>
       <button type="button" data-lang="en">EN</button>
@@ -60,11 +63,11 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
     <div class="answer" id="answer"></div>
     <div class="sig" id="sig"></div>
   </div>
-  <p class="hint">АКСИ × Grok · Кодекс · источники</p>
+  <p class="hint">АКСИ × Grok · PWA · источники</p>
   <div class="dock">
-    <button type="button" class="mic" id="mic" aria-label="mic">🎙</button>
+    <button type="button" class="mic" id="mic">🎙</button>
     <textarea id="input" rows="1" placeholder="Скажи АКСИ…" enterkeyhint="send"></textarea>
-    <button type="button" id="send" aria-label="send">↑</button>
+    <button type="button" id="send">↑</button>
   </div>
 </div>
 <script src="../i18n.js"></script>
@@ -74,21 +77,16 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
 <script src="../aksi-brain.js"></script>
 <script>
 (function(){
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
   var c=document.getElementById('field'),x=c.getContext('2d'),W,H,pts=[];
   function resize(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:32},function(){return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2};});}
   addEventListener('resize',resize);resize();
   (function loop(){x.clearRect(0,0,W,H);var g=x.createRadialGradient(W/2,H*.38,0,W/2,H*.4,H*.55);g.addColorStop(0,'rgba(76,29,149,.25)');g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;x.fillStyle='rgba(196,181,253,.35)';x.beginPath();x.arc(p.x,p.y,1.2,0,6.3);x.fill();});requestAnimationFrame(loop);})();
-
   if(window.AksiI18n){AksiI18n.setLang(AksiI18n.lang());AksiI18n.apply();}
   document.querySelectorAll('[data-lang]').forEach(function(b){
     b.classList.toggle('on',b.getAttribute('data-lang')===(localStorage.getItem('AKSI_LANG')||'ru'));
-    b.onclick=function(){
-      document.querySelectorAll('[data-lang]').forEach(function(x){x.classList.remove('on');});
-      b.classList.add('on');
-      if(window.AksiI18n){AksiI18n.setLang(b.getAttribute('data-lang'));AksiI18n.apply();}
-    };
+    b.onclick=function(){document.querySelectorAll('[data-lang]').forEach(function(x){x.classList.remove('on');});b.classList.add('on');if(window.AksiI18n){AksiI18n.setLang(b.getAttribute('data-lang'));AksiI18n.apply();};};
   });
-
   var orb=document.getElementById('orb'),status=document.getElementById('status'),answer=document.getElementById('answer');
   var thoughts=document.getElementById('thoughts'),sig=document.getElementById('sig'),input=document.getElementById('input');
   var sendBtn=document.getElementById('send'),micBtn=document.getElementById('mic'),busy=false,n=0;
@@ -97,87 +95,28 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
   async function hex16(s){if(!crypto.subtle)return'0';var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('').slice(0,16).toUpperCase();}
   function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
   function esc(s){return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');}
-
   async function resonate(text){
     if(!text||busy)return;busy=true;n++;sendBtn.disabled=true;
     answer.classList.remove('show');answer.innerHTML='';thoughts.innerHTML='';sig.textContent='';
     orb.classList.add('pulse');setStatus(t('listening'));await wait(200);
-
-    if(window.AksiCodex){
-      var gate=AksiCodex.check(text);
-      if(!gate.ok){
-        setStatus('Кодекс');
-        answer.innerHTML=esc(gate.message);
-        answer.classList.add('show');
-        sig.textContent='Codex v'+(AksiCodex.VERSION||'1');
-        orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;
-        return;
-      }
-    }
-
+    if(window.AksiCodex){var gate=AksiCodex.check(text);if(!gate.ok){setStatus('Кодекс');answer.innerHTML=esc(gate.message);answer.classList.add('show');sig.textContent='Codex';orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;return;}}
     setStatus(t('resonance'));
     var route=window.AksiMath?AksiMath.route(text):'general';
-    var steps=['codex ok','route '+route,'AKSI brain'];
-    for(var i=0;i<steps.length;i++){
-      var d=document.createElement('div');d.className='th';
-      d.textContent='['+(i+1)+'] '+steps[i]+' · '+(await hex16(steps[i]+text)).slice(0,8);
-      thoughts.appendChild(d);await wait(100);
-    }
-
+    var steps=['codex ok','route '+route,'brain'];
+    for(var i=0;i<steps.length;i++){var d=document.createElement('div');d.className='th';d.textContent='['+(i+1)+'] '+steps[i]+' · '+(await hex16(steps[i]+text)).slice(0,8);thoughts.appendChild(d);await wait(90);}
     var replyText='';
     try{
-      if(window.AKSIBrain&&AKSIBrain.fullReply){
-        var r=await AKSIBrain.fullReply(text,n);
-        replyText=r.text||'';
-        sig.textContent='🔏 '+(r.signature||'')+' · АКСИ×Grok';
-      } else if(window.AksiWorld){
-        var w=await AksiWorld.search(text);
-        replyText=(w&&w.text)?w.text:'Нет ответа.';
-        if(w&&w.sources&&w.sources.length)replyText+='\n\nИсточники: '+w.sources.join(' · ');
-        sig.textContent='🔏 world · АКСИ×Grok';
-      } else {
-        replyText='Я АКСИ. Модули грузятся — обнови страницу.';
-      }
-    }catch(e){
-      replyText='Сбой: '+(e&&e.message?e.message:'unknown');
-    }
-
-    setStatus('АКСИ');
-    answer.innerHTML=esc(replyText).replace(/\n/g,'<br>');
-    answer.classList.add('show');
-    orb.classList.remove('pulse');
-    busy=false;sendBtn.disabled=false;
-    try{
-      if(window.speechSynthesis&&replyText){
-        var u=new SpeechSynthesisUtterance(replyText.slice(0,400));
-        u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';
-        speechSynthesis.cancel();speechSynthesis.speak(u);
-      }
-    }catch(e){}
+      if(window.AKSIBrain&&AKSIBrain.fullReply){var r=await AKSIBrain.fullReply(text,n);replyText=r.text||'';sig.textContent='🔏 '+(r.signature||'')+' · АКСИ×Grok';}
+      else{replyText='Обновите страницу — brain не загрузился.';}
+    }catch(e){replyText='Сбой: '+(e.message||'error');}
+    setStatus('АКСИ');answer.innerHTML=esc(replyText).replace(/\n/g,'<br>');answer.classList.add('show');orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;
+    try{if(speechSynthesis&&replyText){var u=new SpeechSynthesisUtterance(replyText.slice(0,400));u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}
   }
-
   function go(){var v=(input.value||'').trim();if(!v)return;input.value='';resonate(v);}
-  sendBtn.onclick=go;
-  input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go();}});
-
+  sendBtn.onclick=go;input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go();}});
   var rec=null,listening=false;
-  if(window.SpeechRecognition||window.webkitSpeechRecognition){
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    rec=new SR();rec.lang='ru-RU';rec.interimResults=false;
-    rec.onresult=function(ev){
-      var tx=ev.results[0][0].transcript;
-      input.value=tx;listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');
-      resonate(tx);
-    };
-    rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');};
-  }else{micBtn.style.display='none';}
-  micBtn.onclick=function(){
-    if(!rec)return;
-    if(listening){rec.stop();return;}
-    listening=true;micBtn.classList.add('on');orb.classList.add('listening');
-    setStatus(t('speak'));
-    try{rec.start();}catch(e){}
-  };
+  if(window.SpeechRecognition||window.webkitSpeechRecognition){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;rec=new SR();rec.lang='ru-RU';rec.interimResults=false;rec.onresult=function(ev){var tx=ev.results[0][0].transcript;input.value=tx;listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');resonate(tx);};rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');};}else micBtn.style.display='none';
+  micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add('on');orb.classList.add('listening');setStatus(t('speak'));try{rec.start();}catch(e){};};
 })();
 </script>
 </body>
