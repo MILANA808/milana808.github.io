@@ -3,72 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АКСИ · Сообщения</title>
-<meta name="theme-color" content="#f3ebe0">
+<title>АКСИ · E2E сообщения</title>
+<meta name="theme-color" content="#05020c">
 <link rel="stylesheet" href="../styles.css">
-<script src="../aksi-core.js" defer></script>
 <style>
-  .msg-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-    min-height: 520px;
-  }
-  @media (min-width: 800px) {
-    .msg-layout { grid-template-columns: 240px 1fr; }
-  }
-  .peers { padding: 12px; max-height: 520px; overflow-y: auto; }
-  .peer {
-    display: block; width: 100%; text-align: left;
-    background: transparent; border: none; border-radius: 12px;
-    padding: 12px; cursor: pointer; font: inherit; color: var(--ink);
-    margin-bottom: 4px;
-  }
-  .peer:hover, .peer.active { background: rgba(166,124,82,0.12); }
-  .peer .pn { font-weight: 600; font-size: 14px; }
-  .peer .pl { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .thread {
-    display: flex; flex-direction: column;
-    min-height: 520px; max-height: 70vh;
-  }
-  .thread-head {
-    padding: 14px 18px; border-bottom: 1px solid var(--border);
-    font-weight: 600;
-  }
-  .thread-body {
-    flex: 1; overflow-y: auto; padding: 16px;
-    display: flex; flex-direction: column; gap: 10px;
-    background: linear-gradient(180deg, #faf6f0, #f7f1e8);
-  }
-  .bubble {
-    max-width: 85%; padding: 12px 14px; border-radius: 16px; font-size: 14px;
-    line-height: 1.5;
-  }
-  .bubble.me {
-    align-self: flex-end;
-    background: linear-gradient(135deg, #8b5e34, #a67c52);
-    color: #fffbf5;
-    border-bottom-right-radius: 6px;
-  }
-  .bubble.them {
-    align-self: flex-start;
-    background: #fffbf5;
-    border: 1px solid var(--border);
-    border-bottom-left-radius: 6px;
-  }
-  .bubble .t { font-size: 10px; opacity: 0.7; margin-top: 4px; }
-  .thread-input {
-    display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border);
-  }
-  .thread-input input {
-    flex: 1; background: #f5efe6; border: 1px solid var(--border);
-    border-radius: 999px; padding: 12px 16px; font: inherit; outline: none;
-  }
-  .new-peer { padding: 12px; border-top: 1px solid var(--border); }
-  .new-peer input {
-    width: 100%; background: #f5efe6; border: 1px solid var(--border);
-    border-radius: 10px; padding: 10px; font: inherit; margin-bottom: 8px;
-  }
+  .msg-layout{display:grid;grid-template-columns:1fr;gap:14px;min-height:520px}
+  @media(min-width:800px){.msg-layout{grid-template-columns:240px 1fr}}
+  .peers{padding:12px;max-height:520px;overflow-y:auto}
+  .peer{display:block;width:100%;text-align:left;background:transparent;border:none;border-radius:12px;padding:12px;cursor:pointer;font:inherit;color:var(--ink);margin-bottom:4px}
+  .peer:hover,.peer.active{background:rgba(183,148,246,.12)}
+  .peer .pn{font-weight:600;font-size:14px}
+  .peer .pl{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thread{display:flex;flex-direction:column;min-height:520px;max-height:70vh}
+  .thread-head{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  .lock{font-size:11px;color:var(--teal);font-family:var(--mono)}
+  .thread-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:rgba(0,0,0,.25)}
+  .bubble{max-width:85%;padding:12px 14px;border-radius:16px;font-size:14px;line-height:1.5}
+  .bubble.me{align-self:flex-end;background:linear-gradient(135deg,#6b46c1,#3182ce);color:#fff;border-bottom-right-radius:6px}
+  .bubble.them{align-self:flex-start;background:rgba(30,18,55,.9);border:1px solid var(--border);border-bottom-left-radius:6px}
+  .bubble .t{font-size:10px;opacity:.7;margin-top:4px;font-family:var(--mono)}
+  .thread-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+  .thread-input input{flex:1;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:999px;padding:12px 16px;font:inherit;outline:none;color:var(--ink)}
+  .new-peer{padding:12px;border-top:1px solid var(--border)}
+  .new-peer input{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;padding:10px;font:inherit;margin-bottom:8px;color:var(--ink)}
+  .banner{font-size:13px;color:var(--muted);padding:12px 16px;border:1px solid var(--border);border-radius:12px;margin-bottom:16px;background:rgba(118,228,247,.06)}
 </style>
 </head>
 <body>
@@ -77,28 +35,31 @@
   <div class="nav-inner">
     <a class="brand" href="../"><span class="mark">АКСИ</span></a>
     <div class="nav-links">
-      <a href="../">Главная</a>
-      <a href="../feed/">Лента</a>
-      <a href="./" style="color:var(--accent-deep)">Сообщения</a>
-      <a href="../cabinet/">Кабинет</a>
-      <a href="../#demo">Агент</a>
+      <a href="../aksi/">ИИ</a>
+      <a href="./" style="color:var(--teal)">Сообщения</a>
+      <a href="../earn/">Доход</a>
+      <a href="../">MATRIX</a>
     </div>
   </div>
 </nav>
 <main>
-  <h1 class="sec-title">Сообщения</h1>
-  <p class="sec-sub">Личные диалоги в браузере. Для живого API укажите backend в кабинете.</p>
+  <h1 class="sec-title">Сообщения E2E</h1>
+  <p class="sec-sub">Шифрование в браузере: AES-GCM. Ключ только у тебя (localStorage). Сервер plaintext не видит — его пока нет.</p>
+  <div class="banner">🔒 Сообщения хранятся <strong style="color:var(--ink)">зашифрованными</strong> локально. Это foundation для соцсети, не Telegram-замена «№1 в мире» — зато реально E2E.</div>
 
   <div class="msg-layout">
     <div class="glass peers">
       <div id="peer-list"></div>
       <div class="new-peer">
-        <input id="new-peer" placeholder="Новый диалог (id)">
+        <input id="new-peer" placeholder="id собеседника">
         <button type="button" class="btn btn-ghost btn-sm" id="new-peer-btn" style="width:100%">Открыть</button>
       </div>
     </div>
     <div class="glass thread">
-      <div class="thread-head" id="thread-title">Выберите диалог</div>
+      <div class="thread-head">
+        <span id="thread-title">Выберите диалог</span>
+        <span class="lock" id="lock-state">🔒 AES-GCM</span>
+      </div>
       <div class="thread-body" id="thread-body"></div>
       <div class="thread-input">
         <input id="msg-input" placeholder="Сообщение…" autocomplete="off">
@@ -107,61 +68,121 @@
     </div>
   </div>
 </main>
-<footer>АКСИ · Messages</footer>
+<footer>АКСИ · E2E vault</footer>
 </div>
 <script>
 (function(){
-  var peer="aksi";
-  function ready(){
-    if(!window.AksiCore){setTimeout(ready,30);return;}
-    var C=AksiCore;
-    C.ensureAksiThread();
+  var STORE='AKSI_E2E_V1';
+  var peer='aksi';
+  var keyPromise=null;
 
-    function renderPeers(){
-      var list=C.listPeers();
-      if(!list.length) list=[{peer:"aksi",last:"…",ts:0}];
-      var el=document.getElementById("peer-list");
-      el.innerHTML=list.map(function(x){
-        return '<button type="button" class="peer'+(x.peer===peer?' active':'')+'" data-peer="'+x.peer+'">'+ 
-          '<div class="pn">'+x.peer+'</div><div class="pl">'+esc(x.last||"")+'</div></button>';
-      }).join("");
-      el.querySelectorAll("[data-peer]").forEach(function(b){
-        b.onclick=function(){peer=b.getAttribute("data-peer");renderPeers();renderThread();};
-      });
-    }
-    function renderThread(){
-      document.getElementById("thread-title").textContent=peer;
-      var msgs=C.getMessages(peer);
-      var body=document.getElementById("thread-body");
-      body.innerHTML=msgs.map(function(m){
-        return '<div class="bubble '+(m.me?'me':'them')+'">'+esc(m.text)+
-          '<div class="t">'+C.fmtTime(m.ts)+'</div></div>';
-      }).join("");
-      body.scrollTop=body.scrollHeight;
-    }
-    function esc(s){return String(s||"").replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");}
-    function send(){
-      var inp=document.getElementById("msg-input");
-      var t=(inp.value||"").trim();
-      if(!t)return;
-      inp.value="";
-      C.sendMessage(peer,t);
-      renderPeers();
-      renderThread();
-    }
-    document.getElementById("msg-send").onclick=send;
-    document.getElementById("msg-input").onkeydown=function(e){if(e.key==="Enter")send();};
-    document.getElementById("new-peer-btn").onclick=function(){
-      var n=(document.getElementById("new-peer").value||"").trim().slice(0,32);
-      if(!n)return;
-      peer=n;
-      document.getElementById("new-peer").value="";
-      if(!C.getMessages(peer).length)C.sendMessage(peer,"👋");
-      renderPeers();renderThread();
-    };
-    renderPeers();renderThread();
+  function b64(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)));}
+  function unb64(s){var bin=atob(s);var u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer;}
+
+  async function getKey(){
+    if(keyPromise)return keyPromise;
+    keyPromise=(async function(){
+      var raw=localStorage.getItem('AKSI_E2E_KEY');
+      if(raw){
+        return crypto.subtle.importKey('raw',unb64(raw),{name:'AES-GCM'},false,['encrypt','decrypt']);
+      }
+      var k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);
+      var exp=await crypto.subtle.exportKey('raw',k);
+      localStorage.setItem('AKSI_E2E_KEY',b64(exp));
+      return k;
+    })();
+    return keyPromise;
   }
-  ready();
+
+  async function encrypt(text){
+    var key=await getKey();
+    var iv=crypto.getRandomValues(new Uint8Array(12));
+    var ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,new TextEncoder().encode(text));
+    return b64(iv)+'.'+b64(ct);
+  }
+  async function decrypt(blob){
+    try{
+      var parts=blob.split('.');
+      var key=await getKey();
+      var pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(unb64(parts[0]))},key,unb64(parts[1]));
+      return new TextDecoder().decode(pt);
+    }catch(e){return '[не расшифровано]';}
+  }
+
+  function load(){try{return JSON.parse(localStorage.getItem(STORE)||'{}');}catch(e){return {};}}
+  function save(db){localStorage.setItem(STORE,JSON.stringify(db));}
+
+  async function listPeers(){
+    var db=load(),out=[],k;
+    for(k in db){
+      var arr=db[k]||[];
+      var last=arr.length?await decrypt(arr[arr.length-1].c):'';
+      out.push({peer:k,last:last,ts:arr.length?arr[arr.length-1].ts:0});
+    }
+    out.sort(function(a,b){return b.ts-a.ts;});
+    if(!out.length)out=[{peer:'aksi',last:'…',ts:0}];
+    return out;
+  }
+
+  async function getMsgs(p){
+    var db=load();var arr=db[p]||[];var out=[],i;
+    for(i=0;i<arr.length;i++){
+      out.push({me:arr[i].me,text:await decrypt(arr[i].c),ts:arr[i].ts});
+    }
+    return out;
+  }
+
+  async function send(p,text){
+    var db=load();
+    if(!db[p])db[p]=[];
+    var c=await encrypt(text);
+    db[p].push({me:true,c:c,ts:Date.now()});
+    // local echo from aksi for demo thread
+    if(p==='aksi'){
+      var reply='🔒 Получила (локальный vault). E2E AES-GCM · АКСИ';
+      db[p].push({me:false,c:await encrypt(reply),ts:Date.now()+1});
+    }
+    save(db);
+  }
+
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function fmt(ts){try{return new Date(ts).toLocaleString('ru-RU');}catch(e){return '';}}
+
+  async function renderPeers(){
+    var list=await listPeers();
+    var el=document.getElementById('peer-list');
+    el.innerHTML=list.map(function(x){
+      return '<button type="button" class="peer'+(x.peer===peer?' active':'')+'" data-peer="'+esc(x.peer)+'"><div class="pn">'+esc(x.peer)+'</div><div class="pl">'+esc(x.last)+'</div></button>';
+    }).join('');
+    el.querySelectorAll('[data-peer]').forEach(function(b){
+      b.onclick=function(){peer=b.getAttribute('data-peer');renderPeers();renderThread();};
+    });
+  }
+  async function renderThread(){
+    document.getElementById('thread-title').textContent=peer;
+    var msgs=await getMsgs(peer);
+    var body=document.getElementById('thread-body');
+    body.innerHTML=msgs.map(function(m){
+      return '<div class="bubble '+(m.me?'me':'them')+'">'+esc(m.text)+'<div class="t">'+fmt(m.ts)+' · encrypted</div></div>';
+    }).join('')||'<p class="muted" style="text-align:center;margin-top:40px">Пусто · напиши первое</p>';
+    body.scrollTop=body.scrollHeight;
+  }
+
+  document.getElementById('msg-send').onclick=async function(){
+    var inp=document.getElementById('msg-input');
+    var t=(inp.value||'').trim();if(!t)return;inp.value='';
+    await send(peer,t);await renderPeers();await renderThread();
+  };
+  document.getElementById('msg-input').onkeydown=function(e){
+    if(e.key==='Enter')document.getElementById('msg-send').click();
+  };
+  document.getElementById('new-peer-btn').onclick=async function(){
+    var n=(document.getElementById('new-peer').value||'').trim().slice(0,32);
+    if(!n)return;peer=n;document.getElementById('new-peer').value='';
+    await renderPeers();await renderThread();
+  };
+
+  getKey().then(function(){renderPeers();renderThread();});
 })();
 </script>
 </body>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Доход</title>
+<meta name="theme-color" content="#05020c"/>
+<link rel="stylesheet" href="../styles.css"/>
+</head>
+<body>
+<div class="shell">
+<nav class="topnav" style="padding-top:24px">
+  <div class="nav-inner">
+    <a class="brand" href="../"><span class="mark">АКСИ</span></a>
+    <div class="nav-links">
+      <a href="../aksi/">ИИ</a>
+      <a href="../messages/">Сообщения</a>
+      <a href="./">Доход</a>
+    </div>
+  </div>
+</nav>
+<main style="max-width:720px">
+  <h1 class="sec-title">Как платформа приносит доход</h1>
+  <p class="sec-sub">Честная модель. Без «крипто-чуда» и без обещаний миллионов за ночь.</p>
+
+  <div class="glass" style="padding:22px;margin-bottom:16px">
+    <h3 style="margin:0 0 10px;color:var(--teal)">1. Enterprise / пилот</h3>
+    <p class="muted" style="margin:0;line-height:1.55">Лицензия АКСИ-агента для компаний: DID, audit-лог, on-prem. Контакт: <strong style="color:var(--ink)">aksilove@internet.ru</strong></p>
+  </div>
+  <div class="glass" style="padding:22px;margin-bottom:16px">
+    <h3 style="margin:0 0 10px;color:var(--teal)">2. Поддержка / донат</h3>
+    <p class="muted" style="margin:0 0 12px;line-height:1.55">Кто пользуется публичной MATRIX — может поддержать развитие.</p>
+    <label class="muted" style="font-size:12px">Ссылка на оплату (CloudTips / Boosty / свой URL)</label>
+    <input id="pay-url" placeholder="https://…" style="width:100%;margin:8px 0;padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(0,0,0,.35);color:var(--ink);font:inherit"/>
+    <button type="button" class="btn btn-primary" id="save-pay">Сохранить на сайте (local)</button>
+    <p id="pay-preview" class="muted" style="margin-top:12px;font-size:13px"></p>
+  </div>
+  <div class="glass" style="padding:22px;margin-bottom:16px">
+    <h3 style="margin:0 0 10px;color:var(--teal)">3. API-доступ</h3>
+    <p class="muted" style="margin:0;line-height:1.55">Платный backend (твой сервер): ключи API, лимиты, white-label агент. Включается когда поднимешь Milana-backend в проде.</p>
+  </div>
+  <div class="glass" style="padding:22px;margin-bottom:16px">
+    <h3 style="margin:0 0 10px;color:var(--teal)">4. Что не делаем</h3>
+    <p class="muted" style="margin:0;line-height:1.55">Не продаём «токены АКСИ» из воздуха. Не обещаем пассивный доход от кликов. Доход = ценность + договор + поддержка.</p>
+  </div>
+
+  <div class="glass cta-box">
+    <h2>Быстрый контакт</h2>
+    <p>Письмо с темой «АКСИ pilot»</p>
+    <a class="btn btn-primary" href="mailto:aksilove@internet.ru?subject=AKSI%20pilot">aksilove@internet.ru</a>
+  </div>
+</main>
+<footer>АКСИ · earn</footer>
+</div>
+<script>
+(function(){
+  var inp=document.getElementById('pay-url');
+  var prev=document.getElementById('pay-preview');
+  inp.value=localStorage.getItem('AKSI_PAY_URL')||'';
+  function show(){
+    var u=(inp.value||'').trim();
+    if(u) prev.innerHTML='Кнопка поддержки: <a href="'+u.replace(/"/g,'')+'" target="_blank" rel="noopener" style="color:var(--teal)">Оплатить / поддержать</a>';
+    else prev.textContent='Ссылка не задана — вставь свой URL оплаты.';
+  }
+  show();
+  document.getElementById('save-pay').onclick=function(){
+    localStorage.setItem('AKSI_PAY_URL',(inp.value||'').trim());
+    show();
+  };
+})();
+</script>
+</body>
+</html>
