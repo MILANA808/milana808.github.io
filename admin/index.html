@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Админ</title>
+<style>
+:root{--bg:#0b0614;--card:rgba(40,20,60,.55);--line:rgba(180,120,255,.25);--tx:#efe8ff;--mut:#a898c8;--acc:#c4a0ff;--ok:#6dffa8;--err:#ff8aa0}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:radial-gradient(1200px 600px at 20% -10%,#3a1a5c 0%,var(--bg) 55%);color:var(--tx);min-height:100vh}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+h1{margin:0;font-size:1.15rem;font-weight:600;letter-spacing:.04em}a{color:var(--acc)}
+.wrap{max-width:1100px;margin:0 auto;padding:20px;display:grid;gap:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:800px){.row{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;backdrop-filter:blur(10px)}
+.card h2{margin:0 0 12px;font-size:.95rem;color:var(--acc);font-weight:600}
+label{display:block;font-size:.75rem;color:var(--mut);margin-bottom:4px}
+input,textarea,select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--tx);margin-bottom:10px}
+button{cursor:pointer;border:1px solid var(--line);background:linear-gradient(135deg,#5a2d8a,#3a1858);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600}
+button.sec{background:transparent}button:disabled{opacity:.5}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.7rem;border:1px solid var(--line);color:var(--mut)}
+.pill.ok{color:var(--ok);border-color:rgba(109,255,168,.4)}.pill.err{color:var(--err)}
+pre{white-space:pre-wrap;word-break:break-word;font-size:.78rem;background:rgba(0,0,0,.35);padding:12px;border-radius:10px;max-height:280px;overflow:auto;margin:0}
+table{width:100%;border-collapse:collapse;font-size:.8rem}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chat-log{min-height:120px}
+</style>
+</head>
+<body>
+<header>
+  <h1>АКСИ · Админ-панель</h1>
+  <div>
+    <span id="status" class="pill">API…</span>
+    <a href="/" style="margin-left:12px">← MATRIX</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <h2>Подключение к backend</h2>
+    <label>AKSI_API (Milana-backend)</label>
+    <input id="api" placeholder="http://localhost:8000"/>
+    <label>Admin token (X-Admin-Token)</label>
+    <input id="token" type="password" placeholder="aksi-admin-dev"/>
+    <div class="actions">
+      <button type="button" id="btn-save">Сохранить</button>
+      <button type="button" class="sec" id="btn-ping">Проверить /health</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>Identity</h2>
+      <div class="actions">
+        <button type="button" id="btn-id">GET /api/identity</button>
+        <button type="button" class="sec" id="btn-proof">Proof</button>
+      </div>
+      <pre id="out-id">—</pre>
+    </div>
+    <div class="card">
+      <h2>Система / stats</h2>
+      <div class="actions">
+        <button type="button" id="btn-stats">Admin stats</button>
+        <button type="button" class="sec" id="btn-sys">System</button>
+      </div>
+      <pre id="out-stats">—</pre>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>Пользователи</h2>
+      <button type="button" id="btn-users">Загрузить</button>
+      <div id="users-tbl" style="margin-top:10px;overflow:auto"></div>
+    </div>
+    <div class="card">
+      <h2>Агенты</h2>
+      <button type="button" id="btn-agents">Загрузить</button>
+      <div id="agents-tbl" style="margin-top:10px;overflow:auto"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Тест чата АКСИ</h2>
+    <label>Сообщение</label>
+    <textarea id="msg" rows="2" placeholder="кто ты"></textarea>
+    <div class="actions">
+      <button type="button" id="btn-chat">Отправить /api/chat</button>
+    </div>
+    <pre id="out-chat" class="chat-log">—</pre>
+  </div>
+
+  <div class="card">
+    <h2>Справка</h2>
+    <p style="margin:0;color:var(--mut);font-size:.85rem;line-height:1.5">
+      Backend: репозиторий <code>MILANA808/Milana-backend</code> v0.4+ ·
+      <code>uvicorn main:app --port 8000</code> ·
+      Админ-токен по умолчанию <code>aksi-admin-dev</code> (смени в проде через <code>AKSI_ADMIN_TOKEN</code>).<br/>
+      Это UI к API, не React-Admin monorepo. Social/E2E/PG — следующие фазы.
+    </p>
+  </div>
+</div>
+<script>
+(function(){
+  var apiEl=document.getElementById('api');
+  var tokEl=document.getElementById('token');
+  var statusEl=document.getElementById('status');
+  apiEl.value=localStorage.getItem('AKSI_API')||'http://localhost:8000';
+  tokEl.value=localStorage.getItem('AKSI_ADMIN_TOKEN')||'aksi-admin-dev';
+
+  function base(){ return (apiEl.value||'').replace(/\/$/,''); }
+  function headers(admin){
+    var h={'Content-Type':'application/json'};
+    if(admin) h['X-Admin-Token']=tokEl.value||'';
+    return h;
+  }
+  function setStatus(ok,text){
+    statusEl.className='pill '+(ok?'ok':'err');
+    statusEl.textContent=text;
+  }
+  async function jfetch(path, opts, admin){
+    var url=base()+path;
+    var o=Object.assign({headers:headers(!!admin)}, opts||{});
+    var r=await fetch(url,o);
+    var t=await r.text();
+    var data; try{ data=JSON.parse(t);}catch(e){ data={raw:t}; }
+    if(!r.ok) throw new Error((data&&data.detail)||r.status+' '+t.slice(0,120));
+    return data;
+  }
+  function show(id,obj){
+    document.getElementById(id).textContent=typeof obj==='string'?obj:JSON.stringify(obj,null,2);
+  }
+
+  document.getElementById('btn-save').onclick=function(){
+    localStorage.setItem('AKSI_API', apiEl.value.trim());
+    localStorage.setItem('AKSI_ADMIN_TOKEN', tokEl.value);
+    setStatus(true,'сохранено');
+  };
+  document.getElementById('btn-ping').onclick=async function(){
+    try{
+      var h=await jfetch('/health');
+      setStatus(true,'healthy · '+(h.version||''));
+      show('out-stats',h);
+    }catch(e){ setStatus(false,String(e.message||e)); }
+  };
+  document.getElementById('btn-id').onclick=async function(){
+    try{ show('out-id', await jfetch('/api/identity')); }
+    catch(e){ show('out-id', String(e.message||e)); }
+  };
+  document.getElementById('btn-proof').onclick=async function(){
+    try{ show('out-id', await jfetch('/api/identity/proof')); }
+    catch(e){ show('out-id', String(e.message||e)); }
+  };
+  document.getElementById('btn-stats').onclick=async function(){
+    try{ show('out-stats', await jfetch('/api/admin/stats',{},true)); }
+    catch(e){ show('out-stats', String(e.message||e)); }
+  };
+  document.getElementById('btn-sys').onclick=async function(){
+    try{ show('out-stats', await jfetch('/api/admin/system',{},true)); }
+    catch(e){ show('out-stats', String(e.message||e)); }
+  };
+  document.getElementById('btn-users').onclick=async function(){
+    try{
+      var d=await jfetch('/api/admin/users',{},true);
+      var users=d.users||[];
+      if(!users.length){ document.getElementById('users-tbl').innerHTML='<p style="color:var(--mut)">пусто</p>'; return; }
+      var html='<table><tr><th>user</th><th>did</th><th>active</th><th></th></tr>';
+      users.forEach(function(u){
+        html+='<tr><td>'+esc(u.username)+'</td><td style="font-size:.7rem">'+esc((u.did||'').slice(0,24))+'…</td><td>'+(u.is_active?'yes':'no')+'</td>';
+        html+='<td><button type="button" data-block="'+esc(u.id)+'">block</button></td></tr>';
+      });
+      html+='</table>';
+      document.getElementById('users-tbl').innerHTML=html;
+      document.querySelectorAll('[data-block]').forEach(function(b){
+        b.onclick=async function(){
+          try{
+            await jfetch('/api/admin/users/'+b.getAttribute('data-block')+'/block',{method:'POST',body:JSON.stringify({blocked:true})},true);
+            document.getElementById('btn-users').click();
+          }catch(e){ alert(e); }
+        };
+      });
+    }catch(e){ document.getElementById('users-tbl').textContent=String(e.message||e); }
+  };
+  document.getElementById('btn-agents').onclick=async function(){
+    try{
+      var d=await jfetch('/api/admin/agents',{},true);
+      var ag=d.agents||[];
+      if(!ag.length){ document.getElementById('agents-tbl').innerHTML='<p style="color:var(--mut)">нет агентов</p>'; return; }
+      var html='<table><tr><th>name</th><th>model</th><th>EQS</th></tr>';
+      ag.forEach(function(a){
+        html+='<tr><td>'+esc(a.name)+'</td><td>'+esc(a.model)+'</td><td>'+(a.reputation_score||'—')+'</td></tr>';
+      });
+      html+='</table>';
+      document.getElementById('agents-tbl').innerHTML=html;
+    }catch(e){ document.getElementById('agents-tbl').textContent=String(e.message||e); }
+  };
+  document.getElementById('btn-chat').onclick=async function(){
+    var msg=(document.getElementById('msg').value||'').trim()||'кто ты';
+    try{
+      var d=await jfetch('/api/chat',{method:'POST',body:JSON.stringify({message:msg})});
+      show('out-chat', d.answer||d);
+    }catch(e){ show('out-chat', String(e.message||e)); }
+  };
+  function esc(s){ return String(s==null?'' :s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];}); }
+  document.getElementById('btn-ping').click();
+})();
+</script>
+</body>
+</html>
