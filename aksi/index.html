@@ -4,119 +4,210 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ</title>
-<meta name="theme-color" content="#7c3aed"/>
-<meta name="description" content="АКСИ — суверенный ИИ. Сборка АКСИ × Grok"/>
-<link rel="manifest" href="/manifest.webmanifest"/>
+<meta name="theme-color" content="#0a0612"/>
+<meta name="description" content="АКСИ — суверенный ИИ"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
+<link rel="manifest" href="/manifest.webmanifest"/>
 <style>
+:root{
+  --bg:#0a0612;
+  --ink:#f4f0ff;
+  --muted:#9b92b0;
+  --line:rgba(255,255,255,.08);
+  --accent:#a78bfa;
+  --accent2:#38bdf8;
+  --card:rgba(255,255,255,.04);
+}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
-#field{position:fixed;inset:0;z-index:0}
-.ui{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;max-width:720px;margin:0 auto;padding:env(safe-area-inset-top,12px) 16px env(safe-area-inset-bottom,16px)}
-.top{display:flex;align-items:center;justify-content:space-between;padding:8px 0 4px;gap:8px;flex-wrap:wrap}
-.top a{color:#9b8ec4;text-decoration:none;font-size:12px}
-.brand{font-weight:700;letter-spacing:.2em;font-size:13px;color:#c4b5fd}
-.langs{display:flex;gap:4px;align-items:center}
-.langs button{background:transparent;border:1px solid rgba(167,139,250,.3);color:#a78bfa;border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer}
-.langs button.on{background:rgba(124,58,237,.35);color:#fff;border-color:#a78bfa}
-.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px 8px;min-height:0}
-.orb{width:min(42vw,180px);height:min(42vw,180px);border-radius:50%;background:radial-gradient(circle at 35% 30%,#e9d5ff 0%,#7c3aed 35%,#1e1b4b 70%,#03010a 100%);box-shadow:0 0 60px rgba(124,58,237,.45);position:relative;display:flex;align-items:center;justify-content:center;font-size:2.4rem;color:#fff}
-.orb.pulse{animation:orbPulse 1.2s ease}
-@keyframes orbPulse{0%,100%{transform:scale(1)}40%{transform:scale(1.06)}}
-.orb.listening{box-shadow:0 0 80px rgba(56,189,248,.5)}
-.rings{position:absolute;inset:-20px;border-radius:50%;border:1px solid rgba(196,181,253,.25);pointer-events:none;animation:ring 3s ease-out infinite}
-.rings:nth-child(2){inset:-40px;animation-delay:.4s;border-color:rgba(56,189,248,.2)}
-@keyframes ring{0%{opacity:.6;transform:scale(.92)}100%{opacity:0;transform:scale(1.15)}}
-.status{margin-top:28px;font-size:14px;color:#a78bfa;min-height:1.4em}
-.answer{margin-top:20px;max-width:100%;font-size:clamp(15px,3.8vw,18px);line-height:1.55;color:#ede9fe;opacity:0;transform:translateY(8px);transition:.45s;max-height:32vh;overflow-y:auto;text-align:left;width:100%}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:"SF Pro Text",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column;max-width:640px;margin:0 auto;padding:0 16px;min-height:100dvh}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 8px;flex-shrink:0}
+header a{color:var(--muted);text-decoration:none;font-size:13px;letter-spacing:.02em}
+header a:hover{color:var(--ink)}
+.logo{font-weight:600;letter-spacing:.28em;font-size:12px;color:var(--ink)}
+.langs{display:flex;gap:2px}
+.langs button{
+  background:transparent;border:none;color:var(--muted);font-size:11px;padding:6px 8px;
+  border-radius:8px;cursor:pointer;letter-spacing:.04em
+}
+.langs button.on{color:var(--ink);background:var(--card)}
+main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0;min-height:0;width:100%}
+.orb{
+  width:88px;height:88px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#f5f3ff 0%,#a78bfa 38%,#1e1b4b 72%,#0a0612 100%);
+  box-shadow:0 0 0 1px rgba(167,139,250,.25),0 12px 40px rgba(88,28,135,.35);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;font-weight:300;color:#fff;transition:transform .5s ease,box-shadow .5s
+}
+.orb.pulse{transform:scale(1.04);box-shadow:0 0 0 1px rgba(56,189,248,.4),0 16px 48px rgba(56,189,248,.2)}
+.status{margin-top:20px;font-size:13px;color:var(--muted);min-height:1.3em;letter-spacing:.01em}
+.thoughts{width:100%;margin-top:16px;max-height:20vh;overflow-y:auto}
+.th{
+  font-size:12px;color:var(--muted);padding:8px 12px;margin:4px 0;
+  border-left:2px solid var(--accent);background:var(--card);border-radius:0 10px 10px 0;
+  opacity:0;animation:fade .35s ease forwards
+}
+@keyframes fade{to{opacity:1}}
+.answer{
+  width:100%;margin-top:16px;font-size:15px;line-height:1.6;color:var(--ink);
+  text-align:left;max-height:36vh;overflow-y:auto;
+  opacity:0;transform:translateY(6px);transition:.4s ease
+}
 .answer.show{opacity:1;transform:none}
-.sig{font-size:11px;color:#6b7280;margin-top:10px;font-family:ui-monospace,monospace}
-.thoughts{width:100%;margin-top:12px;text-align:left}
-.th{font-size:12px;color:#9ca3af;padding:6px 10px;margin:4px 0;border-left:2px solid #7c3aed;background:rgba(124,58,237,.08);border-radius:0 8px 8px 0;opacity:0;animation:in .4s ease forwards}
-@keyframes in{to{opacity:1}}
-.dock{padding:10px 0 6px;display:flex;gap:8px;align-items:flex-end}
-.dock textarea{flex:1;resize:none;min-height:48px;border-radius:16px;border:1px solid rgba(167,139,250,.3);background:rgba(15,10,30,.85);color:#f5f3ff;padding:14px 16px;font:inherit;font-size:16px;outline:none}
-.dock button{width:52px;height:52px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-size:1.2rem;flex-shrink:0}
-.dock button.mic{background:rgba(30,20,50,.9);border:1px solid rgba(167,139,250,.35)}
-.dock button.mic.on{background:#0e7490}
-.hint{text-align:center;font-size:11px;color:#4b5563;padding-bottom:4px}
+.sig{font-size:10px;color:#6b6578;margin-top:12px;font-family:ui-monospace,monospace;letter-spacing:.03em}
+footer{flex-shrink:0;padding:8px 0 12px}
+.dock{
+  display:flex;gap:8px;align-items:flex-end;
+  padding:10px;border-radius:20px;background:var(--card);
+  border:1px solid var(--line);backdrop-filter:blur(16px)
+}
+.dock textarea{
+  flex:1;resize:none;min-height:44px;max-height:100px;border:none;background:transparent;
+  color:var(--ink);padding:10px 8px;font:inherit;font-size:16px;outline:none;line-height:1.4
+}
+.dock button{
+  width:44px;height:44px;border-radius:14px;border:none;cursor:pointer;
+  background:linear-gradient(145deg,#8b5cf6,#6366f1);color:#fff;font-size:1.1rem;
+  flex-shrink:0;display:grid;place-items:center
+}
+.dock button:disabled{opacity:.35}
+.dock button.mic{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.dock button.mic.on{border-color:var(--accent2);color:var(--accent2)}
 </style>
 </head>
 <body>
-<canvas id="field"></canvas>
-<div class="ui">
-  <div class="top">
-    <a href="../hub/">Hub</a>
-    <span class="brand">АКСИ</span>
-    <div class="langs">
-      <a href="../about/" style="margin-right:6px">Grok</a>
-      <a href="../CODEX.md" style="margin-right:6px">Кодекс</a>
-      <button type="button" data-lang="ru" class="on">RU</button>
-      <button type="button" data-lang="en">EN</button>
-      <button type="button" data-lang="tt">TT</button>
-    </div>
+<header>
+  <a href="/">←</a>
+  <span class="logo">АКСИ</span>
+  <div class="langs">
+    <button type="button" data-lang="ru" class="on">RU</button>
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="tt">TT</button>
   </div>
-  <div class="stage">
-    <div class="orb" id="orb"><div class="rings"></div><div class="rings"></div><span>Ψ</span></div>
-    <div class="status" id="status">Напиши или скажи — я здесь</div>
-    <div class="thoughts" id="thoughts"></div>
-    <div class="answer" id="answer"></div>
-    <div class="sig" id="sig"></div>
-  </div>
-  <p class="hint">АКСИ × Grok · PWA · источники</p>
+</header>
+
+<main>
+  <div class="orb" id="orb">Ψ</div>
+  <div class="status" id="status">Слушаю</div>
+  <div class="thoughts" id="thoughts"></div>
+  <div class="answer" id="answer"></div>
+  <div class="sig" id="sig"></div>
+</main>
+
+<footer>
   <div class="dock">
-    <button type="button" class="mic" id="mic">🎙</button>
-    <textarea id="input" rows="1" placeholder="Скажи АКСИ…" enterkeyhint="send"></textarea>
-    <button type="button" id="send">↑</button>
+    <button type="button" class="mic" id="mic" aria-label="Микрофон">🎙</button>
+    <textarea id="input" rows="1" placeholder="Сообщение…" enterkeyhint="send"></textarea>
+    <button type="button" id="send" aria-label="Отправить">↑</button>
   </div>
-</div>
+</footer>
+
 <script src="../i18n.js"></script>
-<script src="../aksi-math.js"></script>
 <script src="../codex.js"></script>
-<script src="../search-world.js"></script>
 <script src="../aksi-brain.js"></script>
 <script>
 (function(){
-  if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(function(){});}
-  var c=document.getElementById('field'),x=c.getContext('2d'),W,H,pts=[];
-  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:32},function(){return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2};});}
-  addEventListener('resize',resize);resize();
-  (function loop(){x.clearRect(0,0,W,H);var g=x.createRadialGradient(W/2,H*.38,0,W/2,H*.4,H*.55);g.addColorStop(0,'rgba(76,29,149,.25)');g.addColorStop(1,'transparent');x.fillStyle=g;x.fillRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;x.fillStyle='rgba(196,181,253,.35)';x.beginPath();x.arc(p.x,p.y,1.2,0,6.3);x.fill();});requestAnimationFrame(loop);})();
-  if(window.AksiI18n){AksiI18n.setLang(AksiI18n.lang());AksiI18n.apply();}
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});
+  if(window.AksiI18n){AksiI18n.setLang(AksiI18n.lang());}
   document.querySelectorAll('[data-lang]').forEach(function(b){
     b.classList.toggle('on',b.getAttribute('data-lang')===(localStorage.getItem('AKSI_LANG')||'ru'));
-    b.onclick=function(){document.querySelectorAll('[data-lang]').forEach(function(x){x.classList.remove('on');});b.classList.add('on');if(window.AksiI18n){AksiI18n.setLang(b.getAttribute('data-lang'));AksiI18n.apply();};};
+    b.onclick=function(){
+      document.querySelectorAll('[data-lang]').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      if(window.AksiI18n)AksiI18n.setLang(b.getAttribute('data-lang'));
+    };
   });
-  var orb=document.getElementById('orb'),status=document.getElementById('status'),answer=document.getElementById('answer');
-  var thoughts=document.getElementById('thoughts'),sig=document.getElementById('sig'),input=document.getElementById('input');
-  var sendBtn=document.getElementById('send'),micBtn=document.getElementById('mic'),busy=false,n=0;
-  function t(k){return window.AksiI18n?AksiI18n.t(k):k;}
-  function setStatus(s){status.textContent=s;}
-  async function hex16(s){if(!crypto.subtle)return'0';var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0');}).join('').slice(0,16).toUpperCase();}
+
+  var orb=document.getElementById('orb');
+  var status=document.getElementById('status');
+  var answer=document.getElementById('answer');
+  var thoughts=document.getElementById('thoughts');
+  var sig=document.getElementById('sig');
+  var input=document.getElementById('input');
+  var sendBtn=document.getElementById('send');
+  var micBtn=document.getElementById('mic');
+  var busy=false,n=0;
+
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
-  function esc(s){return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');}
+
   async function resonate(text){
-    if(!text||busy)return;busy=true;n++;sendBtn.disabled=true;
+    if(!text||busy)return;
+    busy=true;n++;sendBtn.disabled=true;
     answer.classList.remove('show');answer.innerHTML='';thoughts.innerHTML='';sig.textContent='';
-    orb.classList.add('pulse');setStatus(t('listening'));await wait(200);
-    if(window.AksiCodex){var gate=AksiCodex.check(text);if(!gate.ok){setStatus('Кодекс');answer.innerHTML=esc(gate.message);answer.classList.add('show');sig.textContent='Codex';orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;return;}}
-    setStatus(t('resonance'));
-    var route=window.AksiMath?AksiMath.route(text):'general';
-    var steps=['codex ok','route '+route,'brain'];
-    for(var i=0;i<steps.length;i++){var d=document.createElement('div');d.className='th';d.textContent='['+(i+1)+'] '+steps[i]+' · '+(await hex16(steps[i]+text)).slice(0,8);thoughts.appendChild(d);await wait(90);}
+    orb.classList.add('pulse');
+    status.textContent='…';
+
+    if(window.AksiCodex){
+      var gate=AksiCodex.check(text);
+      if(!gate.ok){
+        status.textContent='Кодекс';
+        answer.innerHTML=esc(gate.message);
+        answer.classList.add('show');
+        orb.classList.remove('pulse');
+        busy=false;sendBtn.disabled=false;
+        return;
+      }
+    }
+
     var replyText='';
     try{
-      if(window.AKSIBrain&&AKSIBrain.fullReply){var r=await AKSIBrain.fullReply(text,n);replyText=r.text||'';sig.textContent='🔏 '+(r.signature||'')+' · АКСИ×Grok';}
-      else{replyText='Обновите страницу — brain не загрузился.';}
-    }catch(e){replyText='Сбой: '+(e.message||'error');}
-    setStatus('АКСИ');answer.innerHTML=esc(replyText).replace(/\n/g,'<br>');answer.classList.add('show');orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;
-    try{if(speechSynthesis&&replyText){var u=new SpeechSynthesisUtterance(replyText.slice(0,400));u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}
+      if(window.AKSIBrain&&AKSIBrain.fullReply){
+        var r=await AKSIBrain.fullReply(text,n);
+        replyText=r.text||'';
+        if(r.signature)sig.textContent=r.signature;
+      }else{
+        replyText='Обновите страницу.';
+      }
+    }catch(e){
+      replyText='Не удалось ответить. Попробуйте ещё раз.';
+    }
+
+    status.textContent='АКСИ';
+    answer.innerHTML=esc(replyText).replace(/\n/g,'<br>');
+    answer.classList.add('show');
+    orb.classList.remove('pulse');
+    busy=false;sendBtn.disabled=false;
+
+    try{
+      if(speechSynthesis&&replyText){
+        var u=new SpeechSynthesisUtterance(replyText.slice(0,400));
+        u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';
+        speechSynthesis.cancel();speechSynthesis.speak(u);
+      }
+    }catch(e){}
   }
-  function go(){var v=(input.value||'').trim();if(!v)return;input.value='';resonate(v);}
-  sendBtn.onclick=go;input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go();}});
+
+  function go(){
+    var v=(input.value||'').trim();
+    if(!v)return;
+    input.value='';
+    resonate(v);
+  }
+  sendBtn.onclick=go;
+  input.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go();}
+  });
+
   var rec=null,listening=false;
-  if(window.SpeechRecognition||window.webkitSpeechRecognition){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;rec=new SR();rec.lang='ru-RU';rec.interimResults=false;rec.onresult=function(ev){var tx=ev.results[0][0].transcript;input.value=tx;listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');resonate(tx);};rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');};}else micBtn.style.display='none';
-  micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add('on');orb.classList.add('listening');setStatus(t('speak'));try{rec.start();}catch(e){};};
+  if(window.SpeechRecognition||window.webkitSpeechRecognition){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    rec=new SR();rec.lang='ru-RU';rec.interimResults=false;
+    rec.onresult=function(ev){
+      var tx=ev.results[0][0].transcript;
+      listening=false;micBtn.classList.remove('on');
+      resonate(tx);
+    };
+    rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove('on');};
+  }else micBtn.style.display='none';
+
+  micBtn.onclick=function(){
+    if(!rec)return;
+    if(listening){rec.stop();return;}
+    listening=true;micBtn.classList.add('on');
+    status.textContent='Говорите…';
+    try{rec.start();}catch(e){}
+  };
 })();
 </script>
 </body>

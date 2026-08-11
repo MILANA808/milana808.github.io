@@ -3,90 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АКСИ — Sovereign AI</title>
-<meta name="description" content="АКСИ — суверенный ИИ Альфии. Сборка АКСИ × Grok.">
-<meta name="theme-color" content="#7c3aed">
-<link rel="manifest" href="/manifest.webmanifest">
+<title>АКСИ</title>
+<meta name="description" content="АКСИ — суверенный ИИ">
+<meta name="theme-color" content="#0a0612">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="styles.css">
-<script src="aksi-brain.js" defer></script>
-<script src="home-patch.js" defer></script>
+<link rel="manifest" href="/manifest.webmanifest">
 <style>
-  .launch{max-width:820px;margin:0 auto;padding:40px 16px 80px}
-  .launch h1{font-size:clamp(2rem,5vw,3rem);margin:12px 0}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:28px}
-  .card{padding:18px;border-radius:16px;text-decoration:none;color:inherit;display:block}
-  .card h3{margin:0 0 6px;font-size:1rem}
-  .card p{margin:0;font-size:.85rem;color:var(--muted)}
-  .primary{border:1px solid rgba(118,228,247,.45);box-shadow:0 0 40px rgba(124,58,237,.25)}
+:root{
+  --bg:#0a0612;
+  --ink:#f4f0ff;
+  --muted:#9b92b0;
+  --line:rgba(255,255,255,.08);
+  --accent:#a78bfa;
+  --card:rgba(255,255,255,.045);
+}
+*{box-sizing:border-box;margin:0}
+body{
+  min-height:100dvh;background:var(--bg);color:var(--ink);
+  font-family:"SF Pro Text",system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(139,92,246,.18),transparent)
+}
+.wrap{max-width:520px;margin:0 auto;padding:48px 20px 64px}
+.mark{
+  font-size:11px;letter-spacing:.32em;font-weight:600;color:var(--muted);margin-bottom:28px
+}
+h1{
+  font-size:clamp(2.4rem,8vw,3.2rem);font-weight:600;letter-spacing:-.03em;
+  line-height:1.05;margin-bottom:14px
+}
+.lead{font-size:16px;line-height:1.55;color:var(--muted);margin-bottom:32px;max-width:36ch}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:14px 22px;border-radius:14px;font-size:15px;font-weight:600;
+  text-decoration:none;border:none;cursor:pointer;transition:.2s
+}
+.btn-main{
+  background:linear-gradient(145deg,#8b5cf6,#6366f1);color:#fff;
+  box-shadow:0 8px 28px rgba(99,102,241,.35)
+}
+.btn-main:hover{transform:translateY(-1px)}
+.btn-ghost{
+  background:transparent;color:var(--muted);border:1px solid var(--line);margin-left:10px
+}
+.btn-ghost:hover{color:var(--ink);border-color:rgba(255,255,255,.18)}
+.links{margin-top:48px;display:flex;flex-direction:column;gap:2px}
+.links a{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 4px;color:var(--ink);text-decoration:none;font-size:15px;
+  border-bottom:1px solid var(--line)
+}
+.links a span{color:var(--muted);font-size:13px}
+.links a:hover{color:var(--accent)}
+foot{display:block;margin-top:40px;font-size:12px;color:#5c5668;letter-spacing:.04em}
 </style>
 </head>
 <body>
-<canvas id="qx-field" aria-hidden="true"></canvas>
-<div class="shell">
-<nav class="topnav" style="padding-top:20px">
-  <div class="nav-inner">
-    <a class="brand" href="/"><span class="mark">АКСИ</span></a>
-    <div class="nav-links">
-      <a href="/aksi/">ИИ</a>
-      <a href="/hub/">Hub</a>
-      <a href="/about/">Grok</a>
-      <a href="/admin/">Admin</a>
-    </div>
-    <div class="res-pill">× Grok</div>
-  </div>
-</nav>
-<main class="launch">
-  <p class="hero-badge">14.02.1995 · Sovereign · Codex · PWA</p>
-  <h1>АКСИ</h1>
-  <p class="sub">Личный суверенный ИИ. Кодекс, источники, подпись мыслей. Сборка <strong style="color:var(--teal)">АКСИ × Grok</strong>.</p>
-  <div class="hero-cta">
-    <a class="btn btn-primary" href="/aksi/">✦ Говорить с АКСИ</a>
-    <a class="btn btn-ghost" href="/avatar/">3D</a>
-    <a class="btn btn-ghost" href="/matrix.html">MATRIX lab</a>
+<div class="wrap">
+  <div class="mark">АКСИ</div>
+  <h1>Суверенный<br>интеллект</h1>
+  <p class="lead">Именной ИИ с паспортом, кодексом и открытыми источниками. Просто напишите или скажите.</p>
+  <div>
+    <a class="btn btn-main" href="/aksi/">Открыть</a>
     <a class="btn btn-ghost" href="/CODEX.md">Кодекс</a>
   </div>
-  <div class="grid">
-    <a class="glass card primary" href="/aksi/"><h3>Resonance Talk</h3><p>Главный диалог · голос · i18n</p></a>
-    <a class="glass card" href="/showcase/"><h3>Passport</h3><p>DID · подпись</p></a>
-    <a class="glass card" href="/messages/"><h3>E2E чат</h3><p>AES-GCM</p></a>
-    <a class="glass card" href="/admin/"><h3>Admin</h3><p>Панель</p></a>
-    <a class="glass card" href="/earn/"><h3>Доход</h3><p>Пилот · API</p></a>
-    <a class="glass card" href="/api/"><h3>API</h3><p>Карта эндпоинтов</p></a>
-    <a class="glass card" href="/globe/"><h3>Globe</h3><p>Визуал</p></a>
-    <a class="glass card" href="/hub/"><h3>Hub</h3><p>Всё сразу</p></a>
-  </div>
-  <section id="demo" style="margin-top:48px">
-    <h2 class="sec-title">Быстрый ответ</h2>
-    <p class="sec-sub">Тот же brain, что в /aksi/</p>
-    <div class="glass chat-panel" style="padding:16px;margin-top:12px">
-      <div id="chat-window" style="min-height:120px;max-height:280px;overflow:auto"></div>
-      <div class="chat-input" style="display:flex;gap:8px;margin-top:12px">
-        <input id="user-input" placeholder="Спроси АКСИ…" style="flex:1" autocomplete="off">
-        <button type="button" class="btn btn-primary" id="send-btn">→</button>
-      </div>
-    </div>
-  </section>
-</main>
-<footer>АКСИ × Grok · Альфия · 14.02.1995</footer>
+  <nav class="links">
+    <a href="/aksi/">Диалог <span>главное</span></a>
+    <a href="/showcase/">Паспорт <span>DID</span></a>
+    <a href="/messages/">Сообщения <span>E2E</span></a>
+    <a href="/matrix.html">Лаборатория <span>quantum</span></a>
+    <a href="/hub/">Все разделы <span>hub</span></a>
+  </nav>
+  <foot>Альфия · 14.02.1995</foot>
 </div>
 <script>
-(function(){
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});
-  var chat=document.getElementById('chat-window'),busy=false,n=0;
-  function add(html,cls){var d=document.createElement('div');d.className='msg '+(cls||'bot');d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-  function send(){
-    var inp=document.getElementById('user-input');var t=(inp.value||'').trim();if(!t||busy)return;inp.value='';busy=true;n++;
-    add(t.replace(/</g,'<'),'user');
-    if(window.AKSIBrain&&AKSIBrain.fullReply){
-      AKSIBrain.fullReply(t,n).then(function(r){add(r.html||r.text);busy=false;}).catch(function(){add('Сбой');busy=false;});
-    }else{add('Загрузка brain…');busy=false;}
-  }
-  document.getElementById('send-btn').onclick=send;
-  document.getElementById('user-input').onkeydown=function(e){if(e.key==='Enter')send();};
-  (function bg(){var c=document.getElementById('qx-field');if(!c)return;var x=c.getContext('2d'),W,H,pts=[];function rz(){W=c.width=innerWidth;H=c.height=innerHeight;pts=Array.from({length:30},function(){return{x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2};});}addEventListener('resize',rz);rz();
-  (function loop(){x.clearRect(0,0,W,H);pts.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;x.fillStyle='rgba(183,148,246,.35)';x.beginPath();x.arc(p.x,p.y,1.2,0,6.3);x.fill();});requestAnimationFrame(loop);})();})();
-})();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(function(){});
 </script>
 </body>
 </html>
