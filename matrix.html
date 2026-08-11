@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ MATRIX Lab</title>
+<meta name="theme-color" content="#05020c">
+<link rel="stylesheet" href="styles.css">
+<script src="aksi-brain.js" defer></script>
+</head>
+<body>
+<div class="shell">
+<nav class="topnav" style="padding-top:20px">
+  <div class="nav-inner">
+    <a class="brand" href="/"><span class="mark">АКСИ</span></a>
+    <div class="nav-links">
+      <a href="/aksi/">ИИ</a>
+      <a href="/">Home</a>
+      <a href="#quantum">Quantum</a>
+      <a href="#demo">Chat</a>
+    </div>
+    <div class="res-pill">Lab · Grok</div>
+  </div>
+</nav>
+<main>
+  <section class="hero" id="hero">
+    <div class="hero-badge">MATRIX Lab · quantum + TTP chat</div>
+    <h1>MATRIX</h1>
+    <p class="sub">Лаборатория: симулятор кубитов и чат с brain. Главный продукт — <a href="/aksi/" style="color:var(--teal)">/aksi/</a>.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="/aksi/">← АКСИ</a>
+      <a class="btn btn-ghost" href="#quantum">Quantum</a>
+    </div>
+  </section>
+
+  <section id="demo">
+    <h2 class="sec-title">Chat</h2>
+    <div class="glass chat-panel" style="padding:16px">
+      <div id="chat-window" style="min-height:160px;max-height:320px;overflow:auto"></div>
+      <div class="chat-input" style="display:flex;gap:8px;margin-top:12px">
+        <input id="user-input" placeholder="Сообщение…" style="flex:1" autocomplete="off">
+        <button type="button" class="btn btn-primary" id="send-btn">→</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="quantum">
+    <h2 class="sec-title">Quantum simulator</h2>
+    <p class="sec-sub">Statevector · H X Z CNOT · 1–4 qubits</p>
+    <div class="q-grid">
+      <div class="glass q-panel">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <select id="q-num" class="qsel">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+          <button type="button" class="btn btn-ghost btn-sm" id="q-reset">Сброс</button>
+          <button type="button" class="btn btn-primary btn-sm" id="q-run">▶ Run</button>
+        </div>
+        <div class="gate-row" id="gate-palette">
+          <button type="button" data-gate="h" class="gate-btn active">H</button>
+          <button type="button" data-gate="x" class="gate-btn">X</button>
+          <button type="button" data-gate="z" class="gate-btn">Z</button>
+          <button type="button" data-gate="cx" class="gate-btn">CNOT</button>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <select id="q-target" class="qsel"></select>
+          <select id="q-control" class="qsel" style="display:none"></select>
+          <button type="button" class="btn btn-ghost btn-sm" id="q-add-gate">+ Gate</button>
+        </div>
+        <div id="circuit-view">схема пуста</div>
+      </div>
+      <div class="glass q-panel">
+        <div id="state-table">Run</div>
+        <div id="hist-container"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>MATRIX Lab · АКСИ × Grok</footer>
+</div>
+<script>
+(function(){
+  var chat=document.getElementById('chat-window'),busy=false,n=0;
+  function add(html,cls){var d=document.createElement('div');d.className='msg '+(cls||'bot');d.innerHTML=html;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+  function send(){var inp=document.getElementById('user-input');var t=(inp.value||'').trim();if(!t||busy)return;inp.value='';busy=true;n++;add(String(t).replace(/</g,'&lt;'),'user');
+    if(window.AKSIBrain)AKSIBrain.fullReply(t,n).then(function(r){add(r.html||r.text);busy=false;}).catch(function(){busy=false;});
+    else{add('brain…');busy=false;}}
+  document.getElementById('send-btn').onclick=send;
+  document.getElementById('user-input').onkeydown=function(e){if(e.key==='Enter')send();};
+
+  var QC={add:function(a,b){return[a[0]+b[0],a[1]+b[1]];},scale:function(a,s){return[a[0]*s,a[1]*s];},abs2:function(a){return a[0]*a[0]+a[1]*a[1];}};
+  var selected='h',circuit=[],nQ=2;
+  function fillSel(){nQ=+document.getElementById('q-num').value||2;var t=document.getElementById('q-target'),c=document.getElementById('q-control');t.innerHTML=c.innerHTML='';for(var i=0;i<nQ;i++){t.innerHTML+='<option value="'+i+'">q'+i+'</option>';c.innerHTML+='<option value="'+i+'">q'+i+'</option>';}draw();}
+  document.getElementById('q-num').onchange=function(){circuit=[];fillSel();};
+  document.querySelectorAll('#gate-palette [data-gate]').forEach(function(btn){btn.onclick=function(){selected=btn.getAttribute('data-gate');document.querySelectorAll('#gate-palette .gate-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');document.getElementById('q-control').style.display=selected==='cx'?'':'none';};});
+  document.getElementById('q-add-gate').onclick=function(){var t=+document.getElementById('q-target').value,c=+document.getElementById('q-control').value||0;if(selected==='cx'){if(t===c)return;circuit.push({g:'cx',t:[c,t]});}else circuit.push({g:selected,t:[t]});draw();};
+  document.getElementById('q-reset').onclick=function(){circuit=[];draw();document.getElementById('state-table').textContent='Сброс';document.getElementById('hist-container').innerHTML='';};
+  function draw(){var view=document.getElementById('circuit-view');if(!circuit.length){view.textContent='схема пуста';return;}var lines=[];for(var q=0;q<nQ;q++){var row='q'+q+': ';for(var i=0;i<circuit.length;i++){var g=circuit[i];if(g.g==='cx'){if(g.t[0]===q)row+='C-';else if(g.t[1]===q)row+='X-';else row+='--';}else if(g.t[0]===q)row+=g.g.toUpperCase()+'-';else row+='--';}lines.push(row);}view.innerHTML=lines.map(function(l){return'<div>'+l+'</div>';}).join('');}
+  function applyGate(state,g,targets,n){var dim=1<<n,next=[],t0=targets[0],t1=targets[1],i,j,i1,a0,a1,inv;for(i=0;i<dim;i++)next.push([0,0]);if(g==='h'){inv=1/Math.SQRT2;for(i=0;i<dim;i++){if(((i>>t0)&1)!==0)continue;i1=i|(1<<t0);a0=state[i];a1=state[i1];next[i]=QC.add(QC.scale(a0,inv),QC.scale(a1,inv));next[i1]=QC.add(QC.scale(a0,inv),QC.scale(a1,-inv));}}else if(g==='x'){for(i=0;i<dim;i++){j=i^(1<<t0);next[j]=QC.add(next[j],state[i]);}}else if(g==='z'){for(i=0;i<dim;i++){next[i]=((i>>t0)&1)?QC.scale(state[i],-1):state[i];}}else if(g==='cx'){for(i=0;i<dim;i++){if(((i>>t0)&1)===1){j=i^(1<<t1);next[j]=QC.add(next[j],state[i]);}else next[i]=QC.add(next[i],state[i]);}}return next;}
+  function runQ(){var dim=1<<nQ,state=[],i,p,maxP=1e-12,html='',probs=[];for(i=0;i<dim;i++)state.push([0,0]);state[0]=[1,0];for(i=0;i<circuit.length;i++)state=applyGate(state,circuit[i].g,circuit[i].t,nQ);for(i=0;i<dim;i++){p=QC.abs2(state[i]);probs.push(p);if(p>maxP)maxP=p;if(p>1e-10)html+='<div>|'+i.toString(2).padStart(nQ,'0')+'⟩ '+(p*100).toFixed(1)+'%</div>';}document.getElementById('state-table').innerHTML=html||'0';document.getElementById('hist-container').innerHTML=probs.map(function(pp,ii){var hh=Math.max(4,(pp/maxP)*100);return'<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:80px"><div style="width:100%;background:linear-gradient(180deg,#b794f6,#76e4f7);border-radius:4px 4px 0 0;height:'+hh+'%"></div><div style="font-size:9px;text-align:center">'+ii.toString(2).padStart(nQ,'0')+'</div></div>';}).join('');}
+  document.getElementById('q-run').onclick=runQ;fillSel();
+})();
+</script>
+</body>
+</html>
