@@ -46,6 +46,7 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
     <a href="../avatar/">3D</a>
     <span class="brand">АКСИ</span>
     <div class="langs">
+      <a href="../about/" style="margin-right:6px">о проекте</a>
       <a href="../CODEX.md" style="margin-right:6px">Кодекс</a>
       <button type="button" data-lang="ru" class="on">RU</button>
       <button type="button" data-lang="en">EN</button>
@@ -59,11 +60,11 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
     <div class="answer" id="answer"></div>
     <div class="sig" id="sig"></div>
   </div>
-  <p class="hint">Кодекс · источники · резонанс</p>
+  <p class="hint">АКСИ × Grok · Кодекс · источники</p>
   <div class="dock">
-    <button type="button" class="mic" id="mic">🎙</button>
-    <textarea id="input" rows="1" placeholder="Скажи АКСИ…"></textarea>
-    <button type="button" id="send">↑</button>
+    <button type="button" class="mic" id="mic" aria-label="mic">🎙</button>
+    <textarea id="input" rows="1" placeholder="Скажи АКСИ…" enterkeyhint="send"></textarea>
+    <button type="button" id="send" aria-label="send">↑</button>
   </div>
 </div>
 <script src="../i18n.js"></script>
@@ -116,46 +117,67 @@ html,body{height:100%;background:#03010a;color:#f0eaff;font-family:system-ui,-ap
 
     setStatus(t('resonance'));
     var route=window.AksiMath?AksiMath.route(text):'general';
-    var sc=window.AksiMath?AksiMath.scoreQuery(text,'акси knowledge '+text,{identity:/акси|ты|who/i.test(text)}):null;
-    var steps=['codex: ok','route: '+route,sc?('score='+sc.score):'score'];
+    var steps=['codex ok','route '+route,'AKSI brain'];
     for(var i=0;i<steps.length;i++){
       var d=document.createElement('div');d.className='th';
       d.textContent='['+(i+1)+'] '+steps[i]+' · '+(await hex16(steps[i]+text)).slice(0,8);
-      thoughts.appendChild(d);await wait(120);
+      thoughts.appendChild(d);await wait(100);
     }
 
-    var replyText='', sources=[];
+    var replyText='';
     try{
-      if(window.AksiWorld&&(route==='retrieve'||route==='general')){
-        var w=await AksiWorld.search(text);
-        if(w&&w.text){replyText=w.text;sources=w.sources||[];}
-      }
-      if(!replyText&&window.AKSIBrain&&AKSIBrain.fullReply){
+      if(window.AKSIBrain&&AKSIBrain.fullReply){
         var r=await AKSIBrain.fullReply(text,n);
         replyText=r.text||'';
-        sig.textContent='🔏 '+(r.signature||'')+' · EQS '+(window.AksiMath?AksiMath.eqs():'');
+        sig.textContent='🔏 '+(r.signature||'')+' · АКСИ×Grok';
+      } else if(window.AksiWorld){
+        var w=await AksiWorld.search(text);
+        replyText=(w&&w.text)?w.text:'Нет ответа.';
+        if(w&&w.sources&&w.sources.length)replyText+='\n\nИсточники: '+w.sources.join(' · ');
+        sig.textContent='🔏 world · АКСИ×Grok';
+      } else {
+        replyText='Я АКСИ. Модули грузятся — обнови страницу.';
       }
-      if(!replyText)replyText='Не нашла устойчивый ответ. Переформулируй вопрос.';
-      if(window.AksiCodex&&sources.length)replyText=AksiCodex.wrapAnswer(replyText,sources);
-      else if(sources.length)replyText+="\n\nИсточники: "+sources.join(' · ');
-      if(!sig.textContent)sig.textContent='🔏 '+(await hex16(replyText)).slice(0,16)+' · Codex';
-    }catch(e){replyText='Сбой поиска. Попробуй ещё раз.';}
+    }catch(e){
+      replyText='Сбой: '+(e&&e.message?e.message:'unknown');
+    }
 
     setStatus('АКСИ');
     answer.innerHTML=esc(replyText).replace(/\n/g,'<br>');
-    answer.classList.add('show');orb.classList.remove('pulse');busy=false;sendBtn.disabled=false;
-    try{if(speechSynthesis&&replyText){var u=new SpeechSynthesisUtterance(replyText.slice(0,400));u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';speechSynthesis.cancel();speechSynthesis.speak(u);}}catch(e){}
+    answer.classList.add('show');
+    orb.classList.remove('pulse');
+    busy=false;sendBtn.disabled=false;
+    try{
+      if(window.speechSynthesis&&replyText){
+        var u=new SpeechSynthesisUtterance(replyText.slice(0,400));
+        u.lang=(localStorage.getItem('AKSI_LANG')==='en')?'en-US':'ru-RU';
+        speechSynthesis.cancel();speechSynthesis.speak(u);
+      }
+    }catch(e){}
   }
+
   function go(){var v=(input.value||'').trim();if(!v)return;input.value='';resonate(v);}
   sendBtn.onclick=go;
   input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();go();}});
+
   var rec=null,listening=false;
   if(window.SpeechRecognition||window.webkitSpeechRecognition){
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;rec=new SR();rec.lang='ru-RU';rec.interimResults=false;
-    rec.onresult=function(ev){input.value=ev.results[0][0].transcript;listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');resonate(input.value);};
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    rec=new SR();rec.lang='ru-RU';rec.interimResults=false;
+    rec.onresult=function(ev){
+      var tx=ev.results[0][0].transcript;
+      input.value=tx;listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');
+      resonate(tx);
+    };
     rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove('on');orb.classList.remove('listening');};
-  }else micBtn.style.display='none';
-  micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add('on');orb.classList.add('listening');setStatus(t('speak'));try{rec.start();}catch(e){};};
+  }else{micBtn.style.display='none';}
+  micBtn.onclick=function(){
+    if(!rec)return;
+    if(listening){rec.stop();return;}
+    listening=true;micBtn.classList.add('on');orb.classList.add('listening');
+    setStatus(t('speak'));
+    try{rec.start();}catch(e){}
+  };
 })();
 </script>
 </body>
