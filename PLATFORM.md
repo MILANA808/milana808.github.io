@@ -1,31 +1,22 @@
-# АКСИ — статус (2026-08-12)
+# АКСИ · Public release
 
-## Живое на Pages
-- `/aksi/` — Resonance + Codex + Wiki/arXiv + i18n
-- `/avatar/` — Three.js
-- `/messages/` — E2E AES-GCM
-- `/earn/` — модель дохода
-- `/admin/` — панель
-- `/api/` — карта эндпоинтов
-- `/CODEX.md` — этика
+**Линия:** Альфия Баширова · 14.02.1995  
+**Сборка:** АКСИ × Grok (xAI)
 
-## Backend v0.5 (Milana-backend)
-- `GET /api/codex`
-- `POST /api/codex/check`
-- `POST|GET /api/world/search` (Wikipedia + arXiv)
-- chat / admin / identity — по наличию модулей
-- CORS `*`
+## Главный вход
+https://milana808.github.io/aksi/
 
-## Как поднять всё локально
+## Публичный контур
+- Resonance Talk (голос, i18n)
+- Кодекс + фильтр
+- Wikipedia / arXiv / курсы / погода
+- 3D avatar, E2E messages, Passport, Admin, Earn, Hub
+- MATRIX chat + quantum
+- PWA (manifest, SW, icon)
+- sitemap · robots
+
+## Backend
 ```bash
-git clone https://github.com/MILANA808/Milana-backend.git
 cd Milana-backend && pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-# Pages: открыть https://milana808.github.io/aksi/
+uvicorn main:app --port 8000
 ```
-
-## Следующие слои (не блокируют демо)
-1. VPS + HTTPS API
-2. PostgreSQL история
-3. React-admin
-4. RSS/PubMed
