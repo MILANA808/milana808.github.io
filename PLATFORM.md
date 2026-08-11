@@ -1,30 +1,31 @@
-# АКСИ — Суверенный Квантовый ИИ · статус платформы
+# АКСИ — статус (2026-08-12)
 
-## Уже в проде (публично)
+## Живое на Pages
+- `/aksi/` — Resonance + Codex + Wiki/arXiv + i18n
+- `/avatar/` — Three.js
+- `/messages/` — E2E AES-GCM
+- `/earn/` — модель дохода
+- `/admin/` — панель
+- `/api/` — карта эндпоинтов
+- `/CODEX.md` — этика
 
-| Компонент | URL / repo |
-|-----------|------------|
-| Resonance Talk | https://milana808.github.io/aksi/ |
-| 3D Avatar | https://milana808.github.io/avatar/ |
-| Codex | https://milana808.github.io/CODEX.md |
-| E2E messages | https://milana808.github.io/messages/ |
-| Admin UI | https://milana808.github.io/admin/ |
-| Earn | https://milana808.github.io/earn/ |
-| Math engine | aksi-math.js |
-| World search | search-world.js (Wiki + arXiv) |
-| Backend API | github.com/MILANA808/Milana-backend |
+## Backend v0.5 (Milana-backend)
+- `GET /api/codex`
+- `POST /api/codex/check`
+- `POST|GET /api/world/search` (Wikipedia + arXiv)
+- chat / admin / identity — по наличию модулей
+- CORS `*`
 
-## Не сделано «в одном коммите» (честно)
+## Как поднять всё локально
+```bash
+git clone https://github.com/MILANA808/Milana-backend.git
+cd Milana-backend && pip install -r requirements.txt
+uvicorn main:app --reload --port 8000
+# Pages: открыть https://milana808.github.io/aksi/
+```
 
-- Полный React monorepo + React-Admin production
-- PostgreSQL история всех чатов в облаке
-- Google CSE / PubMed / полный RSS-кластер
-- GitHub-агент 3ч на каждый fork без GITHUB_TOKEN
-- Kubernetes
-
-## Этапность
-
-1. Codex + search-world + avatar ✅  
-2. Связать /aksi с Codex.filter + World.search ✅ (подключить в UI)  
-3. Backend Ollama + web tools на VPS  
-4. React-admin когда появится стабильный API auth  
+## Следующие слои (не блокируют демо)
+1. VPS + HTTPS API
+2. PostgreSQL история
+3. React-admin
+4. RSS/PubMed
