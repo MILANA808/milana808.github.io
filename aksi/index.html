@@ -5,19 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ</title>
 <meta name="theme-color" content="#05010f"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
 <style>
-:root{
-  --bg:#05010f;--ink:#f3e8ff;--muted:#9d8ec4;--line:rgba(168,85,247,.22);
-  --cyan:#22d3ee;--violet:#a855f7;--card:rgba(20,10,40,.75);
-}
+:root{--bg:#05010f;--ink:#f3e8ff;--muted:#9d8ec4;--line:rgba(168,85,247,.22);--cyan:#22d3ee;--violet:#a855f7;--card:rgba(20,10,40,.75)}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif}
-body{
-  max-width:720px;margin:0 auto;min-height:100dvh;position:relative;overflow:hidden;
-  background:radial-gradient(ellipse 90% 55% at 50% -15%,rgba(168,85,247,.3),transparent 55%),
-    radial-gradient(ellipse 40% 35% at 100% 100%,rgba(34,211,238,.07),transparent),var(--bg);
-}
+body{max-width:720px;margin:0 auto;min-height:100dvh;position:relative;overflow:hidden;background:radial-gradient(ellipse 90% 55% at 50% -15%,rgba(168,85,247,.3),transparent 55%),radial-gradient(ellipse 40% 35% at 100% 100%,rgba(34,211,238,.07),transparent),var(--bg)}
 #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
 .shell{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;padding:0 16px}
 header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 8px}
@@ -58,11 +52,11 @@ footer{flex-shrink:0;padding:6px 0 16px}
   <div class="brand"><i></i>АКСИ</div>
   <span class="meta" id="mem-count"></span>
 </header>
-<div class="toolbar"><button type="button" id="btn-clear">очистить память</button></div>
+<div class="toolbar"><button type="button" id="btn-clear">очистить</button></div>
 <div id="thread">
   <div class="empty" id="empty">
     <div class="orb">Ψ</div>
-    <p>Суверенный интеллект.<br>Пишите — отвечу по существу.</p>
+    <p>Суверенный интеллект.<br>Пишите — отвечу.</p>
     <div class="chips">
       <button type="button" data-q="кто ты">кто ты</button>
       <button type="button" data-q="почему небо голубое">почему небо голубое</button>
@@ -79,26 +73,19 @@ footer{flex-shrink:0;padding:6px 0 16px}
   </div>
 </footer>
 </div>
-<script src="/aksi-memory.js?v=7"></script>
-<script src="/codex.js?v=7"></script>
-<script src="/aksi-brain.js?v=7"></script>
+<script src="/aksi-memory.js?v=9"></script>
+<script src="/aksi-brain.js?v=9"></script>
 <script>
 (function(){
 "use strict";
+try{if(navigator.serviceWorker)navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});});}catch(e){}
+
 (function(){
   var c=document.getElementById("bg-canvas");if(!c)return;
   var x=c.getContext("2d"),W,H,pts=[];
-  function rz(){W=c.width=innerWidth;H=c.height=innerHeight;pts=[];for(var i=0;i<28;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15});}
+  function rz(){W=c.width=innerWidth;H=c.height=innerHeight;pts=[];for(var i=0;i<24;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.15,vy:(Math.random()-.5)*.15});}
   addEventListener("resize",rz);rz();
-  (function loop(){
-    x.clearRect(0,0,W,H);
-    for(var i=0;i<pts.length;i++){
-      var p=pts[i];p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-      x.beginPath();x.arc(p.x,p.y,1.3,0,6.3);x.fillStyle="rgba(192,132,252,.4)";x.fill();
-    }
-    requestAnimationFrame(loop);
-  })();
+  (function loop(){x.clearRect(0,0,W,H);for(var i=0;i<pts.length;i++){var p=pts[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;x.beginPath();x.arc(p.x,p.y,1.3,0,6.3);x.fillStyle="rgba(192,132,252,.4)";x.fill();}requestAnimationFrame(loop);})();
 })();
 
 var thread=document.getElementById("thread");
@@ -107,17 +94,13 @@ var input=document.getElementById("input");
 var sendBtn=document.getElementById("send");
 var micBtn=document.getElementById("mic");
 var memEl=document.getElementById("mem-count");
-var busy=false,n=0;
+var busy=false;
 
 function esc(s){
-  return String(s)
-    .replace(/&/g,"&")
-    .replace(/</g,"<")
-    .replace(/>/g,">");
+  return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");
 }
 function fmt(ts){
-  try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
-  catch(e){return"";}
+  try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit";});}catch(e){return"";}
 }
 function hideEmpty(){if(empty)empty.style.display="none";}
 function addBubble(role,text,ts){
@@ -132,104 +115,91 @@ function withTimeout(p,ms){
   return new Promise(function(resolve){
     var done=false;
     var t=setTimeout(function(){if(!done){done=true;resolve(null);}},ms);
-    Promise.resolve(p).then(function(v){
-      if(!done){done=true;clearTimeout(t);resolve(v);}
-    }).catch(function(){
-      if(!done){done=true;clearTimeout(t);resolve(null);}
-    });
+    Promise.resolve(p).then(function(v){if(!done){done=true;clearTimeout(t);resolve(v);}})
+      .catch(function(){if(!done){done=true;clearTimeout(t);resolve(null);}});
   });
 }
-function localReply(text){
+function instant(text){
   var t=String(text||"");
   var low=t.toLowerCase();
   if(/небо/i.test(t)&&/голуб|син/i.test(t))
-    return"Небо кажется голубым из‑за рассеяния Рэлея: солнечный свет сталкивается с молекулами воздуха, синяя часть спектра рассеивается сильнее. Днём мы видим голубой купол, на закате — красные тона.";
+    return"Небо кажется голубым из‑за рассеяния Рэлея: молекулы воздуха сильнее рассеивают синюю часть солнечного спектра. Днём — голубой купол, на закате — красные тона.";
   if(/привет|здравств|hello|hi\b/.test(low))
-    return"Здравствуйте. Я АКСИ — на связи. Спрашивайте факты и объяснения.";
+    return"Здравствуйте. Я АКСИ — на связи.";
   if(/кто ты|что ты|что такое акси/.test(low))
-    return"Я АКСИ, суверенный ИИ-агент. Отвечаю по существу, ищу факты в Wikipedia, храню память в вашем браузере.";
+    return"Я АКСИ — суверенный ИИ-агент. Отвечаю по существу, ищу факты в Wikipedia, храню память в браузере.";
   if(/как дела/.test(low))return"В рабочем режиме. Чем помочь?";
   if(/спасибо|благодар/.test(low))return"Пожалуйста.";
-  if(/памят|помнишь/.test(low))return"Да. Сообщения с этого устройства сохраняются локально.";
-  return"Пока нет готового ответа на «"+t.slice(0,80)+"». Попробуйте короче: «фотосинтез», «Эйнштейн», «биткоин»."
+  return null;
 }
-async function safeRemember(role,content){
-  if(!window.AksiMemory)return;
-  try{await withTimeout(AksiMemory.remember(role,content),2000);}catch(e){}
-}
-async function refreshCount(){
-  if(!window.AksiMemory){memEl.textContent="";return;}
+async function wiki(text){
   try{
-    var c=await withTimeout(AksiMemory.count(),2000);
-    memEl.textContent=c!=null?(c+" в памяти"):"";
-  }catch(e){memEl.textContent="";}
+    var q=String(text||"").replace(/[?!]+/g," ").replace(/^(что такое|почему|расскажи про|who is|what is)\s+/i,"").trim();
+    if(/небо/i.test(text)&&/голуб/i.test(text))q="Рассеяние Рэлея";
+    if(!q)return null;
+    var s=await withTimeout(fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(q)+"&limit=1&namespace=0&format=json&origin=*").then(function(r){return r.json();}),5000);
+    var title=s&&s[1]&&s[1][0];
+    if(!title)return null;
+    var j=await withTimeout(fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title)).then(function(r){return r.json();}),5000);
+    if(!j||!j.extract)return null;
+    return j.title+".\n\n"+String(j.extract).slice(0,900)+"\n\nИсточник: Wikipedia";
+  }catch(e){return null;}
 }
-async function loadHistory(){
-  if(!window.AksiMemory)return;
+async function crypto(){
   try{
-    var rows=await withTimeout(AksiMemory.history(200),3000);
-    if(!rows||!rows.length){await refreshCount();return;}
-    rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content,r.ts);});
-    await refreshCount();
-    thread.scrollTop=thread.scrollHeight;
-  }catch(e){}
+    var d=await withTimeout(fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd,rub").then(function(r){return r.json();}),5000);
+    if(!d)return null;
+    var lines=[];
+    if(d.bitcoin)lines.push("BTC: $"+d.bitcoin.usd+" / ₽"+d.bitcoin.rub);
+    if(d.ethereum)lines.push("ETH: $"+d.ethereum.usd+" / ₽"+d.ethereum.rub);
+    return lines.length?lines.join("\n"):null;
+  }catch(e){return null;}
 }
 async function getReply(text){
+  var a=instant(text);
+  if(a)return a;
   if(window.AKSIBrain&&typeof AKSIBrain.fullReply==="function"){
-    var r=await withTimeout(AKSIBrain.fullReply(text,n,{}),10000);
+    var r=await withTimeout(AKSIBrain.fullReply(text,0,{}),8000);
     if(r&&r.text)return r.text;
   }
-  return localReply(text);
+  if(/биткоин|bitcoin|курс|крипт|\bbtc\b/i.test(text)){
+    var c=await crypto();
+    if(c)return c;
+  }
+  var w=await wiki(text);
+  if(w)return w;
+  return"Пока нет точного ответа на «"+String(text).slice(0,80)+"». Спросите короче: «фотосинтез», «Эйнштейн», «биткоин».";
 }
 async function respond(text){
   text=String(text||"").trim();
   if(!text||busy)return;
-  busy=true;n++;sendBtn.disabled=true;
+  busy=true;sendBtn.disabled=true;
   try{
-    if(window.AksiCodex&&AksiCodex.check){
-      var gate=AksiCodex.check(text);
-      if(gate&&gate.ok===false){
-        addBubble("bot",gate.message||"Отказ по Кодексу.",Date.now());
-        busy=false;sendBtn.disabled=false;return;
-      }
-    }
     addBubble("user",text,Date.now());
-    await safeRemember("user",text);
+    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("user",text),1500);}catch(e){}}
     var tip=document.createElement("div");
     tip.className="typing";tip.id="typing";tip.textContent="АКСИ…";
     thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
     var reply=await getReply(text);
-    if(!reply)reply=localReply(text);
+    if(!reply)reply="На связи. Уточните вопрос.";
     var t=document.getElementById("typing");if(t)t.remove();
     addBubble("bot",reply,Date.now());
-    await safeRemember("assistant",reply);
-    await refreshCount();
+    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("assistant",reply),1500);}catch(e){}}
+    if(window.AksiMemory){try{var c=await withTimeout(AksiMemory.count(),1000);if(c!=null)memEl.textContent=c+" в памяти";}catch(e){}}
   }catch(err){
     var t2=document.getElementById("typing");if(t2)t2.remove();
-    addBubble("bot",localReply(text),Date.now());
+    addBubble("bot",instant(text)||"Сбой ответа. Попробуйте ещё раз.",Date.now());
   }
-  busy=false;sendBtn.disabled=false;
+  busy=false;sendBtn.disabled=false;input.focus();
 }
-function go(){
-  var v=(input.value||"").trim();
-  if(!v)return;
-  input.value="";
-  respond(v);
-}
+function go(){var v=(input.value||"").trim();if(!v)return;input.value="";respond(v);}
 sendBtn.onclick=go;
-input.addEventListener("keydown",function(e){
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}
-});
-document.querySelectorAll("[data-q]").forEach(function(b){
-  b.onclick=function(){respond(b.getAttribute("data-q"));};
-});
+input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}});
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){respond(b.getAttribute("data-q"));};});
 document.getElementById("btn-clear").onclick=async function(){
-  if(!confirm("Очистить память?"))return;
-  if(window.AksiMemory){try{await withTimeout(AksiMemory.clear(),2000);}catch(e){}}
-  thread.innerHTML="";
-  empty.style.display="";
-  thread.appendChild(empty);
-  await refreshCount();
+  if(!confirm("Очистить?"))return;
+  if(window.AksiMemory){try{await withTimeout(AksiMemory.clear(),1500);}catch(e){}}
+  thread.innerHTML="";empty.style.display="";thread.appendChild(empty);memEl.textContent="";
 };
 var rec=null,listening=false;
 if(window.SpeechRecognition||window.webkitSpeechRecognition){
@@ -238,13 +208,15 @@ if(window.SpeechRecognition||window.webkitSpeechRecognition){
   rec.onresult=function(ev){listening=false;micBtn.classList.remove("on");respond(ev.results[0][0].transcript);};
   rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove("on");};
 }else{micBtn.style.display="none";}
-micBtn.onclick=function(){
-  if(!rec)return;
-  if(listening){rec.stop();return;}
-  listening=true;micBtn.classList.add("on");
-  try{rec.start();}catch(e){}
-};
-loadHistory();
+micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add("on");try{rec.start();}catch(e){};};
+(async function(){
+  if(!window.AksiMemory)return;
+  try{
+    var rows=await withTimeout(AksiMemory.history(100),2500);
+    if(rows&&rows.length){rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content,r.ts);});}
+    var c=await withTimeout(AksiMemory.count(),1000);if(c!=null)memEl.textContent=c+" в памяти";
+  }catch(e){}
+})();
 })();
 </script>
 </body>
