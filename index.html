@@ -5,40 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>АКСИ</title>
 <meta name="theme-color" content="#05010f">
+<meta name="description" content="АКСИ — цифровой гражданин, навигация, космос"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <style>
-:root{--bg:#05010f;--ink:#f3e8ff;--muted:#9d8ec4;--line:rgba(168,85,247,.2)}
+:root{--bg:#030712;--ink:#f8fafc;--muted:#94a3b8;--line:rgba(148,163,184,.15);--violet:#a855f7;--cyan:#22d3ee}
 *{box-sizing:border-box;margin:0}
-body{min-height:100dvh;color:var(--ink);font-family:system-ui,sans-serif;background:radial-gradient(ellipse 90% 50% at 50% -10%,rgba(168,85,247,.28),transparent 50%),#05010f}
-.wrap{max-width:520px;margin:0 auto;padding:44px 18px 96px}
-.mark{font-size:11px;letter-spacing:.35em;font-weight:600;color:var(--muted);margin-bottom:20px}
-h1{font-size:clamp(2rem,6.5vw,2.8rem);font-weight:600;letter-spacing:-.04em;line-height:1.05;margin-bottom:10px}
-.lead{font-size:14px;line-height:1.55;color:var(--muted);margin-bottom:24px;max-width:40ch}
-.grid{display:grid;gap:10px}
-.card{display:block;padding:16px 18px;border-radius:16px;text-decoration:none;color:var(--ink);background:rgba(20,10,40,.65);border:1px solid var(--line)}
-.card strong{display:block;font-size:15px;margin-bottom:3px}
-.card span{font-size:12px;color:var(--muted)}
-.card.main{background:linear-gradient(145deg,rgba(168,85,247,.35),rgba(99,102,241,.25))}
-foot{display:block;margin-top:28px;font-size:12px;color:#5c5668}
+body{min-height:100dvh;color:var(--ink);font-family:system-ui,-apple-system,sans-serif;background:#030712}
+.bg{position:fixed;inset:0;background:
+  radial-gradient(ellipse 80% 50% at 50% -20%,rgba(168,85,247,.35),transparent 50%),
+  radial-gradient(ellipse 40% 30% at 100% 50%,rgba(34,211,238,.08),transparent),
+  radial-gradient(ellipse 40% 30% at 0% 80%,rgba(99,102,241,.12),transparent),
+  #030712;z-index:0}
+.wrap{position:relative;z-index:1;max-width:440px;margin:0 auto;padding:36px 18px 100px}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.logo i{width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 16px var(--cyan);animation:p 2s ease infinite}
+@keyframes p{50%{opacity:.35}}
+.logo span{font-size:11px;letter-spacing:.4em;font-weight:600;color:var(--muted)}
+h1{font-size:clamp(2rem,7vw,2.6rem);font-weight:650;letter-spacing:-.045em;line-height:1.05;margin-bottom:12px}
+.lead{font-size:14px;line-height:1.55;color:var(--muted);margin-bottom:26px}
+.hero{display:block;padding:22px 20px;border-radius:20px;text-decoration:none;color:#fff;background:linear-gradient(135deg,#7c3aed 0%,#4f46e5 45%,#0ea5e9 160%);box-shadow:0 12px 40px rgba(124,58,237,.35);margin-bottom:12px}
+.hero strong{display:block;font-size:1.15rem;margin-bottom:4px}
+.hero span{font-size:13px;opacity:.9}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{display:block;padding:16px;border-radius:16px;text-decoration:none;color:var(--ink);background:rgba(15,23,42,.75);border:1px solid var(--line);backdrop-filter:blur(8px);min-height:88px}
+.card strong{display:block;font-size:14px;margin-bottom:4px}
+.card span{font-size:11px;color:var(--muted);line-height:1.35}
+foot{margin-top:28px;font-size:11px;color:#64748b;line-height:1.5}
 </style>
 </head>
 <body>
+<div class="bg"></div>
 <div class="wrap">
-  <div class="mark">АКСИ</div>
-  <h1>Навигатор мира<br>и космоса</h1>
-  <p class="lead">Маршрут A→B, карта, 3D Земля и Солнечная система — плюс чат и паспорт гражданина.</p>
+  <div class="logo"><i></i><span>АКСИ</span></div>
+  <h1>Система,<br>которая с вами<br>в пути</h1>
+  <p class="lead">Живой GPS-трек, карта, космос по текущей эпохе, паспорт агента и чат. Архитектура — суверенная и честная.</p>
+  <a class="hero" href="/drive/"><strong>▶ Режим «В пути»</strong><span>Скорость · курс · трек · осадки · офлайн-GPS</span></a>
   <nav class="grid">
-    <a class="card main" href="/route/"><strong>➤ Маршрут A → B</strong><span>Дорога, расстояние, время</span></a>
-    <a class="card" href="/map/"><strong>▣ Карта + геолокация</strong><span>Моё место</span></a>
-    <a class="card" href="/earth3d/"><strong>3D Земля</strong><span>Вращение и зум</span></a>
-    <a class="card" href="/solar/"><strong>✧ Солнечная система</strong><span>Все планеты</span></a>
-    <a class="card" href="/aksi/"><strong>✦ Чат АКСИ</strong><span>ИИ</span></a>
-    <a class="card" href="/manifest/"><strong>Манифест</strong><span>Право и принципы</span></a>
+    <a class="card" href="/route/"><strong>A → B</strong><span>Маршрут по дорогам</span></a>
+    <a class="card" href="/map/"><strong>Карта</strong><span>Геопозиция</span></a>
+    <a class="card" href="/solar/"><strong>Космос</strong><span>Планеты «сейчас»</span></a>
+    <a class="card" href="/earth3d/"><strong>3D Земля</strong><span>Глобус</span></a>
+    <a class="card" href="/aksi/"><strong>Чат</strong><span>ИИ АКСИ</span></a>
     <a class="card" href="/citizen/"><strong>Паспорт</strong><span>DID · EQS</span></a>
+    <a class="card" href="/manifest/"><strong>Манифест</strong><span>Право и этика</span></a>
     <a class="card" href="/lab/"><strong>Квант</strong><span>Кубиты</span></a>
   </nav>
-  <foot>aksilove@internet.ru</foot>
+  <foot>GPS без интернета возможен. При глушении спутников координаты невозможны у любого ПО.<br>aksilove@internet.ru</foot>
 </div>
 <script src="/nav.js"></script>
+<script>if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});</script>
 </body>
 </html>

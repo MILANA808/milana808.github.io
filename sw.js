@@ -1,45 +1,29 @@
-/* AKSI minimal service worker — shell cache */
-var CACHE = "aksi-shell-v1";
-var ASSETS = ["/", "/aksi/", "/styles.css", "/aksi-brain.js", "/codex.js", "/aksi-math.js", "/i18n.js", "/search-world.js", "/icon.svg", "/manifest.webmanifest"];
-
-self.addEventListener("install", function (e) {
-  e.waitUntil(
-    caches.open(CACHE).then(function (c) {
-      return c.addAll(ASSETS.map(function (u) {
-        return new Request(u, { cache: "reload" });
-      })).catch(function () {});
-    })
-  );
-  self.skipWaiting();
+/* AKSI service worker — cache shell + recent map tiles for offline drive */
+const CACHE = "aksi-v1";
+const SHELL = ["/", "/drive/", "/nav.js", "/icon.svg", "/route/", "/map/", "/solar/", "/earth3d/", "/aksi/"];
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
-
-self.addEventListener("activate", function (e) {
-  e.waitUntil(
-    caches.keys().then(function (keys) {
-      return Promise.all(
-        keys.map(function (k) {
-          if (k !== CACHE) return caches.delete(k);
-        })
-      );
-    })
-  );
-  self.clients.claim();
+self.addEventListener("activate", (e) => {
+  e.waitUntil(self.clients.claim());
 });
-
-self.addEventListener("fetch", function (e) {
-  if (e.request.method !== "GET") return;
-  e.respondWith(
-    caches.match(e.request).then(function (hit) {
-      return (
-        hit ||
-        fetch(e.request)
-          .then(function (res) {
-            return res;
-          })
-          .catch(function () {
-            return caches.match("/aksi/");
-          })
-      );
-    })
-  );
+self.addEventListener("fetch", (e) => {
+  const u = e.request.url;
+  // cache OSM tiles & app pages
+  if (u.includes("tile.openstreetmap.org") || u.includes("milana808.github.io")) {
+    e.respondWith(
+      caches.open(CACHE).then(async (cache) => {
+        const hit = await cache.match(e.request);
+        if (hit) return hit;
+        try {
+          const res = await fetch(e.request);
+          if (res && res.ok && e.request.method === "GET") cache.put(e.request, res.clone());
+          return res;
+        } catch {
+          return hit || new Response("offline", { status: 503 });
+        }
+      })
+    );
+    return;
+  }
 });
