@@ -54,7 +54,6 @@
       });
   }
 
-  /* ——— Local knowledge for frequent questions ——— */
   var LOCAL = [
     {
       re: /небо.*голуб|почему.*небо|sky.*blue|почему небо/i,
@@ -69,7 +68,7 @@
     {
       re: /кто (ты|вы)|что ты такое|что такое акси/i,
       a:
-        "Я АКСИ — суверенный ИИ-агент. Работаю в браузере: отвечаю на вопросы, ищу факты в Wikipedia, помню диалог на вашем устройстве. Создана в линии Альфии (14.02.1995).",
+        "Я АКСИ — суверенный ИИ-агент. Работаю в браузере: отвечаю на вопросы, ищу факты в Wikipedia, помню диалог на вашем устройстве. Суверенный агент АКСИ.",
     },
     {
       re: /привет|здравствуй|добрый (день|вечер|утро)|hello|hi\b/i,
@@ -154,21 +153,16 @@
       });
   }
 
-  /** Build search query from natural language */
   function toSearchQuery(text) {
     var q = String(text || "")
       .replace(/[?!…]+/g, " ")
-      .replace(
-        /^(а |ну |скажи |пожалуйста |мне |то |же )/gi,
-        ""
-      )
+      .replace(/^(а |ну |скажи |пожалуйста |мне |то |же )/gi, "")
       .replace(
         /^(что такое|что значит|кто такой|кто такая|кто такие|расскажи (про|о)|объясни|почему|зачем|как работает|как устроен|what is|who is|why is|why are|how does)\s+/i,
         ""
       )
       .replace(/\s+/g, " ")
       .trim();
-    // special maps
     if (/небо/i.test(text) && /голуб|син/i.test(text)) return "Рассеяние Рэлея";
     if (/биткоин|bitcoin/i.test(text)) return "Биткойн";
     if (q.length < 2) return String(text || "").slice(0, 80);
@@ -178,12 +172,10 @@
   function searchWiki(query) {
     var q = toSearchQuery(query);
     if (!q || q.length < 2) return Promise.resolve(null);
-
     var searchUrl =
       "https://ru.wikipedia.org/w/api.php?action=opensearch&search=" +
       encodeURIComponent(q) +
       "&limit=5&namespace=0&format=json&origin=*";
-
     return fetchJSON(searchUrl, 5500)
       .then(function (data) {
         var titles = data && data[1];
@@ -192,7 +184,6 @@
             return r || getWikiSummary(q, "en");
           });
         }
-        // try first titles until one has extract
         function tryAt(i) {
           if (i >= titles.length) return getWikiSummary(q, "en");
           return getWikiSummary(titles[i], "ru").then(function (r) {
@@ -240,11 +231,9 @@
 
     if (!text) return finish("Напишите вопрос.", "empty");
 
-    // 1) local knowledge (instant, no network)
     var loc = localKnowledge(text);
     if (loc) return finish(loc, "local");
 
-    // 2) live APIs
     var live = detectLive(text);
     if (live && live.type === "crypto") {
       return getCrypto()
@@ -261,14 +250,12 @@
       });
     }
 
-    // 3) ALWAYS try Wikipedia for remaining questions
     return searchWiki(text).then(function (wiki) {
       if (wiki && wiki.text) {
         var ans = wiki.title + ".\n\n" + wiki.text;
         if (wiki.url) ans += "\n\nИсточник: Wikipedia";
         return finish(ans, "wikipedia");
       }
-      // last resort — honest, not fake "clarify"
       return finish(
         "Не нашла точной статьи по запросу «" +
           text.slice(0, 80) +
