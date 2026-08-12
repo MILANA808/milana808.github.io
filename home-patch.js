@@ -25,8 +25,8 @@
       nav.insertBefore(l, nav.firstChild);
     }
     var foot = document.querySelector("footer");
-    if (foot && foot.textContent.indexOf("Grok") < 0) {
-      foot.textContent = "АКСИ × Grok · MATRIX · 14.02.1995";
+    if (foot) {
+      foot.textContent = "АКСИ · aksilove@internet.ru";
     }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", inject);
