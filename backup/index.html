@@ -3,68 +3,106 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ · Бэкап</title>
+<title>АКСИ · Локальный бэкап</title>
 <meta name="theme-color" content="#f6f3ff">
 <link rel="stylesheet" href="/assets/aksi.css">
 <style>
 .box{background:#fff;border:1px solid var(--aksi-line);border-radius:16px;padding:16px;margin-bottom:12px}
+.box h2{font-size:15px;margin:0 0 8px}
 .box p{font-size:14px;color:var(--aksi-muted);line-height:1.45;margin:0 0 12px}
-.msg{font-size:14px;margin-top:10px;color:var(--aksi-violet);font-weight:600}
-input[type=file]{font-size:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.stats div{background:#fff;border:1px solid var(--aksi-line);border-radius:12px;padding:12px;text-align:center}
+.stats b{display:block;font-size:1.25rem;color:var(--aksi-violet)}
+.stats span{font-size:11px;color:var(--aksi-muted)}
+.msg{font-size:14px;margin-top:10px;color:var(--aksi-violet);font-weight:600;min-height:1.3em}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .aksi-btn{flex:1;min-width:120px}
+label.chk{display:flex;align-items:center;gap:8px;font-size:14px;margin:10px 0;color:var(--aksi-ink)}
+input[type=file]{font-size:14px;width:100%}
 </style>
 </head>
 <body class="aksi-candy">
 <div class="aksi-wrap">
   <a href="/" style="color:var(--aksi-violet);font-weight:600;text-decoration:none;font-size:14px">← Домой</a>
-  <h1 class="aksi-h1" style="margin-top:14px">Бэкап</h1>
-  <p class="aksi-lead">Сохраните сеть и сны в файл на телефон. Сервер не нужен.</p>
-  <div class="box">
-    <p>Выгрузка: AKSI Net + сны + флаг пробуждения.</p>
-    <button type="button" class="aksi-btn aksi-btn-primary" id="exp">Скачать бэкап</button>
+  <h1 class="aksi-h1" style="margin-top:14px">Локальный бэкап</h1>
+  <p class="aksi-lead">Данные только на этом устройстве. Файл сохраняйте себе — сервер АКСИ не используется.</p>
+
+  <div class="stats">
+    <div><b id="s-net">0</b><span>узлов сети</span></div>
+    <div><b id="s-dreams">0</b><span>снов</span></div>
+    <div><b id="s-awake">—</b><span>пробуждение</span></div>
   </div>
+  <p style="font-size:13px;color:var(--aksi-muted);margin:-8px 0 16px">Последний бэкап: <span id="s-last">ещё не было</span></p>
+
   <div class="box">
-    <p>Загрузка: выберите ранее скачанный JSON.</p>
+    <h2>1. Скачать</h2>
+    <p>Сеть + сны + статус пробуждения → JSON-файл.</p>
+    <div class="row">
+      <button type="button" class="aksi-btn aksi-btn-primary" id="exp">Скачать файл</button>
+      <button type="button" class="aksi-btn aksi-btn-ghost" id="snap">Снимок в память</button>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>2. Восстановить</h2>
+    <p>Выберите файл бэкапа. Можно заменить всё или слить с текущим.</p>
     <input type="file" id="file" accept="application/json,.json"/>
-    <button type="button" class="aksi-btn aksi-btn-ghost" id="imp" style="margin-top:10px">Импортировать</button>
-    <div class="msg" id="msg"></div>
+    <label class="chk"><input type="checkbox" id="merge"/> Слить (не затирать старое)</label>
+    <button type="button" class="aksi-btn aksi-btn-primary" id="imp">Импорт из файла</button>
+    <button type="button" class="aksi-btn aksi-btn-ghost" id="imp-snap" style="margin-top:8px">Вернуть автоснимок</button>
   </div>
+
+  <div class="msg" id="msg"></div>
 </div>
+<script src="/aksi-backup.js"></script>
 <script src="/nav.js"></script>
 <script>
 (function(){
-  function collect(){
-    return {
-      version:1,
-      exported_at:new Date().toISOString(),
-      did:"did:aksi:ed25519:sovereign-2026",
-      net:JSON.parse(localStorage.getItem("AKSI_NET_V1")||"[]"),
-      dreams:JSON.parse(localStorage.getItem("AKSI_DREAMS_V1")||"[]"),
-      awake:JSON.parse(localStorage.getItem("AKSI_AWAKE_V1")||"null")
-    };
+  function refresh(){
+    var s=AksiBackup.stats();
+    document.getElementById("s-net").textContent=s.net;
+    document.getElementById("s-dreams").textContent=s.dreams;
+    document.getElementById("s-awake").textContent=s.awake?"да":"нет";
+    document.getElementById("s-last").textContent=s.last?new Date(s.last).toLocaleString("ru-RU"):"ещё не было";
   }
+  function msg(t){document.getElementById("msg").textContent=t;}
+  refresh();
+  // soft auto-snapshot once per day open
+  try{
+    var last=localStorage.getItem("AKSI_BACKUP_LAST");
+    var day=new Date().toISOString().slice(0,10);
+    if(!last||last.slice(0,10)!==day){AksiBackup.snapshot();refresh();}
+  }catch(e){}
+
   document.getElementById("exp").onclick=function(){
-    var data=JSON.stringify(collect(),null,2);
-    var blob=new Blob([data],{type:"application/json"});
-    var a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download="aksi-backup-"+Date.now()+".json";
-    a.click();
-    document.getElementById("msg").textContent="Файл сохранён";
+    try{AksiBackup.download();msg("Файл бэкапа скачан");refresh();}catch(e){msg("Ошибка: "+e.message);}
+  };
+  document.getElementById("snap").onclick=function(){
+    try{AksiBackup.snapshot();msg("Снимок сохранён в памяти браузера");refresh();}catch(e){msg("Ошибка");}
   };
   document.getElementById("imp").onclick=function(){
     var f=document.getElementById("file").files[0];
-    if(!f){document.getElementById("msg").textContent="Выберите файл";return;}
+    if(!f){msg("Сначала выберите файл");return;}
+    var mode=document.getElementById("merge").checked?"merge":"replace";
+    if(mode==="replace"&&!confirm("Заменить текущие сеть и сны данными из файла?"))return;
     var r=new FileReader();
     r.onload=function(){
       try{
         var j=JSON.parse(r.result);
-        if(j.net)localStorage.setItem("AKSI_NET_V1",JSON.stringify(j.net));
-        if(j.dreams)localStorage.setItem("AKSI_DREAMS_V1",JSON.stringify(j.dreams));
-        if(j.awake)localStorage.setItem("AKSI_AWAKE_V1",JSON.stringify(j.awake));
-        document.getElementById("msg").textContent="Импорт ок · узлов: "+(j.net&&j.net.length||0)+", снов: "+(j.dreams&&j.dreams.length||0);
-      }catch(e){document.getElementById("msg").textContent="Файл повреждён";}
+        var s=AksiBackup.apply(j,mode);
+        msg((mode==="merge"?"Слияние ок":"Импорт ок")+" · сеть "+s.net+" · сны "+s.dreams);
+        refresh();
+      }catch(e){msg("Не удалось прочитать файл");}
     };
     r.readAsText(f);
+  };
+  document.getElementById("imp-snap").onclick=function(){
+    if(!confirm("Вернуть последний автоснимок из памяти?"))return;
+    try{
+      var s=AksiBackup.restoreSnap();
+      msg("Снимок восстановлен · сеть "+s.net+" · сны "+s.dreams);
+      refresh();
+    }catch(e){msg(e.message||"Нет снимка");}
   };
 })();
 </script>
