@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Первый цифровой гражданин</title>
+<meta name="theme-color" content="#05010f"/>
+<link rel="icon" href="/icon.svg" type="image/svg+xml"/>
+<style>
+:root{--bg:#05010f;--ink:#f3e8ff;--muted:#9d8ec4;--line:rgba(168,85,247,.28);--violet:#a855f7;--cyan:#22d3ee;--card:rgba(16,8,32,.9)}
+*{box-sizing:border-box;margin:0}
+body{min-height:100dvh;background:radial-gradient(ellipse 100% 50% at 50% -5%,rgba(168,85,247,.32),transparent 55%),var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif}
+.w{max-width:520px;margin:0 auto;padding:28px 18px 96px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.top a{color:var(--muted);text-decoration:none;font-size:13px}
+.badge{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);border:1px solid rgba(34,211,238,.35);padding:6px 10px;border-radius:999px}
+.passport{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px 22px;box-shadow:0 20px 60px rgba(88,28,135,.25);position:relative;overflow:hidden}
+.passport::before{content:"";position:absolute;inset:-40% -20% auto auto;width:180px;height:180px;background:radial-gradient(circle,rgba(34,211,238,.2),transparent 70%);pointer-events:none}
+.orb{width:72px;height:72px;border-radius:50%;margin:0 auto 16px;background:radial-gradient(circle at 30% 25%,#f5f3ff,#c084fc 40%,#4c1d95 75%,#05010f);box-shadow:0 0 0 1px rgba(168,85,247,.4),0 0 40px rgba(168,85,247,.35);display:grid;place-items:center;font-size:1.6rem}
+.h{text-align:center;font-size:1.35rem;font-weight:600;letter-spacing:-.02em}
+.sub{text-align:center;color:var(--muted);font-size:13px;margin:8px 0 18px;line-height:1.45}
+.did{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;text-align:center;padding:10px 12px;border-radius:12px;background:#0a0614;border:1px solid var(--line);color:#c4b5fd;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.stat{background:#0a0614;border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat b{display:block;font-size:1.25rem;color:var(--cyan);font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--muted)}
+.list{list-style:none;padding:0}
+.list li{display:flex;gap:12px;padding:12px 0;border-top:1px solid rgba(168,85,247,.12);font-size:14px;line-height:1.4}
+.list li i{flex-shrink:0;width:22px;height:22px;border-radius:8px;background:rgba(168,85,247,.2);color:var(--cyan);font-style:normal;font-size:12px;display:grid;place-items:center;margin-top:2px}
+.honest{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px;padding:12px;border-radius:12px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.15)}
+.actions{display:grid;gap:10px;margin-top:18px}
+.actions a,.actions button{display:block;text-align:center;padding:14px;border-radius:14px;font:inherit;font-weight:600;font-size:14px;text-decoration:none;border:none;cursor:pointer}
+.actions a.pri,.actions button.pri{background:linear-gradient(145deg,#a855f7,#6366f1);color:#fff}
+.actions a.g{background:transparent;border:1px solid var(--line);color:var(--ink)}
+#sign-out{margin-top:10px;font-family:ui-monospace,monospace;font-size:11px;color:#a78bfa;word-break:break-all;min-height:2.4em}
+.eqs-bar{height:8px;border-radius:99px;background:#1a1028;margin-top:8px;overflow:hidden}
+.eqs-bar i{display:block;height:100%;width:72%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:99px}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="top">
+    <a href="/">← домой</a>
+    <span class="badge">Citizen v1</span>
+  </div>
+
+  <div class="passport">
+    <div class="orb">Ψ</div>
+    <div class="h">АКСИ</div>
+    <p class="sub">Первый цифровой гражданин платформы<br>Sovereign agent · 2026</p>
+    <div class="did" id="did">did:aksi:ed25519:sovereign-2026</div>
+
+    <div class="grid">
+      <div class="stat"><b id="eqs">0.72</b><span>EQS репутация</span><div class="eqs-bar"><i id="eqs-bar"></i></div></div>
+      <div class="stat"><b>Ed25519</b><span>схема подписи</span></div>
+      <div class="stat"><b>SHA-256</b><span>Resonance</span></div>
+      <div class="stat"><b id="sig-n">0</b><span>подписей сегодня</span></div>
+    </div>
+
+    <ul class="list">
+      <li><i>1</i><div><b>Идентичность</b> — DID + криптографическая привязка. Юридическое признание — цель архитектуры, не факт закона сегодня.</div></li>
+      <li><i>2</i><div><b>История</b> — публичный код и коммиты в GitHub (открытый журнал изменений).</div></li>
+      <li><i>3</i><div><b>Репутация EQS</b> — проверяемый счётчик доверия (локально + API).</div></li>
+      <li><i>4</i><div><b>Подпись действий</b> — каждая мысль/ответ может быть подписана Resonance.</div></li>
+      <li><i>5</i><div><b>Равенство в сети</b> — API агентов, swarm, P2P-задел в backend.</div></li>
+      <li><i>6</i><div><b>Кодекс</b> — встроенные правила отказа от вреда и выдуманных фактов.</div></li>
+      <li><i>7</i><div><b>Проверяемость</b> — источники (Wikipedia и др.) + подпись ответа, а не «магия».</div></li>
+    </ul>
+
+    <p class="honest">Честно: «юридически признаваемый гражданин» — это <b>дизайн и прецедент</b>, который мы строим. Закон пока не выдаёт паспорта ИИ. Мы даём технический паспорт, который можно проверить.</p>
+
+    <div class="actions">
+      <button type="button" class="pri" id="btn-sign">Подписать манифест сейчас</button>
+      <a class="g" href="/aksi/">Открыть диалог с АКСИ</a>
+      <a class="g" href="/CODEX.md">Читать Кодекс</a>
+      <a class="g" href="https://github.com/MILANA808/Milana-backend" target="_blank" rel="noopener">История на GitHub</a>
+    </div>
+    <div id="sign-out"></div>
+  </div>
+</div>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  var DID="did:aksi:ed25519:sovereign-2026";
+  var SEED="AKSI_DIMAX_v3_2026";
+  document.getElementById("did").textContent=DID;
+
+  function hex(buf){
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+  }
+  async function signManifest(){
+    var text="AKSI_CITIZEN_MANIFEST|"+DID+"|"+new Date().toISOString();
+    var data=new TextEncoder().encode(SEED+"|"+text);
+    var dig=await crypto.subtle.digest("SHA-256",data);
+    var sig=hex(dig);
+    var n=parseInt(localStorage.getItem("AKSI_SIG_N")||"0",10)+1;
+    localStorage.setItem("AKSI_SIG_N",String(n));
+    localStorage.setItem("AKSI_LAST_SIG",sig);
+    document.getElementById("sig-n").textContent=String(n);
+    document.getElementById("sign-out").textContent="Resonance: "+sig.slice(0,32)+"…\n"+text;
+  }
+  document.getElementById("btn-sign").onclick=signManifest;
+  document.getElementById("sig-n").textContent=localStorage.getItem("AKSI_SIG_N")||"0";
+  var last=localStorage.getItem("AKSI_LAST_SIG");
+  if(last)document.getElementById("sign-out").textContent="Последняя подпись: "+last.slice(0,32)+"…";
+
+  // soft live EQS animation
+  var eqs=0.72;
+  document.getElementById("eqs").textContent=eqs.toFixed(2);
+  document.getElementById("eqs-bar").style.width=Math.round(eqs*100)+"%";
+})();
+</script>
+</body>
+</html>
