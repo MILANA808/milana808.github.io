@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>АКСИ · Карта</title>
+<meta name="theme-color" content="#05010f"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<style>
+:root{--bg:#05010f;--ink:#f3e8ff;--muted:#9d8ec4;--violet:#a855f7;--cyan:#22d3ee;--card:rgba(12,6,28,.92)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;overflow:hidden}
+#map{position:absolute;inset:0;z-index:0}
+.top{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(var(--card),transparent);pointer-events:none}
+.top a,.top button{pointer-events:auto}
+.top a{color:var(--muted);text-decoration:none;font-size:13px}
+.brand{font-size:12px;letter-spacing:.2em;font-weight:600}
+.panel{position:fixed;left:12px;right:12px;bottom:72px;z-index:1000;background:var(--card);border:1px solid rgba(168,85,247,.3);border-radius:18px;padding:14px 16px;backdrop-filter:blur(14px);max-width:480px;margin:0 auto}
+.panel h2{font-size:14px;font-weight:600;margin-bottom:6px}
+.coords{font-family:ui-monospace,monospace;font-size:12px;color:var(--cyan);margin:6px 0;word-break:break-all}
+.muted{font-size:12px;color:var(--muted);line-height:1.4}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button.act{font:inherit;cursor:pointer;border-radius:12px;border:1px solid rgba(168,85,247,.35);background:rgba(168,85,247,.2);color:var(--ink);padding:10px 14px;font-size:13px}
+button.act.pri{background:linear-gradient(145deg,#a855f7,#6366f1);border:none;color:#fff;font-weight:600}
+button.act:disabled{opacity:.4}
+.links{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+.links a{font-size:12px;color:var(--cyan);text-decoration:none}
+.leaflet-control-attribution{font-size:10px!important;background:rgba(5,1,15,.8)!important;color:#9d8ec4!important}
+.leaflet-control-attribution a{color:#c4b5fd!important}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="top">
+  <a href="/">← домой</a>
+  <span class="brand">АКСИ MAP</span>
+  <a href="/manifest/">манифест</a>
+</div>
+<div class="panel">
+  <h2>Навигатор</h2>
+  <p class="muted">Карта OpenStreetMap. Геопозиция запрашивается <b>только с вашего согласия</b> и остаётся в браузере (не уходит на сервер АКСИ).</p>
+  <div class="coords" id="coords">Координаты: —</div>
+  <div class="muted" id="status">Нажмите «Моё место», чтобы разрешить геолокацию.</div>
+  <div class="row">
+    <button type="button" class="act pri" id="btn-geo">Моё место</button>
+    <button type="button" class="act" id="btn-clear">Скрыть метку</button>
+  </div>
+  <div class="links">
+    <a href="/manifest/">Манифест и законы ИИ</a>
+    <a href="/citizen/">Паспорт</a>
+    <a href="/globe/">Глобус</a>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  var map=L.map("map",{zoomControl:true,attributionControl:true}).setView([55.75,37.62],3);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    maxZoom:19,
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  // soft “network” markers (public demo nodes, not real tracking)
+  var demos=[
+    {lat:55.75,lon:37.62,t:"Узел · Европа/СНГ"},
+    {lat:40.71,lon:-74.00,t:"Узел · Америка"},
+    {lat:35.68,lon:139.69,t:"Узел · Азия"},
+    {lat:1.35,lon:103.82,t:"Узел · APAC"}
+  ];
+  demos.forEach(function(d){
+    L.circleMarker([d.lat,d.lon],{radius:7,color:"#22d3ee",fillColor:"#a855f7",fillOpacity:0.7,weight:2})
+      .addTo(map).bindPopup(d.t);
+  });
+
+  var me=null;
+  var coordsEl=document.getElementById("coords");
+  var statusEl=document.getElementById("status");
+
+  function setStatus(t){statusEl.textContent=t;}
+
+  document.getElementById("btn-geo").onclick=function(){
+    if(!navigator.geolocation){
+      setStatus("Геолокация не поддерживается этим браузером.");
+      return;
+    }
+    setStatus("Запрос разрешения…");
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var lat=pos.coords.latitude, lon=pos.coords.longitude, acc=pos.coords.accuracy;
+      coordsEl.textContent="Координаты: "+lat.toFixed(5)+", "+lon.toFixed(5)+" (±"+Math.round(acc)+" м)";
+      setStatus("Позиция получена локально. Данные не отправлялись на сервер АКСИ.");
+      if(me)map.removeLayer(me);
+      me=L.marker([lat,lon]).addTo(map).bindPopup("Вы (только на этом устройстве)");
+      map.setView([lat,lon],14);
+      try{
+        sessionStorage.setItem("AKSI_GEO",JSON.stringify({lat:lat,lon:lon,ts:Date.now()}));
+      }catch(e){}
+    },function(err){
+      var m="Ошибка геолокации";
+      if(err.code===1)m="Доступ к геолокации запрещён. Разрешите в настройках браузера.";
+      if(err.code===2)m="Позиция недоступна.";
+      if(err.code===3)m="Таймаут запроса позиции.";
+      setStatus(m);
+    },{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+  };
+
+  document.getElementById("btn-clear").onclick=function(){
+    if(me){map.removeLayer(me);me=null;}
+    coordsEl.textContent="Координаты: —";
+    setStatus("Метка скрыта.");
+    try{sessionStorage.removeItem("AKSI_GEO");}catch(e){}
+  };
+})();
+</script>
+</body>
+</html>
