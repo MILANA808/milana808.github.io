@@ -3,147 +3,223 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>АКСИ · В пути</title>
+<title>АКСИ · Навигатор</title>
 <meta name="theme-color" content="#020617"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-:root{--bg:#020617;--ink:#f8fafc;--muted:#94a3b8;--cyan:#22d3ee;--violet:#a855f7;--ok:#4ade80;--warn:#fbbf24}
+:root{--bg:#020617;--ink:#f8fafc;--muted:#94a3b8;--cyan:#22d3ee;--violet:#a855f7;--ok:#4ade80;--bad:#f87171}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;overflow:hidden}
 #map{position:absolute;inset:0;z-index:0}
-.top{position:fixed;top:0;left:0;right:0;z-index:5;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(rgba(2,6,23,.95),transparent);pointer-events:none}
-.top a{pointer-events:auto;color:var(--muted);text-decoration:none;font-size:13px}
-.pill{pointer-events:auto;font-size:11px;padding:6px 10px;border-radius:999px;background:rgba(15,23,42,.9);border:1px solid rgba(34,211,238,.3)}
-.pill.on{border-color:var(--ok);color:var(--ok)}
-.dash{position:fixed;left:10px;right:10px;bottom:70px;z-index:5;max-width:480px;margin:0 auto;background:rgba(2,6,23,.92);border:1px solid rgba(168,85,247,.35);border-radius:18px;padding:12px 14px;backdrop-filter:blur(12px)}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;margin-bottom:10px}
-.metrics div{background:#0f172a;border-radius:12px;padding:8px 4px}
-.metrics b{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums;color:var(--cyan)}
-.metrics span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-button{font:inherit;cursor:pointer;border:none;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600}
-.pri{background:linear-gradient(135deg,#a855f7,#4f46e5);color:#fff;flex:1}
-.g{background:#1e293b;color:var(--ink);border:1px solid #334155}
-.note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4}
-.note em{color:var(--warn);font-style:normal}
-#wx{font-size:12px;color:var(--cyan);margin-top:6px}
+.banner{position:fixed;top:0;left:0;right:0;z-index:6;padding:10px 12px 12px;background:linear-gradient(rgba(2,6,23,.97),rgba(2,6,23,.75));}
+.banner-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.banner a{color:var(--muted);text-decoration:none;font-size:13px}
+.flags{display:flex;gap:6px}
+.flag{font-size:10px;padding:4px 8px;border-radius:999px;background:#0f172a;border:1px solid #334155;color:var(--muted)}
+.flag.on{border-color:var(--ok);color:var(--ok)}
+.flag.off{border-color:var(--bad);color:var(--bad)}
+.next{background:#0f172a;border:1px solid rgba(34,211,238,.25);border-radius:14px;padding:10px 12px;min-height:48px}
+.next .turn{font-size:15px;font-weight:600;color:#e2e8f0}
+.next .meta{font-size:12px;color:var(--muted);margin-top:4px}
+.dash{position:fixed;left:8px;right:8px;bottom:68px;z-index:6;max-width:520px;margin:0 auto;background:rgba(2,6,23,.94);border:1px solid rgba(168,85,247,.3);border-radius:18px;padding:10px;backdrop-filter:blur(14px)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.metrics div{background:#0f172a;border-radius:12px;padding:8px 2px;text-align:center}
+.metrics b{display:block;font-size:1rem;font-variant-numeric:tabular-nums;color:var(--cyan)}
+.metrics span{font-size:9px;color:var(--muted);text-transform:uppercase}
+.fields{display:grid;gap:6px;margin-bottom:8px}
+.fields input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:var(--ink);font:inherit;font-size:14px}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:none;border-radius:12px;padding:11px 12px;font-size:12px;font-weight:600;color:#fff}
+.pri{background:linear-gradient(135deg,#a855f7,#4f46e5);flex:1}
+.go{background:linear-gradient(135deg,#0891b2,#4f46e5);flex:1}
+.g{background:#1e293b;border:1px solid #334155;color:var(--ink)}
+.note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.35}
 </style>
 </head>
 <body>
 <div id="map"></div>
-<div class="top">
-  <a href="/">АКСИ</a>
-  <span class="pill" id="net">…</span>
-  <span class="pill" id="gps">GPS</span>
+<div class="banner">
+  <div class="banner-top">
+    <a href="/">АКСИ</a>
+    <div class="flags">
+      <span class="flag" id="f-gps">GPS</span>
+      <span class="flag" id="f-net">NET</span>
+      <span class="flag" id="f-follow">FOLLOW</span>
+    </div>
+  </div>
+  <div class="next">
+    <div class="turn" id="turn">Нажмите «Вести», чтобы карта шла за вами</div>
+    <div class="meta" id="turn-meta">Маршрут · скорость · подсказки</div>
+  </div>
 </div>
 <div class="dash">
   <div class="metrics">
     <div><b id="spd">—</b><span>км/ч</span></div>
-    <div><b id="hdg">—</b><span>курс°</span></div>
-    <div><b id="acc">—</b><span>точность м</span></div>
-    <div><b id="dist">0</b><span>км трек</span></div>
+    <div><b id="hdg">—</b><span>курс</span></div>
+    <div><b id="left">—</b><span>осталось</span></div>
+    <div><b id="eta">—</b><span>ETA</span></div>
+  </div>
+  <div class="fields">
+    <input id="dest" placeholder="Куда едем? (город, адрес)"/>
   </div>
   <div class="row">
-    <button type="button" class="pri" id="btn-start">Старт трека</button>
+    <button type="button" class="pri" id="btn-follow">Вести</button>
+    <button type="button" class="go" id="btn-route">Маршрут сюда</button>
     <button type="button" class="g" id="btn-stop">Стоп</button>
-    <button type="button" class="g" id="btn-wx">Осадки</button>
   </div>
-  <div id="wx">Погода: —</div>
-  <p class="note"><em>Честно:</em> GPS работает без мобильного интернета. Если сигнал спутников <b>глушат</b> — ни одно приложение на Земле не узнает координаты. Карта офлайн — из кеша тайлов, которые вы уже открывали. Маршрут A→B без сети требует заранее скачанных данных.</p>
+  <p class="note">Карта едет за вами (FOLLOW). Маршрут — OSRM + подсказки на поворотах. Живые пробки уровня Google/Яндекс — только у владельцев платных данных о трафике; в открытом стеке их нет. GPS без мобильного интернета работает.</p>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="/nav.js"></script>
 <script>
 (function(){
-  if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("/sw.js").catch(function(){});
-  }
-  var map=L.map("map",{zoomControl:true}).setView([55.75,37.62],13);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-    maxZoom:18,attribution:"© OSM"
-  }).addTo(map);
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});
+  var map=L.map("map",{zoomControl:false}).setView([55.75,37.62],14);
+  L.control.zoom({position:"topright"}).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OSM"}).addTo(map);
 
-  var watchId=null, marker=null, line=null, pts=[], last=null, trackKm=0;
-  var gpsEl=document.getElementById("gps");
-  var netEl=document.getElementById("net");
+  var watchId=null,me=null,trail=null,routeLine=null,destMark=null;
+  var pts=[],following=false,last=null,routeSteps=[],stepIdx=0;
+  var fGps=document.getElementById("f-gps"),fNet=document.getElementById("f-net"),fFollow=document.getElementById("f-follow");
 
-  function setNet(){
-    netEl.textContent=navigator.onLine?"онлайн":"офлайн";
-    netEl.className="pill"+(navigator.onLine?"":" on");
-  }
-  setNet();
-  window.addEventListener("online",setNet);
-  window.addEventListener("offline",setNet);
+  function setFlag(el,on,text){el.textContent=text;el.className="flag "+(on?"on":"off");}
+  function net(){setFlag(fNet,navigator.onLine,navigator.onLine?"NET":"OFF");}
+  net();window.addEventListener("online",net);window.addEventListener("offline",net);
 
   function haversine(a,b){
-    var R=6371,to=Math.PI/180;
+    var R=6371000,to=Math.PI/180;
     var dLat=(b.lat-a.lat)*to,dLon=(b.lon-a.lon)*to;
     var x=Math.sin(dLat/2)**2+Math.cos(a.lat*to)*Math.cos(b.lat*to)*Math.sin(dLon/2)**2;
     return 2*R*Math.asin(Math.sqrt(x));
   }
+  function fmtKm(m){return m>=1000?(m/1000).toFixed(1)+" км":Math.round(m)+" м";}
+  function fmtMin(s){var m=Math.round(s/60);return m>=60?Math.floor(m/60)+"ч "+(m%60)+"м":m+" мин";}
+
+  function ensureMe(lat,lon){
+    if(!me){
+      me=L.marker([lat,lon],{
+        icon:L.divIcon({className:"",html:"<div style=\"width:18px;height:18px;border-radius:50%;background:#22d3ee;border:3px solid #a855f7;box-shadow:0 0 14px #22d3ee\"></div>",iconSize:[18,18],iconAnchor:[9,9]})
+      }).addTo(map);
+    } else me.setLatLng([lat,lon]);
+  }
+
+  function updateStep(lat,lon){
+    if(!routeSteps.length){
+      document.getElementById("turn").textContent=following?"Следуем за вами…":"Нажмите «Вести»";
+      document.getElementById("turn-meta").textContent="Без маршрута — только живой трек";
+      document.getElementById("left").textContent="—";
+      document.getElementById("eta").textContent="—";
+      return;
+    }
+    while(stepIdx<routeSteps.length-1){
+      var s=routeSteps[stepIdx];
+      var end=s.maneuver&&s.maneuver.location;
+      if(!end)break;
+      if(haversine({lat:lat,lon:lon},{lat:end[1],lon:end[0]})<40)stepIdx++;else break;
+    }
+    var cur=routeSteps[stepIdx];
+    var instr=(cur&&cur.maneuver&&cur.maneuver.instruction)||cur.name||"Продолжайте";
+    document.getElementById("turn").textContent=instr;
+    var remainM=0,remainS=0;
+    for(var i=stepIdx;i<routeSteps.length;i++){
+      remainM+=routeSteps[i].distance||0;
+      remainS+=routeSteps[i].duration||0;
+    }
+    document.getElementById("left").textContent=fmtKm(remainM);
+    document.getElementById("eta").textContent=fmtMin(remainS);
+    document.getElementById("turn-meta").textContent="Шаг "+(stepIdx+1)+"/"+routeSteps.length+" · "+fmtKm(cur.distance||0)+" до манёвра";
+  }
 
   function onPos(pos){
-    var lat=pos.coords.latitude, lon=pos.coords.longitude;
-    var spd=pos.coords.speed; // m/s or null
-    var hdg=pos.coords.heading;
-    var acc=pos.coords.accuracy;
-    document.getElementById("spd").textContent=spd!=null&&!isNaN(spd)?(spd*3.6).toFixed(0):"—";
-    document.getElementById("hdg").textContent=hdg!=null&&!isNaN(hdg)?Math.round(hdg):"—";
-    document.getElementById("acc").textContent=acc!=null?Math.round(acc):"—";
-    gpsEl.textContent="GPS ✓";gpsEl.className="pill on";
-
-    var p={lat:lat,lon:lon,t:Date.now()};
-    if(last){
-      var d=haversine(last,p);
-      if(d<50){trackKm+=d;document.getElementById("dist").textContent=trackKm.toFixed(2);}
+    var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    var spd=pos.coords.speed,hdg=pos.coords.heading;
+    setFlag(fGps,true,"GPS");
+    document.getElementById("spd").textContent=spd!=null&&!isNaN(spd)?Math.max(0,spd*3.6).toFixed(0):"—";
+    document.getElementById("hdg").textContent=hdg!=null&&!isNaN(hdg)?Math.round(hdg)+"°":"—";
+    ensureMe(lat,lon);
+    pts.push([lat,lon]);
+    if(pts.length>1){
+      if(trail)map.removeLayer(trail);
+      trail=L.polyline(pts,{color:"#22d3ee",weight:4,opacity:0.8}).addTo(map);
     }
-    last=p;pts.push([lat,lon]);
-    try{sessionStorage.setItem("AKSI_TRACK",JSON.stringify(pts.slice(-2000)));}catch(e){}
-
-    if(!marker){
-      marker=L.circleMarker([lat,lon],{radius:8,color:"#22d3ee",fillColor:"#a855f7",fillOpacity:1,weight:3}).addTo(map);
-      map.setView([lat,lon],16);
-    }else{
-      marker.setLatLng([lat,lon]);
-      map.panTo([lat,lon],{animate:true,duration:0.5});
+    if(following){
+      map.panTo([lat,lon],{animate:true,duration:0.35});
+      if(map.getZoom()<15)map.setZoom(16);
     }
-    if(line)map.removeLayer(line);
-    if(pts.length>1)line=L.polyline(pts,{color:"#22d3ee",weight:4,opacity:0.85}).addTo(map);
+    last={lat:lat,lon:lon};
+    updateStep(lat,lon);
   }
   function onErr(err){
-    gpsEl.textContent=err.code===1?"GPS запрещён":err.code===2?"нет сигнала":"GPS таймаут";
-    gpsEl.className="pill";
+    setFlag(fGps,false,err.code===1?"GPS!":"GPS?");
+    document.getElementById("turn").textContent=err.code===1?"Разрешите геолокацию":"Нет сигнала GPS";
   }
 
-  document.getElementById("btn-start").onclick=function(){
+  function startFollow(){
     if(!navigator.geolocation){alert("Нет геолокации");return;}
-    if(watchId!=null)return;
-    pts=[];trackKm=0;last=null;
-    watchId=navigator.geolocation.watchPosition(onPos,onErr,{
-      enableHighAccuracy:true,maximumAge:1000,timeout:15000
-    });
-    gpsEl.textContent="GPS…";
-  };
-  document.getElementById("btn-stop").onclick=function(){
+    following=true;setFlag(fFollow,true,"FOLLOW");
+    if(watchId==null){
+      watchId=navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:500,timeout:12000});
+    }
+    document.getElementById("turn").textContent="Ведём…";
+  }
+  function stopAll(){
+    following=false;setFlag(fFollow,false,"FOLLOW");
     if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
-    gpsEl.textContent="стоп";gpsEl.className="pill";
-  };
+    document.getElementById("turn").textContent="Остановлено";
+  }
 
-  document.getElementById("btn-wx").onclick=async function(){
-    var el=document.getElementById("wx");
-    if(!last){el.textContent="Сначала включите трек (нужна точка)";return;}
-    if(!navigator.onLine){el.textContent="Осадки: нет сети (нужен интернет для погоды)";return;}
-    el.textContent="Загрузка…";
+  async function geocode(q){
+    var m=/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/.exec(q);
+    if(m)return{lat:+m[1],lon:+m[2],name:q};
+    var j=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q),{headers:{"Accept-Language":"ru"}}).then(function(r){return r.json();});
+    if(!j||!j[0])throw new Error("Адрес не найден");
+    return{lat:+j[0].lat,lon:+j[0].lon,name:j[0].display_name};
+  }
+
+  async function buildRoute(){
+    var q=document.getElementById("dest").value.trim();
+    if(!q){document.getElementById("turn").textContent="Укажите куда едем";return;}
+    if(!last){
+      document.getElementById("turn").textContent="Определяем где вы…";
+      try{
+        await new Promise(function(resolve,reject){
+          navigator.geolocation.getCurrentPosition(function(p){
+            last={lat:p.coords.latitude,lon:p.coords.longitude};
+            ensureMe(last.lat,last.lon);resolve();
+          },reject,{enableHighAccuracy:true,timeout:10000});
+        });
+      }catch(e){}
+    }
+    if(!last){document.getElementById("turn").textContent="Нужен GPS";return;}
+    document.getElementById("turn").textContent="Строим маршрут…";
     try{
-      var url="https://api.open-meteo.com/v1/forecast?latitude="+last.lat+"&longitude="+last.lon+"&current=temperature_2m,precipitation,weather_code,wind_speed_10m&timezone=auto";
-      var j=await fetch(url).then(function(r){return r.json();});
-      var c=j.current||{};
-      el.textContent="Сейчас: "+(c.temperature_2m!=null?c.temperature_2m+"°C":"—")+
-        ", осадки "+(c.precipitation!=null?c.precipitation+" мм":"—")+
-        ", ветер "+(c.wind_speed_10m!=null?c.wind_speed_10m+" км/ч":"—");
-    }catch(e){el.textContent="Погода недоступна";}
-  };
+      var B=await geocode(q);
+      if(destMark)map.removeLayer(destMark);
+      destMark=L.marker([B.lat,B.lon]).addTo(map);
+      var url="https://router.project-osrm.org/route/v1/driving/"+last.lon+","+last.lat+";"+B.lon+","+B.lat+"?overview=full&geometries=geojson&steps=true";
+      var data=await fetch(url).then(function(r){return r.json();});
+      if(data.code!=="Ok"||!data.routes[0])throw new Error("Нет маршрута");
+      var rt=data.routes[0];
+      if(routeLine)map.removeLayer(routeLine);
+      routeLine=L.geoJSON(rt.geometry,{style:{color:"#a855f7",weight:6,opacity:0.85}}).addTo(map);
+      routeSteps=[];
+      (rt.legs||[]).forEach(function(leg){(leg.steps||[]).forEach(function(st){routeSteps.push(st);});});
+      stepIdx=0;
+      map.fitBounds(routeLine.getBounds(),{padding:[50,50]});
+      document.getElementById("left").textContent=fmtKm(rt.distance);
+      document.getElementById("eta").textContent=fmtMin(rt.duration);
+      document.getElementById("turn").textContent="Маршрут готов";
+      document.getElementById("turn-meta").textContent=fmtKm(rt.distance)+" · "+fmtMin(rt.duration);
+      startFollow();
+    }catch(e){
+      document.getElementById("turn").textContent="Ошибка: "+(e.message||e);
+    }
+  }
+
+  document.getElementById("btn-follow").onclick=startFollow;
+  document.getElementById("btn-stop").onclick=stopAll;
+  document.getElementById("btn-route").onclick=buildRoute;
 })();
 </script>
 </body>
