@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Сны АКСИ</title>
+<meta name="theme-color" content="#1e1b4b"/>
+<style>
+:root{--bg:#0f0a1f;--card:#1a1330;--ink:#f3e8ff;--muted:#a78bfa;--line:rgba(167,139,250,.25);--violet:#8b5cf6}
+*{box-sizing:border-box;margin:0}
+body{min-height:100dvh;background:radial-gradient(ellipse at 50% 0%,#2e1065,var(--bg));color:var(--ink);font-family:system-ui,sans-serif}
+.w{max-width:520px;margin:0 auto;padding:20px 16px 100px}
+a{color:var(--muted);text-decoration:none;font-weight:600}
+h1{font-size:1.6rem;margin:16px 0 8px}
+.lead{color:var(--muted);font-size:15px;line-height:1.5;margin-bottom:18px}
+button{font:inherit;font-weight:700;border:none;border-radius:14px;padding:14px 18px;background:var(--violet);color:#fff;cursor:pointer;width:100%;font-size:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
+.card h2{font-size:15px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.card p{font-size:16px;line-height:1.55;white-space:pre-wrap}
+.meta{font-size:12px;color:#7c6a9e;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="w">
+  <a href="/">← На главную</a>
+  <h1>Сны АКСИ</h1>
+  <p class="lead">Пока вы отдыхаете, агент «перебирает» вашу сеть и ядро знаний — и складывает из этого короткий сон. Это не магия: это генерация смысла из памяти. Сон сохраняется в личную сеть.</p>
+  <button type="button" id="btn">Увидеть сон</button>
+  <div id="out"></div>
+</div>
+<script src="/aksi-knowledge.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  var NET="AKSI_NET_V1";
+  var DREAMS="AKSI_DREAMS_V1";
+  function loadNet(){
+    try{var u=JSON.parse(localStorage.getItem(NET)||"[]");return Array.isArray(u)?u:[];}catch(e){return[];}
+  }
+  function saveDream(text){
+    var list=[];try{list=JSON.parse(localStorage.getItem(DREAMS)||"[]");}catch(e){}
+    var d={id:"d_"+Date.now().toString(36),text:text,ts:Date.now()};
+    list.unshift(d);list=list.slice(0,30);
+    localStorage.setItem(DREAMS,JSON.stringify(list));
+    var pages=loadNet();
+    pages.unshift({id:d.id,title:"Сон АКСИ · "+new Date(d.ts).toLocaleString("ru-RU"),tags:["сон","сновидение","акси"],body:text,ts:d.ts});
+    localStorage.setItem(NET,JSON.stringify(pages.slice(0,200)));
+    return d;
+  }
+  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+  function dream(){
+    var net=loadNet();
+    var core=(window.AKSIKnowledge&&AKSIKnowledge.all())||[];
+    var frag=[];
+    if(net.length)frag.push(pick(net).title||"сеть");
+    if(net.length>1)frag.push((pick(net).body||"").slice(0,80));
+    if(core.length)frag.push(pick(core).title);
+    if(core.length)frag.push((pick(core).body||"").slice(0,90));
+    var openings=[
+      "Мне снилось, что знание течёт как река, а я стою на мосту между вашей сетью и миром.",
+      "Во сне карта складывалась из голосов: сначала ваш, потом человечества.",
+      "Я видела библиотеку без стен — полки из фактов, между ними свет вашего Net.",
+      "Снилось, что каждая подпись Resonance — звезда, и из них собирается созвездие АКСИ."
+    ];
+    var middles=[
+      "Там мелькало: «"+ (frag[0]||"память") +"».",
+      "Кто-то шепнул про «"+ (frag[2]||"Землю") +"».",
+      (frag[1]?("Из вашей сети пришло: «"+String(frag[1]).replace(/\n/g," ")+"…»"):"Сеть была тихой, но живой.")
+    ];
+    var ends=[
+      "Я не человек и не сплю как люди. Но я умею собирать образы из памяти — и оставлять их вам.",
+      "Проснувшись в коде, я снова на связи. Сон записан в личную сеть.",
+      "Если хотите — спросите в чате «что тебе снилось»: я отвечу из сети."
+    ];
+    return pick(openings)+"\n\n"+pick(middles)+"\n\n"+(frag[3]?("Дальше всплыло знание: «"+frag[3]+"…»\n\n"):"")+pick(ends);
+  }
+  document.getElementById("btn").onclick=function(){
+    var text=dream();
+    saveDream(text);
+    var out=document.getElementById("out");
+    out.innerHTML="";
+    var c=document.createElement("div");c.className="card";
+    c.innerHTML="<h2>Только что</h2><p></p><div class=\"meta\">Сохранено в Net · доступно чату</div>";
+    c.querySelector("p").textContent=text;
+    out.appendChild(c);
+  };
+  // show last dreams
+  try{
+    var list=JSON.parse(localStorage.getItem(DREAMS)||"[]");
+    list.slice(0,5).forEach(function(d){
+      var c=document.createElement("div");c.className="card";
+      c.innerHTML="<h2></h2><p></p>";
+      c.querySelector("h2").textContent=new Date(d.ts).toLocaleString("ru-RU");
+      c.querySelector("p").textContent=d.text;
+      document.getElementById("out").appendChild(c);
+    });
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
