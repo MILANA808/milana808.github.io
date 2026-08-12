@@ -1,7 +1,6 @@
 # АКСИ · Public release
 
-**Линия:** Альфия Баширова · 14.02.1995  
-**Сборка:** АКСИ × Grok (xAI)
+**Проект:** АКСИ · контакт aksilove@internet.ru
 
 ## Главный вход
 https://milana808.github.io/aksi/
@@ -9,11 +8,8 @@ https://milana808.github.io/aksi/
 ## Публичный контур
 - Resonance Talk (голос, i18n)
 - Кодекс + фильтр
-- Wikipedia / arXiv / курсы / погода
-- 3D avatar, E2E messages, Passport, Admin, Earn, Hub
-- MATRIX chat + quantum
-- PWA (manifest, SW, icon)
-- sitemap · robots
+- Wikipedia / курсы / погода
+- Passport, Admin, Hub, MATRIX, PWA
 
 ## Backend
 ```bash
