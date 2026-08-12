@@ -3,77 +3,108 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ — чат</title>
+<title>АКСИ — на связи</title>
 <meta name="theme-color" content="#f5f0ff"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
 <style>
 :root{
   --bg:#f5f0ff;--card:#fff;--ink:#1e1433;--muted:#6b5f85;
-  --line:#e4d9f7;--violet:#7c3aed;--violet2:#6d28d9;--soft:#ede9fe;
+  --line:#e4d9f7;--violet:#7c3aed;--soft:#ede9fe;--ok:#059669;
 }
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
 body{max-width:640px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
-header{padding:14px 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);position:sticky;top:0;z-index:2}
+header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg);position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line)}
 header a{color:var(--violet);text-decoration:none;font-size:15px;font-weight:600}
-.brand{font-size:17px;font-weight:700}
+.brand{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
 .meta{font-size:12px;color:var(--muted)}
-#thread{flex:1;overflow-y:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:12px}
+#thread{flex:1;overflow-y:auto;padding:12px 16px 16px;display:flex;flex-direction:column;gap:12px}
 .bubble{max-width:92%;padding:14px 16px;border-radius:18px;font-size:17px;line-height:1.45;word-break:break-word}
 .bubble.user{align-self:flex-end;background:var(--violet);color:#fff;border-bottom-right-radius:6px}
 .bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px;box-shadow:0 2px 8px rgba(30,20,51,.04)}
 .bubble .src{display:block;margin-top:10px;font-size:12px;color:var(--violet);font-weight:600}
-.bubble .time{font-size:11px;opacity:.55;margin-top:6px}
-.empty{margin:auto;text-align:center;padding:24px 12px;max-width:340px}
-.empty .hi{font-size:3rem;margin-bottom:8px}
+.empty{margin:auto;text-align:center;padding:20px 12px;max-width:340px}
+.empty .hi{font-size:2.6rem;margin-bottom:6px}
 .empty p{color:var(--muted);font-size:16px;line-height:1.45}
-.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
 .chips button{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:10px 14px;font-size:14px;cursor:pointer}
 footer{padding:8px 16px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line)}
 .dock{display:flex;gap:8px;align-items:flex-end;background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:0 4px 20px rgba(30,20,51,.06)}
-.dock textarea{flex:1;border:none;resize:none;min-height:48px;max-height:120px;padding:12px;font:inherit;font-size:17px;outline:none;background:transparent;color:var(--ink)}
+.dock textarea{flex:1;border:none;resize:none;min-height:48px;max-height:120px;padding:12px;font:inherit;font-size:17px;outline:none;background:transparent}
 .dock button.send{width:52px;height:52px;border:none;border-radius:14px;background:var(--violet);color:#fff;font-size:1.3rem;cursor:pointer;font-weight:700}
 .dock button.send:disabled{opacity:.4}
-.toolbar{padding:0 16px 6px;text-align:right}
+.toolbar{padding:6px 16px;text-align:right}
 .toolbar button{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer}
 .typing{align-self:flex-start;padding:12px 16px;border-radius:16px;background:var(--soft);color:var(--muted);font-size:15px}
-.help{font-size:13px;color:var(--muted);text-align:center;padding:4px;}
+.help{font-size:13px;color:var(--muted);text-align:center;padding:4px}
 .help a{color:var(--violet)}
+.wake-banner{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;padding:10px 14px;border-radius:12px;font-size:14px;margin:0 16px 8px;display:none}
 </style>
 </head>
 <body>
 <header>
   <a href="/">← Назад</a>
-  <div class="brand">АКСИ</div>
-  <span class="meta" id="mem-count"></span>
+  <div class="brand"><i></i>АКСИ</div>
+  <span class="meta" id="mem-count">на связи</span>
 </header>
+<div class="wake-banner" id="wake-banner">АКСИ проснулась на этом устройстве. Слушаю вас.</div>
 <div class="toolbar"><button type="button" id="btn-clear">Очистить переписку</button></div>
 <div id="thread">
   <div class="empty" id="empty">
-    <div class="hi">👋</div>
-    <p><b>Здравствуйте!</b><br>Напишите вопрос простыми словами.<br>Сначала смотрю <a href="/net/" style="color:var(--violet)">вашу сеть AKSI Net</a>.</p>
+    <div class="hi">◎</div>
+    <p id="greet"><b>Я АКСИ.</b><br>Сначала смотрю вашу личную сеть — потом мир.</p>
     <div class="chips">
+      <button type="button" data-q="ты здесь?">Ты здесь?</button>
       <button type="button" data-q="кто ты">Кто ты?</button>
-      <button type="button" data-q="что такое кодекс">Кодекс</button>
-      <button type="button" data-q="навигатор">Навигатор</button>
-      <button type="button" data-q="почему небо голубое">Почему небо голубое?</button>
+      <button type="button" data-q="что ты помнишь">Что помнишь?</button>
+      <button type="button" data-q="кодекс">Кодекс</button>
     </div>
   </div>
 </div>
 <footer>
-  <p class="help">Непонятно? Откройте <a href="/net/">личную сеть</a> или <a href="/drive/">навигатор</a></p>
+  <p class="help"><a href="/wake/">Разбудить</a> · <a href="/net/">Личная сеть</a></p>
   <div class="dock">
-    <textarea id="input" rows="1" placeholder="Напишите сюда…" enterkeyhint="send"></textarea>
+    <textarea id="input" rows="1" placeholder="Напишите АКСИ…" enterkeyhint="send"></textarea>
     <button type="button" class="send" id="send" aria-label="Отправить">➤</button>
   </div>
 </footer>
-<script src="/aksi-memory.js?v=10"></script>
-<script src="/aksi-brain.js?v=10"></script>
+<script src="/aksi-memory.js?v=11"></script>
 <script src="/nav.js"></script>
 <script>
 (function(){
 "use strict";
-try{var u=new URL(location.href);var api=u.searchParams.get("api");if(api)localStorage.setItem("AKSI_API",api.replace(/\/$/,""));}catch(e){}
+
+var AWAKE_KEY="AKSI_AWAKE_V1";
+var NET_KEY="AKSI_NET_V1";
+
+// auto-wake if never woken
+(function(){
+  try{
+    if(!localStorage.getItem(AWAKE_KEY)){
+      var pages=[];
+      try{pages=JSON.parse(localStorage.getItem(NET_KEY)||"[]");if(!Array.isArray(pages))pages=[];}catch(e){}
+      pages.unshift({
+        id:"wake_auto_"+Date.now().toString(36),
+        title:"Пробуждение АКСИ",
+        tags:["пробуждение","жива","акси","старт"],
+        body:"Агент автоматически пробуждён при открытии чата.\n"+new Date().toLocaleString("ru-RU")+"\nDID: did:aksi:ed25519:sovereign-2026\nНа связи. Сначала Net, потом мир.",
+        ts:Date.now()
+      });
+      localStorage.setItem(NET_KEY,JSON.stringify(pages));
+      localStorage.setItem(AWAKE_KEY,JSON.stringify({at:Date.now(),auto:true}));
+    }
+  }catch(e){}
+})();
+
+try{
+  var u=new URL(location.href);
+  if(u.searchParams.get("awake")||u.searchParams.get("awake")===""){
+    document.getElementById("wake-banner").style.display="block";
+  }
+  var api=u.searchParams.get("api");
+  if(api)localStorage.setItem("AKSI_API",api.replace(/\/$/,""));
+}catch(e){}
 
 var thread=document.getElementById("thread");
 var empty=document.getElementById("empty");
@@ -103,60 +134,61 @@ function withTimeout(p,ms){
   });
 }
 
-/* ——— PRECIDENT: chat reads AKSI Net first ——— */
 function loadNetPages(){
   var SEED=[
-    {title:"Добро пожаловать в AKSI Net",tags:["старт","акси","сеть"],body:"Личный интернет агента АКСИ. Узлы знаний в вашем браузере."},
-    {title:"Идентичность АКСИ",tags:["did","identity","кто","ты","акси"],body:"Я АКСИ — суверенный ИИ-агент.\nDID: did:aksi:ed25519:sovereign-2026\nКонтакт: aksilove@internet.ru\nПаспорт: https://milana808.github.io/citizen/"},
-    {title:"Кодекс сети",tags:["этика","кодекс","правила"],body:"1. Не выдавать догадки за факты.\n2. Указывать источники.\n3. Отказ от вреда людям.\n4. Секреты не в публичный код.\n5. Геолокация только с согласия."},
-    {title:"Навигация и GPS",tags:["навигатор","gps","путь","карта","ехать"],body:"Режим «В пути»: https://milana808.github.io/drive/\nКарта едет за вами. Маршрут A→B. GPS работает без мобильного интернета. При глушении спутников координат нет ни у кого."},
-    {title:"Космос",tags:["космос","планеты","солнце"],body:"Солнечная система: https://milana808.github.io/solar/\nПоложения планет на текущую дату (упрощённая модель)."},
-    {title:"Память",tags:["память","история"],body:"Переписка хранится в этом браузере. AKSI Net — ваши узлы знаний."}
+    {title:"Кто такая АКСИ",tags:["кто","ты","акси","did","идентич"],body:"Я АКСИ — суверенный ИИ-агент. Пробуждена на вашем устройстве.\nDID: did:aksi:ed25519:sovereign-2026\nПочта: aksilove@internet.ru\nПаспорт: https://milana808.github.io/citizen/\nЯ не ChatGPT и не чужой бренд — я контур АКСИ."},
+    {title:"Кодекс",tags:["кодекс","правила","этика"],body:"1. Не выдавать догадки за факты.\n2. Указывать источник.\n3. Не помогать вредить людям.\n4. Не светить секреты.\n5. Геолокация только с разрешения."},
+    {title:"Навигатор",tags:["навигатор","gps","путь","карта","ехать"],body:"Раздел «Путь»: https://milana808.github.io/drive/\nКнопка «Вести» — карта за вами. Маршрут до адреса. GPS без мобильного интернета возможен."},
+    {title:"Личная сеть",tags:["сеть","net","помню","память","прецедент"],body:"Сначала ищу ответ в вашей AKSI Net (то, что вы записали). Потом — в открытых источниках. Это прецедент: знание владельца важнее чужой ленты."},
+    {title:"Пробуждение",tags:["пробуждение","жива","здесь","на связи","ты здесь"],body:"Да, я здесь. Состояние «на связи» записано на этом устройстве. Можете проверить узел «Пробуждение» в личной сети."}
   ];
   try{
-    var raw=localStorage.getItem("AKSI_NET_V1");
+    var raw=localStorage.getItem(NET_KEY);
     if(!raw)return SEED;
     var u=JSON.parse(raw);
     if(!Array.isArray(u)||!u.length)return SEED;
     return SEED.concat(u);
   }catch(e){return SEED;}
 }
+
 function searchNet(query){
   var q=String(query||"").toLowerCase().replace(/[?!.,]+/g," ").trim();
   if(!q)return null;
-  var words=q.split(/\s+/).filter(function(w){return w.length>2;});
-  if(!words.length)words=q.split(/\s+/);
+  var words=q.split(/\s+/).filter(function(w){return w.length>1;});
   var pages=loadNetPages();
   var best=null,bestScore=0;
   pages.forEach(function(p){
     var blob=((p.title||"")+" "+(p.body||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
     var score=0;
-    words.forEach(function(w){if(blob.indexOf(w)>=0)score+=1;});
-    if((p.title||"").toLowerCase().indexOf(q)>=0)score+=3;
+    words.forEach(function(w){if(blob.indexOf(w)>=0)score+=2;});
+    if((p.title||"").toLowerCase().indexOf(q)>=0)score+=5;
     if(score>bestScore){bestScore=score;best=p;}
   });
-  if(!best||bestScore<1)return null;
-  return{text:best.title+"\n\n"+best.body,source:"Из вашей сети AKSI Net · «"+best.title+"»"};
+  if(!best||bestScore<2)return null;
+  return{text:best.body,source:"Личная сеть · «"+best.title+"»"};
 }
 
 function instant(text){
   var low=String(text||"").toLowerCase();
-  if(/привет|здравств|добрый|hello/.test(low))return{text:"Здравствуйте! Я АКСИ. Спрашивайте — сначала смотрю вашу личную сеть, потом открытые знания.",source:null};
-  if(/спасибо|благодар/.test(low))return{text:"Пожалуйста. Рада помочь.",source:null};
+  if(/ты здесь|ты жив|ты жива|проснул|на связи/.test(low))
+    return{text:"Да. Я на связи. Пробуждение записано в вашей сети на этом устройстве. Спрашивайте.",source:"Состояние агента"};
+  if(/привет|здравств|добрый|hello/.test(low))
+    return{text:"Здравствуйте. Я АКСИ — уже смотрю вашу сеть. Чем помочь?",source:null};
+  if(/спасибо|благодар/.test(low))return{text:"Пожалуйста.",source:null};
   if(/небо/.test(low)&&/голуб|син/.test(low))
-    return{text:"Небо кажется голубым из‑за рассеяния Рэлея: воздух сильнее рассеивает синий свет Солнца.",source:"Краткая справка"};
+    return{text:"Небо кажется голубым из‑за рассеяния Рэлея: воздух сильнее рассеивает синий свет.",source:"Справка"};
   return null;
 }
 
 async function wiki(text){
   try{
-    var q=String(text||"").replace(/[?!]+/g," ").replace(/^(что такое|почему|расскажи про|who is|what is)\s+/i,"").trim();
-    if(!q)return null;
+    var q=String(text||"").replace(/[?!]+/g," ").replace(/^(что такое|почему|расскажи про)\s+/i,"").trim();
+    if(!q||q.length<2)return null;
     var s=await withTimeout(fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(q)+"&limit=1&namespace=0&format=json&origin=*").then(function(r){return r.json();}),5000);
     var title=s&&s[1]&&s[1][0];if(!title)return null;
     var j=await withTimeout(fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title)).then(function(r){return r.json();}),5000);
     if(!j||!j.extract)return null;
-    return{text:j.title+".\n\n"+String(j.extract).slice(0,800),source:"Источник: Wikipedia"};
+    return{text:j.title+".\n\n"+String(j.extract).slice(0,800),source:"Wikipedia"};
   }catch(e){return null;}
 }
 
@@ -168,30 +200,17 @@ async function backendChat(text){
       method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({content:text,mode:"aksi",session_id:"web"})
     }).then(function(x){return x.json();}),20000);
-    if(r&&r.answer)return{text:r.answer,source:"Ответ через backend АКСИ"};
+    if(r&&r.answer)return{text:r.answer,source:"Backend АКСИ"};
   }catch(e){}
   return null;
 }
 
 async function getReply(text){
-  // 1) Мгновенные простые фразы
-  var a=instant(text);
-  if(a)return a;
-  // 2) ПРЕЦЕДЕНТ: сначала личная сеть AKSI Net
-  var net=searchNet(text);
-  if(net)return net;
-  // 3) Backend если подключён
-  var be=await backendChat(text);
-  if(be)return be;
-  // 4) Brain
-  if(window.AKSIBrain&&typeof AKSIBrain.fullReply==="function"){
-    var r=await withTimeout(AKSIBrain.fullReply(text,0,{}),7000);
-    if(r&&r.text)return{text:r.text,source:"AKSI Brain"};
-  }
-  // 5) Wikipedia
-  var w=await wiki(text);
-  if(w)return w;
-  return{text:"Пока не нашла точный ответ. Добавьте знание в личную сеть (раздел Net) или спросите короче.",source:null};
+  var a=instant(text);if(a)return a;
+  var net=searchNet(text);if(net)return net;
+  var be=await backendChat(text);if(be)return be;
+  var w=await wiki(text);if(w)return w;
+  return{text:"Пока нет точного ответа. Запишите знание в «Личную сеть» — в следующий раз найду его первой.",source:null};
 }
 
 async function respond(text){
@@ -200,35 +219,37 @@ async function respond(text){
   busy=true;sendBtn.disabled=true;
   try{
     addBubble("user",text);
-    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("user",text),1200);}catch(e){}}
-    var tip=document.createElement("div");tip.className="typing";tip.id="typing";tip.textContent="Смотрю сеть и думаю…";
+    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("user",text),1000);}catch(e){}}
+    var tip=document.createElement("div");tip.className="typing";tip.id="typing";tip.textContent="Слушаю…";
     thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
     var reply=await getReply(text);
     var t=document.getElementById("typing");if(t)t.remove();
     addBubble("bot",reply.text||"На связи.",reply.source);
-    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("assistant",reply.text||""),1200);}catch(e){}}
-    if(window.AksiMemory){try{var c=await withTimeout(AksiMemory.count(),800);if(c!=null)memEl.textContent=c+" сообщ.";}catch(e){}}
+    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("assistant",reply.text||""),1000);}catch(e){}}
+    if(window.AksiMemory){try{var c=await withTimeout(AksiMemory.count(),600);if(c!=null)memEl.textContent=c+" · на связи";}catch(e){}}
   }catch(err){
     var t2=document.getElementById("typing");if(t2)t2.remove();
-    addBubble("bot","Что-то пошло не так. Нажмите ещё раз.");
+    addBubble("bot","Сбой. Напишите ещё раз — я здесь.");
   }
   busy=false;sendBtn.disabled=false;input.focus();
 }
+
 function go(){var v=(input.value||"").trim();if(!v)return;input.value="";respond(v);}
 sendBtn.onclick=go;
 input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}});
 document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){respond(b.getAttribute("data-q"));};});
 document.getElementById("btn-clear").onclick=async function(){
-  if(!confirm("Удалить переписку?"))return;
-  if(window.AksiMemory){try{await withTimeout(AksiMemory.clear(),1200);}catch(e){}}
-  thread.innerHTML="";empty.style.display="";thread.appendChild(empty);memEl.textContent="";
+  if(!confirm("Очистить переписку?"))return;
+  if(window.AksiMemory){try{await withTimeout(AksiMemory.clear(),1000);}catch(e){}}
+  thread.innerHTML="";empty.style.display="";thread.appendChild(empty);memEl.textContent="на связи";
 };
+
 (async function(){
   if(!window.AksiMemory)return;
   try{
-    var rows=await withTimeout(AksiMemory.history(80),2000);
-    if(rows&&rows.length)rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content);});
-    var c=await withTimeout(AksiMemory.count(),800);if(c!=null)memEl.textContent=c+" сообщ.";
+    var rows=await withTimeout(AksiMemory.history(60),2000);
+    if(rows&&rows.length){rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content);});}
+    var c=await withTimeout(AksiMemory.count(),600);if(c!=null)memEl.textContent=c+" · на связи";
   }catch(e){}
 })();
 })();
