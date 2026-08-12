@@ -62,12 +62,12 @@ footer{flex-shrink:0;padding:6px 0 16px}
 <div id="thread">
   <div class="empty" id="empty">
     <div class="orb">Ψ</div>
-    <p>Суверенный интеллект.<br>Пишите — отвечу. Память хранится у вас.</p>
+    <p>Суверенный интеллект.<br>Пишите — отвечу по существу.</p>
     <div class="chips">
       <button type="button" data-q="кто ты">кто ты</button>
+      <button type="button" data-q="почему небо голубое">почему небо голубое</button>
       <button type="button" data-q="что такое квантовый компьютер">квантовый компьютер</button>
       <button type="button" data-q="биткоин">биткоин</button>
-      <button type="button" data-q="погода Москва">погода</button>
     </div>
   </div>
 </div>
@@ -79,13 +79,12 @@ footer{flex-shrink:0;padding:6px 0 16px}
   </div>
 </footer>
 </div>
-<script src="/aksi-memory.js"></script>
-<script src="/codex.js"></script>
-<script src="/aksi-brain.js"></script>
+<script src="/aksi-memory.js?v=7"></script>
+<script src="/codex.js?v=7"></script>
+<script src="/aksi-brain.js?v=7"></script>
 <script>
 (function(){
 "use strict";
-
 (function(){
   var c=document.getElementById("bg-canvas");if(!c)return;
   var x=c.getContext("2d"),W,H,pts=[];
@@ -110,8 +109,16 @@ var micBtn=document.getElementById("mic");
 var memEl=document.getElementById("mem-count");
 var busy=false,n=0;
 
-function esc(s){return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");}
-function fmt(ts){try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}catch(e){return"";}}
+function esc(s){
+  return String(s)
+    .replace(/&/g,"&")
+    .replace(/</g,"<")
+    .replace(/>/g,">");
+}
+function fmt(ts){
+  try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
+  catch(e){return"";}
+}
 function hideEmpty(){if(empty)empty.style.display="none";}
 function addBubble(role,text,ts){
   hideEmpty();
@@ -133,13 +140,18 @@ function withTimeout(p,ms){
   });
 }
 function localReply(text){
-  var t=(text||"").toLowerCase();
-  if(/привет|здравств|hello|hi\b/.test(t))return"Здравствуйте. Я АКСИ — на связи. Спросите о фактах, курсах, погоде или просто поговорим.";
-  if(/кто ты|что ты|что такое акси/.test(t))return"Я АКСИ, суверенный ИИ-агент. Отвечаю с опорой на открытые источники, храню память разговора в вашем браузере.";
-  if(/как дела/.test(t))return"В рабочем режиме. Чем помочь?";
-  if(/спасибо|благодар/.test(t))return"Пожалуйста.";
-  if(/памят|помнишь/.test(t))return"Да. Сообщения с этого устройства сохраняются локально. Очистить — кнопка сверху.";
-  return"Приняла: «"+String(text).slice(0,100)+"». Уточните вопрос — или нажмите подсказку ниже (если экран пуст)."
+  var t=String(text||"");
+  var low=t.toLowerCase();
+  if(/небо/i.test(t)&&/голуб|син/i.test(t))
+    return"Небо кажется голубым из‑за рассеяния Рэлея: солнечный свет сталкивается с молекулами воздуха, синяя часть спектра рассеивается сильнее. Днём мы видим голубой купол, на закате — красные тона.";
+  if(/привет|здравств|hello|hi\b/.test(low))
+    return"Здравствуйте. Я АКСИ — на связи. Спрашивайте факты и объяснения.";
+  if(/кто ты|что ты|что такое акси/.test(low))
+    return"Я АКСИ, суверенный ИИ-агент. Отвечаю по существу, ищу факты в Wikipedia, храню память в вашем браузере.";
+  if(/как дела/.test(low))return"В рабочем режиме. Чем помочь?";
+  if(/спасибо|благодар/.test(low))return"Пожалуйста.";
+  if(/памят|помнишь/.test(low))return"Да. Сообщения с этого устройства сохраняются локально.";
+  return"Пока нет готового ответа на «"+t.slice(0,80)+"». Попробуйте короче: «фотосинтез», «Эйнштейн», «биткоин»."
 }
 async function safeRemember(role,content){
   if(!window.AksiMemory)return;
@@ -164,7 +176,7 @@ async function loadHistory(){
 }
 async function getReply(text){
   if(window.AKSIBrain&&typeof AKSIBrain.fullReply==="function"){
-    var r=await withTimeout(AKSIBrain.fullReply(text,n,{}),9000);
+    var r=await withTimeout(AKSIBrain.fullReply(text,n,{}),10000);
     if(r&&r.text)return r.text;
   }
   return localReply(text);
@@ -184,7 +196,7 @@ async function respond(text){
     addBubble("user",text,Date.now());
     await safeRemember("user",text);
     var tip=document.createElement("div");
-    tip.className="typing";tip.id="typing";tip.textContent="АКСИ печатает…";
+    tip.className="typing";tip.id="typing";tip.textContent="АКСИ…";
     thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
     var reply=await getReply(text);
     if(!reply)reply=localReply(text);
