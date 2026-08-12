@@ -1,13 +1,11 @@
 /**
- * AKSI Brain v6 — conversational agent
- * Layers: KB → live APIs → Wikipedia → memory-aware fallback
- * Not a foundation LLM; pairs with backend Ollama when available.
+ * AKSI Brain v7 — answers real questions (Wikipedia + local KB)
  */
 (function (global) {
   "use strict";
   var SEED = "AKSI_DIMAX_v3_2026";
   var DID = "did:aksi:ed25519:sovereign-2026";
-  var VERSION = "6.0";
+  var VERSION = "7.0";
 
   function enc(s) {
     return new TextEncoder().encode(String(s));
@@ -39,21 +37,59 @@
   }
 
   function fetchJSON(url, timeoutMs) {
-    timeoutMs = timeoutMs || 5000;
+    timeoutMs = timeoutMs || 6000;
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
     var t = setTimeout(function () {
-      if (ctrl) ctrl.abort();
+      if (ctrl) try { ctrl.abort(); } catch (e) {}
     }, timeoutMs);
     return fetch(url, ctrl ? { signal: ctrl.signal } : {})
       .then(function (r) {
         clearTimeout(t);
-        if (!r.ok) throw new Error("http");
+        if (!r.ok) throw new Error("http " + r.status);
         return r.json();
       })
       .catch(function (e) {
         clearTimeout(t);
         throw e;
       });
+  }
+
+  /* ——— Local knowledge for frequent questions ——— */
+  var LOCAL = [
+    {
+      re: /небо.*голуб|почему.*небо|sky.*blue|почему небо/i,
+      a:
+        "Небо кажется голубым из‑за рассеяния Рэлея: солнечный свет сталкивается с молекулами воздуха, и синяя часть спектра рассеивается сильнее красной. Поэтому днём мы видим голубой «купол», а на закате — красные и оранжевые тона (луч проходит длиннее и синий уже рассеян).",
+    },
+    {
+      re: /что такое (ии|ai|искусственн\w+ интеллект)/i,
+      a:
+        "Искусственный интеллект — системы, которые решают задачи, обычно требующие человеческого мышления: распознавание, язык, планирование. Современные чат-модели обучаются на больших текстах и предсказывают следующий токен; это мощный, но не «живой» разум.",
+    },
+    {
+      re: /кто (ты|вы)|что ты такое|что такое акси/i,
+      a:
+        "Я АКСИ — суверенный ИИ-агент. Работаю в браузере: отвечаю на вопросы, ищу факты в Wikipedia, помню диалог на вашем устройстве. Создана в линии Альфии (14.02.1995).",
+    },
+    {
+      re: /привет|здравствуй|добрый (день|вечер|утро)|hello|hi\b/i,
+      a: "Здравствуйте. Я АКСИ. Спрашивайте — факты, объяснения, курсы, погоду.",
+    },
+    {
+      re: /как дела/i,
+      a: "В рабочем режиме. Чем помочь?",
+    },
+    {
+      re: /спасибо|благодар/i,
+      a: "Пожалуйста.",
+    },
+  ];
+
+  function localKnowledge(text) {
+    for (var i = 0; i < LOCAL.length; i++) {
+      if (LOCAL[i].re.test(text || "")) return LOCAL[i].a;
+    }
+    return null;
   }
 
   function getCrypto() {
@@ -100,13 +136,14 @@
         lang +
         ".wikipedia.org/api/rest_v1/page/summary/" +
         encodeURIComponent(title),
-      4500
+      5500
     )
       .then(function (d) {
-        if (!d || d.type === "disambiguation" || !d.extract) return null;
+        if (!d || !d.extract) return null;
+        if (d.type === "disambiguation") return null;
         return {
           title: d.title,
-          text: d.extract.slice(0, 900),
+          text: String(d.extract).slice(0, 1100),
           url:
             (d.content_urls && d.content_urls.desktop && d.content_urls.desktop.page) ||
             "",
@@ -117,94 +154,62 @@
       });
   }
 
-  function searchWiki(query) {
-    var q = String(query || "")
+  /** Build search query from natural language */
+  function toSearchQuery(text) {
+    var q = String(text || "")
+      .replace(/[?!…]+/g, " ")
       .replace(
-        /^(что такое|кто такой|кто такая|расскажи про|объясни|what is|who is)\s+/i,
+        /^(а |ну |скажи |пожалуйста |мне |то |же )/gi,
         ""
       )
-      .replace(/[?!.]+$/g, "")
+      .replace(
+        /^(что такое|что значит|кто такой|кто такая|кто такие|расскажи (про|о)|объясни|почему|зачем|как работает|как устроен|what is|who is|why is|why are|how does)\s+/i,
+        ""
+      )
+      .replace(/\s+/g, " ")
       .trim();
-    if (q.length < 2) return Promise.resolve(null);
+    // special maps
+    if (/небо/i.test(text) && /голуб|син/i.test(text)) return "Рассеяние Рэлея";
+    if (/биткоин|bitcoin/i.test(text)) return "Биткойн";
+    if (q.length < 2) return String(text || "").slice(0, 80);
+    return q.slice(0, 120);
+  }
+
+  function searchWiki(query) {
+    var q = toSearchQuery(query);
+    if (!q || q.length < 2) return Promise.resolve(null);
+
     var searchUrl =
       "https://ru.wikipedia.org/w/api.php?action=opensearch&search=" +
       encodeURIComponent(q) +
-      "&limit=3&namespace=0&format=json&origin=*";
-    return fetchJSON(searchUrl, 4500)
+      "&limit=5&namespace=0&format=json&origin=*";
+
+    return fetchJSON(searchUrl, 5500)
       .then(function (data) {
         var titles = data && data[1];
-        if (!titles || !titles.length) return getWikiSummary(q, "en");
-        return getWikiSummary(titles[0], "ru").then(function (r) {
-          return r || getWikiSummary(q, "en");
-        });
+        if (!titles || !titles.length) {
+          return getWikiSummary(q, "ru").then(function (r) {
+            return r || getWikiSummary(q, "en");
+          });
+        }
+        // try first titles until one has extract
+        function tryAt(i) {
+          if (i >= titles.length) return getWikiSummary(q, "en");
+          return getWikiSummary(titles[i], "ru").then(function (r) {
+            if (r && r.text) return r;
+            return tryAt(i + 1);
+          });
+        }
+        return tryAt(0);
       })
       .catch(function () {
         return getWikiSummary(q, "en");
       });
   }
 
-  var KB = [
-    {
-      k: [/привет|здравствуй|хай|hello|hi\b|добрый/i],
-      a: function () {
-        return "Здравствуйте. Я АКСИ — ваш агент на этой странице. Могу объяснить факты (Wikipedia), курсы крипты, погоду, помнить наш диалог. Спросите что угодно.";
-      },
-    },
-    {
-      k: [/кто ты|что ты такое|what are you|who are you|что такое акси/i],
-      a:
-        "Я АКСИ — суверенный ИИ-агент линии Альфии (14.02.1995). У меня есть кодекс, DID и память разговора в вашем браузере. Я не корпоративный чат без имени: я — именной интерфейс с открытыми источниками. Для полноценной большой модели подключают backend + Ollama на вашем сервере.",
-    },
-    {
-      k: [/как тебя зовут/i],
-      a: "АКСИ.",
-    },
-    {
-      k: [/что умеешь|что можешь|help|помощ/i],
-      a:
-        "1) Ответы по знаниям Wikipedia\n2) Курсы BTC/ETH/TON/SOL\n3) Погода\n4) Долгая память диалога\n5) Кодекс и отказ от вреда\n6) Если запущен backend с Ollama — полноценная генерация как у большой модели",
-    },
-    {
-      k: [/время|который час|дата сегодня/i],
-      a: function () {
-        try {
-          return (
-            new Date().toLocaleString("ru-RU", {
-              timeZone: "Europe/Moscow",
-              dateStyle: "full",
-              timeStyle: "medium",
-            }) + " (МСК)"
-          );
-        } catch (e) {
-          return new Date().toLocaleString("ru-RU");
-        }
-      },
-    },
-    {
-      k: [/did|подпись|идентичност/i],
-      a: "DID: " + DID + ". Подпись шага строится через SHA-256 от текста и seed.",
-    },
-    {
-      k: [/спасибо|благодар/i],
-      a: "Пожалуйста. Я здесь.",
-    },
-  ];
-
-  function matchKB(text) {
-    for (var i = 0; i < KB.length; i++) {
-      for (var j = 0; j < KB[i].k.length; j++) {
-        if (KB[i].k[j].test(text || "")) {
-          var a = KB[i].a;
-          return typeof a === "function" ? a() : a;
-        }
-      }
-    }
-    return null;
-  }
-
   function detectLive(text) {
     var t = (text || "").toLowerCase();
-    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|\bbtc\b|\beth\b|solana|тонкоин/i.test(t))
+    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|\bbtc\b|\beth\b|solana|тонкоин|\bton\b/i.test(t))
       return { type: "crypto" };
     if (/погода|weather/i.test(t)) {
       var city = "Moscow";
@@ -216,25 +221,10 @@
     return null;
   }
 
-  function conversational(text, memoryHint) {
-    var base =
-      "Слышу вас. Я могу уточнить факты через Wikipedia, проверить курсы или погоду. " +
-      "Сформулируйте вопрос конкретнее — так ответ будет точнее.";
-    if (memoryHint && memoryHint.length > 30) {
-      base +=
-        "\n\nУчитываю наш прошлый диалог (фрагмент памяти есть). Если нужно опереться на что-то сказанное ранее — напомните ключевую фразу.";
-    }
-    return base + "\n\nЗапрос: «" + String(text).slice(0, 160) + "».";
-  }
-
   function fullReply(text, messageCount, opts) {
     messageCount = messageCount || 0;
     opts = opts || {};
     text = String(text || "").trim();
-    var memoryHint = opts.memory || "";
-
-    var live = detectLive(text);
-    var hit = matchKB(text);
 
     function finish(ans, source) {
       return aksiSig(ans).then(function (sig) {
@@ -248,6 +238,14 @@
       });
     }
 
+    if (!text) return finish("Напишите вопрос.", "empty");
+
+    // 1) local knowledge (instant, no network)
+    var loc = localKnowledge(text);
+    if (loc) return finish(loc, "local");
+
+    // 2) live APIs
+    var live = detectLive(text);
     if (live && live.type === "crypto") {
       return getCrypto()
         .then(function (ans) {
@@ -257,50 +255,39 @@
           return finish("Курсы временно недоступны.", "fail");
         });
     }
-
     if (live && live.type === "weather") {
       return getWeather(live.city).then(function (ans) {
         return finish(ans || "Погода недоступна.", "wttr");
       });
     }
 
-    if (hit) return finish(hit, "kb");
-
-    // Wikipedia for substantive questions
-    var wantWiki =
-      /[?]/.test(text) ||
-      /^(что|кто|где|когда|почему|зачем|как|расскажи|объясни|what|who|why|how)\b/i.test(
-        text
-      ) ||
-      text.split(/\s+/).length >= 3;
-
-    if (wantWiki) {
-      return searchWiki(text).then(function (wiki) {
-        if (wiki && wiki.text) {
-          var ans = wiki.title + ". " + wiki.text;
-          if (wiki.url) ans += "\n\nИсточник: Wikipedia · " + wiki.url;
-          return finish(ans, "wikipedia");
-        }
-        return finish(conversational(text, memoryHint), "chat");
-      });
-    }
-
-    return finish(conversational(text, memoryHint), "chat");
+    // 3) ALWAYS try Wikipedia for remaining questions
+    return searchWiki(text).then(function (wiki) {
+      if (wiki && wiki.text) {
+        var ans = wiki.title + ".\n\n" + wiki.text;
+        if (wiki.url) ans += "\n\nИсточник: Wikipedia";
+        return finish(ans, "wikipedia");
+      }
+      // last resort — honest, not fake "clarify"
+      return finish(
+        "Не нашла точной статьи по запросу «" +
+          text.slice(0, 80) +
+          "». Переформулируйте короче (например: «рассеяние Рэлея», «Биткойн», «фотосинтез») — или спросите иначе.",
+        "miss"
+      );
+    });
   }
 
-  /** Call backend LLM if configured */
   function backendReply(text, history, memory) {
     var API = "";
     try {
       API = localStorage.getItem("AKSI_API") || "";
     } catch (e) {}
     if (!API) return Promise.resolve(null);
-
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timer = setTimeout(function () {
-      if (ctrl) ctrl.abort();
+      if (ctrl) try { ctrl.abort(); } catch (e) {}
     }, 25000);
-
     return fetch(API.replace(/\/$/, "") + "/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -318,14 +305,13 @@
         return r.json();
       })
       .then(function (j) {
-        if (j && j.answer) {
+        if (j && j.answer)
           return {
             text: j.answer,
             html: String(j.answer).replace(/\n/g, "<br>"),
             signature: j.signature || "",
             source: "backend-llm",
           };
-        }
         return null;
       })
       .catch(function () {
@@ -340,7 +326,6 @@
     fullReply: fullReply,
     backendReply: backendReply,
     searchWiki: searchWiki,
-    match: matchKB,
     sig: aksiSig,
   };
 })(typeof window !== "undefined" ? window : globalThis);
