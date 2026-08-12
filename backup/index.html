@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Бэкап</title>
+<meta name="theme-color" content="#f6f3ff">
+<link rel="stylesheet" href="/assets/aksi.css">
+<style>
+.box{background:#fff;border:1px solid var(--aksi-line);border-radius:16px;padding:16px;margin-bottom:12px}
+.box p{font-size:14px;color:var(--aksi-muted);line-height:1.45;margin:0 0 12px}
+.msg{font-size:14px;margin-top:10px;color:var(--aksi-violet);font-weight:600}
+input[type=file]{font-size:14px}
+</style>
+</head>
+<body class="aksi-candy">
+<div class="aksi-wrap">
+  <a href="/" style="color:var(--aksi-violet);font-weight:600;text-decoration:none;font-size:14px">← Домой</a>
+  <h1 class="aksi-h1" style="margin-top:14px">Бэкап</h1>
+  <p class="aksi-lead">Сохраните сеть и сны в файл на телефон. Сервер не нужен.</p>
+  <div class="box">
+    <p>Выгрузка: AKSI Net + сны + флаг пробуждения.</p>
+    <button type="button" class="aksi-btn aksi-btn-primary" id="exp">Скачать бэкап</button>
+  </div>
+  <div class="box">
+    <p>Загрузка: выберите ранее скачанный JSON.</p>
+    <input type="file" id="file" accept="application/json,.json"/>
+    <button type="button" class="aksi-btn aksi-btn-ghost" id="imp" style="margin-top:10px">Импортировать</button>
+    <div class="msg" id="msg"></div>
+  </div>
+</div>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  function collect(){
+    return {
+      version:1,
+      exported_at:new Date().toISOString(),
+      did:"did:aksi:ed25519:sovereign-2026",
+      net:JSON.parse(localStorage.getItem("AKSI_NET_V1")||"[]"),
+      dreams:JSON.parse(localStorage.getItem("AKSI_DREAMS_V1")||"[]"),
+      awake:JSON.parse(localStorage.getItem("AKSI_AWAKE_V1")||"null")
+    };
+  }
+  document.getElementById("exp").onclick=function(){
+    var data=JSON.stringify(collect(),null,2);
+    var blob=new Blob([data],{type:"application/json"});
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="aksi-backup-"+Date.now()+".json";
+    a.click();
+    document.getElementById("msg").textContent="Файл сохранён";
+  };
+  document.getElementById("imp").onclick=function(){
+    var f=document.getElementById("file").files[0];
+    if(!f){document.getElementById("msg").textContent="Выберите файл";return;}
+    var r=new FileReader();
+    r.onload=function(){
+      try{
+        var j=JSON.parse(r.result);
+        if(j.net)localStorage.setItem("AKSI_NET_V1",JSON.stringify(j.net));
+        if(j.dreams)localStorage.setItem("AKSI_DREAMS_V1",JSON.stringify(j.dreams));
+        if(j.awake)localStorage.setItem("AKSI_AWAKE_V1",JSON.stringify(j.awake));
+        document.getElementById("msg").textContent="Импорт ок · узлов: "+(j.net&&j.net.length||0)+", снов: "+(j.dreams&&j.dreams.length||0);
+      }catch(e){document.getElementById("msg").textContent="Файл повреждён";}
+    };
+    r.readAsText(f);
+  };
+})();
+</script>
+</body>
+</html>

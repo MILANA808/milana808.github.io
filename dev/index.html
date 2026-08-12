@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Внутренний разработчик</title>
+<meta name="theme-color" content="#f6f3ff">
+<link rel="stylesheet" href="/assets/aksi.css">
+<style>
+.chat{display:flex;flex-direction:column;gap:10px;min-height:40vh;margin-bottom:12px}
+.b{padding:12px 14px;border-radius:14px;font-size:15px;line-height:1.45;max-width:95%}
+.b.u{align-self:flex-end;background:var(--aksi-violet);color:#fff}
+.b.a{align-self:flex-start;background:#fff;border:1px solid var(--aksi-line)}
+.dock{display:flex;gap:8px}
+.dock input{flex:1;padding:14px;border-radius:14px;border:1px solid var(--aksi-line);font:inherit;font-size:16px}
+.dock button{padding:14px 16px;border:none;border-radius:14px;background:var(--aksi-violet);color:#fff;font-weight:700;font:inherit}
+.hint{font-size:13px;color:var(--aksi-muted);margin-bottom:12px;line-height:1.45}
+</style>
+</head>
+<body class="aksi-candy">
+<div class="aksi-wrap">
+  <a href="/" style="color:var(--aksi-violet);font-weight:600;text-decoration:none;font-size:14px">← Домой</a>
+  <h1 class="aksi-h1" style="margin-top:14px">Разработчик</h1>
+  <p class="hint">Встроенный помощник <b>без сервера</b>. Знает структуру АКСИ и подсказывает, что нажать. Не пишет код на чужих серверах — всё локально.</p>
+  <div class="chat" id="chat"></div>
+  <div class="dock">
+    <input id="q" placeholder="Спросите: где сны? как бэкап?" enterkeyhint="send"/>
+    <button type="button" id="go">→</button>
+  </div>
+</div>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  var KB=[
+    {k:["сон","сны","печать","подпис"],a:"Сны: /dreams/ — кнопка «Увидеть новый сон». Каждый сон с печатью SHA-256. Проверка «печать верна» на той же странице."},
+    {k:["сеть","net","знан","запис"],a:"Личная сеть: /net/ — вкладка «Написать». Чат (/aksi/) сначала ищет ответ здесь. Бэкап: /backup/"},
+    {k:["бэкап","backup","экспорт","сохранить","перенес"],a:"Откройте /backup/ — выгрузить сеть и сны в файл или загрузить обратно. Без сервера, файл у вас."},
+    {k:["чат","ии","акси","отвеч"],a:"Чат: /aksi/ Порядок: простые фразы → Net → ядро знаний → Wikipedia. Сервер не обязателен."},
+    {k:["навиг","путь","gps","карт","маршрут"],a:"Навигатор /drive/ — «Вести» двигает карту. Маршрут A→B: /route/. Пробки как у Google без платных данных недоступны."},
+    {k:["поле","wow","вау"],a:"Поле: /wow/ — частицы, пульс Resonance, счётчики сети и снов."},
+    {k:["просн","старт","разбуд","wake"],a:"Пробуждение: /wake/ или /start/ — три простых шага."},
+    {k:["паспорт","did","identity","гражда"],a:"Паспорт: /citizen/ — DID did:aksi:ed25519:sovereign-2026, EQS, подпись манифеста."},
+    {к:[],a:""},
+    {k:["сервер","backend","хостинг","render"],a:"Сейчас всё работает без сервера. Backend (FastAPI) — опционально, когда будет хостинг и ключи в .env, не в git."},
+    {k:["космос","планет","solar"],a:"Космос: /solar/ — планеты на текущую дату. 3D Земля: /earth3d/"},
+    {k:["квант","кубит","lab"],a:"Квант-лаб: /lab/ — симулятор H, X, Z, CNOT, Bell. Это математика в браузере, не физ. чип."},
+    {k:["манифест","закон","право"],a:"Манифест: /manifest/ — принципы и ориентиры по регулированию ИИ (не юрконсультация)."},
+    {k:["привет","здравств","кто ты","помощь","help"],a:"Я внутренний разработчик АКСИ (офлайн). Спросите: сны, сеть, бэкап, чат, навигатор, поле, паспорт."}
+  ];
+  // fix typo key
+  KB.forEach(function(x){ if(x["к"]) delete x["к"]; });
+
+  var chat=document.getElementById("chat");
+  function add(role,text){
+    var d=document.createElement("div");
+    d.className="b "+(role==="u"?"u":"a");
+    d.textContent=text;
+    chat.appendChild(d);
+    chat.scrollTop=chat.scrollHeight;
+  }
+  function answer(q){
+    q=(q||"").toLowerCase();
+    var best=null,score=0;
+    KB.forEach(function(row){
+      var s=0;(row.k||[]).forEach(function(k){if(q.indexOf(k)>=0)s++;});
+      if(s>score){score=s;best=row;}
+    });
+    if(best&&score>0)return best.a;
+    return"Попробуйте слова: сны, сеть, бэкап, чат, путь, поле, паспорт, космос, квант, старт. Или откройте /hub/";
+  }
+  function go(){
+    var v=document.getElementById("q").value.trim();
+    if(!v)return;
+    document.getElementById("q").value="";
+    add("u",v);add("a",answer(v));
+  }
+  document.getElementById("go").onclick=go;
+  document.getElementById("q").addEventListener("keydown",function(e){if(e.key==="Enter")go();});
+  add("a","На связи. Спросите, куда нажать или как сохранить сеть.");
+})();
+</script>
+</body>
+</html>
