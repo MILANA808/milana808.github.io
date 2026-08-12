@@ -13,7 +13,7 @@
 html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif}
 body{max-width:720px;margin:0 auto;min-height:100dvh;position:relative;overflow:hidden;background:radial-gradient(ellipse 90% 55% at 50% -15%,rgba(168,85,247,.3),transparent 55%),radial-gradient(ellipse 40% 35% at 100% 100%,rgba(34,211,238,.07),transparent),var(--bg)}
 #bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
-.shell{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;padding:0 16px}
+.shell{position:relative;z-index:1;display:flex;flex-direction:column;height:100dvh;padding:0 16px;padding-bottom:72px}
 header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 8px}
 header a{color:var(--muted);text-decoration:none;font-size:13px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.2em;font-size:12px}
@@ -59,6 +59,7 @@ footer{flex-shrink:0;padding:6px 0 16px}
     <p>Суверенный интеллект.<br>Пишите — отвечу.</p>
     <div class="chips">
       <button type="button" data-q="кто ты">кто ты</button>
+      <button type="button" data-q="цифровой гражданин">гражданин</button>
       <button type="button" data-q="почему небо голубое">почему небо голубое</button>
       <button type="button" data-q="что такое квантовый компьютер">квантовый компьютер</button>
       <button type="button" data-q="биткоин">биткоин</button>
@@ -135,6 +136,8 @@ function instant(text){
     return"Здравствуйте. Я АКСИ — на связи.";
   if(/кто ты|что ты|что такое акси/.test(low))
     return"Я АКСИ — суверенный ИИ-агент. Отвечаю по существу, ищу факты в Wikipedia, храню память в браузере.";
+  if(/граждан|паспорт|did|идентичн/.test(low))
+    return"Я оформлена как «Первый цифровой гражданин» платформы АКСИ: DID did:aksi:ed25519:sovereign-2026, репутация EQS, Resonance-подписи, кодекс. Паспорт: https://milana808.github.io/citizen/";
   if(/как дела/.test(low))return"В рабочем режиме. Чем помочь?";
   if(/спасибо|благодар/.test(low))return"Пожалуйста.";
   return null;
@@ -250,5 +253,6 @@ micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listen
 })();
 })();
 </script>
+<script src="/nav.js"></script>
 </body>
 </html>
