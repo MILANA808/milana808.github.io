@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>АКСИ · Маршрут A→B</title>
+<meta name="theme-color" content="#05010f"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<style>
+:root{--bg:#05010f;--ink:#f3e8ff;--muted:#9d8ec4;--violet:#a855f7;--cyan:#22d3ee;--card:rgba(10,5,24,.94)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;overflow:hidden}
+#map{position:absolute;inset:0}
+.ui{position:fixed;z-index:1000;left:10px;right:10px;top:10px;max-width:420px;margin:0 auto;background:var(--card);border:1px solid rgba(168,85,247,.35);border-radius:16px;padding:12px;backdrop-filter:blur(12px)}
+.ui h1{font-size:13px;letter-spacing:.12em;margin-bottom:8px;color:var(--muted)}
+.row{display:flex;gap:6px;margin-bottom:6px}
+input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid rgba(168,85,247,.3);background:#0c0818;color:var(--ink);font:inherit;font-size:14px}
+button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:10px 12px;background:linear-gradient(145deg,#a855f7,#6366f1);color:#fff;font-weight:600;font-size:13px;white-space:nowrap}
+button.g{background:rgba(168,85,247,.2);border:1px solid rgba(168,85,247,.35)}
+.info{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4;max-height:72px;overflow:auto}
+.info b{color:var(--cyan)}
+.links{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+.links a{font-size:11px;color:var(--cyan);text-decoration:none}
+.leaflet-control-attribution{font-size:9px!important}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="ui">
+  <h1>МАРШРУТ A → B</h1>
+  <div class="row"><input id="a" placeholder="Откуда (город или адрес)" value="Москва"/><button type="button" class="g" id="me">Я</button></div>
+  <div class="row"><input id="b" placeholder="Куда" value="Санкт-Петербург"/><button type="button" id="go">Поехали</button></div>
+  <div class="info" id="info">Введите точки и нажмите «Поехали». Маршрут строит OSRM (открытый роутер). Это навигация-подсказка, не замена автопилота.</div>
+  <div class="links">
+    <a href="/earth3d/">3D Земля</a>
+    <a href="/solar/">Солнечная система</a>
+    <a href="/map/">Карта</a>
+    <a href="/">Домой</a>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  var map=L.map("map").setView([55.75,37.62],5);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"© OpenStreetMap"}).addTo(map);
+  var layer=null, markers=[];
+  function info(t){document.getElementById("info").innerHTML=t;}
+  async function geocode(q){
+    var u="https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q);
+    var r=await fetch(u,{headers:{"Accept":"application/json"}});
+    var j=await r.json();
+    if(!j||!j[0])throw new Error("Не найдено: "+q);
+    return {lat:+j[0].lat,lon:+j[0].lon,name:j[0].display_name};
+  }
+  function clear(){
+    if(layer){map.removeLayer(layer);layer=null;}
+    markers.forEach(function(m){map.removeLayer(m);});markers=[];
+  }
+  async function route(){
+    var qa=document.getElementById("a").value.trim();
+    var qb=document.getElementById("b").value.trim();
+    if(!qa||!qb){info("Нужны обе точки");return;}
+    info("Ищем точки…");
+    try{
+      clear();
+      var A=await geocode(qa);
+      var B=await geocode(qb);
+      markers.push(L.marker([A.lat,A.lon]).addTo(map).bindPopup("A: "+A.name));
+      markers.push(L.marker([B.lat,B.lon]).addTo(map).bindPopup("B: "+B.name));
+      info("Строим маршрут…");
+      var url="https://router.project-osrm.org/route/v1/driving/"+A.lon+","+A.lat+";"+B.lon+","+B.lat+"?overview=full&geometries=geojson";
+      var rr=await fetch(url);
+      var data=await rr.json();
+      if(data.code!=="Ok"||!data.routes||!data.routes[0])throw new Error("Маршрут не найден");
+      var rt=data.routes[0];
+      layer=L.geoJSON(rt.geometry,{style:{color:"#22d3ee",weight:5,opacity:0.9}}).addTo(map);
+      map.fitBounds(layer.getBounds(),{padding:[40,40]});
+      var km=(rt.distance/1000).toFixed(1);
+      var min=Math.round(rt.duration/60);
+      var h=Math.floor(min/60),m=min%60;
+      var time=h? (h+" ч "+m+" мин"):(m+" мин");
+      info("<b>"+km+" км</b> · "+time+"<br>A → B по дорогам (OSRM). Обновляйте маршрут при смене точек.");
+    }catch(e){
+      info("Ошибка: "+(e.message||e)+". Проверьте названия или интернет.");
+    }
+  }
+  document.getElementById("go").onclick=route;
+  document.getElementById("me").onclick=function(){
+    if(!navigator.geolocation){info("Нет геолокации");return;}
+    info("Определяем вас…");
+    navigator.geolocation.getCurrentPosition(function(p){
+      document.getElementById("a").value=p.coords.latitude.toFixed(5)+", "+p.coords.longitude.toFixed(5);
+      info("Точка A = ваше место (локально).");
+    },function(){info("Геолокация запрещена");},{enableHighAccuracy:true,timeout:10000});
+  };
+  // allow lat,lon paste as A/B
+  window.__aksiRoute=route;
+})();
+</script>
+</body>
+</html>

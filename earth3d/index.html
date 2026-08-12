@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · 3D Земля</title>
+<meta name="theme-color" content="#020617"/>
+<style>
+*{margin:0;box-sizing:border-box}
+body{background:#020617;color:#e2e8f0;font-family:system-ui,sans-serif;overflow:hidden;height:100dvh}
+canvas{display:block}
+.hud{position:fixed;top:0;left:0;right:0;padding:14px 16px;display:flex;justify-content:space-between;z-index:2;background:linear-gradient(#020617,transparent);pointer-events:none}
+.hud a{pointer-events:auto;color:#94a3b8;text-decoration:none;font-size:13px}
+.brand{letter-spacing:.2em;font-size:11px}
+.tip{position:fixed;bottom:72px;left:50%;transform:translateX(-50%);z-index:2;background:rgba(2,6,23,.85);border:1px solid rgba(34,211,238,.25);border-radius:14px;padding:10px 14px;font-size:12px;color:#94a3b8;text-align:center;max-width:90vw}
+.tip b{color:#22d3ee}
+</style>
+</head>
+<body>
+<div class="hud">
+  <a href="/">← домой</a>
+  <span class="brand">3D EARTH</span>
+  <a href="/solar/">космос</a>
+</div>
+<div class="tip">Тяните для вращения · колёсико — зум · <b>авто-вращение</b> включено</div>
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function(){
+  var scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x020617);
+  var camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.1,100);
+  camera.position.z=3.2;
+  var renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  document.body.appendChild(renderer.domElement);
+
+  // stars
+  var starGeo=new THREE.BufferGeometry();
+  var starPos=[];
+  for(var i=0;i<2000;i++){
+    starPos.push((Math.random()-0.5)*40,(Math.random()-0.5)*40,(Math.random()-0.5)*40);
+  }
+  starGeo.setAttribute("position",new THREE.Float32BufferAttribute(starPos,3));
+  scene.add(new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xa5b4fc,size:0.02})));
+
+  var group=new THREE.Group();scene.add(group);
+  var geo=new THREE.SphereGeometry(1,64,64);
+  // procedural earth-like material (no external texture dependency)
+  var mat=new THREE.MeshStandardMaterial({
+    color:0x1d4ed8,
+    roughness:0.85,
+    metalness:0.1,
+    emissive:0x0f172a,
+    emissiveIntensity:0.15
+  });
+  var earth=new THREE.Mesh(geo,mat);group.add(earth);
+  // continents hint via wire overlay
+  var wire=new THREE.Mesh(
+    new THREE.SphereGeometry(1.001,32,32),
+    new THREE.MeshBasicMaterial({color:0x22d3ee,wireframe:true,transparent:true,opacity:0.08})
+  );
+  group.add(wire);
+  // atmosphere glow
+  var atmo=new THREE.Mesh(
+    new THREE.SphereGeometry(1.04,32,32),
+    new THREE.MeshBasicMaterial({color:0x38bdf8,transparent:true,opacity:0.07,side:THREE.BackSide})
+  );
+  group.add(atmo);
+
+  var light=new THREE.DirectionalLight(0xffffff,1.2);
+  light.position.set(5,3,5);scene.add(light);
+  scene.add(new THREE.AmbientLight(0x334155,0.6));
+
+  var drag=false,lx=0,ly=0,vx=0.002,vy=0;
+  function onDown(e){drag=true;lx=e.clientX||e.touches[0].clientX;ly=e.clientY||e.touches[0].clientY;}
+  function onUp(){drag=false;}
+  function onMove(e){
+    if(!drag)return;
+    var x=e.clientX!==undefined?e.clientX:e.touches[0].clientX;
+    var y=e.clientY!==undefined?e.clientY:e.touches[0].clientY;
+    vx=(x-lx)*0.005;vy=(y-ly)*0.005;
+    group.rotation.y+=vx;group.rotation.x+=vy;
+    lx=x;ly=y;
+  }
+  renderer.domElement.addEventListener("pointerdown",onDown);
+  window.addEventListener("pointerup",onUp);
+  window.addEventListener("pointermove",onMove);
+  renderer.domElement.addEventListener("wheel",function(e){
+    e.preventDefault();
+    camera.position.z=Math.min(8,Math.max(1.6,camera.position.z+e.deltaY*0.005));
+  },{passive:false});
+
+  window.addEventListener("resize",function(){
+    camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+  });
+
+  (function loop(){
+    requestAnimationFrame(loop);
+    if(!drag)group.rotation.y+=0.0015;
+    renderer.render(scene,camera);
+  })();
+})();
+</script>
+</body>
+</html>
