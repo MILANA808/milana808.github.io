@@ -50,7 +50,7 @@ footer{flex-shrink:0;padding:6px 0 16px}
 <header>
   <a href="/">← домой</a>
   <div class="brand"><i></i>АКСИ</div>
-  <span class="meta" id="mem-count"></span>
+  <span class="meta" id="mem-count"></span><span class="meta" id="api-status" style="margin-left:8px"></span>
 </header>
 <div class="toolbar"><button type="button" id="btn-clear">очистить</button></div>
 <div id="thread">
@@ -79,6 +79,13 @@ footer{flex-shrink:0;padding:6px 0 16px}
 (function(){
 "use strict";
 try{if(navigator.serviceWorker)navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});});}catch(e){}
+(function(){
+  try{
+    var u=new URL(location.href);
+    var api=u.searchParams.get("api");
+    if(api){localStorage.setItem("AKSI_API",api.replace(/\/$/,""));}
+  }catch(e){}
+})();
 
 (function(){
   var c=document.getElementById("bg-canvas");if(!c)return;
@@ -100,7 +107,7 @@ function esc(s){
   return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");
 }
 function fmt(ts){
-  try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit";});}catch(e){return"";}
+  try{return new Date(ts).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}catch(e){return"";}
 }
 function hideEmpty(){if(empty)empty.style.display="none";}
 function addBubble(role,text,ts){
@@ -155,9 +162,25 @@ async function crypto(){
     return lines.length?lines.join("\n"):null;
   }catch(e){return null;}
 }
+async function backendChat(text){
+  var API="";
+  try{API=localStorage.getItem("AKSI_API")||"";}catch(e){}
+  if(!API)return null;
+  try{
+    var r=await withTimeout(fetch(API.replace(/\/$/,"")+"/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({content:text,mode:"aksi",session_id:"web"})
+    }).then(function(x){return x.json();}),25000);
+    if(r&&r.answer)return r.answer;
+  }catch(e){}
+  return null;
+}
 async function getReply(text){
   var a=instant(text);
   if(a)return a;
+  var be=await backendChat(text);
+  if(be)return be;
   if(window.AKSIBrain&&typeof AKSIBrain.fullReply==="function"){
     var r=await withTimeout(AKSIBrain.fullReply(text,0,{}),8000);
     if(r&&r.text)return r.text;
@@ -168,7 +191,7 @@ async function getReply(text){
   }
   var w=await wiki(text);
   if(w)return w;
-  return"Пока нет точного ответа на «"+String(text).slice(0,80)+"». Спросите короче: «фотосинтез», «Эйнштейн», «биткоин».";
+  return"Пока нет точного ответа на «"+String(text).slice(0,80)+"». Подключите backend: ?api=https://ваш-url.onrender.com";
 }
 async function respond(text){
   text=String(text||"").trim();
@@ -209,6 +232,14 @@ if(window.SpeechRecognition||window.webkitSpeechRecognition){
   rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove("on");};
 }else{micBtn.style.display="none";}
 micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add("on");try{rec.start();}catch(e){};};
+(function(){
+  var el=document.getElementById("api-status");
+  if(!el)return;
+  var api="";
+  try{api=localStorage.getItem("AKSI_API")||"";}catch(e){}
+  el.textContent=api?"API ✓":"offline";
+  el.title=api||"backend не подключен";
+})();
 (async function(){
   if(!window.AksiMemory)return;
   try{
