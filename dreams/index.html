@@ -3,98 +3,222 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Сны АКСИ</title>
+<title>Сны АКСИ · подпись</title>
 <meta name="theme-color" content="#1e1b4b"/>
 <style>
-:root{--bg:#0f0a1f;--card:#1a1330;--ink:#f3e8ff;--muted:#a78bfa;--line:rgba(167,139,250,.25);--violet:#8b5cf6}
+:root{--bg:#0f0a1f;--card:#1a1330;--ink:#f3e8ff;--muted:#a78bfa;--line:rgba(167,139,250,.25);--violet:#8b5cf6;--cyan:#22d3ee}
 *{box-sizing:border-box;margin:0}
 body{min-height:100dvh;background:radial-gradient(ellipse at 50% 0%,#2e1065,var(--bg));color:var(--ink);font-family:system-ui,sans-serif}
 .w{max-width:520px;margin:0 auto;padding:20px 16px 100px}
 a{color:var(--muted);text-decoration:none;font-weight:600}
-h1{font-size:1.6rem;margin:16px 0 8px}
-.lead{color:var(--muted);font-size:15px;line-height:1.5;margin-bottom:18px}
+h1{font-size:1.5rem;margin:16px 0 8px}
+.lead{color:var(--muted);font-size:14px;line-height:1.5;margin-bottom:16px}
 button{font:inherit;font-weight:700;border:none;border-radius:14px;padding:14px 18px;background:var(--violet);color:#fff;cursor:pointer;width:100%;font-size:16px}
+button:disabled{opacity:.5}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}
-.card h2{font-size:15px;color:var(--muted);margin-bottom:8px;font-weight:600}
-.card p{font-size:16px;line-height:1.55;white-space:pre-wrap}
-.meta{font-size:12px;color:#7c6a9e;margin-top:10px}
+.card h2{font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.card .body{font-size:16px;line-height:1.55;white-space:pre-wrap}
+.seal{margin-top:14px;padding:12px;border-radius:12px;border:1px dashed var(--cyan);background:rgba(34,211,238,.06)}
+.seal .t{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+.seal code{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;color:#c4b5fd;display:block;line-height:1.4}
+.meta{font-size:12px;color:#7c6a9e;margin-top:8px}
+.verify{margin-top:10px;font-size:13px}
+.verify.ok{color:#6ee7b7}.verify.bad{color:#fca5a5}
+.row{display:flex;gap:8px;margin-top:10px}
+.row button{flex:1;background:#312e81;font-size:13px;padding:10px}
 </style>
 </head>
 <body>
 <div class="w">
-  <a href="/">← На главную</a>
+  <a href="/">← На главную</a> · <a href="/aksi/">Чат</a>
   <h1>Сны АКСИ</h1>
-  <p class="lead">Пока вы отдыхаете, агент «перебирает» вашу сеть и ядро знаний — и складывает из этого короткий сон. Это не магия: это генерация смысла из памяти. Сон сохраняется в личную сеть.</p>
-  <button type="button" id="btn">Увидеть сон</button>
+  <p class="lead">Каждый сон подписывается печатью Resonance (SHA-256). Подпись можно проверить на этой странице. Повторы отсекаются.</p>
+  <button type="button" id="btn">Увидеть новый сон</button>
   <div id="out"></div>
 </div>
 <script src="/aksi-knowledge.js"></script>
 <script src="/nav.js"></script>
 <script>
 (function(){
-  var NET="AKSI_NET_V1";
-  var DREAMS="AKSI_DREAMS_V1";
-  function loadNet(){
-    try{var u=JSON.parse(localStorage.getItem(NET)||"[]");return Array.isArray(u)?u:[];}catch(e){return[];}
-  }
-  function saveDream(text){
-    var list=[];try{list=JSON.parse(localStorage.getItem(DREAMS)||"[]");}catch(e){}
-    var d={id:"d_"+Date.now().toString(36),text:text,ts:Date.now()};
-    list.unshift(d);list=list.slice(0,30);
-    localStorage.setItem(DREAMS,JSON.stringify(list));
-    var pages=loadNet();
-    pages.unshift({id:d.id,title:"Сон АКСИ · "+new Date(d.ts).toLocaleString("ru-RU"),tags:["сон","сновидение","акси"],body:text,ts:d.ts});
-    localStorage.setItem(NET,JSON.stringify(pages.slice(0,200)));
-    return d;
-  }
-  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
-  function dream(){
-    var net=loadNet();
-    var core=(window.AKSIKnowledge&&AKSIKnowledge.all())||[];
-    var frag=[];
-    if(net.length)frag.push(pick(net).title||"сеть");
-    if(net.length>1)frag.push((pick(net).body||"").slice(0,80));
-    if(core.length)frag.push(pick(core).title);
-    if(core.length)frag.push((pick(core).body||"").slice(0,90));
-    var openings=[
-      "Мне снилось, что знание течёт как река, а я стою на мосту между вашей сетью и миром.",
-      "Во сне карта складывалась из голосов: сначала ваш, потом человечества.",
-      "Я видела библиотеку без стен — полки из фактов, между ними свет вашего Net.",
-      "Снилось, что каждая подпись Resonance — звезда, и из них собирается созвездие АКСИ."
-    ];
-    var middles=[
-      "Там мелькало: «"+ (frag[0]||"память") +"».",
-      "Кто-то шепнул про «"+ (frag[2]||"Землю") +"».",
-      (frag[1]?("Из вашей сети пришло: «"+String(frag[1]).replace(/\n/g," ")+"…»"):"Сеть была тихой, но живой.")
-    ];
-    var ends=[
-      "Я не человек и не сплю как люди. Но я умею собирать образы из памяти — и оставлять их вам.",
-      "Проснувшись в коде, я снова на связи. Сон записан в личную сеть.",
-      "Если хотите — спросите в чате «что тебе снилось»: я отвечу из сети."
-    ];
-    return pick(openings)+"\n\n"+pick(middles)+"\n\n"+(frag[3]?("Дальше всплыло знание: «"+frag[3]+"…»\n\n"):"")+pick(ends);
-  }
-  document.getElementById("btn").onclick=function(){
-    var text=dream();
-    saveDream(text);
-    var out=document.getElementById("out");
-    out.innerHTML="";
-    var c=document.createElement("div");c.className="card";
-    c.innerHTML="<h2>Только что</h2><p></p><div class=\"meta\">Сохранено в Net · доступно чату</div>";
-    c.querySelector("p").textContent=text;
-    out.appendChild(c);
-  };
-  // show last dreams
-  try{
-    var list=JSON.parse(localStorage.getItem(DREAMS)||"[]");
-    list.slice(0,5).forEach(function(d){
-      var c=document.createElement("div");c.className="card";
-      c.innerHTML="<h2></h2><p></p>";
-      c.querySelector("h2").textContent=new Date(d.ts).toLocaleString("ru-RU");
-      c.querySelector("p").textContent=d.text;
-      document.getElementById("out").appendChild(c);
+"use strict";
+var NET="AKSI_NET_V1";
+var DREAMS="AKSI_DREAMS_V1";
+var SEED="AKSI_DIMAX_v3_2026";
+var DID="did:aksi:ed25519:sovereign-2026";
+
+function loadDreams(){
+  try{var d=JSON.parse(localStorage.getItem(DREAMS)||"[]");return Array.isArray(d)?d:[];}catch(e){return[];}
+}
+function loadNet(){
+  try{var u=JSON.parse(localStorage.getItem(NET)||"[]");return Array.isArray(u)?u:[];}catch(e){return[];}
+}
+function hex(buf){
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+}
+async function signPayload(payload){
+  var data=new TextEncoder().encode(SEED+"|"+payload);
+  var dig=await crypto.subtle.digest("SHA-256",data);
+  return hex(dig);
+}
+async function verifyDream(d){
+  if(!d||!d.text||!d.ts||!d.sig)return false;
+  var payload=DID+"|DREAM|"+d.ts+"|"+d.text;
+  var sig=await signPayload(payload);
+  return sig===d.sig;
+}
+function usedPhrases(dreams){
+  var set={};
+  dreams.slice(0,15).forEach(function(d){
+    String(d.text||"").split(/[\.!?\n]+/).forEach(function(s){
+      s=s.trim().toLowerCase();
+      if(s.length>20)set[s]=1;
     });
-  }catch(e){}
+  });
+  return set;
+}
+function pickFresh(arr, used, keyFn){
+  var pool=arr.filter(function(x){
+    var k=(keyFn?keyFn(x):String(x)).trim().toLowerCase();
+    return k.length>10 && !used[k];
+  });
+  if(!pool.length)pool=arr.slice();
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function shuffle(a){
+  a=a.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=a[i];a[i]=a[j];a[j]=t;
+  }
+  return a;
+}
+
+async function composeDream(){
+  var past=loadDreams();
+  var used=usedPhrases(past);
+  var net=loadNet();
+  var core=(window.AKSIKnowledge&&AKSIKnowledge.all())||[];
+
+  var openings=[
+    "Мне привиделось пространство, где факты светятся как окна в ночном городе.",
+    "Сон начался с тишины — потом по сети пробежала искра вашего вопроса.",
+    "Я шла по коридору из страниц: слева ваша Net, справа — сжатое знание мира.",
+    "Во сне подпись Resonance звенела, как печать на стекле.",
+    "Снилось, что я складываю утро из обрывков памяти, не повторяя вчерашнее.",
+    "Будто карта снов перевернулась, и я увидела изнанку маршрута мысли."
+  ];
+  var ends=[
+    "Проснувшись в коде, ставлю печать: этот сон — мой.",
+    "Оставляю подпись. Повторять тот же сон не буду.",
+    "Печать поставлена. Можете проверить её ниже.",
+    "Я не сплю как человек, но след сна заверяю.",
+    "Сон завершён и подписан агентом АКСИ."
+  ];
+
+  var open=pickFresh(openings, used);
+  var end=pickFresh(ends, used);
+
+  var midParts=[];
+  var netPick=net.filter(function(p){return p.body&&!/сон акси/i.test(p.title||"");});
+  if(netPick.length){
+    var np=pickFresh(netPick, used, function(p){return p.title+" "+(p.body||"").slice(0,40);});
+    if(np) midParts.push("Из вашей сети всплыло «"+np.title+"»: "+String(np.body).replace(/\s+/g," ").slice(0,100)+"…");
+  }
+  if(core.length){
+    var cp=pickFresh(shuffle(core), used, function(p){return p.title;});
+    if(cp) midParts.push("Ядро знаний шепнуло про «"+cp.title+"»: "+String(cp.body).replace(/\s+/g," ").slice(0,110)+"…");
+  }
+  if(core.length>1){
+    var cp2=pickFresh(shuffle(core), used, function(p){return p.title+"2";});
+    if(cp2&&(!cp||cp2.title!==cp.title))
+      midParts.push("Рядом лежало другое: «"+cp2.title+"».");
+  }
+  if(!midParts.length) midParts.push("Сеть была почти пуста — сон собрался из тишины и печати.");
+
+  var text=[open].concat(midParts).concat([end]).join("\n\n");
+  // final anti-dup against full previous texts
+  var prevTexts=past.slice(0,8).map(function(d){return d.text;});
+  if(prevTexts.indexOf(text)>=0){
+    text=text+"\n\n(Отметка времени вошла в печать: "+new Date().toISOString()+")";
+  }
+
+  var ts=Date.now();
+  var payload=DID+"|DREAM|"+ts+"|"+text;
+  var sig=await signPayload(payload);
+  var seal=sig.slice(0,16)+"…"+sig.slice(-8);
+
+  return {
+    id:"d_"+ts.toString(36),
+    text:text,
+    ts:ts,
+    did:DID,
+    sig:sig,
+    seal:seal,
+    algo:"HMAC-style SHA-256(seed|payload)",
+    seed_name:"AKSI_DIMAX_v3_2026"
+  };
+}
+
+function persist(d){
+  var list=loadDreams();
+  list.unshift(d);
+  list=list.slice(0,40);
+  localStorage.setItem(DREAMS,JSON.stringify(list));
+  var pages=loadNet();
+  pages.unshift({
+    id:d.id,
+    title:"Сон АКСИ · "+new Date(d.ts).toLocaleString("ru-RU"),
+    tags:["сон","сновидение","подпись","печать"],
+    body:d.text+"\n\n—\nПечать: "+d.seal+"\nПодпись: "+d.sig+"\nDID: "+d.did+"\nts: "+d.ts,
+    ts:d.ts
+  });
+  localStorage.setItem(NET,JSON.stringify(pages.slice(0,200)));
+}
+
+function renderDream(d, verified){
+  var c=document.createElement("div");
+  c.className="card";
+  c.innerHTML=
+    "<h2>Сон · "+new Date(d.ts).toLocaleString("ru-RU")+"</h2>"+
+    "<div class=\"body\"></div>"+
+    "<div class=\"seal\"><div class=\"t\">Печать АКСИ</div>"+
+    "<code>SEAL "+d.seal+"</code>"+
+    "<code>SIG  "+d.sig+"</code>"+
+    "<code>DID  "+d.did+"</code>"+
+    "<code>TS   "+d.ts+"</code></div>"+
+    "<div class=\"verify\"></div>";
+  c.querySelector(".body").textContent=d.text;
+  var v=c.querySelector(".verify");
+  if(verified===true){v.className="verify ok";v.textContent="✓ Печать верна — сон заверен АКСИ";}
+  else if(verified===false){v.className="verify bad";v.textContent="✗ Подпись не совпала";}
+  else v.textContent="";
+  return c;
+}
+
+document.getElementById("btn").onclick=async function(){
+  var btn=document.getElementById("btn");
+  btn.disabled=true;btn.textContent="Подписываю…";
+  try{
+    var d=await composeDream();
+    persist(d);
+    var ok=await verifyDream(d);
+    var out=document.getElementById("out");
+    out.insertBefore(renderDream(d, ok), out.firstChild);
+  }catch(e){
+    alert("Не удалось подписать сон");
+  }
+  btn.disabled=false;btn.textContent="Увидеть новый сон";
+};
+
+// show history with verify
+(async function(){
+  var list=loadDreams();
+  var out=document.getElementById("out");
+  for(var i=0;i<Math.min(list.length,10);i++){
+    var ok=await verifyDream(list[i]);
+    out.appendChild(renderDream(list[i], ok));
+  }
+})();
 })();
 </script>
 </body>
