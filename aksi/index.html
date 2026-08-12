@@ -29,7 +29,7 @@ footer{flex-shrink:0;padding:8px 0 14px}
 .dock button:disabled{opacity:.35}
 .dock button.mic{background:transparent;border:1px solid var(--line);color:var(--muted)}
 .dock button.mic.on{border-color:#38bdf8;color:#38bdf8}
-.toolbar{display:flex;justify-content:flex-end;padding:4px 0}
+.toolbar{display:flex;justify-content:flex-end;gap:10px;padding:4px 0}
 .toolbar button{background:transparent;border:none;color:var(--muted);font-size:11px;cursor:pointer}
 .typing{align-self:flex-start;padding:10px 14px;color:var(--muted);font-size:13px}
 </style>
@@ -40,11 +40,14 @@ footer{flex-shrink:0;padding:8px 0 14px}
   <span class="logo">АКСИ</span>
   <span class="meta" id="mem-count"></span>
 </header>
-<div class="toolbar"><button type="button" id="btn-clear">Очистить память</button></div>
+<div class="toolbar">
+  <button type="button" id="btn-api" title="URL backend">API</button>
+  <button type="button" id="btn-clear">Очистить память</button>
+</div>
 <div id="thread">
   <div class="empty" id="empty">
     <div class="orb">Ψ</div>
-    <div>Напишите — АКСИ ответит.<br>Память в браузере.</div>
+    <div>Напишите — АКСИ ответит.<br>Память в браузере. Для «полной» модели — backend + Ollama.</div>
   </div>
 </div>
 <footer>
@@ -79,15 +82,6 @@ function addBubble(role,text,ts){
   thread.appendChild(d);
   thread.scrollTop=thread.scrollHeight;
 }
-function localReply(text){
-  var t=(text||"").toLowerCase();
-  if(/привет|здравств|hello|hi\b/.test(t))return"Здравствуйте. Я АКСИ. Спрашивайте о чём угодно.";
-  if(/кто ты|что ты|что такое акси/.test(t))return"Я АКСИ — суверенный агент. Память разговора хранится в вашем браузере.";
-  if(/как дела/.test(t))return"На связи. Чем помочь?";
-  if(/спасибо|благодар/.test(t))return"Пожалуйста.";
-  if(/памят|помнишь/.test(t))return"Да, помню сообщения с этого устройства. Очистить — кнопка сверху.";
-  return"Приняла: «"+String(text).slice(0,100)+"». Уточните вопрос или спросите «кто ты».";
-}
 function withTimeout(p,ms){
   return new Promise(function(resolve){
     var done=false;
@@ -113,13 +107,27 @@ async function loadHistory(){
     thread.scrollTop=thread.scrollHeight;
   }catch(e){}
 }
+
 async function getReply(text){
-  if(window.AKSIBrain&&typeof AKSIBrain.fullReply==="function"){
-    var r=await withTimeout(AKSIBrain.fullReply(text,n),8000);
+  var mem="", hist=[];
+  if(window.AksiMemory){
+    mem=(await withTimeout(AksiMemory.contextBlock(30,10000),2500))||"";
+    var rows=(await withTimeout(AksiMemory.history(20),2000))||[];
+    hist=rows.map(function(r){return{role:r.role==="user"?"user":"assistant",content:r.content};});
+  }
+  // 1) Backend LLM (Ollama via Milana-backend)
+  if(window.AKSIBrain&&AKSIBrain.backendReply){
+    var br=await withTimeout(AKSIBrain.backendReply(text,hist,mem),20000);
+    if(br&&br.text)return br.text;
+  }
+  // 2) Client brain
+  if(window.AKSIBrain&&AKSIBrain.fullReply){
+    var r=await withTimeout(AKSIBrain.fullReply(text,n,{memory:mem}),10000);
     if(r&&r.text)return r.text;
   }
-  return localReply(text);
+  return "Я АКСИ. Сейчас доступен базовый режим. Спросите «кто ты» или факт из Wikipedia.";
 }
+
 async function respond(text){
   text=String(text||"").trim();
   if(!text||busy)return;
@@ -138,30 +146,39 @@ async function respond(text){
     tip.className="typing";tip.id="typing";tip.textContent="АКСИ…";
     thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
     var reply=await getReply(text);
-    if(!reply)reply=localReply(text);
-    if(/памят|помнишь/i.test(text)&&window.AksiMemory){
-      var cnt=await withTimeout(AksiMemory.count(),1500);
-      if(cnt!=null)reply+="\n\nЗаписей в памяти: "+cnt+".";
-    }
+    if(!reply)reply="Не удалось сформировать ответ. Попробуйте ещё раз.";
     var t=document.getElementById("typing");if(t)t.remove();
     addBubble("bot",reply,Date.now());
     await safeRemember("assistant",reply);
     await refreshCount();
   }catch(err){
     var t2=document.getElementById("typing");if(t2)t2.remove();
-    addBubble("bot",localReply(text),Date.now());
+    addBubble("bot","Сбой. Обновите страницу (Ctrl+F5) и попробуйте снова.",Date.now());
   }
   busy=false;sendBtn.disabled=false;
 }
+
 function go(){var v=(input.value||"").trim();if(!v)return;input.value="";respond(v);}
 sendBtn.onclick=go;
 input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}});
+
 document.getElementById("btn-clear").onclick=async function(){
   if(!confirm("Очистить память?"))return;
   if(window.AksiMemory){try{await withTimeout(AksiMemory.clear(),2000);}catch(e){}}
   thread.innerHTML="";empty.style.display="";thread.appendChild(empty);
   await refreshCount();
 };
+document.getElementById("btn-api").onclick=function(){
+  var cur="";try{cur=localStorage.getItem("AKSI_API")||"http://localhost:8000";}catch(e){}
+  var v=prompt("URL backend АКСИ (пустой = только браузер)",cur);
+  if(v===null)return;
+  try{
+    if(v.trim())localStorage.setItem("AKSI_API",v.trim().replace(/\/$/,""));
+    else localStorage.removeItem("AKSI_API");
+    alert(v.trim()?"API сохранён: "+v.trim():"Только браузерный режим");
+  }catch(e){}
+};
+
 var rec=null,listening=false;
 if(window.SpeechRecognition||window.webkitSpeechRecognition){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -170,6 +187,7 @@ if(window.SpeechRecognition||window.webkitSpeechRecognition){
   rec.onerror=rec.onend=function(){listening=false;micBtn.classList.remove("on");};
 }else micBtn.style.display="none";
 micBtn.onclick=function(){if(!rec)return;if(listening){rec.stop();return;}listening=true;micBtn.classList.add("on");try{rec.start();}catch(e){};};
+
 loadHistory();
 })();
 </script>
