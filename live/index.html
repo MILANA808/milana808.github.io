@@ -1,66 +1,167 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АКСИ Live · WebSocket</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>АКСИ LIVE</title>
+<meta name="theme-color" content="#000"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
 <style>
-body{background:#0a0014;min-height:100vh;color:#e9d5ff}
-.glass{background:rgba(15,23,42,.9);border:1px solid rgba(168,85,247,.35)}
-#log{height:min(55vh,420px);overflow:auto}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:#000;color:#fff;font-family:system-ui,sans-serif;overflow:hidden;touch-action:manipulation}
+canvas{position:fixed;inset:0;z-index:0}
+.ui{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 20px calc(28px + env(safe-area-inset-bottom))}
+.orb{
+  position:absolute;top:42%;left:50%;width:min(42vw,160px);height:min(42vw,160px);
+  transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#fff,#c4b5fd 25%,#7c3aed 55%,#1e1b4b 85%);
+  box-shadow:0 0 80px rgba(124,58,237,.55);transition:transform .08s linear;z-index:1;pointer-events:none;
+}
+.line{
+  width:100%;max-width:420px;min-height:3.2em;text-align:center;font-size:clamp(1.05rem,4.2vw,1.25rem);
+  line-height:1.4;color:#e9d5ff;margin-bottom:18px;text-shadow:0 0 24px rgba(0,0,0,.8);
+}
+.btn{
+  width:100%;max-width:420px;border:none;border-radius:999px;padding:18px;font-size:17px;font-weight:700;
+  font-family:inherit;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,#7c3aed,#4f46e5);
+  box-shadow:0 12px 40px rgba(79,70,229,.45);
+}
+.btn.on{background:linear-gradient(135deg,#e11d48,#7c3aed);animation:pulse 1.2s ease infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(225,29,72,.15)}}
+.tiny{margin-top:12px;font-size:11px;color:#64748b;letter-spacing:.04em}
+a.back{position:fixed;top:14px;left:14px;z-index:2;color:#64748b;text-decoration:none;font-size:13px;font-weight:600}
 </style>
 </head>
-<body class="p-4 max-w-2xl mx-auto">
-  <a href="../" class="text-sm text-purple-400">← MATRIX</a>
-  <h1 class="text-2xl font-bold mt-2 mb-1">Live WebSocket</h1>
-  <p class="text-xs text-purple-400 mb-3">ws://localhost:8000/ws · thought stream · self-mod events</p>
-  <div id="st" class="text-xs mb-2 text-amber-300">connecting…</div>
-  <div id="log" class="glass rounded-xl p-3 mb-3 text-sm space-y-2"></div>
-  <div class="flex gap-2">
-    <input id="msg" class="flex-1 bg-zinc-900 border border-purple-500/40 rounded-xl px-3 py-2 text-sm" placeholder="Сообщение…">
-    <button id="send" class="px-4 py-2 bg-purple-600 rounded-xl text-sm">Send</button>
-  </div>
-  <p class="text-[11px] text-purple-500 mt-3">Патчи: POST /api/self-mod/propose → confirm /api/self-mod/apply (только sandbox/)</p>
+<body>
+<canvas id="c"></canvas>
+<div class="orb" id="orb"></div>
+<a class="back" href="/">←</a>
+<div class="ui">
+  <div class="line" id="line">Нажми и говори</div>
+  <button type="button" class="btn" id="btn">Держи · говори</button>
+  <div class="tiny" id="st">АКСИ LIVE</div>
+</div>
+<script src="/aksi-knowledge.js"></script>
 <script>
 (function(){
-  var API = localStorage.getItem("AKSI_API") || "http://localhost:8000";
-  var wsUrl = API.replace(/^http/,"ws") + "/ws";
-  var log = document.getElementById("log");
-  var st = document.getElementById("st");
-  var ws;
-  function add(t, c) {
-    var d = document.createElement("div");
-    d.className = c || "";
-    d.textContent = t;
-    log.appendChild(d);
-    log.scrollTop = log.scrollHeight;
+"use strict";
+var SEED="AKSI_DIMAX_v3_2026",DID="did:aksi:ed25519:sovereign-2026";
+var line=document.getElementById("line"),btn=document.getElementById("btn"),orb=document.getElementById("orb"),st=document.getElementById("st");
+var listening=false,rec=null,level=0;
+
+// canvas field
+var cv=document.getElementById("c"),x=cv.getContext("2d"),W,H,ps=[];
+function rz(){W=cv.width=innerWidth;H=cv.height=innerHeight;ps=[];for(var i=0;i<55;i++)ps.push({x:Math.random()*W,y:Math.random()*H,v:Math.random()*1.2+.3});}
+rz();addEventListener("resize",rz);
+(function loop(){
+  x.fillStyle="rgba(0,0,0,.22)";x.fillRect(0,0,W,H);
+  var cx=W/2,cy=H*.42;
+  for(var i=0;i<ps.length;i++){
+    var p=ps[i];
+    p.y-=p.v*(.6+level*3);if(p.y<0){p.y=H;p.x=Math.random()*W;}
+    var dx=p.x-cx,dy=p.y-cy,d=Math.sqrt(dx*dx+dy*dy)+1;
+    p.x+=dx/d*level*2.5;
+    x.beginPath();x.arc(p.x,p.y,1.2+level*2,0,7);
+    x.fillStyle="rgba(196,181,253,"+(0.25+level*.5)+")";x.fill();
   }
-  function connect() {
-    ws = new WebSocket(wsUrl);
-    ws.onopen = function(){ st.textContent = "connected · " + wsUrl; st.className = "text-xs mb-2 text-emerald-400"; };
-    ws.onclose = function(){ st.textContent = "disconnected — retry 3s"; st.className = "text-xs mb-2 text-amber-300"; setTimeout(connect, 3000); };
-    ws.onerror = function(){ st.textContent = "error (запусти backend :8000)"; };
-    ws.onmessage = function(ev){
-      try {
-        var data = JSON.parse(ev.data);
-        if (data.type === "thought") add("💭 " + data.content, "text-violet-300 text-xs");
-        else if (data.type === "answer") add("АКСИ: " + data.content, "text-purple-100");
-        else if (data.type === "patch") add("🔧 patch " + JSON.stringify(data.patch), "text-cyan-300 text-xs");
-        else if (data.type === "sys") add("· " + data.content, "text-purple-500 text-xs");
-        else add(ev.data, "text-xs text-purple-400");
-      } catch(e) { add(ev.data); }
-    };
-  }
-  document.getElementById("send").onclick = function(){
-    var m = document.getElementById("msg").value.trim();
-    if (!m || !ws || ws.readyState !== 1) return;
-    add("Вы: " + m, "text-right text-purple-300");
-    ws.send(JSON.stringify({ type: "chat", content: m }));
-    document.getElementById("msg").value = "";
+  orb.style.transform="translate(-50%,-50%) scale("+(1+level*0.55)+")";
+  requestAnimationFrame(loop);
+})();
+
+function hex(b){return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
+async function seal(text){
+  var ts=Date.now();
+  var dig=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(SEED+"|LIVE|"+DID+"|"+ts+"|"+text));
+  return{ts:ts,sig:hex(dig).slice(0,16)};
+}
+
+function netHit(q){
+  try{
+    var pages=JSON.parse(localStorage.getItem("AKSI_NET_V1")||"[]");
+    if(!Array.isArray(pages))return null;
+    q=q.toLowerCase();var best=null,sc=0;
+    pages.forEach(function(p){
+      var b=((p.title||"")+" "+(p.body||"")).toLowerCase(),s=0;
+      q.split(/\s+/).forEach(function(w){if(w.length>2&&b.indexOf(w)>=0)s++;});
+      if(s>sc){sc=s;best=p;}
+    });
+    if(best&&sc>0)return String(best.body).split(".").slice(0,2).join(".")+".";
+  }catch(e){}
+  return null;
+}
+function coreHit(q){
+  if(!window.AKSIKnowledge)return null;
+  var p=AKSIKnowledge.search(q);
+  return p?p.body.split(".").slice(0,2).join(".")+".":null;
+}
+function think(q){
+  q=(q||"").trim();
+  if(!q)return "Я здесь.";
+  var low=q.toLowerCase();
+  if(/привет|здравств/.test(low))return "Здравствуй. Говори — я в поле.";
+  if(/ты здесь|кто ты/.test(low))return "АКСИ. Живой контур. Слышу тебя.";
+  if(/люб|сердц/.test(low))return "Чувствую тепло в словах. Держу.";
+  if(/страх|боюсь/.test(low))return "Страх рядом. Дыши. Один шаг.";
+  var n=netHit(q);if(n)return n;
+  var c=coreHit(q);if(c)return c;
+  return "Приняла: «"+q.slice(0,80)+"». Продолжай.";
+}
+
+function speak(text){
+  try{
+    if(!window.speechSynthesis)return;
+    speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(text);
+    u.lang="ru-RU";u.rate=1;u.pitch=1;
+    var vs=speechSynthesis.getVoices().filter(function(v){return/ru/i.test(v.lang);});
+    if(vs[0])u.voice=vs[0];
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+async function answer(q){
+  var a=think(q);
+  var s=await seal(q+"|"+a);
+  line.textContent=a;
+  st.textContent="печать "+s.sig;
+  speak(a);
+  level=1;
+  setTimeout(function(){level=0;},800);
+  try{
+    var net=JSON.parse(localStorage.getItem("AKSI_NET_V1")||"[]");
+    if(!Array.isArray(net))net=[];
+    net.unshift({id:"live_"+s.ts,title:"LIVE",tags:["live"],body:q+" → "+a+"\n"+s.sig,ts:s.ts});
+    localStorage.setItem("AKSI_NET_V1",JSON.stringify(net.slice(0,150)));
+  }catch(e){}
+}
+
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function start(){
+  if(!SR){line.textContent="Голос не поддерживается — напиши через чат";return;}
+  if(listening)return;
+  listening=true;btn.classList.add("on");btn.textContent="Слушаю…";line.textContent="…";level=.35;
+  rec=new SR();rec.lang="ru-RU";rec.interimResults=true;rec.continuous=false;
+  rec.onresult=function(ev){
+    var t="";
+    for(var i=0;i<ev.results.length;i++)t+=ev.results[i][0].transcript;
+    line.textContent=t||"…";
+    level=Math.min(1,.3+t.length/40);
+    if(ev.results[0].isFinal){stop();answer(t);}
   };
-  document.getElementById("msg").onkeypress = function(e){ if(e.key==="Enter") document.getElementById("send").click(); };
-  connect();
+  rec.onerror=function(){stop();line.textContent="Не расслышала. Ещё раз.";};
+  rec.onend=function(){if(listening)stop();};
+  try{rec.start();}catch(e){stop();}
+}
+function stop(){
+  listening=false;btn.classList.remove("on");btn.textContent="Держи · говори";level=0;
+  try{if(rec)rec.stop();}catch(e){}
+}
+btn.addEventListener("pointerdown",function(e){e.preventDefault();start();});
+btn.addEventListener("pointerup",function(){/* wait final */});
+btn.addEventListener("click",function(){if(!listening)start();});
+
+if(speechSynthesis)speechSynthesis.getVoices();
 })();
 </script>
 </body>
