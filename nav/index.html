@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Навигатор АКСИ</title>
+<meta name="theme-color" content="#5b21b6">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,sans-serif;background:#111;color:#fff;overflow:hidden}
+.wrap{height:100%;height:100dvh;display:flex;flex-direction:column}
+#map{flex:1;min-height:120px;width:100%;background:#222}
+.box{
+  flex:0 0 auto;
+  background:#1a1a2e;
+  border-top:6px solid #a855f7;
+  padding:14px 16px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+}
+a.back{color:#c4b5fd;font-size:18px;font-weight:800;text-decoration:none}
+#msg{font-size:20px;font-weight:800;margin:10px 0;min-height:28px}
+input{
+  display:block;width:100%;box-sizing:border-box;
+  font-size:16px;padding:14px;margin:0 0 12px;
+  border-radius:12px;border:3px solid #666;background:#000;color:#fff;
+}
+.row{display:flex;gap:10px}
+button{
+  flex:1;height:60px;border:none;border-radius:14px;
+  font-size:18px;font-weight:900;color:#fff;
+}
+#a{background:#7c3aed}
+#b{background:#0ea5e9}
+#c{background:#444}
+.arw{width:0;height:0;border-left:18px solid transparent;border-right:18px solid transparent;border-bottom:42px solid #22d3ee;filter:drop-shadow(0 0 8px #22d3ee);transform-origin:50% 70%}
+.arw-w{width:56px;height:56px;margin-left:-28px;margin-top:-28px;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="map"></div>
+  <div class="box">
+    <a class="back" href="/?v=2">← МЕНЮ</a>
+    <div id="msg">Нажмите ВЕСТИ</div>
+    <input id="q" type="text" placeholder="Куда едем?" enterkeyhint="go">
+    <div class="row">
+      <button type="button" id="a">ВЕСТИ</button>
+      <button type="button" id="b">ПУТЬ</button>
+      <button type="button" id="c">СТОП</button>
+    </div>
+  </div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  // сброс старого service worker
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(rs){
+      rs.forEach(function(r){r.unregister();});
+    });
+    if(window.caches)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});});
+  }
+
+  var map=L.map('map').setView([55.75,37.62],15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  setTimeout(function(){map.invalidateSize();},300);
+
+  var wid=null,mk=null,line=null,dm=null,last=null,hdg=0;
+  var msg=document.getElementById('msg');
+
+  function arrow(lat,lon,br){
+    if(br!=null&&!isNaN(br))hdg=br;
+    if(!mk){
+      mk=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="arw-w"><div class="arw" id="ar"></div></div>',iconSize:[56,56],iconAnchor:[28,28]})}).addTo(map);
+    }else mk.setLatLng([lat,lon]);
+    setTimeout(function(){var e=document.getElementById('ar');if(e)e.style.transform='rotate('+hdg+'deg)';},0);
+    map.setView([lat,lon],Math.max(map.getZoom(),16));
+  }
+
+  function onOk(p){
+    var lat=p.coords.latitude,lon=p.coords.longitude,br=p.coords.heading;
+    if((br==null||isNaN(br))&&last){
+      var x=lon-last.lon,y=lat-last.lat;
+      if(Math.abs(x)+Math.abs(y)>1e-6)br=(Math.atan2(x,y)*180/Math.PI+360)%360;
+    }
+    arrow(lat,lon,br);
+    last={lat:lat,lon:lon};
+    var s=p.coords.speed;
+    msg.textContent='Вы здесь'+(s!=null&&!isNaN(s)?' · '+Math.max(0,Math.round(s*3.6))+' км/ч':'');
+  }
+  function onBad(e){
+    msg.textContent=e.code===1?'Разрешите геолокацию в настройках телефона':'Нет GPS';
+  }
+
+  document.getElementById('a').onclick=function(){
+    msg.textContent='Ищем GPS…';
+    if(wid!=null)navigator.geolocation.clearWatch(wid);
+    wid=navigator.geolocation.watchPosition(onOk,onBad,{enableHighAccuracy:true,maximumAge:300,timeout:20000});
+  };
+  document.getElementById('c').onclick=function(){
+    if(wid!=null)navigator.geolocation.clearWatch(wid);
+    wid=null;msg.textContent='Стоп';
+  };
+  document.getElementById('b').onclick=async function(){
+    var q=(document.getElementById('q').value||'').trim();
+    if(!q){msg.textContent='Напишите куда';return;}
+    if(!navigator.onLine){msg.textContent='Нужен интернет';return;}
+    msg.textContent='Строим…';
+    try{
+      if(!last){
+        await new Promise(function(res,rej){
+          navigator.geolocation.getCurrentPosition(function(p){onOk(p);res();},rej,{enableHighAccuracy:true,timeout:12000});
+        });
+      }
+      var g=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q),{headers:{'Accept-Language':'ru'}}).then(function(r){return r.json();});
+      if(!g[0])throw new Error('Адрес не найден');
+      var B={lat:+g[0].lat,lon:+g[0].lon};
+      if(dm)map.removeLayer(dm);dm=L.marker([B.lat,B.lon]).addTo(map);
+      var d=await fetch('https://router.project-osrm.org/route/v1/driving/'+last.lon+','+last.lat+';'+B.lon+','+B.lat+'?overview=full&geometries=geojson').then(function(r){return r.json();});
+      if(d.code!=='Ok')throw new Error('Нет маршрута');
+      var rt=d.routes[0];
+      if(line)map.removeLayer(line);
+      line=L.geoJSON(rt.geometry,{style:{color:'#a855f7',weight:7}}).addTo(map);
+      map.fitBounds(line.getBounds(),{padding:[40,40]});
+      msg.textContent=(rt.distance/1000).toFixed(1)+' км · '+Math.round(rt.duration/60)+' мин';
+      document.getElementById('a').click();
+    }catch(err){msg.textContent=err.message||'Ошибка';}
+  };
+})();
+</script>
+</body>
+</html>
