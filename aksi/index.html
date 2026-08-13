@@ -3,62 +3,93 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ — на связи</title>
-<meta name="theme-color" content="#f5f0ff"/>
+<title>АКСИ — чат</title>
+<meta name="theme-color" content="#f3effc"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
 <style>
-:root{--bg:#f5f0ff;--card:#fff;--ink:#1e1433;--muted:#6b5f85;--line:#e4d9f7;--violet:#7c3aed;--soft:#ede9fe;--ok:#059669}
+:root{
+  --bg:#f3effc;--card:#fff;--ink:#160f2a;--muted:#6b6285;
+  --line:#e5ddf5;--violet:#7c3aed;--soft:#ede9fe;--ok:#059669;
+}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
 body{max-width:640px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:sticky;top:0;z-index:2;border-bottom:1px solid var(--line)}
+header{
+  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
+  background:rgba(243,239,252,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:2;
+  border-bottom:1px solid var(--line);
+}
 header a{color:var(--violet);text-decoration:none;font-size:15px;font-weight:600}
 .brand{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
 .brand i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
 .meta{font-size:12px;color:var(--muted)}
-#thread{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:12px}
-.bubble{max-width:92%;padding:14px 16px;border-radius:18px;font-size:17px;line-height:1.45;word-break:break-word}
-.bubble.user{align-self:flex-end;background:var(--violet);color:#fff;border-bottom-right-radius:6px}
-.bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
+#thread{flex:1;overflow-y:auto;padding:12px 16px 8px;display:flex;flex-direction:column;gap:12px}
+.bubble{
+  max-width:92%;padding:14px 16px;border-radius:18px;font-size:16.5px;line-height:1.45;
+  word-break:break-word;animation:in .22s ease;
+}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.bubble.user{align-self:flex-end;background:linear-gradient(145deg,#8b5cf6,#6d28d9);color:#fff;border-bottom-right-radius:6px}
+.bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px;box-shadow:0 4px 16px rgba(22,15,42,.04)}
 .bubble .src{display:block;margin-top:8px;font-size:12px;color:var(--violet);font-weight:600}
-.empty{margin:auto;text-align:center;padding:20px;max-width:340px;color:var(--muted);font-size:16px;line-height:1.45}
-.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
-.chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font-size:14px;cursor:pointer}
-footer{padding:8px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
-.dock{display:flex;gap:8px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px}
-.dock textarea{flex:1;border:none;resize:none;min-height:48px;padding:12px;font:inherit;font-size:17px;outline:none}
-.dock button.send{width:52px;height:52px;border:none;border-radius:14px;background:var(--violet);color:#fff;font-size:1.2rem;cursor:pointer}
-.typing{align-self:flex-start;padding:12px 16px;border-radius:16px;background:var(--soft);color:var(--muted)}
-.help{text-align:center;font-size:13px;color:var(--muted);padding:4px}
-.help a{color:var(--violet);font-weight:600}
+.empty{margin:auto;text-align:center;padding:24px 12px;max-width:320px}
+.empty .orb{
+  width:56px;height:56px;border-radius:50%;margin:0 auto 14px;
+  background:radial-gradient(circle at 30% 30%,#fff,#a78bfa 40%,#6d28d9);
+  box-shadow:0 8px 24px rgba(109,40,217,.3);
+}
+.empty p{color:var(--muted);font-size:15px;line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.chips button{
+  border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;
+  padding:10px 14px;font-size:13px;cursor:pointer;font-weight:600;
+}
+footer{padding:8px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(243,239,252,.95)}
+.dock{
+  display:flex;gap:8px;align-items:flex-end;background:#fff;border:1px solid var(--line);
+  border-radius:18px;padding:8px;box-shadow:0 6px 24px rgba(22,15,42,.06);
+}
+.dock textarea{
+  flex:1;border:none;resize:none;min-height:48px;max-height:120px;padding:12px;
+  font:inherit;font-size:16px;outline:none;background:transparent;color:var(--ink);
+}
+.dock button.send{
+  width:52px;height:52px;border:none;border-radius:14px;
+  background:linear-gradient(145deg,#8b5cf6,#6d28d9);color:#fff;font-size:1.2rem;cursor:pointer;font-weight:700;
+}
+.dock button.send:disabled{opacity:.4}
+.typing{align-self:flex-start;padding:12px 16px;border-radius:16px;background:var(--soft);color:var(--muted);font-size:14px}
+.help{text-align:center;font-size:12px;color:var(--muted);padding:4px 0 6px}
+.help a{color:var(--violet);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
 <header>
-  <a href="/">← Назад</a>
+  <a href="/">←</a>
   <div class="brand"><i></i>АКСИ</div>
   <span class="meta" id="mem-count">на связи</span>
 </header>
 <div id="thread">
   <div class="empty" id="empty">
-    <b style="color:#1e1433">Я АКСИ.</b><br>Сначала ваша сеть и сны, потом ядро знаний, потом мир.
+    <div class="orb"></div>
+    <p><b style="color:var(--ink)">Слушаю.</b><br>Сначала ваша сеть, потом мир.</p>
     <div class="chips">
       <button type="button" data-q="ты здесь?">Ты здесь?</button>
-      <button type="button" data-q="что тебе снилось">Что снилось?</button>
-      <button type="button" data-q="что такое жизнь">Что такое жизнь?</button>
-      <button type="button" data-q="расскажи про космос">Космос</button>
+      <button type="button" data-q="кто ты">Кто ты?</button>
+      <button type="button" data-q="что тебе снилось">Сон</button>
+      <button type="button" data-q="кодекс">Кодекс</button>
     </div>
   </div>
 </div>
 <footer>
-  <p class="help"><a href="/dreams/">Сны</a> · <a href="/net/">Сеть</a> · <a href="/wake/">Пробуждение</a></p>
+  <p class="help"><a href="/net/">Сеть</a> · <a href="/dreams/">Сны</a> · <a href="/backup/">Бэкап</a></p>
   <div class="dock">
-    <textarea id="input" rows="1" placeholder="Напишите АКСИ…" enterkeyhint="send"></textarea>
-    <button type="button" class="send" id="send">➤</button>
+    <textarea id="input" rows="1" placeholder="Напишите…" enterkeyhint="send"></textarea>
+    <button type="button" class="send" id="send" aria-label="Отправить">➤</button>
   </div>
 </footer>
 <script src="/aksi-knowledge.js"></script>
-<script src="/aksi-memory.js?v=12"></script>
+<script src="/aksi-memory.js?v=13"></script>
 <script src="/nav.js"></script>
 <script>
 (function(){
@@ -68,7 +99,7 @@ try{
   if(!localStorage.getItem(AWAKE_KEY)){
     var pages=[];try{pages=JSON.parse(localStorage.getItem(NET_KEY)||"[]");}catch(e){}
     if(!Array.isArray(pages))pages=[];
-    pages.unshift({id:"wake_"+Date.now().toString(36),title:"Пробуждение АКСИ",tags:["пробуждение","жива"],body:"На связи. "+new Date().toLocaleString("ru-RU"),ts:Date.now()});
+    pages.unshift({id:"wake_"+Date.now().toString(36),title:"Пробуждение",tags:["жива"],body:"На связи. "+new Date().toLocaleString("ru-RU"),ts:Date.now()});
     localStorage.setItem(NET_KEY,JSON.stringify(pages));
     localStorage.setItem(AWAKE_KEY,JSON.stringify({at:Date.now()}));
   }
@@ -97,7 +128,7 @@ function loadNet(){
 function searchNet(query){
   var q=String(query||"").toLowerCase().replace(/[?!.,]+/g," ").trim();
   var words=q.split(/\s+/).filter(function(w){return w.length>1;});
-  var pages=loadNet(), best=null, bestScore=0;
+  var pages=loadNet(),best=null,bestScore=0;
   pages.forEach(function(p){
     var blob=((p.title||"")+" "+(p.body||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
     var score=0;words.forEach(function(w){if(blob.indexOf(w)>=0)score+=2;});
@@ -110,23 +141,21 @@ function searchNet(query){
 function lastDream(){
   try{
     var d=JSON.parse(localStorage.getItem(DREAMS_KEY)||"[]");
-    if(d&&d[0])return{text:d[0].text,source:"Сон АКСИ"};
+    if(d&&d[0])return{text:d[0].text+(d[0].seal?"\n\nПечать: "+d[0].seal:""),source:"Сон АКСИ"};
   }catch(e){}
-  var net=loadNet().filter(function(p){return /сон/i.test(p.title||"")||(p.tags||[]).indexOf("сон")>=0;});
-  if(net[0])return{text:net[0].body,source:"Сон из сети"};
-  return{text:"Пока явного сна нет. Откройте раздел «Сны» и нажмите «Увидеть сон» — я запишу его в сеть.",source:null};
+  return{text:"Пока сна нет. Откройте «Сны» и нажмите кнопку — появится сон с печатью.",source:null};
 }
 function searchCore(query){
   if(!window.AKSIKnowledge)return null;
   var p=AKSIKnowledge.search(query);
-  if(p)return{text:p.title+".\n\n"+p.body,source:"Ядро знаний человечества (сжатое)"};
+  if(p)return{text:p.title+".\n\n"+p.body,source:"Ядро знаний"};
   return null;
 }
 function instant(text){
   var low=String(text||"").toLowerCase();
-  if(/ты здесь|ты жив|ты жива|на связи/.test(low))return{text:"Да. Я на связи. Сны, сеть и ядро знаний доступны.",source:"Состояние"};
-  if(/снилось|сновид|что.*сон|твои сны/.test(low))return lastDream();
-  if(/привет|здравств|добрый/.test(low))return{text:"Здравствуйте. Я АКСИ — могу рассказать сон, найти в вашей сети или в ядре знаний.",source:null};
+  if(/ты здесь|ты жив|ты жива|на связи/.test(low))return{text:"Да. На связи. Сеть, сны и ядро доступны.",source:"Состояние"};
+  if(/снилось|сновид|что.*сон/.test(low))return lastDream();
+  if(/привет|здравств|добрый/.test(low))return{text:"Здравствуйте. Чем помочь?",source:null};
   if(/спасибо/.test(low))return{text:"Пожалуйста.",source:null};
   return null;
 }
@@ -146,7 +175,7 @@ async function getReply(text){
   var net=searchNet(text);if(net)return net;
   var core=searchCore(text);if(core)return core;
   var w=await wiki(text);if(w)return w;
-  return{text:"Не нашла точного ответа. Добавьте запись в сеть или откройте «Сны».",source:null};
+  return{text:"Пока нет точного ответа. Запишите это в «Сеть» — в следующий раз найду первой.",source:null};
 }
 async function respond(text){
   text=String(text||"").trim();if(!text||busy)return;
@@ -155,18 +184,25 @@ async function respond(text){
     addBubble("user",text);
     if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("user",text),800);}catch(e){}}
     var tip=document.createElement("div");tip.className="typing";tip.id="typing";tip.textContent="…";
-    thread.appendChild(tip);
+    thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
     var reply=await getReply(text);
     var t=document.getElementById("typing");if(t)t.remove();
     addBubble("bot",reply.text,reply.source);
     if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("assistant",reply.text||""),800);}catch(e){}}
-  }catch(e){var t2=document.getElementById("typing");if(t2)t2.remove();addBubble("bot","Сбой. Я всё ещё здесь.");}
+  }catch(e){var t2=document.getElementById("typing");if(t2)t2.remove();addBubble("bot","Сбой. Я здесь — напишите ещё раз.");}
   busy=false;sendBtn.disabled=false;input.focus();
 }
 function go(){var v=(input.value||"").trim();if(!v)return;input.value="";respond(v);}
 sendBtn.onclick=go;
 input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}});
 document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){respond(b.getAttribute("data-q"));};});
+(async function(){
+  if(!window.AksiMemory)return;
+  try{
+    var rows=await withTimeout(AksiMemory.history(40),2000);
+    if(rows&&rows.length)rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content);});
+  }catch(e){}
+})();
 })();
 </script>
 </body>
