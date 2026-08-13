@@ -1,172 +1,109 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
-<title>АКСИ · Путь</title>
-<meta name="theme-color" content="#0f172a"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Навигатор АКСИ</title>
+<meta name="theme-color" content="#0f172a">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#0f172a;color:#f8fafc;font-family:system-ui,sans-serif}
-#map{position:absolute;inset:0;bottom:calc(56px + env(safe-area-inset-bottom,0px))}
-.top{
-  position:fixed;top:0;left:0;right:0;z-index:5;
-  padding:max(8px,env(safe-area-inset-top)) 10px 8px;
-  background:linear-gradient(#0f172af5,#0f172a00);pointer-events:none;
+* { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; font-family: system-ui, sans-serif; background: #0f172a; color: #fff; overflow: hidden; }
+#map { position: absolute; top: 0; left: 0; right: 0; bottom: 160px; }
+.bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 160px;
+  background: #1e293b; padding: 12px 14px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  border-top: 3px solid #22d3ee;
 }
-.top a{pointer-events:auto;color:#94a3b8;text-decoration:none;font-weight:600;font-size:13px}
-.flags{float:right;display:flex;gap:4px;pointer-events:none}
-.f{font-size:9px;padding:3px 7px;border-radius:99px;border:1px solid #334155;color:#94a3b8}
-.f.on{color:#4ade80;border-color:#4ade80}
-.f.warn{color:#fbbf24;border-color:#fbbf24}
-.card{clear:both;margin-top:8px;background:#1e293b;border-radius:12px;padding:10px 12px;pointer-events:none}
-.card b{display:block;font-size:15px}
-.card span{font-size:11px;color:#94a3b8}
-.bot{
-  position:fixed;left:6px;right:6px;z-index:5;
-  bottom:calc(60px + env(safe-area-inset-bottom,0px));
-  max-width:480px;margin:0 auto;
+.bar a { color: #22d3ee; font-weight: 700; font-size: 1rem; text-decoration: none; }
+#info { font-size: 1.15rem; font-weight: 700; margin: 8px 0; min-height: 1.4em; }
+.row { display: flex; gap: 8px; }
+button {
+  flex: 1; min-height: 52px; border: none; border-radius: 12px;
+  font-size: 1.1rem; font-weight: 800; color: #fff;
 }
-.panel{background:#0f172af2;border:1px solid #334155;border-radius:14px;padding:10px}
-.m{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:8px}
-.m div{background:#1e293b;border-radius:10px;text-align:center;padding:6px 2px}
-.m b{display:block;font-size:.95rem;color:#22d3ee}
-.m i{font-style:normal;font-size:8px;color:#94a3b8;text-transform:uppercase}
-input{
-  width:100%;padding:12px;border-radius:12px;border:1px solid #334155;background:#1e293b;
-  color:#fff;font:inherit;font-size:16px;margin-bottom:8px;
+#go { background: #7c3aed; }
+#stop { background: #334155; }
+.arrow-wrap { width: 44px; height: 44px; margin-left: -22px; margin-top: -22px; display: flex; align-items: center; justify-content: center; }
+.arrow {
+  width: 0; height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-bottom: 34px solid #22d3ee;
+  filter: drop-shadow(0 0 8px #22d3ee);
+  transform-origin: 50% 70%;
 }
-.row{display:flex;gap:6px}
-button{
-  flex:1;min-height:48px;border:none;border-radius:12px;padding:12px 6px;
-  font:inherit;font-size:13px;font-weight:700;color:#fff;
-}
-.g{background:linear-gradient(135deg,#06b6d4,#6366f1)}
-.p{background:linear-gradient(135deg,#a855f7,#6366f1)}
-.s{background:#1e293b;color:#e2e8f0;border:1px solid #334155}
-.arrow-wrap{width:40px;height:40px;margin-left:-20px;margin-top:-20px;display:flex;align-items:center;justify-content:center}
-.arrow{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:30px solid #22d3ee;filter:drop-shadow(0 0 8px #22d3ee);transform-origin:50% 70%}
-.leaflet-control-attribution{font-size:8px!important}
-.leaflet-bar a{width:36px!important;height:36px!important;line-height:36px!important}
 </style>
 </head>
 <body>
 <div id="map"></div>
-<div class="top">
-  <a href="/">АКСИ</a>
-  <div class="flags">
-    <span class="f" id="f-gps">GPS</span>
-    <span class="f" id="f-pdr">PDR</span>
-    <span class="f" id="f-off">NET</span>
-  </div>
-  <div class="card"><b id="t1">Нажмите «Вести»</b><span id="t2">Стрелка с вами</span></div>
-</div>
-<div class="bot">
-  <div class="panel">
-    <div class="m">
-      <div><b id="spd">—</b><i>км/ч</i></div>
-      <div><b id="hdg">—</b><i>курс</i></div>
-      <div><b id="acc">—</b><i>м</i></div>
-      <div><b id="mode">—</b><i>режим</i></div>
-    </div>
-    <input id="dest" placeholder="Куда едем?" enterkeyhint="go"/>
-    <div class="row">
-      <button class="p" id="btn-go" type="button">Вести</button>
-      <button class="g" id="btn-rt" type="button">Маршрут</button>
-      <button class="s" id="btn-st" type="button">Стоп</button>
-    </div>
+<div class="bar">
+  <a href="/">← МЕНЮ</a>
+  <div id="info">Нажмите ВЕСТИ</div>
+  <div class="row">
+    <button type="button" id="go">ВЕСТИ</button>
+    <button type="button" id="stop">СТОП</button>
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="/nav.js"></script>
 <script>
-(function(){
-"use strict";
-var map=L.map("map",{zoomControl:false}).setView([55.75,37.62],16);
-L.control.zoom({position:"bottomright"}).addTo(map);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OSM"}).addTo(map);
-var watchId=null,on=false,last=null,lastGpsAt=0,hdg=0,marker=null,trail=null,pts=[];
-var routeLine=null,steps=[],stepI=0,destMark=null,pdrActive=false,accMagPrev=0,stepCooldown=0,stepLen=0.75;
-function $(id){return document.getElementById(id);}
-function setF(id,cls){$(id).className="f"+(cls?" "+cls:"");}
-function net(){setF("f-off",navigator.onLine?"":"on");$("f-off").textContent=navigator.onLine?"NET":"OFF";}
-net();addEventListener("online",net);addEventListener("offline",net);
-function ensureMarker(lat,lon,bearing){
-  if(bearing!=null&&!isNaN(bearing))hdg=bearing;
-  if(!marker){
-    marker=L.marker([lat,lon],{icon:L.divIcon({className:"",html:'<div class="arrow-wrap"><div class="arrow" id="ar"></div></div>',iconSize:[40,40],iconAnchor:[20,20]}),zIndexOffset:999}).addTo(map);
-  }else marker.setLatLng([lat,lon]);
-  setTimeout(function(){var a=$("ar");if(a)a.style.transform="rotate("+hdg+"deg)";},0);
-}
-function haversine(a,b){var R=6371000,t=Math.PI/180,dLat=(b.lat-a.lat)*t,dLon=(b.lon-a.lon)*t;var x=Math.sin(dLat/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
-function destPoint(lat,lon,brng,dist){
-  var R=6371000,to=Math.PI/180,from=180/Math.PI,φ1=lat*to,λ1=lon*to,δ=dist/R,θ=brng*to;
-  var φ2=Math.asin(Math.sin(φ1)*Math.cos(δ)+Math.cos(φ1)*Math.sin(δ)*Math.cos(θ));
-  var λ2=λ1+Math.atan2(Math.sin(θ)*Math.sin(δ)*Math.cos(φ1),Math.cos(δ)-Math.sin(φ1)*Math.sin(φ2));
-  return{lat:φ2*from,lon:((λ2*from+540)%360)-180};
-}
-function applyPos(lat,lon,spd,bearing,acc,src){
-  if(bearing!=null&&!isNaN(bearing))hdg=bearing;
-  else if(last){var dlon=lon-last.lon,dlat=lat-last.lat;if(Math.abs(dlon)+Math.abs(dlat)>1e-6)hdg=(Math.atan2(dlon,dlat)*180/Math.PI+360)%360;}
-  ensureMarker(lat,lon,hdg);last={lat:lat,lon:lon};pts.push([lat,lon]);
-  if(pts.length>1){if(trail)map.removeLayer(trail);trail=L.polyline(pts.slice(-400),{color:"#22d3ee",weight:4,opacity:.6}).addTo(map);}
-  if(on){map.panTo([lat,lon],{animate:true,duration:.25});if(map.getZoom()<16)map.setZoom(17);}
-  $("spd").textContent=spd!=null&&!isNaN(spd)?Math.max(0,Math.round(spd*3.6)):"—";
-  $("hdg").textContent=Math.round(hdg)+"°";$("acc").textContent=acc!=null?Math.round(acc):"—";$("mode").textContent=src;
-  $("t1").textContent=src==="PDR"?"Инерция":"Вы на карте";$("t2").textContent=src==="PDR"?"GPS слабо · компас+шаги":"Стрелка = курс";
-  if(steps.length){while(stepI<steps.length-1){var s=steps[stepI],end=s.maneuver&&s.maneuver.location;if(!end)break;if(haversine({lat:lat,lon:lon},{lat:end[1],lon:end[0]})<40)stepI++;else break;}
-    var cur=steps[stepI];$("t1").textContent=(cur&&cur.maneuver&&cur.maneuver.instruction)||"По маршруту";}
-}
-function onGps(pos){lastGpsAt=Date.now();pdrActive=false;setF("f-gps","on");setF("f-pdr","");applyPos(pos.coords.latitude,pos.coords.longitude,pos.coords.speed,pos.coords.heading,pos.coords.accuracy,"GPS");}
-function onGpsErr(){setF("f-gps","warn");}
-function onOrient(ev){var h=ev.webkitCompassHeading!=null?ev.webkitCompassHeading:(ev.alpha!=null?(360-ev.alpha):null);if(h!=null&&!isNaN(h))hdg=h;if(pdrActive&&last)ensureMarker(last.lat,last.lon,hdg);}
-function onMotion(ev){
-  if(!on||!last)return;var a=ev.accelerationIncludingGravity;if(!a)return;
-  var mag=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
-  if(accMagPrev>11.5&&mag<accMagPrev&&(Date.now()-stepCooldown)>320){
-    stepCooldown=Date.now();
-    if(Date.now()-lastGpsAt>4000){pdrActive=true;setF("f-pdr","on");setF("f-gps","warn");var np=destPoint(last.lat,last.lon,hdg,stepLen);applyPos(np.lat,np.lon,stepLen/0.5,hdg,null,"PDR");}
+(function () {
+  var map = L.map("map", { zoomControl: true }).setView([55.75, 37.62], 15);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
+  var watchId = null, marker = null, hdg = 0, last = null;
+  var info = document.getElementById("info");
+
+  function setArrow(lat, lon, bearing) {
+    if (bearing != null && !isNaN(bearing)) hdg = bearing;
+    if (!marker) {
+      marker = L.marker([lat, lon], {
+        icon: L.divIcon({
+          className: "",
+          html: '<div class="arrow-wrap"><div class="arrow" id="ar"></div></div>',
+          iconSize: [44, 44],
+          iconAnchor: [22, 22]
+        })
+      }).addTo(map);
+    } else marker.setLatLng([lat, lon]);
+    setTimeout(function () {
+      var a = document.getElementById("ar");
+      if (a) a.style.transform = "rotate(" + hdg + "deg)";
+    }, 0);
+    map.panTo([lat, lon]);
+    last = { lat: lat, lon: lon };
   }
-  accMagPrev=mag;
-}
-function start(){
-  on=true;
-  if(watchId==null)watchId=navigator.geolocation.watchPosition(onGps,onGpsErr,{enableHighAccuracy:true,maximumAge:500,timeout:10000});
-  window.addEventListener("deviceorientation",onOrient,true);
-  window.addEventListener("devicemotion",onMotion,true);
-  $("t1").textContent="Ведём…";
-  navigator.geolocation.getCurrentPosition(onGps,onGpsErr,{enableHighAccuracy:true,timeout:8000});
-}
-function stop(){
-  on=false;pdrActive=false;
-  if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
-  window.removeEventListener("deviceorientation",onOrient,true);
-  window.removeEventListener("devicemotion",onMotion,true);
-  $("t1").textContent="Стоп";$("mode").textContent="—";
-}
-async function route(){
-  var q=$("dest").value.trim();if(!q){$("t1").textContent="Куда?";return;}
-  if(!navigator.onLine){$("t1").textContent="Нужен интернет";return;}
-  if(!last){try{await new Promise(function(r,j){navigator.geolocation.getCurrentPosition(function(p){onGps(p);r();},j,{enableHighAccuracy:true,timeout:8000});});}catch(e){$("t1").textContent="Нужен GPS";return;}}
-  $("t1").textContent="Строим…";
-  try{
-    var g=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q),{headers:{"Accept-Language":"ru"}}).then(function(r){return r.json();});
-    if(!g[0])throw new Error("Не найден");
-    var B={lat:+g[0].lat,lon:+g[0].lon};
-    if(destMark)map.removeLayer(destMark);destMark=L.marker([B.lat,B.lon]).addTo(map);
-    var data=await fetch("https://router.project-osrm.org/route/v1/driving/"+last.lon+","+last.lat+";"+B.lon+","+B.lat+"?overview=full&geometries=geojson&steps=true").then(function(r){return r.json();});
-    if(data.code!=="Ok")throw new Error("Нет пути");
-    var rt=data.routes[0];
-    if(routeLine)map.removeLayer(routeLine);
-    routeLine=L.geoJSON(rt.geometry,{style:{color:"#a855f7",weight:6,opacity:.85}}).addTo(map);
-    steps=[];(rt.legs||[]).forEach(function(l){(l.steps||[]).forEach(function(s){steps.push(s);});});stepI=0;
-    map.fitBounds(routeLine.getBounds(),{padding:[50,50,200,50]});
-    $("t1").textContent="Поехали";$("t2").textContent=Math.round(rt.distance/100)/10+" км";start();
-  }catch(e){$("t1").textContent=e.message||"Ошибка";}
-}
-$("btn-go").onclick=start;$("btn-st").onclick=stop;$("btn-rt").onclick=route;
+
+  function onPos(pos) {
+    var lat = pos.coords.latitude, lon = pos.coords.longitude;
+    var b = pos.coords.heading;
+    if (b == null || isNaN(b)) {
+      if (last) {
+        var dlon = lon - last.lon, dlat = lat - last.lat;
+        if (Math.abs(dlon) + Math.abs(dlat) > 1e-6)
+          b = (Math.atan2(dlon, dlat) * 180 / Math.PI + 360) % 360;
+      }
+    }
+    setArrow(lat, lon, b);
+    var spd = pos.coords.speed;
+    info.textContent = "Вы здесь" + (spd != null && !isNaN(spd) ? " · " + Math.max(0, Math.round(spd * 3.6)) + " км/ч" : "");
+  }
+  function onErr(err) {
+    info.textContent = err.code === 1 ? "Разрешите геолокацию в настройках" : "Нет GPS";
+  }
+
+  document.getElementById("go").onclick = function () {
+    info.textContent = "Ищем спутники…";
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = navigator.geolocation.watchPosition(onPos, onErr, {
+      enableHighAccuracy: true, maximumAge: 500, timeout: 15000
+    });
+  };
+  document.getElementById("stop").onclick = function () {
+    if (watchId != null) navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    info.textContent = "Стоп";
+  };
 })();
 </script>
 </body>
