@@ -1,22 +1,36 @@
 (function(){
   if(window.__AKSI_NAV)return;window.__AKSI_NAV=1;
-  var items=[
-    {href:"/",label:"Дом",icon:"⌂"},
-    {href:"/strand/",label:"Нить",icon:" favour"},
-    {href:"/aksi/",label:"Чат",icon:"✦"},
-    {href:"/dreams/",label:"Сны",icon:"☁"},
-    {href:"/net/",label:"Сеть",icon:"◈"},
-    {href:"/backup/",label:"Бэкап",icon:"⇩"}
-  ];
   var path=location.pathname.replace(/\/+$/,"")||"/";
-  var css=".aksi-nav{position:fixed;bottom:0;left:0;right:0;z-index:9999;display:flex;justify-content:center;padding:8px 4px calc(8px + env(safe-area-inset-bottom));background:rgba(246,243,255,.95);border-top:1px solid #e8e0f7;backdrop-filter:blur(14px)}.aksi-nav a{flex:1;max-width:64px;text-align:center;text-decoration:none;color:#6b6280;font-size:9px;padding:4px 0;border-radius:12px;font-weight:600}.aksi-nav a span{display:block;font-size:15px;margin-bottom:2px;line-height:1}.aksi-nav a.on{color:#5b21b6;background:rgba(124,58,237,.12)}body{padding-bottom:64px!important}";
+  var items=[
+    {href:"/",label:"Дом",ic:"⌂"},
+    {href:"/aksi/",label:"Чат",ic:"✦"},
+    {href:"/drive/",label:"Путь",ic:"➤"},
+    {href:"/net/",label:"Сеть",ic:"◈"},
+    {href:"/live/",label:"Live",ic:"◎"}
+  ];
+  // dark pages keep dark nav
+  var dark=/^\\/(drive|live|wow|strand|dreams)/.test(path);
+  var css=
+    ".m-nav{position:fixed;left:0;right:0;bottom:0;z-index:10000;display:flex;justify-content:space-around;"+
+    "align-items:stretch;min-height:56px;padding-bottom:env(safe-area-inset-bottom,0px);"+
+    "backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}"+
+    (dark
+      ?".m-nav{background:rgba(15,23,42,.94);border-top:1px solid #334155}.m-nav a{color:#94a3b8}.m-nav a.on{color:#22d3ee}"
+      :".m-nav{background:rgba(255,255,255,.94);border-top:1px solid #e5ddf5}.m-nav a{color:#6b6285}.m-nav a.on{color:#7c3aed}")+
+    ".m-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;"+
+    "text-decoration:none;font-size:10px;font-weight:600;min-height:52px;padding:6px 2px 4px;max-width:84px}"+
+    ".m-nav a .ic{font-size:18px;line-height:1}"+
+    "body{padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))!important}";
   var s=document.createElement("style");s.textContent=css;document.head.appendChild(s);
-  var n=document.createElement("nav");n.className="aksi-nav";
+  var n=document.createElement("nav");n.className="m-nav";n.setAttribute("aria-label","Меню");
   items.forEach(function(it){
     var a=document.createElement("a");a.href=it.href;
     var p=it.href.replace(/\/+$/,"")||"/";
     if(path===p||(p!=="/"&&path.indexOf(p)===0))a.className="on";
-    a.innerHTML="<span>"+it.icon+"</span>"+it.label;n.appendChild(a);
+    a.innerHTML="<span class=\"ic\">"+it.ic+"</span>"+it.label;
+    n.appendChild(a);
   });
   document.body.appendChild(n);
+  // SW
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});
 })();

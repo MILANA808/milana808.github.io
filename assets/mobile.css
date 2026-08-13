@@ -1,0 +1,53 @@
+/* AKSI mobile system */
+:root{
+  --m-bg:#f3effc;--m-ink:#160f2a;--m-muted:#6b6285;--m-line:#e5ddf5;
+  --m-violet:#7c3aed;--m-card:#fff;--m-ok:#059669;
+  --nav-h:calc(56px + env(safe-area-inset-bottom,0px));
+  --touch:48px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;-webkit-text-size-adjust:100%}
+body.mobi{
+  margin:0;min-height:100%;min-height:100dvh;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--m-bg);color:var(--m-ink);
+  padding-bottom:var(--nav-h);
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:contain;
+}
+.m-shell{max-width:480px;margin:0 auto;padding:16px 16px 24px}
+.m-logo{font-size:11px;letter-spacing:.35em;font-weight:700;color:var(--m-muted);margin-bottom:12px}
+.m-h1{font-size:clamp(1.75rem,7vw,2.2rem);font-weight:780;letter-spacing:-.03em;line-height:1.08;margin:0 0 10px}
+.m-lead{font-size:15px;line-height:1.5;color:var(--m-muted);margin:0 0 18px}
+.m-btn{
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  width:100%;min-height:var(--touch);padding:14px 16px;border:none;border-radius:16px;
+  font:inherit;font-weight:700;font-size:16px;text-decoration:none;cursor:pointer;
+  margin-bottom:10px;
+}
+.m-btn-main{background:linear-gradient(145deg,#8b5cf6,#6d28d9);color:#fff;box-shadow:0 10px 28px rgba(109,40,217,.3)}
+.m-btn-main small{font-weight:500;font-size:12px;opacity:.9;margin-top:2px}
+.m-btn-sec{background:var(--m-card);color:var(--m-ink);border:1px solid var(--m-line)}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.m-card{
+  display:block;padding:14px;min-height:72px;border-radius:14px;background:var(--m-card);
+  border:1px solid var(--m-line);text-decoration:none;color:var(--m-ink);
+}
+.m-card strong{display:block;font-size:14px;margin-bottom:4px}
+.m-card span{font-size:12px;color:var(--m-muted)}
+/* bottom tab bar */
+.m-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:10000;
+  display:flex;justify-content:space-around;align-items:stretch;
+  min-height:56px;padding-bottom:env(safe-area-inset-bottom,0px);
+  background:rgba(255,255,255,.94);border-top:1px solid var(--m-line);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.m-nav a{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;text-decoration:none;color:var(--m-muted);font-size:10px;font-weight:600;
+  min-height:52px;padding:6px 2px 4px;max-width:80px;
+}
+.m-nav a svg,.m-nav a .ic{font-size:18px;line-height:1}
+.m-nav a.on{color:var(--m-violet)}
+input,textarea,button,select{font-size:16px!important} /* iOS zoom prevent */
