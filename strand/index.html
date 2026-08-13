@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Нить АКСИ — изобретение</title>
+<meta name="theme-color" content="#0c0a14"/>
+<meta name="description" content="Нить: новая форма диалога — парные искры с общей печатью, не чат и не wiki."/>
+<style>
+:root{
+  --bg:#0c0a14;--ink:#f5f3ff;--muted:#9b92b8;--line:rgba(167,139,250,.22);
+  --violet:#a78bfa;--cyan:#22d3ee;--pink:#e879f9;--card:rgba(24,18,40,.92);
+}
+*{box-sizing:border-box;margin:0}
+body{
+  min-height:100dvh;font-family:system-ui,-apple-system,sans-serif;
+  background:radial-gradient(ellipse 90% 50% at 50% -10%,rgba(88,28,135,.45),transparent 50%),var(--bg);
+  color:var(--ink);
+}
+.w{max-width:480px;margin:0 auto;padding:18px 16px 110px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.top a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
+.badge{
+  display:inline-block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(34,211,238,.35);padding:4px 8px;border-radius:999px;margin-bottom:12px;
+}
+h1{font-size:1.65rem;font-weight:750;letter-spacing:-.03em;line-height:1.15;margin-bottom:8px}
+.lead{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:18px}
+.invent{
+  background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(34,211,238,.08));
+  border:1px solid var(--line);border-radius:16px;padding:12px 14px;font-size:13px;line-height:1.45;
+  color:#c4b5fd;margin-bottom:16px;
+}
+.invent strong{color:#fff}
+.composer{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;
+  margin-bottom:16px;
+}
+.composer textarea{
+  width:100%;min-height:72px;border:none;background:transparent;color:var(--ink);
+  font:inherit;font-size:16px;resize:vertical;outline:none;
+}
+.composer button{
+  width:100%;margin-top:8px;border:none;border-radius:14px;padding:14px;
+  font:inherit;font-weight:700;font-size:15px;cursor:pointer;
+  background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;
+}
+.composer button:disabled{opacity:.45}
+.thread{display:flex;flex-direction:column;gap:14px}
+.link{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;
+  position:relative;
+}
+.link::before{
+  content:"";position:absolute;left:22px;top:-14px;width:2px;height:14px;
+  background:linear-gradient(var(--cyan),var(--violet));opacity:.5;
+}
+.link:first-child::before{display:none}
+.you,.aksi{font-size:15px;line-height:1.45;margin-bottom:10px}
+.lab{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.you .lab{color:var(--pink)}
+.aksi .lab{color:var(--cyan)}
+.seal{
+  margin-top:10px;padding:10px;border-radius:12px;border:1px dashed rgba(34,211,238,.3);
+  font-family:ui-monospace,monospace;font-size:10px;color:#a5b4fc;word-break:break-all;line-height:1.4;
+}
+.meta{font-size:11px;color:var(--muted);margin-top:8px}
+.empty{text-align:center;color:var(--muted);font-size:14px;padding:28px 12px}
+.stats{display:flex;gap:12px;font-size:12px;color:var(--muted);margin-bottom:12px}
+.stats b{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="top">
+    <a href="/">← Домой</a>
+    <a href="/aksi/">Чат</a>
+  </div>
+  <div class="badge">Изобретение · Strand Protocol</div>
+  <h1>Нить АКСИ</h1>
+  <p class="lead">Не переписка и не заметка. Вы бросаете <b>искру</b> — АКСИ отвечает <b>контр-искрой</b>. Пара склеивается <b>одной печатью</b>. Так растёт доказуемая нить смысла.</p>
+  <div class="invent">
+    <strong>В чём новое.</strong> Обычный чат — поток сообщений. Wiki — страницы. Нить — <em>двусторонние звенья</em>: (человек ↔ агент) + общий хеш пары. Порядок звеньев нельзя подделать без поломки печати.
+  </div>
+
+  <div class="stats">
+    <div>звеньев <b id="n">0</b></div>
+    <div>протокол <b>STRAND/1</b></div>
+  </div>
+
+  <div class="composer">
+    <textarea id="spark" placeholder="Ваша искра — одна мысль, образ, вопрос…" maxlength="500"></textarea>
+    <button type="button" id="go">Сплести звено</button>
+  </div>
+
+  <div class="thread" id="thread">
+    <div class="empty" id="empty">Нить пуста. Бросьте первую искру.</div>
+  </div>
+</div>
+<script src="/aksi-knowledge.js"></script>
+<script src="/nav.js"></script>
+<script>
+(function(){
+"use strict";
+var KEY="AKSI_STRAND_V1";
+var SEED="AKSI_DIMAX_v3_2026";
+var DID="did:aksi:ed25519:sovereign-2026";
+var PREV="GENESIS";
+
+function load(){
+  try{
+    var a=JSON.parse(localStorage.getItem(KEY)||"[]");
+    return Array.isArray(a)?a:[];
+  }catch(e){return[];}
+}
+function save(list){localStorage.setItem(KEY,JSON.stringify(list.slice(0,100)));}
+
+function hex(buf){
+  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+}
+async function sha(s){
+  var d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  return hex(d);
+}
+
+function loadNetTitles(){
+  try{
+    var n=JSON.parse(localStorage.getItem("AKSI_NET_V1")||"[]");
+    if(!Array.isArray(n))return[];
+    return n.slice(0,12).map(function(p){return p.title||"";}).filter(Boolean);
+  }catch(e){return[];}
+}
+
+function counterSpark(userText, prevSeal){
+  var low=userText.toLowerCase();
+  var net=loadNetTitles();
+  var core=(window.AKSIKnowledge&&AKSIKnowledge.all())||[];
+  var pick=core.length?core[Math.floor(Math.random()*core.length)]:null;
+
+  // resonant templates — avoid pure echo
+  var lines=[];
+  if(/страх|тревог|боль/.test(low))
+    lines.push("Принимаю искру. Рядом с болью полезно одно ясное действие — маленькое, сегодня.");
+  else if(/люб|сердц|нежн/.test(low))
+    lines.push("Искра тепла принята. Сохраню её в нити — как обещание бережности.");
+  else if(/будущ|мечта|хочу/.test(low))
+    lines.push("Будущее в нити начинается с одного звена. Ваша искра уже сдвинула цепь.");
+  else if(/кто я|смысл|зачем/.test(low))
+    lines.push("Смысл не скачивается — он сплетается. Это звено — ваш ход в определении себя.");
+  else if(/акси|ты|ии/.test(low))
+    lines.push("Я — контр-искра, не хозяин. Печать связывает нас как равных в этом звене.");
+  else
+    lines.push("Слышу. Превращаю вашу искру в ответное звено — коротко и по делу.");
+
+  if(net.length)
+    lines.push("В вашей сети отозвалось: «"+net[Math.floor(Math.random()*net.length)]+"».");
+  if(pick)
+    lines.push("Из ядра: "+pick.title+" — "+String(pick.body).split(".")[0]+".");
+
+  lines.push("Предыдущая печать: "+(prevSeal?prevSeal.slice(0,10)+"…":"GENESIS")+".");
+  return lines.join(" ");
+}
+
+async function weave(userText){
+  var list=load();
+  var prev=list.length?list[0].pair_seal:PREV;
+  var ts=Date.now();
+  var aksi=counterSpark(userText, prev===PREV?null:prev);
+  // pair payload binds both sides + chain
+  var payload=["STRAND/1",DID,ts,prev,userText,aksi].join("|");
+  var pair=await sha(SEED+"|"+payload);
+  var link={
+    id:"s_"+ts.toString(36),
+    ts:ts,
+    protocol:"STRAND/1",
+    did:DID,
+    prev:prev,
+    you:userText,
+    aksi:aksi,
+    pair_seal:pair,
+    short:pair.slice(0,12)+"…"+pair.slice(-6)
+  };
+  list.unshift(link);
+  save(list);
+  // also drop a net node for chat discovery
+  try{
+    var net=JSON.parse(localStorage.getItem("AKSI_NET_V1")||"[]");
+    if(!Array.isArray(net))net=[];
+    net.unshift({
+      id:link.id,
+      title:"Звено нити · "+new Date(ts).toLocaleString("ru-RU"),
+      tags:["нить","strand","искра"],
+      body:"Вы: "+userText+"\n\nАКСИ: "+aksi+"\n\nПечать пары: "+pair,
+      ts:ts
+    });
+    localStorage.setItem("AKSI_NET_V1",JSON.stringify(net.slice(0,200)));
+  }catch(e){}
+  return link;
+}
+
+function render(){
+  var list=load();
+  document.getElementById("n").textContent=list.length;
+  var root=document.getElementById("thread");
+  var empty=document.getElementById("empty");
+  root.innerHTML="";
+  if(!list.length){
+    root.appendChild(empty||Object.assign(document.createElement("div"),{className:"empty",textContent:"Нить пуста."}));
+    return;
+  }
+  list.forEach(function(L){
+    var d=document.createElement("div");
+    d.className="link";
+    d.innerHTML=
+      "<div class=\"you\"><div class=\"lab\">Ваша искра</div><div class=\"t\"></div></div>"+
+      "<div class=\"aksi\"><div class=\"lab\">Контр-искра АКСИ</div><div class=\"t\"></div></div>"+
+      "<div class=\"seal\"></div>"+
+      "<div class=\"meta\"></div>";
+    d.querySelector(".you .t").textContent=L.you;
+    d.querySelector(".aksi .t").textContent=L.aksi;
+    d.querySelector(".seal").textContent="PAIR "+L.short+"\nFULL "+L.pair_seal+"\nPREV "+String(L.prev).slice(0,16);
+    d.querySelector(".meta").textContent=new Date(L.ts).toLocaleString("ru-RU")+" · "+L.protocol;
+    root.appendChild(d);
+  });
+}
+
+async function verifyHead(){
+  var list=load();
+  if(!list.length)return true;
+  var L=list[0];
+  var payload=["STRAND/1",L.did,L.ts,L.prev,L.you,L.aksi].join("|");
+  var pair=await sha(SEED+"|"+payload);
+  return pair===L.pair_seal;
+}
+
+document.getElementById("go").onclick=async function(){
+  var ta=document.getElementById("spark");
+  var v=(ta.value||"").trim();
+  if(!v)return;
+  var btn=document.getElementById("go");
+  btn.disabled=true;btn.textContent="Плету…";
+  try{
+    await weave(v);
+    ta.value="";
+    render();
+    var ok=await verifyHead();
+    if(!ok)alert("Печать не сошлась — странно");
+  }catch(e){alert("Сбой");}
+  btn.disabled=false;btn.textContent="Сплести звено";
+};
+
+render();
+})();
+</script>
+</body>
+</html>
