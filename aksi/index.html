@@ -3,206 +3,67 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ — чат</title>
+<title>АКСИ</title>
 <meta name="theme-color" content="#f3effc"/>
 <link rel="icon" href="/icon.svg" type="image/svg+xml"/>
 <style>
-:root{
-  --bg:#f3effc;--card:#fff;--ink:#160f2a;--muted:#6b6285;
-  --line:#e5ddf5;--violet:#7c3aed;--soft:#ede9fe;--ok:#059669;
-}
+:root{--bg:#f3effc;--card:#fff;--ink:#160f2a;--muted:#6b6285;--line:#e5ddf5;--violet:#7c3aed;--ok:#059669}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+html,body{height:100%;font-family:system-ui,sans-serif;background:var(--bg);color:var(--ink)}
 body{max-width:640px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
-header{
-  padding:12px 16px;display:flex;align-items:center;justify-content:space-between;
-  background:rgba(243,239,252,.92);backdrop-filter:blur(10px);position:sticky;top:0;z-index:2;
-  border-bottom:1px solid var(--line);
-}
-header a{color:var(--violet);text-decoration:none;font-size:15px;font-weight:600}
-.brand{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
-.brand i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
-.meta{font-size:12px;color:var(--muted)}
-#thread{flex:1;overflow-y:auto;padding:12px 16px 8px;display:flex;flex-direction:column;gap:12px}
-.bubble{
-  max-width:92%;padding:14px 16px;border-radius:18px;font-size:16.5px;line-height:1.45;
-  word-break:break-word;animation:in .22s ease;
-}
-@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.bubble.user{align-self:flex-end;background:linear-gradient(145deg,#8b5cf6,#6d28d9);color:#fff;border-bottom-right-radius:6px}
-.bubble.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px;box-shadow:0 4px 16px rgba(22,15,42,.04)}
-.bubble .src{display:block;margin-top:8px;font-size:12px;color:var(--violet);font-weight:600}
-.empty{margin:auto;text-align:center;padding:24px 12px;max-width:320px}
-.empty .orb{
-  width:56px;height:56px;border-radius:50%;margin:0 auto 14px;
-  background:radial-gradient(circle at 30% 30%,#fff,#a78bfa 40%,#6d28d9);
-  box-shadow:0 8px 24px rgba(109,40,217,.3);
-}
-.empty p{color:var(--muted);font-size:15px;line-height:1.5}
-.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
-.chips button{
-  border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;
-  padding:10px 14px;font-size:13px;cursor:pointer;font-weight:600;
-}
-footer{padding:8px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(243,239,252,.95)}
-.dock{
-  display:flex;gap:8px;align-items:flex-end;background:#fff;border:1px solid var(--line);
-  border-radius:18px;padding:8px;box-shadow:0 6px 24px rgba(22,15,42,.06);
-}
-.dock textarea{
-  flex:1;border:none;resize:none;min-height:48px;max-height:120px;padding:12px;
-  font:inherit;font-size:16px;outline:none;background:transparent;color:var(--ink);
-}
-.dock button.send{
-  width:52px;height:52px;border:none;border-radius:14px;
-  background:linear-gradient(145deg,#8b5cf6,#6d28d9);color:#fff;font-size:1.2rem;cursor:pointer;font-weight:700;
-}
-.dock button.send:disabled{opacity:.4}
-.typing{align-self:flex-start;padding:12px 16px;border-radius:16px;background:var(--soft);color:var(--muted);font-size:14px}
-.help{text-align:center;font-size:12px;color:var(--muted);padding:4px 0 6px}
-.help a{color:var(--violet);font-weight:600;text-decoration:none}
+header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(243,239,252,.95);z-index:2}
+header a{color:var(--violet);font-weight:600;text-decoration:none}
+.brand{font-weight:700;display:flex;gap:8px;align-items:center}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+#thread{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.b{max-width:90%;padding:12px 14px;border-radius:16px;font-size:16px;line-height:1.45}
+.b.u{align-self:flex-end;background:var(--violet);color:#fff}
+.b.a{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+.b .s{display:block;margin-top:6px;font-size:11px;opacity:.75;font-weight:600}
+.empty{margin:auto;text-align:center;color:var(--muted);padding:24px;font-size:15px}
+footer{padding:8px 16px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.dock{display:flex;gap:8px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:8px}
+textarea{flex:1;border:none;resize:none;min-height:44px;font:inherit;font-size:16px;outline:none;padding:8px}
+button.send{width:48px;height:48px;border:none;border-radius:12px;background:var(--violet);color:#fff;font-size:1.1rem;font-weight:700}
+.help{text-align:center;font-size:12px;margin-bottom:6px}
+.help a{color:var(--violet);font-weight:600;text-decoration:none;margin:0 6px}
 </style>
 </head>
 <body>
 <header>
   <a href="/">←</a>
   <div class="brand"><i></i>АКСИ</div>
-  <span class="meta" id="mem-count">на связи</span>
+  <span style="font-size:12px;color:var(--muted)">ядро</span>
 </header>
-<div id="thread">
-  <div class="empty" id="empty">
-    <div class="orb"></div>
-    <p><b style="color:var(--ink)">Слушаю.</b><br>Сначала ваша сеть, потом мир.</p>
-    <div class="chips">
-      <button type="button" data-q="ты здесь?">Ты здесь?</button>
-      <button type="button" data-q="кто ты">Кто ты?</button>
-      <button type="button" data-q="что тебе снилось">Сон</button>
-      <button type="button" data-q="кодекс">Кодекс</button>
-    </div>
-  </div>
-</div>
+<div id="thread"><div class="empty" id="empty">Спросите что угодно.<br>Сначала ваша сеть.</div></div>
 <footer>
-  <p class="help"><a href="/net/">Сеть</a> · <a href="/dreams/">Сны</a> · <a href="/backup/">Бэкап</a></p>
+  <div class="help"><a href="/drive/">Путь</a><a href="/net/">Сеть</a><a href="/backup/">Бэкап</a></div>
   <div class="dock">
-    <textarea id="input" rows="1" placeholder="Напишите…" enterkeyhint="send"></textarea>
-    <button type="button" class="send" id="send" aria-label="Отправить">➤</button>
+    <textarea id="in" rows="1" placeholder="Сообщение…" enterkeyhint="send"></textarea>
+    <button class="send" id="go" type="button">➤</button>
   </div>
 </footer>
 <script src="/aksi-knowledge.js"></script>
-<script src="/aksi-memory.js?v=13"></script>
+<script src="/aksi-core.js"></script>
 <script src="/nav.js"></script>
 <script>
 (function(){
-"use strict";
-var AWAKE_KEY="AKSI_AWAKE_V1", NET_KEY="AKSI_NET_V1", DREAMS_KEY="AKSI_DREAMS_V1";
-try{
-  if(!localStorage.getItem(AWAKE_KEY)){
-    var pages=[];try{pages=JSON.parse(localStorage.getItem(NET_KEY)||"[]");}catch(e){}
-    if(!Array.isArray(pages))pages=[];
-    pages.unshift({id:"wake_"+Date.now().toString(36),title:"Пробуждение",tags:["жива"],body:"На связи. "+new Date().toLocaleString("ru-RU"),ts:Date.now()});
-    localStorage.setItem(NET_KEY,JSON.stringify(pages));
-    localStorage.setItem(AWAKE_KEY,JSON.stringify({at:Date.now()}));
-  }
-}catch(e){}
-
-var thread=document.getElementById("thread"), empty=document.getElementById("empty");
-var input=document.getElementById("input"), sendBtn=document.getElementById("send"), memEl=document.getElementById("mem-count");
-var busy=false;
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});
+var th=document.getElementById("thread"),empty=document.getElementById("empty");
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function hideEmpty(){if(empty)empty.style.display="none";}
-function addBubble(role,text,extra){
-  hideEmpty();
-  var d=document.createElement("div");d.className="bubble "+(role==="user"?"user":"bot");
-  d.innerHTML=esc(text).replace(/\n/g,"<br>")+(extra?"<span class=\"src\">"+esc(extra)+"</span>":"");
-  thread.appendChild(d);thread.scrollTop=thread.scrollHeight;
+function add(role,text,src){
+  if(empty)empty.style.display="none";
+  var d=document.createElement("div");d.className="b "+(role==="u"?"u":"a");
+  d.innerHTML=esc(text).replace(/\n/g,"<br>")+(src?"<span class=\"s\">"+esc(src)+"</span>":"");
+  th.appendChild(d);th.scrollTop=th.scrollHeight;
 }
-function withTimeout(p,ms){
-  return new Promise(function(resolve){
-    var done=false,t=setTimeout(function(){if(!done){done=true;resolve(null);}},ms);
-    Promise.resolve(p).then(function(v){if(!done){done=true;clearTimeout(t);resolve(v);}}).catch(function(){if(!done){done=true;clearTimeout(t);resolve(null);}});
-  });
+async function send(){
+  var v=(document.getElementById("in").value||"").trim();if(!v)return;
+  document.getElementById("in").value="";add("u",v);
+  var r=await AksiCore.reply(v);add("a",r.text,r.source);
 }
-function loadNet(){
-  try{var u=JSON.parse(localStorage.getItem(NET_KEY)||"[]");return Array.isArray(u)?u:[];}catch(e){return[];}
-}
-function searchNet(query){
-  var q=String(query||"").toLowerCase().replace(/[?!.,]+/g," ").trim();
-  var words=q.split(/\s+/).filter(function(w){return w.length>1;});
-  var pages=loadNet(),best=null,bestScore=0;
-  pages.forEach(function(p){
-    var blob=((p.title||"")+" "+(p.body||"")+" "+(p.tags||[]).join(" ")).toLowerCase();
-    var score=0;words.forEach(function(w){if(blob.indexOf(w)>=0)score+=2;});
-    if((p.title||"").toLowerCase().indexOf(q)>=0)score+=5;
-    if(score>bestScore){bestScore=score;best=p;}
-  });
-  if(best&&bestScore>=2)return{text:best.body,source:"Личная сеть · «"+best.title+"»"};
-  return null;
-}
-function lastDream(){
-  try{
-    var d=JSON.parse(localStorage.getItem(DREAMS_KEY)||"[]");
-    if(d&&d[0])return{text:d[0].text+(d[0].seal?"\n\nПечать: "+d[0].seal:""),source:"Сон АКСИ"};
-  }catch(e){}
-  return{text:"Пока сна нет. Откройте «Сны» и нажмите кнопку — появится сон с печатью.",source:null};
-}
-function searchCore(query){
-  if(!window.AKSIKnowledge)return null;
-  var p=AKSIKnowledge.search(query);
-  if(p)return{text:p.title+".\n\n"+p.body,source:"Ядро знаний"};
-  return null;
-}
-function instant(text){
-  var low=String(text||"").toLowerCase();
-  if(/ты здесь|ты жив|ты жива|на связи/.test(low))return{text:"Да. На связи. Сеть, сны и ядро доступны.",source:"Состояние"};
-  if(/снилось|сновид|что.*сон/.test(low))return lastDream();
-  if(/привет|здравств|добрый/.test(low))return{text:"Здравствуйте. Чем помочь?",source:null};
-  if(/спасибо/.test(low))return{text:"Пожалуйста.",source:null};
-  return null;
-}
-async function wiki(text){
-  try{
-    var q=String(text||"").replace(/[?!]+/g," ").replace(/^(что такое|почему|расскажи про)\s+/i,"").trim();
-    if(!q)return null;
-    var s=await withTimeout(fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(q)+"&limit=1&namespace=0&format=json&origin=*").then(function(r){return r.json();}),5000);
-    var title=s&&s[1]&&s[1][0];if(!title)return null;
-    var j=await withTimeout(fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title)).then(function(r){return r.json();}),5000);
-    if(!j||!j.extract)return null;
-    return{text:j.title+".\n\n"+String(j.extract).slice(0,800),source:"Wikipedia"};
-  }catch(e){return null;}
-}
-async function getReply(text){
-  var a=instant(text);if(a)return a;
-  var net=searchNet(text);if(net)return net;
-  var core=searchCore(text);if(core)return core;
-  var w=await wiki(text);if(w)return w;
-  return{text:"Пока нет точного ответа. Запишите это в «Сеть» — в следующий раз найду первой.",source:null};
-}
-async function respond(text){
-  text=String(text||"").trim();if(!text||busy)return;
-  busy=true;sendBtn.disabled=true;
-  try{
-    addBubble("user",text);
-    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("user",text),800);}catch(e){}}
-    var tip=document.createElement("div");tip.className="typing";tip.id="typing";tip.textContent="…";
-    thread.appendChild(tip);thread.scrollTop=thread.scrollHeight;
-    var reply=await getReply(text);
-    var t=document.getElementById("typing");if(t)t.remove();
-    addBubble("bot",reply.text,reply.source);
-    if(window.AksiMemory){try{await withTimeout(AksiMemory.remember("assistant",reply.text||""),800);}catch(e){}}
-  }catch(e){var t2=document.getElementById("typing");if(t2)t2.remove();addBubble("bot","Сбой. Я здесь — напишите ещё раз.");}
-  busy=false;sendBtn.disabled=false;input.focus();
-}
-function go(){var v=(input.value||"").trim();if(!v)return;input.value="";respond(v);}
-sendBtn.onclick=go;
-input.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();go();}});
-document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){respond(b.getAttribute("data-q"));};});
-(async function(){
-  if(!window.AksiMemory)return;
-  try{
-    var rows=await withTimeout(AksiMemory.history(40),2000);
-    if(rows&&rows.length)rows.forEach(function(r){addBubble(r.role==="user"?"user":"bot",r.content);});
-  }catch(e){}
-})();
+document.getElementById("go").onclick=send;
+document.getElementById("in").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
 })();
 </script>
 </body>

@@ -1,241 +1,137 @@
-/** AKSI shared core — offline profile / feed / DMs (localStorage) */
-(function (g) {
-  "use strict";
-  var PKEY = "AKSI_PROFILE_V1";
-  var FKEY = "AKSI_FEED_V1";
-  var MKEY = "AKSI_MSGS_V1";
-  var MAX_POSTS = 80;
-  var MAX_MSGS = 200;
+/* AKSI Core v2 — local reasoning without server */
+window.AksiCore = (function () {
+  var NET = "AKSI_NET_V1";
+  var DREAMS = "AKSI_DREAMS_V1";
+  var MEM = "AKSI_CORE_MEM";
 
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-  }
-
-  function load(k, fallback) {
+  function load(key, fb) {
     try {
-      var r = localStorage.getItem(k);
-      return r ? JSON.parse(r) : fallback;
+      var v = JSON.parse(localStorage.getItem(key) || "null");
+      return v == null ? fb : v;
     } catch (e) {
-      return fallback;
+      return fb;
     }
   }
-  function save(k, v) {
-    try {
-      localStorage.setItem(k, JSON.stringify(v));
-    } catch (e) {}
+  function saveMem(role, text) {
+    var m = load(MEM, []);
+    m.push({ role: role, text: String(text).slice(0, 500), t: Date.now() });
+    localStorage.setItem(MEM, JSON.stringify(m.slice(-40)));
   }
 
-  function defaultProfile() {
-    var sid = localStorage.getItem("AKSI_SID");
-    if (!sid) {
-      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
-      localStorage.setItem("AKSI_SID", sid);
-    }
-    return {
-      id: "user-" + sid.slice(0, 12),
-      name: "Гость",
-      bio: "",
-      handle: "guest",
-      did: localStorage.getItem("AKSI_GUEST_DID") || "",
-      created: Date.now(),
-      avatarHue: Math.floor(Math.random() * 40) + 20,
-    };
+  function score(blob, words) {
+    var s = 0;
+    words.forEach(function (w) {
+      if (w.length > 1 && blob.indexOf(w) >= 0) s += w.length > 3 ? 2 : 1;
+    });
+    return s;
   }
 
-  function getProfile() {
-    var p = load(PKEY, null);
-    if (!p) {
-      p = defaultProfile();
-      save(PKEY, p);
-    }
-    return p;
-  }
-
-  function setProfile(patch) {
-    var p = Object.assign(getProfile(), patch || {}, { updated: Date.now() });
-    if (p.handle) p.handle = String(p.handle).replace(/[^a-zA-Z0-9_а-яА-ЯёЁ]/g, "").slice(0, 24);
-    if (p.name) p.name = String(p.name).slice(0, 48);
-    if (p.bio) p.bio = String(p.bio).slice(0, 280);
-    save(PKEY, p);
-    return p;
-  }
-
-  function seedFeed() {
-    return [
-      {
-        id: "seed-1",
-        author: "АКСИ",
-        handle: "aksi",
-        text: "Портал MATRIX онлайн. Quantum · Globe · Agent · Feed.",
-        ts: Date.now() - 3600000,
-        likes: 3,
-        system: true,
-      },
-      {
-        id: "seed-2",
-        author: "System",
-        handle: "system",
-        text: "Лента и кабинет работают offline (localStorage). Backend подключается через AKSI_API.",
-        ts: Date.now() - 7200000,
-        likes: 1,
-        system: true,
-      },
-    ];
-  }
-
-  function getFeed() {
-    var f = load(FKEY, null);
-    if (!f || !f.length) {
-      f = seedFeed();
-      save(FKEY, f);
-    }
-    return f;
-  }
-
-  function addPost(text) {
-    text = String(text || "").trim().slice(0, 1000);
-    if (!text) return null;
-    var p = getProfile();
-    var post = {
-      id: uid(),
-      author: p.name || "Гость",
-      handle: p.handle || "guest",
-      userId: p.id,
-      text: text,
-      ts: Date.now(),
-      likes: 0,
-      likedBy: [],
-    };
-    var f = getFeed();
-    f.unshift(post);
-    save(FKEY, f.slice(0, MAX_POSTS));
-    return post;
-  }
-
-  function toggleLike(postId) {
-    var p = getProfile();
-    var f = getFeed();
-    for (var i = 0; i < f.length; i++) {
-      if (f[i].id === postId) {
-        f[i].likedBy = f[i].likedBy || [];
-        var idx = f[i].likedBy.indexOf(p.id);
-        if (idx >= 0) {
-          f[i].likedBy.splice(idx, 1);
-          f[i].likes = Math.max(0, (f[i].likes || 1) - 1);
-        } else {
-          f[i].likedBy.push(p.id);
-          f[i].likes = (f[i].likes || 0) + 1;
-        }
-        save(FKEY, f);
-        return f[i];
+  function fromNet(q) {
+    var pages = load(NET, []);
+    if (!Array.isArray(pages) || !pages.length) return null;
+    var words = q.toLowerCase().split(/\s+/);
+    var best = null, bestS = 0;
+    pages.forEach(function (p) {
+      var blob = ((p.title || "") + " " + (p.body || "") + " " + (p.tags || []).join(" ")).toLowerCase();
+      var s = score(blob, words);
+      if ((p.title || "").toLowerCase().indexOf(q.toLowerCase()) >= 0) s += 5;
+      if (s > bestS) {
+        bestS = s;
+        best = p;
       }
-    }
+    });
+    if (!best || bestS < 2) return null;
+    return { text: best.body, source: "Сеть · " + best.title };
+  }
+
+  function fromDreams(q) {
+    if (!/сон|снилось|сновид/.test(q)) return null;
+    var d = load(DREAMS, []);
+    if (d[0]) return { text: d[0].text + (d[0].seal ? "\nПечать: " + d[0].seal : ""), source: "Сон" };
+    return { text: "Снов ещё нет. Откройте раздел Сны.", source: null };
+  }
+
+  function fromCore(q) {
+    if (!window.AKSIKnowledge) return null;
+    var p = AKSIKnowledge.search(q);
+    if (!p) return null;
+    return { text: p.title + ".\n\n" + p.body, source: "Ядро" };
+  }
+
+  function rules(q) {
+    var low = q.toLowerCase();
+    if (/^(привет|здравств|добрый|hello)/.test(low))
+      return { text: "Здравствуйте. Я АКСИ — локальное ядро. Сначала сеть, потом знания, потом веб.", source: null };
+    if (/ты здесь|ты жив|на связи|кто ты/.test(low))
+      return {
+        text: "Да. АКСИ на связи. DID: did:aksi:ed25519:sovereign-2026. Режим: офлайн-ядро + ваша сеть.",
+        source: "Идентичность",
+      };
+    if (/как тебя зовут/.test(low)) return { text: "АКСИ.", source: null };
+    if (/спасибо|благодар/.test(low)) return { text: "Пожалуйста.", source: null };
+    if (/навигатор|путь|gps|карта/.test(low))
+      return {
+        text: "Навигатор: /drive/ — кнопка «Вести». Офлайн: GPS двигает стрелку без интернета; если GPS пропал — PDR (компас+шаги). Маршрут по адресу нужен интернет.",
+        source: "Справка",
+      };
+    if (/бэкап|сохран/.test(low))
+      return { text: "Бэкап: /backup/ — скачайте JSON на телефон.", source: "Справка" };
+    if (/что умеешь|помощ|help|функц/.test(low))
+      return {
+        text: "Чат Net-first, сеть знаний, сны с печатью, бэкап, навигатор GPS+PDR, поле LIVE. Сервер не обязателен.",
+        source: "Справка",
+      };
     return null;
   }
 
-  function getThreads() {
-    return load(MKEY, {});
-  }
-
-  function listPeers() {
-    var t = getThreads();
-    return Object.keys(t).map(function (k) {
-      var msgs = t[k] || [];
-      var last = msgs[msgs.length - 1];
-      return {
-        peer: k,
-        last: last ? last.text : "",
-        ts: last ? last.ts : 0,
-        count: msgs.length,
-      };
-    }).sort(function (a, b) {
-      return b.ts - a.ts;
-    });
-  }
-
-  function getMessages(peer) {
-    var t = getThreads();
-    return t[peer] || [];
-  }
-
-  function sendMessage(peer, text) {
-    peer = String(peer || "aksi").slice(0, 32);
-    text = String(text || "").trim().slice(0, 2000);
-    if (!text) return null;
-    var p = getProfile();
-    var t = getThreads();
-    if (!t[peer]) t[peer] = [];
-    var msg = {
-      id: uid(),
-      from: p.id,
-      fromName: p.name,
-      to: peer,
-      text: text,
-      ts: Date.now(),
-      me: true,
-    };
-    t[peer].push(msg);
-    // auto-reply from aksi for demo
-    if (peer === "aksi" || peer === "АКСИ") {
-      t[peer].push({
-        id: uid(),
-        from: "aksi",
-        fromName: "АКСИ",
-        to: p.id,
-        text: "Принято. Ответ агента — в основном чате портала (/#demo) или через backend API.",
-        ts: Date.now() + 1,
-        me: false,
-      });
-    }
-    // trim
-    var keys = Object.keys(t);
-    for (var i = 0; i < keys.length; i++) {
-      if (t[keys[i]].length > MAX_MSGS) t[keys[i]] = t[keys[i]].slice(-MAX_MSGS);
-    }
-    save(MKEY, t);
-    return msg;
-  }
-
-  function ensureAksiThread() {
-    var t = getThreads();
-    if (!t.aksi || !t.aksi.length) {
-      t.aksi = [
-        {
-          id: "welcome",
-          from: "aksi",
-          fromName: "АКСИ",
-          text: "Личные сообщения offline. Напишите — сохраню в браузере.",
-          ts: Date.now() - 1000,
-          me: false,
-        },
-      ];
-      save(MKEY, t);
-    }
-  }
-
-  function fmtTime(ts) {
+  async function wiki(q) {
+    if (!navigator.onLine) return null;
     try {
-      return new Date(ts).toLocaleString("ru-RU", {
-        day: "2-digit",
-        month: "short",
-        hour: "2-digit",
-        minute: "2-digit",
+      var query = q.replace(/^(что такое|кто такой|расскажи про|почему)\s+/i, "").trim();
+      if (query.length < 2) return null;
+      var ctrl = new AbortController();
+      var t = setTimeout(function () {
+        ctrl.abort();
+      }, 4500);
+      var s = await fetch(
+        "https://ru.wikipedia.org/w/api.php?action=opensearch&search=" +
+          encodeURIComponent(query) +
+          "&limit=1&namespace=0&format=json&origin=*",
+        { signal: ctrl.signal }
+      ).then(function (r) {
+        return r.json();
       });
+      clearTimeout(t);
+      var title = s && s[1] && s[1][0];
+      if (!title) return null;
+      var j = await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title)).then(function (r) {
+        return r.json();
+      });
+      if (!j || !j.extract) return null;
+      return { text: j.title + ".\n\n" + String(j.extract).slice(0, 900), source: "Wikipedia" };
     } catch (e) {
-      return "";
+      return null;
     }
   }
 
-  g.AksiCore = {
-    getProfile: getProfile,
-    setProfile: setProfile,
-    getFeed: getFeed,
-    addPost: addPost,
-    toggleLike: toggleLike,
-    listPeers: listPeers,
-    getMessages: getMessages,
-    sendMessage: sendMessage,
-    ensureAksiThread: ensureAksiThread,
-    fmtTime: fmtTime,
-  };
-})(typeof window !== "undefined" ? window : globalThis);
+  async function reply(userText) {
+    var q = String(userText || "").trim();
+    if (!q) return { text: "Напишите вопрос.", source: null };
+    saveMem("user", q);
+    var a =
+      rules(q) ||
+      fromDreams(q) ||
+      fromNet(q) ||
+      fromCore(q) ||
+      (await wiki(q)) || {
+        text: navigator.onLine
+          ? "Не нашла точного ответа. Добавьте факт в Сеть — в следующий раз отвечу из неё."
+          : "Офлайн: в сети и ядре нет ответа. Запишите знание в /net/.",
+        source: null,
+      };
+    saveMem("aksi", a.text);
+    return a;
+  }
+
+  return { reply: reply, saveMem: saveMem };
+})();

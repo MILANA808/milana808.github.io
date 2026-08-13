@@ -3,330 +3,204 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>АКСИ · Навигатор</title>
+<title>АКСИ · Путь</title>
 <meta name="theme-color" content="#0f172a"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--ink:#f8fafc;--muted:#94a3b8;--line:#334155;--cyan:#22d3ee;--violet:#a855f7;--ok:#4ade80}
+:root{--bg:#0f172a;--card:#1e293b;--ink:#f8fafc;--muted:#94a3b8;--line:#334155;--cyan:#22d3ee;--ok:#4ade80;--warn:#fbbf24}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,sans-serif;overflow:hidden}
-#map{position:absolute;inset:0;z-index:0}
-.hud-top{
-  position:fixed;top:0;left:0;right:0;z-index:10;padding:10px 12px 12px;
-  background:linear-gradient(rgba(15,23,42,.96),rgba(15,23,42,.7));
-  padding-top:max(10px,env(safe-area-inset-top));
-}
-.row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.row1 a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
-.pills{display:flex;gap:6px}
-.pill{font-size:10px;padding:4px 8px;border-radius:999px;background:#1e293b;border:1px solid var(--line);color:var(--muted)}
-.pill.on{border-color:var(--ok);color:var(--ok)}
-.nav-card{
-  background:var(--card);border:1px solid rgba(34,211,238,.25);border-radius:16px;padding:12px 14px;
-}
-.nav-card .turn{font-size:17px;font-weight:700;line-height:1.3}
-.nav-card .sub{font-size:12px;color:var(--muted);margin-top:4px}
-.hud-bot{
-  position:fixed;left:8px;right:8px;bottom:0;z-index:10;max-width:520px;margin:0 auto;
-  padding:0 0 max(12px,env(safe-area-inset-bottom));
-}
-.panel{
-  background:rgba(15,23,42,.94);border:1px solid rgba(168,85,247,.3);border-radius:18px 18px 14px 14px;
-  padding:12px;backdrop-filter:blur(12px);
-}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.metrics div{background:#1e293b;border-radius:12px;padding:8px 4px;text-align:center}
-.metrics b{display:block;font-size:1.05rem;font-variant-numeric:tabular-nums;color:var(--cyan)}
-.metrics span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
-input#dest{
-  width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
-  background:#1e293b;color:var(--ink);font:inherit;font-size:15px;margin-bottom:8px;
-}
-.btns{display:flex;gap:8px}
-.btns button{
-  flex:1;border:none;border-radius:12px;padding:13px 10px;font:inherit;font-size:13px;font-weight:700;
-  color:#fff;cursor:pointer;
-}
-.b-go{background:linear-gradient(135deg,#0891b2,#4f46e5)}
-.b-nav{background:linear-gradient(135deg,#a855f7,#4f46e5)}
-.b-stop{background:#1e293b;border:1px solid var(--line)!important;color:var(--ink)!important}
-.note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.35}
-/* arrow marker */
-.nav-arrow{
-  width:0;height:0;
-  border-left:11px solid transparent;border-right:11px solid transparent;border-bottom:28px solid #22d3ee;
-  filter:drop-shadow(0 0 6px rgba(34,211,238,.9));
-  transform-origin:50% 70%;
-}
-.nav-arrow-wrap{width:36px;height:36px;display:flex;align-items:center;justify-content:center;margin-left:-18px;margin-top:-18px}
-.leaflet-control-attribution{font-size:9px!important;max-width:45vw}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif}
+#map{position:absolute;inset:0}
+.top{position:fixed;top:0;left:0;right:0;z-index:5;padding:max(10px,env(safe-area-inset-top)) 12px 10px;background:linear-gradient(#0f172af2,#0f172a00)}
+.top a{color:var(--muted);text-decoration:none;font-weight:600;font-size:13px}
+.flags{float:right;display:flex;gap:6px}
+.f{font-size:10px;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.f.on{color:var(--ok);border-color:var(--ok)}
+.f.warn{color:var(--warn);border-color:var(--warn)}
+.card{clear:both;margin-top:10px;background:var(--card);border-radius:14px;padding:12px;border:1px solid #334155}
+.card b{display:block;font-size:16px}
+.card span{font-size:12px;color:var(--muted)}
+.bot{position:fixed;left:8px;right:8px;bottom:max(10px,env(safe-area-inset-bottom));z-index:5;max-width:480px;margin:0 auto}
+.panel{background:#0f172af5;border:1px solid #475569;border-radius:16px;padding:12px}
+.m{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.m div{background:var(--card);border-radius:10px;text-align:center;padding:8px 2px}
+.m b{display:block;font-size:1rem;color:var(--cyan)}
+.m i{font-style:normal;font-size:9px;color:var(--muted);text-transform:uppercase}
+input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;margin-bottom:8px}
+.row{display:flex;gap:8px}
+button{flex:1;border:none;border-radius:12px;padding:12px;font:inherit;font-weight:700;color:#fff;cursor:pointer}
+.g{background:linear-gradient(135deg,#06b6d4,#6366f1)}
+.p{background:linear-gradient(135deg,#a855f7,#6366f1)}
+.s{background:var(--card);color:var(--ink);border:1px solid var(--line)!important}
+.hint{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.35}
+.arrow-wrap{width:40px;height:40px;margin-left:-20px;margin-top:-20px;display:flex;align-items:center;justify-content:center}
+.arrow{width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:30px solid #22d3ee;filter:drop-shadow(0 0 8px #22d3ee);transform-origin:50% 70%}
 </style>
 </head>
 <body>
 <div id="map"></div>
-
-<div class="hud-top">
-  <div class="row1">
-    <a href="/">АКСИ</a>
-    <div class="pills">
-      <span class="pill" id="p-gps">GPS</span>
-      <span class="pill" id="p-nav">NAV</span>
-      <span class="pill" id="p-net">NET</span>
-    </div>
+<div class="top">
+  <a href="/">АКСИ</a>
+  <div class="flags">
+    <span class="f" id="f-gps">GPS</span>
+    <span class="f" id="f-pdr">PDR</span>
+    <span class="f" id="f-off">OFFLINE</span>
   </div>
-  <div class="nav-card">
-    <div class="turn" id="turn">Введите адрес и нажмите «Маршрут»</div>
-    <div class="sub" id="sub">Или «Вести» — стрелка пойдёт за вами</div>
-  </div>
+  <div class="card"><b id="t1">Нажмите «Вести»</b><span id="t2">Стрелка идёт с вами · офлайн: GPS+инерция</span></div>
 </div>
-
-<div class="hud-bot">
+<div class="bot">
   <div class="panel">
-    <div class="metrics">
-      <div><b id="m-spd">—</b><span>км/ч</span></div>
-      <div><b id="m-hdg">—</b><span>курс</span></div>
-      <div><b id="m-left">—</b><span>осталось</span></div>
-      <div><b id="m-eta">—</b><span>ETA</span></div>
+    <div class="m">
+      <div><b id="spd">—</b><i>км/ч</i></div>
+      <div><b id="hdg">—</b><i>курс</i></div>
+      <div><b id="acc">—</b><i>точн.м</i></div>
+      <div><b id="mode">—</b><i>режим</i></div>
     </div>
-    <input id="dest" placeholder="Куда едем?" enterkeyhint="go"/>
-    <div class="btns">
-      <button type="button" class="b-nav" id="btn-nav">Вести</button>
-      <button type="button" class="b-go" id="btn-route">Маршрут</button>
-      <button type="button" class="b-stop" id="btn-stop">Стоп</button>
+    <input id="dest" placeholder="Куда? (нужен интернет для маршрута)"/>
+    <div class="row">
+      <button class="p" id="btn-go" type="button">Вести</button>
+      <button class="g" id="btn-rt" type="button">Маршрут</button>
+      <button class="s" id="btn-st" type="button">Стоп</button>
     </div>
-    <p class="note">Стрелка крутится по компасу/GPS-курсу. Карта следует за вами. Пробки как у Google — только с платными данными.</p>
+    <p class="hint">Офлайн: стрелка двигается по GPS без сети. Если GPS пропал — включается PDR (шаги+компас). Тайлы карты кэшируются. Маршрут A→B нужен интернет (OSRM).</p>
   </div>
 </div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
 "use strict";
+if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js").catch(function(){});
 
-var map=L.map("map",{zoomControl:false,maxZoom:19}).setView([55.75,37.62],15);
+var map=L.map("map",{zoomControl:false}).setView([55.75,37.62],16);
 L.control.zoom({position:"bottomright"}).addTo(map);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
-  maxZoom:19,attribution:"© OSM"
-}).addTo(map);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OSM"}).addTo(map);
 
-var watchId=null, following=false, navigating=false;
-var last=null, routeLine=null, destMark=null, trail=null;
-var routeSteps=[], stepIdx=0, trailPts=[];
-var arrowMarker=null, arrowEl=null, currentHdg=0;
+var watchId=null,on=false,last=null,lastGpsAt=0,hdg=0,marker=null,trail=null,pts=[];
+var routeLine=null,steps=[],stepI=0,destMark=null;
+var pdrActive=false,stepLen=0.75,accMagPrev=0,stepCooldown=0;
 
-var el={};
-["turn","sub","m-spd","m-hdg","m-left","m-eta","p-gps","p-nav","p-net","dest"].forEach(function(id){
-  el[id]=document.getElementById(id);
-});
+function $(id){return document.getElementById(id);}
+function setF(id,cls){$(id).className="f"+(cls?" "+cls:"");}
+function offlineFlag(){setF("f-off",navigator.onLine?"":"on");$("f-off").textContent=navigator.onLine?"ONLINE":"OFFLINE";}
+offlineFlag();addEventListener("online",offlineFlag);addEventListener("offline",offlineFlag);
 
-function pill(id,on){el[id].className="pill"+(on?" on":"");}
-function net(){pill("p-net",navigator.onLine);}
-net();addEventListener("online",net);addEventListener("offline",net);
+function ensureMarker(lat,lon,bearing){
+  if(bearing!=null&&!isNaN(bearing))hdg=bearing;
+  if(!marker){
+    marker=L.marker([lat,lon],{icon:L.divIcon({className:"",html:'<div class="arrow-wrap"><div class="arrow" id="ar"></div></div>',iconSize:[40,40],iconAnchor:[20,20]}),zIndexOffset:999}).addTo(map);
+  }else marker.setLatLng([lat,lon]);
+  setTimeout(function(){var a=$("ar");if(a)a.style.transform="rotate("+hdg+"deg)";},0);
+}
 
 function haversine(a,b){
-  var R=6371000,to=Math.PI/180;
-  var dLat=(b.lat-a.lat)*to,dLon=(b.lon-a.lon)*to;
-  var x=Math.sin(dLat/2)**2+Math.cos(a.lat*to)*Math.cos(b.lat*to)*Math.sin(dLon/2)**2;
+  var R=6371000,t=Math.PI/180,dLat=(b.lat-a.lat)*t,dLon=(b.lon-a.lon)*t;
+  var x=Math.sin(dLat/2)**2+Math.cos(a.lat*t)*Math.cos(b.lat*t)*Math.sin(dLon/2)**2;
   return 2*R*Math.asin(Math.sqrt(x));
 }
-function fmtKm(m){
-  if(m==null||isNaN(m))return "—";
-  return m>=1000?(m/1000).toFixed(1)+" км":Math.round(m)+" м";
-}
-function fmtMin(s){
-  if(s==null||isNaN(s))return "—";
-  var m=Math.round(s/60);
-  return m>=60?Math.floor(m/60)+" ч "+(m%60)+" м":m+" мин";
+function destPoint(lat,lon,brng,dist){
+  var R=6371000,to=Math.PI/180,from=180/Math.PI;
+  var φ1=lat*to,λ1=lon*to,δ=dist/R,θ=brng*to;
+  var φ2=Math.asin(Math.sin(φ1)*Math.cos(δ)+Math.cos(φ1)*Math.sin(δ)*Math.cos(θ));
+  var λ2=λ1+Math.atan2(Math.sin(θ)*Math.sin(δ)*Math.cos(φ1),Math.cos(δ)-Math.sin(φ1)*Math.sin(φ2));
+  return{lat:φ2*from,lon:((λ2*from+540)%360)-180};
 }
 
-// ——— arrow that rotates with person ———
-function ensureArrow(lat,lon,hdg){
-  if(hdg!=null&&!isNaN(hdg))currentHdg=hdg;
-  if(!arrowMarker){
-    var icon=L.divIcon({
-      className:"",
-      html:'<div class="nav-arrow-wrap"><div class="nav-arrow" id="nav-arrow-el"></div></div>',
-      iconSize:[36,36],iconAnchor:[18,18]
-    });
-    arrowMarker=L.marker([lat,lon],{icon:icon,zIndexOffset:1000}).addTo(map);
-    setTimeout(function(){arrowEl=document.getElementById("nav-arrow-el");},0);
-  }else{
-    arrowMarker.setLatLng([lat,lon]);
-  }
-  // rotate arrow (bearing: 0 = north = up)
-  var rot=currentHdg||0;
-  setTimeout(function(){
-    var node=document.getElementById("nav-arrow-el");
-    if(node)node.style.transform="rotate("+rot+"deg)";
-  },0);
-}
-
-function updateStep(lat,lon){
-  if(!routeSteps.length){
-    if(following){
-      el.turn.textContent="Движение за вами";
-      el.sub.textContent="Стрелка = ваш курс";
-    }
-    el["m-left"].textContent="—";
-    el["m-eta"].textContent="—";
-    return;
-  }
-  while(stepIdx<routeSteps.length-1){
-    var s=routeSteps[stepIdx];
-    var end=s.maneuver&&s.maneuver.location;
-    if(!end)break;
-    if(haversine({lat:lat,lon:lon},{lat:end[1],lon:end[0]})<45)stepIdx++;
-    else break;
-  }
-  var cur=routeSteps[stepIdx];
-  var instr=(cur&&cur.maneuver&&cur.maneuver.instruction)||(cur&&cur.name)||"Продолжайте";
-  // prefer Russian-ish short
-  el.turn.textContent=instr;
-  var remainM=0,remainS=0;
-  for(var i=stepIdx;i<routeSteps.length;i++){
-    remainM+=routeSteps[i].distance||0;
-    remainS+=routeSteps[i].duration||0;
-  }
-  el["m-left"].textContent=fmtKm(remainM);
-  el["m-eta"].textContent=fmtMin(remainS);
-  el.sub.textContent="Шаг "+(stepIdx+1)+"/"+routeSteps.length+" · до манёвра "+fmtKm(cur.distance||0);
-
-  if(remainM<25){
-    el.turn.textContent="Вы на месте";
-    el.sub.textContent="Маршрут завершён";
-  }
-}
-
-function onPos(pos){
-  var lat=pos.coords.latitude, lon=pos.coords.longitude;
-  var spd=pos.coords.speed, hdg=pos.coords.heading, acc=pos.coords.accuracy;
-  pill("p-gps",true);
-  el["m-spd"].textContent=(spd!=null&&!isNaN(spd))?Math.max(0,Math.round(spd*3.6)):"—";
-  if(hdg!=null&&!isNaN(hdg)){
-    el["m-hdg"].textContent=Math.round(hdg)+"°";
-  }else if(last){
-    // estimate heading from movement
+function applyPos(lat,lon,spd,bearing,acc,src){
+  if(bearing!=null&&!isNaN(bearing))hdg=bearing;
+  else if(last){
     var dlon=lon-last.lon,dlat=lat-last.lat;
-    if(Math.abs(dlon)+Math.abs(dlat)>0.00001){
-      var br=(Math.atan2(dlon,dlat)*180/Math.PI+360)%360;
-      hdg=br;
-      el["m-hdg"].textContent=Math.round(br)+"°";
+    if(Math.abs(dlon)+Math.abs(dlat)>1e-6)hdg=(Math.atan2(dlon,dlat)*180/Math.PI+360)%360;
+  }
+  ensureMarker(lat,lon,hdg);
+  last={lat:lat,lon:lon};pts.push([lat,lon]);
+  if(pts.length>1){if(trail)map.removeLayer(trail);trail=L.polyline(pts.slice(-400),{color:"#22d3ee",weight:4,opacity:.6}).addTo(map);}
+  if(on){map.panTo([lat,lon],{animate:true,duration:.3});if(map.getZoom()<16)map.setZoom(17);}
+  $("spd").textContent=spd!=null&&!isNaN(spd)?Math.max(0,Math.round(spd*3.6)):"—";
+  $("hdg").textContent=Math.round(hdg)+"°";
+  $("acc").textContent=acc!=null?Math.round(acc):"—";
+  $("mode").textContent=src;
+  $("t1").textContent=src==="PDR"?"Инерция (PDR)":"Вы на карте";
+  $("t2").textContent=src==="PDR"?"GPS слабо — идём по компасу и шагам":"Стрелка = курс";
+  if(steps.length)tickSteps(lat,lon);
+}
+
+function onGps(pos){
+  lastGpsAt=Date.now();pdrActive=false;setF("f-gps","on");setF("f-pdr","");
+  applyPos(pos.coords.latitude,pos.coords.longitude,pos.coords.speed,pos.coords.heading,pos.coords.accuracy,"GPS");
+}
+function onGpsErr(){setF("f-gps","warn");$("t2").textContent="GPS нет · пробуем PDR";}
+
+// ——— PDR: when GPS stale, move arrow by compass + step detection ———
+function onOrient(ev){
+  var h=ev.webkitCompassHeading!=null?ev.webkitCompassHeading:(ev.alpha!=null?(360-ev.alpha):null);
+  if(h!=null&&!isNaN(h))hdg=h;
+  if(pdrActive&&last)ensureMarker(last.lat,last.lon,hdg);
+}
+function onMotion(ev){
+  if(!on||!last)return;
+  var a=ev.accelerationIncludingGravity;if(!a)return;
+  var mag=Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
+  // peak detect ~step
+  if(accMagPrev>11.5&&mag<accMagPrev&&(Date.now()-stepCooldown)>320){
+    stepCooldown=Date.now();
+    // if GPS older than 4s → pure PDR step
+    if(Date.now()-lastGpsAt>4000){
+      pdrActive=true;setF("f-pdr","on");setF("f-gps","warn");
+      var np=destPoint(last.lat,last.lon,hdg,stepLen);
+      applyPos(np.lat,np.lon,stepLen/0.5,hdg,null,"PDR");
     }
   }
-  ensureArrow(lat,lon,hdg);
-  last={lat:lat,lon:lon};
-  trailPts.push([lat,lon]);
-  if(trailPts.length>1){
-    if(trail)map.removeLayer(trail);
-    trail=L.polyline(trailPts.slice(-500),{color:"#22d3ee",weight:4,opacity:0.55}).addTo(map);
+  accMagPrev=mag;
+}
+
+function tickSteps(lat,lon){
+  while(stepI<steps.length-1){
+    var s=steps[stepI],end=s.maneuver&&s.maneuver.location;if(!end)break;
+    if(haversine({lat:lat,lon:lon},{lat:end[1],lon:end[0]})<40)stepI++;else break;
   }
-  if(following||navigating){
-    map.panTo([lat,lon],{animate:true,duration:0.35});
-    if(map.getZoom()<16)map.setZoom(17,{animate:true});
-  }
-  updateStep(lat,lon);
+  var cur=steps[stepI];
+  $("t1").textContent=(cur&&cur.maneuver&&cur.maneuver.instruction)||"По маршруту";
 }
 
-function onErr(err){
-  pill("p-gps",false);
-  el.turn.textContent=err.code===1?"Разрешите геолокацию":"Нет сигнала GPS";
-  el.sub.textContent="Без GPS стрелка не движется";
+function start(){
+  on=true;
+  if(watchId==null)watchId=navigator.geolocation.watchPosition(onGps,onGpsErr,{enableHighAccuracy:true,maximumAge:500,timeout:10000});
+  window.addEventListener("deviceorientation",onOrient,true);
+  window.addEventListener("devicemotion",onMotion,true);
+  $("t1").textContent="Ведём…";
+  navigator.geolocation.getCurrentPosition(onGps,onGpsErr,{enableHighAccuracy:true,timeout:8000});
 }
-
-function startWatch(){
-  if(!navigator.geolocation){alert("Нет геолокации");return;}
-  if(watchId!=null)return;
-  watchId=navigator.geolocation.watchPosition(onPos,onErr,{
-    enableHighAccuracy:true,maximumAge:400,timeout:12000
-  });
-}
-
-function startNav(){
-  following=true;navigating=true;pill("p-nav",true);
-  startWatch();
-  el.turn.textContent="Ведём…";
-  el.sub.textContent="Стрелка = направление движения";
-  // one-shot fix for instant feedback
-  navigator.geolocation.getCurrentPosition(onPos,onErr,{enableHighAccuracy:true,timeout:8000});
-}
-
-function stopAll(){
-  following=false;navigating=false;pill("p-nav",false);
+function stop(){
+  on=false;pdrActive=false;
   if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
-  el.turn.textContent="Остановлено";
-  el.sub.textContent="Нажмите «Вести» или «Маршрут»";
+  window.removeEventListener("deviceorientation",onOrient,true);
+  window.removeEventListener("devicemotion",onMotion,true);
+  $("t1").textContent="Стоп";$("mode").textContent="—";
 }
 
-async function geocode(q){
-  var m=/^\s*(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)\s*$/.exec(q);
-  if(m)return{lat:+m[1],lon:+m[2],name:q};
-  var url="https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q);
-  var j=await fetch(url,{headers:{"Accept-Language":"ru"}}).then(function(r){return r.json();});
-  if(!j||!j[0])throw new Error("Адрес не найден");
-  return{lat:+j[0].lat,lon:+j[0].lon,name:j[0].display_name};
-}
-
-async function buildRoute(){
-  var q=(el.dest.value||"").trim();
-  if(!q){el.turn.textContent="Куда едем?";return;}
-  el.turn.textContent="Ищем вас и строим путь…";
-  if(!last){
-    try{
-      await new Promise(function(res,rej){
-        navigator.geolocation.getCurrentPosition(function(p){
-          last={lat:p.coords.latitude,lon:p.coords.longitude};
-          ensureArrow(last.lat,last.lon,p.coords.heading);
-          res();
-        },rej,{enableHighAccuracy:true,timeout:10000});
-      });
-    }catch(e){el.turn.textContent="Нужен GPS";return;}
-  }
+async function route(){
+  var q=$("dest").value.trim();if(!q){$("t1").textContent="Куда?";return;}
+  if(!navigator.onLine){$("t1").textContent="Маршрут нужен интернет";return;}
+  if(!last){try{await new Promise(function(r,j){navigator.geolocation.getCurrentPosition(function(p){onGps(p);r();},j,{enableHighAccuracy:true,timeout:8000});});}catch(e){$("t1").textContent="Нужен GPS";return;}}
+  $("t1").textContent="Строим…";
   try{
-    var B=await geocode(q);
-    if(destMark)map.removeLayer(destMark);
-    destMark=L.marker([B.lat,B.lon]).addTo(map).bindPopup(B.name);
-    var url="https://router.project-osrm.org/route/v1/driving/"+
-      last.lon+","+last.lat+";"+B.lon+","+B.lat+
-      "?overview=full&geometries=geojson&steps=true&annotations=false";
-    var data=await fetch(url).then(function(r){return r.json();});
-    if(data.code!=="Ok"||!data.routes||!data.routes[0])throw new Error("Нет маршрута");
+    var g=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+encodeURIComponent(q),{headers:{"Accept-Language":"ru"}}).then(function(r){return r.json();});
+    if(!g[0])throw new Error("Не найден");
+    var B={lat:+g[0].lat,lon:+g[0].lon};
+    if(destMark)map.removeLayer(destMark);destMark=L.marker([B.lat,B.lon]).addTo(map);
+    var data=await fetch("https://router.project-osrm.org/route/v1/driving/"+last.lon+","+last.lat+";"+B.lon+","+B.lat+"?overview=full&geometries=geojson&steps=true").then(function(r){return r.json();});
+    if(data.code!=="Ok")throw new Error("Нет пути");
     var rt=data.routes[0];
     if(routeLine)map.removeLayer(routeLine);
-    routeLine=L.geoJSON(rt.geometry,{style:{color:"#a855f7",weight:6,opacity:0.88}}).addTo(map);
-    routeSteps=[];
-    (rt.legs||[]).forEach(function(leg){
-      (leg.steps||[]).forEach(function(st){routeSteps.push(st);});
-    });
-    stepIdx=0;
-    map.fitBounds(routeLine.getBounds(),{padding:[70,70,180,70]});
-    el["m-left"].textContent=fmtKm(rt.distance);
-    el["m-eta"].textContent=fmtMin(rt.duration);
-    el.turn.textContent=routeSteps[0]&&routeSteps[0].maneuver?routeSteps[0].maneuver.instruction:"Маршрут готов";
-    el.sub.textContent=fmtKm(rt.distance)+" · "+fmtMin(rt.duration);
-    startNav();
-  }catch(e){
-    el.turn.textContent=e.message||"Ошибка маршрута";
-  }
+    routeLine=L.geoJSON(rt.geometry,{style:{color:"#a855f7",weight:6,opacity:.85}}).addTo(map);
+    steps=[];(rt.legs||[]).forEach(function(l){(l.steps||[]).forEach(function(s){steps.push(s);});});stepI=0;
+    map.fitBounds(routeLine.getBounds(),{padding:[60,60,160,60]});
+    $("t1").textContent="Маршрут готов";$("t2").textContent=Math.round(rt.distance/100)/10+" км";
+    start();
+  }catch(e){$("t1").textContent=e.message||"Ошибка";}
 }
 
-document.getElementById("btn-nav").onclick=startNav;
-document.getElementById("btn-stop").onclick=stopAll;
-document.getElementById("btn-route").onclick=buildRoute;
-el.dest.addEventListener("keydown",function(e){if(e.key==="Enter")buildRoute();});
-
-// Device orientation as extra heading source when stationary
-if(window.DeviceOrientationEvent){
-  window.addEventListener("deviceorientation",function(ev){
-    if(ev.alpha==null)return;
-    // only use if not moving fast
-    if(following&&arrowEl){
-      // webkit compass
-      var h=ev.webkitCompassHeading!=null?ev.webkitCompassHeading:(360-ev.alpha);
-      if(last)ensureArrow(last.lat,last.lon,h);
-    }
-  },true);
-}
+$("btn-go").onclick=start;$("btn-st").onclick=stop;$("btn-rt").onclick=route;
 })();
 </script>
 </body>

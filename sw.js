@@ -1,29 +1,41 @@
-/* AKSI service worker — cache shell + recent map tiles for offline drive */
-const CACHE = "aksi-v1";
-const SHELL = ["/", "/drive/", "/nav.js", "/icon.svg", "/route/", "/map/", "/solar/", "/earth3d/", "/aksi/"];
-self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+/* AKSI service worker — offline tiles + shell */
+var CACHE="aksi-v3";
+var SHELL=["/","/drive/","/aksi/","/net/","/backup/","/assets/aksi.css","/aksi-knowledge.js","/aksi-backup.js","/nav.js","/icon.svg"];
+self.addEventListener("install",function(e){
+  e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(SHELL).catch(function(){});}).then(function(){return self.skipWaiting();}));
 });
-self.addEventListener("activate", (e) => {
-  e.waitUntil(self.clients.claim());
+self.addEventListener("activate",function(e){
+  e.waitUntil(caches.keys().then(function(keys){
+    return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));
+  }).then(function(){return self.clients.claim();}));
 });
-self.addEventListener("fetch", (e) => {
-  const u = e.request.url;
-  // cache OSM tiles & app pages
-  if (u.includes("tile.openstreetmap.org") || u.includes("milana808.github.io")) {
+self.addEventListener("fetch",function(e){
+  var u=e.request.url;
+  // cache OSM tiles for offline map
+  if(/tile\.openstreetmap\.org/.test(u)){
     e.respondWith(
-      caches.open(CACHE).then(async (cache) => {
-        const hit = await cache.match(e.request);
-        if (hit) return hit;
-        try {
-          const res = await fetch(e.request);
-          if (res && res.ok && e.request.method === "GET") cache.put(e.request, res.clone());
-          return res;
-        } catch {
-          return hit || new Response("offline", { status: 503 });
-        }
+      caches.open(CACHE).then(function(c){
+        return c.match(e.request).then(function(hit){
+          if(hit)return hit;
+          return fetch(e.request).then(function(res){
+            if(res&&res.ok)c.put(e.request,res.clone());
+            return res;
+          }).catch(function(){return hit||Response.error();});
+        });
       })
     );
     return;
   }
+  if(e.request.method!=="GET")return;
+  e.respondWith(
+    caches.match(e.request).then(function(hit){
+      return hit||fetch(e.request).then(function(res){
+        if(res&&res.ok&&/milana808\.github\.io/.test(u)){
+          var copy=res.clone();
+          caches.open(CACHE).then(function(c){c.put(e.request,copy);});
+        }
+        return res;
+      }).catch(function(){return hit||caches.match("/");});
+    })
+  );
 });
