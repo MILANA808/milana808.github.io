@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Pulse</title>
+<meta name="theme-color" content="#0a0618">
+<style>
+:root{--bg:#0a0618;--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(165deg,#0a0618,#160a28);color:var(--ink);min-height:100dvh;max-width:720px;margin:0 auto;padding:14px 14px 48px}
+nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
+nav a{flex:0 0 auto;color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;padding:8px 11px;border-radius:999px}
+nav a.on{color:#fff;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+h1{font-size:1.45rem;margin-bottom:6px}
+.sub{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:14px}
+.glass{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;backdrop-filter:blur(10px)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+button{border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff;min-height:44px}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat div{text-align:center;padding:12px 8px;border-radius:12px;background:rgba(0,0,0,.3);border:1px solid var(--line)}
+.stat b{display:block;font-size:1.3rem}
+.stat span{font-size:10px;color:var(--muted)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{font-size:11px;color:var(--muted)}
+.mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;color:var(--muted);line-height:1.5}
+input{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px}
+a.mod{color:var(--c);text-decoration:none}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Хаб</a>
+  <a href="/contour/">Контур</a>
+  <a class="on" href="/pulse/">Pulse</a>
+  <a href="/proof/">Proof</a>
+  <a href="/lab/">Lab</a>
+</nav>
+
+<h1>Pulse · пульс контура</h1>
+<p class="sub">Идея: сайт сам проверяет свои модули в браузере, считает здоровье и подписывает отчёт. Без сервера.</p>
+
+<div class="glass">
+  <div class="row">
+    <button type="button" id="scan">Сканировать</button>
+    <button type="button" class="ghost" id="dl">Скачать отчёт</button>
+    <button type="button" class="ghost" id="copy">Копировать JSON</button>
+  </div>
+  <input id="api" placeholder="Опционально: URL backend (https://… ) для /health">
+  <div class="stat">
+    <div><b class="ok" id="n-ok">—</b><span>OK</span></div>
+    <div><b class="bad" id="n-bad">—</b><span>FAIL</span></div>
+    <div><b id="n-score">—</b><span>SCORE</span></div>
+  </div>
+  <table>
+    <thead><tr><th>Модуль</th><th>Статус</th><th>мс</th></tr></thead>
+    <tbody id="tbody"><tr><td colspan="3" class="mono">Нажмите «Сканировать»</td></tr></tbody>
+  </table>
+</div>
+
+<div class="glass">
+  <div class="mono" id="sig">подпись появится после скана</div>
+</div>
+
+<script>
+const SEED = "AKSI_DIMAX_v3_2026";
+const DID = "did:aksi:ed25519:sovereign-2026";
+
+const MODULES = [
+  { path: "/", name: "Hub" },
+  { path: "/contour/", name: "Contour" },
+  { path: "/proof/", name: "Proof" },
+  { path: "/lab/", name: "Lab" },
+  { path: "/wake/", name: "Agent" },
+  { path: "/aksi/", name: "Chat" },
+  { path: "/matrix/", name: "WebLLM" },
+  { path: "/aksii-matrix/", name: "MATRIX" },
+  { path: "/quantum/", name: "Quantum" },
+  { path: "/nav/", name: "Nav" },
+  { path: "/globe/", name: "Globe" },
+  { path: "/universe/", name: "Universe" },
+  { path: "/ecosystem.json", name: "ecosystem.json" },
+];
+
+async function sha256hex(str) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function probe(path) {
+  const url = path.startsWith("http") ? path : (location.origin + path);
+  const t0 = performance.now();
+  try {
+    const r = await fetch(url, { method: "GET", cache: "no-store" });
+    return { path, ok: r.ok, status: r.status, ms: Math.round(performance.now() - t0) };
+  } catch (e) {
+    return { path, ok: false, status: 0, ms: Math.round(performance.now() - t0), error: String(e.message || e) };
+  }
+}
+
+let lastReport = null;
+
+async function scan() {
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "<tr><td colspan=3 class=mono>сканирование…</td></tr>";
+  const results = [];
+  for (const m of MODULES) {
+    const r = await probe(m.path);
+    r.name = m.name;
+    results.push(r);
+  }
+  const api = document.getElementById("api").value.trim().replace(/\/$/, "");
+  let backend = null;
+  if (api) {
+    backend = await probe(api + "/health");
+    backend.name = "backend /health";
+    results.push(backend);
+  }
+
+  const ok = results.filter(r => r.ok).length;
+  const bad = results.length - ok;
+  const score = Math.round((ok / results.length) * 100);
+  document.getElementById("n-ok").textContent = ok;
+  document.getElementById("n-bad").textContent = bad;
+  document.getElementById("n-score").textContent = score;
+  document.getElementById("n-score").className = score >= 90 ? "ok" : score >= 60 ? "warn" : "bad";
+
+  tbody.innerHTML = "";
+  results.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML =
+      "<td><a class=mod href=\"" + (r.path.startsWith("http") ? r.path : r.path) + "\">" + (r.name || r.path) + "</a></td>" +
+      "<td class=\"" + (r.ok ? "ok" : "bad") + "\">" + (r.ok ? "OK " + r.status : "FAIL " + r.status) + "</td>" +
+      "<td>" + r.ms + "</td>";
+    tbody.appendChild(tr);
+  });
+
+  const report = {
+    type: "aksi.pulse.report",
+    did: DID,
+    surface: location.origin,
+    time: new Date().toISOString(),
+    score,
+    ok,
+    bad,
+    results: results.map(r => ({ path: r.path, name: r.name, ok: r.ok, status: r.status, ms: r.ms })),
+  };
+  const payload = SEED + "|" + JSON.stringify(report.results) + "|" + report.time;
+  report.signature = await sha256hex(payload);
+  lastReport = report;
+
+  document.getElementById("sig").textContent =
+    "score: " + score + "\n" +
+    "time: " + report.time + "\n" +
+    "sig: " + report.signature + "\n" +
+    "did: " + DID;
+
+  try {
+    const hist = JSON.parse(localStorage.getItem("AKSI_PULSE_V1") || "[]");
+    hist.push({ time: report.time, score, sig: report.signature });
+    localStorage.setItem("AKSI_PULSE_V1", JSON.stringify(hist.slice(-30)));
+  } catch {}
+}
+
+document.getElementById("scan").onclick = scan;
+document.getElementById("dl").onclick = () => {
+  if (!lastReport) return alert("Сначала скан");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(lastReport, null, 2)], { type: "application/json" }));
+  a.download = "aksi-pulse.json";
+  a.click();
+};
+document.getElementById("copy").onclick = async () => {
+  if (!lastReport) return alert("Сначала скан");
+  await navigator.clipboard.writeText(JSON.stringify(lastReport, null, 2));
+  alert("OK");
+};
+
+// auto-scan on open
+scan();
+</script>
+</body>
+</html>
