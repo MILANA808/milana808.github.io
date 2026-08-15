@@ -5,59 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>АКСИ · Квант-лаб</title>
 <meta name="theme-color" content="#0b1020">
+<meta http-equiv="Cache-Control" content="no-cache">
 <style>
-:root{--bg:#0b1020;--card:#121a2f;--ink:#e8eefc;--muted:#8b9bb8;--line:#243047;--cyan:#22d3ee;--violet:#a78bfa;--ok:#4ade80;--gate:#6366f1}
+:root{--bg:#0b1020;--card:#121a2f;--ink:#e8eefc;--muted:#8b9bb8;--line:#243047;--cyan:#22d3ee;--violet:#a78bfa}
 *{box-sizing:border-box;margin:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;max-width:960px;margin:0 auto;padding:12px 12px 28px}
-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;padding-top:env(safe-area-inset-top)}
-header a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
-h1{font-size:1.25rem;font-weight:800}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;max-width:960px;margin:0 auto;padding:12px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-top:env(safe-area-inset-top)}
+header a{color:var(--muted);text-decoration:none;font-weight:600;font-size:13px}
+h1{font-size:1.2rem;font-weight:800;margin-top:4px}
 .layout{display:grid;gap:12px}
-@media(min-width:800px){.layout{grid-template-columns:1fr 1.1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}
+@media(min-width:800px){.layout{grid-template-columns:1fr 1.15fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
 .card h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
-#thread{height:min(42vh,320px);overflow-y:auto;margin-bottom:8px}
-.msg{margin-bottom:8px;font-size:14px;line-height:1.4}
-.msg.u{color:#c4b5fd}
-.msg.a{color:var(--ink)}
-.msg .n{font-size:10px;color:var(--muted);margin-bottom:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chips button,.palette button,.row button{
+  border:1px solid var(--line);background:#0b1020;color:var(--ink);border-radius:12px;
+  padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer;-webkit-appearance:none;
+}
+.chips button{border-radius:999px;padding:10px 14px;font-size:13px}
+.row button.pri{background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff}
+#thread{min-height:120px;max-height:280px;overflow-y:auto;margin-bottom:10px;font-size:14px;line-height:1.45}
+.msg{margin-bottom:10px;white-space:pre-wrap}
+.msg b{display:block;font-size:11px;color:var(--muted);margin-bottom:2px}
 .composer{display:flex;gap:8px}
 .composer input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0b1020;color:var(--ink)}
-.composer button{border:none;border-radius:12px;padding:0 16px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.chips button{border:1px solid var(--line);background:#0b1020;color:var(--ink);border-radius:999px;padding:8px 10px;font-size:12px;font-weight:600}
-.circuit{overflow-x:auto;padding:8px 0}
-.wire-row{display:flex;align-items:center;gap:0;min-height:56px;position:relative;margin:6px 0}
-.wire-row::before{content:"";position:absolute;left:48px;right:8px;top:50%;height:2px;background:#334155;z-index:0}
-.qlabel{width:48px;font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);z-index:1}
-.slots{display:flex;gap:6px;z-index:1;padding-left:4px}
-.slot{
-  width:48px;height:40px;border-radius:10px;border:1px dashed #334155;display:flex;align-items:center;justify-content:center;
-  font-size:12px;font-weight:800;cursor:pointer;background:#0b1020;user-select:none;
+.composer button{border:none;border-radius:12px;padding:0 18px;background:#7c3aed;color:#fff;font-weight:800;font-size:16px}
+.wire{display:flex;align-items:center;gap:8px;margin:10px 0;min-height:44px}
+.wire .lab{width:36px;font-family:monospace;color:var(--muted);font-size:13px}
+.wire .line{flex:1;display:flex;gap:6px;align-items:center;position:relative}
+.wire .line::before{content:"";position:absolute;left:0;right:0;height:2px;background:#334155;z-index:0}
+.gate{
+  position:relative;z-index:1;min-width:44px;height:40px;padding:0 8px;border-radius:10px;
+  border:2px solid #6366f1;background:#1e1b4b;color:#c7d2fe;font-weight:800;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
 }
-.slot.on{border-style:solid;border-color:var(--gate);background:#1e1b4b;color:#c7d2fe}
-.slot.cnot{border-color:var(--cyan);color:var(--cyan)}
-.palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.palette button{border:1px solid var(--line);background:#0b1020;color:var(--ink);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700}
-.probs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
-.probs div{background:#0b1020;border-radius:12px;padding:10px;text-align:center}
-.probs b{display:block;font-size:1.05rem;color:var(--cyan)}
-.probs i{font-style:normal;font-size:10px;color:var(--muted)}
-.bars{display:flex;align-items:flex-end;gap:8px;height:90px;margin-top:12px}
-.bars div{flex:1;background:linear-gradient(180deg,var(--cyan),#6366f1);border-radius:6px 6px 2px 2px;position:relative;min-height:3px}
-.bars span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
-.amp{font-family:ui-monospace,monospace;font-size:11px;color:#a5b4fc;margin-top:22px;line-height:1.5;word-break:break-all}
-.explain{margin-top:10px;font-size:14px;line-height:1.5;color:#cbd5e1;background:#0b1020;border-radius:12px;padding:12px;border:1px solid var(--line)}
+.gate.cn{border-color:var(--cyan);color:var(--cyan)}
+.palette{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.probs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.probs div{background:#0b1020;border-radius:12px;padding:12px 6px;text-align:center}
+.probs b{display:block;font-size:1.15rem;color:var(--cyan)}
+.probs span{font-size:11px;color:var(--muted)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:100px;margin-top:8px}
+.bars i{flex:1;display:block;background:linear-gradient(180deg,#22d3ee,#6366f1);border-radius:6px 6px 2px 2px;min-height:4px}
+.explain{margin-top:12px;padding:12px;background:#0b1020;border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.5;white-space:pre-wrap}
+.amp{margin-top:10px;font-family:ui-monospace,monospace;font-size:11px;color:#a5b4fc;word-break:break-all}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.row button{border:1px solid var(--line);background:#0b1020;color:var(--ink);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700}
-.row button.pri{background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff}
 </style>
 </head>
 <body>
 <header>
   <div>
     <a href="/matrix/">← MATRIX</a>
-    <h1>Квант-лаб · без бэкенда</h1>
+    <h1>Квант-лаб</h1>
   </div>
   <a href="/app/">Приложение</a>
 </header>
@@ -66,298 +65,314 @@ h1{font-size:1.25rem;font-weight:800}
   <div class="card">
     <h2>Чат → схема</h2>
     <div class="chips">
-      <button type="button" data-q="Покажи запутанность двух кубитов и посчитай вероятности">Запутанность</button>
-      <button type="button" data-q="Сделай суперпозицию на первом кубите">Суперпозиция</button>
-      <button type="button" data-q="Схема телепортации (упрощённо)">Телепортация</button>
-      <button type="button" data-q="Алгоритм Гровера на 2 кубитах (идея)">Гровер</button>
+      <button type="button" id="c1">Запутанность</button>
+      <button type="button" id="c2">Суперпозиция</button>
+      <button type="button" id="c3">Телепортация</button>
+      <button type="button" id="c4">Гровер</button>
     </div>
     <div id="thread"></div>
     <div class="composer">
-      <input id="inp" type="text" placeholder="Напишите про схему…" enterkeyhint="send">
+      <input id="inp" type="text" placeholder="Покажи запутанность…" enterkeyhint="send">
       <button type="button" id="send">OK</button>
     </div>
   </div>
 
   <div class="card">
-    <h2>Симулятор (statevector)</h2>
-    <div class="circuit" id="circuit"></div>
+    <h2>Симулятор</h2>
+    <div id="circuit"></div>
     <div class="palette">
-      <button type="button" data-g="H0">H₀</button>
-      <button type="button" data-g="H1">H₁</button>
-      <button type="button" data-g="X0">X₀</button>
-      <button type="button" data-g="X1">X₁</button>
-      <button type="button" data-g="Z0">Z₀</button>
-      <button type="button" data-g="CNOT">CNOT₀₁</button>
-      <button type="button" data-g="DEL">⌫ шаг</button>
-      <button type="button" data-g="CLR">Сброс</button>
+      <button type="button" id="gH0">H₀</button>
+      <button type="button" id="gH1">H₁</button>
+      <button type="button" id="gX0">X₀</button>
+      <button type="button" id="gX1">X₁</button>
+      <button type="button" id="gZ0">Z₀</button>
+      <button type="button" id="gCX">CNOT</button>
+      <button type="button" id="gDel">⌫</button>
+      <button type="button" id="gClr">Сброс</button>
     </div>
     <div class="row">
-      <button type="button" class="pri" id="btn-run">Пересчитать</button>
-      <button type="button" id="btn-explain">Объясни схему</button>
-      <button type="button" id="btn-json">JSON</button>
-      <button type="button" id="btn-md">Отчёт MD</button>
+      <button type="button" class="pri" id="btnRun">Пересчитать</button>
+      <button type="button" id="btnExp">Объясни</button>
+      <button type="button" id="btnJson">JSON</button>
+      <button type="button" id="btnMd">Отчёт</button>
     </div>
     <div class="bars" id="bars"></div>
     <div class="probs" id="probs"></div>
     <div class="amp" id="amp"></div>
-    <div class="explain" id="explain">Задайте схему чатом или кнопками.</div>
+    <div class="explain" id="explain">Нажмите «Запутанность».</div>
   </div>
 </div>
 
 <script>
-(function(){
-"use strict";
+(function () {
+  "use strict";
 
-// ——— Complex & statevector (2 qubits, index = 2*q0+q1) ———
-function C(re,im){return{re:re||0,im:im||0};}
-function cadd(a,b){return C(a.re+b.re,a.im+b.im);}
-function cmul(a,b){return C(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re);}
-function cabs2(a){return a.re*a.re+a.im*a.im;}
-var ISQ=1/Math.SQRT2;
+  // Complex
+  function C(re, im) { return { re: re || 0, im: im || 0 }; }
+  function add(a, b) { return C(a.re + b.re, a.im + b.im); }
+  function mul(a, b) { return C(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re); }
+  function abs2(a) { return a.re * a.re + a.im * a.im; }
+  var ISQ = 1 / Math.SQRT2;
 
-function apply1(psi,q,M){
-  var next=[C(),C(),C(),C()];
-  for(var q0=0;q0<2;q0++){
-    for(var q1=0;q1<2;q1++){
-      var idx=2*q0+q1;
-      var bit=q===0?q0:q1;
-      for(var b=0;b<2;b++){
-        var n0=q===0?b:q0, n1=q===1?b:q1;
-        next[idx]=cadd(next[idx],cmul(M[bit][b],psi[2*n0+n1]));
+  // Index: |q0 q1> = 2*q0 + q1
+  // Apply 2x2 gate M to qubit q (0 or 1)
+  function apply1(psi, q, M) {
+    var next = [C(), C(), C(), C()];
+    for (var b = 0; b < 2; b++) {
+      for (var other = 0; other < 2; other++) {
+        var i0, i1, out;
+        if (q === 0) {
+          // act on q0, other is q1
+          i0 = 0 * 2 + other;
+          i1 = 1 * 2 + other;
+          out = b * 2 + other;
+        } else {
+          // act on q1, other is q0
+          i0 = other * 2 + 0;
+          i1 = other * 2 + 1;
+          out = other * 2 + b;
+        }
+        // next[out] = M[b][0]*psi[i0] + M[b][1]*psi[i1]
+        next[out] = add(mul(M[b][0], psi[i0]), mul(M[b][1], psi[i1]));
       }
     }
+    return next;
   }
-  return next;
-}
-function gateH(psi,q){
-  var H=[[C(ISQ),C(ISQ)],[C(ISQ),C(-ISQ)]];
-  return apply1(psi,q,H);
-}
-function gateX(psi,q){
-  return apply1(psi,q,[[C(0),C(1)],[C(1),C(0)]]);
-}
-function gateZ(psi,q){
-  return apply1(psi,q,[[C(1),C(0)],[C(0),C(-1)]]);
-}
-function gateCNOT(psi){
-  var next=[C(),C(),C(),C()];
-  for(var q0=0;q0<2;q0++){
-    for(var q1=0;q1<2;q1++){
-      var t=q0?(1-q1):q1;
-      next[2*q0+t]=cadd(next[2*q0+t],psi[2*q0+q1]);
+
+  function H(psi, q) {
+    return apply1(psi, q, [[C(ISQ), C(ISQ)], [C(ISQ), C(-ISQ)]]);
+  }
+  function X(psi, q) {
+    return apply1(psi, q, [[C(0), C(1)], [C(1), C(0)]]);
+  }
+  function Z(psi, q) {
+    return apply1(psi, q, [[C(1), C(0)], [C(0), C(-1)]]);
+  }
+  function CNOT(psi) {
+    // control q0, target q1
+    var next = [C(), C(), C(), C()];
+    for (var q0 = 0; q0 < 2; q0++) {
+      for (var q1 = 0; q1 < 2; q1++) {
+        var t = q0 ? (1 - q1) : q1;
+        next[2 * q0 + t] = add(next[2 * q0 + t], psi[2 * q0 + q1]);
+      }
     }
+    return next;
   }
-  return next;
-}
 
-function runCircuit(steps){
-  var psi=[C(1),C(),C(),C()]; // |00>
-  steps.forEach(function(g){
-    if(g==="H0")psi=gateH(psi,0);
-    else if(g==="H1")psi=gateH(psi,1);
-    else if(g==="X0")psi=gateX(psi,0);
-    else if(g==="X1")psi=gateX(psi,1);
-    else if(g==="Z0")psi=gateZ(psi,0);
-    else if(g==="Z1")psi=gateZ(psi,1);
-    else if(g==="CNOT")psi=gateCNOT(psi);
-  });
-  var p=psi.map(cabs2);
-  var labels=["00","01","10","11"];
-  var S=0;p.forEach(function(x){if(x>1e-12)S-=x*Math.log2(x);});
-  return{psi:psi,probs:p,labels:labels,entropy:S,steps:steps.slice()};
-}
-
-// ——— Templates: text → circuit ———
-function textToCircuit(prompt){
-  var t=String(prompt).toLowerCase();
-  if(/тел[еe]порт/.test(t)){
-    return{name:"teleportation_sketch",steps:["H1","CNOT","H0","CNOT","H1"],note:"Упрощённый эскиз идей телепортации на 2 кубитах (не полный 3-qubit протокол)."};
-  }
-  if(/гровер|grover|поиск/.test(t)){
-    return{name:"grover_2q_idea",steps:["H0","H1","X0","X1","H1","CNOT","H1","X0","X1","H0","H1"],note:"Иллюстрация идеи Гровера на 2 кубитах (учебный шаблон)."};
-  }
-  if(/запутан|белл|bell|entangl|cnot.*h|h.*cnot/.test(t)){
-    return{name:"bell_state",steps:["H0","CNOT"],note:"Состояние Белла Φ+: H на q0, затем CNOT."};
-  }
-  if(/суперпоз|hadamard|только h|h на/.test(t)){
-    if(/втор|q1|1/.test(t))return{name:"superpos_q1",steps:["H1"],note:"Суперпозиция на q1."};
-    return{name:"superpos_q0",steps:["H0"],note:"Суперпозиция на q0."};
-  }
-  if(/сброс|очист|zero|\|00/.test(t))return{name:"reset",steps:[],note:"|00⟩"};
-  // default quantum-ish
-  if(/квант|кубит|схем|simulat|вероятн/.test(t)){
-    return{name:"bell_state",steps:["H0","CNOT"],note:"По умолчанию для квантового запроса — Белл."};
-  }
-  return null;
-}
-
-function explainResult(res){
-  var p=res.probs;
-  var lines=[];
-  lines.push("Вероятности:");
-  res.labels.forEach(function(L,i){
-    lines.push("  |"+L+"⟩ = "+p[i].toFixed(4)+(p[i]>0.01?"  ("+Math.round(p[i]*100)+"%)":""));
-  });
-  lines.push("Энтропия Шеннона исхода: "+res.entropy.toFixed(3)+" бит (макс. 2 для 2 кубитов).");
-
-  var dominant=p.map(function(x,i){return{x:x,i:i};}).filter(function(o){return o.x>0.2;});
-  if(Math.abs(p[0]-0.5)<0.08&&Math.abs(p[3]-0.5)<0.08&&p[1]<0.08&&p[2]<0.08){
-    lines.push("Вывод: классическая корреляция измерений — типичный Белл Φ+. Если первый кубит дал 0, второй почти наверняка 0; если 1 — то 1. Это и есть запутанность (в учебной модели без шума).");
-  } else if(Math.abs(p[0]-0.5)<0.08&&Math.abs(p[1]-0.5)<0.08&&p[2]<0.08&&p[3]<0.08){
-    lines.push("Вывод: суперпозиция на младшем кубите при |0⟩ на старшем — продукт-состояние, не Белл.");
-  } else if(res.entropy<0.05){
-    lines.push("Вывод: состояние почти базисное (детерминированный исход)." );
-  } else if(res.entropy>0.9){
-    lines.push("Вывод: заметная неопределённость исхода; проверьте, есть ли корреляции между кубитами.");
-  } else {
-    lines.push("Вывод: смешанный учебный профиль вероятностей — смотрите доминирующие |bas⟩.");
-  }
-  lines.push("Схема: ["+res.steps.join(" → ")+"]");
-  return lines.join("\n");
-}
-
-// ——— State ———
-var steps=[];
-var lastRes=null;
-
-function renderCircuit(){
-  var root=document.getElementById("circuit");
-  root.innerHTML="";
-  var maxCols=Math.max(steps.length,4);
-  [0,1].forEach(function(q){
-    var row=document.createElement("div");row.className="wire-row";
-    row.innerHTML="<div class=\"qlabel\">q"+q+"</div>";
-    var slots=document.createElement("div");slots.className="slots";
-    for(var c=0;c<maxCols;c++){
-      var g=steps[c];
-      var slot=document.createElement("div");
-      slot.className="slot";
-      var label="·";
-      if(g==="H0"&&q===0){label="H";slot.className+=" on";}
-      else if(g==="H1"&&q===1){label="H";slot.className+=" on";}
-      else if(g==="X0"&&q===0){label="X";slot.className+=" on";}
-      else if(g==="X1"&&q===1){label="X";slot.className+=" on";}
-      else if(g==="Z0"&&q===0){label="Z";slot.className+=" on";}
-      else if(g==="Z1"&&q===1){label="Z";slot.className+=" on";}
-      else if(g==="CNOT"){label=q===0?"•":"⊕";slot.className+=" on cnot";}
-      slot.textContent=label;
-      slots.appendChild(slot);
+  function runCircuit(steps) {
+    var psi = [C(1), C(), C(), C()];
+    for (var i = 0; i < steps.length; i++) {
+      var g = steps[i];
+      if (g === "H0") psi = H(psi, 0);
+      else if (g === "H1") psi = H(psi, 1);
+      else if (g === "X0") psi = X(psi, 0);
+      else if (g === "X1") psi = X(psi, 1);
+      else if (g === "Z0") psi = Z(psi, 0);
+      else if (g === "Z1") psi = Z(psi, 1);
+      else if (g === "CNOT") psi = CNOT(psi);
     }
-    row.appendChild(slots);
-    root.appendChild(row);
-  });
-}
-
-function paint(res){
-  lastRes=res;
-  var bars=document.getElementById("bars");bars.innerHTML="";
-  res.probs.forEach(function(x,i){
-    var d=document.createElement("div");
-    d.style.height=Math.max(3,Math.round(x*90))+"px";
-    d.innerHTML="<span>|"+res.labels[i]+"⟩</span>";
-    bars.appendChild(d);
-  });
-  var probs=document.getElementById("probs");probs.innerHTML="";
-  res.labels.forEach(function(L,i){
-    var d=document.createElement("div");
-    d.innerHTML="<b>"+res.probs[i].toFixed(3)+"</b><i>|"+L+"⟩</i>";
-    probs.appendChild(d);
-  });
-  document.getElementById("amp").textContent=res.psi.map(function(a,i){
-    return "|"+res.labels[i]+"⟩: "+a.re.toFixed(3)+(a.im>=0?"+":"")+a.im.toFixed(3)+"i";
-  }).join("   ");
-  document.getElementById("explain").textContent=explainResult(res);
-}
-
-function run(){
-  renderCircuit();
-  var res=runCircuit(steps);
-  paint(res);
-  return res;
-}
-
-function applyTemplate(tpl){
-  steps=tpl.steps.slice();
-  var res=run();
-  return{tpl:tpl,res:res};
-}
-
-// ——— Chat ———
-function addMsg(role,text){
-  var d=document.createElement("div");
-  d.className="msg "+(role==="u"?"u":"a");
-  d.innerHTML="<div class=\"n\">"+(role==="u"?"вы":"АКСИ")+"</div>";
-  var body=document.createElement("div");
-  body.style.whiteSpace="pre-wrap";
-  body.textContent=text;
-  d.appendChild(body);
-  document.getElementById("thread").appendChild(d);
-  document.getElementById("thread").scrollTop=99999;
-}
-
-function handlePrompt(q){
-  addMsg("u",q);
-  var tpl=textToCircuit(q);
-  if(!tpl){
-    addMsg("a","Не распознала квантовый шаблон. Попробуйте: «запутанность», «суперпозиция», «телепортация». Или соберите схему кнопками справа.");
-    return;
+    var probs = psi.map(abs2);
+    // normalize numerical drift
+    var s = probs[0] + probs[1] + probs[2] + probs[3];
+    if (s > 0) probs = probs.map(function (p) { return p / s; });
+    var labels = ["00", "01", "10", "11"];
+    var ent = 0;
+    probs.forEach(function (p) { if (p > 1e-12) ent -= p * Math.log(p) / Math.LN2; });
+    return { psi: psi, probs: probs, labels: labels, entropy: ent, steps: steps.slice() };
   }
-  var out=applyTemplate(tpl);
-  var p=out.res.probs;
-  var msg=
-    "Шаблон: "+tpl.name+"\n"+
-    (tpl.note?tpl.note+"\n":"")+
-    "Гейты: "+tpl.steps.join(" → ")+"\n\n"+
-    "P|00⟩="+p[0].toFixed(3)+", P|01⟩="+p[1].toFixed(3)+", P|10⟩="+p[2].toFixed(3)+", P|11⟩="+p[3].toFixed(3)+"\n\n"+
-    explainResult(out.res);
-  addMsg("a",msg);
-}
 
-document.getElementById("send").onclick=function(){
-  var v=document.getElementById("inp").value.trim();
-  if(!v)return;
-  document.getElementById("inp").value="";
-  handlePrompt(v);
-};
-document.getElementById("inp").addEventListener("keydown",function(e){
-  if(e.key==="Enter"){e.preventDefault();document.getElementById("send").click();}
-});
-document.querySelectorAll("[data-q]").forEach(function(b){
-  b.onclick=function(){handlePrompt(b.getAttribute("data-q"));};
-});
-document.querySelectorAll("[data-g]").forEach(function(b){
-  b.onclick=function(){
-    var g=b.getAttribute("data-g");
-    if(g==="CLR")steps=[];
-    else if(g==="DEL")steps.pop();
-    else steps.push(g);
-    run();
+  function textToCircuit(prompt) {
+    var t = String(prompt).toLowerCase();
+    if (/тел[еe]порт/.test(t))
+      return { name: "teleport_sketch", steps: ["H1", "CNOT", "H0", "CNOT", "H1"], note: "Упрощённый эскиз (2 кубита)." };
+    if (/гровер|grover/.test(t))
+      return { name: "grover_idea", steps: ["H0", "H1", "X0", "X1", "H1", "CNOT", "H1", "X0", "X1", "H0", "H1"], note: "Учебный шаблон Гровера." };
+    if (/запутан|белл|bell|entangl|cnot/.test(t))
+      return { name: "bell", steps: ["H0", "CNOT"], note: "Белл Φ+: H₀ затем CNOT₀₁." };
+    if (/суперпоз|hadamard|\bh\b/.test(t))
+      return { name: "superpos", steps: [/2|втор|q1/.test(t) ? "H1" : "H0"], note: "Суперпозиция." };
+    if (/квант|кубит|вероятн|схем/.test(t))
+      return { name: "bell", steps: ["H0", "CNOT"], note: "По умолчанию — Белл." };
+    return null;
+  }
+
+  function explain(res) {
+    var p = res.probs;
+    var lines = [];
+    lines.push("Вероятности:");
+    for (var i = 0; i < 4; i++) {
+      lines.push("  |" + res.labels[i] + "⟩ = " + p[i].toFixed(4) + " (" + Math.round(p[i] * 1000) / 10 + "%)");
+    }
+    lines.push("Энтропия: " + res.entropy.toFixed(3) + " бит");
+    if (Math.abs(p[0] - 0.5) < 0.05 && Math.abs(p[3] - 0.5) < 0.05 && p[1] < 0.05 && p[2] < 0.05) {
+      lines.push("Вывод: запутанность (Белл Φ+). Если измерили первый кубит как 0 — второй тоже 0; если 1 — второй 1.");
+    } else if (res.entropy < 0.08) {
+      lines.push("Вывод: почти определённый исход.");
+    } else if (Math.abs(p[0] - 0.5) < 0.05 && Math.abs(p[1] - 0.5) < 0.05) {
+      lines.push("Вывод: суперпозиция на q1 при q0=|0⟩.");
+    } else {
+      lines.push("Вывод: смотрите доминирующие состояния в таблице.");
+    }
+    lines.push("Схема: [" + (res.steps.join(" → ") || "пусто") + "]");
+    return lines.join("\n");
+  }
+
+  var steps = [];
+  var last = null;
+
+  function renderCircuit() {
+    var el = document.getElementById("circuit");
+    el.innerHTML = "";
+    function row(q) {
+      var d = document.createElement("div");
+      d.className = "wire";
+      d.innerHTML = "<div class=\"lab\">q" + q + "</div><div class=\"line\" id=\"line" + q + "\"></div>";
+      el.appendChild(d);
+      var line = d.querySelector(".line");
+      steps.forEach(function (g) {
+        var lab = "·";
+        var cls = "gate";
+        if (g === "H0" && q === 0) lab = "H";
+        else if (g === "H1" && q === 1) lab = "H";
+        else if (g === "X0" && q === 0) lab = "X";
+        else if (g === "X1" && q === 1) lab = "X";
+        else if (g === "Z0" && q === 0) lab = "Z";
+        else if (g === "Z1" && q === 1) lab = "Z";
+        else if (g === "CNOT") { lab = q === 0 ? "•" : "⊕"; cls += " cn"; }
+        else return;
+        if (lab === "·" && g !== "CNOT") return;
+        if (lab === "·") return;
+        var gEl = document.createElement("div");
+        gEl.className = cls;
+        gEl.textContent = lab;
+        line.appendChild(gEl);
+      });
+      // show placeholders for empty
+      if (!steps.length) {
+        var ph = document.createElement("div");
+        ph.className = "gate";
+        ph.style.opacity = ".35";
+        ph.textContent = "·";
+        line.appendChild(ph);
+      }
+    }
+    row(0); row(1);
+  }
+
+  function paint(res) {
+    last = res;
+    var bars = document.getElementById("bars");
+    bars.innerHTML = "";
+    res.probs.forEach(function (p) {
+      var i = document.createElement("i");
+      i.style.height = Math.max(4, Math.round(p * 100)) + "px";
+      bars.appendChild(i);
+    });
+    var probs = document.getElementById("probs");
+    probs.innerHTML = "";
+    res.labels.forEach(function (L, i) {
+      var d = document.createElement("div");
+      d.innerHTML = "<b>" + res.probs[i].toFixed(3) + "</b><span>|" + L + "⟩</span>";
+      probs.appendChild(d);
+    });
+    document.getElementById("amp").textContent = res.psi.map(function (a, i) {
+      return "|" + res.labels[i] + "⟩ " + a.re.toFixed(3) + (a.im >= 0 ? "+" : "") + a.im.toFixed(3) + "i";
+    }).join(" · ");
+    document.getElementById("explain").textContent = explain(res);
+  }
+
+  function run() {
+    renderCircuit();
+    var res = runCircuit(steps);
+    paint(res);
+    return res;
+  }
+
+  function addMsg(who, text) {
+    var d = document.createElement("div");
+    d.className = "msg";
+    d.innerHTML = "<b>" + who + "</b>";
+    d.appendChild(document.createTextNode(text));
+    document.getElementById("thread").appendChild(d);
+    document.getElementById("thread").scrollTop = 99999;
+  }
+
+  function handle(q) {
+    addMsg("вы", q);
+    var tpl = textToCircuit(q);
+    if (!tpl) {
+      addMsg("АКСИ", "Не распознала шаблон. Нажмите «Запутанность» или соберите схему кнопками.");
+      return;
+    }
+    steps = tpl.steps.slice();
+    var res = run();
+    var p = res.probs;
+    addMsg("АКСИ",
+      "Шаблон: " + tpl.name + "\n" +
+      (tpl.note || "") + "\n" +
+      "Гейты: " + steps.join(" → ") + "\n\n" +
+      "P|00⟩=" + p[0].toFixed(3) + "  P|01⟩=" + p[1].toFixed(3) +
+      "  P|10⟩=" + p[2].toFixed(3) + "  P|11⟩=" + p[3].toFixed(3) + "\n\n" +
+      explain(res)
+    );
+  }
+
+  function on(id, fn) {
+    var el = document.getElementById(id);
+    if (el) el.onclick = fn;
+  }
+
+  on("c1", function () { handle("Покажи запутанность двух кубитов и посчитай вероятности"); });
+  on("c2", function () { handle("Сделай суперпозицию на первом кубите"); });
+  on("c3", function () { handle("Схема телепортации"); });
+  on("c4", function () { handle("Алгоритм Гровера на 2 кубитах"); });
+  on("send", function () {
+    var v = document.getElementById("inp").value.trim();
+    if (!v) return;
+    document.getElementById("inp").value = "";
+    handle(v);
+  });
+  document.getElementById("inp").onkeydown = function (e) {
+    if (e.key === "Enter") { e.preventDefault(); document.getElementById("send").click(); }
   };
-});
-document.getElementById("btn-run").onclick=function(){run();};
-document.getElementById("btn-explain").onclick=function(){
-  var res=run();
-  addMsg("a","Разбор текущей схемы:\n"+explainResult(res));
-};
-document.getElementById("btn-json").onclick=function(){
-  var data={version:1,qubits:2,steps:steps,result:lastRes&&{probs:lastRes.probs,entropy:lastRes.entropy}};
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-circuit.json";a.click();
-};
-document.getElementById("btn-md").onclick=function(){
-  var res=run();
-  var md="# Отчёт АКСИ · квантовая схема\n\n"+
-    "Гейты: `"+steps.join(" → ")+"`\n\n"+
-    "## Вероятности\n\n"+
-    res.labels.map(function(L,i){return "- |"+L+"⟩: "+res.probs[i].toFixed(6);}).join("\n")+"\n\n"+
-    "Энтропия: "+res.entropy.toFixed(4)+"\n\n"+
-    "## Вывод\n\n"+explainResult(res)+"\n";
-  var blob=new Blob([md],{type:"text/markdown"});
-  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-quantum-report.md";a.click();
-};
 
-run();
-addMsg("a","Напишите «Покажи запутанность двух кубитов и посчитай вероятности» — построю H+CNOT, прогоню statevector и разберу числа. Схему можно менять руками справа.");
+  on("gH0", function () { steps.push("H0"); run(); });
+  on("gH1", function () { steps.push("H1"); run(); });
+  on("gX0", function () { steps.push("X0"); run(); });
+  on("gX1", function () { steps.push("X1"); run(); });
+  on("gZ0", function () { steps.push("Z0"); run(); });
+  on("gCX", function () { steps.push("CNOT"); run(); });
+  on("gDel", function () { steps.pop(); run(); });
+  on("gClr", function () { steps = []; run(); });
+  on("btnRun", function () { run(); });
+  on("btnExp", function () {
+    var res = run();
+    addMsg("АКСИ", "Разбор:\n" + explain(res));
+  });
+  on("btnJson", function () {
+    var data = { version: 1, steps: steps, probs: last && last.probs };
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
+    a.download = "aksi-circuit.json";
+    a.click();
+  });
+  on("btnMd", function () {
+    var res = run();
+    var md = "# АКСИ quantum report\n\nSteps: " + steps.join(" → ") + "\n\n" + explain(res) + "\n";
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" }));
+    a.download = "aksi-quantum.md";
+    a.click();
+  });
+
+  // self-test Bell
+  var test = runCircuit(["H0", "CNOT"]);
+  var ok = Math.abs(test.probs[0] - 0.5) < 0.01 && Math.abs(test.probs[3] - 0.5) < 0.01;
+  run();
+  addMsg("АКСИ", ok
+    ? "Движок OK (Белл-тест пройден). Нажмите «Запутанность»."
+    : "Внимание: самотест Белла не прошёл, числа: " + test.probs.map(function (x) { return x.toFixed(3); }).join(", "));
 })();
 </script>
 </body>
