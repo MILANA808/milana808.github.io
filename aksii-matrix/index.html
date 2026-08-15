@@ -1,71 +1,64 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>АКСИ MATRIX v1.1</title>
-<meta name="theme-color" content="#070b16">
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<style>
-:root{--bg:#070b16;--card:#121a2f;--ink:#eef2ff;--muted:#8b9bb8;--line:#243047;--acc:#8b5cf6;--cyan:#22d3ee}
-*{box-sizing:border-box;margin:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:1100px;margin:0 auto}
-header{padding:max(10px,env(safe-area-inset-top)) 14px 10px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
-header strong{font-size:1.05rem}
-header span{font-size:11px;color:#4ade80}
-.layout{flex:1;display:grid;grid-template-rows:1fr 1fr;min-height:0}
-@media(min-width:900px){.layout{grid-template-rows:1fr;grid-template-columns:1fr 1fr}}
-.panel{display:flex;flex-direction:column;min-height:0;border-bottom:1px solid var(--line)}
-@media(min-width:900px){.panel{border-bottom:none;border-right:1px solid var(--line)}}
-.panel h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);padding:10px 12px 0}
-#thread{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
-.msg{margin-bottom:12px;max-width:95%}
-.msg.u{margin-left:auto}
-.msg .b{padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.msg.u .b{background:var(--acc);color:#fff}
-.msg.a .b{background:var(--card);border:1px solid var(--line)}
-.msg .m{font-size:10px;color:var(--muted);margin-top:3px}
-.composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:#0d1324}
-.composer input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
-.composer button{border:none;border-radius:12px;padding:0 14px;font-weight:800;cursor:pointer}
-#send{background:var(--acc);color:#fff}
-#magic{background:linear-gradient(135deg,#22d3ee,#8b5cf6);color:#fff}
-#mic{background:var(--card);color:var(--ink);border:1px solid var(--line)!important}
-#quirk-wrap{flex:1;min-height:180px;position:relative;background:#000}
-#quirk{width:100%;height:100%;border:0;background:#000}
-#probs{padding:8px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);max-height:100px;overflow:auto}
-#waves{pointer-events:none;position:fixed;inset:0;z-index:50;opacity:0;transition:opacity .3s;background:radial-gradient(circle at 50% 40%,rgba(34,211,238,.25),transparent 55%),radial-gradient(circle at 30% 70%,rgba(139,92,246,.3),transparent 50%)}
-#waves.on{opacity:1}
-#waves::before,#waves::after{content:"";position:absolute;left:50%;top:40%;width:40px;height:40px;border:2px solid rgba(34,211,238,.6);border-radius:50%;transform:translate(-50%,-50%);animation:qwave 1.4s ease-out infinite}
-#waves::after{animation-delay:.35s;border-color:rgba(139,92,246,.5)}
-@keyframes qwave{0%{width:20px;height:20px;opacity:1}100%{width:280px;height:280px;opacity:0}}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05070d">
+<meta name="description" content="АКСИ MATRIX — понятный локальный интерфейс для диалога, памяти и квантовых экспериментов.">
+<title>АКСИ MATRIX — когнитивная лаборатория</title>
+<link rel="stylesheet" href="./matrix.css">
+<style>.msg{margin:0 0 14px;max-width:92%}.msg.u{margin-left:auto}.msg .b{padding:13px 14px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}.msg.u .b{background:linear-gradient(135deg,#7b61ff,#5c75ff)}.msg.a .b{background:#0d1425;border:1px solid var(--line)}.msg .m{font-size:10px;color:var(--muted);margin:5px 4px 0}.empty{padding:28px 8px;color:var(--muted);text-align:center;line-height:1.6}.statusbar{padding:9px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}.statusbar strong{color:var(--green)}.hidden{display:none!important}</style>
 </head>
 <body>
-<div id="waves"></div>
-<header>
-  <strong>АКСИ MATRIX <small style="color:#8b9bb8">v1.1</small></strong>
-  <span id="status">загрузка…</span>
+<div class="shell">
+<header class="top">
+  <div class="brand"><div class="orb" aria-hidden="true"></div><div><h1>АКСИ MATRIX</h1><div class="sub">Понятный вход в ядро АКСИ: диалог · память · квантовые эксперименты</div></div></div>
+  <div class="state"><span class="dot" id="stateDot"></span><span id="status">загрузка…</span></div>
 </header>
-<div class="layout">
-  <div class="panel">
-    <h2>Чат</h2>
-    <div id="thread"></div>
+<main class="grid">
+  <section class="card chat" aria-label="Диалог с АКСИ">
+    <div class="cardhead"><h2>Диалог</h2><p class="hint">Пишите обычными словами. АКСИ работает локально, когда это возможно. Вопросы о кубитах и запутанности запускают эксперимент без облачной модели.</p></div>
+    <div class="statusbar"><span>Режим: <strong id="mode">local-first</strong></span><span id="historyState">память: проверка…</span></div>
+    <div id="thread" class="thread"><div class="empty">Здесь появится разговор.<br>Попробуйте: <b>«Что такое квантовая запутанность?»</b> или <b>«покажи магию»</b>.</div></div>
     <div class="composer">
-      <input id="inp" type="text" placeholder="Спросите или «покажи магию»…" enterkeyhint="send" autocomplete="off">
-      <button type="button" id="mic" title="Голос">🎙</button>
-      <button type="button" id="magic">Магия</button>
-      <button type="button" id="send">➤</button>
+      <input id="inp" type="text" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off" aria-label="Сообщение">
+      <button class="btn" type="button" id="mic" title="Голосовой ввод" aria-label="Голосовой ввод">🎙</button>
+      <button class="btn magic" type="button" id="magic">✦ Магия</button>
+      <button class="btn primary" type="button" id="send" aria-label="Отправить">➤</button>
     </div>
-  </div>
-  <div class="panel">
-    <h2>Quirk · quantum</h2>
-    <div id="quirk-wrap">
-      <iframe id="quirk" title="Quirk" src="https://algassert.com/quirk#circuit=%7B%22cols%22%3A%5B%5B%22H%22%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%5D%7D" allow="accelerometer"></iframe>
-    </div>
-    <div id="probs">Вероятности появятся после симуляции (локальный statevector + Quirk UI).</div>
-  </div>
+  </section>
+
+  <aside class="side">
+    <section class="card quantum" aria-label="Квантовый эксперимент">
+      <div class="cardhead"><h2>Квантовая лаборатория</h2><p class="hint">Справа показан интерактивный Quirk. Кнопка «Магия» создаёт состояние Белла и объясняет полученные вероятности.</p></div>
+      <div class="frame"><iframe id="quirk" title="Интерактивный квантовый симулятор Quirk" src="https://algassert.com/quirk#circuit=%7B%22cols%22%3A%5B%5B%22H%22%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%5D%7D" loading="lazy" allow="fullscreen"></iframe></div>
+      <div id="probs" class="prob">Ожидаю запуск эксперимента.</div>
+    </section>
+
+    <section class="card">
+      <div class="cardhead"><h2>Что здесь происходит</h2><p class="hint">Без научного жаргона: три простых слоя.</p></div>
+      <div class="tools">
+        <div class="tool"><b>🧠 Диалог</b><p>Вопрос → локальная модель, если она доступна, иначе понятный резервный режим.</p></div>
+        <div class="tool"><b>⚛️ Квант</b><p>Реальный симулятор показывает состояние кубитов и результаты эксперимента.</p></div>
+        <div class="tool"><b>💾 Память</b><p>История диалога хранится в браузере и не требует аккаунта.</p></div>
+        <div class="tool"><b>🔐 Честность</b><p>Криптография может подтвердить целостность записи, но не превращает ошибку в истину.</p></div>
+      </div>
+      <div class="explain">
+        <details open><summary>Что такое «локально»?</summary><p>Когда браузер поддерживает WebLLM, небольшая модель загружается на устройство. Если модель недоступна, сайт не делает вид, что она работает.</p></details>
+        <details><summary>Что такое запутанность?</summary><p>Это квантовая связь состояний: после подготовки пары Белла измерения двух кубитов оказываются статистически связаны.</p></details>
+        <details><summary>Почему это называется Matrix?</summary><p>Потому что интерфейс объединяет несколько режимов в одном месте: разговор, память, вычисление и эксперимент.</p></details>
+      </div>
+    </section>
+  </aside>
+</main>
+<footer class="footer"><span class="badge">AKSII MATRIX · local-first</span> <span class="badge">без обязательного аккаунта</span> <span class="badge">проверяемые эксперименты</span></footer>
 </div>
+<div id="waves" aria-hidden="true"></div>
 <script type="module" src="./src/main.js"></script>
+<script>
+  const hs=document.getElementById('historyState');
+  try{const n=JSON.parse(localStorage.getItem('aksi-matrix-history')||'[]').length;hs.textContent='память: '+n+' записей'}catch(e){hs.textContent='память: локальная'}
+  window.addEventListener('error',e=>{const s=document.getElementById('status');if(s)s.textContent='проверка ошибки…';console.error(e.error||e.message)});
+</script>
 </body>
 </html>
