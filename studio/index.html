@@ -6,37 +6,36 @@
 <title>АКСИ Studio</title>
 <meta name="theme-color" content="#0a0618">
 <style>
-:root{--bg:#0b1020;--panel:#121a2e;--ink:#e8eefc;--muted:#8b9bb8;--line:#243047;--acc:#7c3aed;--ok:#4ade80;--bad:#f87171}
+:root{--bg:#0b1020;--panel:#121a2e;--ink:#e8eefc;--muted:#8b9bb8;--line:#243047;--acc:#7c3aed;--ok:#4ade80;--bad:#f87171;--c:#22d3ee}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;overflow:hidden}
-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:#0d1424}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:#0d1424;flex-wrap:wrap}
 header strong{font-size:14px}
-header a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;margin-left:10px}
-.shell{flex:1;display:grid;grid-template-columns:1fr;min-height:0}
-@media(min-width:900px){.shell{grid-template-columns:200px 1fr 320px}}
-.files,.editor,.chat{min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
-.chat{border-right:none;border-left:1px solid var(--line)}
-.hd{padding:8px 10px;font-size:11px;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--line);background:var(--panel)}
-#filelist{flex:1;overflow:auto;padding:6px}
-#filelist button{display:block;width:100%;text-align:left;border:none;background:transparent;color:var(--ink);padding:10px;border-radius:8px;cursor:pointer;font-size:13px}
-#filelist button.on{background:#1a243c}
-#filelist button:hover{background:#151e32}
-.tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
-.tools button,header button{border:1px solid var(--line);background:#151e32;color:var(--ink);border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer}
-.tools button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
-textarea#code{flex:1;width:100%;border:none;resize:none;background:#0a0f1a;color:#dbe7ff;font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.45;padding:12px}
-iframe#preview{flex:1;width:100%;border:none;background:#fff;min-height:180px}
-.split{flex:1;display:grid;grid-template-rows:1fr 1fr;min-height:0}
-#thread{flex:1;overflow:auto;padding:10px;font-size:13px;line-height:1.45}
-.msg{margin-bottom:10px;padding:10px;border-radius:10px;background:#151e32;white-space:pre-wrap;word-break:break-word}
-.msg.u{background:#2a1f4d}
-.msg .m{font-size:10px;color:var(--muted);margin-top:4px}
-.composer{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line);padding-bottom:max(8px,env(safe-area-inset-bottom))}
-.composer input{flex:1;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a0f1a;color:var(--ink)}
-.composer button{border:none;border-radius:10px;padding:0 14px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
+header a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;margin-left:8px}
 #status{font-size:11px;color:var(--muted)}
 .ok{color:var(--ok)}.bad{color:var(--bad)}
+.shell{flex:1;display:grid;grid-template-columns:1fr;min-height:0}
+@media(min-width:960px){.shell{grid-template-columns:180px 1fr 300px}}
+.files,.editor,.chat{min-height:0;display:flex;flex-direction:column;border-color:var(--line);border-style:solid;border-width:0}
+.files{border-right-width:1px}.chat{border-left-width:1px}
+.hd{padding:8px 10px;font-size:10px;letter-spacing:.1em;color:var(--muted);border-bottom:1px solid var(--line);background:var(--panel)}
+#filelist{flex:1;overflow:auto;padding:4px}
+#filelist button{display:block;width:100%;text-align:left;border:none;background:transparent;color:var(--ink);padding:9px 10px;border-radius:8px;cursor:pointer;font-size:12px}
+#filelist button.on{background:#1a243c}
+.tools{display:flex;flex-wrap:wrap;gap:5px;padding:6px;border-bottom:1px solid var(--line)}
+.tools button,header .btn{border:1px solid var(--line);background:#151e32;color:var(--ink);border-radius:8px;padding:7px 9px;font-size:11px;font-weight:700;cursor:pointer}
+.tools button.pri,.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+textarea#code{flex:1;width:100%;border:none;resize:none;background:#0a0f1a;color:#dbe7ff;font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.45;padding:10px;min-height:120px}
+iframe#preview{flex:1;width:100%;border:none;background:#fff;min-height:140px;border-top:1px solid var(--line)}
+.split{flex:1;display:grid;grid-template-rows:1fr 1fr;min-height:0}
+#thread{flex:1;overflow:auto;padding:8px;font-size:12px;line-height:1.4}
+.msg{margin-bottom:8px;padding:8px;border-radius:10px;background:#151e32;white-space:pre-wrap;word-break:break-word}
+.msg.u{background:#2a1f4d}
+.msg .m{font-size:10px;color:var(--muted);margin-top:3px}
+.composer{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line);padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.composer input{flex:1;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a0f1a;color:var(--ink)}
+.composer button{border:none;border-radius:10px;padding:0 12px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body>
@@ -46,36 +45,42 @@ iframe#preview{flex:1;width:100%;border:none;background:#fff;min-height:180px}
     <a href="/">хаб</a>
     <a href="/lab/">lab</a>
     <a href="/pulse/">pulse</a>
+    <a href="/kernel/">kernel</a>
   </div>
-  <div id="status">vfs ready</div>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+    <button type="button" class="btn pri" id="btn-boot">Автосбор</button>
+    <button type="button" class="btn" id="btn-sync">Синк с сайтом</button>
+    <span id="status">…</span>
+  </div>
 </header>
 <div class="shell">
   <aside class="files">
-    <div class="hd">ФАЙЛЫ</div>
+    <div class="hd">VFS</div>
     <div class="tools">
-      <button type="button" id="btn-new">+ файл</button>
-      <button type="button" id="btn-del">удалить</button>
+      <button type="button" id="btn-new">+</button>
+      <button type="button" id="btn-del">×</button>
+      <button type="button" id="btn-export">JSON</button>
     </div>
     <div id="filelist"></div>
   </aside>
   <section class="editor">
-    <div class="hd">РЕДАКТОР · <span id="cur">—</span></div>
+    <div class="hd">EDIT · <span id="cur">—</span></div>
     <div class="tools">
-      <button type="button" class="pri" id="btn-save">Сохранить</button>
-      <button type="button" id="btn-run">Превью</button>
-      <button type="button" id="btn-export">Экспорт JSON</button>
-      <button type="button" id="btn-html">Скачать HTML</button>
+      <button type="button" class="pri" id="btn-save">Save</button>
+      <button type="button" id="btn-run">Preview</button>
+      <button type="button" id="btn-html">HTML</button>
+      <button type="button" id="btn-genome">Genome</button>
     </div>
     <div class="split">
-      <textarea id="code" spellcheck="false" placeholder="код страницы…"></textarea>
-      <iframe id="preview" sandbox="allow-scripts allow-same-origin allow-forms" title="preview"></iframe>
+      <textarea id="code" spellcheck="false"></textarea>
+      <iframe id="preview" sandbox="allow-scripts allow-forms allow-same-origin" title="preview"></iframe>
     </div>
   </section>
   <aside class="chat">
-    <div class="hd">АГЕНТ · пишет в VFS</div>
+    <div class="hd">AGENT</div>
     <div id="thread"></div>
     <div class="composer">
-      <input id="inp" placeholder="например: создай страницу about" enterkeyhint="send" autocomplete="off">
+      <input id="inp" placeholder="команда или описание страницы" enterkeyhint="send" autocomplete="off">
       <button type="button" id="send">➤</button>
     </div>
   </aside>
@@ -83,69 +88,102 @@ iframe#preview{flex:1;width:100%;border:none;background:#fff;min-height:180px}
 <script>
 (function(){
 "use strict";
-const DB="aksi_studio_vfs_v1";
+const DB="aksi_studio_v2";
+const LOG="aksi_studio_log_v2";
 const SEED="AKSI_DIMAX_v3_2026";
 const DID="did:aksi:ed25519:sovereign-2026";
 
-const STARTER = {
-  "index.html": `<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>АКСИ</title>\n<style>body{font-family:system-ui;background:#0b1020;color:#e8eefc;margin:0;padding:24px}a{color:#a78bfa}</style>\n</head>\n<body>\n<h1>АКСИ</h1>\n<p>Сайт собирается в Studio. Агент пишет файлы во внутреннюю файловую систему.</p>\n<p><a href="about.html">О системе</a></p>\n</body>\n</html>`,
-  "about.html": `<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>О системе</title>\n<style>body{font-family:system-ui;background:#0b1020;color:#e8eefc;padding:24px}</style>\n</head>\n<body>\n<h1>О системе</h1>\n<p>DID: did:aksi:ed25519:sovereign-2026</p>\n<p>Редактор: /studio/</p>\n</body>\n</html>`
+/** ——— Concept 1: Signed mutation log ——— */
+async function sha(s){
+  const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function signMut(op, path, content){
+  const entry={ts:new Date().toISOString(),op,path,bytes:(content||"").length,did:DID};
+  entry.sig=await sha(SEED+"|"+op+"|"+path+"|"+entry.bytes+"|"+entry.ts);
+  const log=JSON.parse(localStorage.getItem(LOG)||"[]");
+  log.push(entry);
+  localStorage.setItem(LOG, JSON.stringify(log.slice(-100)));
+  return entry;
+}
+
+/** ——— Concept 2: Module bus (inject live capabilities) ——— */
+const BUS = {
+  quantum: () => `<!-- quantum widget -->\n<div id="q" style="font-family:monospace;padding:12px;background:#111;color:#9f9;border-radius:8px">квант…</div>\n<script>(function(){function C(r,i){return{re:r||0,im:i||0}}function add(a,b){return C(a.re+b.re,a.im+b.im)}function mul(a,b){return C(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re)}function a2(a){return a.re*a.re+a.im*a.im}var s=1/Math.SQRT2,psi=[C(1),C(),C(),C()],H=[[C(s),C(s)],[C(s),C(-s)]],n=[C(),C(),C(),C()];for(var b=0;b<2;b++)for(var o=0;o<2;o++){var i0=o,i1=2+o,out=b*2+o;n[out]=add(mul(H[b][0],psi[i0]),mul(H[b][1],psi[i1]))}psi=n;n=[C(),C(),C(),C()];for(var q0=0;q0<2;q0++)for(var q1=0;q1<2;q1++){var t=q0?1-q1:q1;n[2*q0+t]=add(n[2*q0+t],psi[2*q0+q1])}var p=n.map(a2);document.getElementById("q").textContent="Bell Φ+  P00="+p[0].toFixed(3)+" P11="+p[3].toFixed(3)}())<\/script>`,
+  pulse: () => `<!-- pulse link -->\n<div class="card"><p>Пульс контура: <a href="/pulse/">открыть Pulse</a></p></div>`,
+  kernel: () => `<!-- kernel link -->\n<div class="card"><p>Ядро улучшений: <a href="/kernel/">Kernel</a></p></div>`,
+  identity: () => `<!-- identity -->\n<div class="card"><code>${DID}</code><p style="font-size:12px;color:#8b9bb8">Resonance seed bound · Studio mutation log</p></div>`,
+  nav: () => `<nav style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">\n<a href="index.html">Главная</a>\n<a href="dashboard.html">Dashboard</a>\n<a href="about.html">О системе</a>\n<a href="/lab/">Lab</a>\n<a href="/studio/">Studio</a>\n</nav>`
 };
 
-let vfs = {};
-let current = "index.html";
+/** ——— Concept 3: Page genome (evolvable traits) ——— */
+function defaultGenome(){
+  return { theme:"dark", accent:"#7c3aed", density:"normal", modules:["identity","nav"], generation:0 };
+}
+function loadGenome(){
+  try{return Object.assign(defaultGenome(), JSON.parse(localStorage.getItem("aksi_genome_v1")||"{}"));}catch{return defaultGenome()}
+}
+function saveGenome(g){ localStorage.setItem("aksi_genome_v1", JSON.stringify(g)); }
+function evolveGenome(hint){
+  const g=loadGenome();
+  g.generation++;
+  if(/светл|light/i.test(hint)) g.theme="light";
+  if(/тёмн|dark/i.test(hint)) g.theme="dark";
+  if(/компакт/i.test(hint)) g.density="compact";
+  if(/квант/i.test(hint) && !g.modules.includes("quantum")) g.modules.push("quantum");
+  if(/pulse|пульс/i.test(hint) && !g.modules.includes("pulse")) g.modules.push("pulse");
+  if(/kernel|ядро/i.test(hint) && !g.modules.includes("kernel")) g.modules.push("kernel");
+  saveGenome(g);
+  return g;
+}
+
+function cssFor(g){
+  const bg=g.theme==="light"?"#f4f6fb":"#0b1020";
+  const ink=g.theme==="light"?"#0f172a":"#e8eefc";
+  const card=g.theme==="light"?"#fff":"#121a2e";
+  const pad=g.density==="compact"?"12px":"24px";
+  return `body{font-family:system-ui,-apple-system,sans-serif;background:${bg};color:${ink};margin:0;padding:${pad};line-height:1.5}\na{color:${g.accent}}\n.card{background:${card};border:1px solid #243047;border-radius:12px;padding:16px;margin:12px 0}\nh1{font-size:1.5rem;margin:0 0 12px}\nbutton.aksi{background:${g.accent};color:#fff;border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}`;
+}
+
+function page(title, inner, g){
+  g=g||loadGenome();
+  const mods=(g.modules||[]).map(m=>BUS[m]?BUS[m]():"").join("\n");
+  return `<!DOCTYPE html>\n<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${cssFor(g)}</style></head><body>\n${BUS.nav()}\n<h1>${title}</h1>\n${mods}\n${inner}\n<footer style="margin-top:28px;font-size:11px;opacity:.6">${DID} · genome gen ${g.generation}</footer>\n</body></html>`;
+}
+
+let vfs={};
+let current="index.html";
 
 function loadVfs(){
   try{
     const j=JSON.parse(localStorage.getItem(DB)||"null");
-    if(j&&typeof j==="object") vfs=j;
-    else vfs={...STARTER};
-  }catch{ vfs={...STARTER}; }
+    if(j&&typeof j==="object"&&Object.keys(j).length) vfs=j;
+    else vfs={};
+  }catch{vfs={}}
 }
 function saveVfs(){ localStorage.setItem(DB, JSON.stringify(vfs)); }
 
-async function sign(text){
-  const d=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(SEED+"|"+text+"|"+Date.now()));
-  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-
-function renderFiles(){
-  const box=document.getElementById("filelist");
-  box.innerHTML="";
-  Object.keys(vfs).sort().forEach(name=>{
-    const b=document.createElement("button");
-    b.type="button";
-    b.textContent=name;
-    if(name===current) b.className="on";
-    b.onclick=()=>openFile(name);
-    box.appendChild(b);
-  });
-}
-
-function openFile(name){
-  current=name;
-  document.getElementById("cur").textContent=name;
-  document.getElementById("code").value=vfs[name]||"";
-  renderFiles();
-  preview();
-}
-
-function preview(){
-  const html=document.getElementById("code").value;
-  const iframe=document.getElementById("preview");
-  iframe.srcdoc=html;
-}
-
-function setStatus(t, ok){
+function setStatus(t,ok){
   const el=document.getElementById("status");
   el.textContent=t;
-  el.className=ok===false?"bad":ok===true?"ok":"";
+  el.className=ok===true?"ok":ok===false?"bad":"";
 }
+function renderFiles(){
+  const box=document.getElementById("filelist"); box.innerHTML="";
+  Object.keys(vfs).sort().forEach(n=>{
+    const b=document.createElement("button"); b.type="button"; b.textContent=n;
+    if(n===current)b.className="on"; b.onclick=()=>openFile(n); box.appendChild(b);
+  });
+}
+function openFile(n){
+  current=n; document.getElementById("cur").textContent=n;
+  document.getElementById("code").value=vfs[n]||"";
+  renderFiles(); preview();
+}
+function preview(){ document.getElementById("preview").srcdoc=document.getElementById("code").value; }
 
-function addMsg(role, text, meta){
-  const d=document.createElement("div");
-  d.className="msg "+(role==="u"?"u":"");
-  d.textContent=text;
+function addMsg(role,text,meta){
+  const d=document.createElement("div"); d.className="msg"+(role==="u"?" u":""); d.textContent=text;
   if(meta){const m=document.createElement("div");m.className="m";m.textContent=meta;d.appendChild(m)}
   document.getElementById("thread").appendChild(d);
   document.getElementById("thread").scrollTop=1e9;
@@ -153,135 +191,162 @@ function addMsg(role, text, meta){
 
 function safeName(n){
   n=(n||"page").toLowerCase().replace(/[^a-z0-9._\-]/g,"-").replace(/-+/g,"-");
-  if(!n.endsWith(".html")&&!n.endsWith(".css")&&!n.endsWith(".js")&&!n.endsWith(".md")&&!n.endsWith(".json")) n+=".html";
-  if(n.startsWith(".")||n.includes("..")) n="page.html";
+  if(!/\.(html|css|js|md|json)$/.test(n)) n+=".html";
+  if(n.includes("..")||n.startsWith(".")) n="page.html";
   return n.slice(0,64);
 }
 
-function pageTemplate(title, body){
-  return `<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${title}</title>\n<style>\nbody{font-family:system-ui,-apple-system,sans-serif;background:#0b1020;color:#e8eefc;margin:0;padding:24px;line-height:1.5}\n a{color:#a78bfa}\n h1{font-size:1.6rem;margin-bottom:12px}\n .card{background:#121a2e;border:1px solid #243047;border-radius:12px;padding:16px;margin:12px 0}\n</style>\n</head>\n<body>\n<h1>${title}</h1>\n${body}\n<p style="margin-top:24px;font-size:12px;color:#8b9bb8"><a href="index.html">← на главную</a></p>\n</body>\n</html>`;
+async function writeFile(path, content, op){
+  vfs[path]=content;
+  saveVfs();
+  const mut=await signMut(op||"write", path, content);
+  return mut;
 }
 
-/** Agent: intent → VFS write */
-async function agentWrite(userText){
-  const t=userText.trim();
-  const thoughts=[];
-  thoughts.push("разбор запроса");
+/** Auto-build full mini-site */
+async function boot(){
+  setStatus("автосбор…");
+  const g=loadGenome();
+  g.modules=Array.from(new Set(["identity","nav","pulse","kernel","quantum"]));
+  saveGenome(g);
 
-  // create page
-  let m=t.match(/(?:создай|сделай|добавь|new|create)\s+(?:страницу\s+)?([\w.\-]+)/i);
+  await writeFile("index.html", page("АКСИ", `
+<div class="card"><p>Внутренний сайт, собранный Studio. Агент пишет файлы; мутации подписаны.</p>
+<p><button class="aksi" onclick="location.href='dashboard.html'">Dashboard</button></p></div>`, g), "boot");
+
+  await writeFile("dashboard.html", page("Dashboard", `
+<div class="card"><h2 style="font-size:1rem">Контур</h2>
+<ul>
+<li><a href="/pulse/">Pulse</a> — здоровье модулей</li>
+<li><a href="/kernel/">Kernel</a> — улучшения с подтверждением</li>
+<li><a href="/lab/">Lab</a> — агенты, крипто, Bloch</li>
+<li><a href="/studio/">Studio</a> — этот редактор</li>
+</ul></div>`, g), "boot");
+
+  await writeFile("about.html", page("О системе", `
+<div class="card"><p>Стек: VFS · signed mutations · module bus · page genome.</p>
+<p>Публичный хост: GitHub Pages. Выкладка — через экспорт.</p></div>`, g), "boot");
+
+  // try attach ecosystem snapshot
+  try{
+    const eco=await fetch("/ecosystem.json?v="+Date.now(),{cache:"no-store"}).then(r=>r.json());
+    await writeFile("ecosystem.json", JSON.stringify(eco,null,2), "sync");
+  }catch{}
+
+  openFile("index.html");
+  setStatus("автосбор ok", true);
+  addMsg("a", "Автосбор: index · dashboard · about · genome modules подключены.\nМутации в журнале localStorage.");
+}
+
+/** Pull public routes into VFS as references */
+async function syncSite(){
+  setStatus("синк…");
+  const routes=["/","/lab/","/pulse/","/kernel/","/proof/","/wake/","/quantum/","/contour/","/sovereign/"];
+  let ok=0;
+  const lines=[];
+  for(const path of routes){
+    try{
+      const r=await fetch(path,{cache:"no-store"});
+      lines.push((r.ok?"OK ":"FAIL ")+r.status+" "+path);
+      if(r.ok) ok++;
+    }catch{ lines.push("FAIL 0 "+path); }
+  }
+  const g=loadGenome();
+  await writeFile("sync-report.html", page("Sync report", `<div class="card"><pre style="white-space:pre-wrap;font-size:12px">${lines.join("\n")}\n\nOK ${ok}/${routes.length}</pre></div>`, g), "sync");
+  openFile("sync-report.html");
+  setStatus("синк "+ok+"/"+routes.length, ok===routes.length);
+  addMsg("a", "Синк публичного контура: "+ok+"/"+routes.length+"\nОтчёт: sync-report.html");
+}
+
+async function agent(t){
+  t=t.trim();
+  const g0=loadGenome();
+
+  if(/автосбор|собери сайт|boot/i.test(t)){ await boot(); return "Готово."; }
+  if(/синк|sync/i.test(t)){ await syncSite(); return "Синк завершён."; }
+  if(/genome|геном/i.test(t)){
+    const g=evolveGenome(t);
+    return "Genome gen "+g.generation+" theme="+g.theme+" modules="+g.modules.join(",");
+  }
+  if(/какие файлы|ls/i.test(t)) return Object.keys(vfs).map(f=>f+" · "+(vfs[f]||"").length+"b").join("\n")||"(пусто)";
+  if(/журнал|log|мутац/i.test(t)){
+    const log=JSON.parse(localStorage.getItem(LOG)||"[]").slice(-8);
+    return log.map(e=>e.ts.slice(11,19)+" "+e.op+" "+e.path+" "+e.sig.slice(0,12)).join("\n")||"пусто";
+  }
+
+  let m=t.match(/(?:создай|сделай|добавь)\s+(?:страницу\s+)?([\w.\-]+)/i);
   if(m){
     const name=safeName(m[1]);
-    thoughts.push("создание файла "+name);
-    const title=name.replace(/\.html$/,"");
-    const body=`<div class="card"><p>Страница «${title}» создана агентом АКСИ Studio.</p><p>${t.replace(/</g,"")}</p></div>`;
-    vfs[name]=pageTemplate(title, body);
-    // link from index if html
+    const g=evolveGenome(t);
+    let inner=`<div class="card"><p>${t.replace(/</g,"").slice(0,400)}</p></div>`;
+    if(/форм/i.test(t)) inner+=`<form class="card" onsubmit="event.preventDefault();alert('ok')"><input style="width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #333;background:#0a0f1a;color:#fff" placeholder="поле"><button class="aksi">OK</button></form>`;
+    if(/кнопк/i.test(t)) inner+=`<p><button class="aksi">Action</button></p>`;
+    await writeFile(name, page(name.replace(/\.html$/,""), inner, g), "create");
     if(vfs["index.html"]&&!vfs["index.html"].includes(name)){
-      vfs["index.html"]=vfs["index.html"].replace("</body>",`<p><a href="${name}">${title}</a></p>\n</body>`);
-      thoughts.push("ссылка в index.html");
+      vfs["index.html"]=vfs["index.html"].replace("</body>",`<p><a href="${name}">${name}</a></p></body>`);
+      await writeFile("index.html", vfs["index.html"], "link");
     }
-    saveVfs();
     openFile(name);
-    const sig=await sign(name+vfs[name].length);
-    return {text:"Создан файл «"+name+"» и обновлён index при необходимости.\n\n"+thoughts.map((x,i)=>"["+(i+1)+"] "+x).join("\n"), sig};
+    return "Создан "+name+" · genome gen "+g.generation;
   }
 
-  // rewrite current / edit
-  if(/(перепиши|измени|обнови|напиши|сделай красивее|rewrite|update)/i.test(t)){
-    thoughts.push("правка текущего "+current);
-    const title=current.replace(/\.html$/,"");
-    let body=`<div class="card"><p>${t.replace(/</g,"").slice(0,500)}</p></div>`;
-    if(/список|list/i.test(t)){
-      body+="<ul>"+Object.keys(vfs).map(f=>"<li>"+f+"</li>").join("")+"</ul>";
-    }
-    if(/кнопк/i.test(t)){
-      body+=`<p><button onclick="alert('AKSI')" style="padding:12px 16px;border-radius:10px;border:none;background:#7c3aed;color:#fff;font-weight:700">Действие</button></p>`;
-    }
-    if(/форм/i.test(t)){
-      body+=`<form class="card" onsubmit="event.preventDefault();alert('demo')"><input placeholder="имя" style="width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #243047;background:#0b1020;color:#fff"><button style="padding:10px 14px;border:none;border-radius:8px;background:#7c3aed;color:#fff">OK</button></form>`;
-    }
-    vfs[current]=pageTemplate(title, body);
-    saveVfs();
+  if(/(перепиши|обнови|измени|красивее)/i.test(t)){
+    const g=evolveGenome(t);
+    let inner=`<div class="card"><p>${t.replace(/</g,"").slice(0,500)}</p></div>`;
+    if(/список|файлы/i.test(t)) inner+="<ul>"+Object.keys(vfs).map(f=>"<li>"+f+"</li>").join("")+"</ul>";
+    await writeFile(current, page(current.replace(/\.html$/,""), inner, g), "update");
     openFile(current);
-    const sig=await sign(current+vfs[current].slice(0,80));
-    return {text:"Обновлён «"+current+"».\n\n"+thoughts.map((x,i)=>"["+(i+1)+"] "+x).join("\n"), sig};
-  }
-
-  // list files
-  if(/(какие файлы|список файлов|ls|list files)/i.test(t)){
-    return {text:"Файлы VFS:\n"+Object.keys(vfs).map(f=>"· "+f+" ("+(vfs[f]||"").length+" б)").join("\n"), sig:await sign("ls")};
-  }
-
-  // help
-  if(/(помощ|help|что умеешь)/i.test(t)){
-    return {text:"Команды:\n· создай страницу имя\n· перепиши / сделай красивее / добавь форму|кнопку|список\n· какие файлы\n· открой index\n\nФайлы живут в localStorage. Экспорт → JSON или HTML. Чтобы выложить на GitHub Pages — скачай и залей вручную или через git.", sig:await sign("help")};
+    return "Обновлён "+current;
   }
 
   m=t.match(/(?:открой|open)\s+([\w.\-]+)/i);
   if(m){
     const name=safeName(m[1]);
-    if(vfs[name]){openFile(name);return {text:"Открыт «"+name+"»", sig:await sign("open"+name)};}
-    return {text:"Нет файла «"+name+"»", sig:await sign("miss")};
+    if(vfs[name]){openFile(name);return "Открыт "+name}
+    return "Нет файла";
   }
 
-  // default: append note card to current page
-  thoughts.push("заметка в "+current);
-  const cur=vfs[current]||pageTemplate(current,"");
-  const note=`\n<div class=\"card\"><strong>Агент</strong><p>${t.replace(/</g,"").slice(0,800)}</p></div>\n`;
-  vfs[current]=cur.includes("</body>")?cur.replace("</body>", note+"</body>"):cur+note;
-  saveVfs();
+  if(/помощ|help/i.test(t)) return "автосбор · синк · создай страницу X · перепиши · genome · журнал · ls";
+
+  // default note
+  const g=evolveGenome(t);
+  const cur=vfs[current]||page(current,"",g);
+  const note=`<div class="card"><strong>Agent</strong><p>${t.replace(/</g,"").slice(0,600)}</p></div>`;
+  await writeFile(current, cur.includes("</body>")?cur.replace("</body>",note+"</body>"):cur+note, "note");
   openFile(current);
-  return {text:"Добавил блок на «"+current+"». Для новой страницы: «создай страницу имя».", sig:await sign("note")};
+  return "Заметка на "+current;
 }
 
 async function send(){
   const inp=document.getElementById("inp");
-  const t=inp.value.trim(); if(!t) return;
-  inp.value="";
-  addMsg("u", t);
-  setStatus("агент…");
+  const t=inp.value.trim(); if(!t)return;
+  inp.value=""; addMsg("u",t); setStatus("…");
   try{
-    const res=await agentWrite(t);
-    addMsg("a", res.text, "sig "+res.sig.slice(0,24)+"… · "+DID.slice(0,28));
+    const out=await agent(t);
+    addMsg("a", out, DID.slice(0,32));
     setStatus("ok", true);
-  }catch(e){
-    addMsg("a", "Ошибка: "+(e.message||e));
-    setStatus("error", false);
-  }
+  }catch(e){ addMsg("a", String(e.message||e)); setStatus("err", false); }
 }
 
 document.getElementById("send").onclick=send;
 document.getElementById("inp").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});
-document.getElementById("btn-save").onclick=()=>{vfs[current]=document.getElementById("code").value;saveVfs();setStatus("сохранено "+current,true);preview()};
-document.getElementById("btn-run").onclick=()=>{vfs[current]=document.getElementById("code").value;preview()};
-document.getElementById("btn-new").onclick=()=>{
-  const n=safeName(prompt("Имя файла","page.html")||"");
-  if(!n)return;
-  if(!vfs[n]) vfs[n]=pageTemplate(n.replace(/\.html$/,""),"<div class=\"card\"><p>Новый файл</p></div>");
-  saveVfs(); openFile(n);
-};
-document.getElementById("btn-del").onclick=()=>{
-  if(current==="index.html") return alert("index.html нельзя удалить");
-  if(!confirm("Удалить "+current+"?"))return;
-  delete vfs[current]; saveVfs(); openFile("index.html");
-};
-document.getElementById("btn-export").onclick=()=>{
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(vfs,null,2)],{type:"application/json"}));
-  a.download="aksi-studio-vfs.json"; a.click();
-};
-document.getElementById("btn-html").onclick=()=>{
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([document.getElementById("code").value],{type:"text/html"}));
-  a.download=current; a.click();
-};
+document.getElementById("btn-save").onclick=async()=>{await writeFile(current, document.getElementById("code").value, "save"); setStatus("saved",true); preview()};
+document.getElementById("btn-run").onclick=preview;
+document.getElementById("btn-new").onclick=async()=>{const n=safeName(prompt("file","page.html")||""); if(!n)return; await writeFile(n, page(n.replace(/\.html$/,""),"<div class=card><p>new</p></div>"), "create"); openFile(n)};
+document.getElementById("btn-del").onclick=async()=>{if(current==="index.html")return alert("no"); if(!confirm("delete "+current))return; delete vfs[current]; saveVfs(); await signMut("delete",current,""); openFile(Object.keys(vfs)[0]||"index.html")};
+document.getElementById("btn-export").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({vfs,genome:loadGenome(),log:JSON.parse(localStorage.getItem(LOG)||"[]")},null,2)],{type:"application/json"}));a.download="aksi-studio-v2.json";a.click()};
+document.getElementById("btn-html").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([document.getElementById("code").value],{type:"text/html"}));a.download=current;a.click()};
+document.getElementById("btn-boot").onclick=boot;
+document.getElementById("btn-sync").onclick=syncSite;
+document.getElementById("btn-genome").onclick=()=>{addMsg("a", JSON.stringify(loadGenome(),null,2))};
 
 loadVfs();
-if(!Object.keys(vfs).length) vfs={...STARTER};
-saveVfs();
-openFile(Object.keys(vfs).includes("index.html")?"index.html":Object.keys(vfs)[0]);
-addMsg("a","Studio готова. Пиши: «создай страницу contacts» или «перепиши, добавь форму».\nФайлы — в VFS браузера. Экспорт, когда нужно выложить.");
+(async()=>{
+  if(!Object.keys(vfs).length) await boot();
+  else openFile(vfs["index.html"]?"index.html":Object.keys(vfs)[0]);
+  setStatus("ready", true);
+  addMsg("a", "Studio v2 online.\n· Автосбор — мини-сайт с модулями\n· Синк — проверка живого контура\n· Signed mutations · Module bus · Genome");
+})();
 })();
 </script>
 </body>
