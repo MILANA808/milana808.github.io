@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Universe</title>
+<meta name="theme-color" content="#070b16">
+<style>
+:root{--bg:#070b16;--card:#121a2f;--ink:#eef2ff;--muted:#8b9bb8;--line:#243047;--acc:#8b5cf6;--cyan:#22d3ee;--ok:#4ade80}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;max-width:720px;margin:0 auto;padding:14px 14px 40px}
+header{padding-top:env(safe-area-inset-top);margin-bottom:16px}
+header a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
+h1{font-size:1.5rem;margin:6px 0 4px}
+.sub{color:var(--muted);font-size:13px;line-height:1.4;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px}
+.repo{display:block;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.repo:last-child{border-bottom:none}
+.repo b{display:block;font-size:14px}
+.repo span{font-size:12px;color:var(--muted)}
+.mods{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mods a{display:block;text-align:center;padding:12px;border-radius:12px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:13px;background:#0b1020}
+.mods a.main{grid-column:1/-1;background:linear-gradient(135deg,#7c3aed,#2563eb);border:none;color:#fff;padding:16px}
+#log{font-size:12px;color:var(--muted);max-height:180px;overflow:auto;font-family:ui-monospace,monospace;line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{border:1px solid var(--line);background:#0b1020;color:var(--ink);border-radius:10px;padding:10px 12px;font-weight:700;cursor:pointer;font-size:13px}
+button.pri{background:var(--acc);border:none;color:#fff}
+#status{font-size:12px;color:var(--ok);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <a href="/">← Хаб</a>
+  <h1>Universe · АКСИ</h1>
+  <p class="sub">Единая карта репозиториев и модулей. Саморазвитие: лог эволюции в IndexedDB, подпись Resonance.</p>
+</header>
+
+<div class="card">
+  <h2>Запуск</h2>
+  <div class="mods">
+    <a class="main" href="/wake/">Агент АКСИ</a>
+    <a href="/aksii-matrix/">MATRIX v1.1</a>
+    <a href="/quantum/">Квант</a>
+    <a href="/nav/">Навигатор</a>
+    <a href="/globe/">Глобус</a>
+    <a href="/matrix/">LLM</a>
+    <a href="/app/">Сеть</a>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Репозитории</h2>
+  <div id="repos">загрузка ecosystem.json…</div>
+</div>
+
+<div class="card">
+  <h2>Саморазвитие</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Каждый запуск пишет событие в локальный лог. Агент читает его как память эволюции.</p>
+  <div class="row">
+    <button type="button" class="pri" id="btn-evolve">Записать шаг эволюции</button>
+    <button type="button" id="btn-export">Экспорт JSON</button>
+    <button type="button" id="btn-clear">Очистить лог</button>
+  </div>
+  <div id="status"></div>
+  <div id="log" style="margin-top:10px"></div>
+</div>
+
+<script>
+const DID = "did:aksi:ed25519:sovereign-2026";
+const SEED = "AKSI_DIMAX_v3_2026";
+const KEY = "AKSI_EVOLVE_V1";
+
+async function sign(text) {
+  const payload = SEED + "|" + text + "|" + new Date().toISOString();
+  const dig = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(payload));
+  return Array.from(new Uint8Array(dig)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+function loadLog() {
+  try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; }
+}
+function saveLog(arr) {
+  localStorage.setItem(KEY, JSON.stringify(arr.slice(-200)));
+}
+
+function renderLog() {
+  const arr = loadLog();
+  document.getElementById("log").textContent = arr.length
+    ? arr.slice().reverse().map(e => e.ts.slice(0,19) + "  " + e.event + "  " + e.sig.slice(0,12) + "…").join("\n")
+    : "(пусто)";
+}
+
+async function evolve(event) {
+  const sig = await sign(event);
+  const entry = { ts: new Date().toISOString(), event, sig, did: DID };
+  const arr = loadLog();
+  arr.push(entry);
+  saveLog(arr);
+  renderLog();
+  document.getElementById("status").textContent = "шаг подписан · " + sig.slice(0, 16) + "…";
+  return entry;
+}
+
+async function boot() {
+  let eco = null;
+  try {
+    eco = await fetch("/ecosystem.json?v=" + Date.now()).then(r => r.json());
+  } catch {}
+  const box = document.getElementById("repos");
+  if (!eco || !eco.roles) {
+    box.textContent = "ecosystem.json недоступен";
+  } else {
+    box.innerHTML = Object.values(eco.roles).map(r =>
+      `<a class="repo" href="${r.url}" target="_blank" rel="noopener"><b>${r.repo}</b><span>${r.role}</span></a>`
+    ).join("");
+  }
+  renderLog();
+  await evolve("universe_boot");
+}
+
+document.getElementById("btn-evolve").onclick = () => evolve("manual_step:" + Date.now());
+document.getElementById("btn-export").onclick = () => {
+  const blob = new Blob([JSON.stringify(loadLog(), null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "aksi-evolution.json";
+  a.click();
+};
+document.getElementById("btn-clear").onclick = () => {
+  localStorage.removeItem(KEY);
+  renderLog();
+  document.getElementById("status").textContent = "лог очищен";
+};
+
+boot();
+</script>
+</body>
+</html>
