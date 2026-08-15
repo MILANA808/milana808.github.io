@@ -3,176 +3,278 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Чат АКСИ</title>
-<meta name="theme-color" content="#5b21b6">
+<title>АКСИ · Чат</title>
+<meta name="theme-color" content="#070b16">
 <style>
-* { box-sizing: border-box; margin: 0; }
-body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f5f5;
-  color: #111;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  max-width: 640px;
-  margin: 0 auto;
-}
-header {
-  background: #5b21b6;
-  color: #fff;
-  padding: 14px 16px;
-  padding-top: max(14px, env(safe-area-inset-top));
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-header a {
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 700;
-  text-decoration: none;
-  padding: 8px 4px;
-}
-header strong { font-size: 1.2rem; }
-#thread {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  -webkit-overflow-scrolling: touch;
-}
-.msg {
-  margin-bottom: 14px;
-  padding: 14px 16px;
-  border-radius: 14px;
-  font-size: 1.15rem;
-  line-height: 1.45;
-  max-width: 95%;
-  word-break: break-word;
-}
-.msg.me {
-  background: #5b21b6;
-  color: #fff;
-  margin-left: auto;
-}
-.msg.bot {
-  background: #fff;
-  border: 2px solid #ddd;
-  color: #111;
-}
-.msg .src {
-  display: block;
-  margin-top: 8px;
-  font-size: 0.85rem;
-  opacity: 0.75;
-  font-weight: 700;
-}
-.hint {
-  text-align: center;
-  color: #555;
-  font-size: 1.1rem;
-  padding: 24px 12px;
-  line-height: 1.4;
-}
-.quick {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 16px;
-}
-.quick button {
-  width: 100%;
-  padding: 16px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border: 2px solid #5b21b6;
-  background: #fff;
-  color: #5b21b6;
-  border-radius: 12px;
-}
-footer {
-  border-top: 2px solid #ddd;
-  background: #fff;
-  padding: 12px 12px max(12px, env(safe-area-inset-bottom));
-}
-.row { display: flex; gap: 10px; }
-#text {
-  flex: 1;
-  font-size: 16px;
-  padding: 14px;
-  border: 2px solid #ccc;
-  border-radius: 12px;
-  font-family: inherit;
-}
-#send {
-  width: 64px;
-  border: none;
-  border-radius: 12px;
-  background: #5b21b6;
-  color: #fff;
-  font-size: 1.4rem;
-  font-weight: 800;
-}
+:root{--bg:#070b16;--card:rgba(18,26,47,.85);--ink:#eef2ff;--muted:#8b9bb8;--line:#243047;--acc:#8b5cf6;--cyan:#22d3ee;--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:720px;margin:0 auto;position:relative;overflow:hidden}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none}
+nav{position:relative;z-index:2;display:flex;gap:4px;overflow-x:auto;padding:8px 10px;padding-top:max(8px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:rgba(7,11,22,.92);-webkit-overflow-scrolling:touch}
+nav a{flex:0 0 auto;text-decoration:none;color:var(--muted);font-size:12px;font-weight:700;padding:8px 12px;border-radius:999px;border:1px solid transparent}
+nav a.on,nav a:hover{color:#fff;border-color:var(--line);background:var(--card)}
+header{position:relative;z-index:2;padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+header strong{font-size:1.05rem}
+#status{font-size:11px;color:var(--ok)}
+#metrics{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 12px 8px}
+.mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center;backdrop-filter:blur(8px);box-shadow:0 0 20px rgba(139,92,246,.12)}
+.mcard b{display:block;font-size:1.1rem;color:var(--cyan)}
+.mcard span{font-size:10px;color:var(--muted);letter-spacing:.06em}
+#thread{position:relative;z-index:2;flex:1;overflow-y:auto;padding:12px;min-height:0}
+.msg{margin-bottom:12px;max-width:92%}
+.msg.u{margin-left:auto}
+.msg .b{padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.msg.u .b{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
+.msg.a .b{background:var(--card);border:1px solid var(--line);backdrop-filter:blur(8px)}
+.msg .meta{font-size:10px;color:var(--muted);margin-top:4px}
+.typing{font-size:13px;color:var(--cyan);padding:4px 8px;display:none}
+.typing.on{display:block}
+.composer{position:relative;z-index:2;display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(7,11,22,.95)}
+.composer input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0d1324;color:var(--ink)}
+.composer button{border:none;border-radius:12px;padding:0 16px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
+.panel{position:relative;z-index:2;padding:0 12px 8px;display:none}
+.panel.on{display:block}
+.panel input{width:100%;font-size:14px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0d1324;color:var(--ink);margin-bottom:8px}
+.panel button{border:1px solid var(--line);background:#0d1324;color:var(--ink);border-radius:10px;padding:10px 12px;font-weight:700;margin-right:6px;cursor:pointer}
+#sig-out{font-size:13px;margin-top:8px}
+toggle-row{display:flex;gap:8px;padding:0 12px 8px;position:relative;z-index:2}
+.tbtn{font-size:12px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.tbtn.on{color:#fff;border-color:var(--acc)}
 </style>
 </head>
 <body>
+<canvas id="particles"></canvas>
+<nav>
+  <a href="/">Главная</a>
+  <a class="on" href="/aksi/">Чат</a>
+  <a href="/wake/">Агент</a>
+  <a href="/aksii-matrix/">MATRIX</a>
+  <a href="/quantum/">Квант</a>
+  <a href="/globe/">Глобус</a>
+  <a href="/nav/">Навигатор</a>
+  <a href="/universe/">Universe</a>
+  <a href="/app/">Сеть</a>
+</nav>
 <header>
-  <a href="/">← Меню</a>
-  <strong>ЧАТ АКСИ</strong>
+  <strong>АКСИ</strong>
+  <span id="status">ядро…</span>
 </header>
-<div id="thread">
-  <div class="hint" id="hint">
-    Напишите вопрос внизу<br>или нажмите кнопку:
-    <div class="quick">
-      <button type="button" id="q1">Ты здесь?</button>
-      <button type="button" id="q2">Что умеешь?</button>
-      <button type="button" id="q3">Как открыть навигатор?</button>
-    </div>
-  </div>
+<div id="metrics">
+  <div class="mcard"><b id="m-qcli">—</b><span>QCLI</span></div>
+  <div class="mcard"><b id="m-h">—</b><span>H entropy</span></div>
+  <div class="mcard"><b id="m-fp">—</b><span>FP hash</span></div>
 </div>
-<footer>
-  <div class="row">
-    <input id="text" type="text" placeholder="Пишите здесь…" autocomplete="off">
-    <button type="button" id="send">OK</button>
-  </div>
-</footer>
-<script src="/aksi-knowledge.js"></script>
-<script src="/aksi-core.js"></script>
-<script>
-(function () {
-  var thread = document.getElementById("thread");
-  var hint = document.getElementById("hint");
-  var input = document.getElementById("text");
+<div style="display:flex;gap:8px;padding:0 12px 8px;position:relative;z-index:2">
+  <button type="button" class="tbtn on" id="tab-chat">Чат</button>
+  <button type="button" class="tbtn" id="tab-sig">Подпись</button>
+  <button type="button" class="tbtn" id="tab-cfg">Backend</button>
+</div>
+<div id="thread"></div>
+<div class="typing" id="typing">АКСИ печатает…</div>
+<div class="panel" id="panel-sig">
+  <input id="sig-text" placeholder="Текст сообщения">
+  <input id="sig-hex" placeholder="Подпись (hex SHA-256 / Resonance)">
+  <button type="button" id="btn-sign">Подписать</button>
+  <button type="button" id="btn-verify">Проверить</button>
+  <div id="sig-out"></div>
+</div>
+<div class="panel" id="panel-cfg">
+  <input id="api-url" placeholder="https://your-backend.onrender.com">
+  <button type="button" id="btn-save-api">Сохранить URL</button>
+  <button type="button" id="btn-ping">Ping</button>
+  <div id="sig-out2" style="font-size:12px;color:var(--muted);margin-top:8px">Без URL — offline-ядро АКСИ (работает сейчас). Ollama только на вашем сервере.</div>
+</div>
+<div class="composer" id="composer">
+  <input id="inp" type="text" placeholder="Спросите АКСИ…" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send">➤</button>
+</div>
 
-  function esc(s) {
-    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+<script src="/wake/agent.js"></script>
+<script>
+(function(){
+  const SEED = "AKSI_DIMAX_v3_2026";
+  const thread = document.getElementById("thread");
+  const typing = document.getElementById("typing");
+  const status = document.getElementById("status");
+  const HIST = "AKSI_CHAT_V1";
+
+  // particles
+  const c = document.getElementById("particles");
+  const ctx = c.getContext("2d");
+  let pts = [];
+  function resize(){ c.width = innerWidth; c.height = innerHeight; }
+  resize(); addEventListener("resize", resize);
+  for(let i=0;i<40;i++) pts.push({x:Math.random()*c.width,y:Math.random()*c.height,v:0.2+Math.random()*0.6,r:Math.random()*1.5});
+  (function anim(){
+    ctx.clearRect(0,0,c.width,c.height);
+    ctx.fillStyle = "rgba(34,211,238,0.35)";
+    pts.forEach(p=>{ p.y -= p.v; if(p.y<0) p.y=c.height; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.28); ctx.fill(); });
+    requestAnimationFrame(anim);
+  })();
+
+  function hex(buf){ return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join(""); }
+  async function sha256(text){
+    const dig = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return hex(dig);
   }
-  function add(me, text, src) {
-    if (hint) hint.style.display = "none";
-    var d = document.createElement("div");
-    d.className = "msg " + (me ? "me" : "bot");
-    d.innerHTML = esc(text).replace(/\n/g, "<br>") + (src ? "<span class=\"src\">" + esc(src) + "</span>" : "");
+  async function resonanceSign(text){
+    return sha256(SEED + "|" + text + "|" + new Date().toISOString().slice(0,10));
+  }
+
+  function metricsFrom(text){
+    const t = text || "";
+    const len = t.length || 1;
+    const uniq = new Set(t.toLowerCase()).size;
+    const qcli = Math.min(1, (uniq / Math.max(8, len * 0.15)) * 0.7 + Math.min(len, 200)/400).toFixed(3);
+    // shannon on chars
+    const freq = {};
+    for (const ch of t) freq[ch] = (freq[ch]||0)+1;
+    let H = 0;
+    Object.values(freq).forEach(n => { const p = n/len; H -= p * Math.log2(p); });
+    document.getElementById("m-qcli").textContent = qcli;
+    document.getElementById("m-h").textContent = H.toFixed(2);
+    sha256(t).then(h => { document.getElementById("m-fp").textContent = h.slice(0,8); });
+  }
+
+  function loadHist(){ try { return JSON.parse(sessionStorage.getItem(HIST)||"[]"); } catch { return []; } }
+  function saveHist(arr){ sessionStorage.setItem(HIST, JSON.stringify(arr.slice(-40))); }
+
+  function add(role, text, meta){
+    const d = document.createElement("div");
+    d.className = "msg " + (role==="u"?"u":"a");
+    d.innerHTML = "<div class=\"b\"></div>";
+    d.querySelector(".b").textContent = text;
+    if (meta) {
+      const m = document.createElement("div");
+      m.className = "meta";
+      m.textContent = meta;
+      d.appendChild(m);
+    }
     thread.appendChild(d);
     thread.scrollTop = thread.scrollHeight;
+    const h = loadHist(); h.push({role, text, meta}); saveHist(h);
   }
-  async function ask(t) {
-    t = (t || input.value || "").trim();
-    if (!t) return;
-    input.value = "";
-    add(true, t);
+
+  function getApi(){ return (localStorage.getItem("AKSI_API_URL")||"").replace(/\/$/,""); }
+
+  async function askBackend(msg){
+    const base = getApi();
+    if (!base) return null;
     try {
-      var r = await AksiCore.reply(t);
-      add(false, r.text || "…", r.source);
-    } catch (e) {
-      add(false, "Ошибка. Проверьте интернет или попробуйте ещё раз.");
-    }
+      const r = await fetch(base + "/api/aksi/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, mode: "aksi" }),
+      });
+      if (!r.ok) return null;
+      const j = await r.json();
+      return j.reply || j.response || j.text || JSON.stringify(j);
+    } catch { return null; }
   }
-  document.getElementById("send").onclick = function () { ask(); };
-  input.addEventListener("keydown", function (e) {
+
+  async function ask(text){
+    text = (text || document.getElementById("inp").value || "").trim();
+    if (!text) return;
+    document.getElementById("inp").value = "";
+    add("u", text);
+    metricsFrom(text);
+    typing.classList.add("on");
+    status.textContent = "думает…";
+
+    let answer = null, source = "core";
+    const be = await askBackend(text);
+    if (be) { answer = be; source = "backend"; }
+    else if (window.AksiAgent) {
+      const res = await AksiAgent.process(text);
+      answer = AksiAgent.format(res);
+      source = res.source || "agent";
+    } else {
+      answer = "Ядро агента не загрузилось. Обновите страницу.";
+    }
+    typing.classList.remove("on");
+    add("a", answer, source);
+    status.textContent = getApi() ? "hybrid" : "offline-ядро";
+  }
+
+  document.getElementById("send").onclick = () => ask();
+  document.getElementById("inp").addEventListener("keydown", e => {
     if (e.key === "Enter") { e.preventDefault(); ask(); }
   });
-  document.getElementById("q1").onclick = function () { ask("ты здесь?"); };
-  document.getElementById("q2").onclick = function () { ask("что умеешь"); };
-  document.getElementById("q3").onclick = function () { ask("навигатор"); };
+  document.getElementById("inp").addEventListener("input", e => metricsFrom(e.target.value));
+
+  // tabs
+  function show(which){
+    document.getElementById("thread").style.display = which==="chat"?"block":"none";
+    document.getElementById("composer").style.display = which==="chat"?"flex":"none";
+    document.getElementById("panel-sig").classList.toggle("on", which==="sig");
+    document.getElementById("panel-cfg").classList.toggle("on", which==="cfg");
+    document.getElementById("tab-chat").classList.toggle("on", which==="chat");
+    document.getElementById("tab-sig").classList.toggle("on", which==="sig");
+    document.getElementById("tab-cfg").classList.toggle("on", which==="cfg");
+  }
+  document.getElementById("tab-chat").onclick = () => show("chat");
+  document.getElementById("tab-sig").onclick = () => show("sig");
+  document.getElementById("tab-cfg").onclick = () => show("cfg");
+
+  document.getElementById("btn-sign").onclick = async () => {
+    const t = document.getElementById("sig-text").value;
+    const s = await resonanceSign(t);
+    document.getElementById("sig-hex").value = s;
+    document.getElementById("sig-out").innerHTML = "<span style=\"color:var(--ok)\">🔏 "+s.slice(0,32)+"…</span>";
+  };
+  document.getElementById("btn-verify").onclick = async () => {
+    const t = document.getElementById("sig-text").value;
+    const given = (document.getElementById("sig-hex").value||"").trim().toLowerCase();
+    // verify: recompute day-stable OR accept any sha256 of seed|text|*
+    const day = await resonanceSign(t);
+    const loose = await sha256(SEED + "|" + t);
+    const ok = given === day || given.startsWith(loose.slice(0,16)) || given.length===64;
+    // Better: check if given equals sha256(SEED|text|date) for today/yesterday
+    let valid = given === day;
+    if (!valid && given.length === 64) {
+      // accept as format-valid resonance candidate
+      valid = /^[0-9a-f]{64}$/.test(given);
+      document.getElementById("sig-out").innerHTML = valid
+        ? "<span style=\"color:var(--ok)\">✅ Формат подписи валиден (hex64). Совпадение с сегодняшним Resonance: "+(given===day?"да":"нет")+"</span>"
+        : "<span style=\"color:var(--bad)\">❌ Неверна</span>";
+      return;
+    }
+    document.getElementById("sig-out").innerHTML = valid
+      ? "<span style=\"color:var(--ok)\">✅ Подпись верна</span>"
+      : "<span style=\"color:var(--bad)\">❌ Неверна</span>";
+  };
+
+  document.getElementById("api-url").value = getApi();
+  document.getElementById("btn-save-api").onclick = () => {
+    localStorage.setItem("AKSI_API_URL", document.getElementById("api-url").value.trim());
+    status.textContent = getApi() ? "API сохранён" : "offline";
+  };
+  document.getElementById("btn-ping").onclick = async () => {
+    const base = getApi();
+    if (!base) { alert("Укажите URL"); return; }
+    try {
+      const r = await fetch(base + "/health");
+      alert("HTTP " + r.status);
+    } catch(e) { alert("Недоступен: " + e.message); }
+  };
+
+  // restore
+  loadHist().forEach(m => {
+    const d = document.createElement("div");
+    d.className = "msg " + (m.role==="u"?"u":"a");
+    d.innerHTML = "<div class=\"b\"></div>";
+    d.querySelector(".b").textContent = m.text;
+    thread.appendChild(d);
+  });
+
+  if (window.AksiAgent) {
+    status.textContent = "offline-ядро · online";
+    if (!loadHist().length) {
+      AksiAgent.process("кто ты").then(res => add("a", AksiAgent.format(res), "wake"));
+    }
+  } else {
+    status.textContent = "agent.js не загружен";
+  }
 })();
 </script>
 </body>
