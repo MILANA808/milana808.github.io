@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0f1a">
 <meta name="description" content="АКСИ — персональный приватный когнитивный ассистент с проверяемой целостностью и происхождением данных">
-<title>АКСИ — Trust Console</title>
+<meta name="application-name" content="АКСИ">
+<title>АКСИ — Sovereign Cognitive System</title>
 <link rel="stylesheet" href="/app.css">
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
@@ -21,38 +22,21 @@
 </aside>
 <main class="main">
 <section class="view on" data-view="home">
-  <div class="hero">
-    <div class="eyebrow">SOVEREIGN COGNITIVE SYSTEM</div><h1>АКСИ</h1>
-    <p>Персональный когнитивный контур, который не просит верить ему на слово. Память, происхождение, целостность и действия разделены и проверяются.</p>
-  </div>
+  <div class="hero"><div class="eyebrow">SOVEREIGN COGNITIVE SYSTEM</div><h1>АКСИ</h1><p>Персональный когнитивный контур, который не просит верить ему на слово. Память, происхождение, целостность и действия разделены и проверяются.</p></div>
   <div class="trust-banner"><div><b>Не доверяй. Проверяй.</b><span>Каждый локальный факт может получить отпечаток, происхождение и запись в журнале.</span></div><button type="button" data-nav="trust">Открыть Trust Console →</button></div>
-  <div class="cards">
-    <div class="card" data-go="chat"><b>Чат</b><span>Когнитивный интерфейс · память · provenance</span></div>
-    <div class="card" data-go="studio"><b>Studio</b><span>VFS · производство страниц</span></div>
-    <div class="card" data-go="status"><b>Статус</b><span>Живой скан модулей</span></div>
-    <div class="card card-accent" data-go="trust"><b>Trust Console</b><span>Hash · ledger · evidence · export</span></div>
-    <div class="card" data-go="lab"><b>Lab</b><span>Крипто · агенты · квант</span></div>
-    <div class="card" data-go="pro"><b>Pro</b><span>Инженерный полигон</span></div>
-  </div>
+  <div class="cards"><div class="card" data-go="chat"><b>Чат</b><span>Когнитивный интерфейс · память · provenance</span></div><div class="card" data-go="studio"><b>Studio</b><span>VFS · производство страниц</span></div><div class="card" data-go="status"><b>Статус</b><span>Живой скан модулей</span></div><div class="card card-accent" data-go="trust"><b>Trust Console</b><span>Hash · ledger · evidence · export</span></div><div class="card" data-go="lab"><b>Lab</b><span>Крипто · агенты · квант</span></div><div class="card" data-go="pro"><b>Pro</b><span>Инженерный полигон</span></div></div>
   <div class="panel-pad mono">did:aksi:ed25519:sovereign-2026<br>local-first · Apache-2.0 · <a href="/LICENSE">LICENSE</a> · <a href="/IDENTITY.md">IDENTITY</a></div>
 </section>
 <section class="view" data-view="chat"><div class="chat-wrap"><div class="toolbar"><button type="button" id="btnClearChat">Очистить</button><button type="button" id="btnProofAnswer">Проверить последний ответ</button><a href="/kernel/">Kernel</a></div><div class="chat-log" id="chatLog"></div><div class="composer"><input id="chatInput" placeholder="Спросите АКСИ или напишите «proof»" enterkeyhint="send" autocomplete="off"><button type="button" id="chatSend">➤</button></div></div></section>
 <section class="view" data-view="studio"><div class="toolbar"><a href="/studio/" target="_blank" rel="noopener">Полный экран</a></div><iframe class="iframe-fill" id="studioFrame" title="Studio"></iframe></section>
 <section class="view" data-view="status"><div class="panel-pad"><div class="toolbar" style="padding-left:0;border:none"><button type="button" id="btnStatus">Сканировать</button><a href="/pulse/">Pulse</a></div><div class="stat-grid"><div class="stat"><b class="ok" id="stOk">—</b><span>OK</span></div><div class="stat"><b class="bad" id="stBad">—</b><span>FAIL</span></div><div class="stat"><b id="stScore">—</b><span>SCORE</span></div></div><table class="table"><thead><tr><th>Путь</th><th>HTTP</th><th>мс</th></tr></thead><tbody id="stBody"><tr><td colspan="3" class="mono">…</td></tr></tbody></table><p class="mono" id="stSig" style="margin-top:12px"></p></div></section>
-<section class="view" data-view="trust">
-  <div class="trust-head"><div><div class="eyebrow">AKSI TRUST CONSOLE</div><h2>Проверяемый когнитивный след</h2><p>Эта консоль работает в браузере. Она не утверждает истинность мысли: она показывает, что именно было вычислено, из чего и какой отпечаток получен.</p></div><div class="trust-orb"><span id="trustState">READY</span></div></div>
-  <div class="panel-pad">
-    <div class="proof-grid"><div class="proof-card"><span>IDENTITY</span><b id="proofDid">did:aksi:ed25519:sovereign-2026</b><small>software identity · не паспорт</small></div><div class="proof-card"><span>LEDGER</span><b id="ledgerCount">0 events</b><small>локальная цепочка в браузере</small></div><div class="proof-card"><span>MODE</span><b>LOCAL-FIRST</b><small>данные журнала не отправляются серверу</small></div></div>
-    <div class="proof-box"><div class="proof-title"><b>Evidence generator</b><button type="button" id="btnNewEvidence">Создать доказательство</button></div><textarea id="evidenceInput" placeholder="Введите утверждение или результат, который хотите зафиксировать…"></textarea><div class="evidence-output" id="evidenceOutput">Здесь появятся canonical payload, SHA-256 и связь с предыдущим событием.</div></div>
-    <div class="proof-box"><div class="proof-title"><b>Cognitive Ledger</b><button type="button" id="btnVerifyLedger">Проверить цепочку</button></div><div id="ledgerList" class="ledger-list"><div class="mono">Пока нет событий.</div></div></div>
-    <div class="toolbar trust-actions"><button type="button" id="btnExportProof">Экспорт журнала</button><button type="button" id="btnClearLedger">Удалить локальный журнал</button><a href="/proof/">Legacy Proof</a></div>
-  </div>
-</section>
+<section class="view" data-view="trust"><div class="trust-head"><div><div class="eyebrow">AKSI TRUST CONSOLE</div><h2>Проверяемый когнитивный след</h2><p>Эта консоль работает в браузере. Она не утверждает истинность мысли: она показывает, что именно было вычислено, из чего и какой отпечаток получен.</p></div><div class="trust-orb"><span id="trustState">READY</span></div></div><div class="panel-pad"><div class="proof-grid"><div class="proof-card"><span>IDENTITY</span><b id="proofDid">did:aksi:ed25519:sovereign-2026</b><small>software identity · не паспорт</small></div><div class="proof-card"><span>LEDGER</span><b id="ledgerCount">0 events</b><small>локальная цепочка в браузере</small></div><div class="proof-card"><span>MODE</span><b>LOCAL-FIRST</b><small>данные журнала не отправляются серверу</small></div></div><div class="proof-box"><div class="proof-title"><b>Evidence generator</b><button type="button" id="btnNewEvidence">Создать доказательство</button></div><textarea id="evidenceInput" placeholder="Введите утверждение или результат, который хотите зафиксировать…"></textarea><div class="evidence-output" id="evidenceOutput">Здесь появятся canonical payload, SHA-256 и связь с предыдущим событием.</div></div><div class="proof-box"><div class="proof-title"><b>Cognitive Ledger</b><button type="button" id="btnVerifyLedger">Проверить цепочку</button></div><div id="ledgerList" class="ledger-list"><div class="mono">Пока нет событий.</div></div></div><div class="toolbar trust-actions"><button type="button" id="btnExportProof">Экспорт журнала</button><button type="button" id="btnClearLedger">Удалить локальный журнал</button><a href="/proof/">Legacy Proof</a></div></div></section>
 <section class="view" data-view="lab"><div class="toolbar"><a href="/lab/" target="_blank" rel="noopener">Полный экран</a><a href="/quantum/">Quantum</a></div><iframe class="iframe-fill" id="labFrame" title="Lab"></iframe></section>
 <section class="view" data-view="pro"><div class="panel-pad"><h2 style="font-size:1.1rem;margin-bottom:8px">Pro · инженерный трек</h2><p class="mono" style="margin-bottom:12px">Не титул. Полигон. Здесь систему можно читать, ломать, проверять и улучшать.</p><div class="card" style="cursor:default;margin-bottom:10px"><b>Сегодня</b><span style="display:block;margin-top:6px">1. Trust → создать evidence<br>2. Status → score и реальные endpoints<br>3. Studio → создать страницу<br>4. Lab → криптографический эксперимент</span></div><div class="card" style="cursor:default;margin-bottom:10px"><b>Неделя</b><span style="display:block;margin-top:6px">· Проверить provenance API<br>· Добавить тест<br>· Найти ложное утверждение и исправить его<br>· Сделать один воспроизводимый эксперимент</span></div><label class="mono" for="proNotes">Заметки (локально)</label><textarea id="proNotes" style="width:100%;min-height:120px;margin-top:6px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0a0f18;color:var(--ink);font-size:14px"></textarea><div class="toolbar" style="padding-left:0;border:none;margin-top:10px"><button type="button" id="btnExportState">Экспорт состояния</button><a href="/sovereign/">Sovereign</a><a href="/contour/">Contour</a></div></div></section>
 </main>
 <nav class="bottom"><button type="button" data-nav="home">Обзор</button><button type="button" data-nav="chat">Чат</button><button type="button" data-nav="studio">Studio</button><button type="button" data-nav="status">Статус</button><button type="button" data-nav="trust">Trust</button><button type="button" data-nav="lab">Lab</button><button type="button" data-nav="pro">Pro</button></nav>
 </div>
 <script src="/app.js"></script>
+<script src="/aksi-runtime.js"></script>
 </body>
 </html>
