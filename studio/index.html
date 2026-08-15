@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ Studio</title>
+<meta name="theme-color" content="#0a0618">
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--ink:#e8eefc;--muted:#8b9bb8;--line:#243047;--acc:#7c3aed;--ok:#4ade80;--bad:#f87171}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:#0d1424}
+header strong{font-size:14px}
+header a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;margin-left:10px}
+.shell{flex:1;display:grid;grid-template-columns:1fr;min-height:0}
+@media(min-width:900px){.shell{grid-template-columns:200px 1fr 320px}}
+.files,.editor,.chat{min-height:0;display:flex;flex-direction:column;border-right:1px solid var(--line)}
+.chat{border-right:none;border-left:1px solid var(--line)}
+.hd{padding:8px 10px;font-size:11px;letter-spacing:.08em;color:var(--muted);border-bottom:1px solid var(--line);background:var(--panel)}
+#filelist{flex:1;overflow:auto;padding:6px}
+#filelist button{display:block;width:100%;text-align:left;border:none;background:transparent;color:var(--ink);padding:10px;border-radius:8px;cursor:pointer;font-size:13px}
+#filelist button.on{background:#1a243c}
+#filelist button:hover{background:#151e32}
+.tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.tools button,header button{border:1px solid var(--line);background:#151e32;color:var(--ink);border-radius:8px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer}
+.tools button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+textarea#code{flex:1;width:100%;border:none;resize:none;background:#0a0f1a;color:#dbe7ff;font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:1.45;padding:12px}
+iframe#preview{flex:1;width:100%;border:none;background:#fff;min-height:180px}
+.split{flex:1;display:grid;grid-template-rows:1fr 1fr;min-height:0}
+#thread{flex:1;overflow:auto;padding:10px;font-size:13px;line-height:1.45}
+.msg{margin-bottom:10px;padding:10px;border-radius:10px;background:#151e32;white-space:pre-wrap;word-break:break-word}
+.msg.u{background:#2a1f4d}
+.msg .m{font-size:10px;color:var(--muted);margin-top:4px}
+.composer{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line);padding-bottom:max(8px,env(safe-area-inset-bottom))}
+.composer input{flex:1;font-size:16px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a0f1a;color:var(--ink)}
+.composer button{border:none;border-radius:10px;padding:0 14px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
+#status{font-size:11px;color:var(--muted)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <strong>АКСИ Studio</strong>
+    <a href="/">хаб</a>
+    <a href="/lab/">lab</a>
+    <a href="/pulse/">pulse</a>
+  </div>
+  <div id="status">vfs ready</div>
+</header>
+<div class="shell">
+  <aside class="files">
+    <div class="hd">ФАЙЛЫ</div>
+    <div class="tools">
+      <button type="button" id="btn-new">+ файл</button>
+      <button type="button" id="btn-del">удалить</button>
+    </div>
+    <div id="filelist"></div>
+  </aside>
+  <section class="editor">
+    <div class="hd">РЕДАКТОР · <span id="cur">—</span></div>
+    <div class="tools">
+      <button type="button" class="pri" id="btn-save">Сохранить</button>
+      <button type="button" id="btn-run">Превью</button>
+      <button type="button" id="btn-export">Экспорт JSON</button>
+      <button type="button" id="btn-html">Скачать HTML</button>
+    </div>
+    <div class="split">
+      <textarea id="code" spellcheck="false" placeholder="код страницы…"></textarea>
+      <iframe id="preview" sandbox="allow-scripts allow-same-origin allow-forms" title="preview"></iframe>
+    </div>
+  </section>
+  <aside class="chat">
+    <div class="hd">АГЕНТ · пишет в VFS</div>
+    <div id="thread"></div>
+    <div class="composer">
+      <input id="inp" placeholder="например: создай страницу about" enterkeyhint="send" autocomplete="off">
+      <button type="button" id="send">➤</button>
+    </div>
+  </aside>
+</div>
+<script>
+(function(){
+"use strict";
+const DB="aksi_studio_vfs_v1";
+const SEED="AKSI_DIMAX_v3_2026";
+const DID="did:aksi:ed25519:sovereign-2026";
+
+const STARTER = {
+  "index.html": `<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>АКСИ</title>\n<style>body{font-family:system-ui;background:#0b1020;color:#e8eefc;margin:0;padding:24px}a{color:#a78bfa}</style>\n</head>\n<body>\n<h1>АКСИ</h1>\n<p>Сайт собирается в Studio. Агент пишет файлы во внутреннюю файловую систему.</p>\n<p><a href="about.html">О системе</a></p>\n</body>\n</html>`,
+  "about.html": `<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>О системе</title>\n<style>body{font-family:system-ui;background:#0b1020;color:#e8eefc;padding:24px}</style>\n</head>\n<body>\n<h1>О системе</h1>\n<p>DID: did:aksi:ed25519:sovereign-2026</p>\n<p>Редактор: /studio/</p>\n</body>\n</html>`
+};
+
+let vfs = {};
+let current = "index.html";
+
+function loadVfs(){
+  try{
+    const j=JSON.parse(localStorage.getItem(DB)||"null");
+    if(j&&typeof j==="object") vfs=j;
+    else vfs={...STARTER};
+  }catch{ vfs={...STARTER}; }
+}
+function saveVfs(){ localStorage.setItem(DB, JSON.stringify(vfs)); }
+
+async function sign(text){
+  const d=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(SEED+"|"+text+"|"+Date.now()));
+  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function renderFiles(){
+  const box=document.getElementById("filelist");
+  box.innerHTML="";
+  Object.keys(vfs).sort().forEach(name=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.textContent=name;
+    if(name===current) b.className="on";
+    b.onclick=()=>openFile(name);
+    box.appendChild(b);
+  });
+}
+
+function openFile(name){
+  current=name;
+  document.getElementById("cur").textContent=name;
+  document.getElementById("code").value=vfs[name]||"";
+  renderFiles();
+  preview();
+}
+
+function preview(){
+  const html=document.getElementById("code").value;
+  const iframe=document.getElementById("preview");
+  iframe.srcdoc=html;
+}
+
+function setStatus(t, ok){
+  const el=document.getElementById("status");
+  el.textContent=t;
+  el.className=ok===false?"bad":ok===true?"ok":"";
+}
+
+function addMsg(role, text, meta){
+  const d=document.createElement("div");
+  d.className="msg "+(role==="u"?"u":"");
+  d.textContent=text;
+  if(meta){const m=document.createElement("div");m.className="m";m.textContent=meta;d.appendChild(m)}
+  document.getElementById("thread").appendChild(d);
+  document.getElementById("thread").scrollTop=1e9;
+}
+
+function safeName(n){
+  n=(n||"page").toLowerCase().replace(/[^a-z0-9._\-]/g,"-").replace(/-+/g,"-");
+  if(!n.endsWith(".html")&&!n.endsWith(".css")&&!n.endsWith(".js")&&!n.endsWith(".md")&&!n.endsWith(".json")) n+=".html";
+  if(n.startsWith(".")||n.includes("..")) n="page.html";
+  return n.slice(0,64);
+}
+
+function pageTemplate(title, body){
+  return `<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${title}</title>\n<style>\nbody{font-family:system-ui,-apple-system,sans-serif;background:#0b1020;color:#e8eefc;margin:0;padding:24px;line-height:1.5}\n a{color:#a78bfa}\n h1{font-size:1.6rem;margin-bottom:12px}\n .card{background:#121a2e;border:1px solid #243047;border-radius:12px;padding:16px;margin:12px 0}\n</style>\n</head>\n<body>\n<h1>${title}</h1>\n${body}\n<p style="margin-top:24px;font-size:12px;color:#8b9bb8"><a href="index.html">← на главную</a></p>\n</body>\n</html>`;
+}
+
+/** Agent: intent → VFS write */
+async function agentWrite(userText){
+  const t=userText.trim();
+  const thoughts=[];
+  thoughts.push("разбор запроса");
+
+  // create page
+  let m=t.match(/(?:создай|сделай|добавь|new|create)\s+(?:страницу\s+)?([\w.\-]+)/i);
+  if(m){
+    const name=safeName(m[1]);
+    thoughts.push("создание файла "+name);
+    const title=name.replace(/\.html$/,"");
+    const body=`<div class="card"><p>Страница «${title}» создана агентом АКСИ Studio.</p><p>${t.replace(/</g,"")}</p></div>`;
+    vfs[name]=pageTemplate(title, body);
+    // link from index if html
+    if(vfs["index.html"]&&!vfs["index.html"].includes(name)){
+      vfs["index.html"]=vfs["index.html"].replace("</body>",`<p><a href="${name}">${title}</a></p>\n</body>`);
+      thoughts.push("ссылка в index.html");
+    }
+    saveVfs();
+    openFile(name);
+    const sig=await sign(name+vfs[name].length);
+    return {text:"Создан файл «"+name+"» и обновлён index при необходимости.\n\n"+thoughts.map((x,i)=>"["+(i+1)+"] "+x).join("\n"), sig};
+  }
+
+  // rewrite current / edit
+  if(/(перепиши|измени|обнови|напиши|сделай красивее|rewrite|update)/i.test(t)){
+    thoughts.push("правка текущего "+current);
+    const title=current.replace(/\.html$/,"");
+    let body=`<div class="card"><p>${t.replace(/</g,"").slice(0,500)}</p></div>`;
+    if(/список|list/i.test(t)){
+      body+="<ul>"+Object.keys(vfs).map(f=>"<li>"+f+"</li>").join("")+"</ul>";
+    }
+    if(/кнопк/i.test(t)){
+      body+=`<p><button onclick="alert('AKSI')" style="padding:12px 16px;border-radius:10px;border:none;background:#7c3aed;color:#fff;font-weight:700">Действие</button></p>`;
+    }
+    if(/форм/i.test(t)){
+      body+=`<form class="card" onsubmit="event.preventDefault();alert('demo')"><input placeholder="имя" style="width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #243047;background:#0b1020;color:#fff"><button style="padding:10px 14px;border:none;border-radius:8px;background:#7c3aed;color:#fff">OK</button></form>`;
+    }
+    vfs[current]=pageTemplate(title, body);
+    saveVfs();
+    openFile(current);
+    const sig=await sign(current+vfs[current].slice(0,80));
+    return {text:"Обновлён «"+current+"».\n\n"+thoughts.map((x,i)=>"["+(i+1)+"] "+x).join("\n"), sig};
+  }
+
+  // list files
+  if(/(какие файлы|список файлов|ls|list files)/i.test(t)){
+    return {text:"Файлы VFS:\n"+Object.keys(vfs).map(f=>"· "+f+" ("+(vfs[f]||"").length+" б)").join("\n"), sig:await sign("ls")};
+  }
+
+  // help
+  if(/(помощ|help|что умеешь)/i.test(t)){
+    return {text:"Команды:\n· создай страницу имя\n· перепиши / сделай красивее / добавь форму|кнопку|список\n· какие файлы\n· открой index\n\nФайлы живут в localStorage. Экспорт → JSON или HTML. Чтобы выложить на GitHub Pages — скачай и залей вручную или через git.", sig:await sign("help")};
+  }
+
+  m=t.match(/(?:открой|open)\s+([\w.\-]+)/i);
+  if(m){
+    const name=safeName(m[1]);
+    if(vfs[name]){openFile(name);return {text:"Открыт «"+name+"»", sig:await sign("open"+name)};}
+    return {text:"Нет файла «"+name+"»", sig:await sign("miss")};
+  }
+
+  // default: append note card to current page
+  thoughts.push("заметка в "+current);
+  const cur=vfs[current]||pageTemplate(current,"");
+  const note=`\n<div class=\"card\"><strong>Агент</strong><p>${t.replace(/</g,"").slice(0,800)}</p></div>\n`;
+  vfs[current]=cur.includes("</body>")?cur.replace("</body>", note+"</body>"):cur+note;
+  saveVfs();
+  openFile(current);
+  return {text:"Добавил блок на «"+current+"». Для новой страницы: «создай страницу имя».", sig:await sign("note")};
+}
+
+async function send(){
+  const inp=document.getElementById("inp");
+  const t=inp.value.trim(); if(!t) return;
+  inp.value="";
+  addMsg("u", t);
+  setStatus("агент…");
+  try{
+    const res=await agentWrite(t);
+    addMsg("a", res.text, "sig "+res.sig.slice(0,24)+"… · "+DID.slice(0,28));
+    setStatus("ok", true);
+  }catch(e){
+    addMsg("a", "Ошибка: "+(e.message||e));
+    setStatus("error", false);
+  }
+}
+
+document.getElementById("send").onclick=send;
+document.getElementById("inp").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});
+document.getElementById("btn-save").onclick=()=>{vfs[current]=document.getElementById("code").value;saveVfs();setStatus("сохранено "+current,true);preview()};
+document.getElementById("btn-run").onclick=()=>{vfs[current]=document.getElementById("code").value;preview()};
+document.getElementById("btn-new").onclick=()=>{
+  const n=safeName(prompt("Имя файла","page.html")||"");
+  if(!n)return;
+  if(!vfs[n]) vfs[n]=pageTemplate(n.replace(/\.html$/,""),"<div class=\"card\"><p>Новый файл</p></div>");
+  saveVfs(); openFile(n);
+};
+document.getElementById("btn-del").onclick=()=>{
+  if(current==="index.html") return alert("index.html нельзя удалить");
+  if(!confirm("Удалить "+current+"?"))return;
+  delete vfs[current]; saveVfs(); openFile("index.html");
+};
+document.getElementById("btn-export").onclick=()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(vfs,null,2)],{type:"application/json"}));
+  a.download="aksi-studio-vfs.json"; a.click();
+};
+document.getElementById("btn-html").onclick=()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([document.getElementById("code").value],{type:"text/html"}));
+  a.download=current; a.click();
+};
+
+loadVfs();
+if(!Object.keys(vfs).length) vfs={...STARTER};
+saveVfs();
+openFile(Object.keys(vfs).includes("index.html")?"index.html":Object.keys(vfs)[0]);
+addMsg("a","Studio готова. Пиши: «создай страницу contacts» или «перепиши, добавь форму».\nФайлы — в VFS браузера. Экспорт, когда нужно выложить.");
+})();
+</script>
+</body>
+</html>
