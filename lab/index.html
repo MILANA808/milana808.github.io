@@ -2,12 +2,328 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0;url=/quantum/">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Лаба → Квант</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Lab</title>
+<meta name="theme-color" content="#0a0618">
+<style>
+:root{--bg:#0a0618;--card:rgba(255,255,255,.05);--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.1);--v:#a855f7;--c:#00f0ff;--ok:#4ade80}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(160deg,#0a0618,#1a0a2e);color:var(--ink);min-height:100dvh;max-width:900px;margin:0 auto;padding:12px 12px 40px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-bottom:12px}
+nav a,nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+nav button.on{border-color:var(--v);box-shadow:0 0 12px rgba(168,85,247,.35)}
+h1{font-size:1.4rem;margin-bottom:6px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:14px;line-height:1.4}
+.panel{display:none}.panel.on{display:block}
+.glass{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input,textarea{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px}
+textarea{min-height:72px;resize:vertical}
+button.go{border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff}
+button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer}
+#agents{display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow:auto}
+.agent{border-left:3px solid var(--c);padding:10px 12px;background:rgba(0,0,0,.25);border-radius:0 12px 12px 0}
+.agent.opt{border-color:#4ade80}.agent.sk{border-color:#f87171}.agent.an{border-color:#60a5fa}.agent.ak{border-color:var(--v)}
+.agent b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.agent p{font-size:14px;line-height:1.45;white-space:pre-wrap}
+#bloch-wrap{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){#bloch-wrap{grid-template-columns:280px 1fr}}
+#bloch{width:100%;max-width:280px;height:280px;border-radius:16px;background:#000;display:block;margin:0 auto}
+.mono{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--muted);line-height:1.5}
+#ui-out{min-height:120px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:rgba(0,0,0,.25)}
+#ui-out .card{background:rgba(168,85,247,.15);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+#ui-out button{margin:4px 4px 0 0}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.metrics div{text-align:center;padding:8px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line)}
+.metrics b{display:block;color:var(--c)}
+.metrics span{font-size:10px;color:var(--muted)}
+</style>
 </head>
-<body style="font-family:system-ui;background:#0b1020;color:#fff;padding:40px;text-align:center">
-<p><a href="/quantum/" style="color:#a78bfa;font-size:1.2rem">Открыть квант-лаб</a></p>
-<script>location.replace('/quantum/');</script>
+<body>
+<nav>
+  <a href="/">← Портал</a>
+  <button type="button" class="on" data-p="agents">Сад агентов</button>
+  <button type="button" data-p="crypto">Крипто</button>
+  <button type="button" data-p="bloch">Bloch</button>
+  <button type="button" data-p="uigen">UI на лету</button>
+  <a href="/matrix/">WebLLM</a>
+  <a href="/aksii-matrix/">MATRIX</a>
+</nav>
+
+<h1>АКСИ Lab</h1>
+<p class="sub">Мультиагенты · Web Crypto · сфера Блоха · генерация UI — всё в браузере, без сервера.</p>
+
+<section class="panel on" id="p-agents">
+  <div class="glass">
+    <textarea id="topic" placeholder="Тема для обсуждения агентами…">Нужен ли ИИ суверенитет данных?</textarea>
+    <div class="row">
+      <button type="button" class="go" id="run-agents">Запустить диалог</button>
+      <button type="button" class="ghost" id="clear-agents">Очистить</button>
+    </div>
+  </div>
+  <div id="agents"></div>
+</section>
+
+<section class="panel" id="p-crypto">
+  <div class="glass">
+    <p class="sub">ECDSA P-256 (Web Crypto) + AES-GCM. Ed25519 — не везде в браузерах, поэтому P-256.</p>
+    <button type="button" class="go" id="gen-keys">Сгенерировать ключи</button>
+    <p class="mono" id="pub"></p>
+    <textarea id="cmsg" placeholder="Сообщение"></textarea>
+    <div class="row">
+      <button type="button" class="go" id="csign">Подписать</button>
+      <button type="button" class="ghost" id="cverify">Проверить</button>
+    </div>
+    <input id="csig" placeholder="Подпись (base64)">
+    <div class="row" style="margin-top:8px">
+      <button type="button" class="go" id="cenc">Зашифровать</button>
+      <button type="button" class="ghost" id="cdec">Расшифровать</button>
+    </div>
+    <input id="ccipher" placeholder="Шифротекст (base64 iv.cipher)">
+    <p class="mono" id="cout"></p>
+  </div>
+</section>
+
+<section class="panel" id="p-bloch">
+  <div class="glass">
+    <div id="bloch-wrap">
+      <canvas id="bloch" width="280" height="280"></canvas>
+      <div>
+        <p class="sub">Состояние кубита из метрик текста (учебная визуализация, не физический кубит).</p>
+        <textarea id="btext" placeholder="Введите текст — сфера Блоха обновится">АКСИ суверенный квантовый контур</textarea>
+        <div class="metrics">
+          <div><b id="bh">—</b><span>θ</span></div>
+          <div><b id="bp">—</b><span>φ</span></div>
+          <div><b id="bq">—</b><span>QCLI</span></div>
+        </div>
+        <p class="mono" id="bstate"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-uigen">
+  <div class="glass">
+    <p class="sub">Опишите UI словами — АКСИ соберёт интерактивный блок (шаблоны + правила, без сервера).</p>
+    <textarea id="uiprompt" placeholder="Например: карточка профиля с кнопкой подписать и полем имени">карточка профиля с именем и кнопкой подписать</textarea>
+    <button type="button" class="go" id="gen-ui">Сгенерировать UI</button>
+    <div id="ui-out"></div>
+  </div>
+</section>
+
+<script>
+(function(){
+"use strict";
+
+/* nav */
+document.querySelector("nav").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-p]");
+  if (!b) return;
+  document.querySelectorAll("nav button").forEach((x) => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".panel").forEach((p) => p.classList.remove("on"));
+  document.getElementById("p-" + b.dataset.p).classList.add("on");
+  if (b.dataset.p === "bloch") drawBloch();
+});
+
+/* ——— Multi-agent garden ——— */
+const ROLES = [
+  { id: "ak", name: "АКСИ", cls: "ak", style: (t) => "Сводно: держим суверенитет данных и проверяемость. По теме «" + t.slice(0,80) + "» — сначала факты, потом вывод." },
+  { id: "opt", name: "Оптимист", cls: "opt", style: (t) => "Верю, что локальный ИИ усилит людей: приватность + скорость. «" + t.slice(0,60) + "» — шанс построить доверие." },
+  { id: "sk", name: "Скептик", cls: "sk", style: (t) => "Осторожно: без аудита и отзыва ключей риск высок. В «" + t.slice(0,60) + "» вижу дыры в ответственности." },
+  { id: "an", name: "Аналитик", cls: "an", style: (t) => "Разбор: (1) данные у пользователя (2) подпись действий (3) опциональный LLM. Тема: " + t.slice(0,70) },
+];
+
+function agentRound(topic, prev) {
+  return ROLES.map((r, i) => {
+    let extra = "";
+    if (prev && prev[i]) extra = "\nУчитывая предыдущий тезис, уточняю позицию.";
+    return { role: r.name, cls: r.cls, text: r.style(topic) + extra };
+  });
+}
+
+document.getElementById("run-agents").onclick = async () => {
+  const topic = document.getElementById("topic").value.trim() || "Суверенитет ИИ";
+  const box = document.getElementById("agents");
+  box.innerHTML = "";
+  let prev = null;
+  for (let round = 1; round <= 2; round++) {
+    const lines = agentRound(topic, prev);
+    prev = lines;
+    for (const line of lines) {
+      await new Promise((r) => setTimeout(r, 320));
+      const d = document.createElement("div");
+      d.className = "agent " + line.cls;
+      d.innerHTML = "<b>Раунд " + round + " · " + line.role + "</b><p></p>";
+      d.querySelector("p").textContent = line.text;
+      box.appendChild(d);
+      box.scrollTop = box.scrollHeight;
+    }
+  }
+  const d = document.createElement("div");
+  d.className = "agent ak";
+  d.innerHTML = "<b>АКСИ · итог</b><p></p>";
+  d.querySelector("p").textContent =
+    "Итог симуляции: суверенитет = локальный контроль + крипто-идентичность + возможность жить без внешнего API. Споры агентов зафиксированы только у вас в браузере.";
+  box.appendChild(d);
+};
+document.getElementById("clear-agents").onclick = () => { document.getElementById("agents").innerHTML = ""; };
+
+/* ——— Crypto lab ——— */
+function b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function unb64(s){ return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
+let kp = null, aesKey = null;
+
+async function genKeys(){
+  kp = await crypto.subtle.generateKey({ name:"ECDSA", namedCurve:"P-256" }, true, ["sign","verify"]);
+  aesKey = await crypto.subtle.generateKey({ name:"AES-GCM", length:256 }, true, ["encrypt","decrypt"]);
+  const spki = await crypto.subtle.exportKey("spki", kp.publicKey);
+  document.getElementById("pub").textContent = "Public SPKI (ECDSA P-256):\n" + b64(spki);
+  document.getElementById("cout").textContent = "Ключи созданы локально (подписи + AES-GCM).";
+}
+document.getElementById("gen-keys").onclick = genKeys;
+
+document.getElementById("csign").onclick = async () => {
+  if (!kp) await genKeys();
+  const msg = document.getElementById("cmsg").value;
+  const sig = await crypto.subtle.sign({ name:"ECDSA", hash:"SHA-256" }, kp.privateKey, new TextEncoder().encode(msg));
+  document.getElementById("csig").value = b64(sig);
+  document.getElementById("cout").textContent = "Подпись ECDSA создана.";
+};
+document.getElementById("cverify").onclick = async () => {
+  if (!kp) { document.getElementById("cout").textContent = "Сначала ключи"; return; }
+  const msg = document.getElementById("cmsg").value;
+  const sig = unb64(document.getElementById("csig").value.trim());
+  const ok = await crypto.subtle.verify({ name:"ECDSA", hash:"SHA-256" }, kp.publicKey, sig, new TextEncoder().encode(msg));
+  document.getElementById("cout").textContent = ok ? "✅ Подпись верна" : "❌ Неверна";
+};
+document.getElementById("cenc").onclick = async () => {
+  if (!aesKey) await genKeys();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, aesKey, new TextEncoder().encode(document.getElementById("cmsg").value));
+  document.getElementById("ccipher").value = b64(iv) + "." + b64(ct);
+  document.getElementById("cout").textContent = "AES-GCM: iv.cipher в base64";
+};
+document.getElementById("cdec").onclick = async () => {
+  if (!aesKey) { document.getElementById("cout").textContent = "Нет ключа сессии"; return; }
+  try {
+    const [ivs, cts] = document.getElementById("ccipher").value.split(".");
+    const pt = await crypto.subtle.decrypt({ name:"AES-GCM", iv: unb64(ivs) }, aesKey, unb64(cts));
+    document.getElementById("cout").textContent = "Расшифровано: " + new TextDecoder().decode(pt);
+  } catch {
+    document.getElementById("cout").textContent = "❌ Не удалось расшифровать (другой ключ сессии?)";
+  }
+};
+
+/* ——— Bloch sphere ——— */
+function metrics(text){
+  const n = Math.max(1, text.length);
+  const freq = {};
+  for (const ch of text) freq[ch] = (freq[ch]||0)+1;
+  let H = 0;
+  Object.values(freq).forEach(c => { const p=c/n; H -= p*Math.log2(p); });
+  const alphabet = Math.min(64, Math.max(2, Object.keys(freq).length));
+  const qcli = H / Math.log2(alphabet);
+  // map to Bloch angles
+  const theta = Math.min(Math.PI, (qcli) * Math.PI);
+  let hash = 0;
+  for (let i=0;i<text.length;i++) hash = (hash*31 + text.charCodeAt(i)) >>> 0;
+  const phi = ((hash % 360) / 360) * Math.PI * 2;
+  return { H, qcli, theta, phi };
+}
+
+function drawBloch(){
+  const canvas = document.getElementById("bloch");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = 110;
+  const text = document.getElementById("btext").value;
+  const m = metrics(text);
+  document.getElementById("bh").textContent = m.theta.toFixed(2);
+  document.getElementById("bp").textContent = m.phi.toFixed(2);
+  document.getElementById("bq").textContent = m.qcli.toFixed(3);
+  // Bloch vector
+  const x = Math.sin(m.theta) * Math.cos(m.phi);
+  const y = Math.sin(m.theta) * Math.sin(m.phi);
+  const z = Math.cos(m.theta);
+  document.getElementById("bstate").textContent =
+    "|ψ⟩ ≈ cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩\n" +
+    "r = (" + x.toFixed(3) + ", " + y.toFixed(3) + ", " + z.toFixed(3) + ")";
+
+  ctx.clearRect(0,0,W,H);
+  // sphere
+  ctx.strokeStyle = "rgba(0,240,255,0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+  // equator ellipse
+  ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.35,0,0,Math.PI*2); ctx.stroke();
+  // axes
+  ctx.strokeStyle = "rgba(255,255,255,0.25)";
+  ctx.beginPath(); ctx.moveTo(cx-R-8,cy); ctx.lineTo(cx+R+8,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,cy-R-8); ctx.lineTo(cx,cy+R+8); ctx.stroke();
+  ctx.fillStyle = "#9ca3c7"; ctx.font = "11px sans-serif";
+  ctx.fillText("|0⟩", cx+4, cy-R-10);
+  ctx.fillText("|1⟩", cx+4, cy+R+16);
+  // state vector (x right, z up, y into screen ~ ellipse)
+  const sx = cx + R * x;
+  const sy = cy - R * z * 0.85 - R * y * 0.2;
+  ctx.strokeStyle = "#a855f7";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(sx,sy); ctx.stroke();
+  ctx.fillStyle = "#00f0ff";
+  ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2); ctx.fill();
+  // glow
+  ctx.strokeStyle = "rgba(168,85,247,0.35)";
+  ctx.beginPath(); ctx.arc(sx,sy,12,0,Math.PI*2); ctx.stroke();
+}
+document.getElementById("btext").addEventListener("input", drawBloch);
+
+/* ——— AI UI gen (template rules) ——— */
+document.getElementById("gen-ui").onclick = () => {
+  const p = (document.getElementById("uiprompt").value || "").toLowerCase();
+  const out = document.getElementById("ui-out");
+  out.innerHTML = "";
+  const root = document.createElement("div");
+  root.className = "card";
+
+  if (/профил|profile|имя|user/.test(p)) {
+    root.innerHTML = "<strong>Профиль</strong><br><input placeholder=\"Имя\" id=\"ui-name\" style=\"margin:8px 0;width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><br>";
+    const btn = document.createElement("button");
+    btn.textContent = "Подписать";
+    btn.className = "go";
+    btn.onclick = async () => {
+      const name = document.getElementById("ui-name").value || "anon";
+      const dig = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("AKSI|"+name));
+      const hex = [...new Uint8Array(dig)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,16);
+      alert("Resonance-like: " + hex);
+    };
+    root.appendChild(btn);
+  } else if (/кнопк|button|магия/.test(p)) {
+    root.innerHTML = "<strong>Панель кнопок</strong><br>";
+    ["Магия","Квант","Агенты"].forEach((label) => {
+      const b = document.createElement("button");
+      b.className = "go";
+      b.style.margin = "4px";
+      b.textContent = label;
+      b.onclick = () => alert(label + " · локальный UI");
+      root.appendChild(b);
+    });
+  } else if (/форм|form|логин/.test(p)) {
+    root.innerHTML = "<strong>Форма</strong><br><input placeholder=\"email\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><input placeholder=\"пароль\" type=\"password\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><br>";
+    const b = document.createElement("button");
+    b.className = "go"; b.textContent = "Войти (demo)";
+    b.onclick = () => alert("Demo only · без сервера");
+    root.appendChild(b);
+  } else if (/метрик|dashboard|дашборд/.test(p)) {
+    root.innerHTML = "<strong>Дашборд метрик</strong><div class=\"metrics\"><div><b>0.72</b><span>QCLI</span></div><div><b>3.1</b><span>H</span></div><div><b>OK</b><span>DID</span></div></div>";
+  } else {
+    root.innerHTML = "<strong>Свободный блок</strong><p style=\"color:#9ca3c7;font-size:13px;margin-top:6px\">Распознаны шаблоны: профиль, кнопки, форма, дашборд. Уточните запрос.</p><p>" + (document.getElementById("uiprompt").value || "") + "</p>";
+  }
+  out.appendChild(root);
+};
+
+drawBloch();
+genKeys();
+})();
+</script>
 </body>
 </html>
