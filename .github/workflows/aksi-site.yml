@@ -20,18 +20,22 @@ jobs:
           test -f app.js
           test -f app.css
           test -f aksi-runtime.js
+          test -f aksi-enhancements.js
           test -f sw.js
           test -f manifest.webmanifest
       - name: JavaScript syntax
         run: |
           node --check app.js
           node --check aksi-runtime.js
+          node --check aksi-enhancements.js
           node --check sw.js
       - name: Required runtime wiring
         run: |
           grep -q 'aksi-runtime.js' index.html
+          grep -q 'aksi-enhancements.js' index.html
           grep -q 'AKSI_COGNITIVE_LEDGER_V1' app.js
           grep -q 'AKSI-EVIDENCE-2' aksi-runtime.js
+          grep -q 'AKSI_LOCAL_MEMORY_V1' aksi-enhancements.js
       - name: Static HTML sanity
         run: |
           grep -q '<html' index.html
