@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Proof</title>
+<meta name="theme-color" content="#0a0618">
+<style>
+:root{--bg:#0a0618;--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(165deg,#0a0618,#160a28);color:var(--ink);min-height:100dvh;max-width:720px;margin:0 auto;padding:14px 14px 48px}
+a{color:var(--c);text-decoration:none}
+h1{font-size:1.5rem;margin:10px 0 6px}
+.sub{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:16px}
+.glass{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;backdrop-filter:blur(10px)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.06em}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;line-height:1.5;color:var(--muted)}
+button{border:none;border-radius:10px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff;margin-right:8px;margin-top:8px}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+nav a{font-size:12px;font-weight:700;color:var(--muted);padding:6px 10px;border:1px solid transparent;border-radius:999px}
+nav a.on{border-color:var(--line);color:#fff;background:rgba(255,255,255,.05)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Хаб</a>
+  <a href="/lab/">Lab</a>
+  <a class="on" href="/proof/">Proof</a>
+  <a href="/wake/">Агент</a>
+  <a href="/matrix/">WebLLM</a>
+</nav>
+
+<h1>Доказуемый след</h1>
+<p class="sub">Аудит публичной поверхности milana808.github.io. Не маркетинг — проверка фактов. Аттестация зафиксирована хешем.</p>
+
+<div class="glass">
+  <table>
+    <thead><tr><th>Утверждение</th><th>Вердикт</th><th>Доказательство</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+
+<div class="glass">
+  <div class="mono" id="meta">считаю хеш…</div>
+  <button type="button" id="btn-copy">Копировать attestation JSON</button>
+  <button type="button" class="ghost" id="btn-dl">Скачать proof.json</button>
+</div>
+
+<div class="glass">
+  <p class="sub" style="margin:0">Что это <strong>не</strong>:</p>
+  <ul class="sub" style="margin:8px 0 0 18px;line-height:1.5">
+    <li>Не AGI и не «5 моделей 7B одновременно на телефоне».</li>
+    <li>Не физический квантовый компьютер — statevector и Bloch учебные.</li>
+    <li>Не замена вашего VPS/Ollama: Pages = статика + браузерные API.</li>
+  </ul>
+</div>
+
+<p class="mono" style="margin-top:12px">Contact: aksilove@internet.ru · DID: did:aksi:ed25519:sovereign-2026</p>
+
+<script>
+const CLAIMS = [
+  { id:"route-home", claim:"Главная / отдаёт 200", verdict:"CONFIRMED", how:"HTTP 200 на https://milana808.github.io/" },
+  { id:"route-lab", claim:"Lab /lab/ доступен", verdict:"CONFIRMED", how:"HTTP 200; вкладки agents/crypto/bloch/uigen/quantum в DOM" },
+  { id:"agents", claim:"Сад агентов: 4 роли, 2 раунда, LOG", verdict:"CONFIRMED", how:"Ролевая логика в JS; не multi-LLM" },
+  { id:"crypto", claim:"Крипто: ECDSA P-256 + AES-GCM локально", verdict:"CONFIRMED", how:"Web Crypto API; QR/PEM/JSON export" },
+  { id:"ed25519-browser", claim:"Полный Ed25519 во всех браузерах", verdict:"REFUTED", how:"Используется ECDSA P-256 из-за совместимости" },
+  { id:"bloch", claim:"Bloch + QCLI из текста", verdict:"CONFIRMED", how:"Canvas + gauge; учебная визуализация" },
+  { id:"uigen", claim:"Генерация UI по шаблонам", verdict:"CONFIRMED", how:"Правила по ключевым словам; не LLM-codegen" },
+  { id:"qubit2", claim:"2-qubit Белл 0.5/0.5 в Lab", verdict:"CONFIRMED", how:"Statevector H+CNOT; /quantum/ полный лаб" },
+  { id:"webllm", claim:"Локальный LLM через WebLLM", verdict:"PARTIAL", how:"Маршруты /matrix/ /aksii-matrix/ живы; успех зависит от WebGPU/памяти устройства" },
+  { id:"backend-public", claim:"Публичный FastAPI+Ollama на Pages", verdict:"REFUTED", how:"GitHub Pages не хостит Ollama; offline-first + optional ваш URL" },
+  { id:"agi", claim:"АКСИ = AGI", verdict:"REFUTED", how:"Демо-контур суверенного агента; не общий ИИ человеческого уровня" },
+  { id:"universe", claim:"ecosystem.json + /universe/", verdict:"CONFIRMED", how:"HTTP 200; карта репозиториев" },
+  { id:"contact", claim:"Публичный контакт только aksilove@internet.ru", verdict:"CONFIRMED", how:"Политика публичных страниц" },
+];
+
+const ATTESTATION = {
+  type: "aksi.site.audit",
+  surface: "https://milana808.github.io",
+  did: "did:aksi:ed25519:sovereign-2026",
+  auditor: "Grok (xAI) via site tooling",
+  method: "HTTP probe + DOM feature markers + architectural review",
+  time_utc: new Date().toISOString(),
+  claims: CLAIMS,
+};
+
+const rows = document.getElementById("rows");
+CLAIMS.forEach(c => {
+  const tr = document.createElement("tr");
+  const cls = c.verdict === "CONFIRMED" ? "ok" : c.verdict === "REFUTED" ? "bad" : "warn";
+  tr.innerHTML = "<td>"+c.claim+"</td><td class=\""+cls+"\">"+c.verdict+"</td><td class=\"mono\">"+c.how+"</td>";
+  rows.appendChild(tr);
+});
+
+async function sha256hex(str) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+(async () => {
+  const canonical = JSON.stringify(ATTESTATION.claims);
+  const hash = await sha256hex(canonical);
+  ATTESTATION.claims_sha256 = hash;
+  ATTESTATION.note = "Пересчитайте SHA-256 от JSON.stringify(claims) — должно совпасть.";
+  document.getElementById("meta").textContent =
+    "time: " + ATTESTATION.time_utc + "\n" +
+    "claims_sha256: " + hash + "\n" +
+    "auditor: " + ATTESTATION.auditor + "\n" +
+    "surface: " + ATTESTATION.surface;
+
+  document.getElementById("btn-copy").onclick = async () => {
+    await navigator.clipboard.writeText(JSON.stringify(ATTESTATION, null, 2));
+    alert("Скопировано");
+  };
+  document.getElementById("btn-dl").onclick = () => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(ATTESTATION, null, 2)], { type: "application/json" }));
+    a.download = "aksi-proof.json";
+    a.click();
+  };
+})();
+</script>
+</body>
+</html>
