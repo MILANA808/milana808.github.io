@@ -6,322 +6,394 @@
 <title>АКСИ · Lab</title>
 <meta name="theme-color" content="#0a0618">
 <style>
-:root{--bg:#0a0618;--card:rgba(255,255,255,.05);--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.1);--v:#a855f7;--c:#00f0ff;--ok:#4ade80}
+:root{--bg:#0a0618;--card:rgba(255,255,255,.05);--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171}
 *{box-sizing:border-box;margin:0}
-body{font-family:system-ui,sans-serif;background:linear-gradient(160deg,#0a0618,#1a0a2e);color:var(--ink);min-height:100dvh;max-width:900px;margin:0 auto;padding:12px 12px 40px}
-nav{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-bottom:12px}
-nav a,nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
-nav button.on{border-color:var(--v);box-shadow:0 0 12px rgba(168,85,247,.35)}
-h1{font-size:1.4rem;margin-bottom:6px}
-.sub{color:var(--muted);font-size:13px;margin-bottom:14px;line-height:1.4}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0a0618,#1a0a2e);color:var(--ink);min-height:100dvh;max-width:920px;margin:0 auto;padding:0 12px 48px;position:relative}
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1}
+topnav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;padding-top:max(10px,env(safe-area-inset-top));-webkit-overflow-scrolling:touch}
+topnav a{flex:0 0 auto;text-decoration:none;color:var(--muted);font-size:12px;font-weight:700;padding:8px 11px;border-radius:999px;border:1px solid transparent}
+topnav a:hover,topnav a.on{color:#fff;border-color:var(--line);background:var(--card)}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:8px 0 14px}
+h1{font-size:1.45rem}
+.sub{color:var(--muted);font-size:13px;line-height:1.4;max-width:36em}
+.mail{font-size:11px;color:var(--c);text-decoration:none}
+tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
+tabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer}
+tabs button.on{border-color:var(--v);box-shadow:0 0 14px rgba(168,85,247,.35)}
 .panel{display:none}.panel.on{display:block}
 .glass{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-input,textarea{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px}
-textarea{min-height:72px;resize:vertical}
-button.go{border:none;border-radius:12px;padding:12px 16px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,textarea,select{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px}
+textarea{min-height:70px;resize:vertical}
+button.go{border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff}
 button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer}
-#agents{display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chips button{border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);border-radius:999px;padding:8px 10px;font-size:12px;cursor:pointer}
+#agents{display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow:auto}
 .agent{border-left:3px solid var(--c);padding:10px 12px;background:rgba(0,0,0,.25);border-radius:0 12px 12px 0}
 .agent.opt{border-color:#4ade80}.agent.sk{border-color:#f87171}.agent.an{border-color:#60a5fa}.agent.ak{border-color:var(--v)}
-.agent b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.agent b{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
 .agent p{font-size:14px;line-height:1.45;white-space:pre-wrap}
-#bloch-wrap{display:grid;grid-template-columns:1fr;gap:12px}
-@media(min-width:700px){#bloch-wrap{grid-template-columns:280px 1fr}}
+#bloch-wrap{display:grid;gap:12px}
+@media(min-width:720px){#bloch-wrap{grid-template-columns:280px 1fr}}
 #bloch{width:100%;max-width:280px;height:280px;border-radius:16px;background:#000;display:block;margin:0 auto}
 .mono{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--muted);line-height:1.5}
-#ui-out{min-height:120px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:rgba(0,0,0,.25)}
-#ui-out .card{background:rgba(168,85,247,.15);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
-#ui-out button{margin:4px 4px 0 0}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .metrics div{text-align:center;padding:8px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line)}
 .metrics b{display:block;color:var(--c)}
 .metrics span{font-size:10px;color:var(--muted)}
+#ui-out{min-height:100px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:rgba(0,0,0,.25)}
+#ui-out .card{background:rgba(168,85,247,.12);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
+#tour{position:fixed;inset:0;z-index:50;background:rgba(5,3,16,.88);display:flex;align-items:center;justify-content:center;padding:20px}
+#tour.hide{display:none}
+#tour .box{max-width:360px;background:#12081f;border:1px solid var(--line);border-radius:16px;padding:18px}
+#tour h2{font-size:1.1rem;margin-bottom:8px}
+#tour p{color:var(--muted);font-size:14px;line-height:1.45;margin-bottom:14px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
 </style>
 </head>
 <body>
-<nav>
-  <a href="/">← Портал</a>
-  <button type="button" class="on" data-p="agents">Сад агентов</button>
-  <button type="button" data-p="crypto">Крипто</button>
-  <button type="button" data-p="bloch">Bloch</button>
-  <button type="button" data-p="uigen">UI на лету</button>
-  <a href="/matrix/">WebLLM</a>
-  <a href="/aksii-matrix/">MATRIX</a>
-</nav>
+<canvas id="fx"></canvas>
+<div class="wrap">
+  <topnav>
+    <a href="/">Хаб</a>
+    <a class="on" href="/lab/">Lab</a>
+    <a href="/wake/">Агент</a>
+    <a href="/aksi/">Чат</a>
+    <a href="/matrix/">WebLLM</a>
+    <a href="/aksii-matrix/">MATRIX</a>
+    <a href="/quantum/">Квант</a>
+    <a href="/universe/">Universe</a>
+  </topnav>
 
-<h1>АКСИ Lab</h1>
-<p class="sub">Мультиагенты · Web Crypto · сфера Блоха · генерация UI — всё в браузере, без сервера.</p>
-
-<section class="panel on" id="p-agents">
-  <div class="glass">
-    <textarea id="topic" placeholder="Тема для обсуждения агентами…">Нужен ли ИИ суверенитет данных?</textarea>
-    <div class="row">
-      <button type="button" class="go" id="run-agents">Запустить диалог</button>
-      <button type="button" class="ghost" id="clear-agents">Очистить</button>
+  <header>
+    <div>
+      <h1>АКСИ Lab</h1>
+      <p class="sub">Агенты · крипто · Bloch · UI. Честно: роли без 5×7B на телефоне. Тяжёлый LLM — в MATRIX.</p>
     </div>
-  </div>
-  <div id="agents"></div>
-</section>
+    <a class="mail" href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
+  </header>
 
-<section class="panel" id="p-crypto">
-  <div class="glass">
-    <p class="sub">ECDSA P-256 (Web Crypto) + AES-GCM. Ed25519 — не везде в браузерах, поэтому P-256.</p>
-    <button type="button" class="go" id="gen-keys">Сгенерировать ключи</button>
-    <p class="mono" id="pub"></p>
-    <textarea id="cmsg" placeholder="Сообщение"></textarea>
-    <div class="row">
-      <button type="button" class="go" id="csign">Подписать</button>
-      <button type="button" class="ghost" id="cverify">Проверить</button>
-    </div>
-    <input id="csig" placeholder="Подпись (base64)">
-    <div class="row" style="margin-top:8px">
-      <button type="button" class="go" id="cenc">Зашифровать</button>
-      <button type="button" class="ghost" id="cdec">Расшифровать</button>
-    </div>
-    <input id="ccipher" placeholder="Шифротекст (base64 iv.cipher)">
-    <p class="mono" id="cout"></p>
-  </div>
-</section>
+  <tabs>
+    <button type="button" class="on" data-p="agents">Сад агентов</button>
+    <button type="button" data-p="crypto">Крипто</button>
+    <button type="button" data-p="bloch">Bloch</button>
+    <button type="button" data-p="uigen">UI на лету</button>
+  </tabs>
 
-<section class="panel" id="p-bloch">
-  <div class="glass">
-    <div id="bloch-wrap">
-      <canvas id="bloch" width="280" height="280"></canvas>
-      <div>
-        <p class="sub">Состояние кубита из метрик текста (учебная визуализация, не физический кубит).</p>
-        <textarea id="btext" placeholder="Введите текст — сфера Блоха обновится">АКСИ суверенный квантовый контур</textarea>
-        <div class="metrics">
-          <div><b id="bh">—</b><span>θ</span></div>
-          <div><b id="bp">—</b><span>φ</span></div>
-          <div><b id="bq">—</b><span>QCLI</span></div>
-        </div>
-        <p class="mono" id="bstate"></p>
+  <section class="panel on" id="p-agents">
+    <div class="glass">
+      <div class="chips" id="presets"></div>
+      <textarea id="topic">Нужен ли ИИ суверенитет данных?</textarea>
+      <div class="row">
+        <button type="button" class="go" id="run-agents">Запустить диалог</button>
+        <button type="button" class="ghost" id="clear-agents">Очистить</button>
       </div>
     </div>
-  </div>
-</section>
+    <div id="agents"></div>
+  </section>
 
-<section class="panel" id="p-uigen">
-  <div class="glass">
-    <p class="sub">Опишите UI словами — АКСИ соберёт интерактивный блок (шаблоны + правила, без сервера).</p>
-    <textarea id="uiprompt" placeholder="Например: карточка профиля с кнопкой подписать и полем имени">карточка профиля с именем и кнопкой подписать</textarea>
-    <button type="button" class="go" id="gen-ui">Сгенерировать UI</button>
-    <div id="ui-out"></div>
+  <section class="panel" id="p-crypto">
+    <div class="glass">
+      <p class="sub">ECDSA P-256 + AES-GCM (Web Crypto). DID: <span id="did">did:aksi:ed25519:sovereign-2026</span></p>
+      <div class="row">
+        <button type="button" class="go" id="gen-keys">Ключи</button>
+        <button type="button" class="ghost" id="export-keys">Экспорт JSON</button>
+        <button type="button" class="ghost" id="import-keys">Импорт JSON</button>
+        <button type="button" class="ghost" id="copy-did">Копировать DID</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+      <p class="mono" id="pub">—</p>
+      <textarea id="cmsg" placeholder="Сообщение"></textarea>
+      <div class="row">
+        <button type="button" class="go" id="csign">Подписать</button>
+        <button type="button" class="ghost" id="cverify">Проверить</button>
+        <button type="button" class="ghost" id="dl-sig">Скачать подпись</button>
+      </div>
+      <input id="csig" placeholder="Подпись base64">
+      <div class="row">
+        <button type="button" class="go" id="cenc">Зашифровать</button>
+        <button type="button" class="ghost" id="cdec">Расшифровать</button>
+      </div>
+      <input id="ccipher" placeholder="iv.cipher base64">
+      <p class="mono" id="cout"></p>
+    </div>
+  </section>
+
+  <section class="panel" id="p-bloch">
+    <div class="glass">
+      <div id="bloch-wrap">
+        <canvas id="bloch" width="280" height="280"></canvas>
+        <div>
+          <p class="sub">Учебная визуализация: метрики текста → θ, φ на сфере Блоха (не физический кубит).</p>
+          <textarea id="btext">АКСИ суверенный квантовый контур</textarea>
+          <div class="metrics">
+            <div><b id="bh">—</b><span>θ</span></div>
+            <div><b id="bp">—</b><span>φ</span></div>
+            <div><b id="bq">—</b><span>QCLI</span></div>
+          </div>
+          <p class="mono" id="bstate"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-uigen">
+    <div class="glass">
+      <div class="chips">
+        <button type="button" data-ui="карточка профиля с именем и кнопкой подписать">Профиль</button>
+        <button type="button" data-ui="форма логина email пароль">Форма</button>
+        <button type="button" data-ui="дашборд метрик">Дашборд</button>
+        <button type="button" data-ui="панель кнопок магия квант агенты">Кнопки</button>
+      </div>
+      <textarea id="uiprompt">карточка профиля с именем и кнопкой подписать</textarea>
+      <div class="row">
+        <button type="button" class="go" id="gen-ui">Сгенерировать UI</button>
+        <button type="button" class="ghost" id="export-ui">Экспорт HTML</button>
+      </div>
+      <div id="ui-out"></div>
+    </div>
+  </section>
+</div>
+
+<div id="tour">
+  <div class="box">
+    <h2>Тур по Lab</h2>
+    <p>1) Сад агентов — 4 роли, 2 раунда.<br>2) Крипто — ключи, подпись, AES.<br>3) Bloch — текст → сфера.<br>4) UI на лету — описание → блок.<br>LLM 7B — в MATRIX (WebGPU).</p>
+    <button type="button" class="go" id="tour-ok">Понятно</button>
   </div>
-</section>
+</div>
 
 <script>
 (function(){
 "use strict";
-
-/* nav */
-document.querySelector("nav").addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-p]");
-  if (!b) return;
-  document.querySelectorAll("nav button").forEach((x) => x.classList.toggle("on", x === b));
-  document.querySelectorAll(".panel").forEach((p) => p.classList.remove("on"));
-  document.getElementById("p-" + b.dataset.p).classList.add("on");
-  if (b.dataset.p === "bloch") drawBloch();
-});
-
-/* ——— Multi-agent garden ——— */
-const ROLES = [
-  { id: "ak", name: "АКСИ", cls: "ak", style: (t) => "Сводно: держим суверенитет данных и проверяемость. По теме «" + t.slice(0,80) + "» — сначала факты, потом вывод." },
-  { id: "opt", name: "Оптимист", cls: "opt", style: (t) => "Верю, что локальный ИИ усилит людей: приватность + скорость. «" + t.slice(0,60) + "» — шанс построить доверие." },
-  { id: "sk", name: "Скептик", cls: "sk", style: (t) => "Осторожно: без аудита и отзыва ключей риск высок. В «" + t.slice(0,60) + "» вижу дыры в ответственности." },
-  { id: "an", name: "Аналитик", cls: "an", style: (t) => "Разбор: (1) данные у пользователя (2) подпись действий (3) опциональный LLM. Тема: " + t.slice(0,70) },
-];
-
-function agentRound(topic, prev) {
-  return ROLES.map((r, i) => {
-    let extra = "";
-    if (prev && prev[i]) extra = "\nУчитывая предыдущий тезис, уточняю позицию.";
-    return { role: r.name, cls: r.cls, text: r.style(topic) + extra };
-  });
+const DID = "did:aksi:ed25519:sovereign-2026";
+if (!window.crypto || !crypto.subtle) {
+  document.body.insertAdjacentHTML("afterbegin", "<p class=\"bad\" style=\"padding:12px\">Web Crypto API недоступен в этом браузере.</p>");
 }
 
+/* particles */
+const c = document.getElementById("fx"); const ctx = c.getContext("2d"); let pts = [];
+function resize(){ c.width = innerWidth; c.height = innerHeight; }
+resize(); addEventListener("resize", resize);
+for (let i=0;i<42;i++) pts.push({x:Math.random()*c.width,y:Math.random()*c.height,v:.12+Math.random()*.45,r:Math.random()*1.6});
+(function loop(){
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle="rgba(0,240,255,.2)";
+  pts.forEach(p=>{ p.y-=p.v; if(p.y<0){p.y=c.height;p.x=Math.random()*c.width;} ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.28); ctx.fill(); });
+  requestAnimationFrame(loop);
+})();
+
+/* tabs */
+document.querySelector("tabs").onclick = (e) => {
+  const b = e.target.closest("button[data-p]"); if (!b) return;
+  document.querySelectorAll("tabs button").forEach(x => x.classList.toggle("on", x===b));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("on"));
+  document.getElementById("p-"+b.dataset.p).classList.add("on");
+  if (b.dataset.p==="bloch") drawBloch(true);
+};
+
+/* tour */
+if (!localStorage.getItem("AKSI_LAB_TOUR_V1")) {
+  document.getElementById("tour").classList.remove("hide");
+} else document.getElementById("tour").classList.add("hide");
+document.getElementById("tour-ok").onclick = () => {
+  localStorage.setItem("AKSI_LAB_TOUR_V1", "1");
+  document.getElementById("tour").classList.add("hide");
+};
+
+/* agents */
+const PRESETS = [
+  "Нужен ли ИИ суверенитет данных?",
+  "Может ли агент жить без OpenAI?",
+  "Зачем DID для ИИ?",
+  "Квант-лаб vs реальный квантовый компьютер",
+];
+const presets = document.getElementById("presets");
+PRESETS.forEach(t => {
+  const b = document.createElement("button"); b.type="button"; b.textContent=t.slice(0,28)+(t.length>28?"…":"");
+  b.onclick = () => { document.getElementById("topic").value = t; };
+  presets.appendChild(b);
+});
+const ROLES = [
+  { name:"АКСИ", cls:"ak", fn:t=>"Сводно: суверенитет = локальный контроль + подпись действий. Тема: «"+t.slice(0,70)+"»." },
+  { name:"Оптимист", cls:"opt", fn:t=>"Локальный ИИ даст приватность и скорость. «"+t.slice(0,60)+"» — шанс на доверие." },
+  { name:"Скептик", cls:"sk", fn:t=>"Без аудита и revoke ключей риск высок. В «"+t.slice(0,60)+"» дыры ответственности." },
+  { name:"Аналитик", cls:"an", fn:t=>"Слои: (1) данные у user (2) WebCrypto (3) optional LLM. Тема: "+t.slice(0,70) },
+];
 document.getElementById("run-agents").onclick = async () => {
-  const topic = document.getElementById("topic").value.trim() || "Суверенитет ИИ";
-  const box = document.getElementById("agents");
-  box.innerHTML = "";
-  let prev = null;
-  for (let round = 1; round <= 2; round++) {
-    const lines = agentRound(topic, prev);
-    prev = lines;
-    for (const line of lines) {
-      await new Promise((r) => setTimeout(r, 320));
+  const topic = document.getElementById("topic").value.trim() || PRESETS[0];
+  const box = document.getElementById("agents"); box.innerHTML = "";
+  for (let round=1; round<=2; round++) {
+    for (const r of ROLES) {
+      await new Promise(res => setTimeout(res, 280));
       const d = document.createElement("div");
-      d.className = "agent " + line.cls;
-      d.innerHTML = "<b>Раунд " + round + " · " + line.role + "</b><p></p>";
-      d.querySelector("p").textContent = line.text;
-      box.appendChild(d);
-      box.scrollTop = box.scrollHeight;
+      d.className = "agent "+r.cls;
+      d.innerHTML = "<b>Раунд "+round+" · "+r.name+"</b><p></p>";
+      d.querySelector("p").textContent = r.fn(topic) + (round===2?"\nУточняю с учётом других ролей.":"");
+      box.appendChild(d); box.scrollTop = 1e9;
     }
   }
   const d = document.createElement("div");
   d.className = "agent ak";
-  d.innerHTML = "<b>АКСИ · итог</b><p></p>";
-  d.querySelector("p").textContent =
-    "Итог симуляции: суверенитет = локальный контроль + крипто-идентичность + возможность жить без внешнего API. Споры агентов зафиксированы только у вас в браузере.";
+  d.innerHTML = "<b>АКСИ · итог</b><p>Симуляция ролей (не 5×7B). Тяжёлый LLM — /matrix/. Вывод: суверенитет = ключи + локальность + проверяемость.</p>";
   box.appendChild(d);
 };
-document.getElementById("clear-agents").onclick = () => { document.getElementById("agents").innerHTML = ""; };
+document.getElementById("clear-agents").onclick = () => document.getElementById("agents").innerHTML = "";
 
-/* ——— Crypto lab ——— */
+/* crypto */
 function b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
-function unb64(s){ return Uint8Array.from(atob(s), c => c.charCodeAt(0)); }
-let kp = null, aesKey = null;
+function unb64(s){ return Uint8Array.from(atob(s), c=>c.charCodeAt(0)); }
+let kp=null, aesKey=null, lastSpki="", lastPkcs8="";
 
 async function genKeys(){
-  kp = await crypto.subtle.generateKey({ name:"ECDSA", namedCurve:"P-256" }, true, ["sign","verify"]);
-  aesKey = await crypto.subtle.generateKey({ name:"AES-GCM", length:256 }, true, ["encrypt","decrypt"]);
-  const spki = await crypto.subtle.exportKey("spki", kp.publicKey);
-  document.getElementById("pub").textContent = "Public SPKI (ECDSA P-256):\n" + b64(spki);
-  document.getElementById("cout").textContent = "Ключи созданы локально (подписи + AES-GCM).";
+  kp = await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
+  aesKey = await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt","decrypt"]);
+  lastSpki = b64(await crypto.subtle.exportKey("spki", kp.publicKey));
+  lastPkcs8 = b64(await crypto.subtle.exportKey("pkcs8", kp.privateKey));
+  document.getElementById("pub").textContent = "Public SPKI:\n"+lastSpki;
+  document.getElementById("cout").textContent = "Ключи ECDSA P-256 + AES-GCM созданы локально.";
 }
 document.getElementById("gen-keys").onclick = genKeys;
-
+document.getElementById("export-keys").onclick = () => {
+  if (!lastSpki) { document.getElementById("cout").textContent="Сначала ключи"; return; }
+  const blob = new Blob([JSON.stringify({ did:DID, curve:"P-256", spki:lastSpki, pkcs8:lastPkcs8, ts:new Date().toISOString() }, null, 2)], {type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="aksi-keys.json"; a.click();
+};
+document.getElementById("import-keys").onclick = () => document.getElementById("import-file").click();
+document.getElementById("import-file").onchange = async (e) => {
+  try {
+    const j = JSON.parse(await e.target.files[0].text());
+    kp = {
+      publicKey: await crypto.subtle.importKey("spki", unb64(j.spki), {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]),
+      privateKey: await crypto.subtle.importKey("pkcs8", unb64(j.pkcs8), {name:"ECDSA", namedCurve:"P-256"}, true, ["sign"]),
+    };
+    lastSpki=j.spki; lastPkcs8=j.pkcs8;
+    aesKey = await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt","decrypt"]);
+    document.getElementById("pub").textContent="Imported SPKI:\n"+lastSpki;
+    document.getElementById("cout").textContent="Ключи импортированы. AES-сессия новая.";
+  } catch(err){ document.getElementById("cout").textContent="Ошибка импорта: "+err.message; }
+};
+document.getElementById("copy-did").onclick = async () => {
+  await navigator.clipboard.writeText(DID);
+  document.getElementById("cout").textContent="DID скопирован";
+};
 document.getElementById("csign").onclick = async () => {
   if (!kp) await genKeys();
   const msg = document.getElementById("cmsg").value;
-  const sig = await crypto.subtle.sign({ name:"ECDSA", hash:"SHA-256" }, kp.privateKey, new TextEncoder().encode(msg));
+  const sig = await crypto.subtle.sign({name:"ECDSA", hash:"SHA-256"}, kp.privateKey, new TextEncoder().encode(msg));
   document.getElementById("csig").value = b64(sig);
-  document.getElementById("cout").textContent = "Подпись ECDSA создана.";
+  document.getElementById("cout").innerHTML = "<span class=\"ok\">Подпись создана</span>";
 };
 document.getElementById("cverify").onclick = async () => {
-  if (!kp) { document.getElementById("cout").textContent = "Сначала ключи"; return; }
-  const msg = document.getElementById("cmsg").value;
-  const sig = unb64(document.getElementById("csig").value.trim());
-  const ok = await crypto.subtle.verify({ name:"ECDSA", hash:"SHA-256" }, kp.publicKey, sig, new TextEncoder().encode(msg));
-  document.getElementById("cout").textContent = ok ? "✅ Подпись верна" : "❌ Неверна";
+  if (!kp) { document.getElementById("cout").textContent="Нет ключей"; return; }
+  try {
+    const ok = await crypto.subtle.verify({name:"ECDSA", hash:"SHA-256"}, kp.publicKey, unb64(document.getElementById("csig").value.trim()), new TextEncoder().encode(document.getElementById("cmsg").value));
+    document.getElementById("cout").innerHTML = ok?"<span class=\"ok\">✅ Верна</span>":"<span class=\"bad\">❌ Неверна</span>";
+  } catch { document.getElementById("cout").innerHTML="<span class=\"bad\">Ошибка проверки</span>"; }
+};
+document.getElementById("dl-sig").onclick = () => {
+  const payload = { did:DID, message:document.getElementById("cmsg").value, signature:document.getElementById("csig").value, alg:"ECDSA-P256-SHA256", ts:new Date().toISOString() };
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"})); a.download="aksi-signature.json"; a.click();
 };
 document.getElementById("cenc").onclick = async () => {
   if (!aesKey) await genKeys();
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, aesKey, new TextEncoder().encode(document.getElementById("cmsg").value));
-  document.getElementById("ccipher").value = b64(iv) + "." + b64(ct);
-  document.getElementById("cout").textContent = "AES-GCM: iv.cipher в base64";
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, aesKey, new TextEncoder().encode(document.getElementById("cmsg").value));
+  document.getElementById("ccipher").value = b64(iv)+"."+b64(ct);
+  document.getElementById("cout").textContent="AES-GCM ok";
 };
 document.getElementById("cdec").onclick = async () => {
-  if (!aesKey) { document.getElementById("cout").textContent = "Нет ключа сессии"; return; }
+  if (!aesKey) { document.getElementById("cout").textContent="Нет AES-ключа сессии"; return; }
   try {
-    const [ivs, cts] = document.getElementById("ccipher").value.split(".");
-    const pt = await crypto.subtle.decrypt({ name:"AES-GCM", iv: unb64(ivs) }, aesKey, unb64(cts));
-    document.getElementById("cout").textContent = "Расшифровано: " + new TextDecoder().decode(pt);
-  } catch {
-    document.getElementById("cout").textContent = "❌ Не удалось расшифровать (другой ключ сессии?)";
-  }
+    const [ivs,cts]=document.getElementById("ccipher").value.split(".");
+    const pt=await crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(ivs)}, aesKey, unb64(cts));
+    document.getElementById("cout").textContent="Расшифровано: "+new TextDecoder().decode(pt);
+  } catch { document.getElementById("cout").innerHTML="<span class=\"bad\">Не расшифровано</span>"; }
 };
 
-/* ——— Bloch sphere ——— */
+/* bloch smooth */
+let cur={theta:0.8,phi:1.2}, target={theta:0.8,phi:1.2};
 function metrics(text){
-  const n = Math.max(1, text.length);
-  const freq = {};
-  for (const ch of text) freq[ch] = (freq[ch]||0)+1;
-  let H = 0;
-  Object.values(freq).forEach(c => { const p=c/n; H -= p*Math.log2(p); });
-  const alphabet = Math.min(64, Math.max(2, Object.keys(freq).length));
-  const qcli = H / Math.log2(alphabet);
-  // map to Bloch angles
-  const theta = Math.min(Math.PI, (qcli) * Math.PI);
-  let hash = 0;
-  for (let i=0;i<text.length;i++) hash = (hash*31 + text.charCodeAt(i)) >>> 0;
-  const phi = ((hash % 360) / 360) * Math.PI * 2;
-  return { H, qcli, theta, phi };
+  const n=Math.max(1,text.length); const freq={};
+  for(const ch of text) freq[ch]=(freq[ch]||0)+1;
+  let H=0; Object.values(freq).forEach(c=>{const p=c/n;H-=p*Math.log2(p);});
+  const alphabet=Math.min(64,Math.max(2,Object.keys(freq).length));
+  const qcli=H/(Math.log2(alphabet)||1);
+  const theta=Math.min(Math.PI, qcli*Math.PI);
+  let hash=0; for(let i=0;i<text.length;i++) hash=(hash*31+text.charCodeAt(i))>>>0;
+  const phi=((hash%360)/360)*Math.PI*2;
+  return {H,qcli,theta,phi};
 }
-
-function drawBloch(){
-  const canvas = document.getElementById("bloch");
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  const cx = W/2, cy = H/2, R = 110;
-  const text = document.getElementById("btext").value;
-  const m = metrics(text);
-  document.getElementById("bh").textContent = m.theta.toFixed(2);
-  document.getElementById("bp").textContent = m.phi.toFixed(2);
-  document.getElementById("bq").textContent = m.qcli.toFixed(3);
-  // Bloch vector
-  const x = Math.sin(m.theta) * Math.cos(m.phi);
-  const y = Math.sin(m.theta) * Math.sin(m.phi);
-  const z = Math.cos(m.theta);
-  document.getElementById("bstate").textContent =
-    "|ψ⟩ ≈ cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩\n" +
-    "r = (" + x.toFixed(3) + ", " + y.toFixed(3) + ", " + z.toFixed(3) + ")";
-
+function paintBloch(){
+  cur.theta += (target.theta-cur.theta)*0.12;
+  cur.phi += (target.phi-cur.phi)*0.12;
+  const canvas=document.getElementById("bloch"); const ctx=canvas.getContext("2d");
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2,R=110;
+  const x=Math.sin(cur.theta)*Math.cos(cur.phi);
+  const y=Math.sin(cur.theta)*Math.sin(cur.phi);
+  const z=Math.cos(cur.theta);
   ctx.clearRect(0,0,W,H);
-  // sphere
-  ctx.strokeStyle = "rgba(0,240,255,0.35)";
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle="rgba(0,240,255,.35)"; ctx.lineWidth=1.5;
   ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
-  // equator ellipse
   ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.35,0,0,Math.PI*2); ctx.stroke();
-  // axes
-  ctx.strokeStyle = "rgba(255,255,255,0.25)";
-  ctx.beginPath(); ctx.moveTo(cx-R-8,cy); ctx.lineTo(cx+R+8,cy); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx,cy-R-8); ctx.lineTo(cx,cy+R+8); ctx.stroke();
-  ctx.fillStyle = "#9ca3c7"; ctx.font = "11px sans-serif";
-  ctx.fillText("|0⟩", cx+4, cy-R-10);
-  ctx.fillText("|1⟩", cx+4, cy+R+16);
-  // state vector (x right, z up, y into screen ~ ellipse)
-  const sx = cx + R * x;
-  const sy = cy - R * z * 0.85 - R * y * 0.2;
-  ctx.strokeStyle = "#a855f7";
-  ctx.lineWidth = 2.5;
+  ctx.strokeStyle="rgba(255,255,255,.2)";
+  ctx.beginPath(); ctx.moveTo(cx-R-6,cy); ctx.lineTo(cx+R+6,cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx,cy-R-6); ctx.lineTo(cx,cy+R+6); ctx.stroke();
+  ctx.fillStyle="#9ca3c7"; ctx.font="11px sans-serif";
+  ctx.fillText("|0⟩",cx+6,cy-R-8); ctx.fillText("|1⟩",cx+6,cy+R+14);
+  ctx.fillText("X",cx+R+4,cy-4); ctx.fillText("Z",cx+4,cy-R-4);
+  const sx=cx+R*x, sy=cy-R*z*0.85-R*y*0.2;
+  ctx.strokeStyle="#a855f7"; ctx.lineWidth=2.5;
   ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(sx,sy); ctx.stroke();
-  ctx.fillStyle = "#00f0ff";
-  ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2); ctx.fill();
-  // glow
-  ctx.strokeStyle = "rgba(168,85,247,0.35)";
-  ctx.beginPath(); ctx.arc(sx,sy,12,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle="#00f0ff"; ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2); ctx.fill();
+  requestAnimationFrame(paintBloch);
+}
+function drawBloch(){
+  const text=document.getElementById("btext").value;
+  const m=metrics(text);
+  target.theta=m.theta; target.phi=m.phi;
+  document.getElementById("bh").textContent=m.theta.toFixed(2);
+  document.getElementById("bp").textContent=m.phi.toFixed(2);
+  document.getElementById("bq").textContent=m.qcli.toFixed(3);
+  document.getElementById("bstate").textContent="r≈("+Math.sin(m.theta)*Math.cos(m.phi).toFixed(3)+", "+Math.sin(m.theta)*Math.sin(m.phi).toFixed(3)+", "+Math.cos(m.theta).toFixed(3)+")";
 }
 document.getElementById("btext").addEventListener("input", drawBloch);
+paintBloch(); drawBloch();
 
-/* ——— AI UI gen (template rules) ——— */
-document.getElementById("gen-ui").onclick = () => {
-  const p = (document.getElementById("uiprompt").value || "").toLowerCase();
-  const out = document.getElementById("ui-out");
-  out.innerHTML = "";
-  const root = document.createElement("div");
-  root.className = "card";
-
-  if (/профил|profile|имя|user/.test(p)) {
-    root.innerHTML = "<strong>Профиль</strong><br><input placeholder=\"Имя\" id=\"ui-name\" style=\"margin:8px 0;width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><br>";
-    const btn = document.createElement("button");
-    btn.textContent = "Подписать";
-    btn.className = "go";
-    btn.onclick = async () => {
-      const name = document.getElementById("ui-name").value || "anon";
-      const dig = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("AKSI|"+name));
-      const hex = [...new Uint8Array(dig)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,16);
-      alert("Resonance-like: " + hex);
-    };
+/* UI gen */
+let lastUIHtml="";
+function genUI(p){
+  p=(p||"").toLowerCase();
+  const root=document.createElement("div"); root.className="card";
+  if(/профил|имя|user/.test(p)){
+    root.innerHTML="<strong>Профиль</strong><br><input id=\"ui-name\" placeholder=\"Имя\" style=\"width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\">";
+    const btn=document.createElement("button"); btn.className="go"; btn.textContent="Подписать";
+    btn.onclick=async()=>{ const n=document.getElementById("ui-name").value||"anon"; const d=await crypto.subtle.digest("SHA-256", new TextEncoder().encode("AKSI|"+n)); alert([...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,16)); };
     root.appendChild(btn);
-  } else if (/кнопк|button|магия/.test(p)) {
-    root.innerHTML = "<strong>Панель кнопок</strong><br>";
-    ["Магия","Квант","Агенты"].forEach((label) => {
-      const b = document.createElement("button");
-      b.className = "go";
-      b.style.margin = "4px";
-      b.textContent = label;
-      b.onclick = () => alert(label + " · локальный UI");
-      root.appendChild(b);
-    });
-  } else if (/форм|form|логин/.test(p)) {
-    root.innerHTML = "<strong>Форма</strong><br><input placeholder=\"email\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><input placeholder=\"пароль\" type=\"password\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><br>";
-    const b = document.createElement("button");
-    b.className = "go"; b.textContent = "Войти (demo)";
-    b.onclick = () => alert("Demo only · без сервера");
-    root.appendChild(b);
-  } else if (/метрик|dashboard|дашборд/.test(p)) {
-    root.innerHTML = "<strong>Дашборд метрик</strong><div class=\"metrics\"><div><b>0.72</b><span>QCLI</span></div><div><b>3.1</b><span>H</span></div><div><b>OK</b><span>DID</span></div></div>";
+  } else if(/форм|логин|email/.test(p)){
+    root.innerHTML="<strong>Форма</strong><br><input placeholder=\"email\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><input type=\"password\" placeholder=\"пароль\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><br><button class=\"go\" type=\"button\">Войти (demo)</button>";
+    root.querySelector("button").onclick=()=>alert("Demo · без сервера");
+  } else if(/метрик|дашборд|dashboard/.test(p)){
+    root.innerHTML="<strong>Дашборд</strong><div class=\"metrics\"><div><b>0.72</b><span>QCLI</span></div><div><b>3.1</b><span>H</span></div><div><b>OK</b><span>DID</span></div></div>";
+  } else if(/кнопк|магия|панель/.test(p)){
+    root.innerHTML="<strong>Панель</strong><br>";
+    ["Магия","Квант","Агенты"].forEach(l=>{ const b=document.createElement("button"); b.className="go"; b.style.margin="4px"; b.textContent=l; b.onclick=()=>alert(l); root.appendChild(b); });
   } else {
-    root.innerHTML = "<strong>Свободный блок</strong><p style=\"color:#9ca3c7;font-size:13px;margin-top:6px\">Распознаны шаблоны: профиль, кнопки, форма, дашборд. Уточните запрос.</p><p>" + (document.getElementById("uiprompt").value || "") + "</p>";
+    root.innerHTML="<strong>Блок</strong><p style=\"color:#9ca3c7;font-size:13px;margin-top:6px\">Шаблоны: профиль, форма, дашборд, кнопки.</p>";
   }
-  out.appendChild(root);
+  const out=document.getElementById("ui-out"); out.innerHTML=""; out.appendChild(root);
+  lastUIHtml=root.innerHTML;
+  try{ const h=JSON.parse(localStorage.getItem("AKSI_UI_HIST")||"[]"); h.push({t:new Date().toISOString(),p}); localStorage.setItem("AKSI_UI_HIST", JSON.stringify(h.slice(-20))); }catch{}
+}
+document.getElementById("gen-ui").onclick=()=>genUI(document.getElementById("uiprompt").value);
+document.querySelectorAll("[data-ui]").forEach(b=>b.onclick=()=>{ document.getElementById("uiprompt").value=b.dataset.ui; genUI(b.dataset.ui); });
+document.getElementById("export-ui").onclick=()=>{
+  const html="<!DOCTYPE html><html><body style=\"font-family:system-ui;background:#0a0618;color:#fff;padding:20px\"><div>"+lastUIHtml+"</div></body></html>";
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([html],{type:"text/html"})); a.download="aksi-ui.html"; a.click();
 };
 
-drawBloch();
 genKeys();
 })();
 </script>
