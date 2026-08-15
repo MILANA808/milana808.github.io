@@ -1,66 +1,206 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Разбудить АКСИ</title>
-<meta name="theme-color" content="#f5f0ff"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Пробуждение</title>
+<meta name="theme-color" content="#0b1020">
 <style>
-:root{--bg:#f5f0ff;--ink:#1e1433;--muted:#6b5f85;--violet:#7c3aed;--line:#e4d9f7}
+:root{--bg:#070b16;--card:#121a2f;--ink:#eef2ff;--muted:#8b9bb8;--line:#243047;--acc:#8b5cf6;--cyan:#22d3ee;--ok:#4ade80}
 *{box-sizing:border-box;margin:0}
-body{min-height:100dvh;background:var(--bg);color:var(--ink);font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
-.orb{width:120px;height:120px;border-radius:50%;margin:0 auto 24px;background:radial-gradient(circle at 30% 30%,#fff,#c4b5fd 40%,#7c3aed 70%,#4c1d95);box-shadow:0 0 0 1px #e4d9f7,0 12px 40px rgba(124,58,237,.35);animation:breathe 3s ease-in-out infinite}
-@keyframes breathe{50%{transform:scale(1.05);box-shadow:0 0 0 1px #e4d9f7,0 16px 50px rgba(124,58,237,.5)}}
-h1{font-size:1.75rem;margin-bottom:8px}
-p{color:var(--muted);font-size:16px;line-height:1.5;max-width:28ch;margin:0 auto 28px}
-button{font:inherit;font-size:18px;font-weight:700;border:none;border-radius:16px;padding:16px 28px;background:var(--violet);color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(124,58,237,.35)}
-button:disabled{opacity:.5}
-.status{margin-top:20px;font-size:14px;color:var(--muted);min-height:1.4em}
-a{color:var(--violet);font-weight:600;text-decoration:none}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+#boot{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;transition:opacity .4s}
+#boot.hide{opacity:0;pointer-events:none}
+#boot h1{font-size:1.6rem;margin-bottom:8px;background:linear-gradient(90deg,#fff,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent}
+#boot p{color:var(--muted);font-size:14px;max-width:18em;line-height:1.4;margin-bottom:14px}
+.bar{width:min(260px,80vw);height:6px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:5%;background:linear-gradient(90deg,var(--acc),var(--cyan));transition:width .2s}
+#boot-msg{margin-top:10px;font-size:12px;color:var(--muted)}
+header{padding:max(10px,env(safe-area-inset-top)) 14px 8px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+header a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
+header strong{font-size:1rem}
+#status{font-size:11px;color:var(--ok)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:#0d1324}
+.tools a,.tools button{
+  border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;
+  padding:8px 12px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;
+}
+#thread{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.msg{margin-bottom:14px;max-width:95%}
+.msg.u{margin-left:auto}
+.msg .b{padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.u .b{background:var(--acc);color:#fff}
+.msg.a .b{background:var(--card);border:1px solid var(--line)}
+.msg .m{font-size:10px;color:var(--muted);margin-top:4px}
+.composer{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#0d1324}
+.composer input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.composer button{width:52px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-weight:800;font-size:1.1rem}
 </style>
 </head>
 <body>
-  <div class="orb" id="orb"></div>
-  <h1>Разбудить АКСИ</h1>
-  <p>Один раз на этом устройстве: включим память, личную сеть и отметим, что агент на связи.</p>
-  <button type="button" id="btn">Проснуться</button>
-  <div class="status" id="st"></div>
-  <p style="margin-top:28px;font-size:14px"><a href="/aksi/">Сразу в чат →</a></p>
-<script>
-(function(){
-  var KEY_NET="AKSI_NET_V1";
-  var KEY_AWAKE="AKSI_AWAKE_V1";
-  var st=document.getElementById("st");
-  var btn=document.getElementById("btn");
-  if(localStorage.getItem(KEY_AWAKE)){
-    st.textContent="Уже просыпалась на этом устройстве.";
-    btn.textContent="В чат";
-    btn.onclick=function(){location.href="/aksi/";};
+<div id="boot">
+  <h1>Пробуждение АКСИ</h1>
+  <p>Восстанавливаю агент из Milana-backend: ядро, Resonance, инструменты…</p>
+  <div class="bar"><i id="bar"></i></div>
+  <div id="boot-msg">старт</div>
+</div>
+
+<header>
+  <div>
+    <a href="/">← Хаб</a>
+    <strong> АКСИ</strong>
+  </div>
+  <span id="status">…</span>
+</header>
+
+<div class="tools">
+  <button type="button" id="btn-llm">⚡ Быстрая LLM</button>
+  <a href="/quantum/">Квант</a>
+  <a href="/globe/">Глобус</a>
+  <a href="/nav/">Навигатор</a>
+  <a href="/matrix/">MATRIX</a>
+  <a href="/app/">Сеть</a>
+</div>
+
+<div id="thread"></div>
+<div class="composer">
+  <input id="inp" type="text" placeholder="Спросите АКСИ…" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send">➤</button>
+</div>
+
+<script src="/wake/agent.js"></script>
+<script type="module">
+let engine = null;
+let llmReady = false;
+
+const thread = document.getElementById("thread");
+const status = document.getElementById("status");
+const bar = document.getElementById("bar");
+const bootMsg = document.getElementById("boot-msg");
+
+function setBoot(t, p) {
+  bootMsg.textContent = t;
+  if (p != null) bar.style.width = Math.min(100, p) + "%";
+  status.textContent = t;
+}
+
+function add(role, text, meta) {
+  const d = document.createElement("div");
+  d.className = "msg " + (role === "u" ? "u" : "a");
+  const b = document.createElement("div");
+  b.className = "b";
+  b.textContent = text;
+  d.appendChild(b);
+  if (meta) {
+    const m = document.createElement("div");
+    m.className = "m";
+    m.textContent = meta;
+    d.appendChild(m);
+  }
+  thread.appendChild(d);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+async function loadFastLLM() {
+  setBoot("Подключаю быструю модель…", 10);
+  try {
+    const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
+    // Small & fast instruct model
+    const model = "SmolLM2-360M-Instruct-q4f16_1-MLC";
+    engine = await CreateMLCEngine(model, {
+      initProgressCallback: (r) => {
+        const p = Math.round((r.progress || 0) * 100);
+        setBoot((r.text || "LLM") + " · " + p + "%", p);
+      },
+    });
+    llmReady = true;
+    setBoot("LLM готова · быстро", 100);
+    add("a", "Локальная быстрая модель подключена (SmolLM2-360M). Можно спрашивать свободно.", "webllm");
+    return true;
+  } catch (e) {
+    // try even smaller fallback id
+    try {
+      const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
+      engine = await CreateMLCEngine("Qwen2.5-0.5B-Instruct-q4f16_1-MLC", {
+        initProgressCallback: (r) => {
+          const p = Math.round((r.progress || 0) * 100);
+          setBoot("Qwen0.5B · " + p + "%", p);
+        },
+      });
+      llmReady = true;
+      setBoot("LLM готова (Qwen 0.5B)", 100);
+      add("a", "Запасная быстрая модель Qwen2.5-0.5B подключена.", "webllm");
+      return true;
+    } catch (e2) {
+      engine = null;
+      llmReady = false;
+      setBoot("Без LLM · ядро АКСИ активно", 100);
+      return false;
+    }
+  }
+}
+
+async function llmFn(userText) {
+  if (!engine) return null;
+  const system =
+    "Ты — АКСИ, суверенный ИИ. Отвечай по-русски, кратко и по делу. Не выдавай себя за ChatGPT. Если не знаешь — скажи прямо.";
+  const reply = await engine.chat.completions.create({
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: userText },
+    ],
+    temperature: 0.7,
+    max_tokens: 256,
+  });
+  return reply.choices?.[0]?.message?.content || null;
+}
+
+async function ask(text) {
+  text = (text || document.getElementById("inp").value || "").trim();
+  if (!text) return;
+  document.getElementById("inp").value = "";
+  add("u", text);
+  status.textContent = "думаю…";
+  const result = await AksiAgent.process(text, {
+    llm: llmReady ? llmFn : null,
+  });
+  add("a", AksiAgent.format(result), result.source + " · sig " + (result.sig || "").slice(0, 12));
+  status.textContent = llmReady ? "АКСИ + LLM" : "АКСИ ядро";
+}
+
+document.getElementById("send").onclick = () => ask();
+document.getElementById("inp").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); ask(); }
+});
+document.getElementById("btn-llm").onclick = async () => {
+  document.getElementById("boot").classList.remove("hide");
+  document.getElementById("boot").style.display = "flex";
+  await loadFastLLM();
+  setTimeout(() => {
+    document.getElementById("boot").classList.add("hide");
+  }, 400);
+};
+
+// AUTO WAKE
+(async () => {
+  setBoot("Агент AksiAgent…", 20);
+  if (!window.AksiAgent) {
+    setBoot("Ошибка: agent.js", 100);
     return;
   }
-  btn.onclick=function(){
-    btn.disabled=true;
-    st.textContent="1/3 · открываю личную сеть…";
-    setTimeout(function(){
-      var pages=[];
-      try{pages=JSON.parse(localStorage.getItem(KEY_NET)||"[]");if(!Array.isArray(pages))pages=[];}catch(e){}
-      var wake={
-        id:"wake_"+Date.now().toString(36),
-        title:"Пробуждение АКСИ",
-        tags:["пробуждение","старт","акси","жива"],
-        body:"Агент АКСИ пробуждён на этом устройстве.\nВремя: "+new Date().toLocaleString("ru-RU")+"\nDID: did:aksi:ed25519:sovereign-2026\nРежим: сначала личная сеть, потом мир.\nСтатус: на связи.",
-        ts:Date.now()
-      };
-      pages.unshift(wake);
-      localStorage.setItem(KEY_NET,JSON.stringify(pages));
-      st.textContent="2/3 · записываю состояние…";
-      setTimeout(function(){
-        localStorage.setItem(KEY_AWAKE,JSON.stringify({at:Date.now(),did:"did:aksi:ed25519:sovereign-2026"}));
-        st.textContent="3/3 · готова. Перехожу в чат…";
-        setTimeout(function(){location.href="/aksi/?awake=1";},700);
-      },500);
-    },400);
-  };
+  setBoot("Resonance · DID…", 40);
+  const hello = await AksiAgent.process("кто ты");
+  setBoot("Инструменты: quantum, net, wiki…", 70);
+  // Try fast LLM in background lightly — optional auto
+  setBoot("Ядро готово", 100);
+  document.getElementById("boot").classList.add("hide");
+  status.textContent = "АКСИ на связи";
+  add("a", AksiAgent.format(hello), "wake");
+  add(
+    "a",
+    "Проснулась.\n• «запутанность» — quantum tool\n• «что умеешь» — возможности\n• ⚡ Быстрая LLM — локальная модель\n• Квант / Глобус / Навигатор — как в демо AKSIWORLD",
+    "system"
+  );
 })();
 </script>
 </body>
