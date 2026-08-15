@@ -14,7 +14,7 @@ def test_chain_detects_payload_tampering():
     second = IntegrityEvent.create(1, "response", {"text": "world"}, first.event_hash)
     assert verify_chain([first, second]) == (True, "chain valid")
 
-    tampered = IntegrityEvent(2, second.event_type, {"text": "altered"}, second.previous_hash, second.content_hash, second.event_hash)
+    tampered = IntegrityEvent(1, second.event_type, {"text": "altered"}, second.previous_hash, second.content_hash, second.event_hash)
     ok, reason = verify_chain([first, tampered])
     assert not ok
-    assert "sequence mismatch" in reason
+    assert "content tampering" in reason
