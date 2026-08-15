@@ -22,6 +22,8 @@ jobs:
           test -f aksi-runtime.js
           test -f aksi-enhancements.js
           test -f aksi-control-plane.js
+          test -f aksi-quantum-runtime.js
+          test -f aksi-quantum-chat.js
           test -f integrations/aksi-unified.js
           test -f integrations/repository-registry.json
           test -f sw.js
@@ -41,6 +43,8 @@ jobs:
           node --check aksi-runtime.js
           node --check aksi-enhancements.js
           node --check aksi-control-plane.js
+          node --check aksi-quantum-runtime.js
+          node --check aksi-quantum-chat.js
           node --check integrations/aksi-unified.js
           node --check sw.js
           node --check aksii-matrix/src/main.js
@@ -56,11 +60,21 @@ jobs:
       - name: Required runtime wiring
         run: |
           grep -q 'aksi-runtime.js' index.html
+          grep -q 'aksi-quantum-runtime.js' index.html
+          grep -q 'aksi-quantum-chat.js' index.html
           grep -q 'aksi-enhancements.js' index.html
           grep -q 'AKSI_COGNITIVE_LEDGER_V1' app.js
           grep -q 'AKSI-EVIDENCE-2' aksi-runtime.js
           grep -q 'AKSI_LOCAL_MEMORY_V1' aksi-enhancements.js
           grep -q 'aksi-control-plane.js' index.html
+      - name: Quantum inference contract
+        run: |
+          grep -q 'AKSI-QUANTUM-INFERENCE-1' aksi-quantum-runtime.js
+          grep -q 'local-state-vector' aksi-quantum-runtime.js
+          grep -q 'applyCNOT' aksi-quantum-runtime.js
+          grep -q 'AKSIQuantum.run' aksi-quantum-chat.js
+          grep -q 'aksi:quantum-inference' aksi-quantum-chat.js
+          grep -q 'classical-browser-simulator' aksi-quantum-runtime.js
       - name: Matrix wiring and safety
         run: |
           grep -q 'matrix.css' aksii-matrix/index.html
