@@ -4,61 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#05070d">
-<meta name="description" content="АКСИ MATRIX — понятный локальный интерфейс для диалога, памяти и квантовых экспериментов.">
-<title>АКСИ MATRIX — когнитивная лаборатория</title>
+<meta name="description" content="АКСИ MATRIX — понятный локальный интерфейс для диалога, памяти, доказательств и вычислительных экспериментов.">
+<title>АКСИ MATRIX — cognitive cockpit</title>
 <link rel="stylesheet" href="./matrix.css">
-<style>.msg{margin:0 0 14px;max-width:92%}.msg.u{margin-left:auto}.msg .b{padding:13px 14px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}.msg.u .b{background:linear-gradient(135deg,#7b61ff,#5c75ff)}.msg.a .b{background:#0d1425;border:1px solid var(--line)}.msg .m{font-size:10px;color:var(--muted);margin:5px 4px 0}.empty{padding:28px 8px;color:var(--muted);text-align:center;line-height:1.6}.statusbar{padding:9px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}.statusbar strong{color:var(--green)}.hidden{display:none!important}</style>
+<style>
+.msg{margin:0 0 14px;max-width:92%}.msg.u{margin-left:auto}.msg .b{padding:13px 14px;border-radius:16px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}.msg.u .b{background:linear-gradient(135deg,#7b61ff,#5c75ff)}.msg.a .b{background:#0d1425;border:1px solid var(--line)}.msg .m{font-size:10px;color:var(--muted);margin:5px 4px 0}.empty{padding:28px 8px;color:var(--muted);text-align:center;line-height:1.6}.statusbar{padding:9px 14px;border-bottom:1px solid var(--line);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}.statusbar strong{color:var(--green)}.hidden{display:none!important}
+.mission{margin:0 0 18px;padding:22px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,rgba(123,97,255,.12),rgba(82,230,165,.05));box-shadow:0 20px 60px rgba(0,0,0,.22)}.mission .eyebrow{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#a99bff}.mission h2{margin:7px 0 9px;font-size:clamp(25px,6vw,42px);line-height:1.02}.mission p{margin:0;color:#b8c1d8;line-height:1.6;max-width:780px}.principles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}.principle{padding:13px;border:1px solid var(--line);border-radius:16px;background:#0b1020}.principle b{display:block;font-size:13px;margin-bottom:5px}.principle span{font-size:11px;color:var(--muted);line-height:1.45}.future{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.future .tool{min-height:100px}.future .tag{display:inline-block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8e83ff;margin-bottom:7px}.why{padding:16px;border-left:2px solid #7b61ff;background:rgba(123,97,255,.06);border-radius:0 14px 14px 0;color:#b8c1d8;line-height:1.55;font-size:13px}@media(max-width:800px){.principles,.future{grid-template-columns:1fr 1fr}}@media(max-width:520px){.principles,.future{grid-template-columns:1fr}.mission{padding:18px}}
+</style>
 </head>
 <body>
 <div class="shell">
 <header class="top">
-  <div class="brand"><div class="orb" aria-hidden="true"></div><div><h1>АКСИ MATRIX</h1><div class="sub">Понятный вход в ядро АКСИ: диалог · память · квантовые эксперименты</div></div></div>
+  <div class="brand"><div class="orb" aria-hidden="true"></div><div><h1>АКСИ MATRIX</h1><div class="sub">Когнитивный cockpit: диалог · память · доказательства · эксперименты</div></div></div>
   <div class="state"><span class="dot" id="stateDot"></span><span id="status">загрузка…</span></div>
 </header>
-<main class="grid">
-  <section class="card chat" aria-label="Диалог с АКСИ">
-    <div class="cardhead"><h2>Диалог</h2><p class="hint">Пишите обычными словами. АКСИ работает локально, когда это возможно. Вопросы о кубитах и запутанности запускают эксперимент без облачной модели.</p></div>
-    <div class="statusbar"><span>Режим: <strong id="mode">local-first</strong></span><span id="historyState">память: проверка…</span></div>
-    <div id="thread" class="thread"><div class="empty">Здесь появится разговор.<br>Попробуйте: <b>«Что такое квантовая запутанность?»</b> или <b>«покажи магию»</b>.</div></div>
-    <div class="composer">
-      <input id="inp" type="text" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off" aria-label="Сообщение">
-      <button class="btn" type="button" id="mic" title="Голосовой ввод" aria-label="Голосовой ввод">🎙</button>
-      <button class="btn magic" type="button" id="magic">✦ Магия</button>
-      <button class="btn primary" type="button" id="send" aria-label="Отправить">➤</button>
+<main>
+  <section class="mission" aria-label="Миссия АКСИ">
+    <div class="eyebrow">AKSI / MISSION</div>
+    <h2>Не проси человека верить машине.</h2>
+    <p>Построй систему, которая показывает, <b>что она знает, откуда это взялось, что было вычислено и что ещё нельзя считать доказанным.</b> MATRIX — центральная точка этой архитектуры.</p>
+    <div class="principles">
+      <div class="principle"><b>LOCAL-FIRST</b><span>Личные данные и память остаются на устройстве, если сеть не нужна.</span></div>
+      <div class="principle"><b>PROVENANCE</b><span>Каждый важный результат имеет происхождение и статус.</span></div>
+      <div class="principle"><b>VERIFY</b><span>Целостность можно проверять независимо, а не принимать на веру.</span></div>
+      <div class="principle"><b>HUMAN CONTROL</b><span>Сеть, модели и расширенные возможности включаются явно.</span></div>
     </div>
   </section>
 
-  <aside class="side">
-    <section class="card quantum" aria-label="Квантовый эксперимент">
-      <div class="cardhead"><h2>Квантовая лаборатория</h2><p class="hint">Справа показан интерактивный Quirk. Кнопка «Магия» создаёт состояние Белла и объясняет полученные вероятности.</p></div>
-      <div class="frame"><iframe id="quirk" title="Интерактивный квантовый симулятор Quirk" src="https://algassert.com/quirk#circuit=%7B%22cols%22%3A%5B%5B%22H%22%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%5D%7D" loading="lazy" allow="fullscreen"></iframe></div>
-      <div id="probs" class="prob">Ожидаю запуск эксперимента.</div>
+  <section class="why"><b>Что на самом деле строится:</b> не очередной чат-бот, а персональная когнитивная среда. В ней разговор, память, вычисления, инструменты и доказательства работают как одна система. На этом слое позже могут появляться локальные модели, внешние модели, агенты и приложения — но ядро остаётся независимым от конкретного поставщика AI.</section>
+
+  <div class="grid">
+    <section class="card chat" aria-label="Диалог с АКСИ">
+      <div class="cardhead"><h2>Диалог</h2><p class="hint">Пишите обычными словами. АКСИ использует локальный режим, когда он доступен. Вопросы о квантовых состояниях могут запускать эксперимент.</p></div>
+      <div class="statusbar"><span>Режим: <strong id="mode">local-first</strong></span><span id="historyState">память: проверка…</span></div>
+      <div id="thread" class="thread"><div class="empty">Здесь появится разговор.<br>Попробуйте: <b>«Что такое квантовая запутанность?»</b> или <b>«покажи магию»</b>.</div></div>
+      <div class="composer"><input id="inp" type="text" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off" aria-label="Сообщение"><button class="btn" type="button" id="mic" title="Голосовой ввод" aria-label="Голосовой ввод">🎙</button><button class="btn magic" type="button" id="magic">✦ Магия</button><button class="btn primary" type="button" id="send" aria-label="Отправить">➤</button></div>
     </section>
 
-    <section class="card">
-      <div class="cardhead"><h2>Что здесь происходит</h2><p class="hint">Без научного жаргона: три простых слоя.</p></div>
-      <div class="tools">
-        <div class="tool"><b>🧠 Диалог</b><p>Вопрос → локальная модель, если она доступна, иначе понятный резервный режим.</p></div>
-        <div class="tool"><b>⚛️ Квант</b><p>Реальный симулятор показывает состояние кубитов и результаты эксперимента.</p></div>
-        <div class="tool"><b>💾 Память</b><p>История диалога хранится в браузере и не требует аккаунта.</p></div>
-        <div class="tool"><b>🔐 Честность</b><p>Криптография может подтвердить целостность записи, но не превращает ошибку в истину.</p></div>
-      </div>
-      <div class="explain">
-        <details open><summary>Что такое «локально»?</summary><p>Когда браузер поддерживает WebLLM, небольшая модель загружается на устройство. Если модель недоступна, сайт не делает вид, что она работает.</p></details>
-        <details><summary>Что такое запутанность?</summary><p>Это квантовая связь состояний: после подготовки пары Белла измерения двух кубитов оказываются статистически связаны.</p></details>
-        <details><summary>Почему это называется Matrix?</summary><p>Потому что интерфейс объединяет несколько режимов в одном месте: разговор, память, вычисление и эксперимент.</p></details>
-      </div>
-    </section>
-  </aside>
+    <aside class="side">
+      <section class="card quantum" aria-label="Квантовый эксперимент">
+        <div class="cardhead"><h2>Квантовая лаборатория</h2><p class="hint">Интерактивный эксперимент. «Магия» создаёт состояние Белла и объясняет результат.</p></div>
+        <div class="frame"><iframe id="quirk" title="Интерактивный квантовый симулятор Quirk" src="https://algassert.com/quirk#circuit=%7B%22cols%22%3A%5B%5B%22H%22%5D%2C%5B%22%E2%80%A2%22%2C%22X%22%5D%5D%7D" loading="lazy" allow="fullscreen"></iframe></div>
+        <div id="probs" class="prob">Ожидаю запуск эксперимента.</div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead"><h2>Карта будущей АКСИ</h2><p class="hint">MATRIX — не финальный продукт. Это cockpit для всей системы.</p></div>
+        <div class="tools future">
+          <div class="tool"><span class="tag">01 / Memory</span><b>Личная память</b><p>Контекст и знания пользователя с управляемым хранением и удалением.</p></div>
+          <div class="tool"><span class="tag">02 / Proof</span><b>Доказательства</b><p>Происхождение, хеши, подписи и понятный аудит результатов.</p></div>
+          <div class="tool"><span class="tag">03 / Models</span><b>AI-адаптеры</b><p>Локальные и внешние модели без привязки ядра к одному провайдеру.</p></div>
+          <div class="tool"><span class="tag">04 / Agents</span><b>Агенты</b><p>Инструменты с ограниченными возможностями и явными разрешениями.</p></div>
+          <div class="tool"><span class="tag">05 / Apps</span><b>Экосистема</b><p>Studio, Lab, Globe, Quantum и приложения работают через одно ядро.</p></div>
+          <div class="tool"><span class="tag">06 / Verify</span><b>Независимая проверка</b><p>Другой человек должен суметь проверить результат без доверия к интерфейсу.</p></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="cardhead"><h2>Что здесь происходит</h2><p class="hint">Без научного жаргона.</p></div>
+        <div class="tools">
+          <div class="tool"><b>🧠 Диалог</b><p>Вопрос → локальная модель, если она доступна, иначе честный резервный режим.</p></div>
+          <div class="tool"><b>⚛️ Квант</b><p>Симулятор показывает состояние и результат эксперимента.</p></div>
+          <div class="tool"><b>💾 Память</b><p>История диалога хранится в браузере и не требует аккаунта.</p></div>
+          <div class="tool"><b>🔐 Честность</b><p>Криптография подтверждает целостность записи, но не доказывает истинность её содержания.</p></div>
+        </div>
+        <div class="explain"><details open><summary>Что такое «локально»?</summary><p>Когда браузер поддерживает WebLLM, модель загружается на устройство. Если она недоступна, сайт не делает вид, что она работает.</p></details><details><summary>Что такое запутанность?</summary><p>Это квантовая связь состояний: после подготовки пары Белла измерения двух кубитов оказываются статистически связаны.</p></details><details><summary>Почему Matrix?</summary><p>Потому что здесь соединяются разговор, память, вычисление и эксперимент, а дальше — инструменты всей АКСИ.</p></details></div>
+      </section>
+    </aside>
+  </div>
 </main>
-<footer class="footer"><span class="badge">AKSII MATRIX · local-first</span> <span class="badge">без обязательного аккаунта</span> <span class="badge">проверяемые эксперименты</span></footer>
+<footer class="footer"><span class="badge">AKSII MATRIX · local-first</span><span class="badge">без обязательного аккаунта</span><span class="badge">проверяемые эксперименты</span></footer>
 </div>
 <div id="waves" aria-hidden="true"></div>
 <script type="module" src="./src/main.js"></script>
-<script>
-  const hs=document.getElementById('historyState');
-  try{const n=JSON.parse(localStorage.getItem('aksi-matrix-history')||'[]').length;hs.textContent='память: '+n+' записей'}catch(e){hs.textContent='память: локальная'}
-  window.addEventListener('error',e=>{const s=document.getElementById('status');if(s)s.textContent='проверка ошибки…';console.error(e.error||e.message)});
-</script>
+<script>const hs=document.getElementById('historyState');try{const n=JSON.parse(localStorage.getItem('aksi-matrix-history')||'[]').length;hs.textContent='память: '+n+' записей'}catch(e){hs.textContent='память: локальная'}window.addEventListener('error',e=>{const s=document.getElementById('status');if(s)s.textContent='проверка ошибки…';console.error(e.error||e.message)});</script>
 </body>
 </html>
