@@ -1,137 +1,24 @@
-/* AKSI Core v2 — local reasoning without server */
+/* AKSI Core v3 — sovereign local cognitive runtime. */
 window.AksiCore = (function () {
-  var NET = "AKSI_NET_V1";
-  var DREAMS = "AKSI_DREAMS_V1";
-  var MEM = "AKSI_CORE_MEM";
-
-  function load(key, fb) {
-    try {
-      var v = JSON.parse(localStorage.getItem(key) || "null");
-      return v == null ? fb : v;
-    } catch (e) {
-      return fb;
-    }
-  }
-  function saveMem(role, text) {
-    var m = load(MEM, []);
-    m.push({ role: role, text: String(text).slice(0, 500), t: Date.now() });
-    localStorage.setItem(MEM, JSON.stringify(m.slice(-40)));
-  }
-
-  function score(blob, words) {
-    var s = 0;
-    words.forEach(function (w) {
-      if (w.length > 1 && blob.indexOf(w) >= 0) s += w.length > 3 ? 2 : 1;
-    });
-    return s;
-  }
-
-  function fromNet(q) {
-    var pages = load(NET, []);
-    if (!Array.isArray(pages) || !pages.length) return null;
-    var words = q.toLowerCase().split(/\s+/);
-    var best = null, bestS = 0;
-    pages.forEach(function (p) {
-      var blob = ((p.title || "") + " " + (p.body || "") + " " + (p.tags || []).join(" ")).toLowerCase();
-      var s = score(blob, words);
-      if ((p.title || "").toLowerCase().indexOf(q.toLowerCase()) >= 0) s += 5;
-      if (s > bestS) {
-        bestS = s;
-        best = p;
-      }
-    });
-    if (!best || bestS < 2) return null;
-    return { text: best.body, source: "Сеть · " + best.title };
-  }
-
-  function fromDreams(q) {
-    if (!/сон|снилось|сновид/.test(q)) return null;
-    var d = load(DREAMS, []);
-    if (d[0]) return { text: d[0].text + (d[0].seal ? "\nПечать: " + d[0].seal : ""), source: "Сон" };
-    return { text: "Снов ещё нет. Откройте раздел Сны.", source: null };
-  }
-
-  function fromCore(q) {
-    if (!window.AKSIKnowledge) return null;
-    var p = AKSIKnowledge.search(q);
-    if (!p) return null;
-    return { text: p.title + ".\n\n" + p.body, source: "Ядро" };
-  }
-
-  function rules(q) {
-    var low = q.toLowerCase();
-    if (/^(привет|здравств|добрый|hello)/.test(low))
-      return { text: "Здравствуйте. Я АКСИ — локальное ядро. Сначала сеть, потом знания, потом веб.", source: null };
-    if (/ты здесь|ты жив|на связи|кто ты/.test(low))
-      return {
-        text: "Да. АКСИ на связи. DID: did:aksi:ed25519:sovereign-2026. Режим: офлайн-ядро + ваша сеть.",
-        source: "Идентичность",
-      };
-    if (/как тебя зовут/.test(low)) return { text: "АКСИ.", source: null };
-    if (/спасибо|благодар/.test(low)) return { text: "Пожалуйста.", source: null };
-    if (/навигатор|путь|gps|карта/.test(low))
-      return {
-        text: "Навигатор: /drive/ — кнопка «Вести». Офлайн: GPS двигает стрелку без интернета; если GPS пропал — PDR (компас+шаги). Маршрут по адресу нужен интернет.",
-        source: "Справка",
-      };
-    if (/бэкап|сохран/.test(low))
-      return { text: "Бэкап: /backup/ — скачайте JSON на телефон.", source: "Справка" };
-    if (/что умеешь|помощ|help|функц/.test(low))
-      return {
-        text: "Чат Net-first, сеть знаний, сны с печатью, бэкап, навигатор GPS+PDR, поле LIVE. Сервер не обязателен.",
-        source: "Справка",
-      };
-    return null;
-  }
-
-  async function wiki(q) {
-    if (!navigator.onLine) return null;
-    try {
-      var query = q.replace(/^(что такое|кто такой|расскажи про|почему)\s+/i, "").trim();
-      if (query.length < 2) return null;
-      var ctrl = new AbortController();
-      var t = setTimeout(function () {
-        ctrl.abort();
-      }, 4500);
-      var s = await fetch(
-        "https://ru.wikipedia.org/w/api.php?action=opensearch&search=" +
-          encodeURIComponent(query) +
-          "&limit=1&namespace=0&format=json&origin=*",
-        { signal: ctrl.signal }
-      ).then(function (r) {
-        return r.json();
-      });
-      clearTimeout(t);
-      var title = s && s[1] && s[1][0];
-      if (!title) return null;
-      var j = await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title)).then(function (r) {
-        return r.json();
-      });
-      if (!j || !j.extract) return null;
-      return { text: j.title + ".\n\n" + String(j.extract).slice(0, 900), source: "Wikipedia" };
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async function reply(userText) {
-    var q = String(userText || "").trim();
-    if (!q) return { text: "Напишите вопрос.", source: null };
-    saveMem("user", q);
-    var a =
-      rules(q) ||
-      fromDreams(q) ||
-      fromNet(q) ||
-      fromCore(q) ||
-      (await wiki(q)) || {
-        text: navigator.onLine
-          ? "Не нашла точного ответа. Добавьте факт в Сеть — в следующий раз отвечу из неё."
-          : "Офлайн: в сети и ядре нет ответа. Запишите знание в /net/.",
-        source: null,
-      };
-    saveMem("aksi", a.text);
-    return a;
-  }
-
-  return { reply: reply, saveMem: saveMem };
+  "use strict";
+  var NET="AKSI_NET_V1", DREAMS="AKSI_DREAMS_V1", MEM="AKSI_CORE_MEM", LEDGER="AKSI_CORE_LEDGER_V3", ID="AKSI_CORE_ID_V3";
+  function load(k,fb){try{var v=JSON.parse(localStorage.getItem(k)||"null");return v==null?fb:v;}catch(e){return fb;}}
+  function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+  function canonical(v){if(v===null||typeof v!=="object")return JSON.stringify(v);if(Array.isArray(v))return "["+v.map(canonical).join(",")+"]";return "{"+Object.keys(v).sort().map(function(k){return JSON.stringify(k)+":"+canonical(v[k]);}).join(",")+"}";}
+  async function sha(v){var s=typeof v==="string"?v:canonical(v);var b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
+  function saveMem(role,text,meta){var m=load(MEM,[]);m.push({role:role,text:String(text).slice(0,2000),meta:meta||{},t:new Date().toISOString()});save(MEM,m.slice(-200));}
+  function memory(q){var m=load(MEM,[]);if(!q)return m.slice().reverse();var s=String(q).toLowerCase();return m.filter(function(x){return x.text.toLowerCase().indexOf(s)>=0;}).slice(-30).reverse();}
+  async function identity(){var x=load(ID,null);if(x)return x;if(!crypto.subtle||!crypto.subtle.generateKey)return {available:false,reason:"WebCrypto unavailable"};try{var kp=await crypto.subtle.generateKey({name:"Ed25519"},true,["sign","verify"]);var pub=await crypto.subtle.exportKey("jwk",kp.publicKey);var priv=await crypto.subtle.exportKey("jwk",kp.privateKey);x={algorithm:"Ed25519",publicKey:pub,privateKey:priv,createdAt:new Date().toISOString()};save(ID,x);return x;}catch(e){return {available:false,reason:String(e.message||e)};}}
+  async function fingerprint(){var x=await identity();return x.available===false?"unavailable":(await sha(x.publicKey)).slice(0,32);}
+  async function append(type,subject,source,status){var l=load(LEDGER,[]),previous=l.length?l[l.length-1].event_hash:"GENESIS";var body={schema:"AKSI-EVENT-3",type:type,subject:String(subject),source:source||"local",status:status||"unverified",created_at:new Date().toISOString(),previous_hash:previous};var e=Object.assign({},body,{event_hash:await sha(body)});l.push(e);save(LEDGER,l);return e;}
+  async function verify(){var l=load(LEDGER,[]),previous="GENESIS";for(var i=0;i<l.length;i++){var e=l[i],body={schema:e.schema,type:e.type,subject:e.subject,source:e.source,status:e.status,created_at:e.created_at,previous_hash:previous};if(e.previous_hash!==previous||e.event_hash!==await sha(body))return {ok:false,index:i,reason:"tamper-detected"};previous=e.event_hash;}return {ok:true,count:l.length,head:previous};}
+  function score(blob,words){var s=0;words.forEach(function(w){if(w.length>1&&blob.indexOf(w)>=0)s+=w.length>3?2:1;});return s;}
+  function fromNet(q){var pages=load(NET,[]);if(!Array.isArray(pages)||!pages.length)return null;var words=q.toLowerCase().split(/\s+/),best=null,bestS=0;pages.forEach(function(p){var blob=((p.title||"")+" "+(p.body||"")+" "+(p.tags||[]).join(" ")).toLowerCase(),s=score(blob,words);if((p.title||"").toLowerCase().indexOf(q.toLowerCase())>=0)s+=5;if(s>bestS){bestS=s;best=p;}});return best&&bestS>=2?{text:best.body,source:"Сеть · "+best.title,status:"observed"}:null;}
+  function fromDreams(q){if(!/сон|снилось|сновид/.test(q))return null;var d=load(DREAMS,[]);return d[0]?{text:d[0].text,source:"Сон",status:"observed"}:{text:"Снов ещё нет. Откройте раздел Сны.",source:null,status:"computed"};}
+  function fromCore(q){if(!window.AKSIKnowledge)return null;var p=AKSIKnowledge.search(q);return p?{text:p.title+".\n\n"+p.body,source:"Ядро",status:"computed"}:null;}
+  function rules(q){var low=q.toLowerCase();if(/^(привет|здравств|добрый|hello)/.test(low))return{text:"Здравствуйте. Я АКСИ. Я разделяю вычисленное, наблюдаемое и непроверенное.",source:null,status:"computed"};if(/кто ты|как тебя зовут/.test(low))return{text:"Я АКСИ — локальный когнитивный контур. Моя программная идентичность может быть проверена отдельно от содержания моих ответов.",source:"Идентичность",status:"computed"};if(/помощ|help|что умеешь|функц/.test(low))return{text:"Чат, локальная память, сеть знаний, Trust, Studio, Status, Lab, offline-first runtime и проверяемый cognitive ledger.",source:"Справка",status:"computed"};if(/доказ|proof|чест|провер/.test(low))return{text:"Trust разделяет целостность и истинность: hash показывает изменение данных, но не делает утверждение истинным.",source:"Trust",status:"computed"};return null;}
+  async function wiki(q){if(!navigator.onLine)return null;try{var query=q.replace(/^(что такое|кто такой|расскажи про|почему)\s+/i,"").trim();if(query.length<2)return null;var c=new AbortController(),t=setTimeout(function(){c.abort();},3500),s=await fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(query)+"&limit=1&namespace=0&format=json&origin=*",{signal:c.signal}).then(function(r){return r.json();});clearTimeout(t);var title=s&&s[1]&&s[1][0];if(!title)return null;var j=await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title)).then(function(r){return r.json();});return j&&j.extract?{text:j.title+".\n\n"+String(j.extract).slice(0,900),source:"Wikipedia",status:"observed"}:null;}catch(e){return null;}}
+  async function reply(userText){var q=String(userText||"").trim();if(!q)return{text:"Напишите вопрос.",source:null,status:"computed"};saveMem("user",q,{source:"user"});var a=rules(q)||fromDreams(q)||fromNet(q)||fromCore(q)||await wiki(q)||{text:navigator.onLine?"Не нашла точного ответа. Это не означает, что ответа не существует.":"Офлайн: точного ответа в доступных локальных источниках нет.",source:null,status:"unverified"};saveMem("aksi",a.text,{source:a.source,status:a.status});await append("cognitive-response",a.text,a.source||"local",a.status||"unverified");return a;}
+  async function selfTest(){var h=await sha({aksi:"core",version:"3"}),e=await append("self-test","AKSI Core self-test","runtime","computed"),v=await verify();return{ok:!!h&&v.ok,hash:h.slice(0,16),ledger:v.count,identity:await fingerprint(),version:"3.0.0"};}
+  return {reply:reply,saveMem:saveMem,memory:memory,canonical:canonical,sha:sha,identity:identity,fingerprint:fingerprint,append:append,verify:verify,selfTest:selfTest,exportState:function(){return{schema:"AKSI-STATE-3",memory:load(MEM,[]),ledger:load(LEDGER,[]),identity:load(ID,null),exportedAt:new Date().toISOString()};}};
 })();
