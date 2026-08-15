@@ -8,8 +8,7 @@
   const API_KEY='AKSI_API_ENDPOINT_V1';
   const esc=s=>String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   const getApi=()=>{try{return localStorage.getItem(API_KEY)||''}catch(_){return ''}};
-  const setApi=v=>{try{localStorage.setItem(API_KEY,v.trim().replace(/\/$/,''))}catch(_){}
-  };
+  const setApi=v=>{try{localStorage.setItem(API_KEY,v.trim().replace(/\/$/,''))}catch(_){} };
   async function api(path,opts={}){
     const base=getApi();
     if(!base) throw new Error('Backend endpoint is not configured. AKSI remains local-first.');
@@ -32,5 +31,5 @@
     document.getElementById('aksi-api-test').addEventListener('click',async()=>{const out=document.getElementById('aksi-api-result');out.textContent='Проверка…';try{const r=await api('/health');out.textContent='Backend OK · '+JSON.stringify(r)}catch(e){out.textContent='Backend: '+e.message}});
   }
   window.AKSIUnified={version:'1.0.0',registry:loadRegistry,api,endpoint:getApi,setEndpoint:setApi};
-  document.addEventListener('DOMContentLoaded',panel);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',panel);else panel();
 })();
