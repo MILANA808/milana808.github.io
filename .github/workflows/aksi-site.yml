@@ -26,6 +26,15 @@ jobs:
           test -f integrations/repository-registry.json
           test -f sw.js
           test -f manifest.webmanifest
+          test -f aksii-matrix/index.html
+          test -f aksii-matrix/matrix.css
+          test -f aksii-matrix/src/main.js
+          test -f aksii-matrix/src/core/aksii-agent.js
+          test -f aksii-matrix/src/ai/webllm-wrapper.js
+          test -f aksii-matrix/src/quantum/quirk-controller.js
+          test -f aksii-matrix/src/storage/history.js
+          test -f aksii-matrix/src/utils/quantum-logic.js
+          test -f aksii-matrix/data/templates.json
       - name: JavaScript syntax
         run: |
           node --check app.js
@@ -34,8 +43,16 @@ jobs:
           node --check aksi-control-plane.js
           node --check integrations/aksi-unified.js
           node --check sw.js
+          node --check aksii-matrix/src/main.js
+          node --check aksii-matrix/src/core/aksii-agent.js
+          node --check aksii-matrix/src/ai/webllm-wrapper.js
+          node --check aksii-matrix/src/quantum/quirk-controller.js
+          node --check aksii-matrix/src/storage/history.js
+          node --check aksii-matrix/src/utils/quantum-logic.js
       - name: JSON validation
-        run: node -e "JSON.parse(require('fs').readFileSync('integrations/repository-registry.json','utf8'))"
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('integrations/repository-registry.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('aksii-matrix/data/templates.json','utf8'))"
       - name: Required runtime wiring
         run: |
           grep -q 'aksi-runtime.js' index.html
@@ -44,6 +61,15 @@ jobs:
           grep -q 'AKSI-EVIDENCE-2' aksi-runtime.js
           grep -q 'AKSI_LOCAL_MEMORY_V1' aksi-enhancements.js
           grep -q 'aksi-control-plane.js' index.html
+      - name: Matrix wiring and safety
+        run: |
+          grep -q 'matrix.css' aksii-matrix/index.html
+          grep -q './src/main.js' aksii-matrix/index.html
+          grep -q 'local-first' aksii-matrix/index.html
+          grep -q 'CreateMLCEngine' aksii-matrix/src/ai/webllm-wrapper.js
+          grep -q 'runCircuit' aksii-matrix/src/quantum/quirk-controller.js
+          grep -q 'indexedDB' aksii-matrix/src/storage/history.js
+          grep -q 'bell_state' aksii-matrix/data/templates.json
       - name: Integration contract
         run: |
           grep -q 'AKSI-REPOSITORY-REGISTRY-1' integrations/repository-registry.json
@@ -53,3 +79,5 @@ jobs:
         run: |
           grep -q '<html' index.html
           grep -q '</html>' index.html
+          grep -q '<html' aksii-matrix/index.html
+          grep -q '</html>' aksii-matrix/index.html
