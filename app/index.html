@@ -5,20 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>АКСИ</title>
 <meta name="theme-color" content="#5b21b6">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
 <style>
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:#f3effc;color:#1a1030}
-body{max-width:480px;margin:0 auto;display:flex;flex-direction:column;min-height:100%;min-height:100dvh}
-header{
-  flex:0 0 auto;background:#5b21b6;color:#fff;
-  padding:max(12px,env(safe-area-inset-top)) 16px 12px;
-  display:flex;justify-content:space-between;align-items:center;
-}
+body{max-width:480px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
+header{flex:0 0 auto;background:#5b21b6;color:#fff;padding:max(12px,env(safe-area-inset-top)) 16px 12px;display:flex;justify-content:space-between;align-items:center}
 header strong{font-size:1.15rem}
-header span{font-size:12px;opacity:.9}
+header a{color:#fff;font-size:12px;font-weight:700;text-decoration:none}
 .panel{flex:1 1 auto;min-height:0;display:none;flex-direction:column}
 .panel.on{display:flex}
 #thread{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
@@ -26,48 +20,21 @@ header span{font-size:12px;opacity:.9}
 .msg.me{background:#5b21b6;color:#fff;margin-left:auto}
 .msg.bot{background:#fff;border:1px solid #e4dcf5}
 .msg .src{display:block;margin-top:6px;font-size:11px;font-weight:700;color:#7c3aed}
-.hint{text-align:center;color:#6b6280;padding:24px 12px;font-size:15px;line-height:1.45}
-.hint button{
-  display:block;width:100%;margin:8px 0 0;padding:14px;border-radius:12px;
-  border:2px solid #5b21b6;background:#fff;color:#5b21b6;font-size:15px;font-weight:700;
-}
-.bar{
-  flex:0 0 auto;display:flex;gap:8px;padding:10px 12px;
-  border-top:1px solid #e4dcf5;background:#fff;
-}
-.bar input{
-  flex:1;font-size:16px;padding:12px;border-radius:12px;border:2px solid #ddd;
-}
-.bar button{
-  width:56px;border:none;border-radius:12px;background:#5b21b6;color:#fff;font-size:1.2rem;font-weight:800;
-}
-.net-body{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
-.net-body h2{font-size:1.1rem;margin-bottom:8px}
-.net-body p.lead{font-size:13px;color:#6b6280;margin-bottom:12px}
-.net-body input,.net-body textarea{
-  width:100%;font-size:16px;padding:12px;border-radius:12px;border:2px solid #ddd;margin-bottom:8px;font-family:inherit;
-}
+.hint{text-align:center;color:#6b6280;padding:24px 12px;font-size:15px}
+.hint button{display:block;width:100%;margin:8px 0 0;padding:14px;border-radius:12px;border:2px solid #5b21b6;background:#fff;color:#5b21b6;font-size:15px;font-weight:700}
+.bar{flex:0 0 auto;display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e4dcf5;background:#fff}
+.bar input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:2px solid #ddd}
+.bar button{width:56px;border:none;border-radius:12px;background:#5b21b6;color:#fff;font-size:1.2rem;font-weight:800}
+.net-body{flex:1;overflow-y:auto;padding:14px}
+.net-body input,.net-body textarea{width:100%;font-size:16px;padding:12px;border-radius:12px;border:2px solid #ddd;margin-bottom:8px;font-family:inherit}
 .net-body textarea{min-height:88px}
-#save-net{
-  width:100%;padding:14px;border:none;border-radius:12px;background:#5b21b6;color:#fff;
-  font-size:16px;font-weight:800;margin-bottom:14px;
-}
+#save-net{width:100%;padding:14px;border:none;border-radius:12px;background:#5b21b6;color:#fff;font-size:16px;font-weight:800;margin-bottom:14px}
 .card{background:#fff;border:1px solid #e4dcf5;border-radius:12px;padding:12px;margin-bottom:8px}
-.card b{display:block;margin-bottom:4px}
-.card span{font-size:14px;color:#6b6280;line-height:1.4}
 .more{flex:1;overflow-y:auto;padding:14px}
-.more a{
-  display:block;padding:16px;margin-bottom:10px;background:#fff;border:1px solid #e4dcf5;
-  border-radius:14px;text-decoration:none;color:#1a1030;font-weight:700;font-size:16px;
-}
+.more a{display:block;padding:16px;margin-bottom:10px;background:#fff;border:1px solid #e4dcf5;border-radius:14px;text-decoration:none;color:#1a1030;font-weight:700;font-size:16px}
 .more a small{display:block;font-weight:500;color:#6b6280;margin-top:4px;font-size:13px}
-nav.tabs{
-  flex:0 0 auto;display:flex;border-top:1px solid #e4dcf5;background:#fff;
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-nav.tabs button{
-  flex:1;border:none;background:transparent;padding:10px 4px;font-size:11px;font-weight:700;color:#6b6280;
-}
+nav.tabs{flex:0 0 auto;display:flex;border-top:1px solid #e4dcf5;background:#fff;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs button{flex:1;border:none;background:transparent;padding:10px 4px;font-size:11px;font-weight:700;color:#6b6280}
 nav.tabs button.on{color:#5b21b6}
 nav.tabs button .ic{display:block;font-size:18px;margin-bottom:2px}
 </style>
@@ -75,192 +42,66 @@ nav.tabs button .ic{display:block;font-size:18px;margin-bottom:2px}
 <body>
 <header>
   <strong>АКСИ</strong>
-  <span id="status">на связи</span>
+  <a href="/precedent/">Прецедент</a>
 </header>
-
 <section class="panel on" id="p-chat">
-  <div id="thread">
-    <div class="hint" id="hint">
-      Напишите сообщение<br>или нажмите:
-      <button type="button" data-q="ты здесь?">Ты здесь?</button>
-      <button type="button" data-q="что умеешь?">Что умеешь?</button>
-      <button type="button" data-q="как открыть навигатор?">Навигатор</button>
-    </div>
-  </div>
-  <div class="bar">
-    <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off">
-    <button type="button" id="send">OK</button>
-  </div>
+  <div id="thread"><div class="hint" id="hint">Спросите АКСИ
+    <button type="button" data-q="ты здесь?">Ты здесь?</button>
+    <button type="button" data-q="что умеешь?">Что умеешь?</button>
+  </div></div>
+  <div class="bar"><input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send"><button type="button" id="send">OK</button></div>
 </section>
-
 <section class="panel" id="p-net">
   <div class="net-body">
-    <h2>Личная сеть</h2>
-    <p class="lead">Чат сначала ищет ответ здесь</p>
-    <input id="nt" placeholder="Заголовок">
-    <textarea id="nb" placeholder="Текст…"></textarea>
+    <p style="margin-bottom:10px;color:#6b6280;font-size:13px">Знания для чата (локально)</p>
+    <input id="nt" placeholder="Заголовок"><textarea id="nb" placeholder="Текст…"></textarea>
     <button type="button" id="save-net">Сохранить</button>
     <div id="nlist"></div>
   </div>
 </section>
-
 <section class="panel" id="p-more">
   <div class="more">
-    <a href="/nav/">Навигатор<small>ВЕСТИ · ПУТЬ · стрелка</small></a>
-    <a href="/backup/">Бэкап<small>скачать данные</small></a>
-    <a href="/dreams/">Сны<small>с печатью</small></a>
-    <a href="/live/">Live<small>голос</small></a>
-    <a href="/exocortex/">Экзокортекс<small>ядро</small></a>
-    <a href="/citizen/">Паспорт<small>DID</small></a>
+    <a href="/precedent/">Прецедент<small>DID · квант · подписи</small></a>
+    <a href="/nav/">Навигатор<small>GPS и маршрут</small></a>
+    <a href="/backup/">Бэкап</a>
+    <a href="/live/">Live</a>
   </div>
 </section>
-
 <nav class="tabs">
   <button type="button" class="on" data-p="chat"><span class="ic">✦</span>Чат</button>
   <button type="button" data-p="net"><span class="ic">◈</span>Сеть</button>
   <button type="button" id="go-nav"><span class="ic">➤</span>Путь</button>
   <button type="button" data-p="more"><span class="ic">☰</span>Ещё</button>
 </nav>
-
 <script>
 (function(){
-"use strict";
-
-// —— tabs ——
 var panels={chat:document.getElementById("p-chat"),net:document.getElementById("p-net"),more:document.getElementById("p-more")};
-document.querySelectorAll("nav.tabs [data-p]").forEach(function(b){
-  b.onclick=function(){
-    var name=b.getAttribute("data-p");
-    Object.keys(panels).forEach(function(k){panels[k].classList.toggle("on",k===name);});
-    document.querySelectorAll("nav.tabs [data-p]").forEach(function(x){x.classList.toggle("on",x===b);});
-  };
-});
+document.querySelectorAll("nav.tabs [data-p]").forEach(function(b){b.onclick=function(){var n=b.getAttribute("data-p");Object.keys(panels).forEach(function(k){panels[k].classList.toggle("on",k===n);});document.querySelectorAll("nav.tabs [data-p]").forEach(function(x){x.classList.toggle("on",x===b);});};});
 document.getElementById("go-nav").onclick=function(){location.href="/nav/";};
-
-// —— net storage ——
 var NET_KEY="AKSI_NET_V1";
-function loadNet(){
-  try{var a=JSON.parse(localStorage.getItem(NET_KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}
-}
-function saveNet(list){localStorage.setItem(NET_KEY,JSON.stringify(list));}
-function renderNet(){
-  var list=loadNet().filter(function(p){return (p.ts||0)>0;}).slice(0,40);
-  var root=document.getElementById("nlist");root.innerHTML="";
-  if(!list.length){root.innerHTML="<p style=\"color:#6b6280;font-size:14px\">Пока пусто</p>";return;}
-  list.forEach(function(p){
-    var d=document.createElement("div");d.className="card";
-    d.innerHTML="<b></b><span></span>";
-    d.querySelector("b").textContent=p.title||"Без названия";
-    d.querySelector("span").textContent=String(p.body||"").slice(0,180);
-    root.appendChild(d);
-  });
-}
-document.getElementById("save-net").onclick=function(){
-  var t=document.getElementById("nt").value.trim();
-  var b=document.getElementById("nb").value.trim();
-  if(!t||!b){alert("Заполните заголовок и текст");return;}
-  var list=loadNet();
-  list.unshift({id:"u_"+Date.now().toString(36),title:t,body:b,tags:[],ts:Date.now()});
-  saveNet(list);
-  document.getElementById("nt").value="";
-  document.getElementById("nb").value="";
-  renderNet();
-};
+function loadNet(){try{var a=JSON.parse(localStorage.getItem(NET_KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
+function renderNet(){var list=loadNet().filter(function(p){return p.ts>0;}).slice(0,40);var root=document.getElementById("nlist");root.innerHTML="";if(!list.length){root.innerHTML="<p style=color:#6b6280>Пусто</p>";return;}list.forEach(function(p){var d=document.createElement("div");d.className="card";d.innerHTML="<b></b><div style=color:#6b6280;font-size:14px;margin-top:4px></div>";d.querySelector("b").textContent=p.title;d.querySelector("div").textContent=String(p.body||"").slice(0,160);root.appendChild(d);});}
+document.getElementById("save-net").onclick=function(){var t=document.getElementById("nt").value.trim(),b=document.getElementById("nb").value.trim();if(!t||!b)return;var list=loadNet();list.unshift({id:"u_"+Date.now().toString(36),title:t,body:b,tags:[],ts:Date.now()});localStorage.setItem(NET_KEY,JSON.stringify(list));document.getElementById("nt").value="";document.getElementById("nb").value="";renderNet();};
 renderNet();
-
-// —— core knowledge (inline, always works) ——
-var CORE=[
-  {t:"акси",b:"Я АКСИ — суверенный локальный агент. Сначала читаю вашу сеть, потом ядро знаний, потом Wikipedia если есть интернет. DID: did:aksi:ed25519:sovereign-2026"},
-  {t:"навигатор путь gps карта",b:"Навигатор: откройте вкладку Путь или https://milana808.github.io/nav/ Кнопки ВЕСТИ (стрелка за вами), ПУТЬ (маршрут), СТОП."},
-  {t:"сеть знание",b:"Личная сеть — вкладка Сеть. Запишите факт: чат найдёт его первым."},
-  {t:"бэкап сохран",b:"Бэкап: https://milana808.github.io/backup/ — скачайте JSON на телефон."},
-  {t:"умеешь помощ help функц",b:"Умею: чат Net-first, личная сеть, навигатор GPS, сны с печатью, бэкап, live-голос. Сервер не обязателен."}
-];
-
-function searchNet(q){
-  q=q.toLowerCase();
-  var words=q.split(/\s+/).filter(function(w){return w.length>1;});
-  var best=null,score=0;
-  loadNet().forEach(function(p){
-    var blob=((p.title||"")+" "+(p.body||"")).toLowerCase();
-    var s=0;words.forEach(function(w){if(blob.indexOf(w)>=0)s+=2;});
-    if((p.title||"").toLowerCase().indexOf(q)>=0)s+=4;
-    if(s>score){score=s;best=p;}
-  });
-  if(best&&score>=2)return{text:best.body,src:"Сеть · "+best.title};
-  return null;
-}
-function searchCore(q){
-  q=q.toLowerCase();
-  var best=null,score=0;
-  CORE.forEach(function(c){
-    var s=0;c.t.split(" ").forEach(function(w){if(q.indexOf(w)>=0)s++;});
-    if(s>score){score=s;best=c;}
-  });
-  if(best&&score>0)return{text:best.b,src:"Ядро"};
-  return null;
-}
-async function wiki(q){
-  if(!navigator.onLine)return null;
-  try{
-    var query=q.replace(/^(что такое|кто такой|расскажи про|почему)\s+/i,"").trim();
-    if(query.length<2)return null;
-    var s=await fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(query)+"&limit=1&namespace=0&format=json&origin=*").then(function(r){return r.json();});
-    var title=s&&s[1]&&s[1][0];if(!title)return null;
-    var j=await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title)).then(function(r){return r.json();});
-    if(!j||!j.extract)return null;
-    return{text:j.title+".\n\n"+String(j.extract).slice(0,700),src:"Wikipedia"};
-  }catch(e){return null;}
-}
-function rules(q){
-  var low=q.toLowerCase();
-  if(/привет|здравств|добрый/.test(low))return{text:"Здравствуйте! Я АКСИ. Чем помочь?",src:null};
-  if(/ты здесь|ты жив|на связи|кто ты/.test(low))return{text:"Да, на связи. Локальное ядро АКСИ на вашем устройстве.",src:"Состояние"};
-  if(/спасибо/.test(low))return{text:"Пожалуйста.",src:null};
-  return null;
-}
 async function reply(q){
-  return rules(q)||searchNet(q)||searchCore(q)||(await wiki(q))||{
-    text:navigator.onLine
-      ?"Пока нет точного ответа. Добавьте знание во вкладке Сеть — в следующий раз найду его первой."
-      :"Офлайн: в сети нет ответа. Откройте Сеть и запишите факт.",
-    src:null
-  };
+  var low=q.toLowerCase();
+  if(/привет|здравств/.test(low))return{t:"Здравствуйте. АКСИ на связи.",s:null};
+  if(/ты здесь|кто ты/.test(low))return{t:"Да. Локальный агент. Прецедент: /precedent/",s:"Состояние"};
+  if(/умеешь|help|помощ/.test(low))return{t:"Чат, сеть знаний, навигатор, прецедент (DID+квант+подписи), бэкап.",s:"Справка"};
+  if(/навигатор|путь/.test(low))return{t:"Вкладка Путь или /nav/ — ВЕСТИ и ПУТЬ.",s:"Справка"};
+  var words=low.split(/\s+/),best=null,sc=0;
+  loadNet().forEach(function(p){var blob=((p.title||"")+" "+(p.body||"")).toLowerCase(),s=0;words.forEach(function(w){if(w.length>1&&blob.indexOf(w)>=0)s+=2;});if(s>sc){sc=s;best=p;}});
+  if(best&&sc>=2)return{t:best.body,s:"Сеть · "+best.title};
+  if(navigator.onLine){try{var query=q.replace(/^(что такое|кто такой)\s+/i,"").trim();var s=await fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(query)+"&limit=1&format=json&origin=*").then(function(r){return r.json();});if(s[1]&&s[1][0]){var j=await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(s[1][0])).then(function(r){return r.json();});if(j.extract)return{t:j.title+".\n\n"+String(j.extract).slice(0,700),s:"Wikipedia"};}}catch(e){}}
+  return{t:"Нет ответа в сети. Добавьте знание во вкладке Сеть.",s:null};
 }
-
-// —— chat UI ——
-var thread=document.getElementById("thread");
-var hint=document.getElementById("hint");
+var thread=document.getElementById("thread"),hint=document.getElementById("hint");
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function add(me,text,src){
-  if(hint)hint.style.display="none";
-  var d=document.createElement("div");
-  d.className="msg "+(me?"me":"bot");
-  d.innerHTML=esc(text).replace(/\n/g,"<br>")+(src?"<span class=\"src\">"+esc(src)+"</span>":"");
-  thread.appendChild(d);
-  thread.scrollTop=thread.scrollHeight;
-}
-async function ask(t){
-  t=(t||document.getElementById("inp").value||"").trim();
-  if(!t)return;
-  document.getElementById("inp").value="";
-  add(true,t);
-  document.getElementById("status").textContent="думаю…";
-  try{
-    var r=await reply(t);
-    add(false,r.text,r.src);
-  }catch(e){
-    add(false,"Сбой. Попробуйте ещё раз.");
-  }
-  document.getElementById("status").textContent="на связи";
-}
+function add(me,text,src){if(hint)hint.style.display="none";var d=document.createElement("div");d.className="msg "+(me?"me":"bot");d.innerHTML=esc(text).replace(/\n/g,"<br>")+(src?"<span class=\"src\">"+esc(src)+"</span>":"");thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
+async function ask(t){t=(t||document.getElementById("inp").value||"").trim();if(!t)return;document.getElementById("inp").value="";add(true,t);var r=await reply(t);add(false,r.t,r.s);}
 document.getElementById("send").onclick=function(){ask();};
-document.getElementById("inp").addEventListener("keydown",function(e){
-  if(e.key==="Enter"){e.preventDefault();ask();}
-});
-document.querySelectorAll("[data-q]").forEach(function(b){
-  b.onclick=function(){ask(b.getAttribute("data-q"));};
-});
+document.getElementById("inp").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();ask();}});
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){ask(b.getAttribute("data-q"));};});
 })();
 </script>
 </body>
