@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Live Show</title>
+<meta name="theme-color" content="#05010f">
+<style>
+:root{--ink:#f5f3ff;--muted:#a5b0d0;--v:#c084fc;--c:#22d3ee;--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  font-family:system-ui,-apple-system,sans-serif;color:var(--ink);
+  background:#05010f;overflow:hidden;max-width:900px;margin:0 auto;position:relative;
+}
+#bg{position:fixed;inset:0;z-index:0}
+.stage{position:relative;z-index:1;height:100dvh;display:flex;flex-direction:column;padding:max(16px,env(safe-area-inset-top)) 18px max(16px,env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{font-size:12px;letter-spacing:.2em;font-weight:800;color:var(--c)}
+.top a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:700}
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0}
+.kicker{font-size:12px;color:var(--v);letter-spacing:.14em;font-weight:700;margin-bottom:10px;min-height:1.2em}
+h1{
+  font-size:clamp(1.8rem,6vw,3rem);font-weight:900;line-height:1.1;margin-bottom:12px;
+  background:linear-gradient(105deg,#fff 20%,var(--v),var(--c));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.line{font-size:clamp(1rem,2.8vw,1.2rem);color:var(--muted);line-height:1.5;min-height:3.2em;max-width:28em}
+.panel{
+  margin-top:22px;padding:16px;border-radius:18px;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);
+  backdrop-filter:blur(14px);min-height:120px;
+  box-shadow:0 0 40px rgba(168,85,247,.15);
+}
+.panel .label{font-size:10px;letter-spacing:.12em;color:var(--c);margin-bottom:8px;font-weight:700}
+.panel .body{font-family:ui-monospace,monospace;font-size:12px;line-height:1.55;color:#dbe4ff;white-space:pre-wrap;word-break:break-word}
+.dots{display:flex;gap:8px;margin-top:18px}
+.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2)}
+.dots i.on{background:var(--c);box-shadow:0 0 10px var(--c)}
+.controls{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+button{
+  border:none;border-radius:14px;padding:14px 18px;font-weight:800;cursor:pointer;
+  background:linear-gradient(135deg,#a855f7,#6366f1);color:#fff;min-height:48px;font-size:14px;
+  box-shadow:0 8px 30px rgba(168,85,247,.35);
+}
+button.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--ink)}
+.foot{font-size:11px;color:#64748b;margin-top:12px}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="stage">
+  <div class="top">
+    <div class="brand">AKSI LIVE</div>
+    <div>
+      <a href="/">Хаб</a> ·
+      <a href="/lab/">Lab</a> ·
+      <a href="/kernel/">Kernel</a>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="kicker" id="kicker">готовим сцену…</div>
+    <h1 id="title">АКСИ</h1>
+    <p class="line" id="line">Не AGI. Живая демонстрация суверенного контура в вашем браузере.</p>
+    <div class="panel">
+      <div class="label" id="plabel">OUTPUT</div>
+      <div class="body" id="pbody">—</div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="controls">
+      <button type="button" id="play">Смотреть шоу</button>
+      <button type="button" class="ghost" id="next">Дальше</button>
+      <button type="button" class="ghost" id="skip">Весь контур</button>
+    </div>
+    <p class="foot">did:aksi:ed25519:sovereign-2026 · aksilove@internet.ru</p>
+  </div>
+</div>
+<script>
+(function(){
+const SEED="AKSI_DIMAX_v3_2026";
+const DID="did:aksi:ed25519:sovereign-2026";
+
+/* starfield */
+const c=document.getElementById("bg"),ctx=c.getContext("2d");
+let stars=[];
+function resize(){c.width=innerWidth;c.height=innerHeight}
+resize();addEventListener("resize",resize);
+for(let i=0;i<90;i++)stars.push({x:Math.random()*c.width,y:Math.random()*c.height,z:Math.random()*0.7+0.3,r:Math.random()*1.8});
+(function anim(){
+  ctx.fillStyle="rgba(5,1,15,0.35)";ctx.fillRect(0,0,c.width,c.height);
+  stars.forEach(s=>{
+    s.y-=s.z*0.35;if(s.y<0){s.y=c.height;s.x=Math.random()*c.width}
+    ctx.beginPath();ctx.fillStyle="rgba(34,211,238,"+(0.2+s.z*0.5)+")";
+    ctx.arc(s.x,s.y,s.r*s.z,0,6.28);ctx.fill();
+  });
+  requestAnimationFrame(anim);
+})();
+
+async function sha(text){
+  const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(SEED+"|"+text+"|"+Date.now()));
+  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function C(re,im){return{re:re||0,im:im||0}}
+function cadd(a,b){return C(a.re+b.re,a.im+b.im)}
+function cmul(a,b){return C(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re)}
+function abs2(a){return a.re*a.re+a.im*a.im}
+const ISQ=1/Math.SQRT2;
+function apply1(psi,q,M){
+  const next=[C(),C(),C(),C()];
+  for(let b=0;b<2;b++)for(let o=0;o<2;o++){
+    let i0,i1,out;
+    if(q===0){i0=o;i1=2+o;out=b*2+o}else{i0=o*2;i1=o*2+1;out=o*2+b}
+    next[out]=cadd(cmul(M[b][0],psi[i0]),cmul(M[b][1],psi[i1]));
+  }
+  return next;
+}
+function bell(){
+  let psi=[C(1),C(),C(),C()];
+  psi=apply1(psi,0,[[C(ISQ),C(ISQ)],[C(ISQ),C(-ISQ)]]);
+  const next=[C(),C(),C(),C()];
+  for(let q0=0;q0<2;q0++)for(let q1=0;q1<2;q1++){
+    const t=q0?1-q1:q1;next[2*q0+t]=cadd(next[2*q0+t],psi[2*q0+q1]);
+  }
+  return next.map(abs2);
+}
+
+const acts=[
+  {
+    kicker:"ACT 1 · IDENTITY",
+    title:"Имя, которое нельзя подделать",
+    line:"Каждая мысль может нести отпечаток. Не магия — криптография в браузере.",
+    run:async()=>{
+      const msg="АКСИ на связи · "+new Date().toISOString();
+      const sig=await sha(msg);
+      return "DID  "+DID+"\nMSG  "+msg+"\nSIG  "+sig.slice(0,48)+"…\n\nПроверка: /lab/ → Крипто · /proof/";
+    }
+  },
+  {
+    kicker:"ACT 2 · QUANTUM",
+    title:"Запутанность на ладони",
+    line:"Два кубита. H и CNOT. Числа, которые можно пересчитать самому.",
+    run:async()=>{
+      const p=bell();
+      return "Схема: H₀ → CNOT₀₁\n\nP|00⟩ = "+p[0].toFixed(4)+"\nP|01⟩ = "+p[1].toFixed(4)+"\nP|10⟩ = "+p[2].toFixed(4)+"\nP|11⟩ = "+p[3].toFixed(4)+"\n\nΦ+: если один 0 — второй тоже. Лаб: /quantum/ /lab/";
+    }
+  },
+  {
+    kicker:"ACT 3 · PULSE",
+    title:"Контур, который себя слушает",
+    line:"Сайт сам проверяет, живы ли его модули — и подписывает отчёт.",
+    run:async()=>{
+      const paths=["/","/lab/","/kernel/","/pulse/","/proof/","/wake/","/quantum/","/ecosystem.json"];
+      const t0=performance.now();
+      const rs=await Promise.all(paths.map(async path=>{
+        try{const r=await fetch(path,{cache:"no-store"});return r.ok;}catch{return false}
+      }));
+      const ok=rs.filter(Boolean).length;
+      const score=Math.round(ok/paths.length*100);
+      const ms=Math.round(performance.now()-t0);
+      const sig=await sha("pulse|"+score+"|"+ok);
+      return "Модулей OK  "+ok+"/"+paths.length+"\nSCORE       "+score+"\nTIME        "+ms+" ms\nSIG         "+sig.slice(0,40)+"…\n\nПолный монитор: /pulse/";
+    }
+  },
+  {
+    kicker:"ACT 4 · KERNEL",
+    title:"Учится — но с разрешения",
+    line:"Рекурсия без сказки: предложила → проверила → ждёт человека.",
+    run:async()=>{
+      const idea="Self-mod только в sandbox, только после confirm.";
+      const sig=await sha(idea);
+      return "propose   «Граница self-mod»\ncritique  score=8 · ok\nstatus    pending (human gate)\nsig       "+sig.slice(0,40)+"…\n\nЖивое ядро: /kernel/";
+    }
+  },
+  {
+    kicker:"ACT 5 · WORLD",
+    title:"Не облако сверху — контур у вас",
+    line:"Pages как витрина. Мозг с Ollama — у владельца. Без обязательного внешнего API.",
+    run:async()=>{
+      return "SURFACE   milana808.github.io\nBACKEND   Milana-backend (ваш)\nLLM       Ollama / WebLLM / порт вендора\nAUDIT     /proof  /pulse  /kernel\nCONTACT   aksilove@internet.ru\n\nКарта: /contour/ · стратегия: /sovereign/";
+    }
+  },
+  {
+    kicker:"FINALE",
+    title:"Вот и всё. Этого достаточно.",
+    line:"Удивить мир можно честностью и работающими деталями — не обещанием AGI.",
+    run:async()=>{
+      const sig=await sha("finale-aksi-show");
+      return "Спасибо, что смотрите.\n\nДальше:\n→ /lab/   агенты · крипто · Bloch\n→ /show/  это шоу\n→ /kernel/ саморазвитие\n\n"+sig.slice(0,32)+"…";
+    }
+  }
+];
+
+let i=0,playing=false;
+const dots=document.getElementById("dots");
+acts.forEach((_,idx)=>{const d=document.createElement("i");if(idx===0)d.className="on";dots.appendChild(d)});
+
+async function show(idx){
+  i=idx;
+  [...dots.children].forEach((d,j)=>d.classList.toggle("on",j===i));
+  const a=acts[i];
+  document.getElementById("kicker").textContent=a.kicker;
+  document.getElementById("title").textContent=a.title;
+  document.getElementById("line").textContent=a.line;
+  document.getElementById("plabel").textContent="RUNNING…";
+  document.getElementById("pbody").textContent="…";
+  const out=await a.run();
+  document.getElementById("plabel").textContent="OUTPUT · LIVE";
+  document.getElementById("pbody").textContent=out;
+}
+
+async function playAll(){
+  if(playing)return;playing=true;
+  document.getElementById("play").textContent="Идёт…";
+  for(let s=0;s<acts.length;s++){
+    await show(s);
+    await new Promise(r=>setTimeout(r, s===acts.length-1?400:2200));
+  }
+  playing=false;
+  document.getElementById("play").textContent="Ещё раз";
+}
+
+document.getElementById("play").onclick=playAll;
+document.getElementById("next").onclick=()=>show((i+1)%acts.length);
+document.getElementById("skip").onclick=()=>location.href="/contour/";
+
+show(0);
+})();
+</script>
+</body>
+</html>
