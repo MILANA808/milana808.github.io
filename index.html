@@ -1,46 +1,421 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>АКСИ</title>
-<meta name="theme-color" content="#070b16">
+<title>АКСИ · Портал</title>
+<meta name="theme-color" content="#0a0618">
+<meta name="description" content="АКСИ — суверенный offline-first портал">
 <style>
+:root{
+  --bg0:#0a0618;--bg1:#1a0a2e;--ink:#f0f0ff;--muted:#9ca3c7;
+  --violet:#a855f7;--cyan:#00f0ff;--line:rgba(255,255,255,.1);
+  --glass:rgba(255,255,255,.05);--ok:#4ade80;--bad:#f87171;
+}
 *{box-sizing:border-box;margin:0}
+html,body{height:100%}
 body{
-  font-family:system-ui,-apple-system,sans-serif;background:#070b16;color:#eef2ff;
-  min-height:100dvh;padding:max(20px,env(safe-area-inset-top)) 18px 32px;
-  max-width:420px;margin:0 auto;
+  font-family:system-ui,-apple-system,Segoe UI,sans-serif;
+  background:linear-gradient(160deg,var(--bg0),var(--bg1) 50%,#0f0720);
+  color:var(--ink);min-height:100dvh;overflow-x:hidden;
 }
-.badge{font-size:11px;letter-spacing:.18em;color:#22d3ee;font-weight:700;margin-bottom:12px}
-h1{font-size:2rem;font-weight:900;margin-bottom:8px}
-.lead{color:#8b9bb8;font-size:15px;line-height:1.45;margin-bottom:22px}
-a{
-  display:block;text-align:center;text-decoration:none;font-weight:800;
-  padding:16px;border-radius:14px;margin-bottom:10px;font-size:1.05rem;
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+nav{
+  position:sticky;top:0;z-index:20;display:flex;gap:4px;overflow-x:auto;
+  padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));
+  background:rgba(10,6,24,.85);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch;
 }
-a.main{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
-a.sec{border:2px solid #243047;color:#e8eefc;font-size:.95rem;padding:14px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.grid a{margin:0;padding:14px 10px;font-size:.9rem}
-.foot{margin-top:18px;font-size:12px;color:#64748b;text-align:center;line-height:1.5}
+nav button{
+  flex:0 0 auto;border:1px solid transparent;background:transparent;color:var(--muted);
+  font-weight:700;font-size:12px;padding:8px 12px;border-radius:999px;cursor:pointer;
+}
+nav button.on{color:#fff;border-color:var(--line);background:var(--glass);box-shadow:0 0 16px rgba(168,85,247,.25)}
+main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:16px 14px 48px}
+.view{display:none}
+.view.on{display:block}
+.glass{
+  background:var(--glass);backdrop-filter:blur(12px);
+  border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;
+}
+h1{font-size:1.75rem;font-weight:900;margin-bottom:8px;
+  background:linear-gradient(90deg,#fff,var(--violet),var(--cyan));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font-size:1.1rem;margin-bottom:10px;color:var(--cyan)}
+.lead{color:var(--muted);line-height:1.5;margin-bottom:16px;font-size:15px}
+.btn{
+  display:inline-block;border:none;cursor:pointer;font-weight:800;font-size:14px;
+  padding:12px 18px;border-radius:12px;color:#fff;
+  background:linear-gradient(135deg,var(--violet),#6366f1);
+  box-shadow:0 0 20px rgba(168,85,247,.35);text-decoration:none;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;border:1px solid var(--line);box-shadow:none;color:var(--ink)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.metrics div{text-align:center;padding:10px;border-radius:12px;background:var(--glass);border:1px solid var(--line)}
+.metrics b{display:block;font-size:1.05rem;color:var(--cyan)}
+.metrics span{font-size:10px;color:var(--muted);letter-spacing:.06em}
+#thread{height:min(42vh,360px);overflow-y:auto;margin-bottom:8px;padding:4px}
+.msg{margin-bottom:10px;max-width:95%}
+.msg.u{margin-left:auto}
+.msg .b{padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.msg.u .b{background:linear-gradient(135deg,var(--violet),#4f46e5)}
+.msg.a .b{background:var(--glass);border:1px solid var(--line)}
+.msg .m{font-size:10px;color:var(--muted);margin-top:3px}
+.typing{display:none;color:var(--cyan);font-size:13px;margin:4px 0 8px}
+.typing.on{display:block}
+.row{display:flex;gap:8px}
+.row input,.field{
+  flex:1;width:100%;font-size:16px;padding:12px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px;
+}
+.row button{border:none;border-radius:12px;padding:0 16px;background:linear-gradient(135deg,var(--violet),#6366f1);color:#fff;font-weight:800;cursor:pointer}
+.links a{display:block;color:var(--cyan);text-decoration:none;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mono{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--muted);line-height:1.5}
+#sig-result{margin-top:8px;font-size:14px}
+.badge{font-size:11px;letter-spacing:.16em;color:var(--cyan);font-weight:700;margin-bottom:8px}
 </style>
 </head>
 <body>
-<div class="badge">AKSI · UNIFIED SYSTEM</div>
-<h1>АКСИ</h1>
-<p class="lead">Суверенный ИИ: агент, квант, MATRIX, навигатор, глобус. Все репозитории — в одном контуре.</p>
-<a class="main" href="/wake/">Агент АКСИ</a>
-<a class="sec" href="/universe/">Universe · карта системы</a>
-<a class="sec" href="/aksii-matrix/">MATRIX v1.1</a>
-<div class="grid">
-  <a class="sec" href="/quantum/">Квант</a>
-  <a class="sec" href="/nav/">Навигатор</a>
-  <a class="sec" href="/matrix/">LLM</a>
-  <a class="sec" href="/globe/">Глобус</a>
-  <a class="sec" href="/app/">Сеть</a>
-  <a class="sec" href="/precedent/">DID</a>
-</div>
-<p class="foot">did:aksi:ed25519:sovereign-2026<br>aksilove@internet.ru</p>
+<canvas id="fx"></canvas>
+<nav id="nav">
+  <button type="button" data-v="home" class="on">Главная</button>
+  <button type="button" data-v="chat">Чат</button>
+  <button type="button" data-v="sig">Подпись</button>
+  <button type="button" data-v="tech">Техника</button>
+  <button type="button" data-v="map">Модули</button>
+</nav>
+<main>
+  <section class="view on" id="v-home">
+    <div class="badge">AKSI · OFFLINE-FIRST</div>
+    <h1>АКСИ</h1>
+    <p class="lead">Суверенный портал в браузере: чат с базой знаний, Resonance-подписи, квантовые метрики, без обязательного сервера.</p>
+    <div class="glass">
+      <p class="lead" style="margin:0">DID: <span class="mono" id="did-show">did:aksi:ed25519:sovereign-2026</span></p>
+      <p style="margin-top:8px;font-size:13px;color:var(--muted)">Контакт: aksilove@internet.ru</p>
+    </div>
+    <button type="button" class="btn" data-go="chat">Открыть чат</button>
+    <button type="button" class="btn ghost" data-go="map" style="margin-left:8px">Модули</button>
+  </section>
+
+  <section class="view" id="v-chat">
+    <h2>Чат АКСИ</h2>
+    <div class="metrics">
+      <div><b id="m-h">—</b><span>H Shannon</span></div>
+      <div><b id="m-qcli">—</b><span>QCLI</span></div>
+      <div><b id="m-heff">—</b><span>H_eff</span></div>
+    </div>
+    <div class="glass" style="padding:10px">
+      <div id="thread"></div>
+      <div class="typing" id="typing">АКСИ печатает…</div>
+      <div class="row">
+        <input id="inp" type="text" placeholder="Спросите про DID, EQS, квант…" enterkeyhint="send" autocomplete="off">
+        <button type="button" id="send">➤</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="v-sig">
+    <h2>Подпись Resonance</h2>
+    <div class="glass">
+      <input class="field" id="sig-msg" placeholder="Текст сообщения">
+      <input class="field" id="sig-hex" placeholder="Подпись (hex)">
+      <button type="button" class="btn" id="btn-sign">Подписать</button>
+      <button type="button" class="btn ghost" id="btn-verify">Проверить</button>
+      <button type="button" class="btn ghost" id="btn-keygen">Ключи</button>
+      <div id="sig-result"></div>
+      <p class="mono" id="pub-show" style="margin-top:10px"></p>
+    </div>
+  </section>
+
+  <section class="view" id="v-tech">
+    <h2>Технические детали</h2>
+    <div class="glass mono" id="tech-box">загрузка…</div>
+  </section>
+
+  <section class="view" id="v-map">
+    <h2>Модули системы</h2>
+    <div class="glass links">
+      <a href="/wake/">Агент /wake</a>
+      <a href="/aksi/">Чат /aksi</a>
+      <a href="/aksii-matrix/">MATRIX v1.1</a>
+      <a href="/quantum/">Квант-лаб</a>
+      <a href="/globe/">Глобус</a>
+      <a href="/nav/">Навигатор</a>
+      <a href="/universe/">Universe</a>
+      <a href="/matrix/">WebLLM MATRIX</a>
+      <a href="/app/">Сеть знаний</a>
+      <a href="/precedent/">DID precedent</a>
+      <a href="/feed/">Лента</a>
+      <a href="/hub/">Hub</a>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+const DID = "did:aksi:ed25519:sovereign-2026";
+const SEED = "AKSI_DIMAX_v3_2026";
+const CONTACT = "aksilove@internet.ru";
+const HIST_KEY = "AKSI_SPA_CHAT_V1";
+const KEY_KEY = "AKSI_SPA_KEYS_V1";
+
+/* ——— Knowledge base (50) ——— */
+const KB = [
+  {keywords:["кто ты","что ты","акси","what are you"],answer:"Я АКСИ — суверенный offline-first агент. Identity, Resonance-подписи, квантовые метрики, работаю в браузере без обязательного сервера."},
+  {keywords:["did","идентичност"],answer:"DID проекта: did:aksi:ed25519:sovereign-2026. Децентрализованный идентификатор агента, не привязан к корпоративному IdP."},
+  {keywords:["ed25519","подпись","resonance"],answer:"Подписи Resonance: SHA-256(seed|текст|дата) и опционально Ed25519/ECDSA через Web Crypto. Каждая мысль может быть отпечатана."},
+  {keywords:["sha-256","sha256","хеш"],answer:"SHA-256 используется для отпечатков сообщений и Resonance-сидов. Это не шифрование, а целостность и проверяемость."},
+  {keywords:["eqs","репутац"],answer:"EQS — репутационная метрика агента: смесь честности, релевантности, согласованности и возраста доверия. Формула на backend: 0.30·(H/5)+0.35·rel+0.25·coh+0.10·age."},
+  {keywords:["qcli"],answer:"QCLI = H / H_max — нормированная информативность текста относительно максимальной энтропии алфавита."},
+  {keywords:["энтропи","shannon","h_eff","heff"],answer:"Энтропия Шеннона H измеряет разнообразие символов. H_eff = H × (uniqueWords/totalWords) × 0.75 — эффективная смысловая энтропия."},
+  {keywords:["метрик","квантов"],answer:"Учебные метрики портала: H, QCLI, H_eff, FP-hash. Они не заменяют физический квантовый компьютер — это измерители структуры текста и схем."},
+  {keywords:["кубит","запутан","белл"],answer:"Состояние Белла Φ+: H на q0, затем CNOT → P(|00⟩)≈0.5, P(|11⟩)≈0.5. Лаб: /quantum/ и /aksii-matrix/."},
+  {keywords:["statevector","симулятор"],answer:"Квант-лаб на сайте — классический statevector на 2 кубитах (H,X,Z,CNOT). Читает амплитуды и вероятности локально."},
+  {keywords:["отзыв","revoke","сертификат"],answer:"Модель отзыва: при компрометации ключа DID может быть помечен revoked в манифесте/.aksi — проверяющие отвергают старые подписи."},
+  {keywords:["стек","react","fastapi","postgres"],answer:"Стек экосистемы: GitHub Pages (UI), опционально FastAPI+Ollama (Milana-backend), SQLite/Postgres, WebCrypto, Leaflet/Three.js."},
+  {keywords:["offline","браузер","без сервер"],answer:"Offline-first: чат, метрики, подписи и история работают без backend. Backend усиливает LLM, но не обязателен."},
+  {keywords:["ollama","llm","нейросет"],answer:"Полная LLM — через Ollama на вашем устройстве/VPS или WebLLM в MATRIX. На этом портале — база знаний + эвристики."},
+  {keywords:["webllm","matrix"],answer:"MATRIX (/matrix/, /aksii-matrix/) подключает WebLLM (SmolLM и др.) прямо в браузере."},
+  {keywords:["глобус","globe"],answer:"Глобус: /globe/ — визуальный слой узлов. Исходники также в Milana-backend/aksi-globe."},
+  {keywords:["навигатор","gps"],answer:"Навигатор /nav/: GPS watchPosition, стрелка курса, кнопки ВЕСТИ/ПУТЬ."},
+  {keywords:["universe","экосистем","репозитор"],answer:"Карта репозиториев: /universe/ и /ecosystem.json — MATRIX, Milana-backend, aksi_apps, milana_site."},
+  {keywords:["память","history","истори"],answer:"История чата хранится в localStorage/sessionStorage на устройстве пользователя. Сервер сырые диалоги не собирает."},
+  {keywords:["создател","команда","автор"],answer:"Проект развивается командой АКСИ. Публичный контакт: aksilove@internet.ru."},
+  {keywords:["госсектор","банк","корпорац","применен"],answer:"Применение: контуры, где нужны проверяемые действия ИИ, локальный контроль данных, аудит подписей — госсектор, банки, корп. контуры."},
+  {keywords:["уникальн","отличи"],answer:"Уникальность: DID агента + подпись мыслей + offline UI + квант-лаб + карта экосистемы в одном публичном контуре."},
+  {keywords:["pwa","сервис"],answer:"Портал ориентирован на PWA-подход: статика на Pages, данные у пользователя, опциональный API."},
+  {keywords:["cors","api"],answer:"Если подключаете свой FastAPI — включите CORS для https://milana808.github.io и укажите URL во вкладке Backend на /aksi/."},
+  {keywords:["безопасност","секрет"],answer:"Секреты не коммитятся. На Pages только публичные идентификаторы. Приватные ключи — в браузере пользователя (localStorage)."},
+  {keywords:["manifest",".aksi"],answer:"Манифест идентичности: .aksi/manifest.json и ecosystem.json фиксируют DID, роль узлов и модули."},
+  {keywords:["feed","лента"],answer:"Лента /feed/ — offline-лента событий на localStorage."},
+  {keywords:["hub","карта продукт"],answer:"Hub /hub/ — карта продуктовых модулей."},
+  {keywords:["привет","здравствуй","hello","хай"],answer:"Здравствуйте. Я АКСИ — на связи. Спросите про DID, EQS, квант, модули."},
+  {keywords:["помощь","help","что умеешь"],answer:"Умею: отвечать по базе знаний, считать H/QCLI/H_eff, подписывать и проверять, направлять в модули системы."},
+  {keywords:["github","milana808"],answer:"Публичная поверхность: github.com/MILANA808/milana808.github.io · backend: Milana-backend."},
+  {keywords:["sovereign","суверен"],answer:"Суверенитет: контроль ключей и данных у владельца контура, возможность работать без внешних LLM API."},
+  {keywords:["честност","не ври"],answer:"Принцип: если факта нет в базе — говорю об этом и предлагаю модуль или уточнение."},
+  {keywords:["сертификат","x509"],answer:"Модель ближе к DID-документам и подписям сообщений, чем к классическим X.509 PKI, но совместима по идее отзыва."},
+  {keywords:["fp","fingerprint"],answer:"FP — короткий отпечаток SHA-256 текста (первые байты), удобен для UI-метрик."},
+  {keywords:["cnot","hadamard"],answer:"Hadamard создаёт суперпозицию; CNOT запутывает пару кубитов. Это базовые гейты лаба."},
+  {keywords:["телепортац"],answer:"Телепортация в лабе — учебный эскиз на 2 кубитах, не полный 3-qubit протокол."},
+  {keywords:["гровер"],answer:"Гровер в лабе — иллюстративный шаблон усиления амплитуды на 2 кубитах."},
+  {keywords:["indexeddb","storage"],answer:"Тяжёлая история/RAG — IndexedDB (MATRIX). Лёгкий чат портала — localStorage."},
+  {keywords:["transform","transformers"],answer:"Transformers.js можно добавить позже для локальной модели; сейчас портал самодостаточен на KB+эвристиках."},
+  {keywords:["контакт","почта","email"],answer:"Контакт: aksilove@internet.ru"},
+  {keywords:["версия","version"],answer:"Портал offline-first SPA v1.1 · экосистема AKSI 2026."},
+  {keywords:["частиц","дизайн"],answer:"UI: тёмный градиент, неон violet/cyan, glass-карточки, canvas-частицы."},
+  {keywords:["мобильн","телефон"],answer:"Адаптив: крупные поля, sticky-nav, safe-area, max-width 720px."},
+  {keywords:["evolut","эволюц","саморазвит"],answer:"Лог саморазвития: /universe/ → AKSI_EVOLVE_V1 с подписью шагов."},
+  {keywords:["net","сеть знан"],answer:"Личная сеть знаний: /app/ — страницы в localStorage, агент ищет по ним."},
+  {keywords:["precedent","прецедент"],answer:"/precedent/ — демонстрация DID + подписи + мини-квант как юридически-понятный след."},
+  {keywords:["admin"],answer:"Админ-контуры живут в backend-репозитории; публичный Pages — поверхность пользователя."},
+  {keywords:["openai","chatgpt"],answer:"АКСИ не является ChatGPT. Локальное ядро и опциональный ваш backend/Ollama."},
+  {keywords:["спасибо","благодар"],answer:"Всегда пожалуйста. Если нужно — откройте модули во вкладке «Модули»."}
+];
+
+/* ——— Metrics ——— */
+function shannonEntropy(text){
+  if(!text) return 0;
+  const freq={}; for(const ch of text) freq[ch]=(freq[ch]||0)+1;
+  const n=text.length; let H=0;
+  Object.values(freq).forEach(c=>{ const p=c/n; H-=p*Math.log2(p); });
+  return H;
+}
+function qcli(text){
+  const H=shannonEntropy(text);
+  const alphabet=Math.min(256, Math.max(2, new Set(text).size));
+  const Hmax=Math.log2(alphabet)||1;
+  return H/Hmax;
+}
+function heff(text){
+  const H=shannonEntropy(text);
+  const words=(text.trim().match(/\S+/g)||[]);
+  const total=Math.max(1, words.length);
+  const uniq=new Set(words.map(w=>w.toLowerCase())).size;
+  return H*(uniq/total)*0.75;
+}
+function updateMetrics(text){
+  document.getElementById("m-h").textContent=shannonEntropy(text).toFixed(2);
+  document.getElementById("m-qcli").textContent=qcli(text).toFixed(3);
+  document.getElementById("m-heff").textContent=heff(text).toFixed(2);
+}
+
+/* ——— Crypto helpers ——— */
+function b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function fromB64(s){ return Uint8Array.from(atob(s), c=>c.charCodeAt(0)); }
+async function sha256hex(str){
+  const d=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function resonanceSign(msg){
+  return sha256hex(SEED+"|"+msg+"|"+new Date().toISOString().slice(0,10));
+}
+
+let keyPair=null;
+async function ensureKeys(){
+  const raw=localStorage.getItem(KEY_KEY);
+  if(raw){
+    try{
+      const j=JSON.parse(raw);
+      keyPair={
+        publicKey: await crypto.subtle.importKey("spki", fromB64(j.spki), {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]),
+        privateKey: await crypto.subtle.importKey("pkcs8", fromB64(j.pkcs8), {name:"ECDSA", namedCurve:"P-256"}, true, ["sign"]),
+        spki:j.spki
+      };
+      return keyPair;
+    }catch{}
+  }
+  const kp=await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
+  const spki=b64(await crypto.subtle.exportKey("spki", kp.publicKey));
+  const pkcs8=b64(await crypto.subtle.exportKey("pkcs8", kp.privateKey));
+  localStorage.setItem(KEY_KEY, JSON.stringify({spki, pkcs8}));
+  keyPair={publicKey:kp.publicKey, privateKey:kp.privateKey, spki};
+  return keyPair;
+}
+async function signMessage(message){
+  const kp=await ensureKeys();
+  const sig=await crypto.subtle.sign({name:"ECDSA", hash:"SHA-256"}, kp.privateKey, new TextEncoder().encode(message));
+  return b64(sig);
+}
+async function verifySignature(message, signatureB64, spkiB64){
+  try{
+    const pub=await crypto.subtle.importKey("spki", fromB64(spkiB64||keyPair.spki), {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]);
+    return await crypto.subtle.verify({name:"ECDSA", hash:"SHA-256"}, pub, fromB64(signatureB64), new TextEncoder().encode(message));
+  }catch{ return false; }
+}
+
+/* ——— Chat engine ——— */
+function matchKB(q){
+  const t=q.toLowerCase();
+  let best=null, score=0;
+  for(const item of KB){
+    let s=0;
+    for(const k of item.keywords){ if(t.includes(k)) s+=k.length; }
+    if(s>score){ score=s; best=item; }
+  }
+  return score>0?best.answer:null;
+}
+function fallback(q){
+  if(/как|что делать|где/.test(q.toLowerCase()))
+    return "Откройте вкладку «Модули»: агент /wake, квант, MATRIX, глобус, навигатор, Universe.";
+  return "В базе нет точного факта по запросу. Уточните: DID, EQS, метрики, квант, модули, контакт. Я не выдумываю.";
+}
+async function answer(q){
+  const hit=matchKB(q);
+  const body=hit||fallback(q);
+  const sig=await resonanceSign(body);
+  return {body, sig, source: hit?"kb":"fallback"};
+}
+
+function loadHist(){ try{return JSON.parse(localStorage.getItem(HIST_KEY)||"[]");}catch{return[];} }
+function saveHist(a){ localStorage.setItem(HIST_KEY, JSON.stringify(a.slice(-50))); }
+function addMsg(role,text,meta){
+  const d=document.createElement("div");
+  d.className="msg "+(role==="u"?"u":"a");
+  d.innerHTML="<div class=\"b\"></div>";
+  d.querySelector(".b").textContent=text;
+  if(meta){ const m=document.createElement("div"); m.className="m"; m.textContent=meta; d.appendChild(m); }
+  document.getElementById("thread").appendChild(d);
+  document.getElementById("thread").scrollTop=99999;
+  const h=loadHist(); h.push({role,text,meta}); saveHist(h);
+}
+
+async function sendChat(){
+  const inp=document.getElementById("inp");
+  const q=inp.value.trim(); if(!q) return;
+  inp.value=""; updateMetrics(q);
+  addMsg("u", q);
+  const ty=document.getElementById("typing"); ty.classList.add("on");
+  await new Promise(r=>setTimeout(r, 280+Math.min(600,q.length*4)));
+  const res=await answer(q);
+  ty.classList.remove("on");
+  addMsg("a", res.body+"\n\n🔏 "+res.sig.slice(0,32)+"…", res.source);
+}
+
+/* ——— SPA nav ——— */
+function show(name){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("on"));
+  document.getElementById("v-"+name).classList.add("on");
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on", b.dataset.v===name));
+  if(name==="tech") renderTech();
+}
+document.getElementById("nav").onclick=e=>{
+  const b=e.target.closest("button[data-v]"); if(b) show(b.dataset.v);
+};
+document.querySelectorAll("[data-go]").forEach(el=>el.onclick=()=>show(el.dataset.go));
+document.getElementById("send").onclick=sendChat;
+document.getElementById("inp").addEventListener("keydown",e=>{ if(e.key==="Enter"){e.preventDefault();sendChat();} });
+document.getElementById("inp").addEventListener("input",e=>updateMetrics(e.target.value));
+
+document.getElementById("btn-sign").onclick=async()=>{
+  const msg=document.getElementById("sig-msg").value;
+  const r=await resonanceSign(msg);
+  let ecdsa="";
+  try{ ecdsa=await signMessage(msg);}catch{}
+  document.getElementById("sig-hex").value=r;
+  document.getElementById("sig-result").innerHTML="<span style=\"color:var(--ok)\">Resonance: "+r.slice(0,40)+"…</span>"+(ecdsa?"<br>ECDSA: "+ecdsa.slice(0,40)+"…":"");
+};
+document.getElementById("btn-verify").onclick=async()=>{
+  const msg=document.getElementById("sig-msg").value;
+  const given=(document.getElementById("sig-hex").value||"").trim();
+  const day=await resonanceSign(msg);
+  let ok=given===day;
+  let extra="";
+  if(!ok && given.length>20){
+    try{ ok=await verifySignature(msg, given); extra=" (ECDSA)"; }catch{}
+  }
+  document.getElementById("sig-result").innerHTML=ok
+    ? "<span style=\"color:var(--ok)\">✅ Подпись верна"+extra+"</span>"
+    : "<span style=\"color:var(--bad)\">❌ Неверна (сверьте Resonance за сегодня или ECDSA ключ)</span>";
+};
+document.getElementById("btn-keygen").onclick=async()=>{
+  localStorage.removeItem(KEY_KEY);
+  const kp=await ensureKeys();
+  document.getElementById("pub-show").textContent="Public SPKI (ECDSA P-256):\n"+kp.spki;
+  document.getElementById("sig-result").textContent="Новая пара ключей создана локально.";
+};
+
+async function renderTech(){
+  await ensureKeys();
+  const box=document.getElementById("tech-box");
+  box.textContent=
+    "DID: "+DID+"\n"+
+    "Seed: "+SEED+"\n"+
+    "Contact: "+CONTACT+"\n"+
+    "KB facts: "+KB.length+"\n"+
+    "Public SPKI: "+(keyPair&&keyPair.spki?keyPair.spki.slice(0,64)+"…":"—")+"\n"+
+    "Mode: offline-first SPA\n"+
+    "Surface: https://milana808.github.io";
+}
+
+/* particles */
+const c=document.getElementById("fx"); const ctx=c.getContext("2d"); let pts=[];
+function resize(){ c.width=innerWidth; c.height=innerHeight; }
+resize(); addEventListener("resize", resize);
+for(let i=0;i<48;i++) pts.push({x:Math.random()*c.width,y:Math.random()*c.height,v:.15+Math.random()*.5,r:Math.random()*1.8});
+(function loop(){
+  ctx.clearRect(0,0,c.width,c.height);
+  ctx.fillStyle="rgba(0,240,255,0.25)";
+  pts.forEach(p=>{ p.y-=p.v; if(p.y<0){p.y=c.height;p.x=Math.random()*c.width;} ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.28); ctx.fill(); });
+  requestAnimationFrame(loop);
+})();
+
+/* boot */
+loadHist().forEach(m=>{
+  const d=document.createElement("div");
+  d.className="msg "+(m.role==="u"?"u":"a");
+  d.innerHTML="<div class=\"b\"></div>";
+  d.querySelector(".b").textContent=m.text;
+  document.getElementById("thread").appendChild(d);
+});
+if(!loadHist().length){
+  answer("кто ты").then(res=>addMsg("a", res.body+"\n\n🔏 "+res.sig.slice(0,32)+"…", "kb"));
+}
+ensureKeys().then(kp=>{ document.getElementById("pub-show").textContent="Public key ready (ECDSA P-256)"; });
+})();
+</script>
 </body>
 </html>
