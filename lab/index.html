@@ -6,52 +6,62 @@
 <title>АКСИ · Lab</title>
 <meta name="theme-color" content="#0a0618">
 <style>
-:root{--bg:#0a0618;--card:rgba(255,255,255,.05);--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171}
+:root{--bg:#0a0618;--card:rgba(255,255,255,.06);--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171}
 *{box-sizing:border-box;margin:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0a0618,#1a0a2e);color:var(--ink);min-height:100dvh;max-width:920px;margin:0 auto;padding:0 12px 48px;position:relative}
+body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#0a0618,#160a28 45%,#0d0818);color:var(--ink);min-height:100dvh;max-width:960px;margin:0 auto;padding:0 12px 56px;position:relative}
 #fx{position:fixed;inset:0;z-index:0;pointer-events:none}
 .wrap{position:relative;z-index:1}
-topnav{display:flex;gap:6px;overflow-x:auto;padding:10px 0;padding-top:max(10px,env(safe-area-inset-top));-webkit-overflow-scrolling:touch}
+topnav{display:flex;gap:5px;overflow-x:auto;padding:10px 0 max(8px,env(safe-area-inset-top));-webkit-overflow-scrolling:touch}
 topnav a{flex:0 0 auto;text-decoration:none;color:var(--muted);font-size:12px;font-weight:700;padding:8px 11px;border-radius:999px;border:1px solid transparent}
-topnav a:hover,topnav a.on{color:#fff;border-color:var(--line);background:var(--card)}
-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:8px 0 14px}
-h1{font-size:1.45rem}
-.sub{color:var(--muted);font-size:13px;line-height:1.4;max-width:36em}
-.mail{font-size:11px;color:var(--c);text-decoration:none}
-tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
-tabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer}
-tabs button.on{border-color:var(--v);box-shadow:0 0 14px rgba(168,85,247,.35)}
+topnav a.on,topnav a:hover{color:#fff;border-color:var(--line);background:var(--card)}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+h1{font-size:clamp(1.2rem,4vw,1.5rem)}
+.sub{color:var(--muted);font-size:13px;line-height:1.4;margin-top:4px;max-width:34em}
+.mail{font-size:11px;color:var(--c);text-decoration:none;white-space:nowrap}
+tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+tabs button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 13px;font-size:12px;font-weight:700;cursor:pointer;min-height:40px}
+tabs button.on{border-color:var(--v);box-shadow:0 0 14px rgba(168,85,247,.4)}
 .panel{display:none}.panel.on{display:block}
 .glass{background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input,textarea,select{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px}
-textarea{min-height:70px;resize:vertical}
-button.go{border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff}
-button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:10px 12px;font-weight:700;cursor:pointer}
+input,textarea{width:100%;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink);margin-bottom:8px}
+textarea{min-height:68px;resize:vertical}
+button.go{border:none;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff;min-height:44px}
+button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:11px 12px;font-weight:700;cursor:pointer;min-height:44px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.chips button{border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);border-radius:999px;padding:8px 10px;font-size:12px;cursor:pointer}
-#agents{display:flex;flex-direction:column;gap:10px;max-height:52vh;overflow:auto}
-.agent{border-left:3px solid var(--c);padding:10px 12px;background:rgba(0,0,0,.25);border-radius:0 12px 12px 0}
+.chips button{border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);border-radius:999px;padding:9px 11px;font-size:12px;cursor:pointer;min-height:40px}
+.split{display:grid;gap:10px}
+@media(min-width:800px){.split-2{grid-template-columns:1.2fr .8fr}}
+#agents{display:flex;flex-direction:column;gap:8px;max-height:42vh;overflow:auto}
+.agent{border-left:3px solid var(--c);padding:10px 12px;background:rgba(0,0,0,.28);border-radius:0 12px 12px 0}
 .agent.opt{border-color:#4ade80}.agent.sk{border-color:#f87171}.agent.an{border-color:#60a5fa}.agent.ak{border-color:var(--v)}
 .agent b{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
 .agent p{font-size:14px;line-height:1.45;white-space:pre-wrap}
+#agent-log{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);max-height:42vh;overflow:auto;line-height:1.55;white-space:pre-wrap}
+.mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;color:var(--muted);line-height:1.45}
 #bloch-wrap{display:grid;gap:12px}
 @media(min-width:720px){#bloch-wrap{grid-template-columns:280px 1fr}}
 #bloch{width:100%;max-width:280px;height:280px;border-radius:16px;background:#000;display:block;margin:0 auto}
-.mono{font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;color:var(--muted);line-height:1.5}
 .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .metrics div{text-align:center;padding:8px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line)}
-.metrics b{display:block;color:var(--c)}
-.metrics span{font-size:10px;color:var(--muted)}
-#ui-out{min-height:100px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:rgba(0,0,0,.25)}
+.metrics b{display:block;color:var(--c)}.metrics span{font-size:10px;color:var(--muted)}
+.gauge-wrap{display:flex;align-items:center;gap:12px;margin-top:10px}
+.gauge{width:64px;height:64px}
+#ui-out{min-height:90px;padding:12px;border-radius:12px;border:1px dashed var(--line);background:rgba(0,0,0,.25)}
 #ui-out .card{background:rgba(168,85,247,.12);border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0}
-#tour{position:fixed;inset:0;z-index:50;background:rgba(5,3,16,.88);display:flex;align-items:center;justify-content:center;padding:20px}
+#qr{width:128px;height:128px;margin:8px 0;background:#fff;border-radius:8px;padding:6px}
+#tour{position:fixed;inset:0;z-index:50;background:rgba(5,3,16,.9);display:flex;align-items:center;justify-content:center;padding:20px}
 #tour.hide{display:none}
 #tour .box{max-width:360px;background:#12081f;border:1px solid var(--line);border-radius:16px;padding:18px}
-#tour h2{font-size:1.1rem;margin-bottom:8px}
+#tour h2{margin-bottom:8px;font-size:1.1rem}
 #tour p{color:var(--muted);font-size:14px;line-height:1.45;margin-bottom:14px}
+#help{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));z-index:30;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(168,85,247,.45)}
 .ok{color:var(--ok)}.bad{color:var(--bad)}
+.prob{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.prob div{text-align:center;padding:8px 4px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line);font-size:12px}
+.prob b{display:block;color:var(--c);font-size:14px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 </head>
 <body>
 <canvas id="fx"></canvas>
@@ -70,16 +80,17 @@ button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink
   <header>
     <div>
       <h1>АКСИ Lab</h1>
-      <p class="sub">Агенты · крипто · Bloch · UI. Честно: роли без 5×7B на телефоне. Тяжёлый LLM — в MATRIX.</p>
+      <p class="sub">Агенты · крипто · Bloch · UI · 2-qubit. LLM — в MATRIX.</p>
     </div>
     <a class="mail" href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
   </header>
 
   <tabs>
-    <button type="button" class="on" data-p="agents">Сад агентов</button>
+    <button type="button" class="on" data-p="agents">Агенты</button>
     <button type="button" data-p="crypto">Крипто</button>
     <button type="button" data-p="bloch">Bloch</button>
-    <button type="button" data-p="uigen">UI на лету</button>
+    <button type="button" data-p="uigen">UI</button>
+    <button type="button" data-p="quantum">2-qubit</button>
   </tabs>
 
   <section class="panel on" id="p-agents">
@@ -87,36 +98,41 @@ button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink
       <div class="chips" id="presets"></div>
       <textarea id="topic">Нужен ли ИИ суверенитет данных?</textarea>
       <div class="row">
-        <button type="button" class="go" id="run-agents">Запустить диалог</button>
+        <button type="button" class="go" id="run-agents">Диалог</button>
         <button type="button" class="ghost" id="clear-agents">Очистить</button>
       </div>
     </div>
-    <div id="agents"></div>
+    <div class="split split-2">
+      <div class="glass" style="margin:0"><div id="agents"></div></div>
+      <div class="glass" style="margin:0"><div class="mono" style="margin-bottom:6px;color:var(--c)">LOG</div><div id="agent-log">—</div></div>
+    </div>
   </section>
 
   <section class="panel" id="p-crypto">
     <div class="glass">
-      <p class="sub">ECDSA P-256 + AES-GCM (Web Crypto). DID: <span id="did">did:aksi:ed25519:sovereign-2026</span></p>
+      <p class="sub">ECDSA P-256 + AES-GCM · DID: did:aksi:ed25519:sovereign-2026</p>
       <div class="row">
         <button type="button" class="go" id="gen-keys">Ключи</button>
-        <button type="button" class="ghost" id="export-keys">Экспорт JSON</button>
-        <button type="button" class="ghost" id="import-keys">Импорт JSON</button>
-        <button type="button" class="ghost" id="copy-did">Копировать DID</button>
+        <button type="button" class="ghost" id="export-keys">JSON</button>
+        <button type="button" class="ghost" id="import-keys">Импорт</button>
+        <button type="button" class="ghost" id="pem-btn">PEM</button>
+        <button type="button" class="ghost" id="copy-did">DID</button>
         <input type="file" id="import-file" accept="application/json,.json" hidden>
       </div>
+      <canvas id="qr" width="128" height="128"></canvas>
       <p class="mono" id="pub">—</p>
       <textarea id="cmsg" placeholder="Сообщение"></textarea>
       <div class="row">
         <button type="button" class="go" id="csign">Подписать</button>
         <button type="button" class="ghost" id="cverify">Проверить</button>
-        <button type="button" class="ghost" id="dl-sig">Скачать подпись</button>
+        <button type="button" class="ghost" id="dl-sig">Скачать .json</button>
       </div>
       <input id="csig" placeholder="Подпись base64">
       <div class="row">
-        <button type="button" class="go" id="cenc">Зашифровать</button>
-        <button type="button" class="ghost" id="cdec">Расшифровать</button>
+        <button type="button" class="go" id="cenc">Encrypt</button>
+        <button type="button" class="ghost" id="cdec">Decrypt</button>
       </div>
-      <input id="ccipher" placeholder="iv.cipher base64">
+      <input id="ccipher" placeholder="iv.cipher">
       <p class="mono" id="cout"></p>
     </div>
   </section>
@@ -126,14 +142,19 @@ button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink
       <div id="bloch-wrap">
         <canvas id="bloch" width="280" height="280"></canvas>
         <div>
-          <p class="sub">Учебная визуализация: метрики текста → θ, φ на сфере Блоха (не физический кубит).</p>
           <textarea id="btext">АКСИ суверенный квантовый контур</textarea>
           <div class="metrics">
             <div><b id="bh">—</b><span>θ</span></div>
             <div><b id="bp">—</b><span>φ</span></div>
             <div><b id="bq">—</b><span>QCLI</span></div>
           </div>
-          <p class="mono" id="bstate"></p>
+          <div class="gauge-wrap">
+            <svg class="gauge" viewBox="0 0 36 36">
+              <path d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 1 1 0-31" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="3"/>
+              <path id="gauge-arc" d="M18 2.5a15.5 15.5 0 1 1 0 31 15.5 15.5 0 1 1 0-31" fill="none" stroke="#00f0ff" stroke-width="3" stroke-linecap="round" stroke-dasharray="0 100"/>
+            </svg>
+            <div class="mono" id="bstate"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -149,250 +170,180 @@ button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink
       </div>
       <textarea id="uiprompt">карточка профиля с именем и кнопкой подписать</textarea>
       <div class="row">
-        <button type="button" class="go" id="gen-ui">Сгенерировать UI</button>
-        <button type="button" class="ghost" id="export-ui">Экспорт HTML</button>
+        <button type="button" class="go" id="gen-ui">Сгенерировать</button>
+        <button type="button" class="ghost" id="export-ui">HTML</button>
+        <button type="button" class="ghost" id="load-ui">Последний</button>
+        <button type="button" class="ghost" id="clear-ui">Очистить историю</button>
       </div>
       <div id="ui-out"></div>
     </div>
   </section>
+
+  <section class="panel" id="p-quantum">
+    <div class="glass">
+      <p class="sub">2-qubit statevector: H₀ → CNOT₀₁ (Белл). Полный лаб: /quantum/</p>
+      <div class="row">
+        <button type="button" class="go" id="run-bell">Белл Φ+</button>
+        <button type="button" class="ghost" id="run-h">Только H₀</button>
+        <button type="button" class="ghost" id="run-0">|00⟩</button>
+      </div>
+      <div class="prob" id="probs">
+        <div><b>—</b><span>|00⟩</span></div>
+        <div><b>—</b><span>|01⟩</span></div>
+        <div><b>—</b><span>|10⟩</span></div>
+        <div><b>—</b><span>|11⟩</span></div>
+      </div>
+      <p class="mono" id="qout" style="margin-top:10px"></p>
+    </div>
+  </section>
 </div>
 
-<div id="tour">
+<button type="button" id="help" title="Тур">?</button>
+<div id="tour" class="hide">
   <div class="box">
-    <h2>Тур по Lab</h2>
-    <p>1) Сад агентов — 4 роли, 2 раунда.<br>2) Крипто — ключи, подпись, AES.<br>3) Bloch — текст → сфера.<br>4) UI на лету — описание → блок.<br>LLM 7B — в MATRIX (WebGPU).</p>
-    <button type="button" class="go" id="tour-ok">Понятно</button>
+    <h2>Тур Lab</h2>
+    <p>Агенты (роли + LOG) · Крипто (JSON/PEM/QR) · Bloch + QCLI · UI · 2-qubit. WebLLM → MATRIX.</p>
+    <button type="button" class="go" id="tour-ok">Ок</button>
   </div>
 </div>
 
 <script>
 (function(){
 "use strict";
-const DID = "did:aksi:ed25519:sovereign-2026";
-if (!window.crypto || !crypto.subtle) {
-  document.body.insertAdjacentHTML("afterbegin", "<p class=\"bad\" style=\"padding:12px\">Web Crypto API недоступен в этом браузере.</p>");
-}
+const DID="did:aksi:ed25519:sovereign-2026";
 
 /* particles */
-const c = document.getElementById("fx"); const ctx = c.getContext("2d"); let pts = [];
-function resize(){ c.width = innerWidth; c.height = innerHeight; }
-resize(); addEventListener("resize", resize);
-for (let i=0;i<42;i++) pts.push({x:Math.random()*c.width,y:Math.random()*c.height,v:.12+Math.random()*.45,r:Math.random()*1.6});
-(function loop(){
-  ctx.clearRect(0,0,c.width,c.height);
-  ctx.fillStyle="rgba(0,240,255,.2)";
-  pts.forEach(p=>{ p.y-=p.v; if(p.y<0){p.y=c.height;p.x=Math.random()*c.width;} ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.28); ctx.fill(); });
-  requestAnimationFrame(loop);
-})();
+const fx=document.getElementById("fx"), fctx=fx.getContext("2d"); let pts=[];
+function resize(){fx.width=innerWidth;fx.height=innerHeight}
+resize(); addEventListener("resize",resize);
+for(let i=0;i<36;i++) pts.push({x:Math.random()*fx.width,y:Math.random()*fx.height,v:.1+Math.random()*.4,r:Math.random()*1.5});
+(function loop(){fctx.clearRect(0,0,fx.width,fx.height);fctx.fillStyle="rgba(0,240,255,.18)";pts.forEach(p=>{p.y-=p.v;if(p.y<0){p.y=fx.height;p.x=Math.random()*fx.width}fctx.beginPath();fctx.arc(p.x,p.y,p.r,0,6.28);fctx.fill()});requestAnimationFrame(loop)})();
 
 /* tabs */
-document.querySelector("tabs").onclick = (e) => {
-  const b = e.target.closest("button[data-p]"); if (!b) return;
-  document.querySelectorAll("tabs button").forEach(x => x.classList.toggle("on", x===b));
-  document.querySelectorAll(".panel").forEach(p => p.classList.remove("on"));
+document.querySelector("tabs").onclick=e=>{
+  const b=e.target.closest("button[data-p]"); if(!b) return;
+  document.querySelectorAll("tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
   document.getElementById("p-"+b.dataset.p).classList.add("on");
-  if (b.dataset.p==="bloch") drawBloch(true);
 };
 
 /* tour */
-if (!localStorage.getItem("AKSI_LAB_TOUR_V1")) {
-  document.getElementById("tour").classList.remove("hide");
-} else document.getElementById("tour").classList.add("hide");
-document.getElementById("tour-ok").onclick = () => {
-  localStorage.setItem("AKSI_LAB_TOUR_V1", "1");
-  document.getElementById("tour").classList.add("hide");
-};
+function openTour(){document.getElementById("tour").classList.remove("hide")}
+function closeTour(){localStorage.setItem("AKSI_LAB_TOUR_V1","1");document.getElementById("tour").classList.add("hide")}
+if(!localStorage.getItem("AKSI_LAB_TOUR_V1")) openTour();
+document.getElementById("tour-ok").onclick=closeTour;
+document.getElementById("help").onclick=()=>{localStorage.removeItem("AKSI_LAB_TOUR_V1");openTour()};
 
 /* agents */
-const PRESETS = [
-  "Нужен ли ИИ суверенитет данных?",
-  "Может ли агент жить без OpenAI?",
-  "Зачем DID для ИИ?",
-  "Квант-лаб vs реальный квантовый компьютер",
+const PRESETS=["Нужен ли ИИ суверенитет данных?","Может ли агент жить без OpenAI?","Зачем DID для ИИ?","Квант-лаб vs реальный QPU"];
+const presets=document.getElementById("presets");
+PRESETS.forEach(t=>{const b=document.createElement("button");b.type="button";b.textContent=t.slice(0,26)+(t.length>26?"…":"");b.onclick=()=>document.getElementById("topic").value=t;presets.appendChild(b)});
+const ROLES=[
+  {name:"АКСИ",cls:"ak",fn:t=>"Сводно: суверенитет = ключи + локальность. «"+t.slice(0,64)+"»."},
+  {name:"Оптимист",cls:"opt",fn:t=>"Локальный ИИ усилит доверие. «"+t.slice(0,56)+"»."},
+  {name:"Скептик",cls:"sk",fn:t=>"Без revoke и аудита — риск. «"+t.slice(0,56)+"»."},
+  {name:"Аналитик",cls:"an",fn:t=>"Слои: data@user · WebCrypto · optional LLM. "+t.slice(0,56)},
 ];
-const presets = document.getElementById("presets");
-PRESETS.forEach(t => {
-  const b = document.createElement("button"); b.type="button"; b.textContent=t.slice(0,28)+(t.length>28?"…":"");
-  b.onclick = () => { document.getElementById("topic").value = t; };
-  presets.appendChild(b);
-});
-const ROLES = [
-  { name:"АКСИ", cls:"ak", fn:t=>"Сводно: суверенитет = локальный контроль + подпись действий. Тема: «"+t.slice(0,70)+"»." },
-  { name:"Оптимист", cls:"opt", fn:t=>"Локальный ИИ даст приватность и скорость. «"+t.slice(0,60)+"» — шанс на доверие." },
-  { name:"Скептик", cls:"sk", fn:t=>"Без аудита и revoke ключей риск высок. В «"+t.slice(0,60)+"» дыры ответственности." },
-  { name:"Аналитик", cls:"an", fn:t=>"Слои: (1) данные у user (2) WebCrypto (3) optional LLM. Тема: "+t.slice(0,70) },
-];
-document.getElementById("run-agents").onclick = async () => {
-  const topic = document.getElementById("topic").value.trim() || PRESETS[0];
-  const box = document.getElementById("agents"); box.innerHTML = "";
-  for (let round=1; round<=2; round++) {
-    for (const r of ROLES) {
-      await new Promise(res => setTimeout(res, 280));
-      const d = document.createElement("div");
-      d.className = "agent "+r.cls;
-      d.innerHTML = "<b>Раунд "+round+" · "+r.name+"</b><p></p>";
-      d.querySelector("p").textContent = r.fn(topic) + (round===2?"\nУточняю с учётом других ролей.":"");
-      box.appendChild(d); box.scrollTop = 1e9;
+function logLine(s){const el=document.getElementById("agent-log");if(el.textContent==="—")el.textContent="";el.textContent+=s+"\n";el.scrollTop=1e9}
+document.getElementById("run-agents").onclick=async()=>{
+  const topic=document.getElementById("topic").value.trim()||PRESETS[0];
+  const box=document.getElementById("agents"); box.innerHTML=""; document.getElementById("agent-log").textContent="";
+  logLine("# topic: "+topic);
+  for(let round=1;round<=2;round++){
+    logLine("--- round "+round+" ---");
+    for(let i=0;i<ROLES.length;i++){
+      const r=ROLES[i]; const next=ROLES[(i+1)%ROLES.length];
+      await new Promise(res=>setTimeout(res,260));
+      const text=r.fn(topic)+(round===2?"\nУточнение с учётом других ролей.":"");
+      logLine(r.name+" → "+next.name+": "+text.replace(/\n/g," ").slice(0,90));
+      const d=document.createElement("div"); d.className="agent "+r.cls;
+      d.innerHTML="<b>R"+round+" · "+r.name+"</b><p></p>"; d.querySelector("p").textContent=text;
+      box.appendChild(d); box.scrollTop=1e9;
     }
   }
-  const d = document.createElement("div");
-  d.className = "agent ak";
-  d.innerHTML = "<b>АКСИ · итог</b><p>Симуляция ролей (не 5×7B). Тяжёлый LLM — /matrix/. Вывод: суверенитет = ключи + локальность + проверяемость.</p>";
+  logLine("# done");
+  const d=document.createElement("div"); d.className="agent ak";
+  d.innerHTML="<b>Итог</b><p>Ролевая симуляция (не 5×7B). Тяжёлый LLM — /matrix/.</p>";
   box.appendChild(d);
 };
-document.getElementById("clear-agents").onclick = () => document.getElementById("agents").innerHTML = "";
+document.getElementById("clear-agents").onclick=()=>{document.getElementById("agents").innerHTML="";document.getElementById("agent-log").textContent="—"};
 
 /* crypto */
-function b64(buf){ return btoa(String.fromCharCode(...new Uint8Array(buf))); }
-function unb64(s){ return Uint8Array.from(atob(s), c=>c.charCodeAt(0)); }
-let kp=null, aesKey=null, lastSpki="", lastPkcs8="";
-
+function b64(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)))}
+function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+function spkiToPem(b64s){const lines=b64s.match(/.{1,64}/g).join("\n");return "-----BEGIN PUBLIC KEY-----\n"+lines+"\n-----END PUBLIC KEY-----"}
+let kp=null,aesKey=null,lastSpki="",lastPkcs8="";
+async function showQr(text){
+  try{ await QRCode.toCanvas(document.getElementById("qr"), text.slice(0,200), {width:128, margin:1}); }catch{}
+}
 async function genKeys(){
-  kp = await crypto.subtle.generateKey({name:"ECDSA", namedCurve:"P-256"}, true, ["sign","verify"]);
-  aesKey = await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt","decrypt"]);
-  lastSpki = b64(await crypto.subtle.exportKey("spki", kp.publicKey));
-  lastPkcs8 = b64(await crypto.subtle.exportKey("pkcs8", kp.privateKey));
-  document.getElementById("pub").textContent = "Public SPKI:\n"+lastSpki;
-  document.getElementById("cout").textContent = "Ключи ECDSA P-256 + AES-GCM созданы локально.";
+  kp=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign","verify"]);
+  aesKey=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
+  lastSpki=b64(await crypto.subtle.exportKey("spki",kp.publicKey));
+  lastPkcs8=b64(await crypto.subtle.exportKey("pkcs8",kp.privateKey));
+  document.getElementById("pub").textContent=lastSpki;
+  document.getElementById("cout").textContent="Ключи готовы";
+  showQr(lastSpki);
 }
-document.getElementById("gen-keys").onclick = genKeys;
-document.getElementById("export-keys").onclick = () => {
-  if (!lastSpki) { document.getElementById("cout").textContent="Сначала ключи"; return; }
-  const blob = new Blob([JSON.stringify({ did:DID, curve:"P-256", spki:lastSpki, pkcs8:lastPkcs8, ts:new Date().toISOString() }, null, 2)], {type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="aksi-keys.json"; a.click();
+document.getElementById("gen-keys").onclick=genKeys;
+document.getElementById("pem-btn").onclick=()=>{ if(!lastSpki)return; document.getElementById("pub").textContent=spkiToPem(lastSpki); };
+document.getElementById("export-keys").onclick=()=>{
+  if(!lastSpki){document.getElementById("cout").textContent="Сначала ключи";return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({did:DID,curve:"P-256",spki:lastSpki,pkcs8:lastPkcs8},null,2)],{type:"application/json"}));a.download="aksi-keys.json";a.click();
 };
-document.getElementById("import-keys").onclick = () => document.getElementById("import-file").click();
-document.getElementById("import-file").onchange = async (e) => {
-  try {
-    const j = JSON.parse(await e.target.files[0].text());
-    kp = {
-      publicKey: await crypto.subtle.importKey("spki", unb64(j.spki), {name:"ECDSA", namedCurve:"P-256"}, true, ["verify"]),
-      privateKey: await crypto.subtle.importKey("pkcs8", unb64(j.pkcs8), {name:"ECDSA", namedCurve:"P-256"}, true, ["sign"]),
-    };
+document.getElementById("import-keys").onclick=()=>document.getElementById("import-file").click();
+document.getElementById("import-file").onchange=async e=>{
+  try{
+    const j=JSON.parse(await e.target.files[0].text());
+    kp={publicKey:await crypto.subtle.importKey("spki",unb64(j.spki),{name:"ECDSA",namedCurve:"P-256"},true,["verify"]),privateKey:await crypto.subtle.importKey("pkcs8",unb64(j.pkcs8),{name:"ECDSA",namedCurve:"P-256"},true,["sign"])};
     lastSpki=j.spki; lastPkcs8=j.pkcs8;
-    aesKey = await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt","decrypt"]);
-    document.getElementById("pub").textContent="Imported SPKI:\n"+lastSpki;
-    document.getElementById("cout").textContent="Ключи импортированы. AES-сессия новая.";
-  } catch(err){ document.getElementById("cout").textContent="Ошибка импорта: "+err.message; }
+    aesKey=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
+    document.getElementById("pub").textContent=lastSpki; showQr(lastSpki);
+    document.getElementById("cout").textContent="Импорт OK · AES-сессия новая";
+  }catch(err){document.getElementById("cout").textContent="Ошибка: "+err.message}
 };
-document.getElementById("copy-did").onclick = async () => {
-  await navigator.clipboard.writeText(DID);
-  document.getElementById("cout").textContent="DID скопирован";
-};
-document.getElementById("csign").onclick = async () => {
-  if (!kp) await genKeys();
-  const msg = document.getElementById("cmsg").value;
-  const sig = await crypto.subtle.sign({name:"ECDSA", hash:"SHA-256"}, kp.privateKey, new TextEncoder().encode(msg));
-  document.getElementById("csig").value = b64(sig);
-  document.getElementById("cout").innerHTML = "<span class=\"ok\">Подпись создана</span>";
-};
-document.getElementById("cverify").onclick = async () => {
-  if (!kp) { document.getElementById("cout").textContent="Нет ключей"; return; }
-  try {
-    const ok = await crypto.subtle.verify({name:"ECDSA", hash:"SHA-256"}, kp.publicKey, unb64(document.getElementById("csig").value.trim()), new TextEncoder().encode(document.getElementById("cmsg").value));
-    document.getElementById("cout").innerHTML = ok?"<span class=\"ok\">✅ Верна</span>":"<span class=\"bad\">❌ Неверна</span>";
-  } catch { document.getElementById("cout").innerHTML="<span class=\"bad\">Ошибка проверки</span>"; }
-};
-document.getElementById("dl-sig").onclick = () => {
-  const payload = { did:DID, message:document.getElementById("cmsg").value, signature:document.getElementById("csig").value, alg:"ECDSA-P256-SHA256", ts:new Date().toISOString() };
-  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"})); a.download="aksi-signature.json"; a.click();
-};
-document.getElementById("cenc").onclick = async () => {
-  if (!aesKey) await genKeys();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, aesKey, new TextEncoder().encode(document.getElementById("cmsg").value));
-  document.getElementById("ccipher").value = b64(iv)+"."+b64(ct);
-  document.getElementById("cout").textContent="AES-GCM ok";
-};
-document.getElementById("cdec").onclick = async () => {
-  if (!aesKey) { document.getElementById("cout").textContent="Нет AES-ключа сессии"; return; }
-  try {
-    const [ivs,cts]=document.getElementById("ccipher").value.split(".");
-    const pt=await crypto.subtle.decrypt({name:"AES-GCM", iv:unb64(ivs)}, aesKey, unb64(cts));
-    document.getElementById("cout").textContent="Расшифровано: "+new TextDecoder().decode(pt);
-  } catch { document.getElementById("cout").innerHTML="<span class=\"bad\">Не расшифровано</span>"; }
-};
+document.getElementById("copy-did").onclick=async()=>{await navigator.clipboard.writeText(DID);document.getElementById("cout").textContent="DID скопирован"};
+document.getElementById("csign").onclick=async()=>{if(!kp)await genKeys();const sig=await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},kp.privateKey,new TextEncoder().encode(document.getElementById("cmsg").value));document.getElementById("csig").value=b64(sig);document.getElementById("cout").innerHTML="<span class=ok>Подписано</span>"};
+document.getElementById("cverify").onclick=async()=>{try{const ok=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},kp.publicKey,unb64(document.getElementById("csig").value.trim()),new TextEncoder().encode(document.getElementById("cmsg").value));document.getElementById("cout").innerHTML=ok?"<span class=ok>✅ Верна</span>":"<span class=bad>❌</span>"}catch{document.getElementById("cout").innerHTML="<span class=bad>Ошибка</span>"}};
+document.getElementById("dl-sig").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({did:DID,message:document.getElementById("cmsg").value,signature:document.getElementById("csig").value,alg:"ECDSA-P256-SHA256"},null,2)],{type:"application/json"}));a.download="aksi-sig.json";a.click()};
+document.getElementById("cenc").onclick=async()=>{if(!aesKey)await genKeys();const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},aesKey,new TextEncoder().encode(document.getElementById("cmsg").value));document.getElementById("ccipher").value=b64(iv)+"."+b64(ct)};
+document.getElementById("cdec").onclick=async()=>{try{const[ivs,cts]=document.getElementById("ccipher").value.split(".");const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(ivs)},aesKey,unb64(cts));document.getElementById("cout").textContent=new TextDecoder().decode(pt)}catch{document.getElementById("cout").innerHTML="<span class=bad>Не расшифровано</span>"}};
 
-/* bloch smooth */
-let cur={theta:0.8,phi:1.2}, target={theta:0.8,phi:1.2};
-function metrics(text){
-  const n=Math.max(1,text.length); const freq={};
-  for(const ch of text) freq[ch]=(freq[ch]||0)+1;
-  let H=0; Object.values(freq).forEach(c=>{const p=c/n;H-=p*Math.log2(p);});
-  const alphabet=Math.min(64,Math.max(2,Object.keys(freq).length));
-  const qcli=H/(Math.log2(alphabet)||1);
-  const theta=Math.min(Math.PI, qcli*Math.PI);
-  let hash=0; for(let i=0;i<text.length;i++) hash=(hash*31+text.charCodeAt(i))>>>0;
-  const phi=((hash%360)/360)*Math.PI*2;
-  return {H,qcli,theta,phi};
-}
-function paintBloch(){
-  cur.theta += (target.theta-cur.theta)*0.12;
-  cur.phi += (target.phi-cur.phi)*0.12;
-  const canvas=document.getElementById("bloch"); const ctx=canvas.getContext("2d");
-  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2,R=110;
-  const x=Math.sin(cur.theta)*Math.cos(cur.phi);
-  const y=Math.sin(cur.theta)*Math.sin(cur.phi);
-  const z=Math.cos(cur.theta);
-  ctx.clearRect(0,0,W,H);
-  ctx.strokeStyle="rgba(0,240,255,.35)"; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.35,0,0,Math.PI*2); ctx.stroke();
-  ctx.strokeStyle="rgba(255,255,255,.2)";
-  ctx.beginPath(); ctx.moveTo(cx-R-6,cy); ctx.lineTo(cx+R+6,cy); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx,cy-R-6); ctx.lineTo(cx,cy+R+6); ctx.stroke();
-  ctx.fillStyle="#9ca3c7"; ctx.font="11px sans-serif";
-  ctx.fillText("|0⟩",cx+6,cy-R-8); ctx.fillText("|1⟩",cx+6,cy+R+14);
-  ctx.fillText("X",cx+R+4,cy-4); ctx.fillText("Z",cx+4,cy-R-4);
-  const sx=cx+R*x, sy=cy-R*z*0.85-R*y*0.2;
-  ctx.strokeStyle="#a855f7"; ctx.lineWidth=2.5;
-  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(sx,sy); ctx.stroke();
-  ctx.fillStyle="#00f0ff"; ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2); ctx.fill();
-  requestAnimationFrame(paintBloch);
-}
-function drawBloch(){
-  const text=document.getElementById("btext").value;
-  const m=metrics(text);
-  target.theta=m.theta; target.phi=m.phi;
-  document.getElementById("bh").textContent=m.theta.toFixed(2);
-  document.getElementById("bp").textContent=m.phi.toFixed(2);
-  document.getElementById("bq").textContent=m.qcli.toFixed(3);
-  document.getElementById("bstate").textContent="r≈("+Math.sin(m.theta)*Math.cos(m.phi).toFixed(3)+", "+Math.sin(m.theta)*Math.sin(m.phi).toFixed(3)+", "+Math.cos(m.theta).toFixed(3)+")";
-}
-document.getElementById("btext").addEventListener("input", drawBloch);
-paintBloch(); drawBloch();
+/* bloch */
+let cur={theta:.8,phi:1.2},target={theta:.8,phi:1.2};
+function metrics(text){const n=Math.max(1,text.length);const freq={};for(const ch of text)freq[ch]=(freq[ch]||0)+1;let H=0;Object.values(freq).forEach(c=>{const p=c/n;H-=p*Math.log2(p)});const alphabet=Math.min(64,Math.max(2,Object.keys(freq).length));const qcli=H/(Math.log2(alphabet)||1);const theta=Math.min(Math.PI,qcli*Math.PI);let hash=0;for(let i=0;i<text.length;i++)hash=(hash*31+text.charCodeAt(i))>>>0;return{qcli,theta,phi:((hash%360)/360)*Math.PI*2}}
+function paint(){cur.theta+=(target.theta-cur.theta)*.12;cur.phi+=(target.phi-cur.phi)*.12;const canvas=document.getElementById("bloch"),ctx=canvas.getContext("2d"),W=280,H=280,cx=140,cy=140,R=110;const x=Math.sin(cur.theta)*Math.cos(cur.phi),y=Math.sin(cur.theta)*Math.sin(cur.phi),z=Math.cos(cur.theta);ctx.clearRect(0,0,W,H);ctx.strokeStyle="rgba(0,240,255,.35)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,R,0,6.28);ctx.stroke();ctx.beginPath();ctx.ellipse(cx,cy,R,R*.35,0,0,6.28);ctx.stroke();ctx.strokeStyle="rgba(255,255,255,.2)";ctx.beginPath();ctx.moveTo(cx-R-6,cy);ctx.lineTo(cx+R+6,cy);ctx.stroke();ctx.beginPath();ctx.moveTo(cx,cy-R-6);ctx.lineTo(cx,cy+R+6);ctx.stroke();ctx.fillStyle="#9ca3c7";ctx.font="11px sans-serif";ctx.fillText("|0⟩",cx+6,cy-R-8);ctx.fillText("|1⟩",cx+6,cy+R+14);const sx=cx+R*x,sy=cy-R*z*.85-R*y*.2;ctx.strokeStyle="#a855f7";ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(sx,sy);ctx.stroke();ctx.fillStyle="#00f0ff";ctx.beginPath();ctx.arc(sx,sy,5,0,6.28);ctx.fill();requestAnimationFrame(paint)}
+function drawBloch(){const m=metrics(document.getElementById("btext").value);target.theta=m.theta;target.phi=m.phi;document.getElementById("bh").textContent=m.theta.toFixed(2);document.getElementById("bp").textContent=m.phi.toFixed(2);document.getElementById("bq").textContent=m.qcli.toFixed(3);const circ=97.4;document.getElementById("gauge-arc").setAttribute("stroke-dasharray",(m.qcli*circ).toFixed(1)+" "+circ);document.getElementById("gauge-arc").setAttribute("stroke",m.qcli>0.7?"#a855f7":m.qcli>0.4?"#00f0ff":"#4ade80");document.getElementById("bstate").textContent="QCLI "+m.qcli.toFixed(3)}
+document.getElementById("btext").addEventListener("input",drawBloch);paint();drawBloch();
 
-/* UI gen */
-let lastUIHtml="";
-function genUI(p){
-  p=(p||"").toLowerCase();
-  const root=document.createElement("div"); root.className="card";
-  if(/профил|имя|user/.test(p)){
-    root.innerHTML="<strong>Профиль</strong><br><input id=\"ui-name\" placeholder=\"Имя\" style=\"width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\">";
-    const btn=document.createElement("button"); btn.className="go"; btn.textContent="Подписать";
-    btn.onclick=async()=>{ const n=document.getElementById("ui-name").value||"anon"; const d=await crypto.subtle.digest("SHA-256", new TextEncoder().encode("AKSI|"+n)); alert([...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,16)); };
-    root.appendChild(btn);
-  } else if(/форм|логин|email/.test(p)){
-    root.innerHTML="<strong>Форма</strong><br><input placeholder=\"email\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><input type=\"password\" placeholder=\"пароль\" style=\"width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff\"><br><button class=\"go\" type=\"button\">Войти (demo)</button>";
-    root.querySelector("button").onclick=()=>alert("Demo · без сервера");
-  } else if(/метрик|дашборд|dashboard/.test(p)){
-    root.innerHTML="<strong>Дашборд</strong><div class=\"metrics\"><div><b>0.72</b><span>QCLI</span></div><div><b>3.1</b><span>H</span></div><div><b>OK</b><span>DID</span></div></div>";
-  } else if(/кнопк|магия|панель/.test(p)){
-    root.innerHTML="<strong>Панель</strong><br>";
-    ["Магия","Квант","Агенты"].forEach(l=>{ const b=document.createElement("button"); b.className="go"; b.style.margin="4px"; b.textContent=l; b.onclick=()=>alert(l); root.appendChild(b); });
-  } else {
-    root.innerHTML="<strong>Блок</strong><p style=\"color:#9ca3c7;font-size:13px;margin-top:6px\">Шаблоны: профиль, форма, дашборд, кнопки.</p>";
-  }
-  const out=document.getElementById("ui-out"); out.innerHTML=""; out.appendChild(root);
-  lastUIHtml=root.innerHTML;
-  try{ const h=JSON.parse(localStorage.getItem("AKSI_UI_HIST")||"[]"); h.push({t:new Date().toISOString(),p}); localStorage.setItem("AKSI_UI_HIST", JSON.stringify(h.slice(-20))); }catch{}
+/* UI */
+const UI_KEY="AKSI_UI_HIST_V2"; let lastUIHtml="";
+function genUI(p){p=(p||"").toLowerCase();const root=document.createElement("div");root.className="card";
+if(/профил|имя/.test(p)){root.innerHTML="<strong>Профиль</strong><br><input id=ui-name placeholder=Имя style='width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff'>";const btn=document.createElement("button");btn.className="go";btn.textContent="Подписать";btn.onclick=async()=>{const n=document.getElementById("ui-name").value||"anon";const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("AKSI|"+n));alert([...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,16))};root.appendChild(btn)}
+else if(/форм|логин|email/.test(p)){root.innerHTML="<strong>Форма</strong><br><input placeholder=email style='width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff'><input type=password placeholder=пароль style='width:100%;margin:6px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff'><br><button class=go type=button>Войти</button>";root.querySelector("button").onclick=()=>alert("demo")}
+else if(/метрик|дашборд/.test(p)){root.innerHTML="<strong>Дашборд</strong><div class=metrics><div><b>0.72</b><span>QCLI</span></div><div><b>3.1</b><span>H</span></div><div><b>OK</b><span>DID</span></div></div>"}
+else if(/кнопк|магия|панель/.test(p)){root.innerHTML="<strong>Панель</strong><br>";["Магия","Квант","Агенты"].forEach(l=>{const b=document.createElement("button");b.className="go";b.style.margin="4px";b.textContent=l;b.onclick=()=>alert(l);root.appendChild(b)})}
+else root.innerHTML="<strong>Блок</strong><p class=mono>Шаблоны: профиль, форма, дашборд, кнопки</p>";
+const out=document.getElementById("ui-out");out.innerHTML="";out.appendChild(root);lastUIHtml=root.innerHTML;
+const h=JSON.parse(localStorage.getItem(UI_KEY)||"[]");h.push({t:Date.now(),p,html:lastUIHtml});localStorage.setItem(UI_KEY,JSON.stringify(h.slice(-15)));
 }
 document.getElementById("gen-ui").onclick=()=>genUI(document.getElementById("uiprompt").value);
-document.querySelectorAll("[data-ui]").forEach(b=>b.onclick=()=>{ document.getElementById("uiprompt").value=b.dataset.ui; genUI(b.dataset.ui); });
-document.getElementById("export-ui").onclick=()=>{
-  const html="<!DOCTYPE html><html><body style=\"font-family:system-ui;background:#0a0618;color:#fff;padding:20px\"><div>"+lastUIHtml+"</div></body></html>";
-  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([html],{type:"text/html"})); a.download="aksi-ui.html"; a.click();
-};
+document.querySelectorAll("[data-ui]").forEach(b=>b.onclick=()=>{document.getElementById("uiprompt").value=b.dataset.ui;genUI(b.dataset.ui)});
+document.getElementById("export-ui").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["<!DOCTYPE html><html><body style='background:#0a0618;color:#fff;font-family:system-ui;padding:20px'>"+lastUIHtml+"</body></html>"],{type:"text/html"}));a.download="aksi-ui.html";a.click()};
+document.getElementById("clear-ui").onclick=()=>{localStorage.removeItem(UI_KEY);document.getElementById("ui-out").innerHTML="";lastUIHtml=""};
+document.getElementById("load-ui").onclick=()=>{const h=JSON.parse(localStorage.getItem(UI_KEY)||"[]");if(!h.length){alert("История пуста");return}const last=h[h.length-1];document.getElementById("uiprompt").value=last.p||"";document.getElementById("ui-out").innerHTML="<div class=card>"+last.html+"</div>";lastUIHtml=last.html};
+
+/* 2-qubit */
+function C(re,im){return{re:re||0,im:im||0}}
+function cadd(a,b){return C(a.re+b.re,a.im+b.im)}
+function cmul(a,b){return C(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re)}
+function abs2(a){return a.re*a.re+a.im*a.im}
+const ISQ=1/Math.SQRT2;
+function apply1(psi,q,M){const next=[C(),C(),C(),C()];for(let b=0;b<2;b++)for(let o=0;o<2;o++){let i0,i1,out;if(q===0){i0=o;i1=2+o;out=b*2+o}else{i0=o*2;i1=o*2+1;out=o*2+b}next[out]=cadd(cmul(M[b][0],psi[i0]),cmul(M[b][1],psi[i1]))}return next}
+function showPsi(psi,note){const p=psi.map(abs2);const box=document.getElementById("probs");[...box.children].forEach((d,i)=>{d.querySelector("b").textContent=p[i].toFixed(3)});document.getElementById("qout").textContent=note+"\nP00="+p[0].toFixed(3)+" P01="+p[1].toFixed(3)+" P10="+p[2].toFixed(3)+" P11="+p[3].toFixed(3)}
+document.getElementById("run-0").onclick=()=>showPsi([C(1),C(),C(),C()],"|00⟩");
+document.getElementById("run-h").onclick=()=>{let psi=[C(1),C(),C(),C()];psi=apply1(psi,0,[[C(ISQ),C(ISQ)],[C(ISQ),C(-ISQ)]]);showPsi(psi,"H на q0")};
+document.getElementById("run-bell").onclick=()=>{let psi=[C(1),C(),C(),C()];psi=apply1(psi,0,[[C(ISQ),C(ISQ)],[C(ISQ),C(-ISQ)]]);const next=[C(),C(),C(),C()];for(let q0=0;q0<2;q0++)for(let q1=0;q1<2;q1++){const t=q0?1-q1:q1;next[2*q0+t]=cadd(next[2*q0+t],psi[2*q0+q1])}showPsi(next,"Белл Φ+ · запутанность")};
 
 genKeys();
 })();
