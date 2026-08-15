@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Суверенный контур</title>
+<meta name="theme-color" content="#0a0618">
+<style>
+:root{--bg:#0a0618;--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--c:#00f0ff;--v:#a855f7;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(165deg,#0a0618,#160a28);color:var(--ink);min-height:100dvh;max-width:760px;margin:0 auto;padding:14px 14px 48px;line-height:1.5}
+nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
+nav a{flex:0 0 auto;color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;padding:8px 11px;border-radius:999px}
+nav a.on{color:#fff;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+h1{font-size:1.45rem;margin-bottom:6px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+h2{font-size:1.05rem;color:var(--c);margin:18px 0 8px}
+.glass{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-size:11px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+ul{margin:8px 0 0 18px;color:var(--muted);font-size:14px}
+.mono{font-family:ui-monospace,monospace;font-size:12px;color:var(--muted)}
+a{color:var(--c)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Хаб</a>
+  <a href="/contour/">Контур</a>
+  <a href="/proof/">Proof</a>
+  <a class="on" href="/sovereign/">Суверенитет</a>
+  <a href="/pulse/">Pulse</a>
+</nav>
+
+<h1>Суверенный контур АКСИ</h1>
+<p class="sub">Не маркетинг. Разделение: что уже есть как технологический задел, что требуется для гос/корп. контура РФ, чего на GitHub Pages быть не может.</p>
+
+<div class="glass">
+  <h2 style="margin-top:0">Статус слоёв</h2>
+  <table>
+    <thead><tr><th>Слой</th><th>Сейчас</th><th>Вердикт</th></tr></thead>
+    <tbody>
+      <tr><td>Публичная демонстрация, агент offline, Lab, Pulse, Proof</td><td>milana808.github.io</td><td class="ok">Есть</td></tr>
+      <tr><td>Локальный backend (FastAPI/Ollama)</td><td>Milana-backend (у владельца)</td><td class="ok">Задел</td></tr>
+      <tr><td>DID + проверяемые отчёты</td><td>did:aksi… · /proof · /pulse</td><td class="ok">Концепт работает</td></tr>
+      <tr><td>Astra/РЕД/ALT, аттестация ФСТЭК</td><td>—</td><td class="bad">Не сделано</td></tr>
+      <tr><td>КриптоПро, Магма/Кузнечик</td><td>Web Crypto P-256/AES</td><td class="bad">Не ГОСТ</td></tr>
+      <tr><td>ЕСИА / Госуслуги</td><td>—</td><td class="bad">Нет</td></tr>
+      <tr><td>Реестр ПО Минцифры, Роспатент</td><td>—</td><td class="warn">Юр. работа вне кода</td></tr>
+      <tr><td>GigaChat / YandexGPT / T-Pro адаптеры</td><td>нужны в backend</td><td class="warn">Спроектировать</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="glass">
+  <h2 style="margin-top:0">Целевая архитектура (для периметра)</h2>
+  <ul>
+    <li><b>UI</b> — тот же контур модулей, но хостинг в РФ (Selectel / VK Cloud / Yandex Cloud), не GitHub Pages как прод.</li>
+    <li><b>Agent core</b> — Milana-backend за обратным прокси, без выхода в иностранные LLM API.</li>
+    <li><b>LLM ports</b> — единый интерфейс <span class="mono">complete(prompt, opts) → stream</span>; драйверы: Ollama | GigaChat | YandexGPT | T-Pro | on-prem.</li>
+    <li><b>Crypto ports</b> — интерфейс sign/verify/encrypt; драйверы: WebCrypto (demo) | КриптоПро/ГОСТ (prod).</li>
+    <li><b>Identity</b> — did:aksi для агентов + опциональная привязка к ЕСИА для людей (отдельный контур согласия).</li>
+    <li><b>Audit</b> — Transparent Thought + неизменяемый журнал подписей (то, что уже демонстрируют /proof и /pulse).</li>
+  </ul>
+</div>
+
+<div class="glass">
+  <h2 style="margin-top:0">Порты (контракты, не реализации ГОСТ)</h2>
+  <pre class="mono" style="white-space:pre-wrap;margin:0">// LLM
+complete({ messages, temperature, stream }) → AsyncIterable&lt;token&gt;
+
+// Crypto (prod ≠ browser WebCrypto)
+sign(bytes) → signature
+verify(bytes, signature, publicKey) → boolean
+
+// Identity
+resolveDID(did) → document
+linkESIA(subjectId, consent) → binding  // только в доверенном контуре
+
+// Audit
+appendThought({ text, sig, ts, model }) → entryId</pre>
+</div>
+
+<div class="glass">
+  <h2 style="margin-top:0">Юридический трек (вне репозитория)</h2>
+  <ul>
+    <li>Роспатент: программа для ЭВМ «АКСИ MATRIX».</li>
+    <li>Аудит лицензий зависимостей (MIT/Apache; исключить BSL и спорные).</li>
+    <li>Реестр отечественного ПО — после зрелого дистрибутива, не после GitHub Pages.</li>
+    <li>Передача прав — договор, не «подарок письмом».</li>
+  </ul>
+</div>
+
+<div class="glass">
+  <h2 style="margin-top:0">Куда нести (каналы)</h2>
+  <ul>
+    <li>НТИ (SafeNet / NeuroNet) — пилоты.</li>
+    <li>Фонд содействия инновациям, Сколково — статус и гранты.</li>
+    <li>Центры компетенций: Сбер, Ростех, Росатом — НИОКР.</li>
+    <li>Вузы: МГУ ВМК, МФТИ, Баумана, ИТМО — совместные работы.</li>
+    <li>Минцифры / МЭР — через официальные приёмные, языком ТЗ, не стартапа.</li>
+  </ul>
+</div>
+
+<div class="glass">
+  <h2 style="margin-top:0">Формулировки для письма</h2>
+  <ul>
+    <li>«Программный комплекс обеспечения технологического суверенитета диалоговых систем…»</li>
+    <li>«Протокол проверяемости рассуждений агента (Transparent Thought)…»</li>
+    <li>«Автономный агент для обработки данных внутри периметра без внешних облачных LLM…»</li>
+    <li>«База для лаборатории тестирования доверенных ИИ-моделей…»</li>
+  </ul>
+</div>
+
+<p class="mono">DID: did:aksi:ed25519:sovereign-2026 · aksilove@internet.ru<br>
+Связанные страницы: <a href="/proof/">/proof</a> · <a href="/pulse/">/pulse</a> · <a href="/contour/">/contour</a></p>
+</body>
+</html>
