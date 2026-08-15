@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ · Recursive Kernel</title>
+<meta name="theme-color" content="#0a0618">
+<style>
+:root{--bg:#0a0618;--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,sans-serif;background:linear-gradient(165deg,#0a0618,#160a28);color:var(--ink);min-height:100dvh;max-width:760px;margin:0 auto;padding:14px 14px 48px}
+nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px}
+nav a{flex:0 0 auto;color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;padding:8px 11px;border-radius:999px}
+nav a.on{color:#fff;border:1px solid var(--line);background:rgba(255,255,255,.06)}
+h1{font-size:1.4rem;margin-bottom:6px}
+.sub{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:14px}
+.glass{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+button{border:none;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff;min-height:44px}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+button.ok{background:#166534}
+button.bad{background:#7f1d1d}
+.mono{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.log{max-height:40vh;overflow:auto;font-size:12px;line-height:1.5}
+.card{border-left:3px solid var(--c);padding:10px;margin:8px 0;background:rgba(0,0,0,.25);border-radius:0 10px 10px 0}
+.card b{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.stat div{text-align:center;padding:10px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.25)}
+.stat b{display:block;font-size:1.1rem}
+.stat span{font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/">Хаб</a>
+  <a class="on" href="/kernel/">Kernel</a>
+  <a href="/pulse/">Pulse</a>
+  <a href="/sovereign/">Суверенитет</a>
+  <a href="/lab/">Lab</a>
+  <a href="/wake/">Агент</a>
+</nav>
+
+<h1>Recursive Kernel</h1>
+<p class="sub">Ограниченное самоулучшение (уровень L2–L3): наблюдение → предложение → критика → <b>подтверждение человеком</b> → запись в песочницу знаний. Не RSI «без границ» и не перепись продакшена.</p>
+
+<div class="glass">
+  <div class="stat">
+    <div><b id="gen">0</b><span>поколение</span></div>
+    <div><b id="pending">0</b><span>ожидают</span></div>
+    <div><b id="applied">0</b><span>принято</span></div>
+  </div>
+  <div class="row">
+    <button type="button" id="cycle">Цикл улучшения</button>
+    <button type="button" class="ghost" id="auto">Авто×3</button>
+    <button type="button" class="ghost" id="export">Экспорт</button>
+    <button type="button" class="ghost" id="reset">Сброс песочницы</button>
+  </div>
+  <div class="mono" id="meta">источник: backend/agent_self_mod.py · app/core/agents.py · resonance</div>
+</div>
+
+<div class="glass">
+  <div class="mono" style="margin-bottom:8px;color:var(--c)">ЖУРНАЛ ЦИКЛА</div>
+  <div class="log" id="log"></div>
+</div>
+
+<div class="glass">
+  <div class="mono" style="margin-bottom:8px;color:var(--c)">ПАТЧИ (песочница знаний)</div>
+  <div id="patches"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const SEED = "AKSI_DIMAX_v3_2026";
+const DID = "did:aksi:ed25519:sovereign-2026";
+const KEY = "AKSI_KERNEL_V1";
+const MAX_DEPTH = 3;
+
+const BASE_KB = [
+  { id: "k1", q: "что такое акси", a: "АКСИ — суверенный агентный контур: offline UI, Resonance, опциональный backend." },
+  { id: "k2", q: "self-mod", a: "Self-mod только в sandbox, с confirm_token, без секретов и без автодеплоя." },
+  { id: "k3", q: "resonance", a: "Подпись мысли: SHA-256(seed|text|time). DID: did:aksi:ed25519:sovereign-2026" },
+  { id: "k4", q: "суверенитет", a: "Публичный Pages ≠ гос-периметр. ГОСТ/ЕСИА — отдельный контур. См. /sovereign/" },
+];
+
+function load() {
+  try {
+    const j = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (j && j.kb) return j;
+  } catch {}
+  return { generation: 0, kb: BASE_KB.map(x => ({...x})), proposals: [], history: [] };
+}
+function save(state) { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+async function sign(text) {
+  const p = SEED + "|" + text + "|" + new Date().toISOString();
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(p));
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+function log(msg, cls) {
+  const el = document.getElementById("log");
+  const line = document.createElement("div");
+  if (cls) line.className = cls;
+  line.textContent = "[" + new Date().toISOString().slice(11,19) + "] " + msg;
+  el.appendChild(line);
+  el.scrollTop = 1e9;
+}
+
+function stats(state) {
+  document.getElementById("gen").textContent = state.generation;
+  document.getElementById("pending").textContent = state.proposals.filter(p => p.status === "pending").length;
+  document.getElementById("applied").textContent = state.proposals.filter(p => p.status === "applied").length;
+}
+
+function renderPatches(state) {
+  const box = document.getElementById("patches");
+  box.innerHTML = "";
+  const list = state.proposals.slice().reverse();
+  if (!list.length) { box.innerHTML = "<div class=mono>нет патчей</div>"; return; }
+  list.forEach(p => {
+    const d = document.createElement("div");
+    d.className = "card";
+    d.innerHTML = "<b>" + p.status.toUpperCase() + " · " + p.id + " · gen " + p.generation + "</b><div class=mono></div>";
+    d.querySelector(".mono").textContent = p.title + "\n" + p.description + "\nsig: " + (p.signature||"").slice(0,24) + "…";
+    if (p.status === "pending") {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.style.marginTop = "8px";
+      const a = document.createElement("button");
+      a.className = "ok"; a.textContent = "Принять";
+      a.onclick = () => applyPatch(p.id);
+      const r = document.createElement("button");
+      r.className = "bad"; r.textContent = "Отклонить";
+      r.onclick = () => rejectPatch(p.id);
+      row.appendChild(a); row.appendChild(r);
+      d.appendChild(row);
+    }
+    box.appendChild(d);
+  });
+}
+
+async function observe() {
+  // lightweight self-observation: module count + kb size + pulse hist
+  let pulseScore = null;
+  try {
+    const h = JSON.parse(localStorage.getItem("AKSI_PULSE_V2") || "[]");
+    if (h.length) pulseScore = h[h.length - 1].score;
+  } catch {}
+  const state = load();
+  return {
+    kb_size: state.kb.length,
+    generation: state.generation,
+    pulseScore,
+    pending: state.proposals.filter(p => p.status === "pending").length,
+  };
+}
+
+function critique(proposal, obs) {
+  const notes = [];
+  if (!proposal.title || proposal.title.length < 4) notes.push("слабый title");
+  if ((proposal.new_fact || "").length < 20) notes.push("факт слишком короткий");
+  if (/api[_-]?key|sk-proj|secret/i.test(proposal.new_fact || "")) notes.push("REJECT: похоже на секрет");
+  if (obs.pending > 5) notes.push("очередь патчей велика — не плодить");
+  const reject = notes.some(n => n.startsWith("REJECT"));
+  const score = reject ? 0 : Math.max(0, 10 - notes.length * 2);
+  return { notes, score, reject };
+}
+
+function inventProposal(obs, generation) {
+  const ideas = [
+    {
+      title: "Уточнить offline-first",
+      description: "Добавить факт: UI на Pages не заменяет backend с Ollama.",
+      new_fact: "АКСИ offline-first: чат и Lab работают без сервера; полная LLM — через локальный Milana-backend/Ollama или WebLLM.",
+      q: "offline",
+    },
+    {
+      title: "Связать Pulse и Kernel",
+      description: "Факт о том, что score Pulse может запускать цикл улучшения.",
+      new_fact: "Recursive Kernel читает последний score из Pulse (AKSI_PULSE_V2) как сигнал наблюдения перед propose.",
+      q: "pulse kernel",
+    },
+    {
+      title: "Граница self-mod",
+      description: "Зафиксировать правило sandbox из agent_self_mod.py",
+      new_fact: "Правило self-mod: патч только в sandbox-знаниях, только после confirm, запрет секретов, нет автодеплоя в production.",
+      q: "sandbox self-mod",
+    },
+    {
+      title: "Суверенный порт LLM",
+      description: "Напоминание о vendor-agnostic complete()",
+      new_fact: "Ядро агента вызывает порт complete(); драйверы Ollama/GigaChat/Yandex/T-Pro подключаются снаружи публичного Pages.",
+      q: "llm port",
+    },
+  ];
+  // pick by generation rotation + observation
+  let idea = ideas[generation % ideas.length];
+  if (obs.pulseScore != null && obs.pulseScore < 90) {
+    idea = {
+      title: "Реакция на низкий Pulse",
+      description: "Score " + obs.pulseScore + " — предложить проверку модулей",
+      new_fact: "Если Pulse score < 90, оператору следует открыть /pulse/ и устранить FAIL-модули до следующего цикла Kernel.",
+      q: "pulse fail",
+    };
+  }
+  return idea;
+}
+
+async function oneCycle() {
+  const state = load();
+  if (state.generation >= 1000) { log("лимит поколений", "warn"); return; }
+
+  log("— цикл gen " + (state.generation + 1) + " —");
+  const obs = await observe();
+  log("observe: kb=" + obs.kb_size + " pulse=" + (obs.pulseScore ?? "n/a") + " pending=" + obs.pending);
+
+  const idea = inventProposal(obs, state.generation);
+  log("propose: " + idea.title);
+
+  const crit = critique(idea, obs);
+  log("critique: score=" + crit.score + " " + (crit.notes.join("; ") || "ok"), crit.reject ? "bad" : "ok");
+  if (crit.reject || crit.score < 4) {
+    log("патч отброшен ядром", "bad");
+    state.history.push({ t: new Date().toISOString(), event: "rejected_by_critique", idea: idea.title });
+    save(state);
+    return;
+  }
+
+  const id = "p" + Date.now().toString(36);
+  const body = idea.title + "|" + idea.new_fact;
+  const signature = await sign(body);
+  const proposal = {
+    id,
+    title: idea.title,
+    description: idea.description,
+    new_fact: idea.new_fact,
+    q: idea.q,
+    status: "pending",
+    generation: state.generation + 1,
+    signature,
+    critique: crit,
+    created_at: new Date().toISOString(),
+  };
+  state.proposals.push(proposal);
+  state.generation += 1;
+  state.history.push({ t: proposal.created_at, event: "proposed", id });
+  save(state);
+  stats(state);
+  renderPatches(state);
+  log("ожидает подтверждения человека: " + id, "warn");
+}
+
+function applyPatch(id) {
+  const state = load();
+  const p = state.proposals.find(x => x.id === id);
+  if (!p || p.status !== "pending") return;
+  p.status = "applied";
+  p.applied_at = new Date().toISOString();
+  state.kb.push({ id: "kb_" + id, q: p.q, a: p.new_fact });
+  state.history.push({ t: p.applied_at, event: "applied", id });
+  save(state);
+  stats(state);
+  renderPatches(state);
+  log("applied " + id + " → kb size " + state.kb.length, "ok");
+}
+
+function rejectPatch(id) {
+  const state = load();
+  const p = state.proposals.find(x => x.id === id);
+  if (!p || p.status !== "pending") return;
+  p.status = "rejected";
+  state.history.push({ t: new Date().toISOString(), event: "rejected", id });
+  save(state);
+  stats(state);
+  renderPatches(state);
+  log("rejected " + id, "bad");
+}
+
+document.getElementById("cycle").onclick = () => oneCycle();
+document.getElementById("auto").onclick = async () => {
+  for (let i = 0; i < MAX_DEPTH; i++) {
+    await oneCycle();
+    await new Promise(r => setTimeout(r, 400));
+  }
+};
+document.getElementById("export").onclick = () => {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(load(), null, 2)], { type: "application/json" }));
+  a.download = "aksi-kernel-sandbox.json";
+  a.click();
+};
+document.getElementById("reset").onclick = () => {
+  if (!confirm("Сбросить песочницу Kernel?")) return;
+  localStorage.removeItem(KEY);
+  const s = load();
+  stats(s); renderPatches(s);
+  document.getElementById("log").innerHTML = "";
+  log("reset", "warn");
+};
+
+const s0 = load();
+stats(s0);
+renderPatches(s0);
+log("ядро готово · DID " + DID);
+})();
+</script>
+</body>
+</html>
