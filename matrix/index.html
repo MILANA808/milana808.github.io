@@ -11,20 +11,29 @@
   window.__mermaid = mermaid;
 </script>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155;--acc:#8b5cf6;--ok:#22c55e;--warn:#f59e0b}
+:root{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155;--acc:#8b5cf6}
 *{box-sizing:border-box;margin:0}
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
-header{padding:max(10px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+#boot{
+  position:fixed;inset:0;z-index:100;background:#0f172a;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:24px;text-align:center;
+}
+#boot.hide{opacity:0;pointer-events:none;transition:opacity .4s}
+#boot h1{font-size:1.5rem;margin-bottom:8px}
+#boot p{color:var(--muted);font-size:14px;margin-bottom:16px;max-width:18em;line-height:1.4}
+.bar-wrap{width:min(280px,80vw);height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar-wrap i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width .15s}
+#boot-msg{margin-top:12px;font-size:12px;color:var(--muted);min-height:1.2em}
+header{padding:max(10px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 header a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
 h1{font-size:1rem;font-weight:800}
-#status{font-size:11px;color:var(--muted);max-width:45%;text-align:right}
+#status{font-size:11px;color:var(--muted);max-width:50%;text-align:right}
 .toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:#111827}
 .toolbar button,.toolbar label.btn{
   border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;
   padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer;
 }
 .toolbar button.primary{background:var(--acc);border-color:var(--acc)}
-.toolbar button:disabled{opacity:.45}
 #thread{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch}
 .msg{margin-bottom:12px;max-width:95%}
 .msg.user{margin-left:auto}
@@ -36,31 +45,34 @@ h1{font-size:1rem;font-weight:800}
 .composer{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#111827}
 .composer textarea{flex:1;min-height:44px;max-height:120px;resize:vertical;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 12px;font:inherit;font-size:16px}
 .composer button{width:52px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-weight:800}
-.progress{height:4px;background:var(--line);margin:0 12px 8px;border-radius:4px;overflow:hidden;display:none}
-.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),#22d3ee);transition:width .2s}
 #file-input{display:none}
 </style>
 </head>
 <body>
+<div id="boot">
+  <h1>АКСИ MATRIX</h1>
+  <p>Разворачиваю память, RAG и локальную модель…</p>
+  <div class="bar-wrap"><i id="boot-bar"></i></div>
+  <div id="boot-msg">Старт</div>
+</div>
+
 <header>
   <div>
     <a href="/app/">← АКСИ</a>
-    <h1>MATRIX · локальный ИИ</h1>
+    <h1>MATRIX</h1>
   </div>
-  <div id="status">модель не загружена · работает fallback</div>
+  <div id="status">запуск…</div>
 </header>
-<div class="progress" id="prog"><i id="prog-bar"></i></div>
 <div class="toolbar">
-  <button type="button" class="primary" id="btn-model">Загрузить модель</button>
+  <button type="button" class="primary" id="btn-model">Перезагрузить модель</button>
   <button type="button" id="btn-mic">🎤 Голос</button>
   <label class="btn" for="file-input">📎 Файлы RAG</label>
   <input id="file-input" type="file" accept=".txt,.md,text/plain,text/markdown" multiple>
   <button type="button" id="btn-clear">Очистить историю</button>
-  <button type="button" id="btn-stats">Статус</button>
 </div>
 <div id="thread"></div>
 <div class="composer">
-  <textarea id="inp" rows="1" placeholder="Спросите… (например: покажи схему архитектуры АКСИ)" enterkeyhint="send"></textarea>
+  <textarea id="inp" rows="1" placeholder="Спросите… или «покажи схему архитектуры»" enterkeyhint="send"></textarea>
   <button type="button" id="send">➤</button>
 </div>
 
@@ -76,25 +88,30 @@ const SYSTEM = `Ты — АКСИ MATRIX, суверенный локальны�
 ...диаграмма...
 \`\`\`
 Без лишних слов до и после блока.
-Иначе отвечай кратко и по делу на языке пользователя.
-Если дан контекст из файлов пользователя — опирайся на него.`;
+Иначе отвечай кратко на языке пользователя.
+Если дан контекст из файлов — опирайся на него.`;
 
 let engine = null;
-let loading = false;
 let ragChunks = [];
 
-// ——— IndexedDB ———
+function bootMsg(t, pct) {
+  document.getElementById("boot-msg").textContent = t;
+  if (pct != null) document.getElementById("boot-bar").style.width = Math.min(100, Math.max(0, pct)) + "%";
+  document.getElementById("status").textContent = t;
+}
+function hideBoot() {
+  const b = document.getElementById("boot");
+  b.classList.add("hide");
+  setTimeout(() => { b.style.display = "none"; }, 450);
+}
+
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, 1);
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains(STORE_MSG)) {
-        db.createObjectStore(STORE_MSG, { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains(STORE_RAG)) {
-        db.createObjectStore(STORE_RAG, { keyPath: "id", autoIncrement: true });
-      }
+      if (!db.objectStoreNames.contains(STORE_MSG)) db.createObjectStore(STORE_MSG, { keyPath: "id", autoIncrement: true });
+      if (!db.objectStoreNames.contains(STORE_RAG)) db.createObjectStore(STORE_RAG, { keyPath: "id", autoIncrement: true });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -114,10 +131,7 @@ async function loadMsgs(limit = 40) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_MSG, "readonly");
     const req = tx.objectStore(STORE_MSG).getAll();
-    req.onsuccess = () => {
-      const all = req.result || [];
-      resolve(all.slice(-limit));
-    };
+    req.onsuccess = () => resolve((req.result || []).slice(-limit));
     req.onerror = () => reject(req.error);
   });
 }
@@ -148,27 +162,8 @@ async function loadRag() {
     req.onerror = () => reject(req.error);
   });
 }
-async function clearRag() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_RAG, "readwrite");
-    tx.objectStore(STORE_RAG).clear();
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
 
-// ——— UI ———
 const thread = document.getElementById("thread");
-const statusEl = document.getElementById("status");
-const prog = document.getElementById("prog");
-const progBar = document.getElementById("prog-bar");
-
-function setStatus(t) { statusEl.textContent = t; }
-
-function escapeHtml(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
 
 async function renderMermaid(code, container) {
   try {
@@ -185,7 +180,6 @@ function addBubble(role, content, meta) {
   wrap.className = "msg " + (role === "user" ? "user" : "bot");
   const bubble = document.createElement("div");
   bubble.className = "bubble";
-
   const mermaidMatch = content.match(/```mermaid\s*([\s\S]*?)```/i);
   if (mermaidMatch && role !== "user") {
     const before = content.slice(0, mermaidMatch.index).trim();
@@ -219,7 +213,6 @@ function addBubble(role, content, meta) {
   thread.scrollTop = thread.scrollHeight;
 }
 
-// ——— Simple RAG (TF cosine, pure JS — works offline after files loaded) ———
 function tokenize(s) {
   return String(s).toLowerCase().replace(/[^\p{L}\p{N}\s]+/gu, " ").split(/\s+/).filter(Boolean);
 }
@@ -230,13 +223,11 @@ function tf(tokens) {
 }
 function cosine(a, b) {
   let dot = 0, na = 0, nb = 0;
-  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-  keys.forEach(k => {
+  new Set([...Object.keys(a), ...Object.keys(b)]).forEach(k => {
     const x = a[k] || 0, y = b[k] || 0;
     dot += x * y; na += x * x; nb += y * y;
   });
-  if (!na || !nb) return 0;
-  return dot / (Math.sqrt(na) * Math.sqrt(nb));
+  return (!na || !nb) ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 function chunkText(text, size = 500) {
   const parts = [];
@@ -256,103 +247,81 @@ function retrieve(query, k = 3) {
 async function ingestFiles(fileList) {
   for (const f of fileList) {
     const text = await f.text();
-    const chunks = chunkText(text);
-    for (const ch of chunks) {
+    for (const ch of chunkText(text)) {
       const item = { source: f.name, text: ch, tf: tf(tokenize(ch)), ts: Date.now() };
       ragChunks.push(item);
       await saveRagChunk(item);
     }
   }
-  setStatus("RAG: " + ragChunks.length + " фрагментов · " + (engine ? "модель готова" : "fallback"));
-  addBubble("assistant", "Загружено в RAG. Фрагментов: " + ragChunks.length + ". Спросите по содержимому файлов.", "rag");
+  bootMsg("RAG: " + ragChunks.length + " фрагментов", null);
+  addBubble("assistant", "В RAG загружено. Фрагментов: " + ragChunks.length, "rag");
 }
 
-// ——— Fallback local brain ———
 async function fallbackReply(userText, context) {
   const low = userText.toLowerCase();
   if (/схем|диаграмм|архитектур|mermaid|покажи схему/.test(low)) {
-    return "```mermaid\nflowchart TB\n  U[Пользователь] --> UI[MATRIX UI]\n  UI --> Mem[IndexedDB память]\n  UI --> RAG[RAG по файлам]\n  UI --> LLM[WebLLM / fallback]\n  LLM --> UI\n  RAG --> LLM\n```";
+    return "```mermaid\nflowchart TB\n  U[Пользователь] --> UI[MATRIX UI]\n  UI --> Mem[IndexedDB]\n  UI --> RAG[RAG файлы]\n  UI --> LLM[WebLLM / fallback]\n  RAG --> LLM\n  LLM --> UI\n```";
   }
   if (context) return "По вашим файлам:\n\n" + context.slice(0, 1200);
-  if (/привет|здравств/.test(low)) return "Здравствуйте. MATRIX онлайн. Загрузите модель или работайте в fallback.";
-  if (/ты здесь|кто ты/.test(low)) return "АКСИ MATRIX — локальный контур: память IndexedDB, RAG, Mermaid, голос. Модель WebLLM подключается кнопкой.";
-  return "Fallback-режим: загрузите модель (кнопка выше) или добавьте .txt/.md в RAG. Для схемы напишите «покажи схему архитектуры».";
+  if (/привет|здравств/.test(low)) return "Здравствуйте. MATRIX развёрнут автоматически.";
+  if (/ты здесь|кто ты/.test(low)) return "АКСИ MATRIX. Память, RAG, Mermaid, голос. Модель: " + (engine ? "WebLLM" : "fallback") + ".";
+  return "Система активна. Для схемы: «покажи схему архитектуры». Можно загрузить .txt/.md.";
 }
 
 async function chat(userText) {
   const hits = retrieve(userText, 3);
   const context = hits.map(h => "[" + h.source + "]\n" + h.text).join("\n\n");
   const history = await loadMsgs(12);
-  const messages = [{ role: "system", content: SYSTEM + (context ? "\n\nКонтекст из файлов пользователя:\n" + context : "") }];
+  const messages = [{ role: "system", content: SYSTEM + (context ? "\n\nКонтекст из файлов:\n" + context : "") }];
   history.forEach(m => messages.push({ role: m.role === "user" ? "user" : "assistant", content: m.content }));
   messages.push({ role: "user", content: userText });
 
   if (engine) {
     try {
-      const reply = await engine.chat.completions.create({
-        messages,
-        temperature: 0.7,
-        max_tokens: 512,
-      });
-      return reply.choices?.[0]?.message?.content || "(пустой ответ модели)";
+      const reply = await engine.chat.completions.create({ messages, temperature: 0.7, max_tokens: 512 });
+      return reply.choices?.[0]?.message?.content || "(пустой ответ)";
     } catch (e) {
-      return await fallbackReply(userText, context);
+      return fallbackReply(userText, context);
     }
   }
-  return await fallbackReply(userText, context);
+  return fallbackReply(userText, context);
 }
 
-// ——— Model load ———
 async function loadModel() {
-  if (loading || engine) return;
-  loading = true;
-  prog.style.display = "block";
-  document.getElementById("btn-model").disabled = true;
-  setStatus("Загрузка модели…");
+  bootMsg("Подключаю WebLLM…", 5);
   try {
-    // Small instruct model from MLC catalog (downloaded to browser cache)
     const model = "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC";
     engine = await CreateMLCEngine(model, {
       initProgressCallback: (r) => {
         const p = Math.round((r.progress || 0) * 100);
-        progBar.style.width = p + "%";
-        setStatus((r.text || "Загрузка") + " · " + p + "%");
+        bootMsg((r.text || "Загрузка модели") + " · " + p + "%", p);
       },
     });
-    setStatus("модель готова · локальный инференс");
-    addBubble("assistant", "Модель загружена в браузер. Можно работать. При офлайне ответы идут из кэша модели (после первой загрузки).", "webllm");
+    bootMsg("Модель готова", 100);
+    return true;
   } catch (e) {
     engine = null;
-    setStatus("модель не загрузилась · fallback");
-    addBubble("assistant", "Не удалось загрузить WebLLM (память/браузер/сеть). Работаю в fallback: RAG, Mermaid, история.", String(e.message || e));
+    bootMsg("Модель не загрузилась — fallback активен", 100);
+    return false;
   }
-  loading = false;
-  document.getElementById("btn-model").disabled = false;
-  setTimeout(() => { prog.style.display = "none"; }, 800);
 }
 
-// ——— Voice (Web Speech API — reliable demo; whisper.wasm optional later) ———
-let rec = null;
 function startVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
-    addBubble("assistant", "Голос не поддерживается в этом браузере. Используйте Chrome/Edge.", "voice");
+    addBubble("assistant", "Голос не поддерживается. Chrome/Edge.", "voice");
     return;
   }
-  rec = new SR();
+  const rec = new SR();
   rec.lang = "ru-RU";
-  rec.interimResults = false;
   rec.onresult = (ev) => {
-    const t = ev.results[0][0].transcript;
-    document.getElementById("inp").value = t;
+    document.getElementById("inp").value = ev.results[0][0].transcript;
     send();
   };
-  rec.onerror = () => setStatus("голос: ошибка");
   rec.start();
-  setStatus("слушаю…");
+  bootMsg("слушаю…");
 }
 
-// ——— Send ———
 async function send() {
   const inp = document.getElementById("inp");
   const text = (inp.value || "").trim();
@@ -360,23 +329,26 @@ async function send() {
   inp.value = "";
   addBubble("user", text);
   await saveMsg("user", text);
-  setStatus("генерация…");
+  bootMsg("генерация…");
   const answer = await chat(text);
   addBubble("assistant", answer, engine ? "webllm" : "fallback");
   await saveMsg("assistant", answer);
-  setStatus(engine ? "модель готова" : "fallback · RAG:" + ragChunks.length);
+  bootMsg(engine ? "модель готова · RAG " + ragChunks.length : "fallback · RAG " + ragChunks.length);
 }
 
-// ——— Wire ———
 document.getElementById("send").onclick = send;
 document.getElementById("inp").addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
 });
-document.getElementById("btn-model").onclick = loadModel;
+document.getElementById("btn-model").onclick = async () => {
+  document.getElementById("boot").style.display = "flex";
+  document.getElementById("boot").classList.remove("hide");
+  await loadModel();
+  hideBoot();
+};
 document.getElementById("btn-mic").onclick = startVoice;
 document.getElementById("file-input").onchange = async (e) => {
-  const files = e.target.files;
-  if (files?.length) await ingestFiles(files);
+  if (e.target.files?.length) await ingestFiles(e.target.files);
   e.target.value = "";
 };
 document.getElementById("btn-clear").onclick = async () => {
@@ -384,31 +356,41 @@ document.getElementById("btn-clear").onclick = async () => {
   thread.innerHTML = "";
   addBubble("assistant", "История очищена.", "system");
 };
-document.getElementById("btn-stats").onclick = async () => {
-  const msgs = await loadMsgs(1000);
-  addBubble("assistant",
-    "Сообщений в IndexedDB: " + msgs.length +
-    "\nRAG фрагментов: " + ragChunks.length +
-    "\nМодель: " + (engine ? "загружена" : "нет (fallback)") +
-    "\nОнлайн: " + navigator.onLine,
-    "status");
-};
 
-// boot
+// ——— AUTO BOOT: everything at once ———
 (async () => {
-  const msgs = await loadMsgs(40);
-  msgs.forEach(m => addBubble(m.role === "user" ? "user" : "assistant", m.content));
-  ragChunks = await loadRag();
-  // rehydrate tf if missing
-  ragChunks = ragChunks.map(c => ({
-    ...c,
-    tf: c.tf || tf(tokenize(c.text || "")),
-  }));
-  setStatus("память: " + msgs.length + " · RAG: " + ragChunks.length + " · модель не загружена");
-  if (!msgs.length) {
-    addBubble("assistant",
-      "MATRIX готов.\n1) Загрузить модель (WebLLM, первый раз скачает веса)\n2) Опционально: файлы .txt/.md для RAG\n3) «покажи схему архитектуры АКСИ» — Mermaid\n4) 🎤 голос",
-      "system");
+  try {
+    bootMsg("IndexedDB…", 8);
+    const msgs = await loadMsgs(40);
+    msgs.forEach(m => addBubble(m.role === "user" ? "user" : "assistant", m.content));
+
+    bootMsg("RAG…", 15);
+    ragChunks = (await loadRag()).map(c => ({
+      ...c,
+      tf: c.tf || tf(tokenize(c.text || "")),
+    }));
+
+    bootMsg("Mermaid…", 20);
+    // mermaid already via module
+
+    const ok = await loadModel();
+
+    if (!msgs.length) {
+      addBubble(
+        "assistant",
+        ok
+          ? "Всё развёрнуто: память, RAG, Mermaid, локальная модель. Спросите что угодно или «покажи схему архитектуры»."
+          : "Память и RAG готовы. Модель WebLLM не загрузилась (мало RAM/браузер) — работает fallback. Схемы и файлы доступны.",
+        "system"
+      );
+    }
+
+    hideBoot();
+    bootMsg(ok ? "готово · webllm · RAG " + ragChunks.length : "готово · fallback · RAG " + ragChunks.length);
+  } catch (e) {
+    bootMsg("Ошибка старта: " + (e.message || e), 100);
+    addBubble("assistant", "Старт с ошибкой, fallback активен. Можно писать в чат.", "system");
+    hideBoot();
   }
 })();
 </script>
