@@ -1,0 +1,38 @@
+name: AKSI site verification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Required site files
+        run: |
+          test -f index.html
+          test -f app.js
+          test -f app.css
+          test -f aksi-runtime.js
+          test -f sw.js
+          test -f manifest.webmanifest
+      - name: JavaScript syntax
+        run: |
+          node --check app.js
+          node --check aksi-runtime.js
+          node --check sw.js
+      - name: Required runtime wiring
+        run: |
+          grep -q 'aksi-runtime.js' index.html
+          grep -q 'AKSI_COGNITIVE_LEDGER_V1' app.js
+          grep -q 'AKSI-EVIDENCE-2' aksi-runtime.js
+      - name: Static HTML sanity
+        run: |
+          grep -q '<html' index.html
+          grep -q '</html>' index.html
