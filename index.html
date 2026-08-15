@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0f1a">
-<meta name="description" content="АКСИ — суверенный агентный продукт. Studio, статус, Lab. Apache-2.0.">
+<meta name="description" content="АКСИ — суверенный агентный продукт">
 <title>АКСИ</title>
 <link rel="stylesheet" href="/app.css">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -17,36 +17,37 @@
       <div>АКСИ<small>product · apache-2.0</small></div>
     </div>
     <div class="top-actions">
-      <button type="button" class="pill" data-nav="status">Статус</button>
+      <button type="button" class="pill" data-nav="pro">Pro</button>
       <button type="button" class="pill pri" data-nav="studio">Studio</button>
     </div>
   </header>
 
   <aside class="side">
-    <button type="button" class="on" data-nav="home">Обзор</button>
+    <button type="button" data-nav="home">Обзор</button>
     <button type="button" data-nav="chat">Чат</button>
     <button type="button" data-nav="studio">Studio</button>
     <button type="button" data-nav="status">Статус</button>
     <button type="button" data-nav="lab">Lab</button>
+    <button type="button" data-nav="pro">Pro</button>
     <a class="pill" style="margin-top:12px;text-align:center;display:block" href="/offer/">Пакет</a>
   </aside>
 
   <main class="main">
     <section class="view on" data-view="home">
       <div class="hero">
-        <h1>Продукт АКСИ</h1>
-        <p>Единый контур: агент, редактор сайта, контроль живости модулей, лаборатория. Открытый код, без личных данных в публичном дереве.</p>
+        <h1>АКСИ</h1>
+        <p>Продуктовая оболочка: агент, производство страниц, контроль модулей, лаборатория, трек инженера. Клавиши <b>1–6</b>, <b>/</b> чат, <b>S</b> статус.</p>
       </div>
       <div class="cards">
-        <div class="card" data-go="chat"><b>Чат</b><span>Ответы с подписью Resonance</span></div>
-        <div class="card" data-go="studio"><b>Studio</b><span>Пишите страницы через агента</span></div>
-        <div class="card" data-go="status"><b>Статус</b><span>Скан модулей и score</span></div>
-        <div class="card" data-go="lab"><b>Lab</b><span>Крипто, агенты, квант</span></div>
+        <div class="card" data-go="chat"><b>Чат</b><span>Подпись Resonance · память</span></div>
+        <div class="card" data-go="studio"><b>Studio</b><span>VFS · агент пишет сайт</span></div>
+        <div class="card" data-go="status"><b>Статус</b><span>Скан · score · sig</span></div>
+        <div class="card" data-go="lab"><b>Lab</b><span>Крипто · агенты · квант</span></div>
+        <div class="card" data-go="pro"><b>Pro</b><span>Практика · заметки · экспорт</span></div>
       </div>
       <div class="panel-pad mono">
-        DID: did:aksi:ed25519:sovereign-2026<br>
-        Contact: aksilove@internet.ru<br>
-        <a href="/LICENSE">LICENSE</a> · <a href="/IDENTITY.md">IDENTITY</a> · <a href="/offer/">offer</a>
+        did:aksi:ed25519:sovereign-2026<br>
+        aksilove@internet.ru · <a href="/LICENSE">LICENSE</a> · <a href="/IDENTITY.md">IDENTITY</a>
       </div>
     </section>
 
@@ -55,11 +56,10 @@
         <div class="toolbar">
           <button type="button" id="btnClearChat">Очистить</button>
           <a href="/kernel/">Kernel</a>
-          <a href="/wake/">Wake</a>
         </div>
         <div class="chat-log" id="chatLog"></div>
         <div class="composer">
-          <input id="chatInput" placeholder="Сообщение" enterkeyhint="send" autocomplete="off">
+          <input id="chatInput" placeholder="Сообщение или «checklist»" enterkeyhint="send" autocomplete="off">
           <button type="button" id="chatSend">➤</button>
         </div>
       </div>
@@ -67,7 +67,7 @@
 
     <section class="view" data-view="studio">
       <div class="toolbar">
-        <a href="/studio/" target="_blank" rel="noopener">На весь экран</a>
+        <a href="/studio/" target="_blank" rel="noopener">Полный экран</a>
       </div>
       <iframe class="iframe-fill" id="studioFrame" title="Studio"></iframe>
     </section>
@@ -76,7 +76,7 @@
       <div class="panel-pad">
         <div class="toolbar" style="padding-left:0;border:none">
           <button type="button" id="btnStatus">Сканировать</button>
-          <a href="/pulse/">Pulse расширенный</a>
+          <a href="/pulse/">Pulse</a>
         </div>
         <div class="stat-grid">
           <div class="stat"><b class="ok" id="stOk">—</b><span>OK</span></div>
@@ -85,7 +85,7 @@
         </div>
         <table class="table">
           <thead><tr><th>Путь</th><th>HTTP</th><th>мс</th></tr></thead>
-          <tbody id="stBody"><tr><td colspan="3" class="mono">Нажмите «Сканировать»</td></tr></tbody>
+          <tbody id="stBody"><tr><td colspan="3" class="mono">…</td></tr></tbody>
         </table>
         <p class="mono" id="stSig" style="margin-top:12px"></p>
       </div>
@@ -93,19 +93,42 @@
 
     <section class="view" data-view="lab">
       <div class="toolbar">
-        <a href="/lab/" target="_blank" rel="noopener">На весь экран</a>
+        <a href="/lab/" target="_blank" rel="noopener">Полный экран</a>
         <a href="/quantum/">Quantum</a>
       </div>
       <iframe class="iframe-fill" id="labFrame" title="Lab"></iframe>
     </section>
+
+    <section class="view" data-view="pro">
+      <div class="panel-pad">
+        <h2 style="font-size:1.1rem;margin-bottom:8px">Pro · инженерный трек</h2>
+        <p class="mono" style="margin-bottom:12px">Мировой «топ» не выдаётся кнопкой. Здесь — полигон: система, которую можно читать, ломать и улучшать каждый день.</p>
+        <div class="card" style="cursor:default;margin-bottom:10px">
+          <b>Сегодня</b>
+          <span style="display:block;margin-top:6px">1. Статус → score 100<br>2. Studio → новая страница → экспорт<br>3. Lab → подпись сообщения<br>4. Заметка ниже: что было сложно</span>
+        </div>
+        <div class="card" style="cursor:default;margin-bottom:10px">
+          <b>Неделя</b>
+          <span style="display:block;margin-top:6px">· Прочитать backend agent_self_mod в репо<br>· Один пилот по /offer/ кому-то живому<br>· Добавить свой модуль (даже HTML) в VFS</span>
+        </div>
+        <label class="mono" for="proNotes">Заметки (локально)</label>
+        <textarea id="proNotes" style="width:100%;min-height:120px;margin-top:6px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0a0f18;color:var(--ink);font-size:14px"></textarea>
+        <div class="toolbar" style="padding-left:0;border:none;margin-top:10px">
+          <button type="button" id="btnExportState">Экспорт состояния</button>
+          <a href="/sovereign/">Sovereign</a>
+          <a href="/contour/">Contour</a>
+        </div>
+      </div>
+    </section>
   </main>
 
   <nav class="bottom">
-    <button type="button" class="on" data-nav="home">Обзор</button>
+    <button type="button" data-nav="home">Обзор</button>
     <button type="button" data-nav="chat">Чат</button>
     <button type="button" data-nav="studio">Studio</button>
     <button type="button" data-nav="status">Статус</button>
     <button type="button" data-nav="lab">Lab</button>
+    <button type="button" data-nav="pro">Pro</button>
   </nav>
 </div>
 <script src="/app.js"></script>
