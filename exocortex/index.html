@@ -3,134 +3,308 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>АКСИ · Экзокортекс</title>
-<meta name="theme-color" content="#5b21b6">
+<meta name="theme-color" content="#06080f">
+<title>АКСИ Exocortex</title>
 <style>
-:root{
-  --bg:#f3effc;--ink:#160f2a;--muted:#6b6285;--line:#e5ddf5;--violet:#7c3aed;--card:#fff;
-}
-html[data-cognitive="sparse"] body{--bg:#faf8ff}
-html[data-cognitive="soft"] body{--bg:#f0f9ff}
-html[data-cognitive="compact"] .msg{font-size:15px}
+:root{--bg:#06080f;--panel:#0e1320;--ink:#edf2ff;--muted:#8b97b3;--line:#1c2436;--acc:#7c5cff;--ok:#34d399;--bad:#f87171;--c:#5eead4}
 *{box-sizing:border-box;margin:0}
-body{
-  font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);
-  min-height:100dvh;max-width:480px;margin:0 auto;display:flex;flex-direction:column;
-}
-header{
-  padding:max(12px,env(safe-area-inset-top)) 14px 10px;background:#5b21b6;color:#fff;
-}
-header a{color:#fff;font-weight:700;text-decoration:none;font-size:15px}
-h1{font-size:1.15rem;margin-top:6px}
-.modes{display:flex;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--card)}
-.modes button{
-  flex:1;min-height:44px;border-radius:12px;border:2px solid var(--line);
-  background:#fff;font-weight:700;font-size:13px;
-}
-.modes button.on{border-color:var(--violet);background:#ede9fe;color:var(--violet)}
-#thread{flex:1;overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
-.msg{padding:12px 14px;border-radius:14px;margin-bottom:10px;font-size:16px;line-height:1.45;max-width:92%}
-.msg.u{background:var(--violet);color:#fff;margin-left:auto}
-.msg.a{background:var(--card);border:1px solid var(--line)}
-.msg .s{display:block;font-size:11px;margin-top:6px;opacity:.75;font-weight:700}
-.sys{font-size:12px;color:var(--muted);text-align:center;margin:8px 0}
-footer{padding:10px 12px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--card)}
-.row{display:flex;gap:8px}
-input{
-  flex:1;font-size:16px;padding:14px;border-radius:12px;border:2px solid var(--line);
-}
-button.send{
-  width:56px;border:none;border-radius:12px;background:var(--violet);color:#fff;font-weight:800;font-size:1.1rem;
-}
-.meta{font-size:11px;color:var(--muted);padding:6px 14px;display:flex;justify-content:space-between}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#1a1040 0%,var(--bg) 55%);color:var(--ink);height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:rgba(6,8,15,.9);backdrop-filter:blur(12px)}
+.brand b{display:block;font-size:14px;letter-spacing:.04em}
+.brand span{font-size:11px;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,button,input{font:inherit}
+select,button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer}
+button.pri{background:linear-gradient(135deg,var(--acc),#4f46e5);border:none;font-weight:800}
+main{flex:1;display:grid;grid-template-rows:auto 1fr auto;min-height:0;max-width:900px;width:100%;margin:0 auto}
+.tabs{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
+.tabs button{flex:0 0 auto;font-size:12px;font-weight:700;opacity:.75}
+.tabs button.on{opacity:1;border-color:var(--acc);color:#fff}
+.panel{display:none;flex-direction:column;min-height:0;overflow:auto;padding:0 12px 12px}
+.panel.on{display:flex}
+.log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px 0 12px;min-height:200px}
+.msg{padding:12px 14px;border-radius:14px;max-width:95%;line-height:1.45;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.msg.bot{background:var(--panel);border:1px solid var(--line);align-self:flex-start}
+.msg.user{background:#241b45;align-self:flex-end}
+.msg .m{margin-top:6px;font-size:10px;color:var(--muted);font-family:ui-monospace,monospace}
+.composer{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(6,8,15,.95)}
+.composer input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0a0e18;color:var(--ink)}
+.composer button{padding:0 16px;font-weight:800;border:none;border-radius:12px;background:var(--acc);color:#fff}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card h2{font-size:13px;color:var(--c);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.mono{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);line-height:1.5;word-break:break-all}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.stat div{text-align:center;padding:12px;border-radius:12px;background:#0a0e18;border:1px solid var(--line)}
+.stat b{display:block;font-size:1.2rem}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:7px 4px;border-bottom:1px solid var(--line);text-align:left}
+a{color:var(--c)}
 </style>
 </head>
 <body>
 <header>
-  <a href="/">← Меню</a>
-  <h1>Экзокортекс · ядро v0.1</h1>
-</header>
-<div class="modes">
-  <button type="button" data-m="aksi" id="m-aksi">АКСИ</button>
-  <button type="button" data-m="milana" id="m-milana">Милана</button>
-  <button type="button" data-m="unified" id="m-unified">Вместе</button>
-</div>
-<div class="meta">
-  <span id="cog">когнитивно: normal</span>
-  <span id="mods">модули: —</span>
-</div>
-<div id="thread"></div>
-<footer>
+  <div class="brand"><b>АКСИ EXOCORTEX</b><span id="tagline">cryptographic · sovereign · local-first</span></div>
   <div class="row">
-    <input id="in" type="text" placeholder="Задача или вопрос…" enterkeyhint="send" autocomplete="off">
-    <button type="button" class="send" id="go">OK</button>
+    <select id="lang" aria-label="language"></select>
+    <button type="button" class="pri" id="btnScan">Scan</button>
   </div>
-</footer>
+</header>
+<main>
+  <div class="tabs" id="tabs"></div>
 
-<script src="/kernel/aksi-bus.js"></script>
-<script src="/kernel/aksi-kernel.js"></script>
-<script src="/kernel/modules/persona.js"></script>
-<script src="/kernel/modules/cognitive.js"></script>
-<script src="/kernel/modules/skills.js"></script>
-<script src="/aksi-knowledge.js"></script>
-<script src="/aksi-core.js"></script>
+  <section class="panel on" data-panel="home" id="p-home"></section>
+
+  <section class="panel" data-panel="chat">
+    <div class="log" id="log"></div>
+  </section>
+
+  <section class="panel" data-panel="memory">
+    <div class="card"><h2 id="memTitle">Cognitive ledger</h2><div class="mono" id="ledger">—</div></div>
+    <div class="row">
+      <button type="button" id="btnExport">Export ledger</button>
+      <button type="button" id="btnClearMem">Clear</button>
+    </div>
+  </section>
+
+  <section class="panel" data-panel="status">
+    <div class="stat">
+      <div><b class="ok" id="nOk">—</b><span class="mono">OK</span></div>
+      <div><b class="bad" id="nBad">—</b><span class="mono">FAIL</span></div>
+      <div><b id="nScore">—</b><span class="mono">SCORE</span></div>
+    </div>
+    <table><thead><tr><th>Path</th><th>HTTP</th><th>ms</th></tr></thead><tbody id="tbody"></tbody></table>
+    <p class="mono" id="stSig" style="margin-top:10px"></p>
+  </section>
+
+  <section class="panel" data-panel="links">
+    <div class="card" id="linksCard"></div>
+  </section>
+
+  <div class="composer" id="composer">
+    <input id="inp" placeholder="…" enterkeyhint="send" autocomplete="off">
+    <button type="button" id="send">➤</button>
+  </div>
+</main>
 <script>
 (function(){
-  var thread=document.getElementById("thread");
-  var persona=AksiKernel.get("persona");
-  var cognitive=AksiKernel.get("cognitive");
+"use strict";
+const DID="did:aksi:ed25519:sovereign-2026";
+const SEED="AKSI_DIMAX_v3_2026";
+const CONTACT="aksilove@internet.ru";
+const HIST="AKSI_EXO_CHAT_V1";
+const LEDGER="AKSI_EXO_LEDGER_V1";
 
-  document.getElementById("mods").textContent="модули: "+AksiKernel.list().map(function(m){return m.id;}).join(", ");
+/* i18n: major languages — not "all languages of Earth" */
+const I18N={
+  ru:{name:"Русский",tagline:"криптографический · суверенный · local-first",
+    tabs:{home:"Обзор",chat:"Чат",memory:"Память",status:"Статус",links:"Контур"},
+    ph:"Спросите АКСИ…",scan:"Скан",memTitle:"Когнитивный журнал",
+    home:"<div class=card><h2>Экзокортекс</h2><p>Внешний когнитивный контур: ответы с SHA-256 следом, локальная память, скан модулей. Не AGI и не «все языки мира» — честный суверенный инструмент.</p></div><div class=card><h2>Идентичность</h2><div class=mono>"+DID+"<br>"+CONTACT+"<br>Apache-2.0</div></div>",
+    hello:"АКСИ Exocortex online.\nОтвет подписывается. Память — в вашем браузере.",
+    links:"<p><a href=/">Продукт</a> · <a href=/studio/>Studio</a> · <a href=/lab/>Lab</a> · <a href=/pulse/>Pulse</a> · <a href=/kernel/>Kernel</a> · <a href=/offer/>Offer</a></p>"},
+  en:{name:"English",tagline:"cryptographic · sovereign · local-first",
+    tabs:{home:"Home",chat:"Chat",memory:"Memory",status:"Status",links:"Map"},
+    ph:"Ask AKSI…",scan:"Scan",memTitle:"Cognitive ledger",
+    home:"<div class=card><h2>Exocortex</h2><p>External cognitive shell: signed answers, local memory, module scan. Not AGI. Not every language on Earth — a verifiable sovereign tool.</p></div><div class=card><h2>Identity</h2><div class=mono>"+DID+"<br>"+CONTACT+"<br>Apache-2.0</div></div>",
+    hello:"AKSI Exocortex online.\nAnswers are hashed. Memory stays in your browser.",
+    links:"<p><a href=/">Product</a> · <a href=/studio/>Studio</a> · <a href=/lab/>Lab</a> · <a href=/pulse/>Pulse</a> · <a href=/kernel/>Kernel</a> · <a href=/offer/>Offer</a></p>"},
+  es:{name:"Español",tagline:"criptográfico · soberano · local-first",
+    tabs:{home:"Inicio",chat:"Chat",memory:"Memoria",status:"Estado",links:"Mapa"},
+    ph:"Pregunta a AKSI…",scan:"Escanear",memTitle:"Registro cognitivo",
+    home:"<div class=card><h2>Exocortex</h2><p>Capa cognitiva externa con respuestas firmadas y memoria local.</p></div>",
+    hello:"AKSI Exocortex online.",links:"<p><a href=/">Product</a> · <a href=/studio/>Studio</a></p>"},
+  de:{name:"Deutsch",tagline:"kryptografisch · souverän · local-first",
+    tabs:{home:"Start",chat:"Chat",memory:"Speicher",status:"Status",links:"Karte"},
+    ph:"AKSI fragen…",scan:"Scan",memTitle:"Kognitives Journal",
+    home:"<div class=card><h2>Exocortex</h2><p>Externe kognitive Schicht mit signierten Antworten.</p></div>",
+    hello:"AKSI Exocortex online.",links:"<p><a href=/">Produkt</a> · <a href=/studio/>Studio</a></p>"},
+  fr:{name:"Français",tagline:"cryptographique · souverain · local-first",
+    tabs:{home:"Accueil",chat:"Chat",memory:"Mémoire",status:"Statut",links:"Carte"},
+    ph:"Demandez à AKSI…",scan:"Scan",memTitle:"Journal cognitif",
+    home:"<div class=card><h2>Exocortex</h2><p>Couche cognitive externe, réponses hachées, mémoire locale.</p></div>",
+    hello:"AKSI Exocortex en ligne.",links:"<p><a href=/">Produit</a></p>"},
+  zh:{name:"中文",tagline:"加密 · 主权 · 本地优先",
+    tabs:{home:"概览",chat:"对话",memory:"记忆",status:"状态",links:"地图"},
+    ph:"向阿克西提问…",scan:"扫描",memTitle:"认知账本",
+    home:"<div class=card><h2>外皮质</h2><p>带哈希签名的回答与本地记忆。不是通用人工智能。</p></div>",
+    hello:"АКСИ Exocortex 已上线。",links:"<p><a href=/">产品</a> · <a href=/studio/>Studio</a></p>"},
+  ar:{name:"العربية",tagline:"تشفير · سيادة · محلي أولاً",
+    tabs:{home:"نظرة",chat:"محادثة",memory:"ذاكرة",status:"حالة",links:"خريطة"},
+    ph:"اسأل آكسي…",scan:"فحص",memTitle:"سجل معرفي",
+    home:"<div class=card><h2>القشرة الخارجية</h2><p>إجابات مُجزّأة وسجل محلي. ليست ذكاءً عاماً.</p></div>",
+    hello:"آكسي متصل.",links:"<p><a href=/">المنتج</a></p>"},
+  tt:{name:"Татар",tagline:"криптографик · суверен · local-first",
+    tabs:{home:"Күзәтү",chat:"Чат",memory:"Хәтер",status:"Халәт",links:"Харита"},
+    ph:"АКСИдан сора…",scan:"Скан",memTitle:"Когнитив журнал",
+    home:"<div class=card><h2>Экзокортекс</h2><p>Имзалы җаваплар, җирле хәтер. AGI түгел.</p></div>",
+    hello:"АКСИ Exocortex эшли.",links:"<p><a href=/">Продукт</a></p>"}
+};
 
-  function paintModes(){
-    var m=persona.getMode();
-    ["aksi","milana","unified"].forEach(function(x){
-      document.getElementById("m-"+x).className=m===x?"on":"";
-    });
-  }
-  paintModes();
-  document.querySelectorAll(".modes button").forEach(function(b){
-    b.onclick=function(){
-      persona.setMode(b.getAttribute("data-m"));
-      paintModes();
-      addSys("Режим: "+b.textContent);
-    };
+const KB=[
+  {k:[/кто ты|what are you|quién|wer bist|qui es|你是谁|من أنت|син кем/i],
+   a:{ru:"Я АКСИ Exocortex — локальный когнитивный контур с подписью ответов.",en:"I am AKSI Exocortex — a local cognitive shell with signed answers.",es:"Soy AKSI Exocortex — capa cognitiva local con respuestas firmadas.",de:"Ich bin AKSI Exocortex — lokale kognitive Schicht mit signierten Antworten.",fr:"Je suis AKSI Exocortex — coque cognitive locale.",zh:"我是 АКСИ 外皮质：本地、可验证的认知层。",ar:"أنا آكسي — طبقة معرفية محلية.",tt:"Мин АКСИ Exocortex — җирле когнитив контур."}},
+  {k:[/лиценз|license|apache/i],a:{ru:"Apache License 2.0 — /LICENSE",en:"Apache License 2.0 — /LICENSE",es:"Apache 2.0 — /LICENSE",de:"Apache 2.0 — /LICENSE",fr:"Apache 2.0 — /LICENSE",zh:"Apache 2.0 — /LICENSE",ar:"Apache 2.0 — /LICENSE",tt:"Apache 2.0 — /LICENSE"}},
+  {k:[/studio|студи/i],a:{ru:"Studio: /studio/ — агент пишет страницы в VFS.",en:"Studio: /studio/ — agent writes pages into VFS.",es:"Studio: /studio/",de:"Studio: /studio/",fr:"Studio: /studio/",zh:"Studio：/studio/",ar:"Studio: /studio/",tt:"Studio: /studio/"}},
+  {k:[/did|идентич|identity/i],a:{ru:"DID: "+DID,en:"DID: "+DID,es:"DID: "+DID,de:"DID: "+DID,fr:"DID: "+DID,zh:"DID: "+DID,ar:"DID: "+DID,tt:"DID: "+DID}},
+  {k:[/контакт|contact|email/i],a:{ru:CONTACT,en:CONTACT,es:CONTACT,de:CONTACT,fr:CONTACT,zh:CONTACT,ar:CONTACT,tt:CONTACT}},
+  {k:[/памят|memory|ledger|журнал/i],a:{ru:"Память и ledger — в localStorage браузера. Экспорт во вкладке Память.",en:"Memory and ledger live in browser localStorage.",es:"Memoria en localStorage.",de:"Speicher in localStorage.",fr:"Mémoire en localStorage.",zh:"记忆在浏览器 localStorage。",ar:"الذاكرة في المتصفح.",tt:"Хәтер — браузерда."}},
+  {k:[/помощ|help|умеешь|comand/i],a:{ru:"Вкладки: Обзор, Чат, Память, Статус, Контур. Ответы с SHA-256.",en:"Tabs: Home, Chat, Memory, Status, Map. Answers hashed with SHA-256.",es:"Pestañas + respuestas con hash.",de:"Tabs + Hash-Antworten.",fr:"Onglets + réponses hachées.",zh:"标签页 + SHA-256 回答。",ar:"تبويبات وإجابات مُجزّأة.",tt:"Бүлекләр + SHA-256."}}
+];
+
+let lang=localStorage.getItem("AKSI_EXO_LANG")||((navigator.language||"ru").slice(0,2));
+if(!I18N[lang]) lang="en";
+
+async function digest(s){
+  const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));
+  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function t(){return I18N[lang]||I18N.en}
+
+function applyUI(){
+  const L=t();
+  document.documentElement.lang=lang;
+  document.getElementById("tagline").textContent=L.tagline;
+  document.getElementById("btnScan").textContent=L.scan;
+  document.getElementById("inp").placeholder=L.ph;
+  document.getElementById("memTitle").textContent=L.memTitle;
+  document.getElementById("p-home").innerHTML=L.home;
+  document.getElementById("linksCard").innerHTML=L.links;
+  const tabs=document.getElementById("tabs");
+  tabs.innerHTML="";
+  Object.entries(L.tabs).forEach(([id,label])=>{
+    const b=document.createElement("button");
+    b.type="button";b.textContent=label;b.dataset.tab=id;
+    if(document.querySelector(".panel.on")?.dataset.panel===id) b.className="on";
+    b.onclick=()=>show(id);
+    tabs.appendChild(b);
   });
+  document.getElementById("composer").style.display=
+    (document.querySelector(".panel.on")?.dataset.panel==="chat")?"flex":"none";
+}
 
-  AksiBus.on("cognitive.state",function(intent){
-    document.getElementById("cog").textContent="когнитивно: "+intent.payload.density;
+function show(id){
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.dataset.panel===id));
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));
+  document.getElementById("composer").style.display=id==="chat"?"flex":"none";
+  if(id==="memory") renderLedger();
+  if(id==="status") scan();
+}
+
+function addMsg(role,text,meta){
+  const d=document.createElement("div");
+  d.className="msg "+(role==="user"?"user":"bot");
+  d.textContent=text;
+  if(meta){const m=document.createElement("div");m.className="m";m.textContent=meta;d.appendChild(m)}
+  document.getElementById("log").appendChild(d);
+  document.getElementById("log").scrollTop=1e9;
+}
+
+function loadChat(){
+  try{JSON.parse(localStorage.getItem(HIST)||"[]").forEach(m=>addMsg(m.role,m.text,m.meta))}catch{}
+}
+function saveChat(role,text,meta){
+  try{
+    const h=JSON.parse(localStorage.getItem(HIST)||"[]");
+    h.push({role,text,meta});localStorage.setItem(HIST,JSON.stringify(h.slice(-60)));
+  }catch{}
+}
+
+function readLedger(){try{return JSON.parse(localStorage.getItem(LEDGER)||"[]")}catch{return[]}}
+async function pushLedger(event,payload){
+  const prev=readLedger();
+  const prevHash=prev.length?prev[prev.length-1].hash:"GENESIS";
+  const body={ts:new Date().toISOString(),event,payload,prevHash,did:DID,lang};
+  body.hash=await digest(SEED+"|"+JSON.stringify(body));
+  prev.push(body);
+  localStorage.setItem(LEDGER,JSON.stringify(prev.slice(-80)));
+  return body;
+}
+function renderLedger(){
+  const L=readLedger().slice(-12).reverse();
+  document.getElementById("ledger").textContent=L.length?L.map(e=>e.ts.slice(11,19)+" "+e.event+"\n"+e.hash.slice(0,28)+"…\nprev "+String(e.prevHash).slice(0,16)).join("\n\n"):"—";
+}
+
+function reply(q){
+  for(const row of KB){
+    if(row.k.some(re=>re.test(q))) return row.a[lang]||row.a.en||row.a.ru;
+  }
+  const fallback={
+    ru:"Принято. Уточните: identity, studio, license, memory — или откройте Studio/Lab.",
+    en:"Noted. Try: identity, studio, license, memory — or open Studio/Lab.",
+    es:"Anotado. Prueba: identity, studio, license.",
+    de:"Notiert. Versuche: identity, studio, license.",
+    fr:"Noté. Essayez: identity, studio, license.",
+    zh:"已记录。可问 identity / studio / license。",
+    ar:"تم. جرّب: identity studio license",
+    tt:"Кабул. identity / studio / license сора."
+  };
+  return fallback[lang]||fallback.en;
+}
+
+async function send(){
+  const inp=document.getElementById("inp");
+  const q=inp.value.trim();if(!q)return;
+  inp.value="";
+  addMsg("user",q);saveChat("user",q);
+  const a=reply(q);
+  const entry=await pushLedger("chat_answer",{q:q.slice(0,200),a:a.slice(0,500)});
+  const meta="sha256 "+entry.hash.slice(0,24)+"… · "+DID.slice(0,22);
+  addMsg("bot",a,meta);saveChat("bot",a,meta);
+}
+
+async function scan(){
+  const paths=["/","/exocortex/","/studio/","/lab/","/pulse/","/kernel/","/offer/","/LICENSE","/ecosystem.json"];
+  const tbody=document.getElementById("tbody");tbody.innerHTML="<tr><td colspan=3 class=mono>…</td></tr>";
+  const t0=performance.now();
+  const rows=await Promise.all(paths.map(async p=>{
+    const t=performance.now();
+    try{const r=await fetch(p,{cache:"no-store"});return{p,ok:r.ok,status:r.status,ms:Math.round(performance.now()-t)};}
+    catch{return{p,ok:false,status:0,ms:Math.round(performance.now()-t)};}
+  }));
+  const ok=rows.filter(r=>r.ok).length;
+  const score=Math.round(ok/rows.length*100);
+  document.getElementById("nOk").textContent=ok;
+  document.getElementById("nBad").textContent=rows.length-ok;
+  document.getElementById("nScore").textContent=score;
+  document.getElementById("nScore").className=score>=90?"ok":"bad";
+  tbody.innerHTML="";
+  rows.forEach(r=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML="<td>"+r.p+"</td><td class=\""+(r.ok?"ok":"bad")+"\">"+(r.ok?"OK":"FAIL")+" "+r.status+"</td><td>"+r.ms+"</td>";
+    tbody.appendChild(tr);
   });
+  const rep=await pushLedger("status_scan",{score,ok});
+  document.getElementById("stSig").textContent="score "+score+" · "+Math.round(performance.now()-t0)+" ms · "+rep.hash.slice(0,28)+"…";
+}
 
-  function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-  function add(u,text,src){
-    var d=document.createElement("div");
-    d.className="msg "+(u?"u":"a");
-    d.innerHTML=esc(text).replace(/\n/g,"<br>")+(src?"<span class=\"s\">"+esc(src)+"</span>":"");
-    thread.appendChild(d);
-    thread.scrollTop=thread.scrollHeight;
-  }
-  function addSys(t){
-    var d=document.createElement("div");d.className="sys";d.textContent=t;thread.appendChild(d);
-  }
+// lang select
+const sel=document.getElementById("lang");
+Object.keys(I18N).forEach(code=>{
+  const o=document.createElement("option");o.value=code;o.textContent=I18N[code].name;if(code===lang)o.selected=true;sel.appendChild(o);
+});
+sel.onchange=()=>{lang=sel.value;localStorage.setItem("AKSI_EXO_LANG",lang);applyUI();};
 
-  addSys("Context Bus + микроядро активны. Данные локально.");
+document.getElementById("send").onclick=send;
+document.getElementById("inp").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send();}});
+document.getElementById("btnScan").onclick=()=>{show("status");scan();};
+document.getElementById("btnExport").onclick=()=>{
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(readLedger(),null,2)],{type:"application/json"}));
+  a.download="aksi-exocortex-ledger.json";a.click();
+};
+document.getElementById("btnClearMem").onclick=()=>{
+  if(confirm("Clear?")){localStorage.removeItem(LEDGER);renderLedger();}
+};
 
-  async function send(){
-    var v=(document.getElementById("in").value||"").trim();
-    if(!v)return;
-    document.getElementById("in").value="";
-    add(true,v);
-    if(cognitive)cognitive.update(v);
-    await AksiBus.emit("user.message","ui",{text:v});
-    var raw=await AksiCore.reply(v);
-    var styled=persona.styleReply(raw.text,raw.source);
-    add(false,styled.text,styled.source);
-    await AksiBus.emit("agent.reply","exocortex",{text:styled.text});
-  }
-  document.getElementById("go").onclick=send;
-  document.getElementById("in").addEventListener("keydown",function(e){
-    if(e.key==="Enter"){e.preventDefault();send();}
-  });
+applyUI();
+loadChat();
+if(!document.getElementById("log").children.length){
+  addMsg("bot",t().hello);
+}
+show("home");
 })();
 </script>
 </body>
