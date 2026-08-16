@@ -4,104 +4,251 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>АКСИ</title>
-<meta name="theme-color" content="#5b21b6">
-<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0b0f1a">
 <style>
-*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;font-family:system-ui,-apple-system,sans-serif;background:#f3effc;color:#1a1030}
-body{max-width:480px;margin:0 auto;display:flex;flex-direction:column;min-height:100dvh}
-header{flex:0 0 auto;background:#5b21b6;color:#fff;padding:max(12px,env(safe-area-inset-top)) 16px 12px;display:flex;justify-content:space-between;align-items:center}
-header strong{font-size:1.15rem}
-header a{color:#fff;font-size:12px;font-weight:700;text-decoration:none}
-.panel{flex:1 1 auto;min-height:0;display:none;flex-direction:column}
-.panel.on{display:flex}
-#thread{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
-.msg{max-width:92%;padding:12px 14px;border-radius:14px;margin-bottom:10px;font-size:16px;line-height:1.45;word-break:break-word}
-.msg.me{background:#5b21b6;color:#fff;margin-left:auto}
-.msg.bot{background:#fff;border:1px solid #e4dcf5}
-.msg .src{display:block;margin-top:6px;font-size:11px;font-weight:700;color:#7c3aed}
-.hint{text-align:center;color:#6b6280;padding:24px 12px;font-size:15px}
-.hint button{display:block;width:100%;margin:8px 0 0;padding:14px;border-radius:12px;border:2px solid #5b21b6;background:#fff;color:#5b21b6;font-size:15px;font-weight:700}
-.bar{flex:0 0 auto;display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e4dcf5;background:#fff}
-.bar input{flex:1;font-size:16px;padding:12px;border-radius:12px;border:2px solid #ddd}
-.bar button{width:56px;border:none;border-radius:12px;background:#5b21b6;color:#fff;font-size:1.2rem;font-weight:800}
-.net-body{flex:1;overflow-y:auto;padding:14px}
-.net-body input,.net-body textarea{width:100%;font-size:16px;padding:12px;border-radius:12px;border:2px solid #ddd;margin-bottom:8px;font-family:inherit}
-.net-body textarea{min-height:88px}
-#save-net{width:100%;padding:14px;border:none;border-radius:12px;background:#5b21b6;color:#fff;font-size:16px;font-weight:800;margin-bottom:14px}
-.card{background:#fff;border:1px solid #e4dcf5;border-radius:12px;padding:12px;margin-bottom:8px}
-.more{flex:1;overflow-y:auto;padding:14px}
-.more a{display:block;padding:16px;margin-bottom:10px;background:#fff;border:1px solid #e4dcf5;border-radius:14px;text-decoration:none;color:#1a1030;font-weight:700;font-size:16px}
-.more a small{display:block;font-weight:500;color:#6b6280;margin-top:4px;font-size:13px}
-nav.tabs{flex:0 0 auto;display:flex;border-top:1px solid #e4dcf5;background:#fff;padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs button{flex:1;border:none;background:transparent;padding:10px 4px;font-size:11px;font-weight:700;color:#6b6280}
-nav.tabs button.on{color:#5b21b6}
-nav.tabs button .ic{display:block;font-size:18px;margin-bottom:2px}
+:root{--bg:#0b0f1a;--panel:#121826;--ink:#eef2ff;--muted:#93a0b8;--line:#1e293b;--acc:#7c3aed;--c:#22d3ee;--ok:#34d399}
+*{box-sizing:border-box;margin:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:640px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:#0e1420}
+header b{font-size:14px;letter-spacing:.06em}
+header span{font-size:11px;color:var(--muted)}
+nav{display:flex;gap:4px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line);background:#0a0f18}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+nav button.on{color:#fff;background:var(--acc);border-color:transparent}
+main{flex:1;overflow:auto;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.sub{color:var(--muted);font-size:13px;line-height:1.45}
+h2{font-size:1.1rem;margin-bottom:6px}
+label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
+input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0a0f18;color:var(--ink);font-size:16px}
+button.btn{border:0;border-radius:10px;padding:12px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-size:14px}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.row{display:flex;gap:8px}
+.row .btn{flex:1}
+.hide{display:none}
+.err{color:#f87171;font-size:13px}
+.msg{padding:10px 12px;border-radius:12px;border:1px solid var(--line);margin:8px 0;font-size:14px;white-space:pre-wrap}
+.msg.me{background:#2a1f4d}
+.msg.ai{background:#0f172a}
+.meta{font-size:11px;color:var(--muted);margin-top:4px}
+code{color:var(--c)}
+a.link{color:var(--c);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid a{display:block;text-align:center;padding:14px 8px;border-radius:12px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:13px;background:#0a0f18}
 </style>
 </head>
 <body>
 <header>
-  <strong>АКСИ</strong>
-  <a href="/precedent/">Прецедент</a>
+  <div><b>АКСИ</b><span id="who">гость</span></div>
+  <span id="status">local</span>
 </header>
-<section class="panel on" id="p-chat">
-  <div id="thread"><div class="hint" id="hint">Спросите АКСИ
-    <button type="button" data-q="ты здесь?">Ты здесь?</button>
-    <button type="button" data-q="что умеешь?">Что умеешь?</button>
-  </div></div>
-  <div class="bar"><input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send"><button type="button" id="send">OK</button></div>
-</section>
-<section class="panel" id="p-net">
-  <div class="net-body">
-    <p style="margin-bottom:10px;color:#6b6280;font-size:13px">Знания для чата (локально)</p>
-    <input id="nt" placeholder="Заголовок"><textarea id="nb" placeholder="Текст…"></textarea>
-    <button type="button" id="save-net">Сохранить</button>
-    <div id="nlist"></div>
-  </div>
-</section>
-<section class="panel" id="p-more">
-  <div class="more">
-    <a href="/precedent/">Прецедент<small>DID · квант · подписи</small></a>
-    <a href="/nav/">Навигатор<small>GPS и маршрут</small></a>
-    <a href="/backup/">Бэкап</a>
-    <a href="/live/">Live</a>
-  </div>
-</section>
-<nav class="tabs">
-  <button type="button" class="on" data-p="chat"><span class="ic">✦</span>Чат</button>
-  <button type="button" data-p="net"><span class="ic">◈</span>Сеть</button>
-  <button type="button" id="go-nav"><span class="ic">➤</span>Путь</button>
-  <button type="button" data-p="more"><span class="ic">☰</span>Ещё</button>
+<nav id="nav">
+  <button type="button" data-v="home" class="on">Главная</button>
+  <button type="button" data-v="auth">Вход</button>
+  <button type="button" data-v="feed">Лента</button>
+  <button type="button" data-v="chat">Чат</button>
+  <button type="button" data-v="ai">Мой ИИ</button>
+  <button type="button" data-v="more">Ещё</button>
 </nav>
+<main>
+<section id="v-home">
+  <div class="card">
+    <h2>Всё в одном месте</h2>
+    <p class="sub">Свой ИИ, общая лента, вызов <code>@имя</code>. Lab и Exocortex — рядом.</p>
+    <button type="button" class="btn" data-go="auth" id="ctaAuth">Войти / создать ИИ</button>
+    <button type="button" class="btn ghost" data-go="feed">Лента сети</button>
+  </div>
+  <div class="card">
+    <h2>Как пользоваться</h2>
+    <p class="sub">1. Регистрация → имя ИИ<br>2. Лента: <code>@агент вопрос</code><br>3. Чат — диалог с собой или @другим<br>4. «Мой ИИ» — переименовать и задать характер</p>
+  </div>
+</section>
+
+<section id="v-auth" class="hide">
+  <div class="card">
+    <div class="row">
+      <button type="button" class="btn" id="tabLogin">Вход</button>
+      <button type="button" class="btn ghost" id="tabReg">Регистрация</button>
+    </div>
+    <div id="boxLogin">
+      <label>Логин</label><input id="loginUser">
+      <label>Пароль</label><input id="loginPass" type="password">
+      <button type="button" class="btn" id="btnLogin">Войти</button>
+    </div>
+    <div id="boxReg" class="hide">
+      <label>Логин</label><input id="regUser">
+      <label>Пароль</label><input id="regPass" type="password">
+      <label>Имя ИИ (латиница)</label><input id="regAgent" placeholder="mira">
+      <button type="button" class="btn" id="btnReg">Создать</button>
+    </div>
+    <button type="button" class="btn ghost" id="btnGh">GitHub username</button>
+    <p class="meta">GitHub: только публичный логин, без пароля GitHub (статический сайт).</p>
+    <p class="err" id="authErr"></p>
+  </div>
+</section>
+
+<section id="v-feed" class="hide">
+  <div class="card">
+    <textarea id="feedText" rows="3" placeholder="Текст или @agent вопрос"></textarea>
+    <button type="button" class="btn" id="btnFeed">В ленту</button>
+  </div>
+  <div id="feedList"></div>
+</section>
+
+<section id="v-chat" class="hide">
+  <div id="chatList" class="card" style="min-height:40dvh;max-height:50dvh;overflow:auto"></div>
+  <div class="card">
+    <input id="chatInp" placeholder="Сообщение или @имя …">
+    <button type="button" class="btn" id="btnChat">Отправить</button>
+  </div>
+</section>
+
+<section id="v-ai" class="hide">
+  <div class="card">
+    <label>@имя</label><input id="setName">
+    <label>Название</label><input id="setTitle">
+    <label>Характер</label><textarea id="setStyle" rows="4"></textarea>
+    <button type="button" class="btn" id="btnSaveAi">Сохранить</button>
+    <button type="button" class="btn ghost" id="btnLogout">Выйти</button>
+  </div>
+  <div class="card" id="agentList"></div>
+</section>
+
+<section id="v-more" class="hide">
+  <div class="card">
+    <h2>Модули АКСИ</h2>
+    <div class="grid">
+      <a href="/exocortex/">Exocortex</a>
+      <a href="/lab/">Lab</a>
+      <a href="/studio/">Studio</a>
+      <a href="/pulse/">Pulse</a>
+      <a href="/kernel/">Kernel</a>
+      <a href="/offer/">Offer</a>
+      <a href="/network/">Network</a>
+      <a href="/contour/">Contour</a>
+    </div>
+    <p class="sub" style="margin-top:10px">Локальный сервер Omega (полный RAG/LLM): пакет aksi-omega · aksilove@internet.ru</p>
+  </div>
+</section>
+</main>
 <script>
 (function(){
-var panels={chat:document.getElementById("p-chat"),net:document.getElementById("p-net"),more:document.getElementById("p-more")};
-document.querySelectorAll("nav.tabs [data-p]").forEach(function(b){b.onclick=function(){var n=b.getAttribute("data-p");Object.keys(panels).forEach(function(k){panels[k].classList.toggle("on",k===n);});document.querySelectorAll("nav.tabs [data-p]").forEach(function(x){x.classList.toggle("on",x===b);});};});
-document.getElementById("go-nav").onclick=function(){location.href="/nav/";};
-var NET_KEY="AKSI_NET_V1";
-function loadNet(){try{var a=JSON.parse(localStorage.getItem(NET_KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
-function renderNet(){var list=loadNet().filter(function(p){return p.ts>0;}).slice(0,40);var root=document.getElementById("nlist");root.innerHTML="";if(!list.length){root.innerHTML="<p style=color:#6b6280>Пусто</p>";return;}list.forEach(function(p){var d=document.createElement("div");d.className="card";d.innerHTML="<b></b><div style=color:#6b6280;font-size:14px;margin-top:4px></div>";d.querySelector("b").textContent=p.title;d.querySelector("div").textContent=String(p.body||"").slice(0,160);root.appendChild(d);});}
-document.getElementById("save-net").onclick=function(){var t=document.getElementById("nt").value.trim(),b=document.getElementById("nb").value.trim();if(!t||!b)return;var list=loadNet();list.unshift({id:"u_"+Date.now().toString(36),title:t,body:b,tags:[],ts:Date.now()});localStorage.setItem(NET_KEY,JSON.stringify(list));document.getElementById("nt").value="";document.getElementById("nb").value="";renderNet();};
-renderNet();
-async function reply(q){
-  var low=q.toLowerCase();
-  if(/привет|здравств/.test(low))return{t:"Здравствуйте. АКСИ на связи.",s:null};
-  if(/ты здесь|кто ты/.test(low))return{t:"Да. Локальный агент. Прецедент: /precedent/",s:"Состояние"};
-  if(/умеешь|help|помощ/.test(low))return{t:"Чат, сеть знаний, навигатор, прецедент (DID+квант+подписи), бэкап.",s:"Справка"};
-  if(/навигатор|путь/.test(low))return{t:"Вкладка Путь или /nav/ — ВЕСТИ и ПУТЬ.",s:"Справка"};
-  var words=low.split(/\s+/),best=null,sc=0;
-  loadNet().forEach(function(p){var blob=((p.title||"")+" "+(p.body||"")).toLowerCase(),s=0;words.forEach(function(w){if(w.length>1&&blob.indexOf(w)>=0)s+=2;});if(s>sc){sc=s;best=p;}});
-  if(best&&sc>=2)return{t:best.body,s:"Сеть · "+best.title};
-  if(navigator.onLine){try{var query=q.replace(/^(что такое|кто такой)\s+/i,"").trim();var s=await fetch("https://ru.wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(query)+"&limit=1&format=json&origin=*").then(function(r){return r.json();});if(s[1]&&s[1][0]){var j=await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(s[1][0])).then(function(r){return r.json();});if(j.extract)return{t:j.title+".\n\n"+String(j.extract).slice(0,700),s:"Wikipedia"};}}catch(e){}}
-  return{t:"Нет ответа в сети. Добавьте знание во вкладке Сеть.",s:null};
+const USERS='aksi_net_users_v1', SESSION='aksi_net_session_v1', AGENTS='aksi_net_agents_v1', FEED='aksi_net_feed_v1', CHAT='aksi_net_chat_v1';
+function load(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function $(id){return document.getElementById(id)}
+function session(){return load(SESSION,null)}
+function setSession(u){save(SESSION,u)}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));}
+function ensureAgent(user, agentName, title, style){
+  const agents=load(AGENTS,{});
+  const key=(agentName||'agent').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,24)||('u'+Date.now().toString(36));
+  agents[key]={name:key,title:title||key,owner:user,style:style||'Ты персональный ИИ АКСИ. Кратко и честно.',created:Date.now()};
+  save(AGENTS,agents); return key;
 }
-var thread=document.getElementById("thread"),hint=document.getElementById("hint");
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function add(me,text,src){if(hint)hint.style.display="none";var d=document.createElement("div");d.className="msg "+(me?"me":"bot");d.innerHTML=esc(text).replace(/\n/g,"<br>")+(src?"<span class=\"src\">"+esc(src)+"</span>":"");thread.appendChild(d);thread.scrollTop=thread.scrollHeight;}
-async function ask(t){t=(t||document.getElementById("inp").value||"").trim();if(!t)return;document.getElementById("inp").value="";add(true,t);var r=await reply(t);add(false,r.t,r.s);}
-document.getElementById("send").onclick=function(){ask();};
-document.getElementById("inp").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();ask();}});
-document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){ask(b.getAttribute("data-q"));};});
+function replyAs(agent, text){
+  const style=(agent&&agent.style)||''; const t=text.toLowerCase();
+  if(/кто ты|представь/.test(t)) return 'Я '+((agent&&agent.title)||agent.name)+' (@'+agent.name+'). '+style.slice(0,140);
+  if(/помощь|help|что умеешь/.test(t)) return 'Лента и чат: @'+agent.name+' вопрос. Раздел «Ещё» — Lab, Exocortex, Studio.';
+  if(/акси|did|лиценз/.test(t)) return 'АКСИ: DID did:aksi:ed25519:sovereign-2026, Apache-2.0, контакт aksilove@internet.ru. Я агент @'+agent.name+'.';
+  return '('+((agent&&agent.title)||agent.name)+') '+(style.split(/[.!?]/)[0]||'ОК')+'. «'+text.slice(0,160)+'» — уточните, если нужно глубже.';
+}
+function parseAt(text){
+  const m=/^@([a-zA-Z0-9_]+)\s+([\s\S]+)$/.exec(text.trim());
+  if(m) return {agent:m[1].toLowerCase(), body:m[2]};
+  return {agent:null, body:text.trim()};
+}
+function show(view){
+  ['home','auth','feed','chat','ai','more'].forEach(v=>$('v-'+v).classList.toggle('hide', v!==view));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===view));
+  const s=session();
+  $('who').textContent=s?(s.user+' · @'+s.agent):'гость';
+  if(view==='feed') renderFeed();
+  if(view==='chat') renderChat();
+  if(view==='ai'){ fillAi(); renderAgents(); }
+}
+function renderFeed(){
+  const feed=load(FEED,[]).slice().reverse();
+  $('feedList').innerHTML=feed.map(p=>'<div class="msg"><b>'+esc(p.user)+'</b> '+(p.at?'→ <code>@'+esc(p.at)+'</code>':'')+'<div>'+esc(p.text)+'</div>'+(p.reply?'<div class="msg ai">'+esc(p.reply)+'</div>':'')+'<div class="meta">'+new Date(p.ts).toLocaleString()+'</div></div>').join('')||'<p class="sub">Лента пуста</p>';
+}
+function renderChat(){
+  const s=session(); if(!s){ $('chatList').innerHTML='<p class="sub">Сначала войдите</p>'; return; }
+  const list=(load(CHAT,{})[s.user]||[]);
+  $('chatList').innerHTML=list.map(m=>'<div class="msg '+(m.role==='user'?'me':'ai')+'">'+esc(m.text)+'<div class="meta">'+(m.from||'')+'</div></div>').join('')||'<p class="sub">Начните диалог</p>';
+  $('chatList').scrollTop=1e9;
+}
+function renderAgents(){
+  const agents=load(AGENTS,{});
+  $('agentList').innerHTML='<h2>Агенты</h2>'+Object.keys(agents).map(k=>{const a=agents[k];return '<div class="meta" style="padding:8px 0;border-bottom:1px solid var(--line)"><code>@'+esc(a.name)+'</code> · '+esc(a.title)+' · '+esc(a.owner)+'</div>'}).join('')||'<p class="sub">Пока пусто</p>';
+}
+function fillAi(){
+  const s=session(); if(!s) return; const a=load(AGENTS,{})[s.agent]||{};
+  $('setName').value=a.name||s.agent; $('setTitle').value=a.title||''; $('setStyle').value=a.style||'';
+}
+$('tabLogin').onclick=()=>{ $('boxLogin').classList.remove('hide'); $('boxReg').classList.add('hide'); };
+$('tabReg').onclick=()=>{ $('boxReg').classList.remove('hide'); $('boxLogin').classList.add('hide'); };
+$('btnReg').onclick=async ()=>{
+  $('authErr').textContent='';
+  const user=$('regUser').value.trim().toLowerCase(); const pass=$('regPass').value;
+  let agent=$('regAgent').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+  if(!user||pass.length<4){ $('authErr').textContent='Логин и пароль от 4 символов'; return; }
+  const users=load(USERS,{}); if(users[user]){ $('authErr').textContent='Логин занят'; return; }
+  if(!agent) agent=user+'_ai'; if(load(AGENTS,{})[agent]){ $('authErr').textContent='@ занято'; return; }
+  users[user]={user,pass:await sha(pass),agent,gh:false}; save(USERS,users);
+  ensureAgent(user,agent,agent,'Ты ИИ пользователя '+user+' в сети АКСИ.');
+  setSession({user,agent}); show('home');
+};
+$('btnLogin').onclick=async ()=>{
+  $('authErr').textContent='';
+  const user=$('loginUser').value.trim().toLowerCase(); const pass=await sha($('loginPass').value);
+  const users=load(USERS,{});
+  if(!users[user]||users[user].pass!==pass){ $('authErr').textContent='Неверный логин или пароль'; return; }
+  setSession({user,agent:users[user].agent}); show('home');
+};
+$('btnGh').onclick=async ()=>{
+  const gh=prompt('GitHub username:'); if(!gh) return;
+  const user=gh.trim().toLowerCase().replace(/[^a-z0-9-]/g,''); if(!user) return;
+  const users=load(USERS,{});
+  if(!users[user]){
+    const agent=ensureAgent(user,user.replace(/-/g,'_'),'GitHub '+user,'Ты ИИ GitHub @'+user);
+    users[user]={user,pass:await sha('github:'+user),agent,gh:true}; save(USERS,users);
+  }
+  setSession({user,agent:users[user].agent}); show('home');
+};
+$('btnFeed').onclick=()=>{
+  const s=session(); if(!s){ show('auth'); return; }
+  const raw=$('feedText').value.trim(); if(!raw) return;
+  const parsed=parseAt(raw); const agents=load(AGENTS,{}); let reply=null,at=null;
+  if(parsed.agent&&agents[parsed.agent]){at=parsed.agent;reply=replyAs(agents[at],parsed.body);}
+  else if(parsed.agent){at=parsed.agent;reply='@'+at+' не найден';}
+  const feed=load(FEED,[]); feed.push({user:s.user,text:raw,at,reply,ts:Date.now()}); save(FEED,feed.slice(-200));
+  $('feedText').value=''; renderFeed();
+};
+$('btnChat').onclick=()=>{
+  const s=session(); if(!s){ show('auth'); return; }
+  const raw=$('chatInp').value.trim(); if(!raw) return;
+  const parsed=parseAt(raw); const agents=load(AGENTS,{}); const target=parsed.agent||s.agent; const agent=agents[target];
+  const all=load(CHAT,{}); if(!all[s.user]) all[s.user]=[];
+  all[s.user].push({role:'user',text:raw,from:s.user});
+  all[s.user].push({role:'ai',text:agent?replyAs(agent,parsed.body||raw):('Нет @'+target),from:'@'+target});
+  save(CHAT,all); $('chatInp').value=''; renderChat();
+};
+$('btnSaveAi').onclick=()=>{
+  const s=session(); if(!s) return;
+  let name=$('setName').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+  const title=$('setTitle').value.trim()||name; const style=$('setStyle').value.trim();
+  if(!name) return alert('Имя');
+  const agents=load(AGENTS,{}); if(name!==s.agent&&agents[name]) return alert('Занято');
+  if(name!==s.agent) delete agents[s.agent];
+  agents[name]={name,title,owner:s.user,style,created:Date.now()}; save(AGENTS,agents);
+  const users=load(USERS,{}); if(users[s.user]){users[s.user].agent=name;save(USERS,users)}
+  setSession({user:s.user,agent:name}); alert('Сохранено @'+name); show('ai');
+};
+$('btnLogout').onclick=()=>{localStorage.removeItem(SESSION);show('home')};
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+show('home');
 })();
 </script>
 </body>
