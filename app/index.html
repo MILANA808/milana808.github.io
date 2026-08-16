@@ -3,64 +3,86 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>АКСИ</title>
+<title>АКСИ — суверенный локальный ИИ</title>
 <meta name="theme-color" content="#0b0f1a">
+<meta name="description" content="Локальный суверенный ИИ-контур: оркестратор, агенты, лента, без обязательного облака.">
 <style>
-:root{--bg:#0b0f1a;--panel:#121826;--ink:#eef2ff;--muted:#93a0b8;--line:#1e293b;--acc:#7c3aed;--c:#22d3ee;--ok:#34d399}
+:root{--bg:#0b0f1a;--panel:#121826;--ink:#eef2ff;--muted:#93a0b8;--line:#1e293b;--acc:#2563eb;--c:#38bdf8;--ok:#34d399}
 *{box-sizing:border-box;margin:0}
-body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:640px;margin:0 auto}
-header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:#0e1420}
-header b{font-size:14px;letter-spacing:.06em}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+header{padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:#0e1420;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header b{font-size:15px}
 header span{font-size:11px;color:var(--muted)}
-nav{display:flex;gap:4px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line);background:#0a0f18}
-nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
-nav button.on{color:#fff;background:var(--acc);border-color:transparent}
-main{flex:1;overflow:auto;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom))}
+nav{display:flex;gap:4px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line)}
+nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:10px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff;border-color:transparent}
+main{flex:1;overflow:auto;padding:12px 14px;padding-bottom:max(16px,env(safe-area-inset-bottom))}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
-.sub{color:var(--muted);font-size:13px;line-height:1.45}
-h2{font-size:1.1rem;margin-bottom:6px}
+.sub{color:var(--muted);font-size:13px;line-height:1.5}
+h2{font-size:1.05rem;margin-bottom:8px}
 label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
 input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0a0f18;color:var(--ink);font-size:16px}
-button.btn{border:0;border-radius:10px;padding:12px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-size:14px}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
-.row{display:flex;gap:8px}
-.row .btn{flex:1}
+.btn{border:0;border-radius:10px;padding:12px;background:var(--acc);color:#fff;font-weight:800;cursor:pointer;width:100%;margin-top:8px;font-size:14px}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.row{display:flex;gap:8px}.row .btn{flex:1}
 .hide{display:none}
 .err{color:#f87171;font-size:13px}
+.ok{color:var(--ok)}
 .msg{padding:10px 12px;border-radius:12px;border:1px solid var(--line);margin:8px 0;font-size:14px;white-space:pre-wrap}
-.msg.me{background:#2a1f4d}
+.msg.me{background:#1e293b}
 .msg.ai{background:#0f172a}
-.meta{font-size:11px;color:var(--muted);margin-top:4px}
+.step{font-size:12px;padding:8px 10px;border-left:3px solid var(--c);background:#0a0f18;margin:6px 0;color:#cbd5e1}
+.meta{font-size:11px;color:var(--muted);margin-top:4px;font-family:ui-monospace,monospace}
 code{color:var(--c)}
-a.link{color:var(--c);font-size:13px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.grid a{display:block;text-align:center;padding:14px 8px;border-radius:12px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:13px;background:#0a0f18}
+.grid a{display:block;text-align:center;padding:12px 8px;border-radius:12px;border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:13px;background:#0a0f18}
+.badge{display:inline-block;font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--c);margin-right:4px}
 </style>
 </head>
 <body>
 <header>
-  <div><b>АКСИ</b><span id="who">гость</span></div>
-  <span id="status">local</span>
+  <div><b>АКСИ</b><span> суверенный · локальный · проверяемый</span></div>
+  <span id="who">гость</span>
 </header>
-<nav id="nav">
-  <button type="button" data-v="home" class="on">Главная</button>
+<nav>
+  <button type="button" class="on" data-v="home">Главная</button>
+  <button type="button" data-v="orch">Оркестратор</button>
   <button type="button" data-v="auth">Вход</button>
   <button type="button" data-v="feed">Лента</button>
   <button type="button" data-v="chat">Чат</button>
   <button type="button" data-v="ai">Мой ИИ</button>
-  <button type="button" data-v="more">Ещё</button>
+  <button type="button" data-v="modules">Модули</button>
 </nav>
 <main>
+
 <section id="v-home">
   <div class="card">
-    <h2>Всё в одном месте</h2>
-    <p class="sub">Свой ИИ, общая лента, вызов <code>@имя</code>. Lab и Exocortex — рядом.</p>
-    <button type="button" class="btn" data-go="auth" id="ctaAuth">Войти / создать ИИ</button>
-    <button type="button" class="btn ghost" data-go="feed">Лента сети</button>
+    <h2>Локальный ИИ-контур</h2>
+    <p class="sub">Данные остаются в браузере. Нет обязательного иностранного облака. Оркестратор ведёт запрос по шагам: план → знания → ответ → проверка.</p>
+    <p style="margin:10px 0"><span class="badge">local-first</span><span class="badge">без AGI-заявлений</span><span class="badge">Apache-2.0</span></p>
+    <button type="button" class="btn" data-go="orch">Открыть оркестратор</button>
+    <button type="button" class="btn ghost" data-go="auth">Войти / создать агента</button>
   </div>
   <div class="card">
-    <h2>Как пользоваться</h2>
-    <p class="sub">1. Регистрация → имя ИИ<br>2. Лента: <code>@агент вопрос</code><br>3. Чат — диалог с собой или @другим<br>4. «Мой ИИ» — переименовать и задать характер</p>
+    <h2>Соответствие суверенному контуру</h2>
+    <p class="sub">· Обработка на устройстве пользователя<br>· Открытый код и лицензия<br>· Отказ от ответа без опоры на локальные знания<br>· Человек задаёт имя и правила своего агента<br>· Идентичность системы: DID (программный)</p>
+  </div>
+</section>
+
+<section id="v-orch" class="hide">
+  <div class="card">
+    <h2>Оркестратор</h2>
+    <p class="sub">Единая точка входа. Маршрутизация: факты из базы · агент сети · отказ при нехватке данных.</p>
+    <textarea id="orchQ" rows="3" placeholder="Ваш вопрос…"></textarea>
+    <button type="button" class="btn" id="btnOrch">Выполнить</button>
+  </div>
+  <div class="card">
+    <h2>Ход</h2>
+    <div id="orchSteps" class="sub">Пока пусто</div>
+  </div>
+  <div class="card">
+    <h2>Ответ</h2>
+    <div id="orchAns" class="sub">—</div>
   </div>
 </section>
 
@@ -71,26 +93,27 @@ a.link{color:var(--c);font-size:13px}
       <button type="button" class="btn ghost" id="tabReg">Регистрация</button>
     </div>
     <div id="boxLogin">
-      <label>Логин</label><input id="loginUser">
-      <label>Пароль</label><input id="loginPass" type="password">
+      <label>Логин</label><input id="loginUser" autocomplete="username">
+      <label>Пароль</label><input id="loginPass" type="password" autocomplete="current-password">
       <button type="button" class="btn" id="btnLogin">Войти</button>
     </div>
     <div id="boxReg" class="hide">
-      <label>Логин</label><input id="regUser">
-      <label>Пароль</label><input id="regPass" type="password">
-      <label>Имя ИИ (латиница)</label><input id="regAgent" placeholder="mira">
+      <label>Логин</label><input id="regUser" autocomplete="username">
+      <label>Пароль</label><input id="regPass" type="password" autocomplete="new-password">
+      <label>Имя агента (латиница, для @)</label><input id="regAgent" placeholder="mira">
       <button type="button" class="btn" id="btnReg">Создать</button>
     </div>
-    <button type="button" class="btn ghost" id="btnGh">GitHub username</button>
-    <p class="meta">GitHub: только публичный логин, без пароля GitHub (статический сайт).</p>
+    <button type="button" class="btn ghost" id="btnGh">Войти по GitHub username</button>
+    <p class="meta">Пароль GitHub не запрашивается. Полный OAuth — только с вашим сервером в контуре РФ.</p>
     <p class="err" id="authErr"></p>
   </div>
 </section>
 
 <section id="v-feed" class="hide">
   <div class="card">
-    <textarea id="feedText" rows="3" placeholder="Текст или @agent вопрос"></textarea>
-    <button type="button" class="btn" id="btnFeed">В ленту</button>
+    <p class="sub">Общая лента (локальный реестр). Вызов агента: <code>@имя вопрос</code></p>
+    <textarea id="feedText" rows="3" placeholder="Сообщение"></textarea>
+    <button type="button" class="btn" id="btnFeed">Опубликовать</button>
   </div>
   <div id="feedList"></div>
 </section>
@@ -105,150 +128,227 @@ a.link{color:var(--c);font-size:13px}
 
 <section id="v-ai" class="hide">
   <div class="card">
+    <h2>Ваш агент</h2>
     <label>@имя</label><input id="setName">
     <label>Название</label><input id="setTitle">
-    <label>Характер</label><textarea id="setStyle" rows="4"></textarea>
+    <label>Правила ответа</label><textarea id="setStyle" rows="4" placeholder="Кратко, по делу, на русском…"></textarea>
     <button type="button" class="btn" id="btnSaveAi">Сохранить</button>
     <button type="button" class="btn ghost" id="btnLogout">Выйти</button>
   </div>
   <div class="card" id="agentList"></div>
 </section>
 
-<section id="v-more" class="hide">
+<section id="v-modules" class="hide">
   <div class="card">
-    <h2>Модули АКСИ</h2>
+    <h2>Модули контура</h2>
+    <p class="sub">Дополнительные поверхности того же проекта. Работают в браузере.</p>
     <div class="grid">
-      <a href="/exocortex/">Exocortex</a>
       <a href="/lab/">Lab</a>
+      <a href="/exocortex/">Exocortex</a>
       <a href="/studio/">Studio</a>
       <a href="/pulse/">Pulse</a>
-      <a href="/kernel/">Kernel</a>
-      <a href="/offer/">Offer</a>
-      <a href="/network/">Network</a>
-      <a href="/contour/">Contour</a>
+      <a href="/quantum/">Quantum</a>
+      <a href="/proof/">Proof</a>
     </div>
-    <p class="sub" style="margin-top:10px">Локальный сервер Omega (полный RAG/LLM): пакет aksi-omega · aksilove@internet.ru</p>
+    <p class="meta" style="margin-top:12px">DID: did:aksi:ed25519:sovereign-2026<br>Контакт: aksilove@internet.ru<br>Лицензия: Apache-2.0</p>
   </div>
 </section>
+
 </main>
 <script>
 (function(){
-const USERS='aksi_net_users_v1', SESSION='aksi_net_session_v1', AGENTS='aksi_net_agents_v1', FEED='aksi_net_feed_v1', CHAT='aksi_net_chat_v1';
+"use strict";
+const USERS="aksi_net_users_v1", SESSION="aksi_net_session_v1", AGENTS="aksi_net_agents_v1", FEED="aksi_net_feed_v1", CHAT="aksi_net_chat_v1";
+
+/* Локальная база фактов — суверенный offline-контур */
+const KB=[
+  {k:["акси","что такое"],a:"АКСИ — локальный суверенный ИИ-контур: оркестратор, персональные агенты, лента. Данные по умолчанию на устройстве."},
+  {k:["did","идентич"],a:"Программный DID: did:aksi:ed25519:sovereign-2026. Это идентичность системы, не паспортные данные."},
+  {k:["лиценз","apache"],a:"Код распространяется под Apache License 2.0."},
+  {k:["контакт","связ","email"],a:"Контакт: aksilove@internet.ru"},
+  {k:["суверен","росси","национал","импортонезависим"],a:"Принципы контура: local-first, отказ от обязательного внешнего API, открытый код, контроль пользователя над агентом, возможность вынести на свой сервер в периметре."},
+  {k:["оркестратор","как работа"],a:"Оркестратор: (1) разбор запроса (2) поиск в локальной базе (3) при необходимости ответ агента (4) отказ, если фактов нет."},
+  {k:["персональн","мой ии","агент"],a:"После входа у вас есть агент @имя. Его можно переименовать и задать правила в разделе «Мой ИИ». Вызов в ленте: @имя вопрос."},
+  {k:["безопасно","данн","облак"],a:"На этом сайте аккаунты и лента хранятся в localStorage браузера. Для корпоративного контура РФ используйте свой backend в периметре."}
+];
+
 function load(k,d){try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(d))}catch(e){return d}}
 function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
-async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function sha(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 function $(id){return document.getElementById(id)}
 function session(){return load(SESSION,null)}
 function setSession(u){save(SESSION,u)}
-function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+
+function kbAnswer(q){
+  const t=(q||"").toLowerCase();
+  for(const row of KB){ if(row.k.every(x=>t.includes(x))||row.k.some(x=>t.includes(x)&&row.k.length===1)) return row.a; }
+  for(const row of KB){ if(row.k.some(x=>t.includes(x))) return row.a; }
+  return null;
+}
+
 function ensureAgent(user, agentName, title, style){
   const agents=load(AGENTS,{});
-  const key=(agentName||'agent').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,24)||('u'+Date.now().toString(36));
-  agents[key]={name:key,title:title||key,owner:user,style:style||'Ты персональный ИИ АКСИ. Кратко и честно.',created:Date.now()};
+  const key=(agentName||"agent").toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,24)||("u"+Date.now().toString(36));
+  agents[key]={name:key,title:title||key,owner:user,style:style||"Отвечай кратко, по делу, на русском. Не выдумывай факты.",created:Date.now()};
   save(AGENTS,agents); return key;
 }
+
 function replyAs(agent, text){
-  const style=(agent&&agent.style)||''; const t=text.toLowerCase();
-  if(/кто ты|представь/.test(t)) return 'Я '+((agent&&agent.title)||agent.name)+' (@'+agent.name+'). '+style.slice(0,140);
-  if(/помощь|help|что умеешь/.test(t)) return 'Лента и чат: @'+agent.name+' вопрос. Раздел «Ещё» — Lab, Exocortex, Studio.';
-  if(/акси|did|лиценз/.test(t)) return 'АКСИ: DID did:aksi:ed25519:sovereign-2026, Apache-2.0, контакт aksilove@internet.ru. Я агент @'+agent.name+'.';
-  return '('+((agent&&agent.title)||agent.name)+') '+(style.split(/[.!?]/)[0]||'ОК')+'. «'+text.slice(0,160)+'» — уточните, если нужно глубже.';
+  const style=(agent&&agent.style)||"";
+  const t=text.toLowerCase();
+  const kb=kbAnswer(text);
+  if(kb) return kb;
+  if(/кто ты|представь/.test(t)) return "Я "+((agent&&agent.title)||agent.name)+" (@"+agent.name+"). "+style.slice(0,140);
+  if(/помощь|что умеешь/.test(t)) return "Оркестратор, лента, чат, @вызов. Правила задаются в «Мой ИИ».";
+  return "("+((agent&&agent.title)||agent.name)+") "+(style.split(/[.!?]/)[0]||"Принято")+". Запрос: «"+text.slice(0,140)+"». Если нужен факт из базы — сформулируйте проще.";
 }
+
 function parseAt(text){
-  const m=/^@([a-zA-Z0-9_]+)\s+([\s\S]+)$/.exec(text.trim());
+  const m=/^@([a-zA-Z0-9_]+)\s+([\s\S]+)$/.exec((text||"").trim());
   if(m) return {agent:m[1].toLowerCase(), body:m[2]};
-  return {agent:null, body:text.trim()};
+  return {agent:null, body:(text||"").trim()};
 }
-function show(view){
-  ['home','auth','feed','chat','ai','more'].forEach(v=>$('v-'+v).classList.toggle('hide', v!==view));
-  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===view));
+
+/** Оркестратор: явные шаги, локально */
+function orchestrate(question){
+  const steps=[];
+  const q=(question||"").trim();
+  steps.push({t:"Приём запроса", d:q.slice(0,200)||"(пусто)"});
+  if(!q) return {steps, answer:"Введите вопрос.", route:"empty"};
+
+  const at=parseAt(q);
+  if(at.agent){
+    steps.push({t:"Маршрут", d:"вызов агента @"+at.agent});
+    const agent=load(AGENTS,{})[at.agent];
+    if(!agent){ steps.push({t:"Проверка", d:"агент не найден"}); return {steps, answer:"Агент @"+at.agent+" не зарегистрирован.", route:"miss"}; }
+    const ans=replyAs(agent, at.body);
+    steps.push({t:"Ответ агента", d:"style/owner "+agent.owner});
+    steps.push({t:"Проверка", d:"локальный ответ без внешнего API"});
+    return {steps, answer:ans, route:"agent"};
+  }
+
+  steps.push({t:"Маршрут", d:"поиск в локальной базе знаний"});
+  const hit=kbAnswer(q);
+  if(hit){
+    steps.push({t:"Найдено", d:"фрагмент базы"});
+    steps.push({t:"Проверка", d:"ответ опирается на локальный факт"});
+    return {steps, answer:hit, route:"kb"};
+  }
+
   const s=session();
-  $('who').textContent=s?(s.user+' · @'+s.agent):'гость';
-  if(view==='feed') renderFeed();
-  if(view==='chat') renderChat();
-  if(view==='ai'){ fillAi(); renderAgents(); }
+  if(s && load(AGENTS,{})[s.agent]){
+    steps.push({t:"Fallback", d:"персональный агент @"+s.agent});
+    const ans=replyAs(load(AGENTS,{})[s.agent], q);
+    steps.push({t:"Проверка", d:"без подтверждённого факта — осторожная формулировка"});
+    return {steps, answer:ans, route:"personal"};
+  }
+
+  steps.push({t:"Проверка", d:"фактов недостаточно"});
+  return {steps, answer:"Недостаточно данных в локальной базе. Уточните вопрос или добавьте знание через своего агента.", route:"refuse"};
 }
+
+function show(view){
+  ["home","orch","auth","feed","chat","ai","modules"].forEach(v=>$("v-"+v).classList.toggle("hide", v!==view));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on", b.dataset.v===view));
+  const s=session();
+  $("who").textContent=s?(s.user+" · @"+s.agent):"гость";
+  if(view==="feed") renderFeed();
+  if(view==="chat") renderChat();
+  if(view==="ai"){ fillAi(); renderAgents(); }
+}
+
 function renderFeed(){
   const feed=load(FEED,[]).slice().reverse();
-  $('feedList').innerHTML=feed.map(p=>'<div class="msg"><b>'+esc(p.user)+'</b> '+(p.at?'→ <code>@'+esc(p.at)+'</code>':'')+'<div>'+esc(p.text)+'</div>'+(p.reply?'<div class="msg ai">'+esc(p.reply)+'</div>':'')+'<div class="meta">'+new Date(p.ts).toLocaleString()+'</div></div>').join('')||'<p class="sub">Лента пуста</p>';
+  $("feedList").innerHTML=feed.map(p=>"<div class=\"msg\"><b>"+esc(p.user)+"</b> "+(p.at?"→ <code>@"+esc(p.at)+"</code>":"")+"<div>"+esc(p.text)+"</div>"+(p.reply?"<div class=\"msg ai\">"+esc(p.reply)+"</div>":"")+"<div class=\"meta\">"+new Date(p.ts).toLocaleString()+"</div></div>").join("")||"<p class=\"sub\">Лента пуста</p>";
 }
 function renderChat(){
-  const s=session(); if(!s){ $('chatList').innerHTML='<p class="sub">Сначала войдите</p>'; return; }
+  const s=session(); if(!s){ $("chatList").innerHTML="<p class=\"sub\">Сначала войдите</p>"; return; }
   const list=(load(CHAT,{})[s.user]||[]);
-  $('chatList').innerHTML=list.map(m=>'<div class="msg '+(m.role==='user'?'me':'ai')+'">'+esc(m.text)+'<div class="meta">'+(m.from||'')+'</div></div>').join('')||'<p class="sub">Начните диалог</p>';
-  $('chatList').scrollTop=1e9;
+  $("chatList").innerHTML=list.map(m=>"<div class=\"msg "+(m.role==="user"?"me":"ai")+"\">"+esc(m.text)+"<div class=\"meta\">"+(m.from||"")+"</div></div>").join("")||"<p class=\"sub\">Начните диалог</p>";
+  $("chatList").scrollTop=1e9;
 }
 function renderAgents(){
   const agents=load(AGENTS,{});
-  $('agentList').innerHTML='<h2>Агенты</h2>'+Object.keys(agents).map(k=>{const a=agents[k];return '<div class="meta" style="padding:8px 0;border-bottom:1px solid var(--line)"><code>@'+esc(a.name)+'</code> · '+esc(a.title)+' · '+esc(a.owner)+'</div>'}).join('')||'<p class="sub">Пока пусто</p>';
+  $("agentList").innerHTML="<h2>Реестр агентов</h2>"+Object.keys(agents).map(k=>{const a=agents[k];return "<div class=\"meta\" style=\"padding:8px 0;border-bottom:1px solid var(--line)\"><code>@"+esc(a.name)+"</code> · "+esc(a.title)+" · "+esc(a.owner)+"</div>"}).join("")||"<p class=\"sub\">Пока пусто</p>";
 }
 function fillAi(){
   const s=session(); if(!s) return; const a=load(AGENTS,{})[s.agent]||{};
-  $('setName').value=a.name||s.agent; $('setTitle').value=a.title||''; $('setStyle').value=a.style||'';
+  $("setName").value=a.name||s.agent; $("setTitle").value=a.title||""; $("setStyle").value=a.style||"";
 }
-$('tabLogin').onclick=()=>{ $('boxLogin').classList.remove('hide'); $('boxReg').classList.add('hide'); };
-$('tabReg').onclick=()=>{ $('boxReg').classList.remove('hide'); $('boxLogin').classList.add('hide'); };
-$('btnReg').onclick=async ()=>{
-  $('authErr').textContent='';
-  const user=$('regUser').value.trim().toLowerCase(); const pass=$('regPass').value;
-  let agent=$('regAgent').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
-  if(!user||pass.length<4){ $('authErr').textContent='Логин и пароль от 4 символов'; return; }
-  const users=load(USERS,{}); if(users[user]){ $('authErr').textContent='Логин занят'; return; }
-  if(!agent) agent=user+'_ai'; if(load(AGENTS,{})[agent]){ $('authErr').textContent='@ занято'; return; }
+
+$("btnOrch").onclick=()=>{
+  const r=orchestrate($("orchQ").value);
+  $("orchSteps").innerHTML=r.steps.map(s=>"<div class=\"step\"><b>"+esc(s.t)+"</b><br>"+esc(s.d)+"</div>").join("");
+  $("orchAns").textContent=r.answer;
+};
+
+$("tabLogin").onclick=()=>{ $("boxLogin").classList.remove("hide"); $("boxReg").classList.add("hide"); };
+$("tabReg").onclick=()=>{ $("boxReg").classList.remove("hide"); $("boxLogin").classList.add("hide"); };
+
+$("btnReg").onclick=async ()=>{
+  $("authErr").textContent="";
+  const user=$("regUser").value.trim().toLowerCase(); const pass=$("regPass").value;
+  let agent=$("regAgent").value.trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
+  if(!user||pass.length<4){ $("authErr").textContent="Логин и пароль (от 4)"; return; }
+  const users=load(USERS,{}); if(users[user]){ $("authErr").textContent="Логин занят"; return; }
+  if(!agent) agent=user+"_ai"; if(load(AGENTS,{})[agent]){ $("authErr").textContent="@ занято"; return; }
   users[user]={user,pass:await sha(pass),agent,gh:false}; save(USERS,users);
-  ensureAgent(user,agent,agent,'Ты ИИ пользователя '+user+' в сети АКСИ.');
-  setSession({user,agent}); show('home');
+  ensureAgent(user,agent,agent,"Отвечай кратко, по делу, на русском. Не выдумывай факты.");
+  setSession({user,agent}); show("home");
 };
-$('btnLogin').onclick=async ()=>{
-  $('authErr').textContent='';
-  const user=$('loginUser').value.trim().toLowerCase(); const pass=await sha($('loginPass').value);
+$("btnLogin").onclick=async ()=>{
+  $("authErr").textContent="";
+  const user=$("loginUser").value.trim().toLowerCase(); const pass=await sha($("loginPass").value);
   const users=load(USERS,{});
-  if(!users[user]||users[user].pass!==pass){ $('authErr').textContent='Неверный логин или пароль'; return; }
-  setSession({user,agent:users[user].agent}); show('home');
+  if(!users[user]||users[user].pass!==pass){ $("authErr").textContent="Неверный логин или пароль"; return; }
+  setSession({user,agent:users[user].agent}); show("home");
 };
-$('btnGh').onclick=async ()=>{
-  const gh=prompt('GitHub username:'); if(!gh) return;
-  const user=gh.trim().toLowerCase().replace(/[^a-z0-9-]/g,''); if(!user) return;
+$("btnGh").onclick=async ()=>{
+  const gh=prompt("GitHub username:"); if(!gh) return;
+  const user=gh.trim().toLowerCase().replace(/[^a-z0-9-]/g,""); if(!user) return;
   const users=load(USERS,{});
   if(!users[user]){
-    const agent=ensureAgent(user,user.replace(/-/g,'_'),'GitHub '+user,'Ты ИИ GitHub @'+user);
-    users[user]={user,pass:await sha('github:'+user),agent,gh:true}; save(USERS,users);
+    const agent=ensureAgent(user,user.replace(/-/g,"_"),"GitHub "+user,"Отвечай кратко. Владелец GitHub @"+user+".");
+    users[user]={user,pass:await sha("github:"+user),agent,gh:true}; save(USERS,users);
   }
-  setSession({user,agent:users[user].agent}); show('home');
+  setSession({user,agent:users[user].agent}); show("home");
 };
-$('btnFeed').onclick=()=>{
-  const s=session(); if(!s){ show('auth'); return; }
-  const raw=$('feedText').value.trim(); if(!raw) return;
+
+$("btnFeed").onclick=()=>{
+  const s=session(); if(!s){ show("auth"); return; }
+  const raw=$("feedText").value.trim(); if(!raw) return;
   const parsed=parseAt(raw); const agents=load(AGENTS,{}); let reply=null,at=null;
-  if(parsed.agent&&agents[parsed.agent]){at=parsed.agent;reply=replyAs(agents[at],parsed.body);}
-  else if(parsed.agent){at=parsed.agent;reply='@'+at+' не найден';}
+  if(parsed.agent&&agents[parsed.agent]){ at=parsed.agent; reply=replyAs(agents[at],parsed.body); }
+  else if(parsed.agent){ at=parsed.agent; reply="Агент @"+at+" не найден"; }
   const feed=load(FEED,[]); feed.push({user:s.user,text:raw,at,reply,ts:Date.now()}); save(FEED,feed.slice(-200));
-  $('feedText').value=''; renderFeed();
+  $("feedText").value=""; renderFeed();
 };
-$('btnChat').onclick=()=>{
-  const s=session(); if(!s){ show('auth'); return; }
-  const raw=$('chatInp').value.trim(); if(!raw) return;
+$("btnChat").onclick=()=>{
+  const s=session(); if(!s){ show("auth"); return; }
+  const raw=$("chatInp").value.trim(); if(!raw) return;
   const parsed=parseAt(raw); const agents=load(AGENTS,{}); const target=parsed.agent||s.agent; const agent=agents[target];
   const all=load(CHAT,{}); if(!all[s.user]) all[s.user]=[];
-  all[s.user].push({role:'user',text:raw,from:s.user});
-  all[s.user].push({role:'ai',text:agent?replyAs(agent,parsed.body||raw):('Нет @'+target),from:'@'+target});
-  save(CHAT,all); $('chatInp').value=''; renderChat();
+  all[s.user].push({role:"user",text:raw,from:s.user});
+  all[s.user].push({role:"ai",text:agent?replyAs(agent,parsed.body||raw):("Нет @"+target),from:"@"+target});
+  save(CHAT,all); $("chatInp").value=""; renderChat();
 };
-$('btnSaveAi').onclick=()=>{
+$("btnSaveAi").onclick=()=>{
   const s=session(); if(!s) return;
-  let name=$('setName').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
-  const title=$('setTitle').value.trim()||name; const style=$('setStyle').value.trim();
-  if(!name) return alert('Имя');
-  const agents=load(AGENTS,{}); if(name!==s.agent&&agents[name]) return alert('Занято');
+  let name=$("setName").value.trim().toLowerCase().replace(/[^a-z0-9_]/g,"");
+  const title=$("setTitle").value.trim()||name; const style=$("setStyle").value.trim();
+  if(!name) return alert("Укажите имя");
+  const agents=load(AGENTS,{}); if(name!==s.agent&&agents[name]) return alert("Имя занято");
   if(name!==s.agent) delete agents[s.agent];
   agents[name]={name,title,owner:s.user,style,created:Date.now()}; save(AGENTS,agents);
-  const users=load(USERS,{}); if(users[s.user]){users[s.user].agent=name;save(USERS,users)}
-  setSession({user:s.user,agent:name}); alert('Сохранено @'+name); show('ai');
+  const users=load(USERS,{}); if(users[s.user]){ users[s.user].agent=name; save(USERS,users); }
+  setSession({user:s.user,agent:name}); alert("Сохранено @"+name); show("ai");
 };
-$('btnLogout').onclick=()=>{localStorage.removeItem(SESSION);show('home')};
-document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.v));
-document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
-show('home');
+$("btnLogout").onclick=()=>{ localStorage.removeItem(SESSION); show("home"); };
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>show(b.dataset.v));
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+show("home");
 })();
 </script>
 </body>
