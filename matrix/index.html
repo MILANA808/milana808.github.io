@@ -2,77 +2,13 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>АКСИ</title>
-<style>
-*{box-sizing:border-box;margin:0}
-html,body{height:100%;background:#0f172a;color:#f1f5f9;font-family:system-ui,-apple-system,sans-serif}
-body{display:flex;flex-direction:column;max-width:720px;margin:0 auto}
-#boot{position:fixed;inset:0;z-index:99;background:#0f172a;display:flex;align-items:center;justify-content:center;flex-direction:column}
-#boot h1{font-size:1.4rem;margin-bottom:8px}
-#boot p{color:#94a3b8;font-size:13px}
-header{padding:max(10px,env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
-h1{font-size:1rem;font-weight:800}
-#status{font-size:11px;color:#94a3b8}
-.bar{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid #334155}
-.bar button,.bar label{border:1px solid #334155;background:#1e293b;color:#f1f5f9;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;white-space:nowrap}
-#thread{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
-.msg{margin:0 0 10px;max-width:92%}
-.msg.u{margin-left:auto}
-.b{padding:12px 14px;border-radius:14px;font-size:15px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.msg.u .b{background:#7c3aed;color:#fff}
-.msg.a .b{background:#1e293b;border:1px solid #334155}
-.composer{display:flex;gap:8px;padding:8px 10px max(12px,env(safe-area-inset-bottom));border-top:1px solid #334155;background:#111827}
-#inp{flex:1;min-height:44px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#f1f5f9;padding:10px;font-size:16px}
-#send{width:48px;border:0;border-radius:12px;background:#7c3aed;color:#fff;font-weight:800;font-size:18px}
-#file{display:none}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0;url=/?from=matrix">
+<title>АКСИ MATRIX</title>
+<style>html,body{margin:0;height:100%;background:#0b1020;color:#f1f5f9;font-family:system-ui;display:grid;place-items:center}a{color:#a78bfa}</style>
 </head>
 <body>
-<div id="boot"><h1>АКСИ</h1><p>Секунду…</p></div>
-<script>setTimeout(function(){var b=document.getElementById("boot");if(b)b.style.display="none";},250);</script>
-<header><h1>АКСИ</h1><div id="status">…</div></header>
-<div class="bar">
-<button type="button" id="btnArch">Схема</button>
-<label for="file">Файл</label>
-<input type="file" id="file" accept=".txt,.md,text/plain" multiple>
-<button type="button" id="btnClear">Очистить</button>
-</div>
-<div id="thread"></div>
-<div class="composer">
-<input id="inp" type="text" placeholder="Спросите АКСИ…" enterkeyhint="send" autocomplete="off">
-<button type="button" id="send">➤</button>
-</div>
-<script>
-(function(){
-var DID="did:aksi:ed25519:sovereign-2026",rag=[],busy=false;
-var O=[
-{t:"АКСИ — local-first ИИ: ответы на устройстве.",k:"акси aksi контур проект"},
-{t:"DID: did:aksi:ed25519:sovereign-2026. aksilove@internet.ru",k:"did контакт"},
-{t:"Быстрый чат без тяжёлой модели на телефоне.",k:"matrix быстр"},
-{t:"Омега: FastAPI + Ollama.",k:"омега ollama сервер"},
-{t:"RAG: загрузите .txt.",k:"rag файл"}
-];
-function $(id){return document.getElementById(id)}
-function add(role,text){var w=document.createElement("div");w.className="msg "+(role==="user"?"u":"a");var b=document.createElement("div");b.className="b";b.textContent=text;w.appendChild(b);$("thread").appendChild(w);$("thread").scrollTop=1e9}
-function score(q,t,k){var low=q.toLowerCase(),n=0;low.split(/\s+/).forEach(function(p){if(p&&t.toLowerCase().indexOf(p)>=0)n++});(k||"").split(/\s+/).forEach(function(x){if(x&&low.indexOf(x)>=0)n+=2});return n}
-function ans(q){var low=q.toLowerCase(),hits=[];O.forEach(function(r){var s=score(q,r.t,r.k);if(s>0)hits.push({t:r.t,s:s})});rag.forEach(function(r){var s=score(q,r,"");if(s>0)hits.push({t:r,s:s})});hits.sort(function(a,b){return b.s-a.s});
-if(/привет|здравств|добрый/.test(low))return "Здравствуйте. АКСИ на связи.";
-if(/кто ты|что ты/.test(low))return "Я АКСИ. DID: "+DID+"\nОтвечаю локально.";
-if(/схем|архитектур/.test(low))return "Вы → знания → ответ → экран";
-if(hits.length&&hits[0].s>=2)return "По знаниям:\n"+hits.slice(0,3).map(function(h,i){return (i+1)+". "+h.t}).join("\n");
-return "Попробуйте: кто ты · схема. "+DID}
-function send(){if(busy)return;var i=$("inp"),q=(i.value||"").trim();if(!q)return;i.value="";busy=true;add("user",q);add("assistant",ans(q));busy=false;$("status").textContent="ok"}
-$("send").onclick=send;$("inp").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();send()}};
-$("btnArch").onclick=function(){$("inp").value="покажи схему";send()};
-$("btnClear").onclick=function(){$("thread").innerHTML="";add("assistant","Очищено.")};
-$("file").onchange=function(e){var fs=e.target.files;if(!fs)return;Array.prototype.forEach.call(fs,function(f){var r=new FileReader();r.onload=function(){var t=String(r.result||"");for(var i=0;i<t.length;i+=400){var c=t.slice(i,i+400);if(c.trim().length>15)rag.push(c)}add("assistant","Файл: "+rag.length)};r.readAsText(f)});e.target.value=""};
-add("assistant","АКСИ готов. Напишите «кто ты».");
-$("status").textContent="готово";
-var b=$("boot");if(b)b.style.display="none";
-})();
-</script>
+<p>Открываем АКСИ… <a href="/?from=matrix">перейти</a></p>
+<script>location.replace('/?from=matrix');</script>
 </body>
 </html>
