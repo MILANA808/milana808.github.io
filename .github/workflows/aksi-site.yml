@@ -11,55 +11,80 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Required core files
         run: |
-          test -f index.html
-          test -f app.js
-          test -f app.css
-          test -f aksi-global.js
-          test -f aksi-global.css
-          test -f 404.html
-          test -f aksi-runtime.js
-          test -f aksi-quantum-runtime.js
-          test -f aksi-quantum-chat.js
-          test -f aksi-learning.js
-          test -f aksi-proof-graph.js
-          test -f aksi-counterfactual.js
-          test -f aksi-quantum-reasoner.js
-          test -f aksi-frontier.js
-          test -f aksi-passport.js
-      - name: JavaScript syntax
+          set -e
+          for f in index.html 404.html app.js app.css aksi-global.js aksi-global.css aksi-runtime.js aksi-quantum-runtime.js aksi-quantum-chat.js aksi-learning.js aksi-proof-graph.js aksi-counterfactual.js aksi-quantum-reasoner.js aksi-frontier.js aksi-passport.js; do test -f "$f"; done
+
+      - name: JavaScript syntax — entire repository
         run: |
-          for f in app.js aksi-global.js aksi-runtime.js aksi-quantum-runtime.js aksi-quantum-chat.js aksi-learning.js aksi-proof-graph.js aksi-counterfactual.js aksi-quantum-reasoner.js aksi-frontier.js aksi-passport.js; do node --check "$f"; done
+          set -e
+          find . -type f -name '*.js' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' f; do node --check "$f"; done
+
+      - name: Python syntax — backend
+        run: |
+          set -e
+          if find backend -type f -name '*.py' | grep -q .; then
+            python3 -m compileall -q backend
+          fi
+
       - name: Global interface contract
         run: |
+          set -e
           grep -q 'АКСИ' 404.html
-          grep -q 'aksi-global.js' aksi-global.js
-          grep -q 'aksi-global.css' aksi-global.css
+          grep -q 'window.AKSI' aksi-runtime.js
+          grep -q 'aksi:runtime-ready' aksi-runtime.js
+          grep -q 'local-first' aksi-global.js
+
       - name: Quantum contract
         run: |
+          set -e
           grep -q 'AKSI-QUANTUM-INFERENCE-1' aksi-quantum-runtime.js
           grep -q 'local-state-vector' aksi-quantum-runtime.js
           grep -q 'AKSIQuantum.run' aksi-quantum-chat.js
-      - name: Build universal shell into every HTML page
+
+      - name: Static link sanity
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          snippet='<!-- AKSI-GLOBAL -->\n<script src="/aksi-global.js" defer></script>'
-          for p in Path('.').rglob('*.html'):
-              if any(x in p.parts for x in ('.git','node_modules')): continue
-              s=p.read_text(encoding='utf-8')
-              if 'aksi-global.js' not in s:
-                  s=s.replace('</body>',snippet+'\n</body>',1) if '</body>' in s else s+'\n'+snippet+'\n'
-                  p.write_text(s,encoding='utf-8')
+          import re
+          root = Path('.')
+          errors = []
+          for p in root.rglob('*.html'):
+              if '.git' in p.parts or 'node_modules' in p.parts:
+                  continue
+              text = p.read_text(encoding='utf-8', errors='replace')
+              for attr in ('href', 'src'):
+                  for raw in re.findall(rf'{attr}=["\']([^"\']+)', text, flags=re.I):
+                      if raw.startswith(('#','http://','https://','mailto:','tel:','data:','javascript:')):
+                          continue
+                      target = raw.split('?',1)[0].split('#',1)[0]
+                      if not target:
+                          continue
+                      if target.startswith('/'):
+                          candidate = root / target.lstrip('/')
+                      else:
+                          candidate = (p.parent / target).resolve()
+                      if candidate.suffix == '':
+                          candidate_index = candidate / 'index.html'
+                          if candidate_index.exists():
+                              continue
+                      if not candidate.exists():
+                          errors.append(f'{p}: missing {attr}={raw}')
+          if errors:
+              print('\n'.join(errors))
+              raise SystemExit(1)
+          print('Static links OK')
           PY
-      - name: Static HTML sanity
+
+      - name: HTML sanity
         run: |
           python3 - <<'PY'
           from pathlib import Path
           for p in Path('.').rglob('*.html'):
               if any(x in p.parts for x in ('.git','node_modules')): continue
-              s=p.read_text(encoding='utf-8')
-              assert '<html' in s.lower(), p
-              assert 'aksi-global.js' in s, p
+              s=p.read_text(encoding='utf-8', errors='replace').lower()
+              assert '<html' in s, p
+              assert '</html>' in s, p
           PY
