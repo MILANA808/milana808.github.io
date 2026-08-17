@@ -4,27 +4,60 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f4f6fb">
-<meta name="description" content="АКСИ — единый помощник">
+<meta name="description" content="АКСИ — суверенный помощник: чат, поиск, заметки, квант, DID">
 <title>АКСИ</title>
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--line:#e2e8f0;--ink:#0f172a;--muted:#64748b;--acc:#6d28d9;--acc2:#2563eb;--soft:#eef2ff;--ok:#059669}
+:root{
+  --bg:#f4f6fb;--card:#ffffff;--line:#e2e8f0;--ink:#0f172a;--muted:#64748b;
+  --acc:#6d28d9;--acc2:#2563eb;--soft:#eef2ff;--ok:#059669;--warn:#d97706;
+}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
-body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:760px;margin:0 auto}
-header{padding:max(12px,env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:#fff;position:sticky;top:0;z-index:30}
-.logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:grid;place-items:center;font-weight:900;color:#fff}
-h1{font-size:1.12rem;font-weight:800;line-height:1.1}
-header .sub{font-size:11px;color:var(--muted)}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);
+  display:flex;flex-direction:column;max-width:820px;margin:0 auto;
+}
+#live{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+  padding:max(8px,env(safe-area-inset-top)) 12px 8px;
+  background:#fff;border-bottom:1px solid var(--line);font-size:12px;
+}
+#live .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(5,150,105,.2);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+#live .mono{font-family:ui-monospace,Menlo,monospace;color:var(--muted)}
+#live button{border:0;background:transparent;color:var(--acc2);font-weight:700;cursor:pointer;font-size:12px}
+header{padding:12px 14px 8px;display:flex;align-items:center;gap:12px}
+.avatar{
+  width:52px;height:52px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#1a1040,#0d0820 70%);
+  border:2px solid #a855f7;display:grid;place-items:center;position:relative;flex-shrink:0;
+  box-shadow:0 0 18px rgba(168,85,247,.35);
+}
+.avatar svg{width:40px;height:40px}
+header h1{font-size:1.25rem;font-weight:800;line-height:1.1}
+header .sub{font-size:12px;color:var(--muted)}
 #status{margin-left:auto;font-size:11px;color:var(--muted)}
-nav{display:flex;gap:5px;overflow-x:auto;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
-nav button{flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 13px;font-size:13px;font-weight:700;cursor:pointer;min-height:38px;color:var(--ink)}
-nav button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
-#prog{display:none;padding:4px 14px;font-size:12px;color:var(--acc2);background:#fff}
-#prog.on{display:block}
-main{flex:1;overflow:auto;padding:12px 14px 8px;-webkit-overflow-scrolling:touch}
+.grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  padding:0 14px 10px;
+}
+@media(min-width:520px){.grid{grid-template-columns:repeat(4,1fr)}}
+.mod{
+  border:1px solid var(--line);background:#fff;border-radius:14px;
+  padding:12px 8px;text-align:center;cursor:pointer;
+  font-size:12px;font-weight:700;color:var(--ink);
+  min-height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  transition:border-color .15s,box-shadow .15s;
+}
+.mod:hover,.mod.on{border-color:#c4b5fd;box-shadow:0 4px 14px rgba(109,40,217,.12)}
+.mod .ic{font-size:20px;line-height:1}
+.mod small{font-weight:500;color:var(--muted);font-size:10px}
+#ws{flex:1;overflow:auto;padding:0 14px 8px;-webkit-overflow-scrolling:touch}
 .panel{display:none}
 .panel.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
 .card h2{font-size:1rem;margin-bottom:4px}
 .muted{color:var(--muted);font-size:13px;line-height:1.45}
 .row{display:flex;gap:8px;margin-top:10px;align-items:center}
@@ -33,14 +66,17 @@ main{flex:1;overflow:auto;padding:12px 14px 8px;-webkit-overflow-scrolling:touch
 .btn.p{background:var(--acc);color:#fff;border-color:var(--acc)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chips button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer}
-#thread{min-height:120px}
+#thread{min-height:100px;max-height:42vh;overflow:auto;padding:4px 0}
 .msg{margin:0 0 10px;max-width:92%}
 .msg.u{margin-left:auto}
 .b{padding:11px 13px;border-radius:14px;font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 .msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
 .msg.a .b{background:#fff;border:1px solid var(--line)}
 .meta{font-size:11px;color:var(--muted);margin-top:3px}
-.composer{display:flex;gap:8px;padding:10px 12px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff;position:sticky;bottom:0;z-index:25}
+.composer{
+  display:flex;gap:8px;padding:10px 12px max(12px,env(safe-area-inset-bottom));
+  border-top:1px solid var(--line);background:#fff;position:sticky;bottom:0;z-index:30;
+}
 #inp{flex:1;min-height:46px;border:1px solid var(--line);border-radius:12px;padding:11px;font-size:16px;outline:none}
 #inp:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(109,40,217,.12)}
 #send{width:48px;border:0;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-weight:800;font-size:17px;cursor:pointer}
@@ -53,33 +89,57 @@ main{flex:1;overflow:auto;padding:12px 14px 8px;-webkit-overflow-scrolling:touch
 .links a span{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
 .bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .pill{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+#prog{display:none;padding:4px 14px;font-size:12px;color:var(--acc2)}
+#prog.on{display:block}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;word-break:break-all;background:#f8fafc;padding:8px;border-radius:8px;border:1px solid var(--line)}
 footer{text-align:center;padding:4px 8px 8px;font-size:11px;color:var(--muted)}
+.did-box{margin-top:10px;padding:10px;border-radius:12px;border:1px solid var(--line);background:#fafafa}
 </style>
 </head>
 <body>
+
+<div id="live">
+  <span class="dot" aria-hidden="true"></span>
+  <strong>АКСИ online</strong>
+  <span class="mono" id="msk">--:--:-- МСК</span>
+  <button type="button" id="btnDid">DID</button>
+  <span class="mono" id="hashShort"></span>
+</div>
+
 <header>
-  <div class="logo">А</div>
+  <div class="avatar" id="avatar" title="АКСИ">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="16" fill="none" stroke="#a855f7" stroke-width="1.2"/>
+      <circle cx="14" cy="17" r="2.2" fill="#7c3aed"/>
+      <circle cx="26" cy="17" r="2.2" fill="#7c3aed"/>
+      <path d="M13 25 Q20 29 27 25" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
   <div>
     <h1>АКСИ</h1>
-    <div class="sub">один помощник · одна память</div>
+    <div class="sub">все функции на одной странице</div>
   </div>
   <span id="status">…</span>
 </header>
 
-<nav id="nav">
-  <button type="button" class="on" data-t="chat">Чат</button>
-  <button type="button" data-t="search">Поиск</button>
-  <button type="button" data-t="notes">Заметки</button>
-  <button type="button" data-t="quantum">Квант</button>
-  <button type="button" data-t="more">Ещё</button>
-</nav>
+<div class="grid" id="mods">
+  <button type="button" class="mod on" data-p="chat"><span class="ic">💬</span>Чат<small>ответы</small></button>
+  <button type="button" class="mod" data-p="search"><span class="ic">🔍</span>Поиск<small>интернет</small></button>
+  <button type="button" class="mod" data-p="notes"><span class="ic">📝</span>Заметки<small>память</small></button>
+  <button type="button" class="mod" data-p="quantum"><span class="ic">⚛</span>Квант<small>2 кубита</small></button>
+  <button type="button" class="mod" data-p="math"><span class="ic">∑</span>Счёт<small>формулы</small></button>
+  <button type="button" class="mod" data-p="files"><span class="ic">📄</span>Файлы<small>в память</small></button>
+  <button type="button" class="mod" data-p="voice"><span class="ic">🎤</span>Голос<small>в чат</small></button>
+  <button type="button" class="mod" data-p="id"><span class="ic">🛡</span>Идентичность<small>DID</small></button>
+  <button type="button" class="mod" data-p="apps"><span class="ic">▦</span>Приложения<small>разделы</small></button>
+</div>
 <div id="prog"></div>
 
-<main>
+<div id="ws">
   <section class="panel on" id="p-chat">
     <div class="card" id="welcome">
-      <h2>Единый АКСИ</h2>
-      <p class="muted">Чат, поиск, заметки и квант связаны. Пишите внизу — ответ появится здесь. Вкладки только помогают.</p>
+      <h2>Единый контур</h2>
+      <p class="muted">Кнопки сверху — все модули. Поле внизу всегда открыто. Поиск, заметки и квант пишут в этот же чат.</p>
       <div class="chips">
         <button type="button" data-q="кто ты">Кто ты?</button>
         <button type="button" data-q="что умеешь">Что умеешь?</button>
@@ -94,7 +154,7 @@ footer{text-align:center;padding:4px 8px 8px;font-size:11px;color:var(--muted)}
   <section class="panel" id="p-search">
     <div class="card">
       <h2>Поиск</h2>
-      <p class="muted">Результат также попадёт в чат — одна история.</p>
+      <p class="muted">Википедия + DuckDuckGo. Краткий ответ дублируется в чат.</p>
       <div class="row">
         <input class="field" id="sIn" placeholder="Что найти?">
         <button type="button" class="btn p" id="sBtn">Найти</button>
@@ -106,7 +166,7 @@ footer{text-align:center;padding:4px 8px 8px;font-size:11px;color:var(--muted)}
   <section class="panel" id="p-notes">
     <div class="card">
       <h2>Заметки</h2>
-      <p class="muted">Общая память с чатом. Можно: запомни: текст</p>
+      <p class="muted">Общая память с чатом. Команда: запомни: текст</p>
       <div class="row">
         <input class="field" id="nIn" placeholder="Новая заметка">
         <button type="button" class="btn p" id="nBtn">+</button>
@@ -117,8 +177,8 @@ footer{text-align:center;padding:4px 8px 8px;font-size:11px;color:var(--muted)}
 
   <section class="panel" id="p-quantum">
     <div class="card">
-      <h2>Квант</h2>
-      <p class="muted">Учебный симулятор. Объяснение уйдёт в чат.</p>
+      <h2>Квант · 2 кубита</h2>
+      <p class="muted">Учебный statevector. Результат и пояснение уходят в чат.</p>
       <div class="chips">
         <button type="button" class="btn p" id="qBell">Запутанность</button>
         <button type="button" class="btn" id="qSuper">Суперпозиция</button>
@@ -129,52 +189,88 @@ footer{text-align:center;padding:4px 8px 8px;font-size:11px;color:var(--muted)}
     </div>
   </section>
 
-  <section class="panel" id="p-more">
+  <section class="panel" id="p-math">
     <div class="card">
-      <h2>Посчитать</h2>
+      <h2>Счёт</h2>
+      <p class="muted">Числа и операции. Ответ также в чате.</p>
       <div class="row">
-        <input class="field" id="mIn" placeholder="25*4">
+        <input class="field" id="mIn" placeholder="25*4 или (3+2)^2">
         <button type="button" class="btn p" id="mBtn">=</button>
       </div>
       <div id="mOut" class="muted" style="margin-top:8px"></div>
     </div>
+  </section>
+
+  <section class="panel" id="p-files">
     <div class="card">
-      <h2>Файл в память</h2>
-      <p class="muted">.txt / .md — фрагменты попадут в общую базу чата</p>
+      <h2>Файлы → память</h2>
+      <p class="muted">.txt / .md. Фрагменты попадают в общую базу чата.</p>
       <input type="file" id="fIn" accept=".txt,.md,text/plain" multiple style="margin-top:8px">
       <div id="fOut" class="muted" style="margin-top:8px"></div>
     </div>
+  </section>
+
+  <section class="panel" id="p-voice">
     <div class="card">
       <h2>Голос</h2>
-      <button type="button" class="btn p" id="vBtn">Сказать → чат</button>
-    </div>
-    <div class="card links">
-      <h2>Расширения</h2>
-      <a href="/matrix/">Квант-лаборатория<span>полный симулятор</span></a>
-      <a href="/lab/">Опыты<span>крипто и агенты</span></a>
-      <a href="/about/">О проекте</a>
+      <p class="muted">Распознавание речи → сразу в чат (нужен микрофон и поддержка браузера).</p>
+      <button type="button" class="btn p" id="vBtn" style="margin-top:10px">Сказать вопрос</button>
     </div>
   </section>
-</main>
+
+  <section class="panel" id="p-id">
+    <div class="card">
+      <h2>Идентичность АКСИ</h2>
+      <p class="muted">Локальный DID-контур (без сервера). Без личных данных.</p>
+      <div class="did-box">
+        <div class="muted">DID</div>
+        <div class="mono" id="didFull">—</div>
+        <div class="muted" style="margin-top:8px">Отпечаток SHA-256</div>
+        <div class="mono" id="didHash">—</div>
+        <div class="muted" style="margin-top:8px">Режим</div>
+        <div class="mono">local-first · browser · aksi-one</div>
+      </div>
+      <div class="row">
+        <input class="field" id="didName" placeholder="Имя агента (опционально)">
+        <button type="button" class="btn p" id="didGen">Создать DID</button>
+      </div>
+      <div id="didUser" class="muted" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-apps">
+    <div class="card links">
+      <h2>Приложения и разделы</h2>
+      <p class="muted">Расширения сайта (отдельные страницы).</p>
+      <a href="/matrix/">MATRIX · квант-лаборатория<span>полный симулятор и чат</span></a>
+      <a href="/lab/">Lab · опыты<span>крипто, агенты, сфера Блоха</span></a>
+      <a href="/globe/">Глобус<span>карта узлов</span></a>
+      <a href="/about/">О проекте<span>манифест и контакты</span></a>
+      <a href="/hub/">Хаб<span>карта модулей</span></a>
+    </div>
+  </section>
+</div>
 
 <div class="composer">
   <input id="inp" type="text" placeholder="Спросите АКСИ…" enterkeyhint="send" autocomplete="off">
   <button type="button" id="send" aria-label="Отправить">➤</button>
 </div>
-<footer>aksilove@internet.ru · всё в одном контуре</footer>
+<footer>aksilove@internet.ru · локальный контур · без личных данных</footer>
 
 <script>
 (function(){
 "use strict";
-var DB="aksi_one_v1";
+var DB="aksi_dash_v1";
 var facts=[], learned=[], rag=[], busy=false;
+var DID_SEED="aksi-sovereign-local-2026";
 
 var CORE=[
-  {t:"АКСИ — единый помощник: чат, поиск, заметки и квант на одной странице с общей памятью.",k:"акси кто единый"},
-  {t:"Вкладки связаны: поиск и квант пишут в чат, заметки читаются из чата.",k:"вкладк связан как пользоват умеешь"},
+  {t:"АКСИ — единый помощник на одной странице: чат, поиск, заметки, квант, счёт, файлы, голос, DID.",k:"акси кто единый умеешь"},
+  {t:"Все кнопки сверху — модули. Они связаны: результат поиска, квант и заметки попадают в чат.",k:"кнопк модул вкладк связан"},
   {t:"Команды: запомни: … · найди … · посчитай … · покажи запутанность",k:"запомни поиск посчитай квант"},
   {t:"Нет данных — отвечаю «не знаю», не выдумываю.",k:"правда не знаю"},
-  {t:"Контакт: aksilove@internet.ru",k:"контакт email"}
+  {t:"Контакт проекта: aksilove@internet.ru",k:"контакт email"},
+  {t:"Идентичность локальная: DID вида did:aksi:local:<hash>, считается в браузере.",k:"did идентичность"}
 ];
 
 function $(id){return document.getElementById(id)}
@@ -185,20 +281,51 @@ function refreshStats(){
   $("stats").innerHTML=
     "<span class='pill'>заметок: "+facts.length+"</span>"+
     "<span class='pill'>файлов: "+rag.length+"</span>"+
-    "<span class='pill'>выучено: "+learned.length+"</span>";
+    "<span class='pill'>опыт: "+learned.length+"</span>";
 }
+
+function tickMSK(){
+  try{
+    $("msk").textContent=new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК";
+  }catch(e){$("msk").textContent=new Date().toLocaleTimeString("ru-RU")+" "}
+}
+tickMSK();setInterval(tickMSK,1000);
+
+function sha256hex(str){
+  if(window.crypto&&crypto.subtle){
+    return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){
+      return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0")}).join("");
+    });
+  }
+  return Promise.resolve(simpleHash(str));
+}
+function simpleHash(s){
+  var h=0x811c9dc5;
+  for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h*0x01000193)>>>0}
+  return ("00000000"+h.toString(16)).slice(-8)+("00000000"+(s.length*2654435761>>>0).toString(16)).slice(-8);
+}
+
+function initIdentity(){
+  sha256hex(DID_SEED).then(function(h){
+    var did="did:aksi:local:"+h.slice(0,32);
+    $("didFull").textContent=did;
+    $("didHash").textContent=h;
+    $("hashShort").textContent=h.slice(0,8).toUpperCase();
+  });
+}
+initIdentity();
 
 function openDB(){return new Promise(function(res,rej){try{var r=indexedDB.open(DB,1);r.onupgradeneeded=function(){var d=r.result;["msgs","facts","learned","rag"].forEach(function(n){if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:"id",autoIncrement:true})})};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}}catch(e){rej(e)}})}
 function idbAdd(s,v){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(s,"readwrite");tx.objectStore(s).add(v);tx.oncomplete=function(){res()};tx.onerror=function(){rej(tx.error)}})})}
 function idbAll(s){return openDB().then(function(db){return new Promise(function(res,rej){var q=db.transaction(s,"readonly").objectStore(s).getAll();q.onsuccess=function(){res(q.result||[])};q.onerror=function(){rej(q.error)}})})}
 function idbClear(s){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(s,"readwrite");tx.objectStore(s).clear();tx.oncomplete=function(){res()};tx.onerror=function(){rej(tx.error)}})})}
 
-function tab(name){
+function panel(name){
   document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on")});
-  document.querySelectorAll("#nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===name)});
+  document.querySelectorAll("#mods .mod").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-p")===name)});
   var el=$("p-"+name);if(el)el.classList.add("on");
   try{window.history.replaceState(null,"","#"+name)}catch(e){}
-  if(name==="chat")setTimeout(function(){$("inp").focus()},50);
+  if(name==="chat")setTimeout(function(){$("inp").focus()},40);
 }
 
 function score(q,text,keys){var low=q.toLowerCase(),n=0,t=(text||"").toLowerCase();low.split(/\s+/).forEach(function(p){if(p.length>1&&t.indexOf(p)>=0)n++});(keys||"").split(/\s+/).forEach(function(k){if(k&&low.indexOf(k)>=0)n+=2});return n}
@@ -269,14 +396,14 @@ function showQ(s,text,toChat){
   $("qProbs").innerHTML=L.map(function(l,i){return "<div><b>"+(p[i]*100).toFixed(0)+"%</b>|"+l+"⟩</div>"}).join("");
   if(toChat){
     var line=L.map(function(l,i){return "|"+l+"⟩ "+(p[i]*100).toFixed(0)+"%"}).join(" · ");
-    tab("chat");say(text+"\n\n"+line,"квант");
+    panel("chat");say(text+"\n\n"+line,"квант");
   }
 }
 
 function wiki(q){return fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(q.trim().replace(/\s+/g,"_"))).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){return {title:j.title,t:j.extract||"",url:(j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page)||"",s:"Википедия"}})}
 function ddg(q){return fetch("https://api.duckduckgo.com/?q="+encodeURIComponent(q)+"&format=json&no_redirect=1&no_html=1").then(function(r){return r.json()}).then(function(j){return {title:j.Heading||q,t:j.AbstractText||j.Answer||"",url:j.AbstractURL||"",s:"DuckDuckGo"}})}
 
-function doSearch(q,silent){
+function doSearch(q){
   prog("Ищу…");$("sOut").textContent="…";
   return Promise.all([wiki(q).catch(function(){return null}),ddg(q).catch(function(){return null})]).then(function(arr){
     var lines=[],ok=false,brief=[];
@@ -289,10 +416,8 @@ function doSearch(q,silent){
     });
     var out=ok?lines.join("\n"):"Нет данных. Проверьте интернет.";
     $("sOut").textContent=out;prog("");
-    if(!silent){
-      tab("chat");
-      say(ok?("Поиск «"+q+"»:\n\n"+(brief.join("\n\n")||out.slice(0,500))):out, ok?"поиск":"не знаю");
-    }
+    panel("chat");
+    say(ok?("Поиск «"+q+"»:\n\n"+(brief.join("\n\n")||out.slice(0,500))):out, ok?"поиск":"не знаю");
     return ok;
   });
 }
@@ -300,7 +425,7 @@ function doSearch(q,silent){
 function answer(q){
   var low=q.toLowerCase(),m;
   if((m=q.match(/^(?:запомни|запомнить)\s*[:\-–]?\s*(.+)$/i))){
-    saveFact(m[1]);return {t:"Записала в общую память:\n«"+m[1]+"»\n\nВидно во вкладке «Заметки».",s:"заметка"};
+    saveFact(m[1]);return {t:"Записала в общую память:\n«"+m[1]+"»\n\nМодуль «Заметки».",s:"заметка"};
   }
   if((m=q.match(/^(?:найди|поиск:|\/поиск)\s*(.+)$/i))){
     $("sIn").value=m[1];return {t:null,s:"search-pending",q:m[1]};
@@ -308,32 +433,33 @@ function answer(q){
   if(/покажи запутан|запутанност|bell/i.test(low)){
     var st=CNOT(H0(ket0()));showQ(st,"Если один кубит 0 — второй тоже 0; если 1 — оба 1. Это запутанность.",false);
     var p=probs(st);
-    return {t:"Квант — состояние Белла:\n|00⟩ "+(p[0]*100).toFixed(0)+"% · |11⟩ "+(p[3]*100).toFixed(0)+"%\n\nЕсли измерить один кубит, второй совпадёт. Подробности — вкладка «Квант».",s:"квант"};
+    return {t:"Квант — Белл:\n|00⟩ "+(p[0]*100).toFixed(0)+"% · |11⟩ "+(p[3]*100).toFixed(0)+"%\n\nМодуль «Квант».",s:"квант"};
   }
   if(/суперпозиц/i.test(low)){
     showQ(H0(ket0()),"Суперпозиция первого кубита.",false);
-    return {t:"Суперпозиция: |00⟩ и |10⟩ ≈ по 50%. См. вкладку «Квант».",s:"квант"};
+    return {t:"Суперпозиция: |00⟩ и |10⟩ ≈ 50%. Модуль «Квант».",s:"квант"};
   }
   if((m=q.match(/^(?:посчитай|\/мат)\s*(.+)$/i))){
     try{return {t:"Ответ: "+safeMath(m[1]),s:"счёт"}}catch(e){return {t:e.message,s:"ошибка"}}
   }
-  if(/привет|здравств/.test(low))return {t:"Здравствуйте. Я АКСИ — всё связано в одном месте. Спросите или откройте вкладку.",s:"система"};
-  if(/кто ты|что ты/.test(low))return {t:"Я АКСИ.\nОдин контур: чат ↔ поиск ↔ заметки ↔ квант.\nОбщая память на устройстве.",s:"система"};
-  if(/что умеешь|как пользоват|помощь/.test(low))return {t:"• вопрос внизу → ответ в чате\n• найди … → поиск + чат\n• запомни: … → заметки + чат\n• покажи запутанность → квант + чат\n• посчитай 25*4\n\nВкладки — тот же АКСИ, другой вид.",s:"система"};
+  if(/привет|здравств/.test(low))return {t:"Здравствуйте. Все модули сверху. Пишите сюда — это общий чат.",s:"система"};
+  if(/кто ты|что ты/.test(low))return {t:"Я АКСИ.\nОдин локальный контур: чат ↔ поиск ↔ заметки ↔ квант ↔ DID.\nБез сервера, без личных данных на странице.",s:"система"};
+  if(/что умеешь|как пользоват|помощь/.test(low))return {t:"Кнопки сверху:\n• Чат · Поиск · Заметки · Квант\n• Счёт · Файлы · Голос · Идентичность · Приложения\n\nКоманды: найди … · запомни: … · посчитай … · покажи запутанность",s:"система"};
+  if(/did|идентичност|паспорт/.test(low))return {t:"Откройте модуль «Идентичность». DID считается локально в браузере.",s:"система"};
   var hits=retrieve(q);
   if(hits.length&&hits[0].s>=2)return {t:hits.map(function(h,i){return (i+1)+". "+h.text}).join("\n\n"),s:hits[0].src};
-  return {t:"Не знаю точного ответа.\nПопробуйте «найди …» или «запомни: …».",s:"не знаю"};
+  return {t:"Не знаю точного ответа.\n«найди …» или «запомни: …».",s:"не знаю"};
 }
 
 function send(q0){
   if(busy)return;
   var q=(q0||$("inp").value||"").trim();if(!q)return;
-  $("inp").value="";busy=true;tab("chat");
+  $("inp").value="";busy=true;panel("chat");
   ask(q);
   var pack=answer(q);
   if(pack.s==="search-pending"){
     prog("Ищу…");
-    doSearch(pack.q,false).then(function(){busy=false;status("готово");prog("")});
+    doSearch(pack.q).then(function(){busy=false;status("готово");prog("")});
     return;
   }
   say(pack.t,pack.s);
@@ -344,21 +470,23 @@ function send(q0){
   busy=false;status("готово");
 }
 
-document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){tab(b.getAttribute("data-t"))}});
+document.querySelectorAll("#mods .mod").forEach(function(b){
+  b.onclick=function(){panel(b.getAttribute("data-p"))};
+});
 document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){send(b.getAttribute("data-q"))}});
 $("send").onclick=function(){send()};
 $("inp").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();send()}};
-$("sBtn").onclick=function(){var q=$("sIn").value.trim();if(!q)return;tab("chat");ask("найди "+q);prog("Ищу…");doSearch(q,false).then(function(){prog("");status("готово")})};
+$("sBtn").onclick=function(){var q=$("sIn").value.trim();if(!q)return;panel("chat");ask("найди "+q);prog("Ищу…");doSearch(q).then(function(){prog("");status("готово")})};
 $("sIn").onkeydown=function(e){if(e.key==="Enter")$("sBtn").click()};
 $("nBtn").onclick=function(){
   var t=$("nIn").value;if(!t.trim())return;$("nIn").value="";
-  saveFact(t);tab("chat");say("Заметка в общей памяти:\n«"+t.trim()+"»","заметка");
+  saveFact(t);panel("chat");say("Заметка в общей памяти:\n«"+t.trim()+"»","заметка");
 };
 $("mBtn").onclick=function(){
   try{
     var v=safeMath($("mIn").value);
     $("mOut").textContent="= "+v;
-    tab("chat");say("Счёт: "+$("mIn").value+" = "+v,"счёт");
+    panel("chat");say("Счёт: "+$("mIn").value+" = "+v,"счёт");
   }catch(e){$("mOut").textContent=e.message}
 };
 $("qBell").onclick=function(){showQ(CNOT(H0(ket0())),"Если один кубит 0 — второй тоже 0; если 1 — оба 1. Это запутанность.",true)};
@@ -373,21 +501,30 @@ $("fIn").onchange=function(e){
       for(var i=0;i<t.length;i+=450){var c=t.slice(i,i+450);if(c.trim().length<15)continue;var item={text:c,ts:Date.now()};rag.push(item);idbAdd("rag",item).catch(function(){})}
       left--;if(!left){
         $("fOut").textContent="В памяти: "+rag.length+" фрагм.";
-        refreshStats();tab("chat");say("Файл добавлен в общую память ("+rag.length+" фрагм.). Спрашивайте в чате.","файл");
+        refreshStats();panel("chat");say("Файл добавлен ("+rag.length+" фрагм.). Спрашивайте в чате.","файл");
       }
     };r.readAsText(f);
   });
 };
 (function(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){$("vBtn").onclick=function(){alert("Голос недоступен")};return}
+  if(!SR){$("vBtn").onclick=function(){alert("Голос недоступен в этом браузере")};return}
   var rec=new SR();rec.lang="ru-RU";
   rec.onresult=function(e){$("inp").value=e.results[0][0].transcript;send()};
   $("vBtn").onclick=function(){try{rec.start()}catch(e){}};
 })();
+$("btnDid").onclick=function(){panel("id")};
+$("didGen").onclick=function(){
+  var name=($("didName").value||"agent").trim();
+  sha256hex("user:"+name+":"+Date.now()).then(function(h){
+    var did="did:aksi:local:"+h.slice(0,32);
+    $("didUser").innerHTML="<div class='did-box'><div class='muted'>Ваш локальный DID</div><div class='mono'>"+esc(did)+"</div><div class='muted' style='margin-top:6px'>отпечаток</div><div class='mono'>"+esc(h)+"</div></div>";
+  });
+};
 
 var h=(location.hash||"#chat").slice(1);
-if(["chat","search","notes","quantum","more"].indexOf(h)>=0)tab(h);else tab("chat");
+var ok=["chat","search","notes","quantum","math","files","voice","id","apps"];
+if(ok.indexOf(h)>=0)panel(h);else panel("chat");
 
 Promise.resolve().then(function(){return idbAll("msgs")}).then(function(msgs){
   (msgs||[]).slice(-20).forEach(function(m){bubble(m.role==="user"?"user":"assistant",m.content,m.role==="assistant"?"история":null)});
@@ -396,8 +533,8 @@ Promise.resolve().then(function(){return idbAll("msgs")}).then(function(msgs){
   learned=l||[];return idbAll("rag");
 }).then(function(r){
   rag=r||[];refreshStats();
-  if(!$("thread").children.length)say("Готова. Всё работает как один контур: поиск, заметки и квант встречаются в чате.","система");
-  status("единый контур");
+  if(!$("thread").children.length)say("Готова. Все модули сверху. Это один локальный контур — без сервера и без личных данных на странице.","система");
+  status("локальный контур");
 }).catch(function(){status("готово")});
 })();
 </script>
