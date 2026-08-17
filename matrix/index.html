@@ -3,89 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>АКСИ MATRIX 4</title>
 <meta name="theme-color" content="#0f172a">
-<script type="module">
-  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
-  mermaid.initialize({ startOnLoad: false, theme: "dark" });
-  window.__mermaid = mermaid;
-</script>
+<title>АКСИ</title>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155;--acc:#8b5cf6;--c:#22d3ee}
+:root{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155;--acc:#7c3aed;--c:#22d3ee}
 *{box-sizing:border-box;margin:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);height:100dvh;display:flex;flex-direction:column;max-width:920px;margin:0 auto}
-#boot{position:fixed;inset:0;z-index:100;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
-#boot.hide{opacity:0;pointer-events:none;transition:opacity .35s}
-#boot h1{font-size:1.45rem;margin-bottom:8px}
-#boot p{color:var(--muted);font-size:14px;margin-bottom:16px;max-width:20em;line-height:1.4}
-.bar-wrap{width:min(280px,80vw);height:8px;background:var(--line);border-radius:99px;overflow:hidden}
-.bar-wrap i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#8b5cf6,#22d3ee);transition:width .15s}
-#boot-msg{margin-top:12px;font-size:12px;color:var(--muted)}
-header{padding:max(10px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:720px;margin:0 auto;-webkit-tap-highlight-color:transparent}
+#boot{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+#boot.hide{opacity:0;pointer-events:none;transition:opacity .25s}
+#boot h1{font-size:1.35rem;margin-bottom:6px}
+#boot p{color:var(--muted);font-size:13px}
+header{padding:max(8px,env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 header a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
-h1{font-size:1rem;font-weight:800}
-#status{font-size:11px;color:var(--muted);max-width:48%;text-align:right}
-.toolbar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line);background:#111827}
-.toolbar button,.toolbar label.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700;cursor:pointer}
-.toolbar button.primary{background:var(--acc);border-color:var(--acc)}
-.main{flex:1;display:grid;grid-template-columns:1.2fr .8fr;min-height:0}
-@media(max-width:720px){.main{grid-template-columns:1fr}.side{display:none}.side.on{display:flex}}
-#thread{overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch}
-.side{display:flex;flex-direction:column;border-left:1px solid var(--line);background:#0b1220;min-height:0}
-.side h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line)}
-#thoughts{flex:1;overflow:auto;padding:10px 12px}
-.step{font-size:12px;line-height:1.4;padding:8px 10px;margin-bottom:8px;border-radius:10px;border:1px solid var(--line);background:var(--card)}
-.step b{color:var(--c);display:block;margin-bottom:4px;font-size:11px}
-.step .sig{font-family:ui-monospace,monospace;font-size:10px;color:var(--muted);word-break:break-all;margin-top:6px}
-.msg{margin-bottom:12px;max-width:95%}
+h1{font-size:.95rem;font-weight:800}
+#status{font-size:11px;color:var(--muted);max-width:45%;text-align:right}
+.toolbar{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.toolbar button,.toolbar label{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;min-height:40px}
+.main{flex:1;display:flex;min-height:0}
+#thread{flex:1;overflow-y:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
+.side{display:none;width:42%;border-left:1px solid var(--line);background:#0b1220;flex-direction:column;min-height:0}
+.side.on{display:flex}
+@media(min-width:760px){.side{display:flex}}
+.side h2{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+#thoughts{flex:1;overflow:auto;padding:8px}
+.step{font-size:11px;padding:8px;margin-bottom:6px;border-radius:8px;border:1px solid var(--line);background:var(--card);line-height:1.35}
+.step b{color:var(--c);display:block;margin-bottom:2px;font-size:10px}
+.msg{margin-bottom:10px;max-width:92%}
 .msg.user{margin-left:auto}
-.msg .bubble{padding:12px 14px;border-radius:14px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.msg .bubble{padding:11px 13px;border-radius:14px;font-size:15px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
 .msg.user .bubble{background:var(--acc);color:#fff}
 .msg.bot .bubble{background:var(--card);border:1px solid var(--line)}
-.msg .meta{font-size:10px;color:var(--muted);margin-top:4px;font-family:ui-monospace,monospace}
-.mermaid-box{background:#0b1220;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;overflow-x:auto}
-.composer{display:flex;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#111827}
-.composer textarea{flex:1;min-height:48px;max-height:140px;resize:vertical;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 12px;font:inherit;font-size:16px}
-.composer button{width:52px;border:none;border-radius:12px;background:var(--acc);color:#fff;font-weight:800}
+.msg .meta{font-size:10px;color:var(--muted);margin-top:3px;font-family:ui-monospace,monospace}
+.composer{display:flex;gap:8px;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#111827}
+.composer textarea{flex:1;min-height:44px;max-height:100px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px;font:inherit;font-size:16px;resize:none}
+.composer button{width:48px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:800;font-size:16px}
 #file-input{display:none}
+.mermaid-box{overflow-x:auto;margin-top:8px;background:#0b1220;border-radius:8px;padding:8px}
 </style>
 </head>
 <body>
-<div id="boot">
-  <h1>АКСИ 4.0</h1>
-  <p>Instant · skills · proof · TTP</p>
-  <div class="bar-wrap"><i id="boot-bar"></i></div>
-  <div id="boot-msg">Старт</div>
-</div>
+<div id="boot"><h1>АКСИ</h1><p>Быстрый старт…</p></div>
 <header>
-  <div>
-    <a href="/app/">Сеть</a>
-    <h1>АКСИ MATRIX 4</h1>
-  </div>
+  <div><a href="/app/">Сеть</a><h1>АКСИ</h1></div>
   <div id="status">…</div>
 </header>
 <div class="toolbar">
-  <button type="button" class="primary" id="btn-model">Модель</button>
-  <button type="button" id="btn-mic">Голос</button>
-  <label class="btn" for="file-input">RAG</label>
-  <input id="file-input" type="file" accept=".txt,.md,text/plain,text/markdown" multiple>
   <button type="button" id="btn-arch">Схема</button>
+  <label for="file-input">RAG</label>
+  <input id="file-input" type="file" accept=".txt,.md,text/plain" multiple>
   <button type="button" id="btn-proof">Proof</button>
   <button type="button" id="btn-verify">Verify</button>
   <button type="button" id="btn-thoughts">Мысли</button>
+  <button type="button" id="btn-mic">Голос</button>
   <button type="button" id="btn-clear">Очистить</button>
 </div>
 <div class="main">
   <div id="thread"></div>
-  <aside class="side on" id="side">
-    <h2>TTP · Resonance</h2>
-    <div id="thoughts"><div class="step"><b>ready</b>Вопрос → мгновенный ответ + подпись</div></div>
+  <aside class="side" id="side">
+    <h2>Ход мыслей</h2>
+    <div id="thoughts"></div>
   </aside>
 </div>
 <div class="composer">
-  <textarea id="inp" rows="2" placeholder="Вопрос, uuid, hash …, посчитай 2+2, покажи схему" enterkeyhint="send"></textarea>
-  <button type="button" id="send">➤</button>
+  <textarea id="inp" rows="1" placeholder="Спросите АКСИ…" enterkeyhint="send"></textarea>
+  <button type="button" id="send" aria-label="Отправить">➤</button>
 </div>
-<script type="module" src="./app.js"></script>
+<script type="module" src="./app.js?v=5"></script>
 </body>
 </html>
