@@ -61,7 +61,7 @@ button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink
 .prob div{text-align:center;padding:8px 4px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid var(--line);font-size:12px}
 .prob b{display:block;color:var(--c);font-size:14px}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
 <body>
 <canvas id="fx"></canvas>
@@ -212,14 +212,12 @@ button.ghost{border:1px solid var(--line);background:transparent;color:var(--ink
 "use strict";
 const DID="did:aksi:ed25519:sovereign-2026";
 
-/* particles */
 const fx=document.getElementById("fx"), fctx=fx.getContext("2d"); let pts=[];
 function resize(){fx.width=innerWidth;fx.height=innerHeight}
 resize(); addEventListener("resize",resize);
 for(let i=0;i<36;i++) pts.push({x:Math.random()*fx.width,y:Math.random()*fx.height,v:.1+Math.random()*.4,r:Math.random()*1.5});
 (function loop(){fctx.clearRect(0,0,fx.width,fx.height);fctx.fillStyle="rgba(0,240,255,.18)";pts.forEach(p=>{p.y-=p.v;if(p.y<0){p.y=fx.height;p.x=Math.random()*fx.width}fctx.beginPath();fctx.arc(p.x,p.y,p.r,0,6.28);fctx.fill()});requestAnimationFrame(loop)})();
 
-/* tabs */
 document.querySelector("tabs").onclick=e=>{
   const b=e.target.closest("button[data-p]"); if(!b) return;
   document.querySelectorAll("tabs button").forEach(x=>x.classList.toggle("on",x===b));
@@ -227,14 +225,12 @@ document.querySelector("tabs").onclick=e=>{
   document.getElementById("p-"+b.dataset.p).classList.add("on");
 };
 
-/* tour */
 function openTour(){document.getElementById("tour").classList.remove("hide")}
 function closeTour(){localStorage.setItem("AKSI_LAB_TOUR_V1","1");document.getElementById("tour").classList.add("hide")}
 if(!localStorage.getItem("AKSI_LAB_TOUR_V1")) openTour();
 document.getElementById("tour-ok").onclick=closeTour;
 document.getElementById("help").onclick=()=>{localStorage.removeItem("AKSI_LAB_TOUR_V1");openTour()};
 
-/* agents */
 const PRESETS=["Нужен ли ИИ суверенитет данных?","Может ли агент жить без OpenAI?","Зачем DID для ИИ?","Квант-лаб vs реальный QPU"];
 const presets=document.getElementById("presets");
 PRESETS.forEach(t=>{const b=document.createElement("button");b.type="button";b.textContent=t.slice(0,26)+(t.length>26?"…":"");b.onclick=()=>document.getElementById("topic").value=t;presets.appendChild(b)});
@@ -268,13 +264,12 @@ document.getElementById("run-agents").onclick=async()=>{
 };
 document.getElementById("clear-agents").onclick=()=>{document.getElementById("agents").innerHTML="";document.getElementById("agent-log").textContent="—"};
 
-/* crypto */
 function b64(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)))}
 function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
 function spkiToPem(b64s){const lines=b64s.match(/.{1,64}/g).join("\n");return "-----BEGIN PUBLIC KEY-----\n"+lines+"\n-----END PUBLIC KEY-----"}
 let kp=null,aesKey=null,lastSpki="",lastPkcs8="";
 async function showQr(text){
-  try{ await QRCode.toCanvas(document.getElementById("qr"), text.slice(0,200), {width:128, margin:1}); }catch{}
+  try{ await QRCode.toCanvas(document.getElementById("qr"), text.slice(0,200), {width:128, margin:1}); }catch(e){console.warn("QR",e)}
 }
 async function genKeys(){
   kp=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign","verify"]);
@@ -309,14 +304,12 @@ document.getElementById("dl-sig").onclick=()=>{const a=document.createElement("a
 document.getElementById("cenc").onclick=async()=>{if(!aesKey)await genKeys();const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},aesKey,new TextEncoder().encode(document.getElementById("cmsg").value));document.getElementById("ccipher").value=b64(iv)+"."+b64(ct)};
 document.getElementById("cdec").onclick=async()=>{try{const[ivs,cts]=document.getElementById("ccipher").value.split(".");const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(ivs)},aesKey,unb64(cts));document.getElementById("cout").textContent=new TextDecoder().decode(pt)}catch{document.getElementById("cout").innerHTML="<span class=bad>Не расшифровано</span>"}};
 
-/* bloch */
 let cur={theta:.8,phi:1.2},target={theta:.8,phi:1.2};
 function metrics(text){const n=Math.max(1,text.length);const freq={};for(const ch of text)freq[ch]=(freq[ch]||0)+1;let H=0;Object.values(freq).forEach(c=>{const p=c/n;H-=p*Math.log2(p)});const alphabet=Math.min(64,Math.max(2,Object.keys(freq).length));const qcli=H/(Math.log2(alphabet)||1);const theta=Math.min(Math.PI,qcli*Math.PI);let hash=0;for(let i=0;i<text.length;i++)hash=(hash*31+text.charCodeAt(i))>>>0;return{qcli,theta,phi:((hash%360)/360)*Math.PI*2}}
 function paint(){cur.theta+=(target.theta-cur.theta)*.12;cur.phi+=(target.phi-cur.phi)*.12;const canvas=document.getElementById("bloch"),ctx=canvas.getContext("2d"),W=280,H=280,cx=140,cy=140,R=110;const x=Math.sin(cur.theta)*Math.cos(cur.phi),y=Math.sin(cur.theta)*Math.sin(cur.phi),z=Math.cos(cur.theta);ctx.clearRect(0,0,W,H);ctx.strokeStyle="rgba(0,240,255,.35)";ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,R,0,6.28);ctx.stroke();ctx.beginPath();ctx.ellipse(cx,cy,R,R*.35,0,0,6.28);ctx.stroke();ctx.strokeStyle="rgba(255,255,255,.2)";ctx.beginPath();ctx.moveTo(cx-R-6,cy);ctx.lineTo(cx+R+6,cy);ctx.stroke();ctx.beginPath();ctx.moveTo(cx,cy-R-6);ctx.lineTo(cx,cy+R+6);ctx.stroke();ctx.fillStyle="#9ca3c7";ctx.font="11px sans-serif";ctx.fillText("|0⟩",cx+6,cy-R-8);ctx.fillText("|1⟩",cx+6,cy+R+14);const sx=cx+R*x,sy=cy-R*z*.85-R*y*.2;ctx.strokeStyle="#a855f7";ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(sx,sy);ctx.stroke();ctx.fillStyle="#00f0ff";ctx.beginPath();ctx.arc(sx,sy,5,0,6.28);ctx.fill();requestAnimationFrame(paint)}
 function drawBloch(){const m=metrics(document.getElementById("btext").value);target.theta=m.theta;target.phi=m.phi;document.getElementById("bh").textContent=m.theta.toFixed(2);document.getElementById("bp").textContent=m.phi.toFixed(2);document.getElementById("bq").textContent=m.qcli.toFixed(3);const circ=97.4;document.getElementById("gauge-arc").setAttribute("stroke-dasharray",(m.qcli*circ).toFixed(1)+" "+circ);document.getElementById("gauge-arc").setAttribute("stroke",m.qcli>0.7?"#a855f7":m.qcli>0.4?"#00f0ff":"#4ade80");document.getElementById("bstate").textContent="QCLI "+m.qcli.toFixed(3)}
 document.getElementById("btext").addEventListener("input",drawBloch);paint();drawBloch();
 
-/* UI */
 const UI_KEY="AKSI_UI_HIST_V2"; let lastUIHtml="";
 function genUI(p){p=(p||"").toLowerCase();const root=document.createElement("div");root.className="card";
 if(/профил|имя/.test(p)){root.innerHTML="<strong>Профиль</strong><br><input id=ui-name placeholder=Имя style='width:100%;margin:8px 0;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:#000;color:#fff'>";const btn=document.createElement("button");btn.className="go";btn.textContent="Подписать";btn.onclick=async()=>{const n=document.getElementById("ui-name").value||"anon";const d=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("AKSI|"+n));alert([...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,"0")).join("").slice(0,16))};root.appendChild(btn)}
@@ -333,7 +326,6 @@ document.getElementById("export-ui").onclick=()=>{const a=document.createElement
 document.getElementById("clear-ui").onclick=()=>{localStorage.removeItem(UI_KEY);document.getElementById("ui-out").innerHTML="";lastUIHtml=""};
 document.getElementById("load-ui").onclick=()=>{const h=JSON.parse(localStorage.getItem(UI_KEY)||"[]");if(!h.length){alert("История пуста");return}const last=h[h.length-1];document.getElementById("uiprompt").value=last.p||"";document.getElementById("ui-out").innerHTML="<div class=card>"+last.html+"</div>";lastUIHtml=last.html};
 
-/* 2-qubit */
 function C(re,im){return{re:re||0,im:im||0}}
 function cadd(a,b){return C(a.re+b.re,a.im+b.im)}
 function cmul(a,b){return C(a.re*b.re-a.im*b.im,a.re*b.im+a.im*b.re)}
