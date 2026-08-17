@@ -31,18 +31,22 @@ async function refreshHistoryCount() {
 }
 
 async function send() {
+  if (!input) return;
   const text = input.value.trim();
   if (!text) return;
+  input.disabled = true;
   try {
     await agent.handle(text);
+    input.value = "";
   } catch (error) {
     console.error(error);
     ui.add("a", "Не удалось выполнить запрос в текущем режиме. Локальная часть сайта продолжает работать. Попробуйте ещё раз или запустите «Магия».", "error");
     setStatus("ошибка запроса", false);
   } finally {
+    input.disabled = false;
     await refreshHistoryCount();
-    if (status.textContent === "ошибка запроса") return;
-    setStatus("АКСИ online");
+    if (!status || status.textContent !== "ошибка запроса") setStatus("АКСИ online");
+    input.focus();
   }
 }
 
@@ -53,11 +57,9 @@ async function boot() {
     const thread = $("thread");
     if (thread) thread.innerHTML = "";
     last.forEach((m) => ui.add(m.role, m.text, m.meta || ""));
-    if (!last.length) {
-      ui.add("a", "АКСИ MATRIX готова.\nПопробуйте «покажи магию» или задайте обычный вопрос.", "system");
-    }
+    if (!last.length) ui.add("a", "АКСИ MATRIX готова.\nПопробуйте «покажи магию» или задайте обычный вопрос.", "system");
     await refreshHistoryCount();
-    quirk.loadTemplate("bell_state");
+    if ($( "quirk" )) quirk.loadTemplate("bell_state");
     setStatus("АКСИ online");
   } catch (error) {
     console.error(error);
@@ -66,13 +68,16 @@ async function boot() {
   }
 }
 
-$("send").onclick = send;
-input.addEventListener("keydown", (event) => {
+const sendButton = $("send");
+if (sendButton) sendButton.onclick = send;
+if (input) input.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); send(); }
 });
-$("magic").onclick = () => agent.handle("покажи магию").then(refreshHistoryCount).catch((e) => console.error(e));
-$("mic").onclick = () => ui.startVoice((text) => {
-  input.value = text;
+const magic = $("magic");
+if (magic) magic.onclick = () => agent.handle("покажи магию").then(refreshHistoryCount).catch((e) => console.error(e));
+const mic = $("mic");
+if (mic) mic.onclick = () => ui.startVoice((text) => {
+  if (input) input.value = text;
   send();
 });
 
