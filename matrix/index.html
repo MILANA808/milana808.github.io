@@ -2,13 +2,101 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0;url=/?from=matrix">
-<title>АКСИ MATRIX</title>
-<style>html,body{margin:0;height:100%;background:#0b1020;color:#f1f5f9;font-family:system-ui;display:grid;place-items:center}a{color:#a78bfa}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>АКСИ MATRIX v2 — квантовый симулятор и агент</title>
+<meta name="description" content="Суверенный квантовый симулятор: оптимизатор схем, DSL, генератор алгоритмов, арт по statevector, демо NFT-сертификат.">
+<meta name="theme-color" content="#0a0618">
+<meta property="og:title" content="АКСИ MATRIX v2">
+<meta property="og:description" content="Квантовые схемы, ИИ-агент, DSL, арт, демо-сертификаты">
+<meta property="og:url" content="https://milana808.github.io/matrix/">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="css/style.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"АКСИ MATRIX","applicationCategory":"DeveloperApplication","operatingSystem":"Web","url":"https://milana808.github.io/matrix/","description":"Локальный квантовый симулятор и агент АКСИ"}
+</script>
 </head>
 <body>
-<p>Открываем АКСИ… <a href="/?from=matrix">перейти</a></p>
-<script>location.replace('/?from=matrix');</script>
+<canvas id="fx"></canvas>
+<div class="wrap">
+  <topnav>
+    <a href="/">Хаб</a>
+    <a class="on" href="/matrix/">MATRIX</a>
+    <a href="/lab/">Lab</a>
+    <a href="/quantum/">Квант</a>
+    <a href="/hub/">Карта</a>
+  </topnav>
+  <header>
+    <div>
+      <h1>АКСИ MATRIX v2</h1>
+      <p class="sub">Симулятор · оптимизатор · DSL · шаблоны · арт · демо-сертификат. NFT без блокчейна — локальный сертификат; интернет — Wikipedia по запросу.</p>
+    </div>
+  </header>
+  <div class="grid">
+    <div>
+      <div class="glass">
+        <div class="row">
+          <label>Цель <select id="tgt"><option>0</option><option>1</option><option>2</option><option>3</option></select></label>
+          <label>Контр <select id="ctl"><option>0</option><option selected>1</option><option>2</option></select></label>
+          <button type="button" data-gate="H">H</button>
+          <button type="button" data-gate="X">X</button>
+          <button type="button" data-gate="Y">Y</button>
+          <button type="button" data-gate="Z">Z</button>
+          <button type="button" data-gate="S">S</button>
+          <button type="button" data-gate="T">T</button>
+          <button type="button" data-gate="CNOT">CNOT</button>
+          <button type="button" data-gate="SWAP">SWAP</button>
+          <button type="button" class="go" id="btnRun">▶ Счёт</button>
+          <button type="button" class="ghost" id="btnOpt">Оптимизировать</button>
+        </div>
+        <div id="gateList"></div>
+        <label class="muted">DSL</label>
+        <textarea id="dslOut" placeholder="H 0&#10;CNOT 0 1"></textarea>
+        <div class="row">
+          <button type="button" class="go" id="btnDSL">Применить DSL</button>
+          <button type="button" id="btnQASM">QASM</button>
+          <button type="button" id="btnQiskit">Qiskit</button>
+          <a id="shareLink" href="#">Ссылка</a>
+        </div>
+        <textarea id="exportBox" placeholder="Экспорт…"></textarea>
+      </div>
+      <div class="glass" style="margin-top:12px">
+        <div class="muted">Вероятности</div>
+        <div class="probs" id="probs"></div>
+        <div class="bloch-row" style="margin-top:10px">
+          <canvas id="bloch0" width="140" height="140"></canvas>
+          <canvas id="bloch1" width="140" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="glass">
+        <div class="muted">Квантовое арт-поле</div>
+        <canvas id="art" width="360" height="200"></canvas>
+        <div id="artHash">hash —</div>
+        <div class="row" style="justify-content:center;margin-top:8px">
+          <button type="button" id="btnWallet">Кошелёк</button>
+          <button type="button" class="go" id="btnMint">Mint демо-сертификат</button>
+        </div>
+        <div id="walletInfo">MetaMask опционален</div>
+      </div>
+      <div class="glass" style="margin-top:12px">
+        <div class="muted">АКСИ</div>
+        <div id="chat"></div>
+        <div class="composer">
+          <input id="chatIn" placeholder="Сделай Белла / оптимизируй / найди запутанность" enterkeyhint="send">
+          <button type="button" class="go" id="btnChat">➤</button>
+          <button type="button" id="btnVoice" title="Голос">🎤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="js/quantum-core.js"></script>
+<script src="js/dsl-translator.js"></script>
+<script src="js/quantum-visualizer.js"></script>
+<script src="js/aksi-brain.js"></script>
+<script src="js/crypto-wallet.js"></script>
+<script src="js/ui-controller.js"></script>
+<script>UIController.init();</script>
 </body>
 </html>
