@@ -1,0 +1,18 @@
+(()=>{'use strict';
+const $=s=>document.querySelector(s);const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function load(src){return new Promise(r=>{if(document.querySelector('script[src="'+src+'"]'))return r();const s=document.createElement('script');s.src=src;s.onload=()=>r();s.onerror=()=>r();document.head.appendChild(s)})}
+async function boot(){
+ if(document.getElementById('aksi-global'))return;
+ const link=document.createElement('link');link.rel='stylesheet';link.href='/aksi-global.css';document.head.appendChild(link);
+ const root=document.createElement('div');root.id='aksi-global';root.innerHTML='<div class="aksi-pop" id="aksi-pop"><div class="aksi-grid"><div class="aksi-card"><b>Состояние</b><div id="aksi-cap" class="aksi-mono">проверка…</div></div><div class="aksi-card"><b>Последний ответ</b><div id="aksi-last" class="aksi-mono aksi-muted">нет</div></div></div><div style="margin-top:10px"><button class="aksi-btn" id="aksi-home">Главная</button><button class="aksi-btn" id="aksi-chat">Чат</button><button class="aksi-btn" id="aksi-trust">Trust</button><button class="aksi-btn" id="aksi-lab">Lab</button></div></div><div class="aksi-bar"><span class="aksi-logo">АКСИ</span><span class="aksi-status" id="aksi-status">local-first · запуск</span><button class="aksi-btn primary" id="aksi-open">АКСИ</button></div>';
+document.body.appendChild(root);
+const files=['aksi-core.js','aksi-proof.js','aksi-proof-graph.js','aksi-counterfactual.js','aksi-learning.js','aksi-quantum-reasoner.js','aksi-frontier.js','aksi-passport.js'];for(const f of files)await load('/'+f);
+const caps=[['Core',!!window.AKSI],['Proof',!!window.AKSIProof],['Graph',!!window.AKSIProofGraph],['Learning',!!window.AKSILearning],['Q',!!window.AKSIQuantumReasoner],['Frontier',!!window.AKSIFrontier],['Passport',!!window.AKSIPassport],['Crypto',!!crypto?.subtle],['IndexedDB',!!indexedDB]];
+const active=caps.filter(x=>x[1]).length;$('#aksi-status').textContent=`local-first · ${active}/${caps.length} контуров доступны`;
+$('#aksi-cap').innerHTML=caps.map(x=>`${x[1]?'✓':'—'} ${esc(x[0])} <span class="${x[1]?'aksi-ok':'aksi-muted'}">${x[1]?'AVAILABLE':'NOT ACTIVE'}</span>`).join('<br>');
+$('#aksi-open').onclick=()=>$('#aksi-pop').classList.toggle('open');
+$('#aksi-home').onclick=()=>location.href='/';$('#aksi-chat').onclick=()=>location.href='/#chat';$('#aksi-trust').onclick=()=>location.href='/aksi-verifier.html';$('#aksi-lab').onclick=()=>location.href='/aksi-quantum.html';
+window.addEventListener('aksi:answer',e=>{const d=e.detail||{};$('#aksi-last').textContent=String(d.answer||d.text||'').slice(0,500);});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
