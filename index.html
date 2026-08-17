@@ -4,152 +4,355 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Cache-Control" content="no-cache">
 <title>АКСИ</title>
 <style>
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;background:#0f172a;color:#f1f5f9;font-family:system-ui,-apple-system,sans-serif}
-body{display:flex;flex-direction:column;max-width:720px;margin:0 auto}
-#boot{position:fixed;inset:0;z-index:99;background:#0f172a;display:flex;align-items:center;justify-content:center;flex-direction:column}
-#boot h1{font-size:1.4rem;margin-bottom:8px}
-#boot p{color:#94a3b8;font-size:13px}
-header{padding:max(10px,env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+body{display:flex;flex-direction:column;max-width:760px;margin:0 auto}
+header{padding:max(10px,env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center;gap:8px}
 h1{font-size:1rem;font-weight:800}
-#status{font-size:11px;color:#94a3b8}
+#status{font-size:11px;color:#94a3b8;text-align:right;max-width:50%}
 .bar{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid #334155}
-.bar button,.bar label{border:1px solid #334155;background:#1e293b;color:#f1f5f9;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;white-space:nowrap}
+.bar button,.bar label{border:1px solid #334155;background:#1e293b;color:#f1f5f9;border-radius:10px;padding:9px 11px;font-size:12px;font-weight:700;white-space:nowrap}
+.bar button.on{background:#7c3aed;border-color:#7c3aed}
 #thread{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
 .msg{margin:0 0 10px;max-width:92%}
 .msg.u{margin-left:auto}
 .b{padding:12px 14px;border-radius:14px;font-size:15px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
 .msg.u .b{background:#7c3aed;color:#fff}
 .msg.a .b{background:#1e293b;border:1px solid #334155}
-.meta{font-size:10px;color:#94a3b8;margin-top:4px}
+.meta{font-size:10px;color:#94a3b8;margin-top:3px}
 .composer{display:flex;gap:8px;padding:8px 10px max(12px,env(safe-area-inset-bottom));border-top:1px solid #334155;background:#111827}
 #inp{flex:1;min-height:44px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#f1f5f9;padding:10px;font-size:16px}
 #send{width:48px;border:0;border-radius:12px;background:#7c3aed;color:#fff;font-weight:800;font-size:18px}
 #file{display:none}
-#side{display:none;padding:8px;border-top:1px solid #334155;max-height:28vh;overflow:auto;background:#0b1220;font-size:12px}
-#side.on{display:block}
-.step{padding:8px;margin-bottom:6px;border:1px solid #334155;border-radius:8px;background:#1e293b}
-.step b{color:#22d3ee;display:block;font-size:10px;margin-bottom:2px}
+#prog{display:none;padding:6px 12px;font-size:12px;color:#94a3b8;border-bottom:1px solid #334155}
+#prog.on{display:block}
 </style>
 </head>
 <body>
-<div id="boot"><h1>АКСИ</h1><p>Секунду…</p></div>
-<script>
-setTimeout(function(){var b=document.getElementById("boot");if(b)b.style.display="none";},250);
-</script>
 <header>
   <h1>АКСИ</h1>
-  <div id="status">…</div>
+  <div id="status">локально</div>
 </header>
 <div class="bar">
+  <button type="button" id="btnLLM">Нейросеть</button>
   <button type="button" id="btnArch">Схема</button>
   <label for="file">Файл</label>
   <input type="file" id="file" accept=".txt,.md,text/plain" multiple>
-  <button type="button" id="btnThink">Мысли</button>
   <button type="button" id="btnClear">Очистить</button>
 </div>
+<div id="prog"></div>
 <div id="thread"></div>
-<div id="side"></div>
 <div class="composer">
   <input id="inp" type="text" placeholder="Спросите АКСИ…" enterkeyhint="send" autocomplete="off">
   <button type="button" id="send">➤</button>
 </div>
-<script>
-(function(){
-  var DID="did:aksi:ed25519:sovereign-2026";
-  var rag=[], busy=false;
-  var O=[
-    {t:"АКСИ — local-first ИИ: ответы на устройстве.",k:"акси aksi контур проект суверен"},
-    {t:"DID: did:aksi:ed25519:sovereign-2026. Контакт aksilove@internet.ru.",k:"did идентич контакт email"},
-    {t:"MATRIX — быстрый чат в браузере, без тяжёлой модели на телефоне.",k:"matrix модель быстр"},
-    {t:"Омега: FastAPI + Ollama на своём сервере.",k:"омега omega fastapi ollama сервер"},
-    {t:"Сеть /app: агенты и лента.",k:"сеть агент лента"},
-    {t:"RAG: загрузите .txt — ответы по файлу.",k:"rag файл документ"},
-    {t:"Без данных в контексте — честный отказ.",k:"отказ политик"}
-  ];
-  function $(id){return document.getElementById(id)}
-  function hideBoot(){var b=$("boot");if(b)b.style.display="none"}
-  function status(t){var s=$("status");if(s)s.textContent=t}
-  function add(role,text,meta){
-    var w=document.createElement("div");
-    w.className="msg "+(role==="user"?"u":"a");
-    var b=document.createElement("div");b.className="b";b.textContent=text;w.appendChild(b);
-    if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;w.appendChild(m)}
-    $("thread").appendChild(w);$("thread").scrollTop=1e9;
+<script type="module">
+const DID = "did:aksi:ed25519:sovereign-2026";
+const DB = "aksi_mem_v1";
+const SYSTEM = `Ты — АКСИ, суверенный локальный ассистент.
+Отвечай на языке пользователя, по делу, развёрнуто когда нужно.
+Опирайся на CONTEXT (история и файлы), если он есть.
+Не выдумывай новости и курсы. DID: ${DID}. Контакт: aksilove@internet.ru.`;
+
+const ONTOLOGY = [
+  { t: "АКСИ — local-first ИИ-контур: ответы и данные на устройстве.", k: "акси aksi контур проект суверен" },
+  { t: "DID: did:aksi:ed25519:sovereign-2026. Контакт aksilove@internet.ru. Apache-2.0.", k: "did идентич контакт" },
+  { t: "MATRIX: чат в браузере, память IndexedDB, RAG, опционально WebLLM.", k: "matrix webllm память" },
+  { t: "Омега: FastAPI + Ollama + RAG для своего сервера.", k: "омега omega fastapi ollama" },
+  { t: "Сеть /app: агенты @имя, лента.", k: "сеть агент лента" },
+  { t: "RAG: загрузите .txt/.md — ответы по файлам.", k: "rag файл документ" },
+];
+
+let engine = null;
+let loadingLLM = false;
+let history = [];
+let rag = [];
+let busy = false;
+
+const $ = (id) => document.getElementById(id);
+const thread = $("thread");
+
+function status(t) { $("status").textContent = t; }
+function prog(t) {
+  const p = $("prog");
+  if (!t) { p.classList.remove("on"); p.textContent = ""; return; }
+  p.textContent = t;
+  p.classList.add("on");
+}
+
+function addBubble(role, text, meta) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg " + (role === "user" ? "u" : "a");
+  const b = document.createElement("div");
+  b.className = "b";
+  b.textContent = text;
+  wrap.appendChild(b);
+  if (meta) {
+    const m = document.createElement("div");
+    m.className = "meta";
+    m.textContent = meta;
+    wrap.appendChild(m);
   }
-  function steps(list){
-    var s=$("side");if(!s)return;
-    s.innerHTML=(list||[]).map(function(x,i){return '<div class="step"><b>'+(i+1)+'. '+x.t+'</b>'+(x.d||'')+'</div>'}).join("");
-  }
-  function score(q,text,keys){
-    var low=q.toLowerCase(), n=0, parts=low.split(/\s+/);
-    for(var i=0;i<parts.length;i++){if(parts[i]&&text.toLowerCase().indexOf(parts[i])>=0)n++}
-    (keys||"").split(/\s+/).forEach(function(k){if(k&&low.indexOf(k)>=0)n+=2});
-    return n;
-  }
-  function retrieve(q){
-    var hits=[];
-    O.forEach(function(row){var s=score(q,row.t,row.k);if(s>0)hits.push({text:row.t,score:s})});
-    rag.forEach(function(r){var s=score(q,r.text,"");if(s>0)hits.push({text:r.text,score:s})});
-    hits.sort(function(a,b){return b.score-a.score});
-    return hits.slice(0,5);
-  }
-  function reply(q,hits){
-    var low=q.toLowerCase();
-    if(/привет|здравств|добрый|hello/.test(low)) return "Здравствуйте. АКСИ на связи.\n\nСпросите «кто ты» или «покажи схему».";
-    if(/кто ты|что ты|представь/.test(low)) return "Я АКСИ — локальный ассистент на этой странице.\n\nDID: "+DID+"\n\nОтвечаю сразу, без облака.";
-    if(/схем|архитектур|покажи схему/.test(low)) return "Схема:\nВы → поиск знаний → ответ → экран\n\nВсё на телефоне. DID: "+DID;
-    if(/помощ|умеешь|команд/.test(low)) return "• вопрос про АКСИ\n• покажи схему\n• кнопка Файл — загрузить .txt\n\naksilove@internet.ru";
-    if(/uuid/.test(low)) return "UUID: "+("xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==="x"?r:(r&0x3|0x8)).toString(16)}));
-    if(/который час|сколько времени/.test(low)) return "Сейчас: "+new Date().toLocaleString();
-    var m=low.match(/(?:посчитай|вычисли)\s+([0-9+\-*/().\s]+)/);
-    if(m){try{var v=Function("return("+m[1].replace(/[^0-9+\-*/().\s]/g,"")+")")();if(typeof v==="number"&&isFinite(v))return "Результат: "+v}catch(e){}}
-    if(hits.length&&hits[0].score>=2) return "По знаниям:\n\n"+hits.slice(0,4).map(function(h,i){return (i+1)+". "+h.text}).join("\n");
-    return "Мало данных. Попробуйте: кто ты · схема · или загрузите файл.\n"+DID;
-  }
-  function send(){
-    if(busy)return;
-    var inp=$("inp"), q=(inp.value||"").trim();
-    if(!q)return;
-    inp.value="";busy=true;
-    add("user",q);
-    var t0=Date.now();
-    var st=[];
-    st.push({t:"Приём",d:q.slice(0,80)});
-    var hits=retrieve(q);
-    st.push({t:"Поиск",d:hits.length?"найдено "+hits.length:"пусто"});
-    var text=reply(q,hits);
-    st.push({t:"Ответ",d:"готово"});
-    steps(st);
-    var ms=Date.now()-t0;
-    add("assistant",text,ms+" ms");
-    status(ms+" ms");
-    busy=false;
-  }
-  $("send").onclick=send;
-  $("inp").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();send()}};
-  $("btnArch").onclick=function(){$("inp").value="покажи схему";send()};
-  $("btnThink").onclick=function(){$("side").classList.toggle("on")};
-  $("btnClear").onclick=function(){$("thread").innerHTML="";$("side").innerHTML="";add("assistant","Очищено.")};
-  $("file").onchange=function(e){
-    var files=e.target.files;if(!files)return;
-    Array.prototype.forEach.call(files,function(f){
-      var r=new FileReader();
-      r.onload=function(){
-        var t=String(r.result||"");
-        for(var i=0;i<t.length;i+=400){var c=t.slice(i,i+400);if(c.trim().length>15)rag.push({text:c,source:f.name})}
-        add("assistant","Файл загружен. Фрагментов: "+rag.length);
-      };
-      r.readAsText(f);
+  thread.appendChild(wrap);
+  thread.scrollTop = 1e9;
+}
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB, 1);
+    r.onupgradeneeded = () => {
+      const d = r.result;
+      if (!d.objectStoreNames.contains("msgs")) d.createObjectStore("msgs", { keyPath: "id", autoIncrement: true });
+      if (!d.objectStoreNames.contains("rag")) d.createObjectStore("rag", { keyPath: "id", autoIncrement: true });
+    };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function saveMsg(role, content) {
+  try {
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction("msgs", "readwrite");
+      tx.objectStore("msgs").add({ role, content, ts: Date.now() });
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
     });
-    e.target.value="";
-  };
-  add("assistant","АКСИ готов. Пишите вопрос — ответ сразу.\n\nПримеры: кто ты · покажи схему");
-  status("готово");
-  hideBoot();
+  } catch (_) {}
+}
+async function loadMsgs() {
+  try {
+    const db = await openDB();
+    return await new Promise((res, rej) => {
+      const tx = db.transaction("msgs", "readonly");
+      const q = tx.objectStore("msgs").getAll();
+      q.onsuccess = () => res(q.result || []);
+      q.onerror = () => rej(q.error);
+    });
+  } catch (_) { return []; }
+}
+async function clearMsgs() {
+  try {
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction("msgs", "readwrite");
+      tx.objectStore("msgs").clear();
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  } catch (_) {}
+}
+async function saveRag(item) {
+  try {
+    const db = await openDB();
+    await new Promise((res, rej) => {
+      const tx = db.transaction("rag", "readwrite");
+      tx.objectStore("rag").add(item);
+      tx.oncomplete = () => res();
+      tx.onerror = () => rej(tx.error);
+    });
+  } catch (_) {}
+}
+async function loadRag() {
+  try {
+    const db = await openDB();
+    return await new Promise((res, rej) => {
+      const tx = db.transaction("rag", "readonly");
+      const q = tx.objectStore("rag").getAll();
+      q.onsuccess = () => res(q.result || []);
+      q.onerror = () => rej(q.error);
+    });
+  } catch (_) { return []; }
+}
+
+function score(q, text, keys) {
+  const low = q.toLowerCase();
+  let n = 0;
+  low.split(/\s+/).forEach((p) => { if (p && text.toLowerCase().includes(p)) n++; });
+  (keys || "").split(/\s+/).forEach((k) => { if (k && low.includes(k)) n += 2; });
+  return n;
+}
+function retrieve(q) {
+  const hits = [];
+  ONTOLOGY.forEach((r) => {
+    const s = score(q, r.t, r.k);
+    if (s > 0) hits.push({ text: r.t, score: s });
+  });
+  rag.forEach((r) => {
+    const s = score(q, r.text || "", "");
+    if (s > 0) hits.push({ text: r.text, score: s });
+  });
+  hits.sort((a, b) => b.score - a.score);
+  return hits.slice(0, 6);
+}
+
+function instantReply(q, hits) {
+  const low = q.toLowerCase();
+  if (/привет|здравств|добрый|hello/.test(low)) {
+    return "Здравствуйте. АКСИ на связи.\n\nПамять диалога сохраняется. Кнопка «Нейросеть» включает WebLLM.\nСпросите «кто ты» или «покажи схему».";
+  }
+  if (/кто ты|что ты|представь/.test(low)) {
+    return "Я АКСИ — локальный ассистент.\n\nDID: " + DID + "\n\n• память контекста (IndexedDB)\n• RAG по файлам\n• мгновенные ответы\n• WebLLM по кнопке «Нейросеть»";
+  }
+  if (/схем|архитектур|покажи схему/.test(low)) {
+    return "Схема АКСИ:\n\nВы → история+RAG → (WebLLM или знания) → ответ → память\n\nDID: " + DID;
+  }
+  if (/помощ|умеешь|команд/.test(low)) {
+    return "• вопрос — ответ с историей\n• «Нейросеть» — WebLLM\n• Файл — RAG\n• Очистить — сброс памяти\n\naksilove@internet.ru";
+  }
+  if (hits.length && hits[0].score >= 2) {
+    return "По знаниям и файлам:\n\n" + hits.slice(0, 4).map((h, i) => (i + 1) + ". " + h.text).join("\n");
+  }
+  if (history.length >= 2) {
+    return "Уточните вопрос. В диалоге уже " + history.length + " сообщений. Можно включить «Нейросеть».\n" + DID;
+  }
+  return "Пока мало данных. Спросите про АКСИ, загрузите файл или включите нейросеть.\n" + DID;
+}
+
+function buildContext(hits) {
+  if (!hits.length) return "";
+  return "Факты:\n" + hits.map((h) => "- " + h.text).join("\n");
+}
+
+async function loadLLM() {
+  if (engine || loadingLLM) return !!engine;
+  loadingLLM = true;
+  $("btnLLM").disabled = true;
+  prog("Загрузка WebLLM…");
+  status("модель…");
+  try {
+    const { CreateMLCEngine } = await import("https://esm.run/@mlc-ai/web-llm");
+    engine = await CreateMLCEngine("TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC", {
+      initProgressCallback: (r) => {
+        const p = Math.round((r.progress || 0) * 100);
+        prog("Модель " + p + "% · " + (r.text || ""));
+        status("модель " + p + "%");
+      },
+    });
+    $("btnLLM").classList.add("on");
+    $("btnLLM").textContent = "Нейросеть ✓";
+    prog("");
+    status("webllm · память " + history.length);
+    addBubble("assistant", "Нейросеть готова. Дальше ответы с учётом контекста диалога.", "webllm");
+    return true;
+  } catch (e) {
+    engine = null;
+    prog("");
+    status("локально (модель недоступна)");
+    addBubble("assistant", "WebLLM не загрузилась: " + (e.message || e) + "\n\nРаботаю на знаниях + память.", "err");
+    return false;
+  } finally {
+    loadingLLM = false;
+    $("btnLLM").disabled = false;
+  }
+}
+
+async function chatLLM(userText, hits) {
+  const context = buildContext(hits);
+  const messages = [
+    { role: "system", content: SYSTEM + (context ? "\n\nCONTEXT:\n" + context : "") },
+  ];
+  history.slice(-12).forEach((m) => {
+    messages.push({ role: m.role === "user" ? "user" : "assistant", content: m.content });
+  });
+  messages.push({ role: "user", content: userText });
+  const reply = await engine.chat.completions.create({
+    messages,
+    temperature: 0.7,
+    max_tokens: 512,
+  });
+  return (reply.choices?.[0]?.message?.content || "").trim();
+}
+
+async function send() {
+  if (busy) return;
+  const inp = $("inp");
+  const q = (inp.value || "").trim();
+  if (!q) return;
+  inp.value = "";
+  busy = true;
+  addBubble("user", q);
+  history.push({ role: "user", content: q });
+  await saveMsg("user", q);
+
+  const t0 = Date.now();
+  const hits = retrieve(q);
+  let text = "";
+  let mode = "instant";
+
+  try {
+    if (engine) {
+      status("думаю…");
+      prog("WebLLM + контекст (" + history.length + " сообщ.)");
+      text = await chatLLM(q, hits);
+      mode = "webllm";
+      if (!text || text.length < 8) {
+        text = instantReply(q, hits);
+        mode = "instant+fallback";
+      }
+    } else {
+      text = instantReply(q, hits);
+    }
+  } catch (e) {
+    text = instantReply(q, hits) + "\n\n(модель: " + (e.message || e) + ")";
+    mode = "error-fallback";
+  }
+
+  const ms = Date.now() - t0;
+  prog("");
+  addBubble("assistant", text, mode + " · " + ms + "ms · hist " + history.length);
+  history.push({ role: "assistant", content: text });
+  await saveMsg("assistant", text);
+  status((engine ? "webllm" : "локально") + " · " + history.length + " сообщ.");
+  busy = false;
+}
+
+$("send").onclick = send;
+$("inp").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") { e.preventDefault(); send(); }
+});
+$("btnLLM").onclick = () => loadLLM();
+$("btnArch").onclick = () => { $("inp").value = "покажи схему"; send(); };
+$("btnClear").onclick = async () => {
+  history = [];
+  await clearMsgs();
+  thread.innerHTML = "";
+  addBubble("assistant", "Память очищена. Можно начать новый диалог.", "sys");
+  status(engine ? "webllm · 0" : "локально · 0");
+};
+$("file").onchange = async (e) => {
+  const files = e.target.files;
+  if (!files?.length) return;
+  for (const f of files) {
+    const text = await f.text();
+    for (let i = 0; i < text.length; i += 450) {
+      const chunk = text.slice(i, i + 450);
+      if (chunk.trim().length < 20) continue;
+      const item = { source: f.name, text: chunk, ts: Date.now() };
+      rag.push(item);
+      await saveRag(item);
+    }
+  }
+  addBubble("assistant", "В RAG: " + rag.length + " фрагментов.", "rag");
+  e.target.value = "";
+};
+
+(async () => {
+  const msgs = await loadMsgs();
+  msgs.slice(-40).forEach((m) => {
+    history.push({ role: m.role === "user" ? "user" : "assistant", content: m.content });
+    addBubble(m.role === "user" ? "user" : "assistant", m.content);
+  });
+  rag = await loadRag();
+  if (!msgs.length) {
+    addBubble("assistant",
+      "АКСИ готов.\n\n• Пишите — ответ с учётом истории\n• «Нейросеть» — WebLLM + контекст\n• Файл — знания из документов\n\nПамять сохраняется между перезагрузками.",
+      "sys");
+  }
+  status((engine ? "webllm" : "локально") + " · " + history.length + " сообщ. · RAG " + rag.length);
 })();
 </script>
 </body>
