@@ -6,69 +6,400 @@
 <meta name="theme-color" content="#0f172a">
 <title>АКСИ</title>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--ink:#f1f5f9;--muted:#94a3b8;--line:#334155;--acc:#7c3aed;--c:#22d3ee}
 *{box-sizing:border-box;margin:0}
-html,body{height:100%}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:720px;margin:0 auto;-webkit-tap-highlight-color:transparent}
-#boot{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
-#boot.hide{opacity:0;pointer-events:none;transition:opacity .25s}
-#boot h1{font-size:1.35rem;margin-bottom:6px}
-#boot p{color:var(--muted);font-size:13px}
-header{padding:max(8px,env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-header a{color:var(--muted);text-decoration:none;font-size:13px;font-weight:600}
-h1{font-size:.95rem;font-weight:800}
-#status{font-size:11px;color:var(--muted);max-width:45%;text-align:right}
-.toolbar{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
-.toolbar button,.toolbar label{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;min-height:40px}
-.main{flex:1;display:flex;min-height:0}
-#thread{flex:1;overflow-y:auto;padding:10px 12px;-webkit-overflow-scrolling:touch}
-.side{display:none;width:42%;border-left:1px solid var(--line);background:#0b1220;flex-direction:column;min-height:0}
-.side.on{display:flex}
-@media(min-width:760px){.side{display:flex}}
-.side h2{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
-#thoughts{flex:1;overflow:auto;padding:8px}
-.step{font-size:11px;padding:8px;margin-bottom:6px;border-radius:8px;border:1px solid var(--line);background:var(--card);line-height:1.35}
-.step b{color:var(--c);display:block;margin-bottom:2px;font-size:10px}
-.msg{margin-bottom:10px;max-width:92%}
-.msg.user{margin-left:auto}
-.msg .bubble{padding:11px 13px;border-radius:14px;font-size:15px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.msg.user .bubble{background:var(--acc);color:#fff}
-.msg.bot .bubble{background:var(--card);border:1px solid var(--line)}
-.msg .meta{font-size:10px;color:var(--muted);margin-top:3px;font-family:ui-monospace,monospace}
-.composer{display:flex;gap:8px;padding:8px 10px;padding-bottom:max(8px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#111827}
-.composer textarea{flex:1;min-height:44px;max-height:100px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px;font:inherit;font-size:16px;resize:none}
-.composer button{width:48px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:800;font-size:16px}
-#file-input{display:none}
-.mermaid-box{overflow-x:auto;margin-top:8px;background:#0b1220;border-radius:8px;padding:8px}
+html,body{height:100%;background:#0f172a;color:#f1f5f9;font-family:system-ui,-apple-system,sans-serif}
+body{display:flex;flex-direction:column;max-width:720px;margin:0 auto;-webkit-tap-highlight-color:transparent}
+#boot{position:fixed;inset:0;z-index:99;background:#0f172a;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#boot h1{font-size:1.4rem;margin-bottom:8px}
+#boot p{color:#94a3b8;font-size:13px}
+header{padding:max(10px,env(safe-area-inset-top)) 12px 8px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+header a{color:#94a3b8;text-decoration:none;font-size:13px;font-weight:600}
+h1{font-size:1rem;font-weight:800}
+#status{font-size:11px;color:#94a3b8}
+.bar{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-bottom:1px solid #334155}
+.bar button,.bar label{border:1px solid #334155;background:#1e293b;color:#f1f5f9;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;white-space:nowrap;min-height:40px}
+#thread{flex:1;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch}
+.msg{margin:0 0 10px;max-width:92%}
+.msg.u{margin-left:auto}
+.b{padding:12px 14px;border-radius:14px;font-size:15px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.msg.u .b{background:#7c3aed;color:#fff}
+.msg.a .b{background:#1e293b;border:1px solid #334155}
+.meta{font-size:10px;color:#94a3b8;margin-top:4px;font-family:ui-monospace,monospace}
+.composer{display:flex;gap:8px;padding:8px 10px max(10px,env(safe-area-inset-bottom));border-top:1px solid #334155;background:#111827}
+#inp{flex:1;min-height:44px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#f1f5f9;padding:10px;font-size:16px;font-family:inherit}
+#send{width:48px;border:0;border-radius:12px;background:#7c3aed;color:#fff;font-weight:800;font-size:18px}
+#file{display:none}
+#side{display:none;padding:8px;border-top:1px solid #334155;max-height:30vh;overflow:auto;background:#0b1220;font-size:12px}
+#side.on{display:block}
+.step{padding:8px;margin-bottom:6px;border:1px solid #334155;border-radius:8px;background:#1e293b}
+.step b{color:#22d3ee;display:block;margin-bottom:2px;font-size:10px}
 </style>
 </head>
 <body>
-<div id="boot"><h1>АКСИ</h1><p>Быстрый старт…</p></div>
+<div id="boot"><h1>АКСИ</h1><p id="bootp">Загрузка…</p></div>
 <header>
-  <div><a href="/app/">Сеть</a><h1>АКСИ</h1></div>
+  <div><a href="/app/">Сеть</a> · <h1 style="display:inline">АКСИ</h1></div>
   <div id="status">…</div>
 </header>
-<div class="toolbar">
-  <button type="button" id="btn-arch">Схема</button>
-  <label for="file-input">RAG</label>
-  <input id="file-input" type="file" accept=".txt,.md,text/plain" multiple>
-  <button type="button" id="btn-proof">Proof</button>
-  <button type="button" id="btn-verify">Verify</button>
-  <button type="button" id="btn-thoughts">Мысли</button>
-  <button type="button" id="btn-mic">Голос</button>
-  <button type="button" id="btn-clear">Очистить</button>
+<div class="bar">
+  <button type="button" id="btnArch">Схема</button>
+  <label for="file">Файл</label>
+  <input type="file" id="file" accept=".txt,.md,text/plain" multiple>
+  <button type="button" id="btnThink">Мысли</button>
+  <button type="button" id="btnClear">Очистить</button>
 </div>
-<div class="main">
-  <div id="thread"></div>
-  <aside class="side" id="side">
-    <h2>Ход мыслей</h2>
-    <div id="thoughts"></div>
-  </aside>
-</div>
+<div id="thread"></div>
+<div id="side"></div>
 <div class="composer">
-  <textarea id="inp" rows="1" placeholder="Спросите АКСИ…" enterkeyhint="send"></textarea>
-  <button type="button" id="send" aria-label="Отправить">➤</button>
+  <input id="inp" type="text" placeholder="Спросите АКСИ…" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send">➤</button>
 </div>
-<script type="module" src="./app.js?v=5"></script>
+<script>
+(function () {
+  "use strict";
+  var DID = "did:aksi:ed25519:sovereign-2026";
+  var DB = "aksi_m6";
+  var rag = [];
+  var busy = false;
+  var keyPair = null;
+
+  var ONTOLOGY = [
+    { t: "АКСИ — local-first ИИ: ответы на устройстве, без обязательного облака.", k: "акси aksi контур проект суверен что такое" },
+    { t: "DID: did:aksi:ed25519:sovereign-2026. Контакт: aksilove@internet.ru. Apache-2.0.", k: "did идентич контакт лиценз email" },
+    { t: "MATRIX — чат на сайте: мгновенные ответы, память, RAG, подпись.", k: "matrix модель версия быстр" },
+    { t: "Омега — серверный контур FastAPI + Ollama для своего сервера.", k: "омега omega fastapi ollama сервер" },
+    { t: "TTP: ход мыслей виден; ответ можно подписать ECDSA в браузере.", k: "ttp мысл подпись resonance крипт" },
+    { t: "Сеть /app: агенты @имя, лента.", k: "сеть агент лента @ регистр" },
+    { t: "Модули: /matrix /app /lab /exocortex /studio /quantum.", k: "модул lab studio quantum" },
+    { t: "RAG: загрузите .txt/.md — ответы по вашим файлам.", k: "rag файл загруз документ" },
+    { t: "Политика: без данных в контексте — честный отказ, без выдумки.", k: "отказ галлюцин политик правд" }
+  ];
+
+  function $(id) { return document.getElementById(id); }
+  function status(t) { var s = $("status"); if (s) s.textContent = t; }
+
+  function hideBoot() {
+    var b = $("boot");
+    if (!b) return;
+    b.style.display = "none";
+  }
+  setTimeout(hideBoot, 600);
+
+  function addBubble(role, text, meta) {
+    var wrap = document.createElement("div");
+    wrap.className = "msg " + (role === "user" ? "u" : "a");
+    var b = document.createElement("div");
+    b.className = "b";
+    b.textContent = text;
+    wrap.appendChild(b);
+    if (meta) {
+      var m = document.createElement("div");
+      m.className = "meta";
+      m.textContent = meta;
+      wrap.appendChild(m);
+    }
+    $("thread").appendChild(wrap);
+    $("thread").scrollTop = 1e9;
+  }
+
+  function showSteps(steps) {
+    var side = $("side");
+    if (!side) return;
+    side.innerHTML = (steps || []).map(function (s, i) {
+      return '<div class="step"><b>' + (i + 1) + ". " + esc(s.t) + "</b>" + esc(s.d || "") + "</div>";
+    }).join("");
+  }
+  function esc(s) {
+    return String(s || "").replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+  }
+
+  function openDB() {
+    return new Promise(function (res, rej) {
+      try {
+        var r = indexedDB.open(DB, 1);
+        r.onupgradeneeded = function () {
+          var d = r.result;
+          if (!d.objectStoreNames.contains("m")) d.createObjectStore("m", { keyPath: "id", autoIncrement: true });
+          if (!d.objectStoreNames.contains("r")) d.createObjectStore("r", { keyPath: "id", autoIncrement: true });
+          if (!d.objectStoreNames.contains("k")) d.createObjectStore("k");
+        };
+        r.onsuccess = function () { res(r.result); };
+        r.onerror = function () { rej(r.error); };
+      } catch (e) { rej(e); }
+    });
+  }
+
+  function idbAll(store) {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(store, "readonly");
+        var q = tx.objectStore(store).getAll();
+        q.onsuccess = function () { res(q.result || []); };
+        q.onerror = function () { rej(q.error); };
+      });
+    });
+  }
+  function idbAdd(store, val) {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(store, "readwrite");
+        tx.objectStore(store).add(val);
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbClear(store) {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction(store, "readwrite");
+        tx.objectStore(store).clear();
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+  function idbGetKey() {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("k", "readonly");
+        var q = tx.objectStore("k").get("ecdsa");
+        q.onsuccess = function () { res(q.result); };
+        q.onerror = function () { rej(q.error); };
+      });
+    });
+  }
+  function idbPutKey(val) {
+    return openDB().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("k", "readwrite");
+        tx.objectStore("k").put(val, "ecdsa");
+        tx.oncomplete = function () { res(); };
+        tx.onerror = function () { rej(tx.error); };
+      });
+    });
+  }
+
+  function tok(s) {
+    return String(s).toLowerCase().replace(/[^\u0400-\u04FFa-z0-9\s]+/gi, " ").split(/\s+/).filter(Boolean);
+  }
+  function score(q, text, keys) {
+    var low = q.toLowerCase();
+    var qt = tok(q);
+    var tt = tok(text);
+    var n = 0;
+    for (var i = 0; i < qt.length; i++) {
+      if (tt.indexOf(qt[i]) >= 0) n += 1;
+    }
+    var ks = (keys || "").split(/\s+/);
+    for (var j = 0; j < ks.length; j++) {
+      if (ks[j] && low.indexOf(ks[j]) >= 0) n += 2;
+    }
+    return n;
+  }
+  function retrieve(q) {
+    var hits = [];
+    for (var i = 0; i < ONTOLOGY.length; i++) {
+      var s = score(q, ONTOLOGY[i].t, ONTOLOGY[i].k);
+      if (s > 0) hits.push({ text: ONTOLOGY[i].t, score: s, source: "ontology" });
+    }
+    for (var r = 0; r < rag.length; r++) {
+      var s2 = score(q, rag[r].text, "");
+      if (s2 > 0) hits.push({ text: rag[r].text, score: s2, source: rag[r].source || "file" });
+    }
+    hits.sort(function (a, b) { return b.score - a.score; });
+    return hits.slice(0, 5);
+  }
+
+  function reply(q, hits) {
+    var low = q.toLowerCase();
+    if (/привет|здравств|добрый|hello|hi\b/.test(low)) {
+      return "Здравствуйте. АКСИ на связи — ответ сразу.\n\nСпросите «кто ты», «покажи схему» или загрузите файл.";
+    }
+    if (/кто ты|что ты|представь|версия/.test(low)) {
+      return "Я АКСИ MATRIX (мобильная версия).\n\nDID: " + DID + "\n\nРаботаю локально в браузере: знания проекта, ваши файлы, подпись ответа. Без тяжёлой модели — быстро на телефоне.";
+    }
+    if (/схем|архитектур|диаграмм|покажи схему/.test(low)) {
+      return "Схема АКСИ:\n\nВы → поиск знаний → ответ → подпись → экран\n\nВсё на устройстве. Модули: /matrix, /app, Lab.\nDID: " + DID;
+    }
+    if (/помощ|умеешь|команд|что можешь/.test(low)) {
+      return "• вопрос про АКСИ\n• покажи схему\n• загрузить .txt (кнопка Файл)\n• Мысли — ход ответа\n\naksilove@internet.ru";
+    }
+    if (/uuid|guid/.test(low)) {
+      var id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+      return "UUID: " + id;
+    }
+    if (/который час|сколько времени|дата сейчас/.test(low)) {
+      return "Сейчас: " + new Date().toLocaleString();
+    }
+    var m = low.match(/(?:посчитай|вычисли)\s+([0-9+\-*/().\s]+)/);
+    if (m) {
+      try {
+        var v = Function('"use strict";return(' + m[1].replace(/[^0-9+\-*/().\s]/g, "") + ")")();
+        if (typeof v === "number" && isFinite(v)) return "Результат: " + v;
+      } catch (e) {}
+    }
+    if (hits.length && hits[0].score >= 2) {
+      var lines = hits.slice(0, 4).map(function (h, i) { return (i + 1) + ". " + h.text; }).join("\n");
+      return "По локальным знаниям:\n\n" + lines;
+    }
+    return "Пока мало данных по этому запросу.\n\nПопробуйте: кто ты · схема · DID · или загрузите файл.\n" + DID;
+  }
+
+  function sha256hex(str) {
+    if (!window.crypto || !crypto.subtle) return Promise.resolve("no-subtle");
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function (buf) {
+      return Array.from(new Uint8Array(buf)).map(function (x) {
+        return x.toString(16).padStart(2, "0");
+      }).join("");
+    });
+  }
+
+  function ensureKeys() {
+    if (keyPair) return Promise.resolve(keyPair);
+    if (!window.crypto || !crypto.subtle) return Promise.resolve(null);
+    return idbGetKey().then(function (stored) {
+      if (stored && stored.privateKey) {
+        return Promise.all([
+          crypto.subtle.importKey("jwk", stored.privateKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
+          crypto.subtle.importKey("jwk", stored.publicKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"])
+        ]).then(function (keys) {
+          keyPair = { privateKey: keys[0], publicKey: keys[1] };
+          return keyPair;
+        });
+      }
+      return crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]).then(function (kp) {
+        keyPair = kp;
+        return Promise.all([
+          crypto.subtle.exportKey("jwk", kp.privateKey),
+          crypto.subtle.exportKey("jwk", kp.publicKey)
+        ]).then(function (jwk) {
+          return idbPutKey({ privateKey: jwk[0], publicKey: jwk[1] }).then(function () { return keyPair; });
+        });
+      });
+    }).catch(function () { return null; });
+  }
+
+  function signText(text) {
+    return ensureKeys().then(function (kp) {
+      if (!kp) return sha256hex(text).then(function (h) { return { sha256: h, signature: "" }; });
+      return crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, kp.privateKey, new TextEncoder().encode(text)).then(function (sig) {
+        var u = new Uint8Array(sig);
+        var s = "";
+        for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+        var b64 = btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+        return sha256hex(text).then(function (h) { return { sha256: h, signature: b64 }; });
+      });
+    }).catch(function () {
+      return { sha256: "err", signature: "" };
+    });
+  }
+
+  function chat(q) {
+    var t0 = Date.now();
+    var steps = [];
+    function step(t, d) { steps.push({ t: t, d: d }); showSteps(steps); }
+    step("Приём", q.slice(0, 120));
+    var hits = retrieve(q);
+    step("Поиск", hits.length ? ("найдено " + hits.length) : "пусто");
+    var text = reply(q, hits);
+    step("Ответ", "готово");
+    return signText(text).then(function (sig) {
+      var ms = Date.now() - t0;
+      step("Подпись", (sig.sha256 || "").slice(0, 12) + " · " + ms + "ms");
+      return { text: text, ms: ms, sig: sig };
+    });
+  }
+
+  function send() {
+    if (busy) return;
+    var inp = $("inp");
+    var q = (inp.value || "").trim();
+    if (!q) return;
+    inp.value = "";
+    busy = true;
+    addBubble("user", q);
+    idbAdd("m", { role: "user", content: q, ts: Date.now() }).catch(function () {});
+    chat(q).then(function (r) {
+      addBubble("assistant", r.text, r.ms + "ms · " + (r.sig.sha256 || "").slice(0, 10));
+      idbAdd("m", { role: "assistant", content: r.text, ts: Date.now() }).catch(function () {});
+      status(r.ms + " ms");
+    }).catch(function (e) {
+      addBubble("assistant", "Ошибка: " + (e && e.message ? e.message : e));
+    }).then(function () { busy = false; });
+  }
+
+  $("send").onclick = send;
+  $("inp").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); send(); }
+  });
+  $("btnArch").onclick = function () { $("inp").value = "покажи схему"; send(); };
+  $("btnThink").onclick = function () { $("side").classList.toggle("on"); };
+  $("btnClear").onclick = function () {
+    idbClear("m").catch(function () {});
+    $("thread").innerHTML = "";
+    $("side").innerHTML = "";
+    addBubble("assistant", "Очищено. Можно писать.");
+  };
+  $("file").onchange = function (e) {
+    var files = e.target.files;
+    if (!files || !files.length) return;
+    var pending = files.length;
+    Array.prototype.forEach.call(files, function (f) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        var text = String(reader.result || "");
+        for (var i = 0; i < text.length; i += 400) {
+          var chunk = text.slice(i, i + 400);
+          if (chunk.trim().length < 15) continue;
+          var item = { source: f.name, text: chunk };
+          rag.push(item);
+          idbAdd("r", item).catch(function () {});
+        }
+        pending--;
+        if (pending <= 0) {
+          addBubble("assistant", "Файлы загружены. Фрагментов: " + rag.length);
+          status("RAG " + rag.length);
+        }
+      };
+      reader.readAsText(f);
+    });
+    e.target.value = "";
+  };
+
+  $("bootp").textContent = "Почти готово…";
+  Promise.resolve()
+    .then(function () { return ensureKeys(); })
+    .then(function () {
+      return idbAll("m").then(function (msgs) {
+        (msgs || []).slice(-40).forEach(function (m) {
+          addBubble(m.role === "user" ? "user" : "assistant", m.content);
+        });
+        return msgs;
+      }).catch(function () { return []; });
+    })
+    .then(function (msgs) {
+      return idbAll("r").then(function (rows) {
+        rag = rows || [];
+        return msgs;
+      }).catch(function () { return msgs; });
+    })
+    .then(function (msgs) {
+      if (!msgs || !msgs.length) {
+        addBubble("assistant", "АКСИ готов. Пишите вопрос — ответ сразу.\n\nПримеры: кто ты · покажи схему");
+      }
+      status("готово · RAG " + rag.length);
+      hideBoot();
+    })
+    .catch(function () {
+      status("ok");
+      addBubble("assistant", "Готов к работе.");
+      hideBoot();
+    });
+})();
+</script>
 </body>
 </html>
