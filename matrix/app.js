@@ -1,32 +1,38 @@
 import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
+import { detectSkill, runSkill } from "./skills.js";
 
-const DB_NAME = "aksi_matrix_v3";
+const DB_NAME = "aksi_matrix_v4";
 const STORE_MSG = "messages";
 const STORE_RAG = "rag";
 const STORE_KEYS = "keys";
 const DID = "did:aksi:ed25519:sovereign-2026";
+const VERSION = "MATRIX-4.0-instant";
 
-const SYSTEM = `Ты — АКСИ MATRIX. Отвечай развёрнуто на языке пользователя. Опирайся на CONTEXT. Не выдумывай новости и курсы. Схемы — в блоке mermaid. DID: ${DID}.`;
+const SYSTEM = `Ты — АКСИ MATRIX ${VERSION}. Отвечай развёрнуто. Опирайся на CONTEXT. Не выдумывай новости. Схемы — mermaid. DID: ${DID}.`;
 
 const ONTOLOGY = [
-  { t: "АКСИ — суверенный local-first ИИ-контур: данные и ответы на устройстве пользователя, без обязательного иностранного облака.", k: ["акси", "что такое", "проект", "контур"] },
-  { t: "Программный DID: did:aksi:ed25519:sovereign-2026. Контакт: aksilove@internet.ru. Лицензия: Apache License 2.0.", k: ["did", "идентич", "контакт", "лиценз", "email"] },
-  { t: "MATRIX — браузерный ИИ: мгновенные ответы из онтологии и RAG, опционально WebLLM, IndexedDB-память, Mermaid, голос, ECDSA-подпись хода мыслей.", k: ["matrix", "браузер", "модель", "webllm"] },
-  { t: "АКСИ-Омега — серверный контур: FastAPI, Ollama, hybrid RAG (Chroma+BM25), Рубикон (JSON-схема), Resonance Ed25519, Docker.", k: ["омега", "omega", "fastapi", "ollama", "сервер"] },
-  { t: "Transparent Thought Protocol (TTP): каждый ответ сопровождается цепочкой шагов; Resonance подписывает шаги и итог (ECDSA P-256 / SHA-256).", k: ["ttp", "мысл", "подпись", "resonance", "крипт"] },
-  { t: "Политика: нет факта в локальном CONTEXT → честный отказ, без галлюцинаций о «текущих» событиях.", k: ["галлюцин", "отказ", "политик", "правд"] },
-  { t: "Сеть /app: регистрация, персональный агент @имя, общая лента, вызов чужого ИИ через @агент вопрос.", k: ["сеть", "агент", "лента", "@", "регистр"] },
-  { t: "Оркестратор: приём → поиск знаний → маршрут → ответ → TTP → подпись. Ответ сначала из локальной базы (мгновенно).", k: ["оркестр", "как работа", "маршрут"] },
-  { t: "Модули сайта: /matrix (этот ИИ), /app (сеть), /lab, /exocortex, /studio, /pulse, /quantum, /proof.", k: ["модул", "lab", "exocortex", "studio", "разделы"] },
-  { t: "RAG: загрузите .txt/.md — фрагменты индексируются локально и участвуют в ответах.", k: ["rag", "файл", "загруз", "документ"] },
-  { t: "Air-gapped / суверенный режим: приоритет локального инференса; внешние API не обязательны.", k: ["суверен", "air", "оффлайн", "локаль", "импорт"] },
-  { t: "Не AGI: цель — проверяемый полезный локальный ассистент с прозрачной логикой.", k: ["agi", "превосход", "умный"] },
+  { t: "АКСИ — суверенный local-first ИИ-контур: ответы и данные на устройстве, без обязательного иностранного облака.", k: ["акси","aksi","контур","проект","суверен","что такое"] },
+  { t: "DID: did:aksi:ed25519:sovereign-2026. Контакт aksilove@internet.ru. Лицензия Apache-2.0.", k: ["did","идентич","контакт","лиценз","email"] },
+  { t: "MATRIX 4.0: мгновенный оркестратор, онтология, RAG, TTP+ECDSA, skills, proof/verify, опциональный WebLLM.", k: ["matrix","версия","4.0","skills","мгновен"] },
+  { t: "Омега: FastAPI + Ollama + hybrid RAG + Рубикон + Resonance Ed25519 + Docker.", k: ["омега","omega","fastapi","ollama","сервер","docker"] },
+  { t: "TTP: цепочка шагов; шаг и итог подписываются ECDSA P-256 + SHA-256 (Resonance в браузере).", k: ["ttp","мысл","ход","прозрачн","thought"] },
+  { t: "Политика anti-hallucination: нет опоры в CONTEXT → отказ/уточнение, без выдуманных текущих фактов.", k: ["галлюцин","отказ","политик","правд"] },
+  { t: "Сеть /app: аккаунты, агент @имя, лента, вызов через @agent текст.", k: ["сеть","агент","лента","@","регистр","network"] },
+  { t: "Оркестратор: intent → retrieve → skills? → compose → TTP → sign. Instant-path не ждёт LLM.", k: ["оркестр","intent","маршрут","compose"] },
+  { t: "Модули: /matrix /app /lab /exocortex /studio /pulse /quantum /proof /kernel /offer.", k: ["модул","lab","exocortex","studio","quantum","proof"] },
+  { t: "RAG: .txt/.md → чанки IndexedDB, TF-cosine + онтология.", k: ["rag","файл","загруз","документ"] },
+  { t: "Air-gapped: приоритет локального контура; внешние API не обязательны.", k: ["air","оффлайн","локаль","суверен","периметр"] },
+  { t: "Swarm (Омега): Research Critic Coder Guardian Formalizer Scientist; mutations_allowed=false.", k: ["swarm","рой","critic","guardian"] },
+  { t: "Не AGI: проверяемый полезный ассистент, не заявление о превосходстве над frontier-моделями.", k: ["agi","превосход","frontier"] },
 ];
 
-let engine = null;
-let modelLoading = false;
-let ragChunks = [];
-let cryptoKey = null;
+const SYNONYMS = {
+  "архитектура": ["схема","структура","слои","architecture","diagram"],
+  "подпись": ["signature","resonance","sig","хеш","hash"],
+  "помощь": ["help","команды","умеешь","функции"],
+};
+
+let engine = null, modelLoading = false, ragChunks = [], cryptoKey = null, lastPackage = null;
 
 function bootMsg(t, pct) {
   const el = document.getElementById("boot-msg");
@@ -42,7 +48,7 @@ function hideBoot() {
   const b = document.getElementById("boot");
   if (!b) return;
   b.classList.add("hide");
-  setTimeout(() => { b.style.display = "none"; }, 300);
+  setTimeout(() => { b.style.display = "none"; }, 280);
 }
 
 function openDB() {
@@ -144,7 +150,14 @@ async function ensureKeys() {
 async function signText(text) {
   await ensureKeys();
   const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, cryptoKey.privateKey, new TextEncoder().encode(text));
-  return { alg: "ECDSA-P256-SHA256", did: DID, sha256: await sha256hex(text), signature: b64(sig) };
+  return { alg: "ECDSA-P256-SHA256", did: DID, sha256: await sha256hex(text), signature: b64(sig), at: new Date().toISOString() };
+}
+async function verifyText(text, signatureB64) {
+  await ensureKeys();
+  try {
+    const bin = Uint8Array.from(atob(signatureB64.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+    return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, cryptoKey.publicKey, bin, new TextEncoder().encode(text));
+  } catch { return false; }
 }
 
 const thread = document.getElementById("thread");
@@ -163,7 +176,7 @@ function showThoughts(steps) {
     if (s.sig) {
       const m = document.createElement("div");
       m.className = "sig";
-      m.textContent = "sig " + s.sig.sha256.slice(0, 16) + "… · " + (s.sig.signature || "").slice(0, 16) + "…";
+      m.textContent = "sig " + s.sig.sha256.slice(0, 16) + "… · " + (s.sig.signature || "").slice(0, 14) + "…";
       d.appendChild(m);
     }
     thoughtsEl.appendChild(d);
@@ -175,9 +188,7 @@ async function renderMermaid(code, container) {
     const id = "mmd_" + Math.random().toString(36).slice(2);
     const { svg } = await window.__mermaid.render(id, code);
     container.innerHTML = svg;
-  } catch (e) {
-    container.textContent = code;
-  }
+  } catch (e) { container.textContent = code; }
 }
 
 function addBubble(role, content, meta) {
@@ -189,20 +200,13 @@ function addBubble(role, content, meta) {
   if (mermaidMatch && role !== "user") {
     const before = content.slice(0, mermaidMatch.index).trim();
     if (before) { const t = document.createElement("div"); t.textContent = before; bubble.appendChild(t); }
-    const box = document.createElement("div");
-    box.className = "mermaid-box";
-    bubble.appendChild(box);
+    const box = document.createElement("div"); box.className = "mermaid-box"; bubble.appendChild(box);
     renderMermaid(mermaidMatch[1].trim(), box);
     const after = content.slice(mermaidMatch.index + mermaidMatch[0].length).trim();
     if (after) { const t2 = document.createElement("div"); t2.style.marginTop = "8px"; t2.textContent = after; bubble.appendChild(t2); }
   } else bubble.textContent = content;
   wrap.appendChild(bubble);
-  if (meta) {
-    const m = document.createElement("div");
-    m.className = "meta";
-    m.textContent = meta;
-    wrap.appendChild(m);
-  }
+  if (meta) { const m = document.createElement("div"); m.className = "meta"; m.textContent = meta; wrap.appendChild(m); }
   thread.appendChild(wrap);
   thread.scrollTop = thread.scrollHeight;
 }
@@ -210,10 +214,15 @@ function addBubble(role, content, meta) {
 function tokenize(s) {
   return String(s).toLowerCase().replace(/[^\p{L}\p{N}\s]+/gu, " ").split(/\s+/).filter(Boolean);
 }
+function expandQuery(q) {
+  let low = q.toLowerCase();
+  Object.entries(SYNONYMS).forEach(([root, list]) => {
+    if (list.some(x => low.includes(x)) && !low.includes(root)) low += " " + root;
+  });
+  return low;
+}
 function tf(tokens) {
-  const m = {};
-  tokens.forEach(t => { m[t] = (m[t] || 0) + 1; });
-  return m;
+  const m = {}; tokens.forEach(t => { m[t] = (m[t] || 0) + 1; }); return m;
 }
 function cosine(a, b) {
   let dot = 0, na = 0, nb = 0;
@@ -223,27 +232,24 @@ function cosine(a, b) {
   });
   return (!na || !nb) ? 0 : dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
-function chunkText(text, size = 500) {
-  const parts = [];
-  const clean = text.replace(/\r/g, "");
+function chunkText(text, size = 480) {
+  const parts = [], clean = text.replace(/\r/g, "");
   for (let i = 0; i < clean.length; i += size) parts.push(clean.slice(i, i + size));
   return parts.filter(p => p.trim().length > 20);
 }
-
 function scoreOntology(query) {
-  const low = query.toLowerCase();
-  const q = tf(tokenize(query));
+  const low = expandQuery(query);
+  const q = tf(tokenize(low));
   return ONTOLOGY.map(row => {
-    let score = cosine(q, tf(tokenize(row.t)));
-    row.k.forEach(k => { if (low.includes(k)) score += 0.35; });
+    let score = cosine(q, tf(tokenize(row.t))) * 1.2;
+    row.k.forEach(k => { if (low.includes(k)) score += 0.4; });
     return { source: "ontology", text: row.t, score };
   }).sort((a, b) => b.score - a.score);
 }
-
-function retrieve(query, k = 5) {
-  const q = tf(tokenize(query));
+function retrieve(query, k = 6) {
+  const q = tf(tokenize(expandQuery(query)));
   const fromFiles = ragChunks.map(c => ({ ...c, score: cosine(q, c.tf || {}) })).filter(c => c.score > 0.02);
-  const fromOnt = scoreOntology(query).filter(c => c.score > 0.08);
+  const fromOnt = scoreOntology(query).filter(c => c.score > 0.1);
   return [...fromFiles, ...fromOnt].sort((a, b) => b.score - a.score).slice(0, k);
 }
 
@@ -256,29 +262,31 @@ async function ingestFiles(fileList) {
       await saveRagChunk(item);
     }
   }
-  bootMsg("мгновенно · RAG " + ragChunks.length);
-  addBubble("assistant", "Файлы в локальном RAG. Фрагментов: " + ragChunks.length + ". Можно спрашивать сразу.", "rag");
+  bootMsg("instant · RAG " + ragChunks.length);
+  addBubble("assistant", "RAG обновлён. Фрагментов: " + ragChunks.length + ".", "rag");
 }
 
-function composeInstant(userText, hits) {
+function composeInstant(userText, hits, skillOut) {
   const low = userText.toLowerCase();
-  const bullets = (hits || []).slice(0, 5).map(h => "• " + h.text).join("\n");
+  const bullets = (hits || []).slice(0, 6).map((h, i) => (i + 1) + ". [" + h.source + "] " + h.text).join("\n");
+  const conf = hits && hits[0] ? Math.min(0.95, 0.35 + hits[0].score) : 0.2;
+  if (skillOut) return { answer: skillOut + "\n\nSkill локально. DID: " + DID + " · " + VERSION, route: "skill", confidence: 0.99 };
   if (/схем|диаграмм|архитектур|mermaid|покажи схему/.test(low)) {
-    return { answer: "Архитектура АКСИ (локальный контур):\n\n```mermaid\nflowchart LR\n  U[Вы] --> Q[Вопрос]\n  Q --> R[Retrieve онтология+RAG]\n  R --> A[Мгновенный ответ]\n  A --> T[TTP шаги]\n  T --> S[ECDSA подпись]\n  S --> UI[Экран]\n  UI --> M[IndexedDB]\n```\n\nПоток: вопрос → поиск → ответ сразу → подписанный ход мыслей. WebLLM — опционально в фоне.\n\nDID: " + DID + " · Apache-2.0 · aksilove@internet.ru", route: "architecture" };
+    return { answer: "Архитектура АКСИ MATRIX 4.0:\n\n```mermaid\nflowchart TB\n  U[Пользователь] --> I[Intent + Skills]\n  I --> R[Retrieve]\n  R --> C[Compose instant]\n  C --> T[TTP]\n  T --> S[ECDSA]\n  S --> UI[Ответ + proof]\n  I -.opt.-> L[WebLLM]\n```\n\nНовое: skills, proof, verify, confidence, синонимы.\nDID: " + DID, route: "architecture", confidence: 0.95 };
   }
   if (/привет|здравств|добрый|hello|hi\b/.test(low)) {
-    return { answer: "Здравствуйте. АКСИ MATRIX отвечает сразу из локальных знаний.\n\nБез ожидания модели:\n• онтология АКСИ\n• RAG по файлам\n• ход мыслей с подписью\n• схемы Mermaid\n\nWebLLM — кнопка «Модель», не блокирует чат.\n\nСпросите: кто ты, архитектура, DID, сеть — или загрузите .txt/.md.", route: "greet" };
+    return { answer: "Здравствуйте. MATRIX 4.0 — instant.\n\n• онтология + RAG\n• TTP + ECDSA\n• skills: hash / uuid / время / посчитай\n• Proof + Verify\n\nWebLLM — кнопка «Модель».", route: "greet", confidence: 0.9 };
   }
-  if (/кто ты|что ты|представь|твоя роль/.test(low)) {
-    return { answer: "Я АКСИ MATRIX — локальный ассистент на этой странице.\n\nDID: " + DID + ".\n\nКак устроен ответ:\n1) Мгновенный поиск по онтологии и RAG\n2) Сборка развёрнутого ответа\n3) TTP — шаги справа\n4) ECDSA P-256 подпись\n\nРядом: /app, Lab, Exocortex. Омега — свой сервер.\n\nНе AGI: быстрый проверяемый local-first помощник.", route: "identity" };
+  if (/кто ты|что ты|представь|версия/.test(low)) {
+    return { answer: "Я АКСИ MATRIX " + VERSION + ".\n\nDID: " + DID + "\n\n1) Intent/skills 2) Retrieve 3) Compose 4) TTP+ECDSA 5) Proof\n\nНе AGI — local-first проверяемый ассистент.", route: "identity", confidence: 0.95 };
   }
-  if (/помощ|умеешь|что можешь|команд|функц/.test(low)) {
-    return { answer: "Могу сразу:\n1) Объяснять АКСИ, MATRIX, Омегу, TTP, DID, @агентов\n2) Отвечать по файлам (RAG)\n3) Схемы («покажи схему»)\n4) Подписанный ход мыслей\n5) Голос (Chrome/Edge)\n6) По желанию — WebLLM\n\nНе выдумываю курсы и новости без ваших данных.", route: "help" };
+  if (/помощ|умеешь|команд|skills|функц/.test(low)) {
+    return { answer: "• Вопрос по АКСИ\n• покажи схему\n• hash текст / uuid / который час / посчитай 12*7\n• RAG-файлы\n• Proof / Verify\n\naksilove@internet.ru", route: "help", confidence: 0.92 };
   }
-  if (hits && hits.length && hits[0].score > 0.15) {
-    return { answer: "По локальным знаниям:\n\n" + bullets + "\n\nВывод: АКСИ — суверенный local-first контур (MATRIX в браузере, Омега на сервере). Прозрачность TTP важнее громких заявлений.\n\nУточните вопрос или добавьте файл в RAG.", route: "kb" };
+  if (hits && hits.length && hits[0].score > 0.18) {
+    return { answer: "Сводка (confidence ~" + conf.toFixed(2) + "):\n\n" + bullets + "\n\nСинтез: local-first АКСИ — MATRIX в браузере, Омега в периметре, TTP для проверяемости.", route: "kb", confidence: conf };
   }
-  return { answer: "По «" + userText.slice(0, 120) + "» мало точных совпадений в онтологии.\n\nПопробуйте: кто ты / DID / архитектура / сеть агентов / TTP — или загрузите документ.\n\nПолитика: лучше пробел, чем выдумка. " + DID, route: "refuse_soft" };
+  return { answer: "Мало опоры на «" + userText.slice(0, 100) + "». Спросите DID/TTP/архитектура/сеть или skill/uuid/hash.\n" + DID, route: "refuse_soft", confidence: conf };
 }
 
 async function chat(userText) {
@@ -289,66 +297,75 @@ async function chat(userText) {
     steps.push({ title, detail, sig });
     showThoughts(steps);
   };
-  await push("Приём", userText.slice(0, 240));
+  await push("Приём", userText.slice(0, 220));
+  const skill = detectSkill(userText);
+  let skillOut = null;
+  if (skill) {
+    await push("Skill", skill.name);
+    skillOut = await runSkill(skill, sha256hex);
+  }
   const hits = retrieve(userText, 6);
-  await push("Retrieve", hits.length ? hits.map(h => h.source + "(" + (h.score || 0).toFixed(2) + ")").join(", ") : "пусто");
-  let { answer, route } = composeInstant(userText, hits);
-  await push("Сборка", "instant · " + route);
-  if (engine && !/схем|диаграмм|архитектур|mermaid/.test(userText.toLowerCase())) {
+  await push("Retrieve", hits.length ? hits.map(h => h.source + "@" + (h.score || 0).toFixed(2)).join(", ") : "пусто");
+  let { answer, route, confidence } = composeInstant(userText, hits, skillOut);
+  await push("Compose", route + " · conf " + (confidence || 0).toFixed(2));
+  if (engine && !skill && !/схем|диаграмм|архитектур|mermaid/.test(userText.toLowerCase())) {
     try {
-      await push("WebLLM", "фоновое усиление");
+      await push("WebLLM", "optional");
       const context = hits.map(h => h.text).join("\n");
       const reply = await engine.chat.completions.create({
-        messages: [
-          { role: "system", content: SYSTEM + (context ? "\nCONTEXT:\n" + context : "") },
-          { role: "user", content: userText },
-        ],
-        temperature: 0.7,
-        max_tokens: 400,
+        messages: [{ role: "system", content: SYSTEM + (context ? "\nCONTEXT:\n" + context : "") }, { role: "user", content: userText }],
+        temperature: 0.65, max_tokens: 350,
       });
       const extra = reply.choices?.[0]?.message?.content || "";
-      if (extra && extra.length > 80) {
-        answer = answer + "\n\n—\nДополнение модели:\n" + extra;
-        route = route + "+llm";
-      }
+      if (extra.length > 80) { answer += "\n\n—\nWebLLM:\n" + extra; route += "+llm"; }
     } catch (_) {}
   }
   const finalSig = await signText(answer);
   const ms = Math.round(performance.now() - t0);
-  await push("Resonance", finalSig.sha256.slice(0, 20) + "… · " + ms + " ms");
-  return { answer, route, finalSig, ms };
+  await push("Resonance", finalSig.sha256.slice(0, 18) + "… · " + ms + "ms");
+  lastPackage = {
+    version: VERSION, did: DID, question: userText, answer, route, confidence, ms,
+    steps: steps.map(s => ({ title: s.title, detail: s.detail, sha256: s.sig?.sha256, signature: s.sig?.signature })),
+    final: finalSig,
+    sources: (hits || []).map(h => ({ source: h.source, score: h.score, preview: (h.text || "").slice(0, 120) })),
+    created_at: new Date().toISOString(),
+  };
+  return { answer, route, finalSig, ms, confidence };
 }
 
 async function loadModel() {
   if (modelLoading || engine) return !!engine;
   modelLoading = true;
-  bootMsg("WebLLM в фоне…", 5);
+  bootMsg("WebLLM…", 5);
   try {
     engine = await CreateMLCEngine("TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC", {
-      initProgressCallback: (r) => {
-        const p = Math.round((r.progress || 0) * 100);
-        bootMsg("модель " + p + "%", p);
-      },
+      initProgressCallback: (r) => bootMsg("модель " + Math.round((r.progress || 0) * 100) + "%", Math.round((r.progress || 0) * 100)),
     });
-    bootMsg("модель готова · чат уже был мгновенным");
+    bootMsg("модель on");
     return true;
-  } catch (e) {
-    engine = null;
-    bootMsg("мгновенный режим · модель пропущена");
-    return false;
-  } finally {
-    modelLoading = false;
-  }
+  } catch { engine = null; bootMsg("instant only"); return false; }
+  finally { modelLoading = false; }
 }
 
 function startVoice() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { addBubble("assistant", "Голос: Chrome или Edge.", "voice"); return; }
-  const rec = new SR();
-  rec.lang = "ru-RU";
+  if (!SR) { addBubble("assistant", "Голос: Chrome/Edge.", "voice"); return; }
+  const rec = new SR(); rec.lang = "ru-RU";
   rec.onresult = (ev) => { document.getElementById("inp").value = ev.results[0][0].transcript; send(); };
-  rec.start();
-  bootMsg("слушаю…");
+  rec.start(); bootMsg("слушаю…");
+}
+
+function exportProof() {
+  if (!lastPackage) { addBubble("assistant", "Нет ответа для proof.", "proof"); return; }
+  const blob = new Blob([JSON.stringify(lastPackage, null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = "aksi-proof-" + Date.now() + ".json"; a.click(); URL.revokeObjectURL(a.href);
+  addBubble("assistant", "Proof JSON скачан.", "proof");
+}
+async function verifyLast() {
+  if (!lastPackage?.final?.signature) { addBubble("assistant", "Нет подписи.", "verify"); return; }
+  const ok = await verifyText(lastPackage.answer, lastPackage.final.signature);
+  addBubble("assistant", ok ? "✅ Подпись верна (ECDSA P-256)." : "❌ Подпись не совпала.", "verify");
 }
 
 let busy = false;
@@ -357,69 +374,50 @@ async function send() {
   const inp = document.getElementById("inp");
   const text = (inp.value || "").trim();
   if (!text) return;
-  inp.value = "";
-  busy = true;
-  addBubble("user", text);
-  await saveMsg("user", text);
+  inp.value = ""; busy = true;
+  addBubble("user", text); await saveMsg("user", text);
   document.getElementById("side")?.classList.add("on");
   try {
-    const { answer, route, finalSig, ms } = await chat(text);
-    addBubble("assistant", answer, "instant · " + route + " · " + ms + " ms · sig " + (finalSig.sha256 || "").slice(0, 12));
-    await saveMsg("assistant", answer, { route, sig: finalSig, ms });
-    bootMsg("готово · " + ms + " ms · RAG " + ragChunks.length + (engine ? " · llm" : ""));
-  } catch (e) {
-    addBubble("assistant", "Ошибка: " + (e.message || e), "error");
-  } finally {
-    busy = false;
-  }
+    const { answer, route, finalSig, ms, confidence } = await chat(text);
+    addBubble("assistant", answer, "v4 · " + route + " · " + ms + "ms · conf " + (confidence || 0).toFixed(2) + " · " + (finalSig.sha256 || "").slice(0, 10));
+    await saveMsg("assistant", answer, { route, sig: finalSig, ms, confidence });
+    bootMsg("ok · " + ms + "ms · RAG " + ragChunks.length + (engine ? " · llm" : ""));
+  } catch (e) { addBubble("assistant", "Ошибка: " + (e.message || e), "error"); }
+  finally { busy = false; }
 }
 
 document.getElementById("send").onclick = send;
-document.getElementById("inp").addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-});
+document.getElementById("inp").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
 document.getElementById("btn-model").onclick = async () => {
   document.getElementById("boot").style.display = "flex";
   document.getElementById("boot").classList.remove("hide");
-  await loadModel();
-  hideBoot();
+  await loadModel(); hideBoot();
 };
 document.getElementById("btn-mic").onclick = startVoice;
-document.getElementById("file-input").onchange = async (e) => {
-  if (e.target.files?.length) await ingestFiles(e.target.files);
-  e.target.value = "";
-};
+document.getElementById("file-input").onchange = async (e) => { if (e.target.files?.length) await ingestFiles(e.target.files); e.target.value = ""; };
 document.getElementById("btn-clear").onclick = async () => {
-  await clearMsgs();
-  thread.innerHTML = "";
-  showThoughts([{ title: "очищено", detail: "Новый диалог." }]);
-  addBubble("assistant", "История очищена. Пишите — ответ сразу.", "system");
+  await clearMsgs(); thread.innerHTML = ""; lastPackage = null;
+  showThoughts([{ title: "clear", detail: "Новая сессия." }]);
+  addBubble("assistant", "Очищено. MATRIX 4.0 готов.", "system");
 };
-document.getElementById("btn-arch").onclick = () => {
-  document.getElementById("inp").value = "покажи схему архитектуры АКСИ";
-  send();
-};
-document.getElementById("btn-thoughts").onclick = () => {
-  document.getElementById("side")?.classList.toggle("on");
-};
+document.getElementById("btn-arch").onclick = () => { document.getElementById("inp").value = "покажи схему архитектуры АКСИ"; send(); };
+document.getElementById("btn-thoughts").onclick = () => { document.getElementById("side")?.classList.toggle("on"); };
+document.getElementById("btn-proof")?.addEventListener("click", exportProof);
+document.getElementById("btn-verify")?.addEventListener("click", verifyLast);
 
 (async () => {
   try {
-    bootMsg("Ключи…", 20);
-    await ensureKeys();
-    bootMsg("Память…", 50);
+    bootMsg("Ключи…", 25); await ensureKeys();
+    bootMsg("Память…", 55);
     const msgs = await loadMsgs(40);
     msgs.forEach((m) => addBubble(m.role === "user" ? "user" : "assistant", m.content));
     ragChunks = (await loadRag()).map((c) => ({ ...c, tf: c.tf || tf(tokenize(c.text || "")) }));
-    bootMsg("мгновенный режим готов", 100);
-    if (!msgs.length) {
-      addBubble("assistant", "АКСИ отвечает сразу из локальной онтологии и RAG. Тяжёлая модель — кнопка «Модель», без блокировки чата.\n\nСпросите что угодно или нажмите «Схема».", "system");
-    }
-    hideBoot();
-    bootMsg("instant · RAG " + ragChunks.length);
+    bootMsg("MATRIX 4.0", 100);
+    if (!msgs.length) addBubble("assistant", "MATRIX 4.0: instant, skills, proof, verify.\n\nПримеры: кто ты · покажи схему · uuid · hash привет · посчитай 15*8", "system");
+    hideBoot(); bootMsg("v4 · RAG " + ragChunks.length);
   } catch (e) {
-    bootMsg("ошибка старта", 100);
-    addBubble("assistant", "Старт с ошибкой, чат доступен: " + (e.message || e), "system");
+    bootMsg("error", 100);
+    addBubble("assistant", "Старт: " + (e.message || e), "system");
     hideBoot();
   }
 })();
