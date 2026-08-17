@@ -4,212 +4,258 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
-<meta name="description" content="АКСИ — суверенный локальный ИИ. Чат, память, RAG на вашем устройстве.">
+<meta name="description" content="АКСИ — суверенный ИИ с памятью и самообучением в браузере">
 <meta http-equiv="Cache-Control" content="no-cache">
-<title>АКСИ — суверенный ИИ</title>
+<title>АКСИ</title>
 <style>
-:root{
-  --bg:#0b1020;--card:rgba(30,41,59,.72);--line:rgba(148,163,184,.18);
-  --ink:#f1f5f9;--muted:#94a3b8;--acc:#8b5cf6;--acc2:#22d3ee;--ok:#34d399;
-}
+:root{--bg:#0b1020;--card:rgba(30,41,59,.75);--line:rgba(148,163,184,.2);--ink:#f8fafc;--muted:#94a3b8;--acc:#8b5cf6;--acc2:#22d3ee;--ok:#34d399}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
-body{
-  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-  background:radial-gradient(1200px 600px at 10% -10%,#1e1b4b 0%,transparent 55%),
-             radial-gradient(900px 500px at 100% 0%,#0e7490 0%,transparent 40%),
-             var(--bg);
-  color:var(--ink);display:flex;flex-direction:column;max-width:820px;margin:0 auto;
-}
-header{
-  padding:max(12px,env(safe-area-inset-top)) 16px 12px;
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  border-bottom:1px solid var(--line);backdrop-filter:blur(12px);
-  background:rgba(11,16,32,.65);position:sticky;top:0;z-index:20;
-}
-.brand{display:flex;align-items:center;gap:10px}
-.logo{
-  width:36px;height:36px;border-radius:12px;
-  background:linear-gradient(135deg,var(--acc),var(--acc2));
-  display:grid;place-items:center;font-weight:900;font-size:14px;color:#0b1020;
-  box-shadow:0 0 24px rgba(139,92,246,.45);
-}
-.brand h1{font-size:1.05rem;font-weight:800;letter-spacing:.02em}
-.brand small{display:block;color:var(--muted);font-size:11px;font-weight:500}
-#status{font-size:11px;color:var(--muted);text-align:right}
-.nav{
-  display:flex;gap:6px;overflow-x:auto;padding:10px 12px;
-  border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch;
-}
-.nav a,.nav button,.nav label{
-  flex:0 0 auto;text-decoration:none;color:var(--ink);
-  border:1px solid var(--line);background:var(--card);
-  border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;
-  backdrop-filter:blur(8px);cursor:pointer;min-height:38px;
-}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(1000px 500px at 0% -10%,#1e1b4b,transparent 50%),radial-gradient(800px 400px at 100% 0%,#0e749022,transparent),var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:840px;margin:0 auto}
+header{padding:max(12px,env(safe-area-inset-top)) 14px 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid var(--line);background:rgba(11,16,32,.7);backdrop-filter:blur(14px);position:sticky;top:0;z-index:30}
+.brand{display:flex;gap:10px;align-items:center}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;color:#0b1020;box-shadow:0 0 20px rgba(139,92,246,.4)}
+.brand h1{font-size:1.05rem;font-weight:800}
+.brand small{display:block;color:var(--muted);font-size:11px}
+#status{font-size:11px;color:var(--muted);text-align:right;max-width:48%}
+.nav{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;border-bottom:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.nav button,.nav a,.nav label{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 13px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;min-height:38px;backdrop-filter:blur(8px)}
 .nav button.on{background:linear-gradient(135deg,#7c3aed,#6366f1);border-color:transparent}
-.hero{
-  margin:14px 14px 0;padding:18px;border-radius:18px;
-  background:linear-gradient(145deg,rgba(139,92,246,.18),rgba(34,211,238,.08));
-  border:1px solid var(--line);
-}
-.hero h2{font-size:1.25rem;margin-bottom:6px}
-.hero p{color:var(--muted);font-size:14px;line-height:1.5}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.chips button{
-  border:1px solid var(--line);background:rgba(15,23,42,.5);color:var(--ink);
-  border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer;
-}
-#prog{display:none;margin:0 14px;padding:8px 12px;font-size:12px;color:var(--acc2)}
+.hero{margin:12px 12px 0;padding:16px;border-radius:16px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(139,92,246,.16),rgba(34,211,238,.06))}
+.hero h2{font-size:1.15rem;margin-bottom:4px}
+.hero p{color:var(--muted);font-size:13px;line-height:1.45}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chips button{border:1px solid var(--line);background:rgba(15,23,42,.55);color:var(--ink);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;cursor:pointer}
+#prog{display:none;padding:6px 14px;font-size:12px;color:var(--acc2)}
 #prog.on{display:block}
-#thread{flex:1;overflow-y:auto;padding:12px 14px 8px;-webkit-overflow-scrolling:touch}
-.msg{margin:0 0 12px;max-width:92%;animation:in .25s ease}
+#thread{flex:1;overflow-y:auto;padding:12px 14px;-webkit-overflow-scrolling:touch}
+.msg{margin:0 0 11px;max-width:92%;animation:in .2s ease}
 .msg.u{margin-left:auto}
-@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.b{
-  padding:13px 15px;border-radius:16px;font-size:15px;line-height:1.5;
-  white-space:pre-wrap;word-break:break-word;
-}
-.msg.u .b{background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border-bottom-right-radius:6px}
-.msg.a .b{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px;backdrop-filter:blur(8px)}
-.meta{font-size:10px;color:var(--muted);margin-top:4px;padding-left:4px}
-.composer{
-  display:flex;gap:8px;padding:10px 14px max(14px,env(safe-area-inset-bottom));
-  border-top:1px solid var(--line);background:rgba(11,16,32,.85);backdrop-filter:blur(12px);
-}
-#inp{
-  flex:1;min-height:48px;border-radius:14px;border:1px solid var(--line);
-  background:rgba(30,41,59,.8);color:var(--ink);padding:12px 14px;font-size:16px;outline:none;
-}
-#inp:focus{border-color:rgba(139,92,246,.6);box-shadow:0 0 0 3px rgba(139,92,246,.15)}
-#send{
-  width:52px;border:0;border-radius:14px;
-  background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;font-weight:800;font-size:18px;cursor:pointer;
-}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.b{padding:12px 14px;border-radius:16px;font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.u .b{background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;border-bottom-right-radius:5px}
+.msg.a .b{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px;backdrop-filter:blur(8px)}
+.meta{font-size:10px;color:var(--muted);margin-top:3px;padding-left:2px}
+.composer{display:flex;gap:8px;padding:10px 12px max(12px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:rgba(11,16,32,.88);backdrop-filter:blur(12px)}
+#inp{flex:1;min-height:48px;border-radius:14px;border:1px solid var(--line);background:rgba(30,41,59,.85);color:var(--ink);padding:12px 14px;font-size:16px;outline:none}
+#inp:focus{border-color:rgba(139,92,246,.55);box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+#send{width:52px;border:0;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#6366f1);color:#fff;font-weight:800;font-size:18px;cursor:pointer}
 #file{display:none}
-.footer{text-align:center;padding:6px 12px 10px;font-size:11px;color:var(--muted)}
+.drawer{display:none;border-top:1px solid var(--line);background:rgba(15,23,42,.95);max-height:40vh;overflow:auto;padding:12px}
+.drawer.on{display:block}
+.drawer h3{font-size:12px;color:var(--acc2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em}
+.fact{display:flex;gap:8px;align-items:flex-start;padding:8px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--card);font-size:13px}
+.fact button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:14px}
+.footer{text-align:center;padding:4px 10px 8px;font-size:10px;color:var(--muted)}
 .footer a{color:var(--acc2);text-decoration:none}
-@media(max-width:480px){
-  .hero h2{font-size:1.1rem}
-  .nav a,.nav button,.nav label{padding:8px 11px;font-size:11px}
-}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
     <div class="logo">А</div>
-    <div>
-      <h1>АКСИ</h1>
-      <small>суверенный локальный ИИ</small>
-    </div>
+    <div><h1>АКСИ</h1><small>память · обучение · локально</small></div>
   </div>
-  <div id="status">запуск…</div>
+  <div id="status">…</div>
 </header>
 
 <nav class="nav">
   <button type="button" id="btnLLM">✦ Нейросеть</button>
-  <button type="button" id="btnArch">Схема</button>
-  <label for="file">📁 Файл</label>
+  <button type="button" id="btnMem">Память</button>
+  <button type="button" id="btnLearn">Учить</button>
+  <label for="file">Файл</label>
   <input type="file" id="file" accept=".txt,.md,text/plain" multiple>
-  <button type="button" id="btnClear">Очистить</button>
-  <a href="/app/">Сеть</a>
+  <button type="button" id="btnClear">Очистить чат</button>
   <a href="/lab/">Lab</a>
-  <a href="/matrix/">Matrix</a>
+  <a href="/hub/">Карта</a>
 </nav>
 
 <section class="hero" id="hero">
-  <h2>Говорите с АКСИ прямо здесь</h2>
-  <p>Ответы на устройстве. Память диалога. Файлы как знания. Нейросеть — по желанию.</p>
+  <h2>АКСИ на связи</h2>
+  <p>Запоминает факты, учится из диалога, отвечает сразу. Всё на вашем устройстве.</p>
   <div class="chips">
     <button type="button" data-q="кто ты">Кто ты?</button>
-    <button type="button" data-q="покажи схему">Схема</button>
-    <button type="button" data-q="что умеешь">Что умеешь?</button>
-    <button type="button" data-q="память">Про память</button>
+    <button type="button" data-q="что ты помнишь">Что помнишь?</button>
+    <button type="button" data-q="запомни: мой любимый цвет синий">Пример «запомни»</button>
+    <button type="button" data-q="чему ты научилась">Чему научилась?</button>
   </div>
 </section>
 
 <div id="prog"></div>
 <div id="thread"></div>
 
-<div class="composer">
-  <input id="inp" type="text" placeholder="Напишите АКСИ…" enterkeyhint="send" autocomplete="off">
-  <button type="button" id="send" aria-label="Отправить">➤</button>
+<div class="drawer" id="drawer">
+  <h3>Память фактов</h3>
+  <div id="factList"></div>
+  <div style="display:flex;gap:6px;margin-top:8px">
+    <input id="factIn" placeholder="Новый факт…" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#1e293b;color:#fff;font-size:14px">
+    <button type="button" id="factAdd" style="padding:10px 14px;border:0;border-radius:10px;background:#7c3aed;color:#fff;font-weight:700">+</button>
+  </div>
 </div>
-<div class="footer">DID · <span id="did">did:aksi:ed25519:sovereign-2026</span> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></div>
+
+<div class="composer">
+  <input id="inp" type="text" placeholder="Спросите или: запомни …" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send">➤</button>
+</div>
+<div class="footer">DID did:aksi:ed25519:sovereign-2026 · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></div>
 
 <script>
 (function(){
 "use strict";
 var DID="did:aksi:ed25519:sovereign-2026";
-var DB="aksi_home_v3";
-var history=[],rag=[],busy=false,engine=null,loadingLLM=false;
+var DB="aksi_learn_v1";
+var history=[], facts=[], learned=[], rag=[], busy=false, engine=null, loadingLLM=false;
 
-var ONTOLOGY=[
-{t:"АКСИ — суверенный local-first ИИ: ответы и данные на вашем устройстве.",k:"акси aksi контур проект суверен что такое"},
-{t:"DID: did:aksi:ed25519:sovereign-2026. Контакт: aksilove@internet.ru. Apache-2.0.",k:"did идентич контакт email"},
-{t:"Главная страница: чат, память IndexedDB, RAG по файлам, WebLLM по кнопке.",k:"чат matrix webllm память главн"},
-{t:"Омега — серверный контур FastAPI + Ollama для своего сервера.",k:"омега omega fastapi ollama"},
-{t:"Сеть /app — агенты и лента. Lab, Matrix, quantum, studio — модули платформы.",k:"сеть агент lab matrix quantum"},
-{t:"RAG: кнопка «Файл» загружает .txt/.md — ответы по содержимому документов.",k:"rag файл документ"},
-{t:"Память: история хранится локально и восстанавливается после перезагрузки.",k:"память контекст история"}
+var CORE=[
+  {t:"АКСИ — суверенный local-first ИИ: данные и ответы на устройстве пользователя.",k:"акси aksi кто суверен"},
+  {t:"DID: did:aksi:ed25519:sovereign-2026. Контакт aksilove@internet.ru. Apache-2.0.",k:"did контакт email"},
+  {t:"Память: факты можно записывать командой «запомни …» или кнопкой Память.",k:"память запомни факт"},
+  {t:"Самообучение: АКСИ сохраняет полезные пары вопрос→ответ и учитывает их дальше.",k:"обучен науч учитс самоген"},
+  {t:"Нейросеть (WebLLM) включается кнопкой и использует историю + факты как контекст.",k:"нейросеть webllm модель"},
+  {t:"RAG: загрузите .txt/.md — фрагменты попадают в знания.",k:"rag файл документ"},
+  {t:"Модули: /lab крипто и агенты, /hub карта продукта, /app сеть.",k:"lab hub app модул"}
 ];
 
 function $(id){return document.getElementById(id)}
 function status(t){$("status").textContent=t}
 function prog(t){var p=$("prog");if(!t){p.className="";p.textContent="";return}p.textContent=t;p.className="on"}
+
 function addBubble(role,text,meta){
   var w=document.createElement("div");w.className="msg "+(role==="user"?"u":"a");
   var b=document.createElement("div");b.className="b";b.textContent=text;w.appendChild(b);
   if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;w.appendChild(m)}
   $("thread").appendChild(w);$("thread").scrollTop=1e9;
-  var h=$("hero");if(h&&history.length>1)h.style.display="none";
+  if(history.length>0)$("hero").style.display="none";
 }
 
-function openDB(){return new Promise(function(res,rej){try{var r=indexedDB.open(DB,1);r.onupgradeneeded=function(){var d=r.result;if(!d.objectStoreNames.contains("msgs"))d.createObjectStore("msgs",{keyPath:"id",autoIncrement:true});if(!d.objectStoreNames.contains("rag"))d.createObjectStore("rag",{keyPath:"id",autoIncrement:true})};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}}catch(e){rej(e)}})}
+function openDB(){return new Promise(function(res,rej){try{var r=indexedDB.open(DB,1);r.onupgradeneeded=function(){var d=r.result;["msgs","facts","learned","rag"].forEach(function(n){if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:"id",autoIncrement:true})})};r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)}}catch(e){rej(e)}})}
 function idbAdd(store,val){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(store,"readwrite");tx.objectStore(store).add(val);tx.oncomplete=function(){res()};tx.onerror=function(){rej(tx.error)}})})}
-function idbAll(store){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(store,"readonly");var q=tx.objectStore(store).getAll();q.onsuccess=function(){res(q.result||[])};q.onerror=function(){rej(q.error)}})})}
+function idbAll(store){return openDB().then(function(db){return new Promise(function(res,rej){var q=db.transaction(store,"readonly").objectStore(store).getAll();q.onsuccess=function(){res(q.result||[])};q.onerror=function(){rej(q.error)}})})}
 function idbClear(store){return openDB().then(function(db){return new Promise(function(res,rej){var tx=db.transaction(store,"readwrite");tx.objectStore(store).clear();tx.oncomplete=function(){res()};tx.onerror=function(){rej(tx.error)}})})}
 
-function score(q,text,keys){var low=q.toLowerCase(),n=0,tlow=(text||"").toLowerCase();low.split(/\s+/).forEach(function(p){if(p&&tlow.indexOf(p)>=0)n++});(keys||"").split(/\s+/).forEach(function(k){if(k&&low.indexOf(k)>=0)n+=2});return n}
-function retrieve(q){var hits=[];ONTOLOGY.forEach(function(r){var s=score(q,r.t,r.k);if(s>0)hits.push({text:r.t,score:s})});rag.forEach(function(r){var s=score(q,r.text||"","");if(s>0)hits.push({text:r.text,score:s})});hits.sort(function(a,b){return b.score-a.score});return hits.slice(0,6)}
+function score(q,text,keys){var low=q.toLowerCase(),n=0,t=(text||"").toLowerCase();low.split(/\s+/).forEach(function(p){if(p.length>1&&t.indexOf(p)>=0)n++});(keys||"").split(/\s+/).forEach(function(k){if(k&&low.indexOf(k)>=0)n+=2});return n}
+
+function allKnowledge(){
+  var list=[];
+  CORE.forEach(function(c){list.push({text:c.t,keys:c.k,src:"core"})});
+  facts.forEach(function(f){list.push({text:f.text,keys:"",src:"fact"})});
+  learned.forEach(function(l){list.push({text:"Q: "+l.q+" → A: "+l.a,keys:"",src:"learn",q:l.q,a:l.a})});
+  rag.forEach(function(r){list.push({text:r.text,keys:"",src:"file"})});
+  return list;
+}
+
+function retrieve(q){
+  var hits=[];
+  allKnowledge().forEach(function(k){
+    var s=score(q,k.text+(k.q||""),k.keys);
+    if(k.q&&q.toLowerCase().indexOf(k.q.toLowerCase().slice(0,20))>=0)s+=3;
+    if(s>0)hits.push({text:k.a||k.text,score:s,src:k.src});
+  });
+  hits.sort(function(a,b){return b.score-a.score});
+  return hits.slice(0,8);
+}
+
+function saveFact(text){
+  text=(text||"").trim();
+  if(text.length<3)return Promise.resolve(false);
+  var item={text:text,ts:Date.now()};
+  facts.push(item);
+  return idbAdd("facts",item).then(function(){renderFacts();return true}).catch(function(){return true});
+}
+
+function renderFacts(){
+  var box=$("factList");
+  if(!facts.length){box.innerHTML="<p style='color:#94a3b8;font-size:13px'>Пока пусто. Напишите «запомни: …» или добавьте ниже.</p>";return}
+  box.innerHTML=facts.slice().reverse().map(function(f,i){
+    var idx=facts.length-1-i;
+    return "<div class='fact'><span style='flex:1'>"+esc(f.text)+"</span><button type='button' data-del='"+idx+"' title='удалить'>×</button></div>";
+  }).join("");
+  box.querySelectorAll("[data-del]").forEach(function(btn){
+    btn.onclick=function(){
+      var i=+btn.getAttribute("data-del");
+      facts.splice(i,1);
+      idbClear("facts").then(function(){
+        return Promise.all(facts.map(function(f){return idbAdd("facts",f)}));
+      }).then(renderFacts);
+    };
+  });
+}
+function esc(s){return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">")}
+
+function tryLearn(q,a){
+  if(!q||!a||a.length<20||a.length>600)return;
+  if(/ошибк|не загрузил|мало данных/i.test(a))return;
+  if(/запомни/i.test(q))return;
+  var item={q:q.slice(0,200),a:a.slice(0,500),ts:Date.now()};
+  var exists=learned.some(function(l){return l.q===item.q});
+  if(exists)return;
+  learned.push(item);
+  if(learned.length>80)learned=learned.slice(-80);
+  idbAdd("learned",item).catch(function(){});
+}
+
+function parseRemember(q){
+  var m=q.match(/^(?:запомни|запомнить|remember)\s*[:\-–]?\s*(.+)$/i);
+  return m?m[1].trim():null;
+}
 
 function instantReply(q,hits){
   var low=q.toLowerCase();
-  if(/привет|здравств|добрый|hello/.test(low))return "Здравствуйте. Я АКСИ — на связи прямо на этой странице.\n\nПамять включена. Можно нажать «Нейросеть» или загрузить файл.";
-  if(/кто ты|что ты|представь/.test(low))return "Я АКСИ — суверенный локальный ассистент.\n\nDID: "+DID+"\n\n• ответы на устройстве\n• память диалога\n• знания из ваших файлов\n• WebLLM по кнопке «Нейросеть»\n\nКонтакт: aksilove@internet.ru";
-  if(/схем|архитектур|покажи схему/.test(low))return "Как устроена АКСИ здесь:\n\n1. Вы пишете вопрос\n2. Поиск по знаниям + файлам + истории\n3. Ответ сразу или через нейросеть\n4. Всё сохраняется локально\n\nМодули: /app · /lab · /matrix";
-  if(/помощ|умеешь|что можешь|команд/.test(low))return "Могу:\n• отвечать про проект АКСИ\n• помнить наш разговор\n• читать ваши .txt/.md\n• включить нейросеть в браузере\n\nСпросите что угодно про контур.";
-  if(/памят|контекст|помни/.test(low))return "Память работает в IndexedDB. Сейчас сообщений: "+history.length+".\nПосле обновления страницы история подтянется снова.";
-  if(hits.length&&hits[0].score>=2)return "По знаниям:\n\n"+hits.slice(0,4).map(function(h,i){return (i+1)+". "+h.text}).join("\n");
-  if(history.length>=2)return "Уточните, пожалуйста. В диалоге уже "+history.length+" сообщений. Можно включить «Нейросеть».";
-  return "Пока мало данных. Нажмите подсказку выше или спросите «кто ты».";
+  var rem=parseRemember(q);
+  if(rem){
+    saveFact(rem);
+    return "Записала в память:\n«"+rem+"»\n\nВсего фактов: "+facts.length+". Спросите «что ты помнишь».";
+  }
+  if(/привет|здравств|добрый|hello/.test(low))return "Здравствуйте. Я АКСИ.\n\nМогу запоминать факты («запомни: …»), учиться из диалога и отвечать по вашим файлам.";
+  if(/кто ты|что ты|представь/.test(low))return "Я АКСИ — локальный ассистент на этой странице.\n\nDID: "+DID+"\nФактов в памяти: "+facts.length+"\nВыученных пар: "+learned.length+"\nФайловых фрагментов: "+rag.length+"\n\nПишите «запомни: …» — сохраню.";
+  if(/что ты помнишь|покажи память|факты/.test(low)){
+    if(!facts.length&&!learned.length)return "Память фактов пока пуста. Напишите:\nзапомни: мне важно …";
+    var lines=[];
+    facts.slice(-12).forEach(function(f,i){lines.push((i+1)+". "+f.text)});
+    if(learned.length)lines.push("— выучено пар: "+learned.length);
+    return "В памяти:\n"+lines.join("\n");
+  }
+  if(/чему ты науч|чему науч|самообуч|выучил/.test(low)){
+    if(!learned.length)return "Пока мало самообученных пар. После нескольких осмысленных диалогов они появятся.";
+    return "Последние выученные связки:\n"+learned.slice(-5).map(function(l,i){return (i+1)+". «"+l.q.slice(0,60)+"» → «"+l.a.slice(0,80)+"…»"}).join("\n");
+  }
+  if(/схем|архитектур|как устроен/.test(low))return "Схема:\n1. Вопрос\n2. Поиск: факты + выученное + файлы + ядро\n3. Ответ (мгновенный или нейросеть)\n4. При полезном ответе — самообучение (пара Q→A)\n5. «запомни:» — явная запись факта";
+  if(/помощ|умеешь|что можешь/.test(low))return "• запомни: факт\n• что ты помнишь\n• чему научилась\n• загрузка файлов\n• нейросеть (кнопка)\n• обычные вопросы про АКСИ";
+  for(var i=0;i<learned.length;i++){
+    if(score(q,learned[i].q,"")>=3)return learned[i].a+"\n\n(из выученного)";
+  }
+  if(hits.length&&hits[0].score>=2){
+    return "По знаниям:\n\n"+hits.slice(0,5).map(function(h,i){return (i+1)+". ["+h.src+"] "+h.text}).join("\n");
+  }
+  if(history.length>=2)return "Уточните вопрос. В диалоге "+history.length+" реплик, фактов "+facts.length+". Можно: запомни: …";
+  return "Мало данных. Напишите «запомни: …» или спросите «кто ты».";
 }
 
 function buildMessages(userText,hits){
-  var sys="Ты — АКСИ, суверенный локальный ассистент. Отвечай по-русски, ясно и по делу. DID: "+DID+".";
-  if(hits.length)sys+="\nФакты:\n"+hits.map(function(h){return "- "+h.text}).join("\n");
+  var sys="Ты АКСИ — суверенный локальный ассистент. Отвечай по-русски, ясно. Учитывай FACTS. DID: "+DID+".";
+  if(facts.length)sys+="\nFACTS:\n"+facts.slice(-15).map(function(f){return "- "+f.text}).join("\n");
+  if(hits.length)sys+="\nCONTEXT:\n"+hits.slice(0,4).map(function(h){return "- "+h.text}).join("\n");
   var msgs=[{role:"system",content:sys}];
-  history.slice(-12).forEach(function(m){msgs.push({role:m.role==="user"?"user":"assistant",content:m.content})});
+  history.slice(-10).forEach(function(m){msgs.push({role:m.role==="user"?"user":"assistant",content:m.content})});
   msgs.push({role:"user",content:userText});
   return msgs;
 }
 
 function loadLLM(){
   if(engine||loadingLLM)return;
-  loadingLLM=true;$("btnLLM").disabled=true;prog("Загрузка нейросети…");status("модель…");
+  loadingLLM=true;$("btnLLM").disabled=true;prog("Загрузка нейросети…");
   var s=document.createElement("script");s.type="module";
   s.textContent="import { CreateMLCEngine } from 'https://esm.run/@mlc-ai/web-llm';\nwindow.__aksiEng=async function(cb){return CreateMLCEngine('TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC',{initProgressCallback:cb})};\nwindow.dispatchEvent(new Event('aksi-ready'));";
-  function fail(msg){engine=null;loadingLLM=false;$("btnLLM").disabled=false;prog("");status("локально");addBubble("assistant","Нейросеть не загрузилась: "+msg+"\n\nЧат и память работают как раньше.","err")}
+  function fail(m){engine=null;loadingLLM=false;$("btnLLM").disabled=false;prog("");status("локально");addBubble("assistant","Нейросеть недоступна: "+m+"\nЧат, память и обучение работают.","err")}
   window.addEventListener("aksi-ready",function(){
-    if(typeof window.__aksiEng!=="function"){fail("модуль не готов");return}
-    window.__aksiEng(function(r){var p=Math.round((r.progress||0)*100);prog("Модель "+p+"%");status("модель "+p+"%")}).then(function(eng){
-      engine=eng;$("btnLLM").className="on";$("btnLLM").textContent="✦ Нейросеть ✓";prog("");status("webllm · "+history.length);
-      addBubble("assistant","Нейросеть готова. Следующие ответы будут с учётом всего диалога.","webllm");
-      loadingLLM=false;$("btnLLM").disabled=false;
+    if(typeof window.__aksiEng!=="function"){fail("модуль");return}
+    window.__aksiEng(function(r){prog("Модель "+Math.round((r.progress||0)*100)+"%")}).then(function(eng){
+      engine=eng;$("btnLLM").className="on";$("btnLLM").textContent="✦ Нейросеть ✓";prog("");
+      addBubble("assistant","Нейросеть готова. Учитываю факты и историю.","webllm");
+      loadingLLM=false;$("btnLLM").disabled=false;status("webllm · "+facts.length+" фактов");
     }).catch(function(e){fail(e.message||e)});
   },{once:true});
-  s.onerror=function(){fail("сеть / CDN")};document.head.appendChild(s);
+  s.onerror=function(){fail("CDN")};document.head.appendChild(s);
 }
 
 function send(q0){
@@ -222,39 +268,68 @@ function send(q0){
   history.push({role:"user",content:q});
   idbAdd("msgs",{role:"user",content:q,ts:Date.now()}).catch(function(){});
   var t0=Date.now(),hits=retrieve(q);
+
   function done(text,mode){
-    var ms=Date.now()-t0;prog("");
+    var ms=Date.now()-t0;
     addBubble("assistant",text,mode+" · "+ms+"ms");
     history.push({role:"assistant",content:text});
     idbAdd("msgs",{role:"assistant",content:text,ts:Date.now()}).catch(function(){});
-    status((engine?"webllm":"локально")+" · "+history.length+" сообщ.");busy=false;
+    tryLearn(q,text);
+    status((engine?"webllm":"локально")+" · фактов "+facts.length+" · выучено "+learned.length);
+    busy=false;prog("");
   }
+
+  if(parseRemember(q)){done(instantReply(q,hits),"память");return}
+
   if(engine){
-    status("думаю…");prog("Нейросеть + контекст");
-    engine.chat.completions.create({messages:buildMessages(q,hits),temperature:0.7,max_tokens:512}).then(function(r){
+    status("думаю…");prog("нейросеть + память");
+    engine.chat.completions.create({messages:buildMessages(q,hits),temperature:0.65,max_tokens:480}).then(function(r){
       var t=((r.choices&&r.choices[0]&&r.choices[0].message&&r.choices[0].message.content)||"").trim();
       if(!t||t.length<4)t=instantReply(q,hits);
       done(t,"webllm");
-    }).catch(function(e){done(instantReply(q,hits)+"\n\n("+ (e.message||e)+")","fallback")});
+    }).catch(function(e){done(instantReply(q,hits),"fallback")});
   }else done(instantReply(q,hits),"быстро");
 }
 
 $("send").onclick=function(){send()};
 $("inp").onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();send()}};
 $("btnLLM").onclick=loadLLM;
-$("btnArch").onclick=function(){send("покажи схему")};
-$("btnClear").onclick=function(){history=[];idbClear("msgs").catch(function(){});$("thread").innerHTML="";$("hero").style.display="";addBubble("assistant","Память очищена. Можно начать заново.","sys");status(engine?"webllm · 0":"локально")};
-$("file").onchange=function(e){var files=e.target.files;if(!files)return;var left=files.length;Array.prototype.forEach.call(files,function(f){var r=new FileReader();r.onload=function(){var t=String(r.result||"");for(var i=0;i<t.length;i+=450){var c=t.slice(i,i+450);if(c.trim().length<20)continue;var item={source:f.name,text:c,ts:Date.now()};rag.push(item);idbAdd("rag",item).catch(function(){})}left--;if(left<=0)addBubble("assistant","Файлы в знаниях: "+rag.length+" фрагментов. Спрашивайте по ним.","rag")};r.readAsText(f)});e.target.value=""};
-document.querySelectorAll(".chips button").forEach(function(btn){btn.onclick=function(){send(btn.getAttribute("data-q"))}});
+$("btnMem").onclick=function(){$("drawer").classList.toggle("on");renderFacts()};
+$("btnLearn").onclick=function(){send("чему ты научилась")};
+$("btnClear").onclick=function(){
+  history=[];idbClear("msgs").catch(function(){});
+  $("thread").innerHTML="";$("hero").style.display="";
+  addBubble("assistant","Чат очищен. Факты и выученное сохранены.","sys");
+};
+$("factAdd").onclick=function(){var t=$("factIn").value;if(!t.trim())return;$("factIn").value="";saveFact(t.trim()).then(function(){addBubble("assistant","Факт сохранён: «"+t.trim()+"»","память")})};
+$("file").onchange=function(e){
+  var files=e.target.files;if(!files)return;var left=files.length;
+  Array.prototype.forEach.call(files,function(f){
+    var r=new FileReader();
+    r.onload=function(){
+      var t=String(r.result||"");
+      for(var i=0;i<t.length;i+=450){
+        var c=t.slice(i,i+450);if(c.trim().length<20)continue;
+        var item={text:c,source:f.name,ts:Date.now()};rag.push(item);idbAdd("rag",item).catch(function(){});
+      }
+      left--;if(left<=0)addBubble("assistant","В знаниях из файлов: "+rag.length+" фрагментов.","rag");
+    };
+    r.readAsText(f);
+  });
+  e.target.value="";
+};
+document.querySelectorAll(".chips button").forEach(function(b){b.onclick=function(){send(b.getAttribute("data-q"))}});
 
 Promise.resolve().then(function(){return idbAll("msgs")}).then(function(msgs){
   (msgs||[]).slice(-40).forEach(function(m){history.push({role:m.role==="user"?"user":"assistant",content:m.content});addBubble(m.role==="user"?"user":"assistant",m.content)});
-  return idbAll("rag");
-}).then(function(rows){
-  rag=rows||[];
-  if(!history.length)addBubble("assistant","Добро пожаловать.\n\nНапишите вопрос или нажмите подсказку выше — отвечу сразу.","sys");
-  status("локально · "+history.length+" · RAG "+rag.length);
-}).catch(function(){addBubble("assistant","АКСИ готов. Пишите.","sys");status("локально")});
+  return idbAll("facts");
+}).then(function(f){facts=f||[];return idbAll("learned")}).then(function(l){
+  learned=l||[];return idbAll("rag");
+}).then(function(r){
+  rag=r||[];
+  if(!history.length)addBubble("assistant","Добро пожаловать.\n\n• «запомни: …» — запись в память\n• «что ты помнишь» — список фактов\n• диалог — самообучение пар Q→A\n\nВсё локально в браузере.","sys");
+  status("локально · фактов "+facts.length+" · выучено "+learned.length);
+}).catch(function(){addBubble("assistant","АКСИ готова.","sys");status("локально")});
 })();
 </script>
 </body>
