@@ -44,12 +44,13 @@ code{font-size:12px;background:var(--card);padding:2px 6px;border-radius:6px}
 <div class="bar">
   <button type="button" data-q="кто ты">Кто ты?</button>
   <button type="button" data-q="что умеешь">Возможности</button>
-  <button type="button" data-q="помощь">Помощь</button>
+  <button type="button" data-q="аттестат">Аттестат Grok</button>
   <button type="button" data-q="покажи запутанность">Запутанность</button>
   <button type="button" id="btnClear">Очистить</button>
   <button type="button" id="btnTheme">Тема</button>
   <button type="button" id="btnSettings">Настройки</button>
   <button type="button" id="btnExport">Экспорт</button>
+  <a href="/proof/">Proof</a>
   <a href="/">Главная</a>
 </div>
 <div id="prog"></div>
@@ -66,7 +67,7 @@ code{font-size:12px;background:var(--card);padding:2px 6px;border-radius:6px}
     <button type="button" class="btn" id="btnProbe" style="background:var(--acc2)">Проверить backend</button>
   </div>
   <p style="margin-top:10px;color:var(--muted);font-size:12px">
-    Запуск LLM: <code>cd backend && ./start.sh</code> → URL <code>http://127.0.0.1:8000</code>
+    Запуск LLM: <code>cd backend && ./start.sh</code> → <code>http://127.0.0.1:8000</code>
   </p>
 </div>
 <div id="thread" role="log" aria-live="polite"></div>
@@ -74,14 +75,15 @@ code{font-size:12px;background:var(--card);padding:2px 6px;border-radius:6px}
   <input id="inp" type="text" placeholder="Вопрос по-русски…" enterkeyhint="send" autocomplete="off">
   <button type="button" id="send" aria-label="Отправить">➤</button>
 </div>
-<script src="/aksi-core.js?v=12"></script>
-<script src="/aksi-product-core.js?v=12"></script>
+<script src="/aksi-core.js?v=13"></script>
+<script src="/aksi-product-core.js?v=13"></script>
+<script src="/aksi-product-boost.js?v=13"></script>
 <script>
 (function(){
   "use strict";
   var thread=document.getElementById("thread"), inp=document.getElementById("inp");
   var statusEl=document.getElementById("status"), prog=document.getElementById("prog");
-  var CHAT_KEY="aksi_chat_ui_v12";
+  var CHAT_KEY="aksi_chat_ui_v13";
   function setStatus(t,ok){statusEl.textContent=t;statusEl.className=ok?"ok":"";}
   function showProg(t){if(!t){prog.classList.remove("on");prog.textContent="";return;}prog.textContent=t;prog.classList.add("on");}
   function addMsg(role,text,steps,meta){
@@ -142,7 +144,7 @@ code{font-size:12px;background:var(--card);padding:2px 6px;border-radius:6px}
   AksiProduct.init().then(function(info){
     var base="готова"+(info.ed25519?" · Ed25519":" · SHA");
     setStatus(base,true);
-    if(!restore()) addMsg("a","Здравствуйте. Я АКСИ — суверенный локальный помощник.\n\nДанные по умолчанию остаются на устройстве.\nНапишите вопрос или нажмите «Возможности».");
+    if(!restore()) addMsg("a","Здравствуйте. Я АКСИ.\n\nОтвечаю сразу offline. Спросите «аттестат» про Grok, откройте /proof для подписи.\nДанные остаются на устройстве.");
     return AksiProduct.autoConnectLocal().then(function(b){
       if(b&&b.ok){setStatus(base+" · LLM",true);addMsg("a","Локальный backend подключён"+(b.model?" ("+b.model+")":"")+".");}
     });
