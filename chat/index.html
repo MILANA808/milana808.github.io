@@ -4,17 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
-<meta name="description" content="АКСИ — суверенный локальный чат. Offline-first.">
 <title>АКСИ — чат</title>
 <style>
 :root{--bg:#0b1220;--panel:#111827;--card:#1a2332;--line:#243044;--ink:#e8eef7;--muted:#94a3b8;--acc:#8b5cf6;--acc2:#3b82f6;--ok:#34d399}
 [data-theme="light"]{--bg:#f1f5f9;--panel:#fff;--card:#fff;--line:#e2e8f0;--ink:#0f172a;--muted:#64748b;--acc:#7c3aed;--acc2:#2563eb;--ok:#059669}
 *{box-sizing:border-box;margin:0}html,body{height:100%}
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:800px;margin:0 auto}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;max-width:800px;margin:0 auto}
 header{display:flex;align-items:center;gap:12px;padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));border-bottom:1px solid var(--line);background:var(--panel)}
-.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;color:#fff;font-size:18px}
-h1{font-size:1.15rem;font-weight:800}
-.sub{font-size:12px;color:var(--muted)}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;color:#fff}
+h1{font-size:1.15rem;font-weight:800}.sub{font-size:12px;color:var(--muted)}
 #status{margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}#status.ok{color:var(--ok)}
 .bar{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
 .bar button,.bar a{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none}
@@ -29,11 +27,12 @@ h1{font-size:1.15rem;font-weight:800}
 .msg .b{padding:12px 14px;border-radius:16px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .msg.u .b{background:linear-gradient(135deg,var(--acc),#4f46e5);color:#fff;border-bottom-right-radius:6px}
 .msg.a .b{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
-.thought{margin-top:6px;padding:8px 10px;border-radius:10px;border:1px dashed var(--line);font-size:12px;color:var(--muted);line-height:1.4}
+.thought{margin-top:6px;padding:8px 10px;border-radius:10px;border:1px dashed var(--line);font-size:12px;color:var(--muted)}
 .meta{font-size:11px;color:var(--muted);margin-top:5px;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
 .composer{display:flex;gap:8px;padding:12px 16px max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--panel)}
 #inp{flex:1;min-height:48px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:16px;background:var(--card);color:var(--ink)}
 #send{width:50px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#fff;font-weight:800;font-size:18px;cursor:pointer}
+code{font-size:12px;background:var(--card);padding:2px 6px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -56,134 +55,97 @@ h1{font-size:1.15rem;font-weight:800}
 <div id="prog"></div>
 <div class="drawer" id="settings">
   <strong>Суверенитет и backend</strong>
-  <label>Backend URL (OpenAI-compatible)</label>
+  <label>Backend URL (локальный Ollama-мост)</label>
   <input type="url" id="backendUrl" placeholder="http://127.0.0.1:8000" autocomplete="off">
   <div class="row">
     <label><input type="checkbox" id="llmEnabled"> Использовать LLM</label>
     <label><input type="checkbox" id="offlineOnly"> Только офлайн</label>
   </div>
-  <div class="row"><button type="button" class="btn" id="btnSaveCfg">Сохранить</button></div>
-  <p style="margin-top:10px;color:var(--muted);font-size:12px">По умолчанию ответы локальные. Backend — только ваш сервер.</p>
+  <div class="row">
+    <button type="button" class="btn" id="btnSaveCfg">Сохранить</button>
+    <button type="button" class="btn" id="btnProbe" style="background:var(--acc2)">Проверить backend</button>
+  </div>
+  <p style="margin-top:10px;color:var(--muted);font-size:12px">
+    Запуск LLM: <code>cd backend && ./start.sh</code> → URL <code>http://127.0.0.1:8000</code>
+  </p>
 </div>
 <div id="thread" role="log" aria-live="polite"></div>
 <div class="composer">
   <input id="inp" type="text" placeholder="Вопрос по-русски…" enterkeyhint="send" autocomplete="off">
   <button type="button" id="send" aria-label="Отправить">➤</button>
 </div>
-<script src="/aksi-core.js"></script>
-<script src="/aksi-product-core.js"></script>
+<script src="/aksi-core.js?v=12"></script>
+<script src="/aksi-product-core.js?v=12"></script>
 <script>
-(function () {
+(function(){
   "use strict";
-  var thread = document.getElementById("thread");
-  var inp = document.getElementById("inp");
-  var statusEl = document.getElementById("status");
-  var prog = document.getElementById("prog");
-  var CHAT_KEY = "aksi_chat_ui_v11";
-  function setStatus(t, ok) { statusEl.textContent = t; statusEl.className = ok ? "ok" : ""; }
-  function showProg(t) {
-    if (!t) { prog.classList.remove("on"); prog.textContent = ""; return; }
-    prog.textContent = t; prog.classList.add("on");
+  var thread=document.getElementById("thread"), inp=document.getElementById("inp");
+  var statusEl=document.getElementById("status"), prog=document.getElementById("prog");
+  var CHAT_KEY="aksi_chat_ui_v12";
+  function setStatus(t,ok){statusEl.textContent=t;statusEl.className=ok?"ok":"";}
+  function showProg(t){if(!t){prog.classList.remove("on");prog.textContent="";return;}prog.textContent=t;prog.classList.add("on");}
+  function addMsg(role,text,steps,meta){
+    var div=document.createElement("div");div.className="msg "+(role==="u"?"u":"a");
+    var html='<div class="b">'+AksiProduct.esc(text)+"</div>";
+    if(steps&&steps.length) html+='<div class="thought">💭 '+AksiProduct.esc(steps.join(" → "))+"</div>";
+    if(meta) html+='<div class="meta">'+AksiProduct.esc(meta)+"</div>";
+    div.innerHTML=html;thread.appendChild(div);thread.scrollTop=thread.scrollHeight;persist();
   }
-  function addMsg(role, text, steps, meta) {
-    var div = document.createElement("div");
-    div.className = "msg " + (role === "u" ? "u" : "a");
-    var html = '<div class="b">' + AksiProduct.esc(text) + "</div>";
-    if (steps && steps.length) html += '<div class="thought">💭 ' + AksiProduct.esc(steps.join(" → ")) + "</div>";
-    if (meta) html += '<div class="meta">' + AksiProduct.esc(meta) + "</div>";
-    div.innerHTML = html;
-    thread.appendChild(div);
-    thread.scrollTop = thread.scrollHeight;
-    persist();
-  }
-  function persist() {
-    try {
-      var items = [];
-      thread.querySelectorAll(".msg").forEach(function (m) {
-        var b = m.querySelector(".b"); if (!b) return;
-        items.push({ role: m.classList.contains("u") ? "u" : "a", text: b.textContent });
-      });
-      localStorage.setItem(CHAT_KEY, JSON.stringify(items.slice(-80)));
-    } catch (e) {}
-  }
-  function restore() {
-    try {
-      var items = JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
-      if (!items.length) return false;
-      items.forEach(function (it) {
-        var div = document.createElement("div");
-        div.className = "msg " + (it.role === "u" ? "u" : "a");
-        div.innerHTML = '<div class="b">' + AksiProduct.esc(it.text) + "</div>";
-        thread.appendChild(div);
-      });
-      thread.scrollTop = thread.scrollHeight;
-      return true;
-    } catch (e) { return false; }
-  }
-  function send(text) {
-    text = (text || inp.value || "").trim();
-    if (!text) return;
-    inp.value = "";
-    addMsg("u", text);
-    showProg("Думаю…");
-    setStatus("думаю");
-    AksiProduct.answer(text).then(function (res) {
+  function persist(){try{var items=[];thread.querySelectorAll(".msg").forEach(function(m){var b=m.querySelector(".b");if(!b)return;items.push({role:m.classList.contains("u")?"u":"a",text:b.textContent});});localStorage.setItem(CHAT_KEY,JSON.stringify(items.slice(-80)));}catch(e){}}
+  function restore(){try{var items=JSON.parse(localStorage.getItem(CHAT_KEY)||"[]");if(!items.length)return false;items.forEach(function(it){var div=document.createElement("div");div.className="msg "+(it.role==="u"?"u":"a");div.innerHTML='<div class="b">'+AksiProduct.esc(it.text)+"</div>";thread.appendChild(div);});thread.scrollTop=thread.scrollHeight;return true;}catch(e){return false;}}
+  function send(text){
+    text=(text||inp.value||"").trim();if(!text)return;inp.value="";addMsg("u",text);showProg("Думаю…");setStatus("думаю");
+    AksiProduct.answer(text).then(function(res){
       showProg(null);
-      if (res.clearChat) { thread.innerHTML = ""; try { localStorage.removeItem(CHAT_KEY); } catch (e) {} }
-      var sig = res.signature || {};
-      var meta = (sig.algo || "?") + " " + String(sig.sig || "").slice(0, 20) + "… · " + (res.source || "local") + (sig.realCrypto ? " · Ed25519" : "");
-      addMsg("a", res.text, res.steps, meta);
-      setStatus("готова", true);
-    }).catch(function (e) {
-      showProg(null);
-      addMsg("a", "Ошибка: " + (e && e.message ? e.message : e));
-      setStatus("ошибка");
-    });
+      if(res.clearChat){thread.innerHTML="";try{localStorage.removeItem(CHAT_KEY);}catch(e){}}
+      var sig=res.signature||{};
+      var meta=(sig.algo||"?")+" "+String(sig.sig||"").slice(0,20)+"… · "+(res.source||"local")+(sig.realCrypto?" · Ed25519":"");
+      addMsg("a",res.text,res.steps,meta);setStatus("готова",true);
+    }).catch(function(e){showProg(null);addMsg("a","Ошибка: "+(e&&e.message?e.message:e));setStatus("ошибка");});
   }
-  document.getElementById("send").onclick = function () { send(); };
-  inp.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-  });
-  document.querySelectorAll("[data-q]").forEach(function (b) {
-    b.onclick = function () { send(b.getAttribute("data-q")); };
-  });
-  document.getElementById("btnClear").onclick = function () {
-    thread.innerHTML = ""; try { localStorage.removeItem(CHAT_KEY); } catch (e) {}
-    AksiProduct.clearSession(); addMsg("a", "Чат очищен.");
-  };
-  document.getElementById("btnTheme").onclick = function () {
-    var cur = document.documentElement.getAttribute("data-theme");
-    document.documentElement.setAttribute("data-theme", cur === "light" ? "" : "light");
-  };
-  document.getElementById("btnSettings").onclick = function () {
+  document.getElementById("send").onclick=function(){send();};
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
+  document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){send(b.getAttribute("data-q"));};});
+  document.getElementById("btnClear").onclick=function(){thread.innerHTML="";try{localStorage.removeItem(CHAT_KEY);}catch(e){}AksiProduct.clearSession();addMsg("a","Чат очищен.");};
+  document.getElementById("btnTheme").onclick=function(){var cur=document.documentElement.getAttribute("data-theme");document.documentElement.setAttribute("data-theme",cur==="light"?"":"light");};
+  document.getElementById("btnSettings").onclick=function(){
     document.getElementById("settings").classList.toggle("on");
-    var c = AksiProduct.getConfig();
-    document.getElementById("backendUrl").value = c.backendUrl || "";
-    document.getElementById("llmEnabled").checked = !!c.llmEnabled;
-    document.getElementById("offlineOnly").checked = !!c.offlineOnly;
+    var c=AksiProduct.getConfig();
+    document.getElementById("backendUrl").value=c.backendUrl||"";
+    document.getElementById("llmEnabled").checked=!!c.llmEnabled;
+    document.getElementById("offlineOnly").checked=!!c.offlineOnly;
   };
-  document.getElementById("btnSaveCfg").onclick = function () {
-    AksiProduct.setConfig({
-      backendUrl: document.getElementById("backendUrl").value.trim(),
-      llmEnabled: document.getElementById("llmEnabled").checked,
-      offlineOnly: document.getElementById("offlineOnly").checked
+  document.getElementById("btnSaveCfg").onclick=function(){
+    AksiProduct.setConfig({backendUrl:document.getElementById("backendUrl").value.trim(),llmEnabled:document.getElementById("llmEnabled").checked,offlineOnly:document.getElementById("offlineOnly").checked});
+    addMsg("a","Настройки сохранены.");
+  };
+  document.getElementById("btnProbe").onclick=function(){
+    var url=document.getElementById("backendUrl").value.trim()||"http://127.0.0.1:8000";
+    showProg("Проверяю backend…");
+    AksiProduct.probeBackend(url).then(function(info){
+      showProg(null);
+      if(info.ok){
+        document.getElementById("backendUrl").value=info.url;
+        document.getElementById("llmEnabled").checked=true;
+        AksiProduct.setConfig({backendUrl:info.url,llmEnabled:true});
+        addMsg("a","Backend найден. LLM: "+(info.model||"ok")+(info.ollama?" · Ollama":""));
+        setStatus("готова · LLM",true);
+      } else addMsg("a","Backend не отвечает на "+info.url+". Запустите: cd backend && ./start.sh");
     });
-    addMsg("a", "Настройки сохранены.");
   };
-  document.getElementById("btnExport").onclick = function () {
-    var data = AksiProduct.exportAll();
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "aksi-export-" + Date.now() + ".json";
-    a.click();
+  document.getElementById("btnExport").onclick=function(){
+    var data=AksiProduct.exportAll();
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-export-"+Date.now()+".json";a.click();
   };
   setStatus("загрузка");
-  AksiProduct.init().then(function (info) {
-    setStatus("готова" + (info.ed25519 ? " · Ed25519" : " · SHA"), true);
-    if (!restore()) {
-      addMsg("a", "Здравствуйте. Я АКСИ — суверенный локальный помощник.\n\nДанные по умолчанию остаются на устройстве.\nНапишите вопрос или нажмите «Возможности».");
-    }
+  AksiProduct.init().then(function(info){
+    var base="готова"+(info.ed25519?" · Ed25519":" · SHA");
+    setStatus(base,true);
+    if(!restore()) addMsg("a","Здравствуйте. Я АКСИ — суверенный локальный помощник.\n\nДанные по умолчанию остаются на устройстве.\nНапишите вопрос или нажмите «Возможности».");
+    return AksiProduct.autoConnectLocal().then(function(b){
+      if(b&&b.ok){setStatus(base+" · LLM",true);addMsg("a","Локальный backend подключён"+(b.model?" ("+b.model+")":"")+".");}
+    });
   });
 })();
 </script>
