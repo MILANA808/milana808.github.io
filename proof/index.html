@@ -2,125 +2,164 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>АКСИ · Proof</title>
-<meta name="theme-color" content="#0a0618">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>АКСИ — Proof · подпись и аттестат</title>
 <style>
-:root{--bg:#0a0618;--ink:#f0f0ff;--muted:#9ca3c7;--line:rgba(255,255,255,.12);--v:#a855f7;--c:#00f0ff;--ok:#4ade80;--bad:#f87171;--warn:#fbbf24}
+:root{--bg:#0b1220;--panel:#111827;--card:#1a2332;--line:#243044;--ink:#e8eef7;--muted:#94a3b8;--acc:#8b5cf6;--acc2:#3b82f6;--ok:#34d399;--bad:#f87171}
+[data-theme=light]{--bg:#f1f5f9;--panel:#fff;--card:#fff;--line:#e2e8f0;--ink:#0f172a;--muted:#64748b}
 *{box-sizing:border-box;margin:0}
-body{font-family:system-ui,sans-serif;background:linear-gradient(165deg,#0a0618,#160a28);color:var(--ink);min-height:100dvh;max-width:720px;margin:0 auto;padding:14px 14px 48px}
-a{color:var(--c);text-decoration:none}
-h1{font-size:1.5rem;margin:10px 0 6px}
-.sub{color:var(--muted);font-size:13px;line-height:1.45;margin-bottom:16px}
-.glass{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;backdrop-filter:blur(10px)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:11px;letter-spacing:.06em}
-.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
-.mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;line-height:1.5;color:var(--muted)}
-button{border:none;border-radius:10px;padding:11px 14px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--v),#6366f1);color:#fff;margin-right:8px;margin-top:8px}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-nav a{font-size:12px;font-weight:700;color:var(--muted);padding:6px 10px;border:1px solid transparent;border-radius:999px}
-nav a.on{border-color:var(--line);color:#fff;background:rgba(255,255,255,.05)}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);max-width:820px;margin:0 auto;padding:16px;padding-bottom:48px;line-height:1.5}
+header{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;color:#fff}
+h1{font-size:1.25rem;font-weight:800} .sub{font-size:13px;color:var(--muted)}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+nav a,button.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.card h2{font-size:1rem;margin-bottom:8px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
+textarea,input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;font-family:ui-monospace,Menlo,monospace}
+textarea{min-height:120px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{border:0;border-radius:12px;padding:10px 16px;font-weight:700;background:var(--acc);color:#fff;cursor:pointer}
+.btn2{background:var(--acc2)}
+#out{margin-top:12px;padding:12px;border-radius:12px;border:1px dashed var(--line);font-size:13px;white-space:pre-wrap;word-break:break-all;color:var(--muted)}
+#out.ok{border-color:var(--ok);color:var(--ok)}
+#out.bad{border-color:var(--bad);color:var(--bad)}
+.sha{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;background:var(--card);padding:10px;border-radius:10px;margin-top:8px}
+pre.att{white-space:pre-wrap;font-size:13px;line-height:1.45;max-height:280px;overflow:auto;background:var(--card);padding:12px;border-radius:12px;border:1px solid var(--line)}
 </style>
 </head>
 <body>
+<header>
+  <div class="logo">А</div>
+  <div>
+    <h1>Proof · подпись АКСИ</h1>
+    <div class="sub">Ed25519 · аттестат Grok×АКСИ · проверка</div>
+  </div>
+</header>
 <nav>
-  <a href="/">Хаб</a>
-  <a href="/lab/">Lab</a>
-  <a class="on" href="/proof/">Proof</a>
-  <a href="/wake/">Агент</a>
-  <a href="/matrix/">WebLLM</a>
+  <a href="/">Главная</a>
+  <a href="/chat/?v=13">Чат</a>
+  <a href="/BACKEND.md">Backend</a>
+  <button type="button" class="chip" id="btnTheme">Тема</button>
 </nav>
 
-<h1>Доказуемый след</h1>
-<p class="sub">Аудит публичной поверхности milana808.github.io. Не маркетинг — проверка фактов. Аттестация зафиксирована хешем.</p>
-
-<div class="glass">
-  <table>
-    <thead><tr><th>Утверждение</th><th>Вердикт</th><th>Доказательство</th></tr></thead>
-    <tbody id="rows"></tbody>
-  </table>
+<div class="card">
+  <h2>1. Аттестат создания (Grok × АКСИ)</h2>
+  <p style="font-size:14px;color:var(--muted)">Публичный текст о совместной разработке. Целостность — SHA-256.</p>
+  <pre class="att" id="attText">загрузка…</pre>
+  <div class="sha" id="attSha">SHA-256: …</div>
+  <div class="row">
+    <button type="button" class="btn" id="btnSignAtt">Подписать аттестат ключом АКСИ</button>
+    <button type="button" class="btn btn2" id="btnCopyAtt">Копировать текст</button>
+  </div>
+  <div id="attOut" class="sha" style="margin-top:10px;display:none"></div>
 </div>
 
-<div class="glass">
-  <div class="mono" id="meta">считаю хеш…</div>
-  <button type="button" id="btn-copy">Копировать attestation JSON</button>
-  <button type="button" class="ghost" id="btn-dl">Скачать proof.json</button>
+<div class="card">
+  <h2>2. Подписать любой текст</h2>
+  <label>Текст</label>
+  <textarea id="msg" placeholder="Вставьте текст для подписи…"></textarea>
+  <div class="row">
+    <button type="button" class="btn" id="btnSign">Подписать Ed25519</button>
+  </div>
+  <div id="signOut" class="sha" style="margin-top:10px;display:none"></div>
 </div>
 
-<div class="glass">
-  <p class="sub" style="margin:0">Что это <strong>не</strong>:</p>
-  <ul class="sub" style="margin:8px 0 0 18px;line-height:1.5">
-    <li>Не AGI и не «5 моделей 7B одновременно на телефоне».</li>
-    <li>Не физический квантовый компьютер — statevector и Bloch учебные.</li>
-    <li>Не замена вашего VPS/Ollama: Pages = статика + браузерные API.</li>
-  </ul>
+<div class="card">
+  <h2>3. Проверить подпись</h2>
+  <p style="font-size:13px;color:var(--muted)">Ed25519 (нужен publicKey JWK) или сверка SHA-256.</p>
+  <label>Исходный текст</label>
+  <textarea id="vMsg"></textarea>
+  <label>Подпись (hex / base64)</label>
+  <input id="vSig" autocomplete="off">
+  <label>Публичный ключ JWK (JSON, опционально)</label>
+  <textarea id="vPub" style="min-height:80px" placeholder='{"kty":"OKP","crv":"Ed25519",...}'></textarea>
+  <div class="row">
+    <button type="button" class="btn btn2" id="btnVerify">Проверить</button>
+  </div>
+  <div id="out"></div>
 </div>
 
-<p class="mono" style="margin-top:12px">Contact: aksilove@internet.ru · DID: did:aksi:ed25519:sovereign-2026</p>
+<div class="card">
+  <h2>Как это связано с Grok</h2>
+  <p style="font-size:14px">Аттестат фиксирует совместную разработку с Grok (xAI). Код открыт на GitHub. Подпись на этой странице — ваш локальный ключ АКСИ: можно скрепить аттестат своим DID.</p>
+  <p style="font-size:13px;color:var(--muted);margin-top:8px">Контакт: aksilove@internet.ru · DID: did:aksi:ed25519:sovereign-2026</p>
+</div>
 
+<script src="/aksi-core.js?v=13"></script>
+<script src="/aksi-product-core.js?v=13"></script>
 <script>
-const CLAIMS = [
-  { id:"route-home", claim:"Главная / отдаёт 200", verdict:"CONFIRMED", how:"HTTP 200 на https://milana808.github.io/" },
-  { id:"route-lab", claim:"Lab /lab/ доступен", verdict:"CONFIRMED", how:"HTTP 200; вкладки agents/crypto/bloch/uigen/quantum в DOM" },
-  { id:"agents", claim:"Сад агентов: 4 роли, 2 раунда, LOG", verdict:"CONFIRMED", how:"Ролевая логика в JS; не multi-LLM" },
-  { id:"crypto", claim:"Крипто: ECDSA P-256 + AES-GCM локально", verdict:"CONFIRMED", how:"Web Crypto API; QR/PEM/JSON export" },
-  { id:"ed25519-browser", claim:"Полный Ed25519 во всех браузерах", verdict:"REFUTED", how:"Используется ECDSA P-256 из-за совместимости" },
-  { id:"bloch", claim:"Bloch + QCLI из текста", verdict:"CONFIRMED", how:"Canvas + gauge; учебная визуализация" },
-  { id:"uigen", claim:"Генерация UI по шаблонам", verdict:"CONFIRMED", how:"Правила по ключевым словам; не LLM-codegen" },
-  { id:"qubit2", claim:"2-qubit Белл 0.5/0.5 в Lab", verdict:"CONFIRMED", how:"Statevector H+CNOT; /quantum/ полный лаб" },
-  { id:"webllm", claim:"Локальный LLM через WebLLM", verdict:"PARTIAL", how:"Маршруты /matrix/ /aksii-matrix/ живы; успех зависит от WebGPU/памяти устройства" },
-  { id:"backend-public", claim:"Публичный FastAPI+Ollama на Pages", verdict:"REFUTED", how:"GitHub Pages не хостит Ollama; offline-first + optional ваш URL" },
-  { id:"agi", claim:"АКСИ = AGI", verdict:"REFUTED", how:"Демо-контур суверенного агента; не общий ИИ человеческого уровня" },
-  { id:"universe", claim:"ecosystem.json + /universe/", verdict:"CONFIRMED", how:"HTTP 200; карта репозиториев" },
-  { id:"contact", claim:"Публичный контакт только aksilove@internet.ru", verdict:"CONFIRMED", how:"Политика публичных страниц" },
-];
-
-const ATTESTATION = {
-  type: "aksi.site.audit",
-  surface: "https://milana808.github.io",
-  did: "did:aksi:ed25519:sovereign-2026",
-  auditor: "Grok (xAI) via site tooling",
-  method: "HTTP probe + DOM feature markers + architectural review",
-  time_utc: new Date().toISOString(),
-  claims: CLAIMS,
-};
-
-const rows = document.getElementById("rows");
-CLAIMS.forEach(c => {
-  const tr = document.createElement("tr");
-  const cls = c.verdict === "CONFIRMED" ? "ok" : c.verdict === "REFUTED" ? "bad" : "warn";
-  tr.innerHTML = "<td>"+c.claim+"</td><td class=\""+cls+"\">"+c.verdict+"</td><td class=\"mono\">"+c.how+"</td>";
-  rows.appendChild(tr);
-});
-
-async function sha256hex(str) {
-  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2,"0")).join("");
-}
-
-(async () => {
-  const canonical = JSON.stringify(ATTESTATION.claims);
-  const hash = await sha256hex(canonical);
-  ATTESTATION.claims_sha256 = hash;
-  ATTESTATION.note = "Пересчитайте SHA-256 от JSON.stringify(claims) — должно совпасть.";
-  document.getElementById("meta").textContent =
-    "time: " + ATTESTATION.time_utc + "\n" +
-    "claims_sha256: " + hash + "\n" +
-    "auditor: " + ATTESTATION.auditor + "\n" +
-    "surface: " + ATTESTATION.surface;
-
-  document.getElementById("btn-copy").onclick = async () => {
-    await navigator.clipboard.writeText(JSON.stringify(ATTESTATION, null, 2));
-    alert("Скопировано");
+(function(){
+  function $(id){ return document.getElementById(id); }
+  $("btnTheme").onclick=function(){
+    var cur=document.documentElement.getAttribute("data-theme");
+    document.documentElement.setAttribute("data-theme", cur==="light"?"":"light");
   };
-  document.getElementById("btn-dl").onclick = () => {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(ATTESTATION, null, 2)], { type: "application/json" }));
-    a.download = "aksi-proof.json";
-    a.click();
+  function b64ToBytes(b64){
+    var bin=atob(b64.replace(/-/g,"+").replace(/_/g,"/"));
+    var u=new Uint8Array(bin.length);
+    for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+    return u;
+  }
+  function looksHex(s){ return /^[0-9a-fA-F]+$/.test(s) && s.length%2===0; }
+  function hexToBytes(h){
+    var u=new Uint8Array(h.length/2);
+    for(var i=0;i<u.length;i++) u[i]=parseInt(h.substr(i*2,2),16);
+    return u;
+  }
+  AksiProduct.init().then(function(info){
+    var att=AksiProduct.getAttestation();
+    $("attText").textContent=att.text;
+    $("attSha").textContent="SHA-256: "+att.sha256+(info.ed25519?" · ядро Ed25519 готово":" · fallback SHA");
+  });
+  $("btnCopyAtt").onclick=function(){
+    var t=AksiProduct.getAttestation().text;
+    navigator.clipboard.writeText(t).then(function(){ $("attOut").style.display="block"; $("attOut").textContent="Скопировано."; });
+  };
+  $("btnSignAtt").onclick=function(){
+    var att=AksiProduct.getAttestation();
+    AksiProduct.signText(att.text).then(function(r){
+      $("attOut").style.display="block";
+      $("attOut").textContent="algo: "+r.algo+"\nrealCrypto: "+!!r.realCrypto+"\ndid: "+r.did+"\nsig: "+r.sig+"\n"+(r.publicKey?"publicKey: "+JSON.stringify(r.publicKey):"");
+      $("vMsg").value=att.text;
+      $("vSig").value=typeof r.sig==="string"?r.sig:JSON.stringify(r.sig);
+      if(r.publicKey) $("vPub").value=JSON.stringify(r.publicKey);
+    });
+  };
+  $("btnSign").onclick=function(){
+    var t=$("msg").value.trim();
+    if(!t){ alert("Введите текст"); return; }
+    AksiProduct.signText(t).then(function(r){
+      $("signOut").style.display="block";
+      $("signOut").textContent="algo: "+r.algo+"\nrealCrypto: "+!!r.realCrypto+"\nsig: "+r.sig+"\n"+(r.publicKey?JSON.stringify(r.publicKey):"");
+      $("vMsg").value=t;
+      $("vSig").value=typeof r.sig==="string"?r.sig:JSON.stringify(r.sig);
+      if(r.publicKey) $("vPub").value=JSON.stringify(r.publicKey);
+    });
+  };
+  $("btnVerify").onclick=async function(){
+    var out=$("out"); out.className="";
+    var text=$("vMsg").value, sigRaw=$("vSig").value.trim(), pubRaw=$("vPub").value.trim();
+    if(!text||!sigRaw){ out.textContent="Нужны текст и подпись."; out.className="bad"; return; }
+    try{
+      var hash=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+      var hex=Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+      if(hex===sigRaw || hex.indexOf(sigRaw)===0){ out.textContent="✓ SHA-256 совпадает.\n"+hex; out.className="ok"; return; }
+    }catch(e){}
+    if(pubRaw){
+      try{
+        var jwk=JSON.parse(pubRaw);
+        var key=await crypto.subtle.importKey("jwk", jwk, {name:"Ed25519"}, false, ["verify"]);
+        var sigBytes = looksHex(sigRaw)?hexToBytes(sigRaw):b64ToBytes(sigRaw);
+        var ok=await crypto.subtle.verify({name:"Ed25519"}, key, sigBytes, new TextEncoder().encode(text));
+        if(ok){ out.textContent="✓ Подпись Ed25519 ВЕРНА."; out.className="ok"; }
+        else { out.textContent="✗ Подпись Ed25519 НЕВЕРНА."; out.className="bad"; }
+        return;
+      }catch(e){ out.textContent="Ошибка Ed25519: "+e.message; out.className="bad"; return; }
+    }
+    out.textContent="Укажите publicKey JWK для Ed25519 или полный SHA-256."; out.className="bad";
   };
 })();
 </script>
