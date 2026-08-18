@@ -1,6 +1,6 @@
 /**
  * АКСИ — локальный помощник
- * v2026-08-18.4 · русский · локально · без выдумок
+ * v2026-08-18.5 · понятно · по-русски · локально
  */
 (function () {
   "use strict";
@@ -13,12 +13,14 @@
   var INP = document.getElementById("inp");
   var SEND = document.getElementById("send");
   var SUPER = document.getElementById("superBtn");
+  var CHAT_KEY = "aksi_chat_v1";
 
   function setStatus(t) { if (STATUS) STATUS.textContent = t; }
   function showProg(t) {
     if (!PROG) return;
     if (!t) { PROG.classList.remove("on"); PROG.textContent = ""; return; }
-    PROG.textContent = t; PROG.classList.add("on");
+    PROG.textContent = t;
+    PROG.classList.add("on");
   }
 
   var DB_NAME = "aksi_v1", STORE = "facts", db = null, memCache = [];
@@ -29,7 +31,8 @@
         var req = indexedDB.open(DB_NAME, 1);
         req.onupgradeneeded = function (e) {
           var d = e.target.result;
-          if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+          if (!d.objectStoreNames.contains(STORE))
+            d.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
         };
         req.onsuccess = function (e) { db = e.target.result; resolve(db); };
         req.onerror = function () { resolve(null); };
@@ -40,7 +43,8 @@
   function loadFacts() {
     return openDB().then(function () {
       if (!db) {
-        try { memCache = JSON.parse(localStorage.getItem("aksi_facts") || "[]"); } catch (e) { memCache = []; }
+        try { memCache = JSON.parse(localStorage.getItem("aksi_facts") || "[]"); }
+        catch (e) { memCache = []; }
         return memCache;
       }
       return new Promise(function (resolve) {
@@ -79,11 +83,12 @@
     var list = document.getElementById("nList");
     if (!list) return;
     if (!memCache.length) {
-      list.innerHTML = '<p class="muted" style="margin-top:8px">Пока пусто. Напишите «запомни: …» в чате.</p>';
+      list.innerHTML = '<p class="muted" style="margin-top:8px">Пока пусто. В чате: <b>запомни: ваш текст</b></p>';
       return;
     }
-    list.innerHTML = memCache.slice(0, 30).map(function (f, i) {
-      return '<div class="fact"><span style="flex:1">' + esc(f.text) + '</span><button type="button" data-del="' + i + '" title="Удалить">×</button></div>';
+    list.innerHTML = memCache.slice(0, 40).map(function (f, i) {
+      return '<div class="fact"><span style="flex:1">' + esc(f.text) +
+        '</span><button type="button" data-del="' + i + '" title="Удалить">×</button></div>';
     }).join("");
     list.querySelectorAll("[data-del]").forEach(function (btn) {
       btn.onclick = function () { deleteFact(+btn.getAttribute("data-del")); };
@@ -91,28 +96,37 @@
   }
 
   var KB = [
-    { q: ["кто ты", "что ты", "представься", "как тебя зовут"], a: "Я АКСИ — локальный помощник. Работаю в браузере. Отвечаю по-русски, стараюсь не выдумывать и показывать, откуда взялась информация." },
-    { q: ["что умеешь", "возможности", "функции", "что можешь"], a: "Умею:\n• отвечать на вопросы\n• искать в Википедии\n• считать выражения\n• показывать запутанность и суперпозицию\n• запоминать заметки на устройстве\n• голосовой ввод\n• локальный DID\nНапишите вопрос или нажмите «Умный ответ»." },
-    { q: ["ии", "искусственный интеллект", "что такое ии"], a: "Искусственный интеллект — программы, которые помогают с задачами, обычно требующими мышления. Я — один из таких помощников: работаю локально и отделяю факты от догадок." },
-    { q: ["запутанность", "запутай", "bell", "белл", "квант"], a: null, special: "quantum-bell" },
-    { q: ["суперпозиция", "суперпозиц"], a: null, special: "quantum-super" },
-    { q: ["как пользоваться", "помощь", "инструкция"], a: "1. Напишите вопрос внизу.\n2. Или «Умный ответ» — выберу инструмент.\n3. Меню справа (☰ на телефоне).\n4. «запомни: текст» — сохранить заметку." },
-    { q: ["память", "заметки"], a: "Память только на вашем устройстве. Напишите «запомни: …». Список — в разделе «Заметки»." },
-    { q: ["did", "идентичность", "подпись"], a: "DID — локальный цифровой идентификатор. Раздел «Идентичность» внизу страницы." },
-    { q: ["привет", "здравствуй", "добрый день", "доброе утро", "hello"], a: "Здравствуйте. Я АКСИ. Напишите вопрос или нажмите «Умный ответ»." },
-    { q: ["контакт", "почта", "email", "связь"], a: "Контакт: aksilove@internet.ru" },
-    { q: ["матрикс", "matrix", "лаб", "глобус"], a: "Разделы:\n• /matrix/ — квантовый симулятор\n• /lab/ — криптография\n• /globe/ — карта узлов\n• /hub/ — карта модулей" }
+    { q: ["кто ты", "что ты", "представься", "как тебя зовут", "ты кто"], a: "Я АКСИ — понятный помощник на русском.\n\nРаботаю прямо в браузере, без обязательного сервера. Стараюсь не выдумывать: если не знаю — говорю. Под ответом виден ход мысли и короткая подпись." },
+    { q: ["что умеешь", "возможности", "функции", "что можешь", "навыки"], a: "Сейчас умею:\n\n• отвечать и объяснять простыми словами\n• искать кратко в Википедии\n• считать выражения, например (3+2)^2\n• показывать запутанность и суперпозицию кубитов\n• запоминать заметки на вашем устройстве\n• принимать голос\n• создавать локальный DID\n\nНапишите вопрос или нажмите «Умный ответ»." },
+    { q: ["что такое ии", "искусственный интеллект", "объясни ии"], a: "Искусственный интеллект — программы, которые помогают с задачами, обычно требующими мышления: понимать текст, искать закономерности, подсказывать решения.\n\nЯ один из таких помощников. Отличие: работаю локально и стараюсь отделять факты от догадок." },
+    { q: ["запутанность", "запутай", "bell", "белл", "состояние белла", "покажи запутанность"], a: null, special: "quantum-bell" },
+    { q: ["суперпозиция", "суперпозиц", "адамар"], a: null, special: "quantum-super" },
+    { q: ["как пользоваться", "помощь", "инструкция", "справка", "что делать"], a: "Как пользоваться:\n\n1. Напишите вопрос в поле внизу и нажмите ➤\n2. Или нажмите «Умный ответ» — выберу нужный инструмент\n3. Меню справа (на телефоне ☰) — разделы сайта\n4. «запомни: текст» — сохранить заметку\n5. Раздел «Квант» — наглядные примеры" },
+    { q: ["память", "заметки", "что запомнила"], a: "Память хранится только на вашем устройстве.\n\nСохранить: «запомни: ваш текст».\nСписок — в разделе «Заметки» на этой странице." },
+    { q: ["did", "идентичность", "подпись", "цифровой след"], a: "DID — локальный цифровой идентификатор. Создаётся в браузере, личные данные не передаёт.\n\nСмотрите раздел «Идентичность» внизу." },
+    { q: ["привет", "здравствуй", "добрый день", "доброе утро", "добрый вечер", "hello", "hi"], a: "Здравствуйте. Я АКСИ.\n\nМожете спросить что угодно по-русски: объяснить понятие, посчитать, показать запутанность или запомнить заметку." },
+    { q: ["спасибо", "благодарю", "thanks"], a: "Пожалуйста. Если понадобится ещё — напишите." },
+    { q: ["контакт", "почта", "email", "связь", "написать"], a: "Публичный контакт: aksilove@internet.ru" },
+    { q: ["матрикс", "matrix", "лаб", "глобус", "хаб", "hub"], a: "Другие разделы:\n\n• /matrix/ — полный квантовый симулятор\n• /lab/ — криптография и опыты\n• /globe/ — карта узлов\n• /hub/ — карта модулей\n\nМеню справа тоже ведёт туда." },
+    { q: ["правда", "врёшь", "достоверн", "галлюцинац", "проверь"], a: "Я стараюсь не выдумывать.\n\n• Из базы знаний — так и пишу\n• Из Википедии — указываю источник\n• Если не знаю — говорю прямо\n• Под ответом — ход мысли и подпись\n\nЭто не абсолютная истина, но прозрачность: видно, откуда взялось утверждение." },
+    { q: ["офлайн", "без интернета", "локально"], a: "Базовые ответы, память, счёт и квант работают без интернета.\n\nДля поиска в Википедии нужен интернет." }
   ];
 
   function matchKB(text) {
     var t = (text || "").toLowerCase().replace(/ё/g, "е");
+    var best = null, bestScore = 0;
     for (var i = 0; i < KB.length; i++) {
       var item = KB[i];
       for (var j = 0; j < item.q.length; j++) {
-        if (t.indexOf(item.q[j]) !== -1) return item;
+        var key = item.q[j];
+        if (t === key) return item;
+        if (t.indexOf(key) !== -1 && key.length > bestScore) {
+          bestScore = key.length;
+          best = item;
+        }
       }
     }
-    return null;
+    return best;
   }
 
   function statevector(gates) {
@@ -152,12 +166,13 @@
     }
     if (txt) {
       txt.innerHTML = mode === "bell"
-        ? "<b>Запутанность (Белл)</b><br>H + CNOT. |00⟩ и |11⟩ ≈ 50%. Если первый кубит 0 — второй тоже 0."
-        : "<b>Суперпозиция</b><br>Гейт H. До измерения — «и 0, и 1». После — 0 или 1 ~50%.";
+        ? "<b>Запутанность (Белл)</b><br>Гейты: H → CNOT. |00⟩ и |11⟩ ≈ 50%. Если первый кубит 0 — второй тоже 0."
+        : "<b>Суперпозиция</b><br>Гейт H. До измерения — «и 0, и 1». После — 0 или 1 ≈ 50%.";
     }
-    return mode === "bell"
-      ? "Запутанность двух кубитов (Белл).\n|00⟩ ≈ 50%, |11⟩ ≈ 50%.\nЕсли первый 0 — второй тоже 0.\nСмотрите раздел «Квант» ниже."
-      : "Суперпозиция (гейт H).\nДо измерения — «и 0, и 1».\nСмотрите раздел «Квант».";
+    if (mode === "bell") {
+      return "Показала запутанность двух кубитов (состояние Белла).\n\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\n\nЕсли измерить первый кубит и получить 0, второй тоже будет 0 — это и есть запутанность.\n\nСхему смотрите в разделе «Квант» ниже.";
+    }
+    return "Показала суперпозицию (гейт Адамара).\n\nДо измерения кубит в состоянии «и 0, и 1». После измерения — 0 или 1 примерно поровну.\n\nСмотрите раздел «Квант».";
   }
 
   function searchWiki(query) {
@@ -170,7 +185,7 @@
       if (!extract) throw new Error("empty");
       return {
         title: j.title || query,
-        text: extract.slice(0, 900),
+        text: extract.slice(0, 1000),
         url: (j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page) || ""
       };
     });
@@ -183,14 +198,13 @@
     try {
       var v = new Function("return (" + s + ")")();
       if (typeof v !== "number" || !isFinite(v)) return null;
-      return v;
+      return Math.round(v * 1e12) / 1e12;
     } catch (e) { return null; }
   }
 
   function sha256Hex(str) {
-    if (!window.crypto || !crypto.subtle) {
+    if (!window.crypto || !crypto.subtle)
       return Promise.resolve("local-" + Math.abs(hashCode(str)).toString(16));
-    }
     return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function (buf) {
       return Array.from(new Uint8Array(buf)).map(function (b) {
         return b.toString(16).padStart(2, "0");
@@ -217,27 +231,73 @@
     var div = document.createElement("div");
     div.className = "msg " + (role === "u" ? "u" : "a");
     var html = '<div class="b">' + esc(text) + "</div>";
-    if (thought) html += '<div class="thought">💭 Ход мысли: ' + esc(thought) + "</div>";
+    if (thought) html += '<div class="thought">💭 ' + esc(thought) + "</div>";
     if (meta) html += '<div class="meta">' + esc(meta) + "</div>";
     div.innerHTML = html;
     THREAD.appendChild(div);
     THREAD.scrollTop = THREAD.scrollHeight;
+    persistChat();
+  }
+
+  function persistChat() {
+    try {
+      if (!THREAD) return;
+      var items = [];
+      THREAD.querySelectorAll(".msg").forEach(function (m) {
+        var b = m.querySelector(".b");
+        if (!b) return;
+        items.push({ role: m.classList.contains("u") ? "u" : "a", text: b.textContent });
+      });
+      if (items.length > 50) items = items.slice(-50);
+      localStorage.setItem(CHAT_KEY, JSON.stringify(items));
+    } catch (e) {}
+  }
+
+  function restoreChat() {
+    try {
+      var raw = localStorage.getItem(CHAT_KEY);
+      if (!raw || !THREAD) return false;
+      var items = JSON.parse(raw);
+      if (!items || !items.length) return false;
+      items.forEach(function (it) {
+        var div = document.createElement("div");
+        div.className = "msg " + (it.role === "u" ? "u" : "a");
+        div.innerHTML = '<div class="b">' + esc(it.text) + "</div>";
+        THREAD.appendChild(div);
+      });
+      THREAD.scrollTop = THREAD.scrollHeight;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  function clearChat() {
+    if (THREAD) THREAD.innerHTML = "";
+    try { localStorage.removeItem(CHAT_KEY); } catch (e) {}
+    addMsg("a", "Чат очищен. Напишите новый вопрос.", "система");
   }
 
   function aksiAnswer(raw) {
     var q = (raw || "").trim();
     if (!q) return Promise.resolve({ text: "Напишите вопрос — отвечу по-русски.", thought: "пустой ввод" });
 
+    if (/^(очисти|очистить)\s*(чат)?$/i.test(q)) {
+      clearChat();
+      return Promise.resolve({ text: "Готово.", thought: "очистка чата" });
+    }
+
     var m = q.match(/^(запомни|запомнить|remember)\s*[:\-]?\s*(.+)$/i);
     if (m && m[2]) {
       return saveFact(m[2]).then(function () {
         renderNotes();
-        return { text: "Запомнила: «" + m[2].trim() + "».\nТолько на этом устройстве.", thought: "память → локально" };
+        return {
+          text: "Запомнила:\n«" + m[2].trim() + "»\n\nТолько на этом устройстве.",
+          thought: "память → локально"
+        };
       });
     }
 
-    if (/^[\d\s+\-*/().^,]+$/.test(q) || /посчитай|вычисли|сколько будет/i.test(q)) {
-      var expr = q.replace(/посчитай|вычисли|сколько будет/gi, "").trim() || q;
+    if (/^[\d\s+\-*/().^,]+$/.test(q) || /посчитай|вычисли|сколько будет|чему равно/i.test(q)) {
+      var expr = q.replace(/посчитай|вычисли|сколько будет|чему равно/gi, "").trim() || q;
       var val = safeMath(expr);
       if (val !== null) {
         return Promise.resolve({ text: "Результат: " + val, thought: "локальный расчёт" });
@@ -246,20 +306,19 @@
 
     var hit = matchKB(q);
     if (hit) {
-      if (hit.special === "quantum-bell") {
+      if (hit.special === "quantum-bell")
         return Promise.resolve({ text: showQuantum("bell"), thought: "запутанность → симулятор 2 кубитов" });
-      }
-      if (hit.special === "quantum-super") {
+      if (hit.special === "quantum-super")
         return Promise.resolve({ text: showQuantum("super"), thought: "суперпозиция → гейт H" });
-      }
       return Promise.resolve({ text: hit.a, thought: "локальная база знаний АКСИ" });
     }
 
     var low = q.toLowerCase();
+    var words = low.split(/\s+/).filter(function (w) { return w.length > 3; });
     var found = memCache.filter(function (f) {
-      return f.text.toLowerCase().indexOf(low) !== -1 || low.split(/\s+/).some(function (w) {
-        return w.length > 3 && f.text.toLowerCase().indexOf(w) !== -1;
-      });
+      var ft = f.text.toLowerCase();
+      if (ft.indexOf(low) !== -1) return true;
+      return words.some(function (w) { return ft.indexOf(w) !== -1; });
     });
     if (found.length) {
       return Promise.resolve({
@@ -268,18 +327,20 @@
       });
     }
 
-    showProg("Ищу…");
+    showProg("Ищу в открытых источниках…");
     return searchWiki(q).then(function (res) {
       showProg(null);
       return {
-        text: res.title + "\n\n" + res.text + (res.url ? "\n\nИсточник: " + res.url : "") + "\n\n(Кратко из Википедии.)",
-        thought: "поиск ru.wikipedia.org"
+        text: res.title + "\n\n" + res.text +
+          (res.url ? "\n\nИсточник: " + res.url : "") +
+          "\n\n— Кратко из Википедии. При необходимости проверьте.",
+        thought: "открытый поиск → ru.wikipedia.org"
       };
     }).catch(function () {
       showProg(null);
       return {
-        text: "Точного ответа нет.\n\nПопробуйте переформулировать, «запомни: …» или «что умеешь».",
-        thought: "нет совпадения"
+        text: "Точного ответа пока нет.\n\nМожно:\n• переформулировать вопрос\n• написать «запомни: …»\n• открыть раздел «Поиск» выше\n• спросить «что умеешь»",
+        thought: "нет совпадения в базе и поиске"
       };
     });
   }
@@ -293,8 +354,12 @@
     setStatus("думаю…");
     aksiAnswer(text).then(function (res) {
       showProg(null);
+      if (res.text === "Готово." && res.thought === "очистка чата") {
+        setStatus("готова");
+        return;
+      }
       sha256Hex(res.text + "|" + (res.thought || "") + "|" + Date.now()).then(function (sig) {
-        addMsg("a", res.text, "подпись: " + sig.slice(0, 16) + "… · локально", res.thought || "");
+        addMsg("a", res.text, "подпись " + sig.slice(0, 12) + "… · локально", res.thought || "");
         setStatus("готова");
       });
     });
@@ -303,7 +368,7 @@
   function superRoute() {
     var text = (INP && INP.value) || "";
     if (!text.trim()) {
-      addMsg("a", "Напишите вопрос внизу — разберу и выберу инструмент.");
+      addMsg("a", "Напишите вопрос внизу — разберу и выберу: поиск, счёт, квант или память.");
       return;
     }
     sendText(text);
@@ -328,7 +393,10 @@
 
   function startVoice() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { addMsg("a", "Голос в этом браузере недоступен. Пишите текстом."); return; }
+    if (!SR) {
+      addMsg("a", "Голосовой ввод в этом браузере недоступен. Можно писать текстом.");
+      return;
+    }
     var rec = new SR();
     rec.lang = "ru-RU";
     rec.interimResults = false;
@@ -357,15 +425,19 @@
       };
     });
 
+    var clearBtn = document.getElementById("clearChat");
+    if (clearBtn) clearBtn.onclick = clearChat;
+
     var sBtn = document.getElementById("sBtn"), sIn = document.getElementById("sIn");
     if (sBtn && sIn) sBtn.onclick = function () {
       var q = sIn.value.trim();
       if (!q) return;
-      document.getElementById("sOut").textContent = "Ищу…";
+      var out = document.getElementById("sOut");
+      out.textContent = "Ищу…";
       searchWiki(q).then(function (r) {
-        document.getElementById("sOut").textContent = r.title + "\n\n" + r.text + (r.url ? "\n\n" + r.url : "");
+        out.textContent = r.title + "\n\n" + r.text + (r.url ? "\n\n" + r.url : "");
       }).catch(function () {
-        document.getElementById("sOut").textContent = "Не найдено.";
+        out.textContent = "Не найдено. Попробуйте другие слова.";
       });
     };
 
@@ -383,7 +455,8 @@
     var mBtn = document.getElementById("mBtn"), mIn = document.getElementById("mIn");
     if (mBtn && mIn) mBtn.onclick = function () {
       var v = safeMath(mIn.value);
-      document.getElementById("mOut").textContent = v === null ? "Пример: (3+2)*4" : "Результат: " + v;
+      document.getElementById("mOut").textContent =
+        v === null ? "Не удалось. Пример: (3+2)*4" : "Результат: " + v;
     };
 
     var fIn = document.getElementById("fIn");
@@ -395,8 +468,10 @@
         var reader = new FileReader();
         reader.onload = function () {
           var text = String(reader.result || "").slice(0, 8000);
-          saveFact("[" + file.name + "] " + text.slice(0, 500)).then(function () {
-            n++; if (out) out.textContent = "Файлов: " + n; renderNotes();
+          saveFact("[" + file.name + "] " + text.slice(0, 600)).then(function () {
+            n++;
+            if (out) out.textContent = "Загружено файлов: " + n;
+            renderNotes();
           });
         };
         reader.readAsText(file);
@@ -416,8 +491,13 @@
       renderDID();
       bind();
       setStatus("готова");
-      if (THREAD && !THREAD.children.length) {
-        addMsg("a", "Здравствуйте. Я АКСИ — помощник на русском.\nРаботаю локально.\nНапишите вопрос или нажмите «Умный ответ».", "система · без сервера");
+      var had = restoreChat();
+      if (!had && THREAD) {
+        addMsg(
+          "a",
+          "Здравствуйте. Я АКСИ — понятный помощник на русском.\n\nРаботаю локально в браузере.\nНапишите вопрос или нажмите «Умный ответ».",
+          "система · без сервера"
+        );
       }
     });
   }
