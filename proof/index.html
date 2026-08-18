@@ -12,14 +12,14 @@
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);max-width:820px;margin:0 auto;padding:16px;padding-bottom:48px;line-height:1.5}
 header{display:flex;gap:12px;align-items:center;margin-bottom:16px}
 .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;color:#fff}
-h1{font-size:1.25rem;font-weight:800} .sub{font-size:13px;color:var(--muted)}
+h1{font-size:1.25rem;font-weight:800}.sub{font-size:13px;color:var(--muted)}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 nav a,button.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
 .card h2{font-size:1rem;margin-bottom:8px}
 label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
 textarea,input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;font-family:ui-monospace,Menlo,monospace}
-textarea{min-height:120px;resize:vertical}
+textarea{min-height:110px;resize:vertical}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .btn{border:0;border-radius:12px;padding:10px 16px;font-weight:700;background:var(--acc);color:#fff;cursor:pointer}
 .btn2{background:var(--acc2)}
@@ -33,133 +33,101 @@ pre.att{white-space:pre-wrap;font-size:13px;line-height:1.45;max-height:280px;ov
 <body>
 <header>
   <div class="logo">А</div>
-  <div>
-    <h1>Proof · подпись АКСИ</h1>
-    <div class="sub">Ed25519 · аттестат Grok×АКСИ · проверка</div>
-  </div>
+  <div><h1>Proof · подпись АКСИ</h1><div class="sub">Ed25519 · аттестат Grok×АКСИ · проверка</div></div>
 </header>
 <nav>
   <a href="/">Главная</a>
   <a href="/chat/?v=13">Чат</a>
-  <a href="/BACKEND.md">Backend</a>
+  <a href="/ATTESTATION.md">Аттестат</a>
   <button type="button" class="chip" id="btnTheme">Тема</button>
 </nav>
-
 <div class="card">
   <h2>1. Аттестат создания (Grok × АКСИ)</h2>
-  <p style="font-size:14px;color:var(--muted)">Публичный текст о совместной разработке. Целостность — SHA-256.</p>
   <pre class="att" id="attText">загрузка…</pre>
   <div class="sha" id="attSha">SHA-256: …</div>
   <div class="row">
     <button type="button" class="btn" id="btnSignAtt">Подписать аттестат ключом АКСИ</button>
-    <button type="button" class="btn btn2" id="btnCopyAtt">Копировать текст</button>
+    <button type="button" class="btn btn2" id="btnCopyAtt">Копировать</button>
   </div>
   <div id="attOut" class="sha" style="margin-top:10px;display:none"></div>
 </div>
-
 <div class="card">
   <h2>2. Подписать любой текст</h2>
   <label>Текст</label>
-  <textarea id="msg" placeholder="Вставьте текст для подписи…"></textarea>
-  <div class="row">
-    <button type="button" class="btn" id="btnSign">Подписать Ed25519</button>
-  </div>
+  <textarea id="msg" placeholder="Текст для подписи…"></textarea>
+  <div class="row"><button type="button" class="btn" id="btnSign">Подписать Ed25519</button></div>
   <div id="signOut" class="sha" style="margin-top:10px;display:none"></div>
 </div>
-
 <div class="card">
   <h2>3. Проверить подпись</h2>
-  <p style="font-size:13px;color:var(--muted)">Ed25519 (нужен publicKey JWK) или сверка SHA-256.</p>
-  <label>Исходный текст</label>
-  <textarea id="vMsg"></textarea>
-  <label>Подпись (hex / base64)</label>
-  <input id="vSig" autocomplete="off">
-  <label>Публичный ключ JWK (JSON, опционально)</label>
-  <textarea id="vPub" style="min-height:80px" placeholder='{"kty":"OKP","crv":"Ed25519",...}'></textarea>
-  <div class="row">
-    <button type="button" class="btn btn2" id="btnVerify">Проверить</button>
-  </div>
+  <label>Текст</label><textarea id="vMsg"></textarea>
+  <label>Подпись</label><input id="vSig" autocomplete="off">
+  <label>Public key JWK (для Ed25519)</label><textarea id="vPub" style="min-height:70px"></textarea>
+  <div class="row"><button type="button" class="btn btn2" id="btnVerify">Проверить</button></div>
   <div id="out"></div>
 </div>
-
-<div class="card">
-  <h2>Как это связано с Grok</h2>
-  <p style="font-size:14px">Аттестат фиксирует совместную разработку с Grok (xAI). Код открыт на GitHub. Подпись на этой странице — ваш локальный ключ АКСИ: можно скрепить аттестат своим DID.</p>
-  <p style="font-size:13px;color:var(--muted);margin-top:8px">Контакт: aksilove@internet.ru · DID: did:aksi:ed25519:sovereign-2026</p>
-</div>
-
 <script src="/aksi-core.js?v=13"></script>
 <script src="/aksi-product-core.js?v=13"></script>
+<script src="/aksi-product-boost.js?v=13"></script>
 <script>
 (function(){
-  function $(id){ return document.getElementById(id); }
-  $("btnTheme").onclick=function(){
-    var cur=document.documentElement.getAttribute("data-theme");
-    document.documentElement.setAttribute("data-theme", cur==="light"?"":"light");
-  };
-  function b64ToBytes(b64){
-    var bin=atob(b64.replace(/-/g,"+").replace(/_/g,"/"));
-    var u=new Uint8Array(bin.length);
-    for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
-    return u;
-  }
-  function looksHex(s){ return /^[0-9a-fA-F]+$/.test(s) && s.length%2===0; }
-  function hexToBytes(h){
-    var u=new Uint8Array(h.length/2);
-    for(var i=0;i<u.length;i++) u[i]=parseInt(h.substr(i*2,2),16);
-    return u;
+  function $(id){return document.getElementById(id);}
+  $("btnTheme").onclick=function(){var c=document.documentElement.getAttribute("data-theme");document.documentElement.setAttribute("data-theme",c==="light"?"":"light");};
+  function looksHex(s){return /^[0-9a-fA-F]+$/.test(s)&&s.length%2===0;}
+  function hexToBytes(h){var u=new Uint8Array(h.length/2);for(var i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);return u;}
+  function b64ToBytes(b64){var bin=atob(b64.replace(/-/g,"+").replace(/_/g,"/"));var u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;}
+  function showAtt(att, ed){
+    $("attText").textContent=att.text;
+    $("attSha").textContent="SHA-256: "+att.sha256+(ed?" · Ed25519 готово":"");
   }
   AksiProduct.init().then(function(info){
-    var att=AksiProduct.getAttestation();
-    $("attText").textContent=att.text;
-    $("attSha").textContent="SHA-256: "+att.sha256+(info.ed25519?" · ядро Ed25519 готово":" · fallback SHA");
+    showAtt(AksiProduct.getAttestation(), info.ed25519);
+    fetch("/ATTESTATION.json").then(function(r){return r.json();}).then(function(j){
+      if(j&&j.text) showAtt({text:j.text,sha256:j.sha256}, info.ed25519);
+    }).catch(function(){});
   });
   $("btnCopyAtt").onclick=function(){
-    var t=AksiProduct.getAttestation().text;
-    navigator.clipboard.writeText(t).then(function(){ $("attOut").style.display="block"; $("attOut").textContent="Скопировано."; });
+    var t=$("attText").textContent;
+    navigator.clipboard.writeText(t).then(function(){$("attOut").style.display="block";$("attOut").textContent="Скопировано.";});
   };
   $("btnSignAtt").onclick=function(){
-    var att=AksiProduct.getAttestation();
-    AksiProduct.signText(att.text).then(function(r){
+    var t=$("attText").textContent;
+    AksiProduct.signText(t).then(function(r){
       $("attOut").style.display="block";
-      $("attOut").textContent="algo: "+r.algo+"\nrealCrypto: "+!!r.realCrypto+"\ndid: "+r.did+"\nsig: "+r.sig+"\n"+(r.publicKey?"publicKey: "+JSON.stringify(r.publicKey):"");
-      $("vMsg").value=att.text;
-      $("vSig").value=typeof r.sig==="string"?r.sig:JSON.stringify(r.sig);
+      $("attOut").textContent="algo: "+r.algo+"\nrealCrypto: "+!!r.realCrypto+"\nsig: "+r.sig+"\n"+(r.publicKey?JSON.stringify(r.publicKey):"");
+      $("vMsg").value=t; $("vSig").value=typeof r.sig==="string"?r.sig:JSON.stringify(r.sig);
       if(r.publicKey) $("vPub").value=JSON.stringify(r.publicKey);
     });
   };
   $("btnSign").onclick=function(){
-    var t=$("msg").value.trim();
-    if(!t){ alert("Введите текст"); return; }
+    var t=$("msg").value.trim(); if(!t) return alert("Введите текст");
     AksiProduct.signText(t).then(function(r){
       $("signOut").style.display="block";
-      $("signOut").textContent="algo: "+r.algo+"\nrealCrypto: "+!!r.realCrypto+"\nsig: "+r.sig+"\n"+(r.publicKey?JSON.stringify(r.publicKey):"");
-      $("vMsg").value=t;
-      $("vSig").value=typeof r.sig==="string"?r.sig:JSON.stringify(r.sig);
+      $("signOut").textContent="algo: "+r.algo+"\nrealCrypto: "+!!r.realCrypto+"\nsig: "+r.sig;
+      $("vMsg").value=t; $("vSig").value=typeof r.sig==="string"?r.sig:JSON.stringify(r.sig);
       if(r.publicKey) $("vPub").value=JSON.stringify(r.publicKey);
     });
   };
   $("btnVerify").onclick=async function(){
     var out=$("out"); out.className="";
     var text=$("vMsg").value, sigRaw=$("vSig").value.trim(), pubRaw=$("vPub").value.trim();
-    if(!text||!sigRaw){ out.textContent="Нужны текст и подпись."; out.className="bad"; return; }
+    if(!text||!sigRaw){out.textContent="Нужны текст и подпись.";out.className="bad";return;}
     try{
       var hash=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
       var hex=Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
-      if(hex===sigRaw || hex.indexOf(sigRaw)===0){ out.textContent="✓ SHA-256 совпадает.\n"+hex; out.className="ok"; return; }
+      if(hex===sigRaw||hex.indexOf(sigRaw)===0){out.textContent="✓ SHA-256 совпадает.\n"+hex;out.className="ok";return;}
     }catch(e){}
     if(pubRaw){
       try{
         var jwk=JSON.parse(pubRaw);
         var key=await crypto.subtle.importKey("jwk", jwk, {name:"Ed25519"}, false, ["verify"]);
-        var sigBytes = looksHex(sigRaw)?hexToBytes(sigRaw):b64ToBytes(sigRaw);
+        var sigBytes=looksHex(sigRaw)?hexToBytes(sigRaw):b64ToBytes(sigRaw);
         var ok=await crypto.subtle.verify({name:"Ed25519"}, key, sigBytes, new TextEncoder().encode(text));
-        if(ok){ out.textContent="✓ Подпись Ed25519 ВЕРНА."; out.className="ok"; }
-        else { out.textContent="✗ Подпись Ed25519 НЕВЕРНА."; out.className="bad"; }
-        return;
-      }catch(e){ out.textContent="Ошибка Ed25519: "+e.message; out.className="bad"; return; }
+        out.textContent=ok?"✓ Подпись Ed25519 ВЕРНА.":"✗ Подпись НЕВЕРНА.";
+        out.className=ok?"ok":"bad"; return;
+      }catch(e){out.textContent="Ошибка: "+e.message;out.className="bad";return;}
     }
-    out.textContent="Укажите publicKey JWK для Ed25519 или полный SHA-256."; out.className="bad";
+    out.textContent="Укажите JWK для Ed25519 или полный SHA-256."; out.className="bad";
   };
 })();
 </script>
