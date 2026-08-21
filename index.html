@@ -77,7 +77,7 @@ h2{font-size:.95rem;font-weight:800;margin-bottom:6px}.muted{color:var(--muted);
   <button type="button" class="tab" data-p="files">📎 Файлы</button>
   <button type="button" class="tab" data-p="id">🔑 ID</button>
   <button type="button" class="tab" data-p="about">ℹ О продукте</button>
-  <div id="st">загрузка…</div>
+  <div id="st">загрузка…</div><div id="clock" style="font-size:10px;color:var(--muted);padding:0 8px 4px"></div>
 </aside>
 <div class="main">
   <div class="top"><h1 id="title">Главная</h1><p id="sub">Все модули работают здесь</p></div>
@@ -195,6 +195,8 @@ var titles={home:["Главная","Все модули работают зде�
 
 function esc(s){return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");}
 function setSt(t,ok){if(!ST)return;ST.textContent=t;ST.classList.toggle("ok",!!ok);}
+function tickClock(){var el=document.getElementById("clock");if(!el)return;try{var now=new Date();el.textContent=now.toLocaleString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК · v22";}catch(e){el.textContent="v22";}}
+setInterval(tickClock,1000);tickClock();
 function showProg(t){if(!PROG)return;if(!t){PROG.classList.remove("on");PROG.textContent="";return;}PROG.textContent=t;PROG.classList.add("on");}
 
 function openPanel(name){
@@ -359,9 +361,11 @@ function sendText(raw){
 }
 
 function bind(){
-  document.querySelectorAll(".tab").forEach(function(t){t.onclick=function(){openPanel(t.getAttribute("data-p"));};});
-  document.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){openPanel(b.getAttribute("data-go"));};});
-  document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){sendText(b.getAttribute("data-q"));};});
+  document.addEventListener("click",function(e){
+    var t=e.target.closest(".tab");if(t){e.preventDefault();openPanel(t.getAttribute("data-p"));return;}
+    var g=e.target.closest("[data-go]");if(g){e.preventDefault();openPanel(g.getAttribute("data-go"));return;}
+    var q=e.target.closest("[data-q]");if(q){e.preventDefault();sendText(q.getAttribute("data-q"));return;}
+  });
   var burger=document.getElementById("burger"),overlay=document.getElementById("overlay");
   if(burger)burger.onclick=openSide;if(overlay)overlay.onclick=closeSide;
   if(SEND)SEND.onclick=function(){sendText(INP&&INP.value);};
