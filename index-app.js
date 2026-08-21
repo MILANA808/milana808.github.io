@@ -1,29 +1,32 @@
 /**
- * АКСИ — единое приложение
- * Левые вкладки · offline · по-русски
+ * АКСИ v18 — единый рабочий клиент (vanilla)
+ * Чат, аватар, голос, приложения, квант, ID, LLM
  */
 (function () {
   "use strict";
   if (window.__AKSI_APP__) return;
   window.__AKSI_APP__ = 1;
 
-  var STATUS = document.getElementById("status");
+  var STATUS = document.getElementById("sideStatus");
   var THREAD = document.getElementById("thread");
   var PROG = document.getElementById("prog");
   var INP = document.getElementById("inp");
   var SEND = document.getElementById("send");
   var CHAT_KEY = "aksi_chat_v1";
+  var voiceOn = true;
+  var emotion = "neutral";
   var titles = {
-    chat: ["Чат", "Пишите внизу — ответ сразу, offline"],
-    search: ["Поиск", "Кратко из Википедии"],
-    notes: ["Заметки", "Только на этом устройстве"],
+    home: ["Главная", "Все модули в одном окне"],
+    chat: ["Чат", "Аватар · голос · ход мысли"],
+    apps: ["Приложения", "Запуск модулей"],
     quantum: ["Квант", "Учебная симуляция 2 кубитов"],
-    tools: ["Счёт", "Простые выражения"],
-    voice: ["Голос", "Речь → чат"],
-    files: ["Файлы", "Текст в локальную память"],
+    search: ["Поиск", "Википедия"],
+    notes: ["Заметки", "Память устройства"],
+    voice: ["Голос", "Микрофон → чат"],
+    files: ["Файлы", ".txt / .md"],
     id: ["ID", "Локальный идентификатор"],
-    llm: ["LLM", "Опционально, на вашем ПК"],
-    about: ["О продукте", "Что реально работает"]
+    llm: ["LLM", "Ollama (опционально)"],
+    about: ["О продукте", "Что работает"]
   };
 
   function setStatus(t, ok) {
@@ -34,16 +37,18 @@
   function showProg(t) {
     if (!PROG) return;
     if (!t) { PROG.classList.remove("on"); PROG.textContent = ""; return; }
-    PROG.textContent = t;
-    PROG.classList.add("on");
+    PROG.textContent = t; PROG.classList.add("on");
+  }
+  function esc(s) {
+    return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");
   }
 
   function openPanel(name) {
     document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("on"); });
     document.querySelectorAll(".tab").forEach(function (t) {
-      t.classList.toggle("on", t.getAttribute("data-panel") === name);
+      t.classList.toggle("on", t.getAttribute("data-p") === name);
     });
-    var panel = document.getElementById("panel-" + name);
+    var panel = document.getElementById("p-" + name);
     if (panel) panel.classList.add("on");
     var meta = titles[name] || [name, ""];
     var th = document.getElementById("title");
@@ -56,67 +61,97 @@
     closeSide();
   }
   function closeSide() {
-    var side = document.getElementById("side");
-    var ov = document.getElementById("overlay");
-    if (side) side.classList.remove("open");
-    if (ov) ov.classList.remove("on");
+    var s = document.getElementById("side"), o = document.getElementById("overlay");
+    if (s) s.classList.remove("open");
+    if (o) o.classList.remove("on");
   }
   function openSide() {
-    var side = document.getElementById("side");
-    var ov = document.getElementById("overlay");
-    if (side) side.classList.add("open");
-    if (ov) ov.classList.add("on");
+    var s = document.getElementById("side"), o = document.getElementById("overlay");
+    if (s) s.classList.add("open");
+    if (o) o.classList.add("on");
   }
 
-  var DB_NAME = "aksi_v1", STORE = "facts", db = null, memCache = [];
-  function openDB() {
-    return new Promise(function (resolve) {
-      try {
-        var req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = function (e) {
-          var d = e.target.result;
-          if (!d.objectStoreNames.contains(STORE))
-            d.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
-        };
-        req.onsuccess = function (e) { db = e.target.result; resolve(db); };
-        req.onerror = function () { resolve(null); };
-      } catch (e) { resolve(null); }
-    });
+  function tickMSK() {
+    try {
+      document.getElementById("mskTime").textContent =
+        new Date().toLocaleTimeString("ru-RU", { timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit", second: "2-digit" }) + " МСК";
+    } catch (e) {}
   }
+  function updateLiveExtra() {
+    var id = localStorage.getItem("aksi_local_id") || "ещё не создан";
+    var name = localStorage.getItem("aksi_local_name") || "АКСИ";
+    var el = document.getElementById("liveExtra");
+    if (!el) return;
+    el.innerHTML =
+      "<div><b>Имя:</b> " + esc(name) + "</div>" +
+      "<div style='margin-top:6px'><b>Локальный ID</b><code>" + esc(id) + "</code></div>" +
+      "<div style='margin-top:8px;color:#94a3b8'>Режим: offline-first · подпись SHA-256</div>";
+  }
+
+  var COLORS = {
+    neutral: { p: "#a855f7", i: "#7c3aed" },
+    happy: { p: "#22c55e", i: "#16a34a" },
+    thinking: { p: "#3b82f6", i: "#1d4ed8" },
+    excited: { p: "#f59e0b", i: "#d97706" },
+    sad: { p: "#64748b", i: "#475569" },
+    confident: { p: "#ec4899", i: "#be185d" }
+  };
+  function detectEmotion(text) {
+    var t = (text || "").toLowerCase();
+    if (/рад|отлично|прекрасно|здорово/.test(t)) return "happy";
+    if (/думаю|анализ|вычисл|расчёт/.test(t)) return "thinking";
+    if (/жаль|сожалею|к сожалению/.test(t)) return "sad";
+    if (/квант|энерг|резонанс|запутан/.test(t)) return "confident";
+    if (t.indexOf("!") !== -1 && t.length < 80) return "excited";
+    return "neutral";
+  }
+  function drawAvatar(emo, speaking) {
+    emotion = emo || "neutral";
+    var c = COLORS[emotion] || COLORS.neutral;
+    var svg = document.getElementById("avatarSvg");
+    if (!svg) return;
+    var mouth = emotion === "happy" || emotion === "excited"
+      ? "M 30 52 Q 44 64 58 52"
+      : emotion === "sad"
+      ? "M 30 58 Q 44 50 58 58"
+      : "M 32 54 Q 44 58 56 54";
+    var open = speaking ? '<ellipse cx="44" cy="56" rx="6" ry="4" fill="' + c.p + '" opacity="0.6"/>' : "";
+    svg.innerHTML =
+      '<circle cx="44" cy="44" r="34" fill="#0d0820" stroke="' + c.p + '" stroke-width="2"/>' +
+      '<circle cx="32" cy="38" r="5" fill="' + c.i + '"/><circle cx="56" cy="38" r="5" fill="' + c.i + '"/>' +
+      '<circle cx="33.5" cy="36.5" r="1.6" fill="#fff" opacity="0.8"/><circle cx="57.5" cy="36.5" r="1.6" fill="#fff" opacity="0.8"/>' +
+      '<path d="' + mouth + '" fill="none" stroke="' + c.p + '" stroke-width="2.2" stroke-linecap="round"/>' + open;
+    var lab = document.getElementById("emoLabel");
+    if (lab) lab.textContent = emotion === "thinking" ? "Думаю…" : emotion === "happy" ? "Рада помочь" : emotion === "excited" ? "Интересно!" : "АКСИ";
+  }
+  function speak(text) {
+    if (!voiceOn || !window.speechSynthesis) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(String(text).slice(0, 280));
+      u.lang = "ru-RU";
+      u.rate = emotion === "excited" ? 1.12 : emotion === "thinking" ? 0.92 : 1;
+      u.onstart = function () { drawAvatar(emotion, true); };
+      u.onend = function () { drawAvatar(emotion, false); };
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
+  var memCache = [];
   function loadFacts() {
-    return openDB().then(function () {
-      if (!db) {
-        try { memCache = JSON.parse(localStorage.getItem("aksi_facts") || "[]"); }
-        catch (e) { memCache = []; }
-        return memCache;
-      }
-      return new Promise(function (resolve) {
-        var tx = db.transaction(STORE, "readonly");
-        var r = tx.objectStore(STORE).getAll();
-        r.onsuccess = function () { memCache = r.result || []; resolve(memCache); };
-        r.onerror = function () { resolve([]); };
-      });
-    });
+    try { memCache = JSON.parse(localStorage.getItem("aksi_facts") || "[]"); } catch (e) { memCache = []; }
+    return Promise.resolve(memCache);
   }
   function saveFact(text) {
     text = (text || "").trim();
     if (!text) return Promise.resolve();
-    var item = { text: text.slice(0, 2000), ts: Date.now() };
-    memCache.unshift(item);
-    try { localStorage.setItem("aksi_facts", JSON.stringify(memCache.slice(0, 200))); } catch (e) {}
-    if (!db) return Promise.resolve();
-    return new Promise(function (resolve) {
-      try {
-        var tx = db.transaction(STORE, "readwrite");
-        tx.objectStore(STORE).add(item);
-        tx.oncomplete = function () { resolve(); };
-        tx.onerror = function () { resolve(); };
-      } catch (e) { resolve(); }
-    });
+    memCache.unshift({ text: text.slice(0, 2000), ts: Date.now() });
+    memCache = memCache.slice(0, 200);
+    try { localStorage.setItem("aksi_facts", JSON.stringify(memCache)); } catch (e) {}
+    return Promise.resolve();
   }
-  function deleteFact(idx) {
-    if (idx < 0 || idx >= memCache.length) return;
-    memCache.splice(idx, 1);
+  function deleteFact(i) {
+    memCache.splice(i, 1);
     try { localStorage.setItem("aksi_facts", JSON.stringify(memCache)); } catch (e) {}
     renderNotes();
   }
@@ -124,18 +159,15 @@
     var list = document.getElementById("nList");
     if (!list) return;
     if (!memCache.length) {
-      list.innerHTML = '<p class="muted" style="margin-top:8px">Пока пусто. В чате: <b>запомни: текст</b></p>';
+      list.innerHTML = '<p class="muted" style="margin-top:8px">Пусто. В чате: <b>запомни: текст</b></p>';
       return;
     }
     list.innerHTML = memCache.slice(0, 40).map(function (f, i) {
-      return '<div class="fact"><div style="flex:1">' + esc(f.text) + '</div><button type="button" data-del="' + i + '" aria-label="Удалить">×</button></div>';
+      return '<div class="fact"><div style="flex:1">' + esc(f.text) + '</div><button type="button" data-del="' + i + '">×</button></div>';
     }).join("");
     list.querySelectorAll("[data-del]").forEach(function (b) {
       b.onclick = function () { deleteFact(+b.getAttribute("data-del")); };
     });
-  }
-  function esc(s) {
-    return String(s).replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
   }
 
   function addMsg(role, text, meta, thoughts) {
@@ -143,9 +175,7 @@
     var div = document.createElement("div");
     div.className = "msg " + (role === "u" ? "u" : "a");
     var html = '<div class="b">' + esc(text) + "</div>";
-    if (thoughts && thoughts.length) {
-      html += '<div class="thought">Ход: ' + esc(thoughts.join(" → ")) + "</div>";
-    }
+    if (thoughts && thoughts.length) html += '<div class="thought">Ход: ' + esc(thoughts.join(" → ")) + "</div>";
     if (meta) html += '<div class="meta">' + esc(meta) + "</div>";
     div.innerHTML = html;
     THREAD.appendChild(div);
@@ -154,12 +184,10 @@
   }
   function persistChat() {
     try {
-      var nodes = THREAD ? THREAD.querySelectorAll(".msg") : [];
-      var arr = [];
+      var nodes = THREAD.querySelectorAll(".msg"), arr = [];
       for (var i = 0; i < nodes.length; i++) {
         var b = nodes[i].querySelector(".b");
-        if (!b) continue;
-        arr.push({ role: nodes[i].classList.contains("u") ? "u" : "a", text: b.textContent });
+        if (b) arr.push({ role: nodes[i].classList.contains("u") ? "u" : "a", text: b.textContent });
       }
       localStorage.setItem(CHAT_KEY, JSON.stringify(arr.slice(-40)));
     } catch (e) {}
@@ -175,34 +203,26 @@
   function clearChat() {
     if (THREAD) THREAD.innerHTML = "";
     try { localStorage.removeItem(CHAT_KEY); } catch (e) {}
-    addMsg("a", "История очищена. Напишите вопрос.", "система");
+    addMsg("a", "История очищена.", "система");
   }
 
   var KB = [
-    { q: ["кто ты", "что ты", "ты кто", "представься"], a: "Я АКСИ — локальный помощник в браузере.\n\nОтвечаю offline: база знаний, память, счёт, учебный квант. При сети могу кратко взять Википедию. LLM — только если вы сами подключите на своём компьютере.\n\nДанные по умолчанию остаются на устройстве." },
-    { q: ["что умеешь", "возможности", "функции", "что можешь"], a: "Умею:\n• чат offline с ходом мысли и подписью\n• запоминать заметки («запомни: …»)\n• поиск в Википедии (нужен интернет)\n• считать простые выражения\n• учебный квант-демо (Bell, суперпозиция)\n• голос → текст (если браузер умеет)\n• читать .txt/.md в память\n• опционально — локальную LLM (Ollama)\n\nВкладки слева открывают все модули." },
-    { q: ["привет", "здравствуй", "добрый день", "hi", "hello"], a: "Здравствуйте. Я АКСИ. Напишите вопрос или откройте вкладку слева." },
-    { q: ["помощь", "help", "как пользоваться"], a: "Слева — вкладки: Чат, Поиск, Заметки, Квант, Счёт, Голос, Файлы, ID, LLM.\n\nВ чате:\n• «запомни: текст» — заметка\n• «2+2» — счёт\n• «запутанность» — квант-демо\n• обычный вопрос — ответ из базы или Википедии" },
-    { q: ["запутанность", "белл", "bell", "кубит", "квант"], a: "__QUANTUM_BELL__" },
-    { q: ["суперпозиция"], a: "__QUANTUM_SUPER__" },
-    { q: ["память", "заметки"], a: "Заметки хранятся на этом устройстве. Напишите «запомни: …» или откройте вкладку «Заметки»." },
-    { q: ["подпись", "хеш", "sha"], a: "Под каждым ответом — локальная подпись (SHA-256). Это целостность текста на устройстве, не доказательство истинности внешних фактов." },
-    { q: ["офлайн", "offline", "без интернета"], a: "Да. База, заметки, счёт и квант работают без сети. Википедия и LLM — только при доступе к сети / backend." },
-    { q: ["бэкенд", "backend", "ollama", "llm"], a: "LLM необязательна. Установите Ollama, запустите backend, укажите URL во вкладке LLM. Без этого чат уже отвечает offline." }
+    { q: ["кто ты", "что ты", "представься"], a: "Я АКСИ — локальный помощник в браузере.\n\nЧат, заметки, поиск, квант-демо, голос, ID. LLM — только если вы подключите Ollama на своём ПК.\nДанные по умолчанию остаются на устройстве." },
+    { q: ["что умеешь", "возможности", "функции"], a: "• Чат offline + ход мысли + подпись\n• Приложения (вкладки слева)\n• Квант: Bell и суперпозиция\n• Поиск (Википедия)\n• Заметки и файлы\n• Голос (ввод и озвучка)\n• Локальный ID\n• Опционально LLM" },
+    { q: ["привет", "здравствуй", "добрый"], a: "Здравствуйте. Откройте модуль слева или напишите вопрос." },
+    { q: ["помощь", "help"], a: "Слева — модули. В чате: «запомни: …», «2+2», «запутанность»." },
+    { q: ["запутанность", "белл", "bell", "кубит", "квант"], a: "__QB__" },
+    { q: ["суперпозиция"], a: "__QS__" },
+    { q: ["офлайн", "offline"], a: "База, заметки, счёт и квант работают без сети." }
   ];
-
   function matchKB(text) {
     var t = (text || "").toLowerCase().replace(/ё/g, "е");
-    var best = null, bestScore = 0;
+    var best = null, sc = 0;
     for (var i = 0; i < KB.length; i++) {
-      var item = KB[i];
-      for (var j = 0; j < item.q.length; j++) {
-        var key = item.q[j];
-        if (t === key) return item;
-        if (t.indexOf(key) !== -1 && key.length > bestScore) {
-          bestScore = key.length;
-          best = item;
-        }
+      for (var j = 0; j < KB[i].q.length; j++) {
+        var k = KB[i].q[j];
+        if (t === k) return KB[i];
+        if (t.indexOf(k) !== -1 && k.length > sc) { sc = k.length; best = KB[i]; }
       }
     }
     return best;
@@ -210,76 +230,56 @@
 
   function statevector(gates) {
     var s = [1, 0, 0, 0];
-    function applyH(q) {
-      var ns = [0, 0, 0, 0], inv = 1 / Math.SQRT2;
+    function H(q) {
+      var n = [0, 0, 0, 0], inv = 1 / Math.SQRT2;
       if (q === 0) {
-        ns[0] = inv * (s[0] + s[2]); ns[1] = inv * (s[1] + s[3]);
-        ns[2] = inv * (s[0] - s[2]); ns[3] = inv * (s[1] - s[3]);
+        n[0] = inv * (s[0] + s[2]); n[1] = inv * (s[1] + s[3]);
+        n[2] = inv * (s[0] - s[2]); n[3] = inv * (s[1] - s[3]);
       } else {
-        ns[0] = inv * (s[0] + s[1]); ns[1] = inv * (s[0] - s[1]);
-        ns[2] = inv * (s[2] + s[3]); ns[3] = inv * (s[2] - s[3]);
+        n[0] = inv * (s[0] + s[1]); n[1] = inv * (s[0] - s[1]);
+        n[2] = inv * (s[2] + s[3]); n[3] = inv * (s[2] - s[3]);
       }
-      s = ns;
+      s = n;
     }
-    function applyCNOT() {
-      var ns = s.slice(); ns[2] = s[3]; ns[3] = s[2]; s = ns;
-    }
-    gates.forEach(function (g) {
-      if (g === "H0") applyH(0);
-      else if (g === "H1") applyH(1);
-      else if (g === "CNOT") applyCNOT();
-    });
-    return { probs: s.map(function (a) { return a * a; }) };
+    function CNOT() { var n = s.slice(); n[2] = s[3]; n[3] = s[2]; s = n; }
+    gates.forEach(function (g) { if (g === "H0") H(0); else if (g === "CNOT") CNOT(); });
+    return s.map(function (a) { return a * a; });
   }
   function showQuantum(mode) {
     var gates = mode === "bell" ? ["H0", "CNOT"] : ["H0"];
-    var r = statevector(gates);
+    var p = statevector(gates);
     var labels = ["|00⟩", "|01⟩", "|10⟩", "|11⟩"];
     var box = document.getElementById("qProbs");
     var txt = document.getElementById("qText");
-    if (box) {
-      box.innerHTML = labels.map(function (l, i) {
-        return "<div><b>" + (r.probs[i] * 100).toFixed(0) + "%</b>" + l + "</div>";
-      }).join("");
-    }
-    if (txt) {
-      txt.innerHTML = mode === "bell"
-        ? "<b>Запутанность (Белл)</b><br>Гейты: H → CNOT. |00⟩ и |11⟩ ≈ 50%."
-        : "<b>Суперпозиция</b><br>Гейт H. После измерения 0 или 1 ≈ 50%.";
-    }
-    if (mode === "bell") {
-      return "Запутанность двух кубитов (Белл).\n\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\n\nЕсли первый кубит 0 — второй тоже 0. Это учебная симуляция в браузере.";
-    }
-    return "Суперпозиция (гейт Адамара).\n\nДо измерения — «и 0, и 1». После — 0 или 1 примерно поровну.";
+    if (box) box.innerHTML = labels.map(function (l, i) {
+      return "<div><b>" + (p[i] * 100).toFixed(0) + "%</b>" + l + "</div>";
+    }).join("");
+    if (txt) txt.innerHTML = mode === "bell"
+      ? "<b>Bell</b> — H + CNOT. |00⟩ и |11⟩ ≈ 50%."
+      : "<b>Суперпозиция</b> — H. После измерения 0 или 1 ≈ 50%.";
+    return mode === "bell"
+      ? "Запутанность (Bell):\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\nЕсли первый кубит 0 — второй тоже 0. Учебная симуляция."
+      : "Суперпозиция (H): до измерения «и 0, и 1», после — 0 или 1 ≈ поровну.";
   }
-
   function safeMath(expr) {
     var e = String(expr || "").replace(/,/g, ".").replace(/\s/g, "");
     if (!/^[\d+\-*/().^]+$/.test(e)) return null;
     e = e.replace(/\^/g, "**");
     try {
-      var v = Function('"use strict"; return (' + e + ");')();
+      var v = Function('"use strict";return(' + e + ")')();
       return typeof v === "number" && isFinite(v) ? v : null;
     } catch (err) { return null; }
   }
-
-  function searchWiki(query) {
-    var url = "https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(query);
-    return fetch(url).then(function (r) {
-      if (!r.ok) throw new Error("wiki");
-      return r.json();
-    }).then(function (j) {
-      if (!j || !j.extract) return null;
-      return (j.title ? j.title + ".\n\n" : "") + String(j.extract).slice(0, 900);
-    }).catch(function () { return null; });
+  function searchWiki(q) {
+    return fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(q))
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (j) { return j && j.extract ? ((j.title || "") + ".\n\n" + String(j.extract).slice(0, 900)) : null; })
+      .catch(function () { return null; });
   }
-
   function shaLocal(str) {
     if (window.crypto && crypto.subtle) {
       return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function (buf) {
-        return Array.from(new Uint8Array(buf)).map(function (b) {
-          return b.toString(16).padStart(2, "0");
-        }).join("").slice(0, 16);
+        return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("").slice(0, 16);
       });
     }
     var h = 0x811c9dc5;
@@ -287,26 +287,11 @@
     return Promise.resolve(("00000000" + (h >>> 0).toString(16)).slice(-8));
   }
 
-  function tryProduct(q) {
-    if (window.AksiProduct && typeof AksiProduct.answer === "function") {
-      return Promise.resolve(AksiProduct.answer(q)).then(function (r) {
-        if (!r) return null;
-        if (typeof r === "string") return { text: r, steps: ["product-core"], meta: "AksiProduct" };
-        return {
-          text: r.text || r.answer || "",
-          steps: r.steps || r.thoughts || ["product-core"],
-          meta: (r.sig ? "sig:" + String(r.sig).slice(0, 16) : "") || r.source || "AksiProduct"
-        };
-      }).catch(function () { return null; });
-    }
-    return Promise.resolve(null);
-  }
-
   function tryLLM(q) {
     var on = document.getElementById("llmOn");
     var urlEl = document.getElementById("llmUrl");
     if (!on || !on.checked) return Promise.resolve(null);
-    var base = (urlEl && urlEl.value || "http://127.0.0.1:8000").replace(/\/$/, "");
+    var base = (urlEl && urlEl.value || "").replace(/\/$/, "");
     showProg("LLM…");
     return fetch(base + "/v1/chat/completions", {
       method: "POST",
@@ -314,66 +299,62 @@
       body: JSON.stringify({
         model: "local",
         messages: [
-          { role: "system", content: "Ты АКСИ — краткий полезный помощник на русском. Без выдумок." },
+          { role: "system", content: "Ты АКСИ — краткий помощник на русском. Без выдумок." },
           { role: "user", content: q }
         ],
         temperature: 0.3
       })
-    }).then(function (r) {
-      if (!r.ok) throw new Error("llm");
-      return r.json();
-    }).then(function (j) {
-      var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
-      return t ? { text: t, steps: ["llm"], meta: "backend" } : null;
-    }).catch(function () { return null; });
+    }).then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (j) {
+        var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+        return t ? { text: t, steps: ["llm"], meta: "backend" } : null;
+      }).catch(function () { return null; });
   }
-
+  function tryProduct(q) {
+    if (window.AksiProduct && typeof AksiProduct.answer === "function") {
+      return Promise.resolve(AksiProduct.answer(q)).then(function (r) {
+        if (!r) return null;
+        if (typeof r === "string") return { text: r, steps: ["core"], meta: "product" };
+        return { text: r.text || r.answer || "", steps: r.steps || ["core"], meta: r.source || "product" };
+      }).catch(function () { return null; });
+    }
+    return Promise.resolve(null);
+  }
   function localAnswer(q) {
     var steps = ["разбор"];
     var m = q.match(/^запомни[:\s]+(.+)/i);
     if (m) {
-      steps.push("заметка");
       return saveFact(m[1]).then(function () {
         renderNotes();
-        return { text: "Запомнила: «" + m[1].slice(0, 200) + "».", steps: steps, meta: "память" };
+        return { text: "Запомнила: «" + m[1].slice(0, 200) + "».", steps: steps.concat(["память"]), meta: "память" };
       });
     }
-    var mathQ = q.replace(/^(сколько будет|посчитай|вычисли)\s+/i, "").trim();
-    if (/^[\d+\-*/().^\s,]+$/.test(mathQ) && /[\d]/.test(mathQ)) {
-      var v = safeMath(mathQ);
-      if (v !== null) {
-        steps.push("счёт");
-        return Promise.resolve({ text: "Результат: " + v, steps: steps, meta: "math" });
-      }
+    var mq = q.replace(/^(сколько будет|посчитай|вычисли)\s+/i, "").trim();
+    if (/^[\d+\-*/().^\s,]+$/.test(mq) && /\d/.test(mq)) {
+      var v = safeMath(mq);
+      if (v !== null) return Promise.resolve({ text: "Результат: " + v, steps: steps.concat(["счёт"]), meta: "math" });
     }
     var kb = matchKB(q);
     if (kb) {
-      steps.push("база");
-      if (kb.a === "__QUANTUM_BELL__") return Promise.resolve({ text: showQuantum("bell"), steps: steps.concat(["квант"]), meta: "квант" });
-      if (kb.a === "__QUANTUM_SUPER__") return Promise.resolve({ text: showQuantum("super"), steps: steps.concat(["квант"]), meta: "квант" });
-      return Promise.resolve({ text: kb.a, steps: steps, meta: "KB" });
+      if (kb.a === "__QB__") return Promise.resolve({ text: showQuantum("bell"), steps: steps.concat(["квант"]), meta: "квант" });
+      if (kb.a === "__QS__") return Promise.resolve({ text: showQuantum("super"), steps: steps.concat(["квант"]), meta: "квант" });
+      return Promise.resolve({ text: kb.a, steps: steps.concat(["база"]), meta: "KB" });
     }
     var ql = q.toLowerCase();
     for (var i = 0; i < memCache.length; i++) {
-      if (memCache[i].text && memCache[i].text.toLowerCase().indexOf(ql.slice(0, 24)) !== -1) {
-        steps.push("память");
-        return Promise.resolve({ text: "Из ваших заметок:\n" + memCache[i].text.slice(0, 500), steps: steps, meta: "память" });
+      if (memCache[i].text && memCache[i].text.toLowerCase().indexOf(ql.slice(0, 20)) !== -1) {
+        return Promise.resolve({ text: "Из заметок:\n" + memCache[i].text.slice(0, 500), steps: steps.concat(["память"]), meta: "память" });
       }
     }
     if (navigator.onLine) {
-      steps.push("вики");
       showProg("Ищу…");
-      var query = q.replace(/^(что такое|кто такой|расскажи про|почему)\s+/i, "").trim();
+      var query = q.replace(/^(что такое|кто такой|расскажи про)\s+/i, "").trim();
       return searchWiki(query).then(function (w) {
-        if (w) return { text: w, steps: steps, meta: "Wikipedia" };
-        return { text: "Точного ответа в базе нет. Уточните вопрос или добавьте «запомни: …».", steps: steps, meta: "fallback" };
+        if (w) return { text: w, steps: steps.concat(["вики"]), meta: "Wikipedia" };
+        return { text: "Точного ответа нет. Уточните или «запомни: …».", steps: steps, meta: "fallback" };
       });
     }
-    return Promise.resolve({
-      text: "Офлайн: в локальной базе точного ответа нет. Попробуйте «кто ты», «что умеешь» или «запомни: …».",
-      steps: steps.concat(["офлайн"]),
-      meta: "offline"
-    });
+    return Promise.resolve({ text: "Офлайн: в базе нет ответа. Попробуйте «кто ты» или «что умеешь».", steps: steps.concat(["офлайн"]), meta: "offline" });
   }
 
   function sendText(raw) {
@@ -382,22 +363,25 @@
     addMsg("u", q);
     if (INP) INP.value = "";
     showProg("Думаю…");
+    drawAvatar("thinking", false);
     openPanel("chat");
-    var p = tryLLM(q).then(function (r) {
+    tryLLM(q).then(function (r) {
       if (r) return r;
       return tryProduct(q).then(function (r2) {
         if (r2 && r2.text) return r2;
         return localAnswer(q);
       });
-    });
-    p.then(function (ans) {
+    }).then(function (ans) {
       return shaLocal(ans.text + "|" + Date.now()).then(function (h) {
         showProg("");
+        var emo = detectEmotion(ans.text);
+        drawAvatar(emo, false);
         addMsg("a", ans.text, (ans.meta || "") + " · " + h, ans.steps);
+        speak(ans.text);
       });
     }).catch(function () {
       showProg("");
-      addMsg("a", "Ошибка ответа. Попробуйте ещё раз.", "error");
+      addMsg("a", "Ошибка. Попробуйте ещё раз.", "error");
     });
   }
 
@@ -409,12 +393,14 @@
       var name = localStorage.getItem("aksi_local_name") || "";
       if (el) el.textContent = id;
       if (u) u.textContent = name ? "Имя: " + name : "";
+      var lh = document.getElementById("liveHash");
+      if (lh && id !== "—") lh.textContent = id.slice(-8).toUpperCase();
+      updateLiveExtra();
     } catch (e) {}
   }
   function genUserDID() {
     var name = (document.getElementById("didName") || {}).value || "aksi";
-    var seed = name + "|" + Date.now() + "|" + Math.random();
-    shaLocal(seed).then(function (h) {
+    shaLocal(name + "|" + Date.now() + "|" + Math.random()).then(function (h) {
       var id = "local:" + h + h.slice(0, 8);
       try {
         localStorage.setItem("aksi_local_id", id);
@@ -423,20 +409,12 @@
       renderDID();
     });
   }
-
   function startVoice() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      addMsg("a", "Голос не поддерживается в этом браузере.", "голос");
-      openPanel("chat");
-      return;
-    }
+    if (!SR) { addMsg("a", "Голос не поддерживается в этом браузере.", "голос"); openPanel("chat"); return; }
     var r = new SR();
     r.lang = "ru-RU";
-    r.onresult = function (e) {
-      var t = e.results[0][0].transcript;
-      sendText(t);
-    };
+    r.onresult = function (e) { sendText(e.results[0][0].transcript); };
     r.onerror = function () { setStatus("голос: ошибка"); };
     r.start();
     setStatus("слушаю…");
@@ -444,13 +422,15 @@
 
   function bind() {
     document.querySelectorAll(".tab").forEach(function (t) {
-      t.onclick = function () { openPanel(t.getAttribute("data-panel")); };
+      t.onclick = function () { openPanel(t.getAttribute("data-p")); };
+    });
+    document.querySelectorAll("[data-go]").forEach(function (b) {
+      b.onclick = function () { openPanel(b.getAttribute("data-go")); };
     });
     var burger = document.getElementById("burger");
     var overlay = document.getElementById("overlay");
     if (burger) burger.onclick = openSide;
     if (overlay) overlay.onclick = closeSide;
-
     if (SEND) SEND.onclick = function () { sendText(INP && INP.value); };
     if (INP) INP.addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); sendText(INP.value); }
@@ -460,15 +440,17 @@
     });
     var cc = document.getElementById("clearChat");
     if (cc) cc.onclick = clearChat;
-
+    var vt = document.getElementById("voiceToggle");
+    if (vt) vt.onclick = function () {
+      voiceOn = !voiceOn;
+      vt.textContent = voiceOn ? "🔊" : "🔇";
+      if (!voiceOn && window.speechSynthesis) window.speechSynthesis.cancel();
+    };
     var sBtn = document.getElementById("sBtn"), sIn = document.getElementById("sIn");
     if (sBtn && sIn) sBtn.onclick = function () {
-      var q = sIn.value.trim();
-      if (!q) return;
+      var q = sIn.value.trim(); if (!q) return;
       document.getElementById("sOut").textContent = "Ищу…";
-      searchWiki(q).then(function (w) {
-        document.getElementById("sOut").textContent = w || "Ничего не найдено.";
-      });
+      searchWiki(q).then(function (w) { document.getElementById("sOut").textContent = w || "Ничего не найдено."; });
     };
     var nBtn = document.getElementById("nBtn"), nIn = document.getElementById("nIn");
     if (nBtn && nIn) nBtn.onclick = function () {
@@ -477,62 +459,52 @@
     var qBell = document.getElementById("qBell"), qSuper = document.getElementById("qSuper");
     if (qBell) qBell.onclick = function () { showQuantum("bell"); };
     if (qSuper) qSuper.onclick = function () { showQuantum("super"); };
-    var mBtn = document.getElementById("mBtn"), mIn = document.getElementById("mIn");
-    if (mBtn && mIn) mBtn.onclick = function () {
-      var v = safeMath(mIn.value);
-      document.getElementById("mOut").textContent =
-        v === null ? "Не удалось. Пример: (3+2)*4" : "Результат: " + v;
-    };
     var fIn = document.getElementById("fIn");
     if (fIn) fIn.onchange = function () {
-      var files = fIn.files;
-      if (!files || !files.length) return;
-      var out = document.getElementById("fOut"), n = 0;
+      var files = fIn.files, out = document.getElementById("fOut"), n = 0;
+      if (!files) return;
       Array.prototype.forEach.call(files, function (file) {
         var reader = new FileReader();
         reader.onload = function () {
-          var text = String(reader.result || "").slice(0, 8000);
-          saveFact("[" + file.name + "] " + text.slice(0, 600)).then(function () {
-            n++;
-            if (out) out.textContent = "Загружено файлов: " + n;
-            renderNotes();
+          saveFact("[" + file.name + "] " + String(reader.result || "").slice(0, 600)).then(function () {
+            n++; if (out) out.textContent = "Загружено: " + n; renderNotes();
           });
         };
         reader.readAsText(file);
       });
     };
-    var vBtn = document.getElementById("vBtn");
+    var vBtn = document.getElementById("vBtn"), micBtn = document.getElementById("micBtn");
     if (vBtn) vBtn.onclick = startVoice;
+    if (micBtn) micBtn.onclick = startVoice;
     var didGen = document.getElementById("didGen");
     if (didGen) didGen.onclick = genUserDID;
-
+    var livePill = document.getElementById("livePill");
+    var liveExtra = document.getElementById("liveExtra");
+    if (livePill && liveExtra) livePill.onclick = function () {
+      liveExtra.classList.toggle("on");
+      updateLiveExtra();
+    };
     try {
       var cfg = JSON.parse(localStorage.getItem("aksi_llm_cfg") || "{}");
-      var urlEl = document.getElementById("llmUrl");
-      var onEl = document.getElementById("llmOn");
+      var urlEl = document.getElementById("llmUrl"), onEl = document.getElementById("llmOn");
       if (urlEl && cfg.url) urlEl.value = cfg.url;
       if (onEl && cfg.on) onEl.checked = true;
     } catch (e) {}
     var llmSave = document.getElementById("llmSave");
     if (llmSave) llmSave.onclick = function () {
-      var urlEl = document.getElementById("llmUrl");
-      var onEl = document.getElementById("llmOn");
+      var urlEl = document.getElementById("llmUrl"), onEl = document.getElementById("llmOn");
       var cfg = { url: urlEl && urlEl.value, on: !!(onEl && onEl.checked) };
       try { localStorage.setItem("aksi_llm_cfg", JSON.stringify(cfg)); } catch (e) {}
       document.getElementById("llmOut").textContent = "Сохранено.";
-      if (window.AksiProduct && AksiProduct.setConfig) {
-        try { AksiProduct.setConfig({ backendUrl: cfg.url, llmEnabled: cfg.on }); } catch (e) {}
-      }
     };
     var llmPing = document.getElementById("llmPing");
     if (llmPing) llmPing.onclick = function () {
-      var urlEl = document.getElementById("llmUrl");
-      var base = (urlEl && urlEl.value || "").replace(/\/$/, "");
+      var base = (document.getElementById("llmUrl").value || "").replace(/\/$/, "");
       document.getElementById("llmOut").textContent = "Проверка…";
       fetch(base + "/health").then(function (r) {
-        document.getElementById("llmOut").textContent = r.ok ? "Backend доступен." : "Ответ " + r.status;
+        document.getElementById("llmOut").textContent = r.ok ? "Backend доступен." : "Код " + r.status;
       }).catch(function () {
-        document.getElementById("llmOut").textContent = "Недоступен. Запустите Ollama и ./start.sh";
+        document.getElementById("llmOut").textContent = "Недоступен. Запустите Ollama и backend.";
       });
     };
   }
@@ -540,27 +512,21 @@
   function boot() {
     setStatus("загрузка…");
     loadFacts().then(function () {
-      if (window.AksiProduct && typeof AksiProduct.init === "function") {
-        try { AksiProduct.init(); } catch (e) {}
-      }
+      if (window.AksiProduct && AksiProduct.init) try { AksiProduct.init(); } catch (e) {}
+      drawAvatar("neutral", false);
       renderNotes();
       renderDID();
       bind();
+      tickMSK();
+      setInterval(tickMSK, 1000);
       setStatus("готова", true);
       var hash = (location.hash || "").replace("#", "");
-      if (titles[hash]) openPanel(hash);
-      else openPanel("chat");
-      var had = restoreChat();
-      if (!had && THREAD) {
-        addMsg(
-          "a",
-          "Здравствуйте. Я АКСИ — локальный помощник.\n\nСлева — все функции. Внизу — чат.\nПопробуйте: «кто ты» или «что умеешь».",
-          "система"
-        );
+      if (titles[hash]) openPanel(hash); else openPanel("home");
+      if (!restoreChat() && THREAD) {
+        addMsg("a", "Здравствуйте. Я АКСИ.\n\nСлева — модули. На главной — плитки приложений. В чате можно писать и говорить.", "система");
       }
     });
   }
-
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 })();
