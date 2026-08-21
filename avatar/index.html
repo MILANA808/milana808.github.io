@@ -1,88 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ · 3D Avatar</title>
-<meta name="theme-color" content="#03010a"/>
-<style>
-*{margin:0;box-sizing:border-box}body{background:#03010a;color:#e9e3ff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:2}
-a{color:#a78bfa;text-decoration:none;font-size:13px}
-#c{flex:1;display:block}
-.hud{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);text-align:center;z-index:2;width:min(420px,92vw)}
-.hud p{font-size:13px;color:#9ca3af;margin-bottom:10px}
-button{border:none;border-radius:12px;padding:12px 18px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:600;cursor:pointer}
-</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="0;url=/">
+<title>АКСИ</title>
 </head>
 <body>
-<header>
-  <a href="../aksi/">← АКСИ</a>
-  <strong style="letter-spacing:.15em;font-size:12px">3D · Ψ</strong>
-  <a href="../CODEX.md">Кодекс</a>
-</header>
-<canvas id="c"></canvas>
-<div class="hud">
-  <p id="label">Суверенный квантовый слой · движение мыши</p>
-  <button type="button" id="pulse">Пульс ответа</button>
-</div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<script>
-(function(){
-  var canvas=document.getElementById('c');
-  var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true});
-  var scene=new THREE.Scene();
-  var camera=new THREE.PerspectiveCamera(45,1,0.1,100);
-  camera.position.z=4.2;
-  var light=new THREE.PointLight(0xb794f6,1.4,20);light.position.set(2,2,3);scene.add(light);
-  scene.add(new THREE.AmbientLight(0x404060,0.6));
-
-  var geo=new THREE.IcosahedronGeometry(1.1,3);
-  var mat=new THREE.MeshStandardMaterial({
-    color:0x7c3aed,emissive:0x2e1065,metalness:0.35,roughness:0.35,
-    wireframe:false
-  });
-  var mesh=new THREE.Mesh(geo,mat);scene.add(mesh);
-  var wire=new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.18,2),
-    new THREE.MeshBasicMaterial({color:0x76e4f7,wireframe:true,transparent:true,opacity:0.25})
-  );
-  scene.add(wire);
-
-  var particles=new THREE.BufferGeometry();
-  var N=400,pos=new Float32Array(N*3);
-  for(var i=0;i<N*3;i++)pos[i]=(Math.random()-0.5)*8;
-  particles.setAttribute('position',new THREE.BufferAttribute(pos,3));
-  var pts=new THREE.Points(particles,new THREE.PointsMaterial({color:0xc4b5fd,size:0.02,transparent:true,opacity:0.7}));
-  scene.add(pts);
-
-  function resize(){
-    var w=innerWidth,h=innerHeight;
-    renderer.setSize(w,h,false);
-    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
-    camera.aspect=w/h;camera.updateProjectionMatrix();
-  }
-  addEventListener('resize',resize);resize();
-
-  var mx=0,my=0,pulse=0;
-  addEventListener('pointermove',function(e){mx=(e.clientX/innerWidth)*2-1;my=-(e.clientY/innerHeight)*2+1;});
-  document.getElementById('pulse').onclick=function(){pulse=1;};
-
-  var t=0;
-  (function loop(){
-    t+=0.01;
-    pulse*=0.94;
-    var s=1+pulse*0.15;
-    mesh.scale.setScalar(s);wire.scale.setScalar(s*1.02);
-    mesh.rotation.y+=0.008;mesh.rotation.x=my*0.3+Math.sin(t)*0.05;
-    mesh.rotation.y+=mx*0.01;
-    wire.rotation.y-=0.004;
-    pts.rotation.y+=0.001;
-    mat.emissiveIntensity=0.4+pulse*1.2;
-    renderer.render(scene,camera);
-    requestAnimationFrame(loop);
-  })();
-})();
-</script>
+<p><a href="/">На главную</a></p>
 </body>
 </html>
