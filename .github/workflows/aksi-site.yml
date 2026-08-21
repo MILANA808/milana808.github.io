@@ -59,6 +59,9 @@ jobs:
                   for raw in re.findall(rf'{attr}=["\']([^"\']+)', text, flags=re.I):
                       if raw.startswith(('#','http://','https://','mailto:','tel:','data:','javascript:')):
                           continue
+                      # JS template literals inside HTML/scripts — not static paths
+                      if '${' in raw or '{' in raw:
+                          continue
                       target = raw.split('?',1)[0].split('#',1)[0]
                       if not target:
                           continue
