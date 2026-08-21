@@ -1,39 +1,28 @@
-# AKSI — продукт, не демо
+# АКСИ — что реально работает
 
-## Аудит (честно)
+## Работает сейчас
 
-### Реально работает
-- Главная (index.html + index-app.js): чат, Википедия, заметки IndexedDB, квант-демо 2 кубита, счёт, голос, DID-строка
-- aksi-brain.js v7: Wikipedia opensearch, погода wttr, курсы CoinGecko, локальные эвристики, SHA-подпись
-- Много модулей в корне (memory, quantum, proof…) — разрозненно, не единый продукт
-- Backend (Milana-backend): FastAPI/агент/globe — существует, не обязан для главной
+1. **Чат offline** — ответы из локальной базы, эвристик, памяти
+2. **Transparent Thought** — короткие шаги рассуждения видны в UI
+3. **Локальная подпись** — SHA-256 (или Web Crypto, если доступен) на каждое сообщение
+4. **Память** — IndexedDB / localStorage, команда «запомни: …»
+5. **Файлы** — загрузка .txt/.md в локальную память
+6. **Википедия** — краткое summary при наличии сети
+7. **Счёт** — простые выражения
+8. **Квант-демо** — учебный Bell / суперпозиция на 2 кубитах
+9. **Голос** — Web Speech API (если браузер умеет)
+10. **Backend (опционально)** — OpenAI-compatible `/v1/chat/completions` → Ollama
 
-### Маркетинг / долг
-- «Ed25519 DID» часто = SHA-256 от строки, не настоящий keypair
-- AGI, self-mod, P2P mesh, NFT — не production
-- Десятки MD с обещаниями без единого start path
+## Не заявлено
 
-### Вывод
-Есть рабочий offline/online клиентский мозг. Нет одного продукта «открыл → пользуешься каждый день» с чистой границей local / optional backend.
+- AGI, сознание, P2P-mesh, NFT, self-mod в проде
+- Юридически значимый DID как паспорт ИИ
+- Обязательный облачный сервер
 
-## Целевая архитектура
+## Как пользоваться
 
-```
-UI (app/ или index)
-  → AksiCore (intent, memory, KB, wiki, optional LLM)
-  → Identity (подпись + ledger)
-  → IndexedDB
-Optional: FastAPI → Ollama | xAI | OpenAI-compatible
-```
-
-## Фазы
-1. **Ядро** — AksiCore + chat UI + TTP + память (сделано: aksi-core.js, app/)
-2. **Суверенитет** — настоящий Ed25519 (Web Crypto), export/import, offline toggle
-3. **Backend** — docker-compose + OpenAI-compatible proxy
-4. **Продукт** — PWA, README, убрать мёртвые модули с главной
-
-## Запуск
-- Браузер: https://milana808.github.io/app/
-- С LLM: Ollama + backend/main.py, в UI указать http://127.0.0.1:8000
+1. Откройте главную или `/chat/`
+2. Пишите по-русски
+3. При желании поднимите `backend/start.sh` + Ollama
 
 Контакт: aksilove@internet.ru

@@ -1,59 +1,54 @@
-# AKSI MATRIX — Unified + Live LLM
+# АКСИ
 
-**[Сайт](https://milana808.github.io)** · Backend: FastAPI + Ollama
+Простой локальный помощник в браузере.
 
+**Сайт:** https://milana808.github.io  
 **Контакт:** aksilove@internet.ru
 
----
+## Что умеет
+
+- Чат на русском (ответы offline из базы + эвристики)
+- Поиск по Википедии (нужен интернет)
+- Заметки и файлы в IndexedDB (только на устройстве)
+- Голосовой ввод (где поддерживает браузер)
+- Простой квантовый учебный пример (2 кубита)
+- Калькулятор
+- Читаемый ход мысли + локальная SHA-подпись ответа
+- Опционально: локальная LLM через FastAPI + Ollama
+
+Это **не AGI** и не «сознание». Это практичный offline-first чат с прозрачной логикой.
 
 ## Быстрый старт
 
-```bash
-# 1. Ollama (опционально)
-curl -fsSL https://ollama.com/install.sh | sh
-ollama pull mistral
+Откройте https://milana808.github.io — всё работает в браузере без установки.
 
-# 2. Всё одной командой
-chmod +x start.sh && ./start.sh
-```
-
-- UI: http://localhost:3000  
-- API: http://localhost:8000  
-- Docs: http://localhost:8000/docs  
-
-Или вручную:
+### Локальная LLM (по желанию)
 
 ```bash
-cd backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
+ollama pull qwen2.5:3b
+ollama serve
+cd backend && chmod +x start.sh && ./start.sh
 ```
 
-## Что внутри backend/
+В чате укажите backend `http://127.0.0.1:8000`. Подробнее: [BACKEND.md](BACKEND.md).
 
-| Модуль | Назначение |
-|--------|------------|
-| `core/llm.py` | Ollama stream + offline knowledge fallback |
-| `core/memory.py` | Память диалогов по session_id |
-| `core/knowledge.py` | Knowledge base АКСИ |
-| `core/resonance.py` | Подписи + Resonance |
-| `main.py` | Unified API |
+## Структура
 
-## Чат
+| Путь | Назначение |
+|------|------------|
+| `/` | Главная: чат, поиск, заметки, квант, файлы |
+| `/chat/` | Отдельный чат с настройками backend |
+| `/proof/` | Подпись текста (локально) |
+| `backend/` | Опциональный FastAPI + Ollama |
+| `aksi-product-core.js` | Offline-мозг чата |
+| `aksi-core.js` | Локальный идентификатор + подписи |
 
-```bash
-curl -N -X POST http://localhost:8000/api/aksi/chat \
-  -H 'Content-Type: application/json' \
-  -H 'X-Session-ID: test' \
-  -d '{"content":"Кто ты?","mode":"aksi","history":[]}'
-```
+## Честно
 
-## Идентичность
+- Без backend сайт отвечает сам (база знаний, память, вики).
+- Подпись ответа — локальный хеш/крипто в браузере, не сертификат «личности ИИ».
+- Данные по умолчанию не уходят на чужие серверы.
 
-- DID: `did:aksi:ed25519:sovereign-2026`
-- Seed: `AKSI_DIMAX_v3_2026`
+## Лицензия
 
----
-
-*Суверенный ИИ · Transparent Thought Protocol · aksilove@internet.ru*
+См. LICENSE. Контакт: aksilove@internet.ru
