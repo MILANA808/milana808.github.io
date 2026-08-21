@@ -3,272 +3,267 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f4f6fb">
-<meta name="description" content="АКСИ — локальный помощник: чат, заметки, поиск, квант. Всё в браузере.">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="АКСИ — локальный помощник: чат, квант, приложения, голос, ID">
 <title>АКСИ</title>
 <style>
 :root{
-  --bg:#f1f5f9;--side:#0f172a;--side2:#1e293b;--card:#fff;--line:#e2e8f0;
-  --ink:#0f172a;--muted:#64748b;--acc:#6d28d9;--acc2:#2563eb;--soft:#eef2ff;--ok:#059669;
-  --side-w:200px;
+  --bg:#0b1020;--side:#0f172a;--card:#141c2e;--line:#243044;--ink:#e8eef7;--muted:#94a3b8;
+  --acc:#a855f7;--acc2:#3b82f6;--ok:#22c55e;--soft:rgba(168,85,247,.12);--side-w:220px;
 }
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);display:flex}
-a{color:inherit}
-.side{
-  width:var(--side-w);min-width:var(--side-w);background:var(--side);color:#e2e8f0;
-  display:flex;flex-direction:column;padding:12px 10px;gap:4px;
-  position:fixed;left:0;top:0;bottom:0;z-index:40;overflow:auto;
-}
-.brand{display:flex;align-items:center;gap:10px;padding:8px 8px 16px}
-.brand .logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#2563eb);display:grid;place-items:center;font-weight:900;color:#fff}
-.brand b{font-size:15px}.brand span{display:block;font-size:11px;color:#94a3b8;font-weight:400}
-.tab{
-  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
-  border:0;background:transparent;color:#cbd5e1;padding:10px 12px;border-radius:10px;
-  font-size:13px;font-weight:600;cursor:pointer;
-}
-.tab:hover{background:var(--side2);color:#fff}
-.tab.on{background:linear-gradient(135deg,#6d28d9,#2563eb);color:#fff}
-.tab .ic{width:18px;text-align:center;opacity:.9}
-#status{margin-top:auto;padding:10px 8px;font-size:11px;color:#94a3b8;border-top:1px solid #334155}
-#status.ok{color:#34d399}
+button,input,textarea{font:inherit}
+.side{width:var(--side-w);min-width:var(--side-w);background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 10px;position:fixed;inset:0 auto 0 0;z-index:40;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#a855f7,#3b82f6);display:grid;place-items:center;font-weight:900;color:#fff}
+.brand b{font-size:15px}.brand span{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.tab{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:transparent;color:#cbd5e1;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+.tab:hover{background:#1e293b;color:#fff}
+.tab.on{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
+#sideStatus{margin-top:auto;padding:10px 8px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}
+#sideStatus.ok{color:var(--ok)}
 .main{margin-left:var(--side-w);flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;max-height:100dvh}
-.top{padding:14px 16px 8px;border-bottom:1px solid var(--line);background:rgba(241,245,249,.9);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+.live{position:sticky;top:0;z-index:25;display:flex;justify-content:center;padding:10px 12px;background:rgba(11,16,32,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.live-pill{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(34,197,94,.5);animation:ping 1.6s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(34,197,94,.45)}70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.live-extra{display:none;position:absolute;top:48px;left:50%;transform:translateX(-50%);width:min(340px,92vw);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:12px;z-index:30}
+.live-extra.on{display:block}
+.live-extra code{display:block;word-break:break-all;background:#0b1220;padding:8px;border-radius:8px;margin-top:4px;font-size:11px}
+.top{padding:12px 16px 8px}
 .top h1{font-size:1.15rem;font-weight:800}
-.top p{font-size:13px;color:var(--muted);margin-top:2px}
-.content{flex:1;overflow:auto;padding:14px 16px 90px}
-.panel{display:none;max-width:720px}
+.top p{font-size:13px;color:var(--muted)}
+.content{flex:1;overflow:auto;padding:8px 16px 100px}
+.panel{display:none;max-width:880px;margin:0 auto}
 .panel.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
 h2{font-size:1rem;font-weight:800;margin-bottom:6px}
 .muted{color:var(--muted);font-size:13px}
-.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--acc)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer}
-.btn.p{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:0}
-.row{display:flex;gap:8px;margin-top:8px;align-items:center}
-.field{flex:1;padding:11px 12px;border-radius:12px;border:1px solid var(--line);font-size:15px;background:#fff}
-#thread{min-height:180px;max-height:min(52vh,420px);overflow:auto;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.app{border:1px solid var(--line);background:#0f172a;border-radius:14px;padding:14px;cursor:pointer;text-align:left;color:var(--ink);transition:.15s}
+.app:hover{border-color:#7c3aed;transform:translateY(-1px);box-shadow:0 8px 24px rgba(168,85,247,.15)}
+.app .ic{font-size:22px;margin-bottom:6px}
+.app b{display:block;font-size:14px;margin-bottom:4px}
+.app span{font-size:12px;color:var(--muted)}
+.chat-layout{display:grid;grid-template-columns:100px 1fr;gap:12px;align-items:start}
+@media(max-width:560px){.chat-layout{grid-template-columns:1fr}}
+#avatarWrap{text-align:center}
+#avatarSvg{display:block;margin:0 auto;filter:drop-shadow(0 0 12px rgba(168,85,247,.35))}
+#emoLabel{font-size:11px;color:var(--acc);margin-top:6px}
+#thread{max-height:min(48vh,420px);overflow:auto;margin-top:8px}
 .msg{margin:8px 0}.msg .b{padding:11px 13px;border-radius:14px;font-size:14px;white-space:pre-wrap;word-break:break-word}
-.msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;margin-left:12%}
+.msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);margin-left:10%}
 .msg.a .b{background:var(--soft);border:1px solid var(--line)}
 .thought{font-size:12px;color:var(--muted);margin-top:4px}
 .meta{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;word-break:break-all}
-#prog{display:none;font-size:13px;color:var(--acc2);padding:4px 0;font-weight:600}
-#prog.on{display:block}
-.composer{
-  position:fixed;left:var(--side-w);right:0;bottom:0;max-width:none;
-  display:flex;gap:8px;padding:10px 16px max(12px,env(safe-area-inset-bottom));
-  background:rgba(255,255,255,.96);border-top:1px solid var(--line);z-index:30;
-}
-#inp{flex:1;min-height:46px;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;max-width:640px}
-#send{width:48px;border:0;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.btn{border:1px solid var(--line);background:#0f172a;color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.btn.p{background:linear-gradient(135deg,#7c3aed,#2563eb);border:0;color:#fff}
+.row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.field{flex:1;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#0b1220;color:var(--ink);font-size:15px}
+.composer{position:fixed;left:var(--side-w);right:0;bottom:0;display:flex;gap:8px;padding:10px 16px max(12px,env(safe-area-inset-bottom));background:rgba(15,23,42,.95);border-top:1px solid var(--line);z-index:30}
+#inp{flex:1;min-height:46px;border:1px solid var(--line);border-radius:12px;padding:12px;background:#0b1220;color:var(--ink);font-size:16px;max-width:640px}
+#send,#micBtn{width:48px;border:0;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800;cursor:pointer}
+#micBtn{background:#1e293b;border:1px solid var(--line)}
+#prog{display:none;font-size:13px;color:var(--acc2);font-weight:600;padding:4px 0}#prog.on{display:block}
 .probs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
-.probs div{text-align:center;padding:8px 4px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:11px}
+.probs div{text-align:center;padding:8px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:11px}
 .probs b{display:block;font-size:14px;color:var(--acc2)}
-.fact{display:flex;gap:8px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--soft);font-size:14px}
-.fact button{border:0;background:0;cursor:pointer;color:var(--muted);font-size:16px}
-.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;word-break:break-all;background:#f8fafc;padding:8px;border-radius:8px;border:1px solid var(--line)}
+.fact{display:flex;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:#0f172a;font-size:14px}
+.fact button{border:0;background:0;color:var(--muted);cursor:pointer;font-size:16px}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;word-break:break-all;background:#0b1220;padding:8px;border-radius:8px;border:1px solid var(--line)}
 .list{margin:8px 0 0;padding-left:18px;font-size:14px}.list li{margin:4px 0}
-.score{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.score span{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700}
-.score b{display:block;font-size:15px;color:var(--acc)}
 .burger{display:none;position:fixed;top:10px;left:10px;z-index:50;border:0;border-radius:10px;padding:10px 12px;background:var(--side);color:#fff;font-weight:700}
-.overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:35}
-@media(max-width:820px){
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:35}
+@media(max-width:860px){
   :root{--side-w:0px}
-  .side{transform:translateX(-105%);transition:transform .2s}
-  .side.open{transform:translateX(0);width:220px;min-width:220px}
-  .burger{display:block}
-  .overlay.on{display:block}
-  .main{margin-left:0}
-  .top{padding-left:56px}
-  .composer{left:0}
+  .side{transform:translateX(-105%);transition:.2s;width:230px;min-width:230px}
+  .side.open{transform:none}
+  .burger{display:block}.overlay.on{display:block}
+  .main{margin-left:0}.composer{left:0}.top{padding-left:52px}
 }
 </style>
 </head>
 <body>
-<button type="button" class="burger" id="burger" aria-label="Меню">☰</button>
+<button type="button" class="burger" id="burger">☰</button>
 <div class="overlay" id="overlay"></div>
-
 <aside class="side" id="side">
-  <div class="brand">
-    <div class="logo">А</div>
-    <div><b>АКСИ</b><span>локальный помощник</span></div>
-  </div>
-  <button type="button" class="tab on" data-panel="chat"><span class="ic">💬</span> Чат</button>
-  <button type="button" class="tab" data-panel="search"><span class="ic">🔍</span> Поиск</button>
-  <button type="button" class="tab" data-panel="notes"><span class="ic">📝</span> Заметки</button>
-  <button type="button" class="tab" data-panel="quantum"><span class="ic">⚛</span> Квант</button>
-  <button type="button" class="tab" data-panel="tools"><span class="ic">∑</span> Счёт</button>
-  <button type="button" class="tab" data-panel="voice"><span class="ic">🎙</span> Голос</button>
-  <button type="button" class="tab" data-panel="files"><span class="ic">📎</span> Файлы</button>
-  <button type="button" class="tab" data-panel="id"><span class="ic">🔑</span> ID</button>
-  <button type="button" class="tab" data-panel="llm"><span class="ic">⚙</span> LLM</button>
-  <button type="button" class="tab" data-panel="about"><span class="ic">ℹ</span> О продукте</button>
-  <div id="status">загрузка…</div>
+  <div class="brand"><div class="logo">А</div><div><b>АКСИ</b><span>локальный помощник</span></div></div>
+  <button type="button" class="tab on" data-p="home">🏠 Главная</button>
+  <button type="button" class="tab" data-p="chat">💬 Чат</button>
+  <button type="button" class="tab" data-p="apps">🧩 Приложения</button>
+  <button type="button" class="tab" data-p="quantum">⚛ Квант</button>
+  <button type="button" class="tab" data-p="search">🔍 Поиск</button>
+  <button type="button" class="tab" data-p="notes">📝 Заметки</button>
+  <button type="button" class="tab" data-p="voice">🎙 Голос</button>
+  <button type="button" class="tab" data-p="files">📎 Файлы</button>
+  <button type="button" class="tab" data-p="id">🔑 ID</button>
+  <button type="button" class="tab" data-p="llm">⚙ LLM</button>
+  <button type="button" class="tab" data-p="about">ℹ О продукте</button>
+  <div id="sideStatus">загрузка…</div>
 </aside>
-
 <div class="main">
-  <div class="top">
-    <h1 id="title">Чат</h1>
-    <p id="subtitle">Пишите внизу — ответ сразу, offline</p>
+  <div class="live">
+    <div class="live-pill" id="livePill" title="Статус">
+      <span class="live-dot"></span>
+      <span>АКСИ online</span>
+      <span id="mskTime" class="muted" style="color:#94a3b8">--:--</span>
+      <span id="liveHash" class="muted" style="font-family:ui-monospace;font-size:11px"></span>
+    </div>
+    <div class="live-extra" id="liveExtra"></div>
   </div>
+  <div class="top"><h1 id="title">Главная</h1><p id="subtitle">Все модули в одном окне</p></div>
   <div class="content">
-
-    <section class="panel on" id="panel-chat">
+    <section class="panel on" id="p-home">
       <div class="card">
-        <h2>Чат <span class="tag">ядро</span></h2>
-        <p class="muted">Локальная база, память, при сети — Википедия. Ход мысли и подпись под ответом.</p>
+        <h2>Добро пожаловать</h2>
+        <p class="muted">Рабочий продукт в браузере. Без установки. Данные на устройстве. LLM — по желанию.</p>
+        <div class="grid" style="margin-top:12px">
+          <button type="button" class="app" data-go="chat"><div class="ic">💬</div><b>Чат</b><span>Ответы offline</span></button>
+          <button type="button" class="app" data-go="quantum"><div class="ic">⚛</div><b>Квант</b><span>Bell / суперпозиция</span></button>
+          <button type="button" class="app" data-go="apps"><div class="ic">🧩</div><b>Приложения</b><span>Все модули</span></button>
+          <button type="button" class="app" data-go="id"><div class="ic">🔑</div><b>ID</b><span>Локальный паспорт</span></button>
+          <button type="button" class="app" data-go="notes"><div class="ic">📝</div><b>Заметки</b><span>Память устройства</span></button>
+          <button type="button" class="app" data-go="voice"><div class="ic">🎙</div><b>Голос</b><span>Речь ↔ текст</span></button>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="p-chat">
+      <div class="card">
+        <div class="chat-layout">
+          <div id="avatarWrap">
+            <svg id="avatarSvg" width="88" height="88" viewBox="0 0 88 88"></svg>
+            <div id="emoLabel">АКСИ</div>
+            <div class="chips" style="justify-content:center">
+              <button type="button" class="btn" id="voiceToggle">🔊</button>
+            </div>
+          </div>
+          <div>
+            <h2>Чат</h2>
+            <p class="muted">Аватар + голос + ход мысли. Пишите внизу.</p>
+            <div class="chips">
+              <button type="button" class="btn" data-q="кто ты">Кто ты?</button>
+              <button type="button" class="btn" data-q="что умеешь">Возможности</button>
+              <button type="button" class="btn" data-q="запутанность">Запутанность</button>
+              <button type="button" class="btn" id="clearChat">Очистить</button>
+            </div>
+            <div id="prog"></div>
+            <div id="thread" role="log"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="p-apps">
+      <div class="card">
+        <h2>Приложения</h2>
+        <p class="muted">Запуск модулей.</p>
+        <div class="grid" style="margin-top:10px">
+          <button type="button" class="app" data-go="chat"><div class="ic">💬</div><b>aksichat</b><span>Чат и голос</span></button>
+          <button type="button" class="app" data-go="quantum"><div class="ic">⚛</div><b>Quantum</b><span>2 кубита</span></button>
+          <button type="button" class="app" data-go="search"><div class="ic">🔍</div><b>Поиск</b><span>Википедия</span></button>
+          <button type="button" class="app" data-go="notes"><div class="ic">📝</div><b>Память</b><span>Заметки</span></button>
+          <button type="button" class="app" data-go="files"><div class="ic">📎</div><b>Файлы</b><span>.txt / .md</span></button>
+          <button type="button" class="app" data-go="id"><div class="ic">🪪</div><b>DID</b><span>Локальный ID</span></button>
+          <button type="button" class="app" data-go="llm"><div class="ic">⚙</div><b>LLM</b><span>Ollama</span></button>
+          <button type="button" class="app" data-go="voice"><div class="ic">🎙</div><b>Голос</b><span>Микрофон</span></button>
+        </div>
+      </div>
+    </section>
+    <section class="panel" id="p-quantum">
+      <div class="card">
+        <h2>Квантовый симулятор</h2>
+        <p class="muted">Учебная симуляция 2 кубитов (не hardware).</p>
         <div class="chips">
-          <button type="button" class="btn" data-q="кто ты">Кто ты?</button>
-          <button type="button" class="btn" data-q="что умеешь">Что умеешь?</button>
-          <button type="button" class="btn" data-q="запутанность">Запутанность</button>
-          <button type="button" class="btn" data-q="2+2*3">2+2*3</button>
-          <button type="button" class="btn" id="clearChat">Очистить</button>
-        </div>
-        <div id="prog"></div>
-        <div id="thread" role="log" aria-live="polite"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-search">
-      <div class="card">
-        <h2>Поиск</h2>
-        <p class="muted">Кратко из Википедии (нужен интернет).</p>
-        <div class="row">
-          <input class="field" id="sIn" placeholder="Что найти?" autocomplete="off">
-          <button class="btn p" type="button" id="sBtn">Найти</button>
-        </div>
-        <div id="sOut" class="muted" style="margin-top:10px"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-notes">
-      <div class="card">
-        <h2>Заметки</h2>
-        <p class="muted">Только на этом устройстве. В чате: «запомни: …»</p>
-        <div class="row">
-          <input class="field" id="nIn" placeholder="Новая заметка" autocomplete="off">
-          <button class="btn p" type="button" id="nBtn">+</button>
-        </div>
-        <div id="nList"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-quantum">
-      <div class="card">
-        <h2>Квант <span class="tag">учебный</span></h2>
-        <p class="muted">Симуляция 2 кубитов в браузере — не физический компьютер.</p>
-        <div class="chips">
-          <button type="button" class="btn p" id="qBell">Запутанность (Bell)</button>
+          <button type="button" class="btn p" id="qBell">Bell (запутанность)</button>
           <button type="button" class="btn" id="qSuper">Суперпозиция</button>
         </div>
         <p class="muted" id="qText" style="margin-top:10px">Нажмите кнопку</p>
         <div class="probs" id="qProbs"></div>
       </div>
     </section>
-
-    <section class="panel" id="panel-tools">
+    <section class="panel" id="p-search">
       <div class="card">
-        <h2>Счёт</h2>
-        <p class="muted">Пример: (3+2)^2 · или в чате</p>
-        <div class="row">
-          <input class="field" id="mIn" placeholder="Выражение" inputmode="decimal">
-          <button class="btn p" type="button" id="mBtn">=</button>
-        </div>
-        <div id="mOut" class="muted" style="margin-top:10px"></div>
+        <h2>Поиск</h2>
+        <p class="muted">Кратко из Википедии (нужен интернет).</p>
+        <div class="row"><input class="field" id="sIn" placeholder="Запрос"><button class="btn p" type="button" id="sBtn">Найти</button></div>
+        <div id="sOut" class="muted" style="margin-top:10px"></div>
       </div>
     </section>
-
-    <section class="panel" id="panel-voice">
+    <section class="panel" id="p-notes">
+      <div class="card">
+        <h2>Заметки</h2>
+        <p class="muted">«запомни: …» в чате или здесь.</p>
+        <div class="row"><input class="field" id="nIn" placeholder="Новая заметка"><button class="btn p" type="button" id="nBtn">+</button></div>
+        <div id="nList"></div>
+      </div>
+    </section>
+    <section class="panel" id="p-voice">
       <div class="card">
         <h2>Голос</h2>
-        <p class="muted">Распознавание речи → в чат (если браузер умеет).</p>
-        <button type="button" class="btn p" id="vBtn" style="margin-top:10px;width:100%;max-width:280px">Говорить</button>
+        <p class="muted">Распознавание → чат. Озвучка — в чате (🔊).</p>
+        <button type="button" class="btn p" id="vBtn" style="margin-top:10px">Говорить</button>
       </div>
     </section>
-
-    <section class="panel" id="panel-files">
+    <section class="panel" id="p-files">
       <div class="card">
         <h2>Файлы</h2>
-        <p class="muted">.txt / .md → в локальную память.</p>
+        <p class="muted">.txt / .md в локальную память.</p>
         <input type="file" id="fIn" accept=".txt,.md,text/plain" multiple style="margin-top:10px">
         <div id="fOut" class="muted" style="margin-top:10px"></div>
       </div>
     </section>
-
-    <section class="panel" id="panel-id">
+    <section class="panel" id="p-id">
       <div class="card">
         <h2>Локальный ID</h2>
-        <p class="muted">Идентификатор в браузере (хеш). Не юридический паспорт.</p>
+        <p class="muted">Идентификатор на устройстве (хеш).</p>
         <div class="mono" id="didFull">—</div>
         <div class="row" style="margin-top:10px">
-          <input class="field" id="didName" placeholder="Имя (локально)">
-          <button class="btn p" type="button" id="didGen">Создать ID</button>
+          <input class="field" id="didName" placeholder="Имя агента">
+          <button class="btn p" type="button" id="didGen">Создать</button>
         </div>
-        <div id="didUser"></div>
+        <div id="didUser" class="muted" style="margin-top:8px"></div>
       </div>
     </section>
-
-    <section class="panel" id="panel-llm">
+    <section class="panel" id="p-llm">
       <div class="card">
         <h2>Локальная LLM</h2>
-        <p class="muted">Необязательно. Ollama + backend на вашем компьютере.</p>
+        <p class="muted">Необязательно. Ollama + backend на ПК.</p>
         <ol class="list">
-          <li>Установите Ollama, затем: <code>ollama pull qwen2.5:3b && ollama serve</code></li>
-          <li>В папке backend: <code>./start.sh</code></li>
-          <li>URL: <code>http://127.0.0.1:8000</code></li>
+          <li><code>ollama pull qwen2.5:3b && ollama serve</code></li>
+          <li><code>cd backend && ./start.sh</code></li>
+          <li>URL <code>http://127.0.0.1:8000</code></li>
         </ol>
-        <div class="row" style="margin-top:12px">
-          <input class="field" id="llmUrl" placeholder="http://127.0.0.1:8000" value="http://127.0.0.1:8000">
-        </div>
+        <div class="row"><input class="field" id="llmUrl" value="http://127.0.0.1:8000"></div>
         <div class="chips">
           <button type="button" class="btn p" id="llmSave">Сохранить</button>
           <button type="button" class="btn" id="llmPing">Проверить</button>
-          <label class="btn" style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" id="llmOn"> Использовать LLM</label>
+          <label class="btn"><input type="checkbox" id="llmOn"> Использовать LLM</label>
         </div>
         <div id="llmOut" class="muted" style="margin-top:10px"></div>
-        <p class="muted" style="margin-top:12px">Подробнее: <a href="/BACKEND.md">BACKEND.md</a> · расширенный чат: <a href="/chat/">/chat/</a></p>
       </div>
     </section>
-
-    <section class="panel" id="panel-about">
+    <section class="panel" id="p-about">
       <div class="card">
         <h2>О продукте</h2>
-        <p class="muted">АКСИ — помощник в браузере. Отвечает offline. Данные по умолчанию не уходят с устройства. Облако и LLM — только если вы сами включите.</p>
-        <h2 style="margin-top:14px">Что умеет</h2>
+        <p class="muted">АКСИ — локальный помощник. Чат, аватар, голос, приложения, квант, ID, заметки, поиск, LLM-мост.</p>
         <ul class="list">
-          <li>Чат: база знаний, эвристики, память, Википедия</li>
-          <li>Ход мысли и локальная подпись ответа</li>
-          <li>Заметки и файлы (IndexedDB / localStorage)</li>
-          <li>Учебный квант-демо (2 кубита)</li>
-          <li>Счёт, голос, локальный ID</li>
-          <li>Опционально: локальная LLM (Ollama)</li>
+          <li>Всё на одной странице, кнопки открывают модули</li>
+          <li>Без обязательного сервера</li>
+          <li>Контакт: aksilove@internet.ru</li>
         </ul>
-        <div class="score">
-          <span><b>9/10</b>старт без установки</span>
-          <span><b>8/10</b>приватность</span>
-          <span><b>7/10</b>понятность</span>
-          <span><b>5/10</b>глубина без LLM</span>
-        </div>
-        <p class="muted" style="margin-top:12px">Контакт: aksilove@internet.ru</p>
       </div>
     </section>
-
   </div>
 </div>
-
-<div class="composer" id="composer">
-  <input id="inp" type="text" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off">
-  <button type="button" id="send" aria-label="Отправить">➤</button>
+<div class="composer" id="composer" style="display:none">
+  <button type="button" id="micBtn" title="Микрофон">🎙</button>
+  <input id="inp" type="text" placeholder="Напишите…" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send">➤</button>
 </div>
-
-<script src="/aksi-core.js?v=17"></script>
-<script src="/aksi-product-core.js?v=17"></script>
-<script src="/aksi-product-boost.js?v=17"></script>
-<script src="/index-app.js?v=17"></script>
+<script src="/aksi-core.js?v=18"></script>
+<script src="/aksi-product-core.js?v=18"></script>
+<script src="/index-app.js?v=18"></script>
 </body>
 </html>
