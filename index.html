@@ -2,52 +2,66 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f4f6fb">
-<meta name="description" content="АКСИ — понятный помощник на русском. Чат, поиск, заметки, квант — всё на одной странице.">
-<title>АКСИ — всё на одной странице</title>
+<meta name="description" content="АКСИ — локальный помощник в браузере: чат, заметки, поиск, квант-демо. Offline-first.">
+<title>АКСИ — локальный помощник</title>
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--line:#e5eaf2;--ink:#0f172a;--muted:#64748b;--acc:#6d28d9;--soft:#eef2ff;--ok:#059669}
+:root{
+  --bg:#f4f6fb;--card:#fff;--line:#e2e8f0;--ink:#0f172a;--muted:#64748b;
+  --acc:#6d28d9;--acc2:#2563eb;--soft:#eef2ff;--ok:#059669;--warn:#b45309;
+}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth}
-body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);max-width:720px;margin:0 auto;padding:0 14px 96px;line-height:1.45}
-header{padding:max(14px,env(safe-area-inset-top)) 0 10px;display:flex;align-items:center;gap:12px}
-.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 6px 16px rgba(109,40,217,.25)}
-h1{font-size:1.25rem;font-weight:800}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);max-width:760px;margin:0 auto;padding:0 14px 100px;line-height:1.5}
+header{padding:max(16px,env(safe-area-inset-top)) 0 12px;display:flex;align-items:center;gap:12px}
+.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 8px 20px rgba(109,40,217,.22)}
+h1{font-size:1.3rem;font-weight:800}
 .sub{font-size:13px;color:var(--muted)}
-#status{margin-left:auto;font-size:12px;color:var(--muted);font-weight:600}
-.topnav{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;position:sticky;top:0;z-index:40;background:rgba(244,246,251,.92);backdrop-filter:blur(8px);padding:8px 0;border-bottom:1px solid var(--line)}
-.topnav a{text-decoration:none;color:var(--ink);font-size:12px;font-weight:700;padding:8px 11px;border-radius:999px;border:1px solid var(--line);background:#fff}
-.topnav a:hover{background:var(--soft);color:var(--acc);border-color:#c4b5fd}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
-h2{font-size:1rem;font-weight:800;margin-bottom:6px}
-.muted{font-size:13px;color:var(--muted)}
+#status{margin-left:auto;font-size:12px;font-weight:700;color:var(--muted)}
+#status.ok{color:var(--ok)}
+.nav{display:flex;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:30;background:rgba(244,246,251,.94);backdrop-filter:blur(10px);padding:8px 0;border-bottom:1px solid var(--line);margin-bottom:12px}
+.nav a{text-decoration:none;color:var(--ink);font-size:12px;font-weight:700;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff}
+.nav a:hover{background:var(--soft);color:var(--acc);border-color:#c4b5fd}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+h2{font-size:1.05rem;font-weight:800;margin-bottom:8px}
+h3{font-size:.95rem;font-weight:700;margin:12px 0 6px}
+.muted{color:var(--muted);font-size:13px}
 .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--acc)}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.btn:active{transform:scale(.98)}
 .btn.p{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;border:0}
-.row{display:flex;gap:8px;margin-top:8px}
-.field{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);font-size:15px}
-#thread{max-height:320px;overflow:auto;margin-top:10px}
-.msg{margin:8px 0}.msg .b{padding:10px 12px;border-radius:14px;font-size:14px;white-space:pre-wrap;word-break:break-word}
-.msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;margin-left:20%}
+.row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.field{flex:1;padding:11px 12px;border-radius:12px;border:1px solid var(--line);font-size:15px;background:#fff}
+#thread{max-height:340px;overflow:auto;margin-top:10px;padding-right:4px}
+.msg{margin:8px 0}
+.msg .b{padding:11px 13px;border-radius:14px;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;margin-left:18%}
 .msg.a .b{background:var(--soft);border:1px solid var(--line)}
 .thought{font-size:12px;color:var(--muted);margin-top:4px}
 .meta{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;word-break:break-all}
-.composer{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;display:flex;gap:8px;padding:10px 14px max(12px,env(safe-area-inset-bottom));background:rgba(255,255,255,.95);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
-#inp{flex:1;min-height:46px;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px}
-#send{width:48px;border:0;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800;font-size:18px;cursor:pointer}
+.composer{position:fixed;left:0;right:0;bottom:0;max-width:760px;margin:0 auto;display:flex;gap:8px;padding:10px 14px max(14px,env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
+#inp{flex:1;min-height:48px;border:1px solid var(--line);border-radius:14px;padding:12px;font-size:16px}
+#send{width:50px;border:0;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800;font-size:18px;cursor:pointer}
 .probs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
 .probs div{text-align:center;padding:8px 4px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:11px}
-.probs b{display:block;font-size:14px;color:#2563eb}
-.fact{display:flex;gap:8px;padding:10px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--soft);font-size:14px}
+.probs b{display:block;font-size:14px;color:var(--acc2)}
+.fact{display:flex;gap:8px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--soft);font-size:14px}
+.fact button{border:0;background:0;cursor:pointer;color:var(--muted);font-size:16px;line-height:1}
 .mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;word-break:break-all;background:#f8fafc;padding:8px;border-radius:8px;border:1px solid var(--line)}
-#prog{display:none;font-size:13px;color:#2563eb;padding:6px 0;font-weight:600}#prog.on{display:block}
-footer{text-align:center;font-size:12px;color:var(--muted);padding:16px 0 24px}
+#prog{display:none;font-size:13px;color:var(--acc2);padding:6px 0;font-weight:600}
+#prog.on{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+.list{margin:8px 0 0;padding-left:18px;font-size:14px}
+.list li{margin:4px 0}
+.score{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.score span{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;font-weight:700}
+.score b{display:block;font-size:16px;color:var(--acc)}
+footer{text-align:center;font-size:12px;color:var(--muted);padding:20px 0 28px}
 .links a{display:block;padding:12px;border:1px solid var(--line);border-radius:12px;text-decoration:none;color:var(--ink);margin-top:8px;font-weight:600;background:#fff}
 .links a span{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:520px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -55,12 +69,13 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:16px 0 24px}
   <div class="logo">А</div>
   <div>
     <h1>АКСИ</h1>
-    <div class="sub">чат · заметки · offline · по-русски</div>
+    <div class="sub">локальный помощник · offline-first · по-русски</div>
   </div>
   <span id="status">загрузка…</span>
 </header>
 
-<nav class="topnav" aria-label="Разделы страницы">
+<nav class="nav" aria-label="Разделы">
+  <a href="#about">О продукте</a>
   <a href="#chat">Чат</a>
   <a href="#search">Поиск</a>
   <a href="#notes">Заметки</a>
@@ -69,16 +84,42 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:16px 0 24px}
   <a href="#files">Файлы</a>
   <a href="#voice">Голос</a>
   <a href="#id">ID</a>
-  <a href="#apps">Ещё</a>
+  <a href="#more">Ещё</a>
 </nav>
 
+<section id="about" class="card">
+  <h2>Что это <span class="tag">честно</span></h2>
+  <p class="muted">АКСИ — помощник в браузере. Не AGI, не «сознание», не облачный сервис по умолчанию. Отвечает сразу offline, данные остаются на устройстве.</p>
+  <h3>Основные функции</h3>
+  <ul class="list">
+    <li><b>Чат</b> — локальная база + эвристики + память; при сети — Википедия</li>
+    <li><b>Ход мысли</b> — короткие шаги рассуждения видны под ответом</li>
+    <li><b>Подпись</b> — локальный SHA-256 (или Web Crypto) на ответ</li>
+    <li><b>Заметки и файлы</b> — IndexedDB / localStorage</li>
+    <li><b>Квант-демо</b> — учебный Bell / суперпозиция на 2 кубитах</li>
+    <li><b>Счёт и голос</b> — калькулятор и Web Speech API</li>
+    <li><b>LLM</b> — опционально, локальный backend + Ollama</li>
+  </ul>
+  <h3>Эффективность продукта</h3>
+  <div class="score">
+    <span><b>9/10</b>старт без установки</span>
+    <span><b>8/10</b>приватность по умолчанию</span>
+    <span><b>7/10</b>понятность интерфейса</span>
+    <span><b>5/10</b>глубина ответов без LLM</span>
+    <span><b>8/10</b>прозрачность логики</span>
+  </div>
+  <h3>Прогноз</h3>
+  <p class="muted">Сильная сторона — local-first и понятный UX. Слабая — качество ответов без своей LLM. Рост: подключить локальную модель (Ollama), расширить базу фактов, держать интерфейс простым. Не обещать AGI — обещать полезный offline-чат.</p>
+</section>
+
 <section id="chat" class="card">
-  <h2>Чат <span class="tag">offline</span></h2>
-  <p class="muted">Пишите внизу экрана. Ответ сразу, с ходом мысли и подписью.</p>
+  <h2>Чат <span class="tag">ядро</span></h2>
+  <p class="muted">Пишите внизу. Ответ сразу; шаги мысли и подпись под сообщением.</p>
   <div class="chips">
     <button type="button" class="btn" data-q="кто ты">Кто ты?</button>
     <button type="button" class="btn" data-q="что умеешь">Возможности</button>
-    <button type="button" class="btn" id="clearChat">Очистить чат</button>
+    <button type="button" class="btn" data-q="запутанность">Запутанность</button>
+    <button type="button" class="btn" id="clearChat">Очистить</button>
   </div>
   <div id="prog"></div>
   <div id="thread" role="log" aria-live="polite"></div>
@@ -88,7 +129,7 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:16px 0 24px}
   <h2>Поиск</h2>
   <p class="muted">Кратко из Википедии (нужен интернет).</p>
   <div class="row">
-    <input class="field" id="sIn" placeholder="Что найти?">
+    <input class="field" id="sIn" placeholder="Что найти?" autocomplete="off">
     <button class="btn p" type="button" id="sBtn">Найти</button>
   </div>
   <div id="sOut" class="muted" style="margin-top:8px"></div>
@@ -96,22 +137,22 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:16px 0 24px}
 
 <section id="notes" class="card">
   <h2>Заметки</h2>
-  <p class="muted">«запомни: …» в чате или добавьте здесь. Только на устройстве.</p>
+  <p class="muted">«запомни: …» в чате или здесь. Только на этом устройстве.</p>
   <div class="row">
-    <input class="field" id="nIn" placeholder="Новая заметка">
+    <input class="field" id="nIn" placeholder="Новая заметка" autocomplete="off">
     <button class="btn p" type="button" id="nBtn">+</button>
   </div>
   <div id="nList"></div>
 </section>
 
 <section id="quantum" class="card">
-  <h2>Квант <span class="tag">наглядно</span></h2>
-  <p class="muted">Учебный пример на 2 кубита.</p>
+  <h2>Квант <span class="tag">учебный</span></h2>
+  <p class="muted">Симуляция 2 кубитов в браузере — не физический компьютер.</p>
   <div class="chips">
-    <button type="button" class="btn p" id="qBell">Показать запутанность</button>
-    <button type="button" class="btn" id="qSuper">Показать суперпозицию</button>
+    <button type="button" class="btn p" id="qBell">Запутанность (Bell)</button>
+    <button type="button" class="btn" id="qSuper">Суперпозиция</button>
   </div>
-  <p class="muted" id="qText" style="margin-top:10px">Нажмите кнопку выше</p>
+  <p class="muted" id="qText" style="margin-top:10px">Нажмите кнопку</p>
   <div class="probs" id="qProbs"></div>
 </section>
 
@@ -120,56 +161,55 @@ footer{text-align:center;font-size:12px;color:var(--muted);padding:16px 0 24px}
   <h2>Счёт</h2>
   <p class="muted">Пример: (3+2)^2</p>
   <div class="row">
-    <input class="field" id="mIn" placeholder="Выражение">
+    <input class="field" id="mIn" placeholder="Выражение" inputmode="decimal">
     <button class="btn p" type="button" id="mBtn">=</button>
   </div>
   <div id="mOut" class="muted" style="margin-top:8px"></div>
 </section>
 <section id="voice" class="card">
   <h2>Голос</h2>
-  <p class="muted">Скажите вопрос вслух.</p>
+  <p class="muted">Распознавание речи (если браузер умеет).</p>
   <button type="button" class="btn p" id="vBtn" style="margin-top:8px;width:100%">Говорить</button>
 </section>
 </div>
 
 <section id="files" class="card">
   <h2>Файлы в память</h2>
-  <p class="muted">Загрузите .txt или .md.</p>
+  <p class="muted">.txt / .md — текст попадает в локальную память чата.</p>
   <input type="file" id="fIn" accept=".txt,.md,text/plain" multiple style="margin-top:8px">
   <div id="fOut" class="muted" style="margin-top:8px"></div>
 </section>
 
 <section id="id" class="card">
   <h2>Локальный ID</h2>
-  <p class="muted">Локальный идентификатор (хеш в браузере). Без личных данных.</p>
+  <p class="muted">Идентификатор в браузере (хеш). Не паспорт и не DID «личности ИИ».</p>
   <div class="mono" id="didFull">—</div>
   <div class="row" style="margin-top:10px">
-    <input class="field" id="didName" placeholder="Имя вашего агента">
+    <input class="field" id="didName" placeholder="Имя агента (локально)">
     <button class="btn p" type="button" id="didGen">Создать ID</button>
   </div>
   <div id="didUser"></div>
 </section>
 
-<section id="apps" class="card links">
-  <h2>Ещё</h2>
-  <a href="/chat/">Чат <span>offline + опциональная LLM</span></a>
-  <a href="/proof/">Подпись <span>локальная проверка текста</span></a>
-  <a href="/BACKEND.md">Backend <span>локальная Ollama (необязательно)</span></a>
-  <a href="/START.md">Старт <span>кратко как пользоваться</span></a>
+<section id="more" class="card links">
+  <h2>Дополнительно</h2>
+  <a href="/chat/">Расширенный чат <span>настройки backend / LLM</span></a>
+  <a href="/proof/">Подпись текста <span>локальная проверка</span></a>
+  <a href="/BACKEND.md">Backend <span>Ollama, необязательно</span></a>
+  <a href="/PRODUCT.md">Продукт <span>список того, что реально работает</span></a>
 </section>
 
-<footer>Контакт: aksilove@internet.ru · всё работает локально в браузере</footer>
+<footer>Контакт: aksilove@internet.ru · данные по умолчанию не уходят с устройства</footer>
 
 <div class="composer">
-  <input id="inp" type="text" placeholder="Напишите вопрос по-русски…" enterkeyhint="send" autocomplete="off">
+  <input id="inp" type="text" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off">
   <button type="button" id="send" aria-label="Отправить">➤</button>
 </div>
 
-<script src="/aksi-core.js?v=15"></script>
-<script src="/aksi-product-core.js?v=15"></script>
-<script src="/aksi-product-boost.js?v=15"></script>
-<script src="/nav.js"></script>
-<script src="/index-app.js?v=15"></script>
-<script src="/aksi-home-bridge.js?v=15"></script>
+<script src="/aksi-core.js?v=16"></script>
+<script src="/aksi-product-core.js?v=16"></script>
+<script src="/aksi-product-boost.js?v=16"></script>
+<script src="/index-app.js?v=16"></script>
+<script src="/aksi-home-bridge.js?v=16"></script>
 </body>
 </html>
