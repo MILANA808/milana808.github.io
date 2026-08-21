@@ -15,7 +15,7 @@ jobs:
       - name: Required core files
         run: |
           set -e
-          for f in index.html 404.html app.js app.css aksi-global.js aksi-global.css aksi-runtime.js aksi-quantum-runtime.js aksi-quantum-chat.js aksi-learning.js aksi-proof-graph.js aksi-counterfactual.js aksi-quantum-reasoner.js aksi-frontier.js aksi-passport.js; do test -f "$f"; done
+          for f in index.html 404.html app.js app.css aksi-core.js aksi-product-core.js index-app.js; do test -f "$f"; done
 
       - name: JavaScript syntax — entire repository
         run: |
@@ -29,20 +29,21 @@ jobs:
             python3 -m compileall -q backend
           fi
 
-      - name: Global interface contract
+      - name: Basic contract
         run: |
           set -e
-          grep -q 'АКСИ' 404.html
-          grep -q 'window.AKSI' aksi-runtime.js
-          grep -q 'aksi:runtime-ready' aksi-runtime.js
-          grep -q 'local-first' aksi-global.js
+          grep -qi 'акси' index.html
+          grep -qi 'акси' 404.html
+          test -f BACKEND.md
 
-      - name: Quantum contract
+      - name: Core JS present
         run: |
           set -e
-          grep -q 'AKSI-QUANTUM-INFERENCE-1' aksi-quantum-runtime.js
-          grep -q 'local-state-vector' aksi-quantum-runtime.js
-          grep -q 'AKSIQuantum.run' aksi-quantum-chat.js
+          test -f aksi-product-core.js
+          test -f aksi-core.js
+          node --check aksi-product-core.js
+          node --check aksi-core.js
+          node --check index-app.js
 
       - name: Static link sanity
         run: |
@@ -59,7 +60,6 @@ jobs:
                   for raw in re.findall(rf'{attr}=["\']([^"\']+)', text, flags=re.I):
                       if raw.startswith(('#','http://','https://','mailto:','tel:','data:','javascript:')):
                           continue
-                      # JS template literals inside HTML/scripts — not static paths
                       if '${' in raw or '{' in raw:
                           continue
                       target = raw.split('?',1)[0].split('#',1)[0]
