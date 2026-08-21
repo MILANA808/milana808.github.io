@@ -1,6 +1,5 @@
 /**
- * АКСИ v18 — единый рабочий клиент (vanilla)
- * Чат, аватар, голос, приложения, квант, ID, LLM
+ * АКСИ v19 — единый рабочий клиент
  */
 (function () {
   "use strict";
@@ -16,10 +15,13 @@
   var voiceOn = true;
   var emotion = "neutral";
   var titles = {
-    home: ["Главная", "Все модули в одном окне"],
+    home: ["Главная", "Все модули"],
     chat: ["Чат", "Аватар · голос · ход мысли"],
     apps: ["Приложения", "Запуск модулей"],
-    quantum: ["Квант", "Учебная симуляция 2 кубитов"],
+    quantum: ["Квант", "Симуляция 2 кубитов"],
+    net: ["Сеть", "Погода"],
+    metrics: ["Метрики", "EQS · QCLI · H"],
+    protocol: ["Протокол", "AKSI-Agent-v1"],
     search: ["Поиск", "Википедия"],
     notes: ["Заметки", "Память устройства"],
     voice: ["Голос", "Микрофон → чат"],
@@ -85,7 +87,7 @@
     el.innerHTML =
       "<div><b>Имя:</b> " + esc(name) + "</div>" +
       "<div style='margin-top:6px'><b>Локальный ID</b><code>" + esc(id) + "</code></div>" +
-      "<div style='margin-top:8px;color:#94a3b8'>Режим: offline-first · подпись SHA-256</div>";
+      "<div style='margin-top:8px;color:#94a3b8'>offline-first · SHA-256</div>";
   }
 
   var COLORS = {
@@ -101,7 +103,7 @@
     if (/рад|отлично|прекрасно|здорово/.test(t)) return "happy";
     if (/думаю|анализ|вычисл|расчёт/.test(t)) return "thinking";
     if (/жаль|сожалею|к сожалению/.test(t)) return "sad";
-    if (/квант|энерг|резонанс|запутан/.test(t)) return "confident";
+    if (/квант|энерг|резонанс|запутан|погода/.test(t)) return "confident";
     if (t.indexOf("!") !== -1 && t.length < 80) return "excited";
     return "neutral";
   }
@@ -159,7 +161,7 @@
     var list = document.getElementById("nList");
     if (!list) return;
     if (!memCache.length) {
-      list.innerHTML = '<p class="muted" style="margin-top:8px">Пусто. В чате: <b>запомни: текст</b></p>';
+      list.innerHTML = '<p class="muted" style="margin-top:8px">Пусто. «запомни: текст»</p>';
       return;
     }
     list.innerHTML = memCache.slice(0, 40).map(function (f, i) {
@@ -207,10 +209,10 @@
   }
 
   var KB = [
-    { q: ["кто ты", "что ты", "представься"], a: "Я АКСИ — локальный помощник в браузере.\n\nЧат, заметки, поиск, квант-демо, голос, ID. LLM — только если вы подключите Ollama на своём ПК.\nДанные по умолчанию остаются на устройстве." },
-    { q: ["что умеешь", "возможности", "функции"], a: "• Чат offline + ход мысли + подпись\n• Приложения (вкладки слева)\n• Квант: Bell и суперпозиция\n• Поиск (Википедия)\n• Заметки и файлы\n• Голос (ввод и озвучка)\n• Локальный ID\n• Опционально LLM" },
-    { q: ["привет", "здравствуй", "добрый"], a: "Здравствуйте. Откройте модуль слева или напишите вопрос." },
-    { q: ["помощь", "help"], a: "Слева — модули. В чате: «запомни: …», «2+2», «запутанность»." },
+    { q: ["кто ты", "что ты", "представься"], a: "Я АКСИ — локальный помощник в браузере.\n\nЧат, заметки, поиск, квант, метрики EQS/QCLI, погода, протокол агентов. LLM — по желанию на вашем ПК." },
+    { q: ["что умеешь", "возможности", "функции"], a: "• Чат offline + ход мысли\n• Погода («погода Москва»)\n• Метрики EQS / QCLI\n• Квант Bell\n• Протокол Agent-v1\n• Поиск, заметки, голос, ID\n• Опционально LLM" },
+    { q: ["привет", "здравствуй", "добрый"], a: "Здравствуйте. Слева — модули." },
+    { q: ["помощь", "help"], a: "Вкладки: Чат, Сеть, Метрики, Протокол, Квант…\nВ чате: «погода Москва», «запомни: …», «запутанность»" },
     { q: ["запутанность", "белл", "bell", "кубит", "квант"], a: "__QB__" },
     { q: ["суперпозиция"], a: "__QS__" },
     { q: ["офлайн", "offline"], a: "База, заметки, счёт и квант работают без сети." }
@@ -256,10 +258,10 @@
     }).join("");
     if (txt) txt.innerHTML = mode === "bell"
       ? "<b>Bell</b> — H + CNOT. |00⟩ и |11⟩ ≈ 50%."
-      : "<b>Суперпозиция</b> — H. После измерения 0 или 1 ≈ 50%.";
+      : "<b>Суперпозиция</b> — H.";
     return mode === "bell"
-      ? "Запутанность (Bell):\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\nЕсли первый кубит 0 — второй тоже 0. Учебная симуляция."
-      : "Суперпозиция (H): до измерения «и 0, и 1», после — 0 или 1 ≈ поровну.";
+      ? "Запутанность (Bell):\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\nУчебная симуляция."
+      : "Суперпозиция (H): после измерения 0 или 1 ≈ поровну.";
   }
   function safeMath(expr) {
     var e = String(expr || "").replace(/,/g, ".").replace(/\s/g, "");
@@ -299,7 +301,7 @@
       body: JSON.stringify({
         model: "local",
         messages: [
-          { role: "system", content: "Ты АКСИ — краткий помощник на русском. Без выдумок." },
+          { role: "system", content: "Ты АКСИ — краткий помощник на русском." },
           { role: "user", content: q }
         ],
         temperature: 0.3
@@ -329,6 +331,20 @@
         return { text: "Запомнила: «" + m[1].slice(0, 200) + "».", steps: steps.concat(["память"]), meta: "память" };
       });
     }
+    // Weather
+    var wm = q.match(/погода\s+(.+)/i) || (/^погода$/i.test(q.trim()) ? ["", "Moscow"] : null);
+    if (wm && window.AksiEngine && AksiEngine.getWeather) {
+      steps.push("погода");
+      showProg("Погода…");
+      var city = (wm[1] || "Moscow").trim();
+      return AksiEngine.getWeather(city).then(function (w) {
+        if (w.temp_c === null) return { text: "Погода недоступна.", steps: steps, meta: "net" };
+        var text = "Погода в " + w.city + ":\n" + w.temp_c + "°C, " + w.condition +
+          "\nВлажность " + w.humidity + "% · ветер " + w.wind_kph + " км/ч · ощущается " + w.feelslike_c + "°C";
+        if (AksiEngine.createAgentMessage) AksiEngine.createAgentMessage("user", "response", text);
+        return { text: text, steps: steps, meta: "wttr.in" };
+      });
+    }
     var mq = q.replace(/^(сколько будет|посчитай|вычисли)\s+/i, "").trim();
     if (/^[\d+\-*/().^\s,]+$/.test(mq) && /\d/.test(mq)) {
       var v = safeMath(mq);
@@ -354,7 +370,7 @@
         return { text: "Точного ответа нет. Уточните или «запомни: …».", steps: steps, meta: "fallback" };
       });
     }
-    return Promise.resolve({ text: "Офлайн: в базе нет ответа. Попробуйте «кто ты» или «что умеешь».", steps: steps.concat(["офлайн"]), meta: "offline" });
+    return Promise.resolve({ text: "Офлайн: попробуйте «кто ты» или «что умеешь».", steps: steps.concat(["офлайн"]), meta: "offline" });
   }
 
   function sendText(raw) {
@@ -376,7 +392,14 @@
         showProg("");
         var emo = detectEmotion(ans.text);
         drawAvatar(emo, false);
-        addMsg("a", ans.text, (ans.meta || "") + " · " + h, ans.steps);
+        var meta = (ans.meta || "") + " · " + h;
+        if (window.AksiEngine && AksiEngine.computeQCLI) {
+          meta += " · QCLI " + AksiEngine.computeQCLI(ans.text);
+        }
+        if (window.AksiEngine && AksiEngine.createAgentMessage) {
+          try { AksiEngine.createAgentMessage("user", "response", ans.text); } catch (e) {}
+        }
+        addMsg("a", ans.text, meta, ans.steps);
         speak(ans.text);
       });
     }).catch(function () {
@@ -411,7 +434,7 @@
   }
   function startVoice() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { addMsg("a", "Голос не поддерживается в этом браузере.", "голос"); openPanel("chat"); return; }
+    if (!SR) { addMsg("a", "Голос не поддерживается.", "голос"); openPanel("chat"); return; }
     var r = new SR();
     r.lang = "ru-RU";
     r.onresult = function (e) { sendText(e.results[0][0].transcript); };
@@ -504,7 +527,7 @@
       fetch(base + "/health").then(function (r) {
         document.getElementById("llmOut").textContent = r.ok ? "Backend доступен." : "Код " + r.status;
       }).catch(function () {
-        document.getElementById("llmOut").textContent = "Недоступен. Запустите Ollama и backend.";
+        document.getElementById("llmOut").textContent = "Недоступен.";
       });
     };
   }
@@ -523,7 +546,7 @@
       var hash = (location.hash || "").replace("#", "");
       if (titles[hash]) openPanel(hash); else openPanel("home");
       if (!restoreChat() && THREAD) {
-        addMsg("a", "Здравствуйте. Я АКСИ.\n\nСлева — модули. На главной — плитки приложений. В чате можно писать и говорить.", "система");
+        addMsg("a", "Здравствуйте. Я АКСИ.\n\nСлева: Сеть, Метрики, Протокол, Чат, Квант.\nПопробуйте «погода Москва».", "система");
       }
     });
   }
