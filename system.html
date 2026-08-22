@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<title>АКСИ</title>
+<style>
+:root{--bg:#09090b;--panel:#0c0c0f;--card:#121216;--line:#1f1f27;--ink:#fafafa;--muted:#71717a;--acc:#a78bfa;--ok:#34d399;--soft:rgba(167,139,250,.12);--side:210px;--r:12px;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased}body{background:var(--bg);color:var(--ink);display:flex;overflow:hidden}button,input,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;background:0}
+.side{width:var(--side);min-width:var(--side);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 10px;position:fixed;inset:0 auto 0 0;z-index:40;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 14px}.logo{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7c3aed,#4f46e5);display:grid;place-items:center;font-weight:800;color:#fff;font-size:12px}.brand b{font-size:13px;font-weight:700}.brand small{display:block;font-size:10px;color:var(--muted);margin-top:1px}
+.nav{display:flex;flex-direction:column;gap:2px;flex:1}.tab{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:500;color:var(--muted)}.tab:hover{background:#18181b;color:var(--ink)}.tab.on{background:var(--soft);color:var(--acc)}.tab .i{width:18px;text-align:center;font-size:14px}
+.foot{padding:10px 8px 4px;border-top:1px solid var(--line);margin-top:8px}#st{font-size:11px;color:var(--muted)}#st.ok{color:var(--ok)}#clock{font-size:10px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.main{margin-left:var(--side);flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;max-height:100dvh}.top{padding:12px 18px;border-bottom:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;gap:12px}.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(145deg,#1e1b4b,#312e81);border:1.5px solid #6d28d9;display:grid;place-items:center;font-size:15px}.top h1{font-size:14px;font-weight:650}.top p{font-size:11px;color:var(--muted)}
+.content{flex:1;overflow-y:auto;padding:14px 18px 110px}.panel{display:none;max-width:740px}.panel.on{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:10px}h2{font-size:13px;font-weight:600;margin-bottom:8px}.muted{color:var(--muted);font-size:12px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}.app{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px;text-align:left}.app:hover{border-color:#3f3f46;background:#18181b}.app .ic{font-size:17px;margin-bottom:5px;display:block}.app b{display:block;font-size:12px;font-weight:600}.app span{font-size:10px;color:var(--muted);margin-top:2px;display:block}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}.cell{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:11px}.cell b{display:block;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}.cell .v{font-size:13px;font-weight:600}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--panel)}.btn:hover{border-color:#3f3f46}.btn.p{background:var(--acc);color:#0a0a0c;border-color:transparent}.field{flex:1;min-width:120px;height:34px;padding:0 11px;border-radius:8px;border:1px solid var(--line);background:var(--panel);outline:0}.field:focus{border-color:#4c1d95}.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px;word-break:break-all}
+#thread{display:flex;flex-direction:column;gap:8px;min-height:120px}.msg{max-width:92%;padding:10px 12px;border-radius:12px;font-size:13px;line-height:1.45;white-space:pre-wrap}.msg.u{align-self:flex-end;background:#1e1b4b;border:1px solid #312e81}.msg.a{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}.msg .meta{font-size:10px;color:var(--muted);margin-top:6px}
+#qProbs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}#qProbs div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;font-size:11px}#qProbs b{display:block;font-size:15px;margin-bottom:2px}
+table.pt{width:100%;border-collapse:collapse;font-size:12px}table.pt th,table.pt td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line)}table.pt th{color:var(--muted);font-weight:500;font-size:11px}
+.composer{position:fixed;left:var(--side);right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(9,9,11,.92);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;z-index:30}.composer input{flex:1;height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);outline:0}#send,#mic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--card);border:1px solid var(--line);font-size:15px}#send{background:var(--acc);border-color:transparent;color:#0a0a0c}
+.note-item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}.note-item button{color:var(--muted);font-size:11px}#prog{font-size:11px;color:var(--muted);min-height:16px;margin-top:6px}
+@media(max-width:720px){:root{--side:0px}.side{transform:translateX(-100%);transition:.2s}.side.open{transform:none;width:min(80vw,240px);min-width:0;box-shadow:8px 0 30px rgba(0,0,0,.5)}.burger{display:grid!important}.composer{left:0}}.burger{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--line);place-items:center}
+</style>
+</head>
+<body>
+<aside class="side" id="side">
+<div class="brand"><div class="logo">A</div><div><b>АКСИ</b><small>локальная ИИ-система</small></div></div>
+<nav class="nav">
+<button type="button" class="tab on" data-p="home"><span class="i">⌂</span>Главная</button>
+<button type="button" class="tab" data-p="chat"><span class="i">◈</span>Чат</button>
+<button type="button" class="tab" data-p="quantum"><span class="i">⚛</span>Квант</button>
+<button type="button" class="tab" data-p="net"><span class="i">☁</span>Погода</button>
+<button type="button" class="tab" data-p="metrics"><span class="i">Σ</span>Метрики</button>
+<button type="button" class="tab" data-p="protocol"><span class="i">⇄</span>Протокол</button>
+<button type="button" class="tab" data-p="search"><span class="i">⌕</span>Поиск</button>
+<button type="button" class="tab" data-p="notes"><span class="i">✎</span>Заметки</button>
+<button type="button" class="tab" data-p="voice"><span class="i">🎙</span>Голос</button>
+<button type="button" class="tab" data-p="files"><span class="i">▤</span>Файлы</button>
+<button type="button" class="tab" data-p="id"><span class="i">◉</span>ID</button>
+</nav>
+<div class="foot"><div id="st">…</div><div id="clock">—</div></div>
+</aside>
+<div class="main">
+<div class="top"><button type="button" class="burger" data-act="menu">☰</button><div class="av" id="av">◈</div><div><h1 id="title">Главная</h1><p id="sub">статус</p></div></div>
+<div class="content">
+<section class="panel on" id="p-home">
+<div class="card"><h2>Статус</h2><div class="board"><div class="cell"><b>Протокол</b><div class="v">Agent-v1</div></div><div class="cell"><b>Режим</b><div class="v">offline</div></div><div class="cell"><b>EQS</b><div class="v" id="homeEqs">—</div></div><div class="cell"><b>Память</b><div class="v" id="homeMem">0</div></div></div></div>
+<div class="card"><h2>Модули</h2><div class="grid">
+<button type="button" class="app" data-p="chat"><span class="ic">◈</span><b>Чат</b><span>локальный</span></button>
+<button type="button" class="app" data-p="quantum"><span class="ic">⚛</span><b>Квант</b><span>Bell</span></button>
+<button type="button" class="app" data-p="net"><span class="ic">☁</span><b>Погода</b><span>wttr</span></button>
+<button type="button" class="app" data-p="metrics"><span class="ic">Σ</span><b>Метрики</b><span>EQS</span></button>
+<button type="button" class="app" data-p="protocol"><span class="ic">⇄</span><b>Протокол</b><span>агенты</span></button>
+<button type="button" class="app" data-p="search"><span class="ic">⌕</span><b>Поиск</b><span>wiki</span></button>
+<button type="button" class="app" data-p="notes"><span class="ic">✎</span><b>Заметки</b><span>local</span></button>
+<button type="button" class="app" data-p="id"><span class="ic">◉</span><b>ID</b><span>DID</span></button>
+</div></div>
+<div class="card"><h2>О системе</h2><p class="muted">АКСИ — offline-first ИИ в браузере: чат с подписью, квант, EQS, Agent-v1, поиск, заметки, голос, ID. LLM опционально (Ollama).</p></div>
+</section>
+<section class="panel" id="p-chat"><div class="card"><h2>Чат</h2><div id="thread"></div><div id="prog"></div></div></section>
+<section class="panel" id="p-quantum"><div class="card"><h2>Квант</h2><p class="muted" id="qText">—</p><div class="row" style="margin-top:10px"><button type="button" class="btn p" data-act="bell">Bell</button><button type="button" class="btn" data-act="super">Суперпозиция</button></div><div id="qProbs"></div></div></section>
+<section class="panel" id="p-net"><div class="card"><h2>Погода</h2><div class="row"><input class="field" id="wCity" value="Moscow"><button type="button" class="btn p" data-act="weather">OK</button></div><div id="wOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></div></div></section>
+<section class="panel" id="p-metrics"><div class="card"><h2>Метрики</h2><textarea class="field" id="mIn" style="height:90px;padding:10px;resize:vertical"></textarea><button type="button" class="btn p" data-act="metrics" style="margin-top:8px">Считать</button><div id="mOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></div></div></section>
+<section class="panel" id="p-protocol"><div class="card"><h2>Agent-v1</h2><div class="row" style="margin-top:8px"><button type="button" class="btn p" data-act="protoPing">ping</button><button type="button" class="btn" data-act="protoRefresh">обновить</button></div><div id="protoOut" style="margin-top:12px"></div></div></section>
+<section class="panel" id="p-search"><div class="card"><h2>Поиск</h2><div class="row"><input class="field" id="sIn"><button type="button" class="btn p" data-act="search">OK</button></div><div id="sOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></div></div></section>
+<section class="panel" id="p-notes"><div class="card"><h2>Заметки</h2><div class="row"><input class="field" id="nIn"><button type="button" class="btn p" data-act="noteAdd">+</button></div><div id="nList" style="margin-top:8px"></div></div></section>
+<section class="panel" id="p-voice"><div class="card"><h2>Голос</h2><button type="button" class="btn p" data-act="voice" style="margin-top:8px">🎙 слушать</button></div></section>
+<section class="panel" id="p-files"><div class="card"><h2>Файлы</h2><input type="file" id="fIn" accept=".txt,.md,text/plain" multiple style="margin-top:8px;display:block;font-size:12px;color:var(--muted)"><div id="fOut" class="muted" style="margin-top:8px"></div></div></section>
+<section class="panel" id="p-id"><div class="card"><h2>ID</h2><div class="mono" id="didFull" style="margin-top:8px">—</div><div class="row" style="margin-top:8px"><input class="field" id="didName" placeholder="имя"><button type="button" class="btn p" data-act="didGen">создать</button></div><div id="didUser" class="muted" style="margin-top:6px"></div></div></section>
+</div></div>
+<div class="composer"><button type="button" id="mic" data-act="voice">🎙</button><input id="inp" type="text" placeholder="сообщение…" enterkeyhint="send" autocomplete="off"><button type="button" id="send" data-act="send">➤</button></div>
+<script>
+(function(){
+"use strict";
+var SEED="AKSI_CORE_2026",CHAT_KEY="aksi_sys_chat_v1",NOTES_KEY="aksi_sys_notes_v1",ID_KEY="aksi_sys_id_v1",PROTO_KEY="aksi_sys_proto_v1",DID="did:aksi:local:core";
+var ST=document.getElementById("st"),THREAD=document.getElementById("thread"),PROG=document.getElementById("prog"),INP=document.getElementById("inp");
+var titles={home:["Главная","статус"],chat:["Чат","offline"],quantum:["Квант","2q"],net:["Погода","wttr"],metrics:["Метрики","EQS"],protocol:["Протокол","Agent-v1"],search:["Поиск","wiki"],notes:["Заметки","local"],voice:["Голос","STT"],files:["Файлы","txt"],id:["ID","DID"]};
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\"/g,"&quot;");}
+function setAv(t){var a=document.getElementById("av");if(a)a.textContent=t||"◈";}
+function openPanel(id){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-p")===id);});var el=document.getElementById("p-"+id);if(el)el.classList.add("on");var meta=titles[id]||[id,""];var h=document.getElementById("title"),s=document.getElementById("sub");if(h)h.textContent=meta[0];if(s)s.textContent=meta[1];var side=document.getElementById("side");if(side)side.classList.remove("open");if(id==="protocol")renderProto();if(id==="notes")renderNotes();if(id==="id")renderId();if(id==="chat")renderChat();if(id==="home")refreshHome();}
+function tick(){try{var f=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"});var c=document.getElementById("clock");if(c)c.textContent="MSK "+f.format(new Date());}catch(e){}}
+function sha16(str){if(window.crypto&&crypto.subtle)return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("").slice(0,16);});var h=0x811c9dc5;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}return Promise.resolve(("00000000"+(h>>>0).toString(16)).slice(-8));}
+function shannonH(text){if(!text)return 0;var freq={},n=text.length;for(var i=0;i<n;i++){var c=text[i];freq[c]=(freq[c]||0)+1;}var h=0;Object.keys(freq).forEach(function(k){var p=freq[k]/n;h-=p*Math.log2(p);});return h;}
+function qcli(text){var h=shannonH(text),alphabet=Math.min(256,Math.max(2,new Set(text.split("")).size)),maxH=Math.log2(alphabet);return maxH?Math.min(1,h/maxH):0;}
+function eqs(text){var H=shannonH(text||"");return Math.round(Math.max(0,Math.min(100,(0.30*(H/5)+0.35*0.88+0.25*0.82+0.10*0.75)*100))*10)/10;}
+function loadChat(){try{return JSON.parse(localStorage.getItem(CHAT_KEY)||"[]");}catch(e){return [];}}
+function saveChat(arr){try{localStorage.setItem(CHAT_KEY,JSON.stringify(arr.slice(-80)));}catch(e){}}
+function renderChat(){var mem=loadChat();if(!THREAD)return;THREAD.innerHTML=mem.map(function(m){return '<div class="msg '+(m.role==="u"?"u":"a")+'">'+esc(m.text)+(m.sig?'<div class="meta">sig '+esc(m.sig)+'</div>':'')+'</div>';}).join("");THREAD.scrollTop=THREAD.scrollHeight;var hm=document.getElementById("homeMem");if(hm)hm.textContent=String(mem.length);}
+function addMsg(role,text,sig){var mem=loadChat();mem.push({role:role,text:text,sig:sig||"",ts:Date.now()});saveChat(mem);renderChat();}
+async function answer(q){var t=q.trim(),low=t.toLowerCase();if(!t)return "Пустой запрос.";if(/^(привет|здравств|хай|hello|hi)\b/.test(low))return "Привет. Я АКСИ — локальная система. Чат, квант, метрики, протокол, поиск.";if(/кто ты|что ты|о себе|что умеешь/.test(low))return "АКСИ: offline-first.\n• чат + подпись\n• квант (Bell)\n• EQS / QCLI\n• Agent-v1\n• погода, Wikipedia\n• заметки, голос, ID";if(/время|который час|msk/.test(low)){var f=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"medium",timeStyle:"medium"});return "МСК: "+f.format(new Date());}if(/погод/.test(low)){openPanel("net");var city=(t.match(/погод[аеы]?\s+(?:в\s+)?([а-яa-z\-]+)/i)||[])[1]||"Moscow";var wIn=document.getElementById("wCity");if(wIn)wIn.value=city;return await fetchWeather(city);}if(/bell|белл|запутан/.test(low)){openPanel("quantum");return showQuantum("bell");}if(/суперпоз|qubit|кубит/.test(low)){openPanel("quantum");return showQuantum("super");}if(/eqs|энтропи|qcli|метрик/.test(low)){openPanel("metrics");var mIn=document.getElementById("mIn");if(mIn&&!mIn.value)mIn.value=t;return runMetrics((mIn&&mIn.value)||t);}if(/вики|wiki|найди|поиск/.test(low)){var query=t.replace(/^(найди|поиск|wiki|вики)\s*/i,"").trim()||t;openPanel("search");var sIn=document.getElementById("sIn");if(sIn)sIn.value=query;return await wikiSearch(query);}if(/протокол|agent-v1|пинг/.test(low)){openPanel("protocol");protoPing();return "Agent-v1: ping выполнен.";}return "Принято.\n\nH≈"+shannonH(t).toFixed(2)+" · EQS≈"+eqs(t)+"\n\nУточни или открой модуль.";}
+async function sendText(text){var t=(text||(INP&&INP.value)||"").trim();if(!t)return;if(INP)INP.value="";openPanel("chat");addMsg("u",t);if(PROG)PROG.textContent="…";setAv("…");try{var out=await answer(t);var sig=await sha16(out+"|"+SEED+"|"+Date.now());addMsg("a",out,sig);if(PROG)PROG.textContent="";setAv("◈");}catch(err){addMsg("a","Ошибка: "+(err&&err.message?err.message:String(err)));if(PROG)PROG.textContent="";}}
+function statevector(gates){var s=[1,0,0,0];function applyH(q){var n=[0,0,0,0],inv=1/Math.SQRT2;if(q===0){n[0]=inv*(s[0]+s[2]);n[1]=inv*(s[1]+s[3]);n[2]=inv*(s[0]-s[2]);n[3]=inv*(s[1]-s[3]);}else{n[0]=inv*(s[0]+s[1]);n[1]=inv*(s[0]-s[1]);n[2]=inv*(s[2]+s[3]);n[3]=inv*(s[2]-s[3]);}s=n;}function cnot(){var n=s.slice();n[2]=s[3];n[3]=s[2];s=n;}gates.forEach(function(g){if(g==="H0")applyH(0);else if(g==="CNOT")cnot();});return s.map(function(a){return a*a;});}
+function showQuantum(mode){var gates=mode==="bell"?["H0","CNOT"]:["H0"],p=statevector(gates),labels=["|00⟩","|01⟩","|10⟩","|11⟩"];var box=document.getElementById("qProbs"),txt=document.getElementById("qText");if(box)box.innerHTML=labels.map(function(l,i){return "<div><b>"+(p[i]*100).toFixed(0)+"%</b>"+l+"</div>";}).join("");if(txt)txt.textContent=mode==="bell"?"Bell · H0+CNOT":"H0 · суперпозиция";setAv(mode==="bell"?"⚛":"✨");return mode==="bell"?"Bell\n|00⟩≈50%\n|11⟩≈50%":"Суперпозиция ≈50/50";}
+async function fetchWeather(city){var out=document.getElementById("wOut");if(out)out.textContent="…";try{var r=await fetch("https://wttr.in/"+encodeURIComponent(city||"Moscow")+"?format=3");var t=await r.text();if(out)out.textContent=t.trim();return t.trim();}catch(e){var msg="Сеть недоступна";if(out)out.textContent=msg;return msg;}}
+function runMetrics(text){var t=text||"",H=shannonH(t),Q=qcli(t),E=eqs(t),words=t.trim()?t.trim().split(/\s+/).length:0;var res="H="+H.toFixed(3)+"\nQCLI="+Q.toFixed(3)+"\nEQS="+E+"\nслов≈"+words;var mOut=document.getElementById("mOut");if(mOut)mOut.textContent=res;var he=document.getElementById("homeEqs");if(he)he.textContent=String(E);return res;}
+async function wikiSearch(q){var out=document.getElementById("sOut");if(out)out.textContent="…";try{var r=await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(q),{headers:{"Accept":"application/json"}});if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();var text=(j.extract||j.title||"—").slice(0,900);if(out)out.textContent=text;return text;}catch(e){var msg="Нет данных";if(out)out.textContent=msg;return msg;}}
+function loadProto(){try{return JSON.parse(localStorage.getItem(PROTO_KEY)||"{}");}catch(e){return {};}}
+function saveProto(p){try{localStorage.setItem(PROTO_KEY,JSON.stringify(p));}catch(e){}}
+function ensureProto(){var p=loadProto();if(!p.agents)p.agents={};if(!p.agents[DID])p.agents[DID]={name:"АКСИ",reputationScore:93,messageCount:0,capabilities:["chat","quantum","metrics","search"],lastSeen:Date.now()};if(!p.messages)p.messages=[];saveProto(p);return p;}
+function protoPing(){var p=ensureProto();p.agents[DID].messageCount=(p.agents[DID].messageCount||0)+1;p.agents[DID].lastSeen=Date.now();p.messages.push({from:DID,type:"ping",ts:Date.now()});p.messages=p.messages.slice(-40);saveProto(p);renderProto();}
+function renderProto(){var p=ensureProto(),out=document.getElementById("protoOut");if(!out)return;var rows=Object.keys(p.agents).map(function(did){var a=p.agents[did];return "<tr><td>"+esc(a.name)+"</td><td>"+esc(String(a.reputationScore))+"</td><td>"+esc(String(a.messageCount||0))+"</td></tr>";}).join("");out.innerHTML="<table class='pt'><tr><th>агент</th><th>EQS</th><th>msg</th></tr>"+rows+"</table>";}
+function loadNotes(){try{return JSON.parse(localStorage.getItem(NOTES_KEY)||"[]");}catch(e){return [];}}
+function saveNotes(a){try{localStorage.setItem(NOTES_KEY,JSON.stringify(a.slice(-100)));}catch(e){}}
+function renderNotes(){var list=document.getElementById("nList");if(!list)return;var notes=loadNotes();list.innerHTML=notes.map(function(n,i){return '<div class="note-item"><span>'+esc(n)+'</span><button type="button" data-act="noteDel" data-i="'+i+'">удалить</button></div>';}).join("")||'<p class="muted">пусто</p>';}
+function noteAdd(){var nIn=document.getElementById("nIn");var t=(nIn&&nIn.value||"").trim();if(!t)return;var notes=loadNotes();notes.unshift(t);saveNotes(notes);if(nIn)nIn.value="";renderNotes();}
+function noteDel(i){var notes=loadNotes();notes.splice(Number(i),1);saveNotes(notes);renderNotes();}
+function renderId(){var full=document.getElementById("didFull"),user=document.getElementById("didUser");try{var raw=localStorage.getItem(ID_KEY);if(raw){var o=JSON.parse(raw);if(full)full.textContent=o.did||"—";if(user)user.textContent=o.name?("имя: "+o.name):"";return;}}catch(e){}if(full)full.textContent=DID;if(user)user.textContent="";}
+async function didGen(){var nameEl=document.getElementById("didName");var name=(nameEl&&nameEl.value||"").trim()||"user";var h=await sha16(name+"|"+SEED+"|"+Date.now());var did="did:aksi:local:"+h+h.slice(0,8);try{localStorage.setItem(ID_KEY,JSON.stringify({did:did,name:name,ts:Date.now()}));}catch(e){}renderId();}
+function listen(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("STT недоступно");return;}var r=new SR();r.lang="ru-RU";r.onresult=function(ev){var t=ev.results[0][0].transcript;if(INP)INP.value=t;sendText(t);};r.start();setAv("🎙");}
+function onFiles(files){var out=document.getElementById("fOut");if(!files||!files.length)return;var f=files[0],reader=new FileReader();reader.onload=function(){var text=String(reader.result||"").slice(0,4000);if(out)out.textContent=f.name+" · "+text.length+"\n\n"+text.slice(0,500);};reader.readAsText(f);}
+function refreshHome(){var he=document.getElementById("homeEqs");if(he)he.textContent=String(eqs("АКСИ"));var hm=document.getElementById("homeMem");if(hm)hm.textContent=String(loadChat().length);}
+function handleAct(act,el){if(act==="menu"){document.getElementById("side").classList.toggle("open");return;}if(act==="send"){sendText();return;}if(act==="bell"){showQuantum("bell");return;}if(act==="super"){showQuantum("super");return;}if(act==="weather"){fetchWeather((document.getElementById("wCity")||{}).value);return;}if(act==="metrics"){runMetrics((document.getElementById("mIn")||{}).value);return;}if(act==="search"){wikiSearch((document.getElementById("sIn")||{}).value);return;}if(act==="protoPing"){protoPing();return;}if(act==="protoRefresh"){renderProto();return;}if(act==="noteAdd"){noteAdd();return;}if(act==="noteDel"){noteDel(el&&el.getAttribute("data-i"));return;}if(act==="didGen"){didGen();return;}if(act==="voice"){listen();return;}}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-p],[data-act]");if(!t)return;if(t.hasAttribute("data-p")){e.preventDefault();openPanel(t.getAttribute("data-p"));return;}if(t.hasAttribute("data-act")){e.preventDefault();handleAct(t.getAttribute("data-act"),t);}});
+if(INP)INP.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();sendText();}});
+var fIn=document.getElementById("fIn");if(fIn)fIn.addEventListener("change",function(){onFiles(fIn.files);});
+ensureProto();renderChat();renderNotes();renderId();refreshHome();tick();setInterval(tick,1000);ST.textContent="готова";ST.className="ok";setAv("◈");
+})();
+</script>
+</body>
+</html>
