@@ -2,116 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#09090b">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="0;url=aksi.html?v=12">
 <title>АКСИ</title>
-<style>
-:root{--bg:#09090b;--card:#18181b;--line:#27272a;--t:#fafafa;--m:#a1a1aa;--a:#a78bfa;--a2:#7c3aed;--ok:#4ade80;--font:system-ui,-apple-system,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--t);font:15px/1.5 var(--font)}
-body{display:flex;flex-direction:column;max-width:720px;margin:0 auto}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(9,9,11,.92);z-index:10}
-.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,var(--a2),var(--a));display:grid;place-items:center;font-weight:700;font-size:13px}
-header h1{font-size:15px;font-weight:600}header p{font-size:11px;color:var(--m)}
-#st{margin-left:auto;font-size:11px;color:var(--ok)}
-nav{display:flex;gap:4px;padding:8px 12px;overflow-x:auto;border-bottom:1px solid var(--line)}
-nav button{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:0;background:0;color:var(--m);font-size:12px;font-weight:500}
-nav button.on{background:var(--card);color:var(--t)}
-main{flex:1;overflow:auto;padding:16px 16px 110px}
-.panel{display:none}.panel.on{display:block}
-.msg{display:flex;margin:0 0 12px}.msg.me{justify-content:flex-end}
-.bub{max-width:90%;padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px}
-.msg.me .bub{background:var(--a2);color:#fff;border-bottom-right-radius:5px}
-.msg.ai .bub{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
-.meta{display:block;margin-top:8px;font:10px/1.3 ui-monospace,monospace;color:var(--m)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#121214;color:var(--t);font-size:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-.card h2{font-size:14px;margin:0 0 8px}.muted{color:var(--m);font-size:13px;line-height:1.5}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#121214;color:var(--t);font-size:13px}
-.btn.p{background:var(--a2);border-color:transparent;color:#fff}.btn:disabled{opacity:.45}
-input,textarea,select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--t);font:inherit;outline:0}
-textarea{min-height:100px;resize:vertical}
-.bar{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 30%);z-index:20}
-.bar input{flex:1;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit}
-.bar button{width:48px;height:48px;border-radius:14px;border:0;background:var(--a2);color:#fff;font-size:18px}
-.fact{padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--bg)}
-.fact button{float:right;border:0;background:0;color:var(--m);font-size:16px}
-.ok{color:var(--ok)}.bad{color:#f87171}
-</style>
+<script>location.replace('aksi.html?v=12'+location.hash);</script>
 </head>
-<body>
-<header><div class="logo">A</div><div><h1>АКСИ</h1><p>личное ядро</p></div><span id="st">онлайн</span></header>
-<nav>
-<button type="button" class="on" data-tab="chat">Чат</button>
-<button type="button" data-tab="teach">Учить</button>
-<button type="button" data-tab="mem">Память</button>
-<button type="button" data-tab="more">Ещё</button>
-</nav>
-<main>
-<section class="panel on" id="tab-chat">
-<div id="thread"></div>
-<div class="chips">
-<button type="button" class="chip" data-ask="привет">привет</button>
-<button type="button" class="chip" data-ask="кто ты">кто ты</button>
-<button type="button" class="chip" data-ask="что умеешь">умеешь</button>
-<button type="button" class="chip" data-ask="что ты знаешь">память</button>
-</div>
-</section>
-<section class="panel" id="tab-teach">
-<div class="card"><h2>Учить АКСИ</h2>
-<p class="muted">В чате: <b>запомни: факт</b></p>
-<textarea id="teachBox" placeholder="Факт на строку" style="margin-top:10px"></textarea>
-<div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div>
-</section>
-<section class="panel" id="tab-mem">
-<div class="card"><h2>Память · <span id="memN">0</span></h2>
-<div id="memList"></div>
-<div class="row"><button type="button" class="btn" id="btnExp">Экспорт</button><button type="button" class="btn" id="btnImp">Импорт</button><button type="button" class="btn" id="btnWipe">Стереть</button></div>
-<input type="file" id="impFile" accept=".json" hidden></div>
-</section>
-<section class="panel" id="tab-more">
-<div class="card"><h2>Статус</h2><p class="muted" id="capMsg">…</p>
-<p class="muted" style="margin-top:10px">Ядро работает на любом телефоне.</p></div>
-<div class="card"><h2>Нейросеть (ПК)</h2>
-<p class="muted">WebGPU — обычно только Chrome/Edge на компьютере. На телефоне модель не нужна: отвечает ядро.</p>
-<select id="model" style="margin-top:10px"><option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M</option><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B</option></select>
-<div class="row"><button type="button" class="btn p" id="btnLoad">Загрузить</button><button type="button" class="btn" id="btnUnload">Выгрузить</button></div>
-<p class="muted" id="brainMsg" style="margin-top:10px">—</p></div>
-<div class="card"><h2>Контакт</h2><p class="muted">aksilove@internet.ru</p></div>
-</section>
-</main>
-<div class="bar"><input id="inp" type="text" placeholder="Спросить АКСИ…" enterkeyhint="send" autocomplete="off"><button type="button" id="send">↑</button></div>
-<script>
-(function(){
-"use strict";
-var KEY="aksi11_mem", VER="11.0";
-var engine=null, busy=false;
-function $(id){return document.getElementById(id);}
-function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function status(t){var s=$("st"); if(s) s.textContent=t;}
-function loadMem(){try{var a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
-function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){} renderMem();}
-function addFact(t,src){t=String(t||"").trim();if(!t)return;var a=loadMem();a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:t,src:src||"u",ts:Date.now()});if(a.length>500)a=a.slice(0,500);saveMem(a);}
-function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='muted'>Пусто</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+x.id+"'>×</button>"+esc(x.t)+"</div>";}).join("");}
-function showTab(name){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name);});var el=$("tab-"+name);if(el)el.classList.add("on");if(name==="mem")renderMem();}
-function bubble(role,text,meta){var th=$("thread");if(!th)return;var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML="<div class='bub'>"+esc(text)+(meta?"<span class='meta'>"+esc(meta)+"</span>":"")+"</div>";th.appendChild(d);var main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;}
-var KB=[{k:["кто ты","что ты","представься","акси","ты кто"],a:"Я АКСИ "+VER+" — твоё личное ядро.\n\nРаботаю в браузере. Учусь твоим фактам.\n\naksilove@internet.ru"},{k:["привет","здравств","добрый","hello","hi"],a:"Привет. АКСИ на связи.\n\nСпроси что угодно или: запомни: …"},{k:["умеешь","помоги","команд","что можешь"],a:"• чат и память\n• запомни: факт\n• экспорт JSON\n• на ПК — WebLLM (опционально)"},{k:["нейро","webllm","модель","gpu"],a:"WebLLM только с WebGPU (часто ПК Chrome). На телефоне отвечает ядро — так и задумано."},{k:["контакт","email","почта"],a:"aksilove@internet.ru"},{k:["ошибк","не работает","баг"],a:"Ядро локальное. Красный текст у «Загрузить модель» на телефоне — норма. Пиши в чат."}];
-function tok(s){return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(function(w){return w.length>1;});}
-function score(q,keys,text){var low=q.toLowerCase(),sc=0,i,j,qt=tok(q),tt=tok(text||"");if(keys)for(i=0;i<keys.length;i++)if(low.indexOf(keys[i])!==-1)sc+=3;for(i=0;i<qt.length;i++)for(j=0;j<tt.length;j++)if(qt[i]===tt[j])sc++;return sc;}
-function coreAnswer(q){var low=q.toLowerCase().trim();if(/^(запомни|выучи)\s*[:\s]/.test(low)){var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return"Напиши: запомни: факт";addFact(raw,"chat");return"Запомнила ✓\n«"+raw+"»\nФактов: "+loadMem().length;}if(/забудь всё|очисти память/.test(low)){saveMem([]);return"Память очищена.";}if(/что ты знаешь|что помнишь|моя память/.test(low)){var a=loadMem();if(!a.length)return"Пусто. запомни: …";return"Помню "+a.length+":\n\n"+a.slice(0,15).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}if(/который час|сколько времени|время сейчас|дата/.test(low)){try{return"МСК:\n"+new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"medium"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}var best={sc:0,a:null},i,s;for(i=0;i<KB.length;i++){s=score(q,KB[i].k,KB[i].a);if(s>best.sc)best={sc:s,a:KB[i].a};}var mem=loadMem();for(i=0;i<mem.length;i++){s=score(q,null,mem[i].t)+2;if(s>best.sc)best={sc:s,a:"Из памяти:\n"+mem[i].t};}if(best.sc>=2&&best.a)return best.a;return"Мало данных.\nНаучи: запомни: …\nИли: кто ты / умеешь.\nФактов: "+loadMem().length;}
-function memCtx(){return loadMem().slice(0,10).map(function(x){return "• "+x.t;}).join("\n");}
-function chat(q){q=String(q||"").trim();if(!q||busy)return;busy=true;bubble("me",q);var inp=$("inp");if(inp)inp.value="";status("…");var t0=Date.now();function finish(text,tag){bubble("ai",text,(Date.now()-t0)+" мс · "+tag);status("онлайн");busy=false;showTab("chat");}if(engine){engine.chat.completions.create({messages:[{role:"system",content:"Ты АКСИ. По-русски. "+memCtx()},{role:"user",content:q}],temperature:0.7,max_tokens:400}).then(function(out){var t=(out.choices&&out.choices[0]&&out.choices[0].message&&out.choices[0].message.content)||coreAnswer(q);finish(t,"WebLLM");}).catch(function(){finish(coreAnswer(q),"ядро "+VER);});return;}try{finish(coreAnswer(q),"ядро "+VER);}catch(e){finish("Ошибка: "+(e&&e.message?e.message:e),"err");}}
-document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("button,[data-tab],[data-ask],[data-del]"):e.target;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}if(el.id==="send"){chat(($("inp")||{}).value);return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!v.trim()){status("пусто");return;}v.split(/\n+/).forEach(function(line){if(line.trim())addFact(line.trim(),"teach");});if(box)box.value="";bubble("ai","Сохранено. Фактов: "+loadMem().length);showTab("chat");return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Стереть?"))saveMem([]);return;}if(el.id==="btnLoad"){loadModel();return;}if(el.id==="btnUnload"){engine=null;$("brainMsg").textContent="Выгружено";status("онлайн");return;}});
-document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.id==="inp"){e.preventDefault();chat(e.target.value);}});
-var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result),facts=j.facts||[],cur=loadMem();facts.forEach(function(x){if(x&&x.t)cur.unshift(x);});saveMem(cur.slice(0,500));}catch(err){}};r.readAsText(f);e.target.value="";});
-function detect(){var mobile=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);var gpu=!!(navigator.gpu);var msg=$("capMsg");if(msg){if(mobile)msg.innerHTML="<span class='ok'>Телефон</span> — ядро работает. WebLLM обычно недоступен (норма).";else if(gpu)msg.innerHTML="<span class='ok'>WebGPU</span> — можно пробовать нейросеть.";else msg.innerHTML="Без WebGPU — отвечает ядро.";}var bm=$("brainMsg");if(bm&&(mobile||!gpu))bm.textContent="На этом устройстве модель скорее не загрузится. Чат через ядро — ок.";}
-function loadModel(){var bm=$("brainMsg");if(!navigator.gpu){if(bm)bm.innerHTML="<span class='bad'>Нет WebGPU</span>. На телефоне так и должно. Пиши в чат.";return;}if(bm)bm.textContent="Загрузка…";status("загрузка");var btn=$("btnLoad");if(btn)btn.disabled=true;var id=($("model")||{}).value||"SmolLM2-360M-Instruct-q4f16_1-MLC";import("https://esm.sh/@mlc-ai/web-llm@0.2.79").then(function(webllm){return webllm.CreateMLCEngine(id,{initProgressCallback:function(p){if(bm)bm.textContent=p.text||(Math.round((p.progress||0)*100)+"%");}});}).then(function(eng){engine=eng;if(bm)bm.innerHTML="<span class='ok'>Готово</span>";status("нейросеть");bubble("ai","Нейросеть загружена.");showTab("chat");}).catch(function(err){engine=null;var m=(err&&err.message)?err.message:String(err);if(bm)bm.innerHTML="<span class='bad'>Не загрузилась</span>. Ядро отвечает в чате.";status("онлайн");}).then(function(){if(btn)btn.disabled=false;});}
-try{if(!localStorage.getItem("aksi11_seed")){["АКСИ — личное ядро","Контакт: aksilove@internet.ru"].forEach(function(t){addFact(t,"seed");});localStorage.setItem("aksi11_seed","1");}}catch(e){}
-detect();renderMem();status("онлайн");
-bubble("ai","АКСИ "+VER+"\n\nЯдро готово. На телефоне нейросеть часто недоступна — ответы из ядра и памяти.\n\nНажми «привет».","старт");
-})();
-</script>
+<body style="margin:0;background:#09090b;color:#a1a1aa;font:14px system-ui;display:grid;place-items:center;min-height:100vh">
+<p><a href="aksi.html?v=12" style="color:#a78bfa">Открыть АКСИ</a></p>
 </body>
 </html>
