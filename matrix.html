@@ -2,373 +2,183 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#06050a">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
 <title>АКСИ</title>
 <style>
+:root{--bg:#09090b;--elev:#121214;--card:#18181b;--line:#27272a;--text:#fafafa;--mute:#a1a1aa;--acc:#a78bfa;--acc2:#7c3aed;--ok:#34d399}
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#06050a;--p:#100e18;--c:#16131f;--l:#2c2740;--t:#f0ebf8;--m:#9b93b0;--a:#c9b0ff;--ok:#4ade80}
-html,body{height:100%;background:var(--bg);color:var(--t);font:14px/1.45 system-ui,-apple-system,sans-serif}
-body{display:flex;flex-direction:column;max-width:800px;margin:0 auto}
-header{padding:10px 14px;border-bottom:1px solid var(--l);display:flex;align-items:center;gap:8px;flex-shrink:0}
-header b{font-size:15px}#st{margin-left:auto;font-size:11px;color:var(--ok)}
-nav{display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--l);overflow-x:auto;flex-shrink:0}
-nav button{flex:0 0 auto;padding:8px 12px;border-radius:999px;border:1px solid var(--l);background:var(--p);color:var(--m);font-size:12px}
-nav button.on{background:#2a1f48;color:var(--a);border-color:#4a3a70}
-main{flex:1;overflow:auto;padding:12px 12px 110px}
+html,body{height:100%;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,sans-serif}
+body{display:flex;flex-direction:column;max-width:42rem;margin:0 auto}
+.top{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(9,9,11,.9);z-index:5}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:grid;place-items:center;font-weight:700;font-size:13px}
+.top h1{font-size:15px;font-weight:600}.top p{font-size:11px;color:var(--mute)}
+#st{margin-left:auto;font-size:11px;color:var(--ok)}
+.nav{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.nav button{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:0;background:0;color:var(--mute);font-size:12px;font-weight:500}
+.nav button.on{background:var(--card);color:var(--text)}
+main{flex:1;overflow:auto;padding:16px 16px 120px}
 .panel{display:none}.panel.on{display:block}
-.b{max-width:94%;margin:0 0 10px;padding:11px 13px;border-radius:14px;white-space:pre-wrap;word-break:break-word}
-.b.me{margin-left:auto;background:#1a1430;border:1px solid #3a2f58}
-.b.ai{background:var(--p);border:1px solid var(--l)}
-.b .meta{display:block;margin-top:6px;font:10px/1.3 ui-monospace,monospace;color:#7a7190}
-.card{background:var(--c);border:1px solid var(--l);border-radius:14px;padding:14px;margin-bottom:12px}
-.card h2{font-size:13px;color:var(--a);margin-bottom:8px}
-.muted{color:var(--m);font-size:13px;line-height:1.5}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.btn{padding:10px 12px;border-radius:11px;border:1px solid var(--l);background:var(--p);color:var(--t);font-size:13px}
-.btn.p{background:#2a1f48;border-color:#4a3a70;color:var(--a)}
-input[type=text],textarea,select{width:100%;padding:11px 12px;border-radius:11px;border:1px solid var(--l);background:var(--bg);color:var(--t);font:inherit;outline:0}
+.msg{display:flex;margin-bottom:12px}.msg.me{justify-content:flex-end}
+.bubble{max-width:92%;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:14.5px}
+.msg.me .bubble{background:#7c3aed;color:#fff;border-bottom-right-radius:6px}
+.msg.ai .bubble{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
+.meta{display:block;margin-top:8px;font-size:10px;color:var(--mute);font-family:monospace}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--elev);color:var(--text);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{font-size:13px;font-weight:600;margin-bottom:6px}
+.hint{color:var(--mute);font-size:13px;line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--elev);color:var(--text);font-size:13px}
+.btn.primary{background:#7c3aed;border-color:transparent;color:#fff}
+input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;outline:0}
 textarea{min-height:100px;resize:vertical}
-.composer{position:fixed;left:0;right:0;bottom:0;max-width:800px;margin:0 auto;padding:10px 12px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 30%);z-index:20}
-.composer input{flex:1;padding:14px;border-radius:14px;border:1px solid var(--l);background:var(--c);color:var(--t);font:inherit;outline:0}
-.composer button{width:52px;height:52px;border-radius:14px;border:1px solid #4a3a70;background:#2a1f48;color:var(--a);font-size:18px;flex-shrink:0}
-.qbar{display:flex;gap:4px;height:48px;align-items:flex-end;margin-top:10px}
-.qbar i{flex:1;background:linear-gradient(180deg,#c9b0ff,#5b4a8a);border-radius:4px 4px 0 0;min-height:4px}
-pre.code{background:var(--bg);border:1px solid var(--l);border-radius:10px;padding:12px;overflow:auto;font:12px/1.4 ui-monospace,monospace;max-height:240px;white-space:pre-wrap}
-iframe.preview{width:100%;height:280px;border:1px solid var(--l);border-radius:10px;background:#fff;margin-top:10px}
-.fact{padding:10px;border:1px solid var(--l);border-radius:10px;margin-bottom:8px;font-size:13px;background:var(--bg)}
-.fact button{float:right;background:0;border:0;color:var(--m);font-size:11px}
+.composer{position:fixed;left:0;right:0;bottom:0;max-width:42rem;margin:0 auto;padding:12px 14px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 35%);z-index:10}
+.composer input{flex:1;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit}
+.composer button{width:50px;height:50px;border-radius:14px;border:0;background:#7c3aed;color:#fff;font-size:18px}
+.qbar{display:flex;gap:6px;height:56px;align-items:flex-end;margin-top:14px}
+.qbar i{flex:1;background:linear-gradient(180deg,#a78bfa,#7c3aed);border-radius:6px 6px 2px 2px;min-height:6px}
+.mono{font-family:monospace;font-size:12px;color:var(--mute);margin-top:10px}
+pre.out{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;overflow:auto;font:12px/1.45 monospace;max-height:240px;white-space:pre-wrap}
+iframe.prev{width:100%;height:240px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:12px}
+.fact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--bg)}
+.fact button{float:right;background:0;border:0;color:var(--mute);font-size:16px}
 </style>
 </head>
 <body>
-<header><b>АКСИ</b><span id="st">…</span></header>
-<nav id="nav">
-  <button type="button" class="on" data-tab="chat">Чат</button>
-  <button type="button" data-tab="quantum">Квант</button>
-  <button type="button" data-tab="write">Писатель</button>
-  <button type="button" data-tab="site">Сайт</button>
-  <button type="button" data-tab="teach">Учить</button>
-  <button type="button" data-tab="mem">Память</button>
+<header class="top"><div class="logo">A</div><div><h1>АКСИ</h1><p>личное ядро</p></div><span id="st">…</span></header>
+<nav class="nav">
+<button type="button" class="on" data-tab="chat">Чат</button>
+<button type="button" data-tab="quantum">Квант</button>
+<button type="button" data-tab="write">Писатель</button>
+<button type="button" data-tab="site">Сайт</button>
+<button type="button" data-tab="teach">Учить</button>
+<button type="button" data-tab="mem">Память</button>
 </nav>
 <main>
 <section class="panel on" id="tab-chat">
-  <div id="thread"></div>
-  <div class="row">
-    <button type="button" class="btn p" data-ask="привет">привет</button>
-    <button type="button" class="btn" data-ask="кто ты">кто ты</button>
-    <button type="button" class="btn" data-ask="квантовый статус">квант</button>
-    <button type="button" class="btn" data-ask="собери сайт">сайт</button>
-  </div>
+<div id="thread"></div>
+<div class="chips">
+<button type="button" class="chip" data-ask="привет">привет</button>
+<button type="button" class="chip" data-ask="кто ты">кто ты</button>
+<button type="button" class="chip" data-ask="что умеешь">умеешь</button>
+<button type="button" class="chip" data-ask="что ты знаешь">память</button>
+<button type="button" class="chip" data-ask="собери сайт">сайт</button>
+</div>
 </section>
 <section class="panel" id="tab-quantum">
-  <div class="card">
-    <h2>Квантовый симулятор</h2>
-    <p class="muted">2 кубита. Каждый ответ чата проходит через измерение.</p>
-    <div class="row">
-      <button type="button" class="btn p" data-qgate="h0">H q0</button>
-      <button type="button" class="btn" data-qgate="h1">H q1</button>
-      <button type="button" class="btn" data-qgate="x0">X q0</button>
-      <button type="button" class="btn" data-qgate="z0">Z q0</button>
-      <button type="button" class="btn" data-qgate="cx">CNOT</button>
-      <button type="button" class="btn" data-qgate="bell">Bell</button>
-      <button type="button" class="btn" data-qgate="reset">Сброс</button>
-      <button type="button" class="btn p" data-qgate="measure">Измерить</button>
-    </div>
-    <div id="qstate" class="muted" style="margin-top:12px;font-family:ui-monospace,monospace;font-size:12px"></div>
-    <div class="qbar" id="qbar"></div>
-    <p id="qmsg" class="muted" style="margin-top:10px">автозапуск</p>
-  </div>
+<div class="card"><h2>Квант</h2><p class="hint">2 кубита · измерение в каждом ответе</p>
+<div class="row">
+<button type="button" class="btn primary" data-q="bell">Bell</button>
+<button type="button" class="btn" data-q="h0">H0</button>
+<button type="button" class="btn" data-q="h1">H1</button>
+<button type="button" class="btn" data-q="x0">X</button>
+<button type="button" class="btn" data-q="cx">CNOT</button>
+<button type="button" class="btn" data-q="m">Измерить</button>
+<button type="button" class="btn" data-q="reset">Сброс</button>
+</div>
+<div class="mono" id="qstate"></div><div class="qbar" id="qbar"></div>
+<p class="hint" id="qmsg" style="margin-top:10px">—</p></div>
 </section>
 <section class="panel" id="tab-write">
-  <div class="card">
-    <h2>Самописание</h2>
-    <select id="wType">
-      <option value="note">Заметка</option>
-      <option value="post">Пост</option>
-      <option value="code">Код JS</option>
-      <option value="letter">Письмо</option>
-      <option value="idea">Идея</option>
-    </select>
-    <input type="text" id="wTopic" placeholder="Тема…" style="margin-top:8px">
-    <div class="row">
-      <button type="button" class="btn p" id="btnWrite">Сгенерировать</button>
-      <button type="button" class="btn" id="btnSaveWrite">В память</button>
-    </div>
-    <pre class="code" id="wOut" style="margin-top:12px">—</pre>
-  </div>
+<div class="card"><h2>Писатель</h2>
+<select id="wType"><option value="note">Заметка</option><option value="post">Пост</option><option value="code">Код</option><option value="letter">Письмо</option><option value="idea">Идея</option></select>
+<input type="text" id="wTopic" placeholder="Тема" style="margin-top:8px">
+<div class="row"><button type="button" class="btn primary" id="btnWrite">Сгенерировать</button><button type="button" class="btn" id="btnSaveW">В память</button></div>
+<pre class="out" id="wOut">—</pre></div>
 </section>
 <section class="panel" id="tab-site">
-  <div class="card">
-    <h2>Генератор сайта</h2>
-    <input type="text" id="siteTitle" value="АКСИ Studio" placeholder="Название">
-    <input type="text" id="siteTheme" value="личный ИИ-контур" placeholder="Тема" style="margin-top:8px">
-    <div class="row">
-      <button type="button" class="btn p" id="btnSite">Собрать</button>
-      <button type="button" class="btn" id="btnSiteDl">Скачать</button>
-      <button type="button" class="btn" id="btnSiteRender">Превью</button>
-    </div>
-    <iframe class="preview" id="sitePrev" sandbox="" title="preview"></iframe>
-    <textarea id="siteCode" style="margin-top:10px;min-height:140px;font-family:ui-monospace,monospace;font-size:12px" placeholder="HTML код…"></textarea>
-  </div>
+<div class="card"><h2>Сайт</h2>
+<input type="text" id="siteTitle" value="АКСИ Studio">
+<input type="text" id="siteTheme" value="личный ИИ-контур" style="margin-top:8px">
+<div class="row"><button type="button" class="btn primary" id="btnSite">Собрать</button><button type="button" class="btn" id="btnPrev">Превью</button><button type="button" class="btn" id="btnDl">Скачать</button></div>
+<iframe class="prev" id="sitePrev" title="p"></iframe>
+<textarea id="siteCode" style="margin-top:12px;min-height:120px;font-family:monospace;font-size:12px"></textarea></div>
 </section>
 <section class="panel" id="tab-teach">
-  <div class="card">
-    <h2>Учить</h2>
-    <p class="muted">Или в чате: запомни: факт</p>
-    <textarea id="teachBox" placeholder="Факты, по одному на строку"></textarea>
-    <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div>
-  </div>
+<div class="card"><h2>Учить</h2>
+<p class="hint">Или в чате: запомни: факт</p>
+<textarea id="teachBox" placeholder="Факт на строку" style="margin-top:10px"></textarea>
+<div class="row"><button type="button" class="btn primary" id="btnTeach">Запомнить</button></div></div>
 </section>
 <section class="panel" id="tab-mem">
-  <div class="card">
-    <h2>Память <span id="memN" class="muted"></span></h2>
-    <div id="memList"></div>
-    <div class="row">
-      <button type="button" class="btn" id="btnExp">Экспорт</button>
-      <button type="button" class="btn" id="btnImp">Импорт</button>
-      <button type="button" class="btn" id="btnWipe">Стереть</button>
-    </div>
-    <input type="file" id="impFile" accept=".json,application/json" style="display:none">
-  </div>
+<div class="card"><h2>Память · <span id="memN">0</span></h2>
+<div id="memList"></div>
+<div class="row"><button type="button" class="btn" id="btnExp">Экспорт</button><button type="button" class="btn" id="btnImp">Импорт</button><button type="button" class="btn" id="btnWipe">Стереть</button></div>
+<input type="file" id="impFile" accept=".json" hidden></div>
 </section>
 </main>
-<div class="composer">
-  <input id="inp" type="text" placeholder="Спросить АКСИ…" enterkeyhint="send" autocomplete="off">
-  <button type="button" id="send">→</button>
-</div>
+<div class="composer"><input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off"><button type="button" id="send">↑</button></div>
 <script>
 (function(){
 "use strict";
-var KEY="aksi7_mem", VER="7.0";
-var lastWrite="", lastSite="";
+var KEY="aksi8_mem",VER="8.0",lastWrite="",lastSite="";
 var Q={state:[[1,0],[0,0],[0,0],[0,0]]};
 function cAdd(a,b){return[a[0]+b[0],a[1]+b[1]];}
 function cScale(a,s){return[a[0]*s,a[1]*s];}
 function abs2(a){return a[0]*a[0]+a[1]*a[1];}
-function qReset(){Q.state=[[1,0],[0,0],[0,0],[0,0]]; qShow("reset");}
+function qReset(){Q.state=[[1,0],[0,0],[0,0],[0,0]];qUI("сброс");}
 function qApply(gate,t0,t1){
-  var dim=4, next=[[0,0],[0,0],[0,0],[0,0]], i,j,i1,a0,a1,inv;
-  if(gate==="h"){
-    inv=1/Math.SQRT2;
-    for(i=0;i<dim;i++){
-      if(((i>>t0)&1)!==0)continue;
-      i1=i|(1<<t0); a0=Q.state[i]; a1=Q.state[i1];
-      next[i]=cAdd(cScale(a0,inv),cScale(a1,inv));
-      next[i1]=cAdd(cScale(a0,inv),cScale(a1,-inv));
-    }
-  } else if(gate==="x"){
-    for(i=0;i<dim;i++){j=i^(1<<t0); next[j]=cAdd(next[j],Q.state[i]);}
-  } else if(gate==="z"){
-    for(i=0;i<dim;i++) next[i]=((i>>t0)&1)?cScale(Q.state[i],-1):Q.state[i];
-  } else if(gate==="cx"){
-    for(i=0;i<dim;i++){
-      if(((i>>t0)&1)===1){j=i^(1<<t1); next[j]=cAdd(next[j],Q.state[i]);}
-      else next[i]=cAdd(next[i],Q.state[i]);
-    }
-  }
-  Q.state=next; qShow(gate);
+var dim=4,next=[[0,0],[0,0],[0,0],[0,0]],i,j,i1,a0,a1,inv;
+if(gate==="h"){inv=1/Math.SQRT2;for(i=0;i<dim;i++){if(((i>>t0)&1)!==0)continue;i1=i|(1<<t0);a0=Q.state[i];a1=Q.state[i1];next[i]=cAdd(cScale(a0,inv),cScale(a1,inv));next[i1]=cAdd(cScale(a0,inv),cScale(a1,-inv));}}
+else if(gate==="x"){for(i=0;i<dim;i++){j=i^(1<<t0);next[j]=cAdd(next[j],Q.state[i]);}}
+else if(gate==="z"){for(i=0;i<dim;i++)next[i]=((i>>t0)&1)?cScale(Q.state[i],-1):Q.state[i];}
+else if(gate==="cx"){for(i=0;i<dim;i++){if(((i>>t0)&1)===1){j=i^(1<<t1);next[j]=cAdd(next[j],Q.state[i]);}else next[i]=cAdd(next[i],Q.state[i]);}}
+Q.state=next;qUI(gate);
 }
-function qBell(){qReset(); qApply("h",0); qApply("cx",0,1); qShow("Bell");}
+function qBell(){qReset();qApply("h",0);qApply("cx",0,1);qUI("Bell");}
 function qProbs(){return Q.state.map(function(a,i){return{i:i,p:abs2(a),bits:i.toString(2).padStart(2,"0")};});}
-function qMeasure(){
-  var pr=qProbs(), r=Math.random(), acc=0, pick=0, k;
-  for(k=0;k<pr.length;k++){acc+=pr[k].p; if(r<=acc){pick=pr[k].i; break;}}
-  var ns=[[0,0],[0,0],[0,0],[0,0]]; ns[pick]=[1,0]; Q.state=ns;
-  qShow("|"+pick.toString(2).padStart(2,"0")+">");
-  return pick;
-}
-function qShow(msg){
-  var pr=qProbs(), el=document.getElementById("qstate"), bar=document.getElementById("qbar"), m=document.getElementById("qmsg");
-  if(el) el.textContent=pr.map(function(x){return "|"+x.bits+"> "+(x.p*100).toFixed(1)+"%";}).join("  ");
-  if(bar){
-    var mx=Math.max.apply(null,pr.map(function(x){return x.p;}))||1;
-    bar.innerHTML=pr.map(function(x){return "<i style='height:"+Math.max(4,x.p/mx*48)+"px'></i>";}).join("");
-  }
-  if(m&&msg) m.textContent=msg;
-}
-function qEntropy(){
-  var pr=qProbs(), e=0, i,p;
-  for(i=0;i<pr.length;i++){p=pr[i].p; if(p>1e-12) e-=p*Math.log2(p);}
-  return e;
-}
+function qMeasure(){var pr=qProbs(),r=Math.random(),acc=0,pick=0,k;for(k=0;k<pr.length;k++){acc+=pr[k].p;if(r<=acc){pick=pr[k].i;break;}}var ns=[[0,0],[0,0],[0,0],[0,0]];ns[pick]=[1,0];Q.state=ns;qUI("|"+pick.toString(2).padStart(2,"0")+">");return pick;}
+function qUI(msg){var pr=qProbs(),el=$("qstate"),bar=$("qbar"),m=$("qmsg");if(el)el.textContent=pr.map(function(x){return "|"+x.bits+"> "+(x.p*100).toFixed(0)+"%";}).join(" · ");if(bar){var mx=Math.max.apply(null,pr.map(function(x){return x.p;}))||1;bar.innerHTML=pr.map(function(x){return "<i style='height:"+Math.max(6,x.p/mx*56)+"px'></i>";}).join("");}if(m&&msg)m.textContent=msg;}
+function qEntropy(){var pr=qProbs(),e=0,i,p;for(i=0;i<pr.length;i++){p=pr[i].p;if(p>1e-12)e-=p*Math.log2(p);}return e;}
 function loadMem(){try{var a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
-function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){} renderMem();}
-function addFact(t,src){t=String(t||"").trim();if(!t)return;var a=loadMem();a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:t,src:src||"u",ts:Date.now()});if(a.length>400)a=a.slice(0,400);saveMem(a);}
-function renderMem(){
-  var a=loadMem(),n=document.getElementById("memN"),list=document.getElementById("memList");
-  if(n)n.textContent="("+a.length+")";
-  if(!list)return;
-  if(!a.length){list.innerHTML="<p class='muted'>Пусто</p>";return;}
-  list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+x.id+"'>x</button>"+esc(x.t)+"</div>";}).join("");
-}
+function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}renderMem();}
+function addFact(t,src){t=String(t||"").trim();if(!t)return;var a=loadMem();a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:t,src:src||"u",ts:Date.now()});if(a.length>500)a=a.slice(0,500);saveMem(a);}
+function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='hint'>Пусто — учи АКСИ</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+x.id+"'>×</button>"+esc(x.t)+"</div>";}).join("");}
 function $(id){return document.getElementById(id);}
 function status(t){var s=$("st");if(s)s.textContent=t;}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function tok(s){return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(function(w){return w.length>1;});}
-function showTab(name){
-  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
-  document.querySelectorAll("#nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name);});
-  var el=$("tab-"+name); if(el)el.classList.add("on");
-  if(name==="mem")renderMem();
-  if(name==="quantum")qShow();
-}
-function addBubble(role,text,meta){
-  var th=$("thread"); if(!th)return;
-  var d=document.createElement("div");
-  d.className="b "+(role==="me"?"me":"ai");
-  d.innerHTML=esc(text)+(meta?"<span class='meta'>"+esc(meta)+"</span>":"");
-  th.appendChild(d);
-  var main=document.querySelector("main"); if(main)main.scrollTop=main.scrollHeight;
-}
-function genText(type, topic){
-  topic=topic||"АКСИ";
-  if(type==="post") return "Пост\n\n"+topic+"\n\nЛичный ИИ на устройстве. Учится только от меня.\n\n#АКСИ";
-  if(type==="code") return "// "+topic+"\nfunction hello(n){ return 'Привет, '+n; }\nconsole.log(hello('Альфия'));";
-  if(type==="letter") return "Здравствуйте.\n\nПо поводу: "+topic+".\n\nГотова обсудить.\n\nАКСИ / aksilove@internet.ru";
-  if(type==="idea") return "Идея: "+topic+"\n• офлайн-ядро\n• обучение фактами\n• квантовый ответ\n• white-label";
-  return "Заметка: "+topic+"\n\n1. Суть\n2. Следующий шаг\n— АКСИ "+VER;
-}
-function genSite(title, theme){
-  title=title||"АКСИ"; theme=theme||"личный ИИ";
-  return "<!DOCTYPE html>\n<html lang=ru><head><meta charset=utf-8>\n<meta name=viewport content=\"width=device-width,initial-scale=1\">\n<title>"+title+"</title>\n<style>body{margin:0;font-family:system-ui;background:#0b0a10;color:#f2eef8}header{padding:24px;border-bottom:1px solid #2a2438}main{max-width:720px;margin:0 auto;padding:24px}h1{font-size:28px}.card{background:#16131f;border:1px solid #2a2438;border-radius:16px;padding:20px;margin:16px 0}</style>\n</head><body>\n<header><h1>"+title+"</h1><p style=\"color:#9b93b0\">"+theme+" · АКСИ</p></header>\n<main><div class=card><h2>О проекте</h2><p>"+theme+".</p></div>\n<div class=card><h2>Контакт</h2><p>aksilove@internet.ru</p></div></main>\n</body></html>";
-}
-var BASE=[
-  {t:"Я АКСИ "+VER+" — чат, квант, генерация сайтов и текстов, обучение.",k:["кто ты","что ты","акси"]},
-  {t:"Квант: 2 кубита, H X Z CNOT Bell, измерение в каждом ответе.",k:["квант","кубит","bell"]},
-  {t:"Сайт и Писатель: HTML и тексты с превью.",k:["сайт","писать","html","генерац"]},
-  {t:"Учить: запомни: факт. Память в браузере.",k:["учить","запомни","память"]},
-  {t:"Контакт aksilove@internet.ru",k:["контакт","email"]}
+function showTab(name){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll(".nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name);});var el=$("tab-"+name);if(el)el.classList.add("on");if(name==="mem")renderMem();if(name==="quantum")qUI();}
+function bubble(role,text,meta){var th=$("thread");if(!th)return;var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML="<div class='bubble'>"+esc(text)+(meta?"<span class='meta'>"+esc(meta)+"</span>":"")+"</div>";th.appendChild(d);var main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;}
+var KB=[
+{k:["кто ты","что ты","представься","ты кто","акси"],a:"Я АКСИ "+VER+" — твоё личное офлайн-ядро.\nУмею отвечать, учиться, квант, тексты и HTML-сайты.\naksilove@internet.ru"},
+{k:["привет","здравств","добрый","hello","hi"],a:"Привет. Я АКСИ — на связи.\nСпроси «кто ты», «что умеешь» или научи: запомни: …"},
+{k:["помоги","умеешь","что можешь","команд","help"],a:"1. Чат и память\n2. Учить (запомни: …)\n3. Квант 2 кубита\n4. Писатель\n5. Сайт HTML\n6. Экспорт JSON"},
+{k:["квант","кубит","bell","симулятор"],a:"Квант: statevector 2 кубита, H X Z CNOT, Bell. Каждый ответ чата — через измерение."},
+{k:["сайт","html","лендинг","страниц"],a:"Вкладка Сайт: название, тема, Собрать → превью → Скачать. Или «собери сайт» в чате."},
+{k:["писать","пост","текст","заметк","письмо","код"],a:"Вкладка Писатель — тип и тема → Сгенерировать. Можно в память."},
+{k:["учить","запомни","обуч","память","факт"],a:"запомни: любой факт — и я буду отвечать из твоих слов. Вкладка Учить — пачка фактов."},
+{k:["контакт","email","почта"],a:"aksilove@internet.ru"},
+{k:["продаж","цена","license","enterprise","бизнес"],a:"Personal runtime / Decision Integrity. Studio · Business · Enterprise. aksilove@internet.ru"},
+{k:["офлайн","облако","приват","безопасн"],a:"Всё локально в браузере. Факты в localStorage. Сервер не обязателен."},
+{k:["версия","version"],a:"АКСИ "+VER}
 ];
-function score(q,text,keys){
-  var low=q.toLowerCase(),qt=tok(q),tt=tok(text),sc=0,i,j;
-  for(i=0;i<qt.length;i++)for(j=0;j<tt.length;j++)if(qt[i]===tt[j])sc++;
-  if(keys)for(i=0;i<keys.length;i++)if(low.indexOf(keys[i])!==-1)sc+=2.5;
-  return sc;
-}
-function retrieve(q){
-  var hits=[],a=loadMem(),i,s;
-  for(i=0;i<a.length;i++){s=score(q,a[i].t);if(s>0)hits.push({text:a[i].t,score:s+2});}
-  for(i=0;i<BASE.length;i++){s=score(q,BASE[i].t,BASE[i].k);if(s>0)hits.push({text:BASE[i].t,score:s});}
-  hits.sort(function(x,y){return y.score-x.score;});
-  return hits.slice(0,5);
-}
+function score(q,keys,text){var low=q.toLowerCase(),sc=0,i,qt=tok(q),tt=tok(text||""),j;if(keys)for(i=0;i<keys.length;i++)if(low.indexOf(keys[i])!==-1)sc+=3;for(i=0;i<qt.length;i++)for(j=0;j<tt.length;j++)if(qt[i]===tt[j])sc+=1;return sc;}
+function retrieve(q){var hits=[],a=loadMem(),i,s;for(i=0;i<a.length;i++){s=score(q,null,a[i].t);if(s>0)hits.push({text:a[i].t,score:s+4,src:"mem"});}for(i=0;i<KB.length;i++){s=score(q,KB[i].k,KB[i].a);if(s>0)hits.push({text:KB[i].a,score:s,src:"kb"});}hits.sort(function(x,y){return y.score-x.score;});return hits;}
+function nowMsk(){try{return new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"medium"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}
+function genText(type,topic){topic=(topic||"АКСИ").trim();if(type==="post")return "✦ "+topic+"\n\nЛичный ИИ на устройстве. АКСИ: память, квант, сайты.\n#АКСИ";if(type==="code")return "// "+topic+"\nfunction hello(n){return 'Привет, '+n;}\nconsole.log(hello('Альфия'));";if(type==="letter")return "Здравствуйте.\n\nПо теме: "+topic+".\n\nАКСИ\naksilove@internet.ru";if(type==="idea")return "Идея: "+topic+"\n• офлайн\n• обучение\n• квант\n• white-label";return "Заметка — "+topic+"\n\n• Суть\n• Шаг\n— АКСИ "+VER;}
+function genSite(title,theme){title=title||"АКСИ";theme=theme||"личный ИИ";return "<!DOCTYPE html>\n<html lang=ru><head><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\"><title>"+title+"</title><style>body{margin:0;font-family:system-ui;background:#0a0a0f;color:#f4f2fa}header{padding:48px 24px;background:#1a1230}h1{margin:0 0 8px}main{max-width:720px;margin:0 auto;padding:32px 24px}.card{background:#14121c;border:1px solid #2a2438;border-radius:20px;padding:24px;margin-bottom:16px}</style></head><body><header><h1>"+title+"</h1><p>"+theme+"</p></header><main><div class=card><h2>О проекте</h2><p>"+theme+".</p></div><div class=card><h2>Контакт</h2><p>aksilove@internet.ru</p></div></main></body></html>";}
 function craft(q){
-  var low=q.toLowerCase().trim();
-  if(/^(запомни|выучи)\s*[:\s]/.test(low)){
-    var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();
-    addFact(raw,"chat");
-    return "Запомнила: «"+raw+"». Фактов: "+loadMem().length;
-  }
-  if(/забудь всё|очисти память/.test(low)){saveMem([]);return "Память очищена.";}
-  if(/привет|здравств|добрый|hello|hi\b/.test(low))return "Привет. АКСИ "+VER+". Чат, квант, писатель, сайт, обучение.";
-  if(/кто ты|представься/.test(low))return "АКСИ "+VER+" — офлайн-ядро. Отвечаю, учусь, квантую ответ, собираю HTML.";
-  if(/квант|статус квант|симулятор/.test(low)){
-    var e=qEntropy().toFixed(3);
-    var pr=qProbs().map(function(x){return "|"+x.bits+"> "+(x.p*100).toFixed(0)+"%";}).join(", ");
-    return "Энтропия "+e+" бит. "+pr;
-  }
-  if(/собери сайт|сделай сайт|html/.test(low)){
-    lastSite=genSite("АКСИ","из чата");
-    return "Сайт собран ("+lastSite.length+" байт). Вкладка «Сайт» — превью и скачать.";
-  }
-  if(/сгенерируй|напиши|пост|заметк/.test(low)){
-    lastWrite=genText("post", q.replace(/^(сгенерируй|напиши|пост|заметк\w*)\s*/i,"")||"АКСИ");
-    return lastWrite;
-  }
-  if(/помоги|умеешь|команд|что можешь/.test(low))return "• чат и запомни:\n• квант H/Bell/измерение\n• писатель\n• сайт HTML\n• память JSON";
-  var hits=retrieve(q);
-  if(hits.length&&hits[0].score>=1.5)return "Из знаний:\n\n"+hits.slice(0,4).map(function(h,i){return (i+1)+". "+h.text;}).join("\n");
-  return "Мало данных. Научи: запомни: … или открой Сайт / Писатель.";
+var low=q.toLowerCase().trim();
+if(/^(запомни|выучи)\s*[:\s]/.test(low)){var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return "Напиши: запомни: факт";addFact(raw,"chat");return "Запомнила ✓\n«"+raw+"»\nФактов: "+loadMem().length;}
+if(/забудь всё|очисти память/.test(low)){saveMem([]);return "Память очищена.";}
+if(/что ты знаешь|что помнишь|покажи факт/.test(low)){var a=loadMem();if(!a.length)return "Фактов нет. Напиши: запомни: …";return "Помню "+a.length+":\n\n"+a.slice(0,12).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}
+if(/который час|сколько времени|время сейчас|дата/.test(low))return "МСК:\n"+nowMsk();
+if(/собери сайт|сделай сайт/.test(low)){lastSite=genSite("АКСИ","из чата");return "Сайт готов. Вкладка «Сайт» — превью и скачать.";}
+if(/^(напиши|сгенерируй)\s/.test(low)){lastWrite=genText("post",q.replace(/^(напиши|сгенерируй)\s*/i,"")||"АКСИ");return lastWrite;}
+var hits=retrieve(q);
+if(hits.length&&hits[0].score>=2){if(hits[0].src==="kb"&&hits[0].score>=3)return hits[0].text;if(hits[0].src==="mem"){var mems=hits.filter(function(h){return h.src==="mem";}).slice(0,4);return "Из памяти:\n\n"+mems.map(function(h,i){return (i+1)+". "+h.text;}).join("\n");}return hits[0].text;}
+return "Пока мало данных по запросу.\nНаучи: запомни: …\nИли спроси: кто ты / умеешь / сайт.\nФактов: "+loadMem().length;
 }
-function quantumPass(text){
-  if(qEntropy()<0.05) qApply("h",0);
-  var bit=qMeasure();
-  if(bit===1) return text+"\n\n[Q |"+bit.toString(2).padStart(2,"0")+">]";
-  if(bit===2) return "· "+text;
-  return text;
-}
-function chat(q){
-  q=String(q||"").trim(); if(!q)return;
-  addBubble("me",q);
-  var inp=$("inp"); if(inp)inp.value="";
-  status("…");
-  var t0=Date.now(), text;
-  try{ text=quantumPass(craft(q)); }
-  catch(e){ text="Ошибка: "+(e&&e.message?e.message:e); }
-  addBubble("ai", text, (Date.now()-t0)+"ms · Q · "+VER);
-  status("ok");
-  showTab("chat");
-  if(lastSite && /сайт|html/i.test(q)){
-    var sc=$("siteCode"); if(sc) sc.value=lastSite;
-    var fr=$("sitePrev"); if(fr) fr.srcdoc=lastSite;
-  }
-}
-document.addEventListener("click",function(e){
-  var t=e.target; if(!t)return;
-  var el=t.closest ? t.closest("button,[data-tab],[data-ask],[data-del],[data-qgate]") : t;
-  if(!el)return;
-  var tab=el.getAttribute("data-tab"); if(tab){showTab(tab);return;}
-  var ask=el.getAttribute("data-ask"); if(ask){chat(ask);return;}
-  var del=el.getAttribute("data-del"); if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}
-  var g=el.getAttribute("data-qgate");
-  if(g){
-    if(g==="h0")qApply("h",0); else if(g==="h1")qApply("h",1);
-    else if(g==="x0")qApply("x",0); else if(g==="z0")qApply("z",0);
-    else if(g==="cx")qApply("cx",0,1); else if(g==="bell")qBell();
-    else if(g==="reset")qReset(); else if(g==="measure")qMeasure();
-    return;
-  }
-  if(el.id==="send"){chat(($("inp")||{}).value);return;}
-  if(el.id==="btnTeach"){
-    var box=$("teachBox"), v=box&&box.value;
-    if(!v||!v.trim()){status("пусто");return;}
-    v.split(/\n+/).forEach(function(line){if(line.trim())addFact(line.trim(),"teach");});
-    if(box)box.value=""; addBubble("ai","Сохранено. Фактов: "+loadMem().length); showTab("chat"); return;
-  }
-  if(el.id==="btnWrite"){
-    lastWrite=genText(($("wType")||{}).value||"note", ($("wTopic")||{}).value||"АКСИ");
-    var o=$("wOut"); if(o)o.textContent=lastWrite; return;
-  }
-  if(el.id==="btnSaveWrite"){if(lastWrite){addFact(lastWrite.slice(0,500),"write");status("в памяти");}return;}
-  if(el.id==="btnSite"){
-    lastSite=genSite(($("siteTitle")||{}).value, ($("siteTheme")||{}).value);
-    var code=$("siteCode"); if(code)code.value=lastSite;
-    var fr=$("sitePrev"); if(fr)fr.srcdoc=lastSite;
-    status("сайт"); return;
-  }
-  if(el.id==="btnSiteRender"){
-    var code=$("siteCode"), fr=$("sitePrev");
-    if(code&&fr){fr.srcdoc=code.value; lastSite=code.value;} return;
-  }
-  if(el.id==="btnSiteDl"){
-    var code=($("siteCode")||{}).value||lastSite; if(!code)return;
-    var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([code],{type:"text/html"})); a.download="aksi-site.html"; a.click(); return;
-  }
-  if(el.id==="btnExp"){
-    var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"})); a.download="aksi-memory.json"; a.click(); return;
-  }
-  if(el.id==="btnImp"){var f=$("impFile"); if(f)f.click(); return;}
-  if(el.id==="btnWipe"){if(confirm("Стереть?"))saveMem([]); return;}
-});
-document.addEventListener("keydown",function(e){
-  if(e.key==="Enter"&&e.target&&e.target.id==="inp"){e.preventDefault();chat(e.target.value);}
-});
-var imp=$("impFile");
-if(imp)imp.addEventListener("change",function(e){
-  var f=e.target.files&&e.target.files[0]; if(!f)return;
-  var r=new FileReader();
-  r.onload=function(){try{var j=JSON.parse(r.result);var facts=j.facts||[];var cur=loadMem();facts.forEach(function(x){if(x&&x.t)cur.unshift(x);});saveMem(cur.slice(0,400));status("импорт");}catch(err){status("err");}};
-  r.readAsText(f); e.target.value="";
-});
-try{
-  qBell();
-  renderMem();
-  status("готово");
-  addBubble("ai","АКСИ "+VER+" онлайн.\nКвант Bell запущен.\nЧат · Писатель · Сайт · Учить.","boot");
-}catch(e){
-  status("err");
-  document.body.insertAdjacentHTML("beforeend","<p style='padding:16px;color:#f88'>"+esc(e.message)+"</p>");
-}
+function quantumPass(text){if(qEntropy()<0.08)qApply("h",0);var bit=qMeasure();if(bit===1)return text+"\n\n⟨"+bit.toString(2).padStart(2,"0")+"⟩";return text;}
+function chat(q){q=String(q||"").trim();if(!q)return;bubble("me",q);var inp=$("inp");if(inp)inp.value="";status("…");var t0=Date.now(),text;try{text=quantumPass(craft(q));}catch(e){text="Сбой: "+(e&&e.message?e.message:e);}bubble("ai",text,(Date.now()-t0)+" мс · "+VER);status("онлайн");showTab("chat");if(lastSite&&/сайт|html/i.test(q)){var sc=$("siteCode");if(sc)sc.value=lastSite;var fr=$("sitePrev");if(fr)fr.srcdoc=lastSite;}}
+document.addEventListener("click",function(e){var t=e.target;if(!t)return;var el=t.closest?t.closest("button,[data-tab],[data-ask],[data-del],[data-q]"):t;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}var g=el.getAttribute("data-q");if(g){if(g==="h0")qApply("h",0);else if(g==="h1")qApply("h",1);else if(g==="x0")qApply("x",0);else if(g==="cx")qApply("cx",0,1);else if(g==="bell")qBell();else if(g==="reset")qReset();else if(g==="m")qMeasure();return;}if(el.id==="send"){chat(($("inp")||{}).value);return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!v.trim()){status("пусто");return;}v.split(/\n+/).forEach(function(line){if(line.trim())addFact(line.trim(),"teach");});if(box)box.value="";bubble("ai","Сохранено. Фактов: "+loadMem().length);showTab("chat");return;}if(el.id==="btnWrite"){lastWrite=genText(($("wType")||{}).value||"note",($("wTopic")||{}).value||"АКСИ");var o=$("wOut");if(o)o.textContent=lastWrite;return;}if(el.id==="btnSaveW"){if(lastWrite){addFact(lastWrite.slice(0,600),"write");status("в памяти");}return;}if(el.id==="btnSite"){lastSite=genSite(($("siteTitle")||{}).value,($("siteTheme")||{}).value);var code=$("siteCode");if(code)code.value=lastSite;var fr=$("sitePrev");if(fr)fr.srcdoc=lastSite;status("сайт");return;}if(el.id==="btnPrev"){var code=$("siteCode"),fr=$("sitePrev");if(code&&fr){fr.srcdoc=code.value;lastSite=code.value;}return;}if(el.id==="btnDl"){var code=($("siteCode")||{}).value||lastSite;if(!code)return;var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([code],{type:"text/html"}));a.download="aksi-site.html";a.click();return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Стереть?"))saveMem([]);return;}});
+document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.id==="inp"){e.preventDefault();chat(e.target.value);}});
+var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result);var facts=j.facts||[];var cur=loadMem();facts.forEach(function(x){if(x&&x.t)cur.unshift(x);});saveMem(cur.slice(0,500));status("импорт");}catch(err){status("ошибка");}};r.readAsText(f);e.target.value="";});
+try{if(!localStorage.getItem("aksi8_seeded")){["АКСИ — личное офлайн-ядро","Контакт aksilove@internet.ru","Суверенный ИИ без облака"].forEach(function(t){addFact(t,"seed");});localStorage.setItem("aksi8_seeded","1");}}catch(e){}
+try{qBell();renderMem();status("онлайн");bubble("ai","АКСИ "+VER+"\nКвант Bell · память готова.\nНажми «привет» или научи фактом.","старт");}catch(e){status("ошибка");}
 })();
 </script>
 </body>
