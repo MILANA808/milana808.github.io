@@ -268,7 +268,7 @@
     if (!/^[\d+\-*/().^]+$/.test(e)) return null;
     e = e.replace(/\^/g, "**");
     try {
-      var v = Function('"use strict";return(' + e + ")')();
+      var v = Function('"use strict";return (' + e + ')')();
       return typeof v === "number" && isFinite(v) ? v : null;
     } catch (err) { return null; }
   }
@@ -331,7 +331,6 @@
         return { text: "Запомнила: «" + m[1].slice(0, 200) + "».", steps: steps.concat(["память"]), meta: "память" };
       });
     }
-    // Weather
     var wm = q.match(/погода\s+(.+)/i) || (/^погода$/i.test(q.trim()) ? ["", "Moscow"] : null);
     if (wm && window.AksiEngine && AksiEngine.getWeather) {
       steps.push("погода");
