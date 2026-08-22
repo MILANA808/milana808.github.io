@@ -11,36 +11,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Required core files
+      - name: Required files
         run: |
           set -e
-          for f in index.html 404.html matrix.html; do test -f "$f"; done
-
-      - name: JavaScript syntax
-        run: |
-          set -e
-          find . -type f -name '*.js' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' f; do
-            node --check "$f" || { echo "FAIL $f"; exit 1; }
-          done
-          echo "JS OK"
-
-      - name: matrix.html has working core
+          test -f index.html
+          test -f matrix.html
+          test -f 404.html
+      - name: matrix has chat core
         run: |
           set -e
           grep -q 'function chat' matrix.html
           grep -qi 'акси' matrix.html
           grep -qi 'акси' index.html
           grep -qi 'акси' 404.html
-          echo "core OK"
-
-      - name: HTML closed tags
+      - name: JS syntax
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          for p in Path('.').rglob('*.html'):
-              if any(x in p.parts for x in ('.git','node_modules')): continue
-              s=p.read_text(encoding='utf-8', errors='replace').lower()
-              assert '<html' in s and '</html>' in s, p
-          print('HTML OK')
-          PY
+          set -e
+          find . -type f -name '*.js' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' f; do
+            node --check "$f" || exit 1
+          done
+          echo OK
+      - name: HTML tags
+        run: |
+          python3 -c "
+from pathlib import Path
+for p in Path('.').rglob('*.html'):
+  if '.git' in p.parts or 'node_modules' in p.parts: continue
+  s=p.read_text(encoding='utf-8',errors='replace').lower()
+  assert '<html' in s and '</html>' in s, p
+print('HTML OK')
+"
