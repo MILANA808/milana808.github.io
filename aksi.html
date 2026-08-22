@@ -5,62 +5,63 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#09090b">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="АКСИ">
+<meta name="description" content="АКСИ — личное локальное ИИ-ядро. Чат, память, обучение.">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>АКСИ</title>
+<title>АКСИ — личное ядро</title>
 <style>
-:root{--bg:#09090b;--elev:#111113;--card:#18181b;--line:#27272a;--t:#fafafa;--m:#a1a1aa;--dim:#71717a;--a:#a78bfa;--a2:#7c3aed;--ok:#4ade80;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);--pad:16px;--max:720px;--hd-h:56px;--comp-h:72px}
+:root{--bg:#09090b;--elev:#111113;--card:#18181b;--line:#27272a;--t:#fafafa;--m:#a1a1aa;--dim:#71717a;--a:#a78bfa;--a2:#7c3aed;--ok:#4ade80;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);--pad:16px;--max:720px;--hd:56px}
 *{box-sizing:border-box;margin:0;padding:0}
 html{height:100%;-webkit-text-size-adjust:100%}
 body{min-height:100%;min-height:100dvh;background:var(--bg);color:var(--t);font:15px/1.5 var(--font);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;padding-top:var(--safe-t);-webkit-font-smoothing:antialiased}
-@media (min-width:768px){:root{--pad:20px;--max:820px}body{font-size:15.5px;border-left:1px solid var(--line);border-right:1px solid var(--line);min-height:100vh}}
-@media (min-width:1100px){:root{--max:880px;--pad:24px}body{font-size:16px}}
-header{display:flex;align-items:center;gap:12px;min-height:var(--hd-h);padding:10px var(--pad);border-bottom:1px solid var(--line);background:rgba(9,9,11,.92);backdrop-filter:blur(14px);position:sticky;top:0;z-index:30}
-.logo{width:36px;height:36px;border-radius:11px;flex-shrink:0;background:linear-gradient(145deg,#6d28d9,#a78bfa);display:grid;place-items:center;font-weight:700;font-size:13px}
-header .titles{min-width:0}header h1{font-size:15px;font-weight:600;letter-spacing:-.02em}header p{font-size:11px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#st{margin-left:auto;font-size:11px;color:var(--ok);font-weight:500;flex-shrink:0}
-@media (min-width:768px){.logo{width:40px;height:40px;border-radius:12px}header h1{font-size:16px}}
-nav{display:flex;gap:4px;padding:8px var(--pad);border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:var(--bg);position:sticky;top:var(--hd-h);z-index:20}
+@media(min-width:768px){:root{--pad:20px;--max:800px}body{font-size:15.5px;border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+@media(min-width:1100px){:root{--max:860px;--pad:24px}}
+header{display:flex;align-items:center;gap:12px;min-height:var(--hd);padding:10px var(--pad);border-bottom:1px solid var(--line);background:rgba(9,9,11,.94);backdrop-filter:blur(16px);position:sticky;top:0;z-index:30}
+.logo{width:38px;height:38px;border-radius:12px;flex-shrink:0;background:linear-gradient(145deg,#6d28d9,#a78bfa);display:grid;place-items:center;font:700 13px/1 var(--font);box-shadow:0 0 24px rgba(124,58,237,.35)}
+header h1{font-size:15px;font-weight:650;letter-spacing:-.02em}header .sub{font-size:11px;color:var(--m)}
+#st{margin-left:auto;font-size:11px;color:var(--ok);font-weight:500}
+nav{display:flex;gap:4px;padding:8px var(--pad);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;background:var(--bg);position:sticky;top:var(--hd);z-index:20}
 nav::-webkit-scrollbar{display:none}
-nav button{flex:0 0 auto;min-height:36px;padding:8px 14px;border-radius:999px;border:0;background:transparent;color:var(--m);font:12.5px/1 var(--font);font-weight:500;-webkit-tap-highlight-color:transparent}
+nav button{flex:0 0 auto;min-height:36px;padding:8px 14px;border-radius:999px;border:0;background:0;color:var(--m);font:12.5px/1 var(--font);font-weight:500;-webkit-tap-highlight-color:transparent}
 nav button.on{background:var(--card);color:var(--t)}
-@media (min-width:768px){nav{gap:6px}nav button{padding:9px 16px;font-size:13px;cursor:pointer}nav button:hover{color:var(--t)}}
-main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(var(--comp-h) + var(--safe-b) + 16px);-webkit-overflow-scrolling:touch}
-.panel{display:none}.panel.on{display:block;animation:fade .2s ease}
-@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media(min-width:768px){nav button{cursor:pointer;padding:9px 16px}}
+main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(88px + var(--safe-b));-webkit-overflow-scrolling:touch}
+.panel{display:none}.panel.on{display:block;animation:in .22s ease}
+@keyframes in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 #thread{display:flex;flex-direction:column;gap:12px}
 .msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:min(92%,420px);padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.5}
+.bub{max-width:min(92%,440px);padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.5}
 .msg.me .bub{background:var(--a2);color:#fff;border-bottom-right-radius:5px}
 .msg.ai .bub{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
 .meta{display:block;margin-top:8px;font:10px/1.3 ui-monospace,monospace;color:var(--dim)}.msg.me .meta{color:rgba(255,255,255,.65)}
-@media (min-width:768px){.bub{max-width:min(78%,480px);font-size:15px;padding:14px 16px}}
+@media(min-width:768px){.bub{max-width:min(78%,500px);font-size:15px;padding:14px 16px}}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.chip{min-height:36px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--elev);color:var(--t);font-size:12.5px;-webkit-tap-highlight-color:transparent}
-@media (min-width:768px){.chip{cursor:pointer;font-size:13px}.chip:hover{border-color:var(--a);background:rgba(167,139,250,.08)}}
+.chip{min-height:36px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--elev);color:var(--t);font-size:12.5px}
+@media(min-width:768px){.chip{cursor:pointer}.chip:hover{border-color:var(--a);background:rgba(167,139,250,.08)}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
 .card h2{font-size:14px;font-weight:600;margin:0 0 8px}.muted{color:var(--m);font-size:13px;line-height:1.55}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{min-height:42px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--elev);color:var(--t);font:13px/1 var(--font);font-weight:500;-webkit-tap-highlight-color:transparent}
+.btn{min-height:42px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--elev);color:var(--t);font:13px/1 var(--font);font-weight:500}
 .btn.p{background:var(--a2);border-color:transparent;color:#fff}
-@media (min-width:768px){.card{padding:18px 20px;border-radius:18px}.btn{cursor:pointer}.btn:hover{filter:brightness(1.08)}}
+@media(min-width:768px){.btn{cursor:pointer}.card{padding:18px 20px}}
 input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--t);font:inherit;outline:0}
-textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-color:rgba(167,139,250,.45)}
-.fact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--bg);line-height:1.4}
-.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;line-height:1;padding:0 4px;min-width:28px;min-height:28px}
+textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-color:rgba(167,139,250,.5)}
+.fact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--bg)}
+.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;min-width:28px;min-height:28px}
 .bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));display:flex;gap:10px;align-items:center;background:linear-gradient(transparent,var(--bg) 35%);z-index:40}
 .bar input{flex:1;min-height:48px;padding:12px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit}
-.bar button{width:48px;height:48px;flex-shrink:0;border-radius:14px;border:0;background:var(--a2);color:#fff;font-size:18px;-webkit-tap-highlight-color:transparent}
-@media (min-width:768px){.bar{padding:14px var(--pad) 18px}.bar input{min-height:50px;font-size:15px}.bar button{width:50px;height:50px;cursor:pointer}.bar button:hover{filter:brightness(1.1)}}
-@media (max-height:430px) and (orientation:landscape){header{min-height:44px;padding:6px var(--pad)}nav{padding:4px var(--pad)}main{padding-bottom:calc(60px + var(--safe-b))}.bar{padding:6px var(--pad) calc(6px + var(--safe-b))}.bar input,.bar button{min-height:40px;height:40px}}
+.bar button{width:48px;height:48px;flex-shrink:0;border-radius:14px;border:0;background:var(--a2);color:#fff;font-size:18px}
+@media(min-width:768px){.bar{padding:14px var(--pad) 18px}.bar input{min-height:50px}.bar button{width:50px;height:50px;cursor:pointer}}
+@media(max-height:430px) and (orientation:landscape){header{min-height:44px;padding:6px var(--pad)}nav{padding:4px var(--pad)}main{padding-bottom:calc(64px + var(--safe-b))}.bar input,.bar button{min-height:40px;height:40px}}
 </style>
 </head>
 <body>
-<header><div class="logo">A</div><div class="titles"><h1>АКСИ</h1><p>v13 · адаптивный · офлайн</p></div><span id="st">онлайн</span></header>
+<header><div class="logo">A</div><div><h1>АКСИ</h1><div class="sub">личное ядро · v1.0</div></div><span id="st">онлайн</span></header>
 <nav>
 <button type="button" class="on" data-tab="chat">Чат</button>
 <button type="button" data-tab="teach">Учить</button>
 <button type="button" data-tab="mem">Память</button>
-<button type="button" data-tab="info">Инфо</button>
+<button type="button" data-tab="about">О продукте</button>
 </nav>
 <main>
 <section class="panel on" id="tab-chat">
@@ -68,12 +69,13 @@ textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-colo
 <div class="chips">
 <button type="button" class="chip" data-ask="привет">привет</button>
 <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-<button type="button" class="chip" data-ask="что умеешь">умеешь</button>
+<button type="button" class="chip" data-ask="что умеешь">возможности</button>
 <button type="button" class="chip" data-ask="что ты знаешь">память</button>
 </div>
 </section>
 <section class="panel" id="tab-teach">
-<div class="card"><h2>Учить</h2><p class="muted">Или в чате: <b>запомни: факт</b></p>
+<div class="card"><h2>Обучить АКСИ</h2>
+<p class="muted">В чате: <b>запомни: …</b></p>
 <textarea id="teachBox" placeholder="Меня зовут Альфия" style="margin-top:10px"></textarea>
 <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div>
 </section>
@@ -82,9 +84,10 @@ textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-colo
 <div class="row"><button type="button" class="btn" id="btnExp">Экспорт</button><button type="button" class="btn" id="btnImp">Импорт</button><button type="button" class="btn" id="btnWipe">Стереть</button></div>
 <input type="file" id="impFile" accept=".json" hidden></div>
 </section>
-<section class="panel" id="tab-info">
-<div class="card"><h2>Интерфейс</h2><p class="muted">Адаптив: телефон, планшет, десктоп. Safe-area для iPhone. Крупные зоны нажатия.</p></div>
-<div class="card"><h2>Ядро</h2><p class="muted">Локальные ответы + память. Без сервера АКСИ.</p></div>
+<section class="panel" id="tab-about">
+<div class="card"><h2>Продукт</h2><p class="muted">АКСИ — готовое личное ИИ-ядро: чат, обучение, память. Локально, без обязательного облака.</p></div>
+<div class="card"><h2>Для кого</h2><p class="muted">Свой контур знаний на устройстве: факты, правила, быстрые ответы из них.</p></div>
+<div class="card"><h2>Стек</h2><p class="muted">Один HTML · localStorage · адаптив · GitHub Pages</p></div>
 <div class="card"><h2>Контакт</h2><p class="muted">aksilove@internet.ru</p></div>
 </section>
 </main>
@@ -92,27 +95,27 @@ textarea{min-height:110px;resize:vertical}input:focus,textarea:focus{border-colo
 <script>
 (function(){
 "use strict";
-var KEY="aksi13_mem",VER="13.0",busy=false;
+var KEY="aksi_product_mem",VER="1.0",busy=false;
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function status(t){var s=$("st");if(s)s.textContent=t;}
 function loadMem(){try{var a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
 function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}renderMem();}
 function addFact(t,src){t=String(t||"").trim();if(!t)return;var a=loadMem();a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:t,src:src||"u",ts:Date.now()});if(a.length>500)a=a.slice(0,500);saveMem(a);}
-function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='muted'>Пусто</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+x.id+"' aria-label='удалить'>×</button>"+esc(x.t)+"</div>";}).join("");}
+function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='muted'>Пока пусто — вкладка «Учить»</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+x.id+"' aria-label='удалить'>×</button>"+esc(x.t)+"</div>";}).join("");}
 function showTab(name){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name);});var el=$("tab-"+name);if(el)el.classList.add("on");if(name==="mem")renderMem();}
 function bubble(role,text,meta){var th=$("thread");if(!th)return;var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML="<div class='bub'>"+esc(text)+(meta?"<span class='meta'>"+esc(meta)+"</span>":"")+"</div>";th.appendChild(d);var main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;}
-var KB=[{k:["кто ты","что ты","представься","акси","ты кто"],a:"Я АКСИ "+VER+" — личное ядро.\n\nАдаптивный интерфейс, локальная память.\n\naksilove@internet.ru"},{k:["привет","здравств","добрый","hello","hi"],a:"Привет. АКСИ на связи.\n\nСпроси что угодно или: запомни: факт"},{k:["умеешь","помоги","команд","что можешь"],a:"• чат\n• учить фактам\n• память JSON\n• адаптив на любом экране"},{k:["адаптив","дизайн","экран","мобил","телефон"],a:"Интерфейс подстраивается: телефон, планшет, десктоп. Safe-area, крупные кнопки."},{k:["контакт","email","почта"],a:"aksilove@internet.ru"}];
+var KB=[{k:["кто ты","что ты","представься","акси","ты кто"],a:"Я АКСИ "+VER+" — готовое личное ядро.\n\nЧат, обучение, память на устройстве.\n\naksilove@internet.ru"},{k:["привет","здравств","добрый","hello","hi"],a:"Привет. АКСИ готова.\n\nСпроси что угодно или: запомни: факт"},{k:["умеешь","помоги","команд","что можешь","возможност"],a:"• чат из знаний и памяти\n• запомни: факт\n• экспорт/импорт JSON\n• офлайн после загрузки"},{k:["продукт","купить","цена","license","продаж"],a:"АКСИ — personal runtime. Пиши: aksilove@internet.ru"},{k:["контакт","email","почта","связь"],a:"aksilove@internet.ru"},{k:["офлайн","сервер","облако","безопасн","приват"],a:"Ядро и память в браузере. Факты — localStorage этого устройства."}];
 function tok(s){return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(function(w){return w.length>1;});}
 function score(q,keys,text){var low=q.toLowerCase(),sc=0,i,j,qt=tok(q),tt=tok(text||"");if(keys)for(i=0;i<keys.length;i++)if(low.indexOf(keys[i])!==-1)sc+=3;for(i=0;i<qt.length;i++)for(j=0;j<tt.length;j++)if(qt[i]===tt[j])sc++;return sc;}
-function answer(q){var low=q.toLowerCase().trim();if(/^(запомни|выучи)\s*[:\s]/.test(low)){var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return"Напиши: запомни: факт";addFact(raw,"chat");return"Запомнила ✓\n«"+raw+"»\nФактов: "+loadMem().length;}if(/забудь всё|очисти память/.test(low)){saveMem([]);return"Память очищена.";}if(/что ты знаешь|что помнишь|моя память/.test(low)){var a=loadMem();if(!a.length)return"Пусто. запомни: …";return"Помню:\n\n"+a.slice(0,15).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}if(/который час|сколько времени|время сейчас|дата/.test(low)){try{return"МСК:\n"+new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"medium"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}var best={sc:0,a:null},i,s;for(i=0;i<KB.length;i++){s=score(q,KB[i].k,KB[i].a);if(s>best.sc)best={sc:s,a:KB[i].a};}var mem=loadMem();for(i=0;i<mem.length;i++){s=score(q,null,mem[i].t)+2;if(s>best.sc)best={sc:s,a:"Из памяти:\n"+mem[i].t};}if(best.sc>=2&&best.a)return best.a;return"Мало данных.\nНаучи: запомни: …\nИли: кто ты / умеешь.\nФактов: "+loadMem().length;}
-function chat(q){q=String(q||"").trim();if(!q||busy)return;busy=true;bubble("me",q);var inp=$("inp");if(inp)inp.value="";status("…");var t0=Date.now(),text;try{text=answer(q);}catch(e){text="Сбой: "+(e&&e.message?e.message:e);}bubble("ai",text,(Date.now()-t0)+" мс · ядро "+VER);status("онлайн");busy=false;showTab("chat");}
-document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("button,[data-tab],[data-ask],[data-del]"):e.target;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}if(el.id==="send"){chat(($("inp")||{}).value);return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!v.trim())return;v.split(/\n+/).forEach(function(line){if(line.trim())addFact(line.trim(),"teach");});if(box)box.value="";bubble("ai","Сохранено. Фактов: "+loadMem().length);showTab("chat");return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Стереть?"))saveMem([]);return;}});
+function answer(q){var low=q.toLowerCase().trim();if(/^(запомни|выучи)\s*[:\s]/.test(low)){var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return"Формат: запомни: факт";addFact(raw,"chat");return"Запомнила ✓\n«"+raw+"»\nФактов: "+loadMem().length;}if(/забудь всё|очисти память/.test(low)){saveMem([]);return"Память очищена.";}if(/что ты знаешь|что помнишь|моя память/.test(low)){var a=loadMem();if(!a.length)return"Память пуста.\nзапомни: …";return"Помню:\n\n"+a.slice(0,15).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}if(/который час|сколько времени|время сейчас|дата/.test(low)){try{return"МСК:\n"+new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"medium"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}var best={sc:0,a:null},i,s;for(i=0;i<KB.length;i++){s=score(q,KB[i].k,KB[i].a);if(s>best.sc)best={sc:s,a:KB[i].a};}var mem=loadMem();for(i=0;i<mem.length;i++){s=score(q,null,mem[i].t)+2;if(s>best.sc)best={sc:s,a:"Из памяти:\n"+mem[i].t};}if(best.sc>=2&&best.a)return best.a;return"Мало данных.\nНаучи: запомни: …\nИли: кто ты / возможности.\nФактов: "+loadMem().length;}
+function chat(q){q=String(q||"").trim();if(!q||busy)return;busy=true;bubble("me",q);var inp=$("inp");if(inp)inp.value="";status("…");var t0=Date.now(),text;try{text=answer(q);}catch(e){text="Сбой: "+(e&&e.message?e.message:e);}bubble("ai",text,(Date.now()-t0)+" мс · АКСИ "+VER);status("онлайн");busy=false;showTab("chat");}
+document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("button,[data-tab],[data-ask],[data-del]"):e.target;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}if(el.id==="send"){chat(($("inp")||{}).value);return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!v.trim())return;v.split(/\n+/).forEach(function(line){if(line.trim())addFact(line.trim(),"teach");});if(box)box.value="";bubble("ai","Сохранено. Фактов: "+loadMem().length);showTab("chat");return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({product:"AKSI",ver:VER,facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Стереть всю память?"))saveMem([]);return;}});
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.id==="inp"){e.preventDefault();chat(e.target.value);}});
-var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result),cur=loadMem();(j.facts||[]).forEach(function(x){if(x&&x.t)cur.unshift(x);});saveMem(cur.slice(0,500));}catch(err){}};r.readAsText(f);e.target.value="";});
-try{if(!localStorage.getItem("aksi13_seed")){["АКСИ — личное ядро","Контакт: aksilove@internet.ru"].forEach(function(t){addFact(t,"seed");});localStorage.setItem("aksi13_seed","1");}}catch(e){}
+var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result),cur=loadMem();(j.facts||[]).forEach(function(x){if(x&&x.t)cur.unshift(x);});saveMem(cur.slice(0,500));status("импорт");}catch(err){status("ошибка файла");}};r.readAsText(f);e.target.value="";});
+try{if(!localStorage.getItem("aksi_product_seed")){["АКСИ — готовое личное ядро","Контакт: aksilove@internet.ru"].forEach(function(t){addFact(t,"seed");});localStorage.setItem("aksi_product_seed","1");}}catch(e){}
 renderMem();status("онлайн");
-bubble("ai","АКСИ "+VER+"\n\nАдаптивный интерфейс · локальное ядро.\nЖми «привет».","старт");
+bubble("ai","АКСИ "+VER+" — продукт готов.\n\nЛокальный чат · обучение · память.\nНажми «привет» или учи фактам.","старт");
 })();
 </script>
 </body>
