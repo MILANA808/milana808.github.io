@@ -2,184 +2,230 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#09090b">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0c0c0e">
 <title>АКСИ</title>
 <style>
-:root{--bg:#09090b;--elev:#121214;--card:#18181b;--line:#27272a;--text:#fafafa;--mute:#a1a1aa;--acc:#a78bfa;--acc2:#7c3aed;--ok:#34d399}
+:root{
+  --bg:#0c0c0e;--s1:#141416;--s2:#1c1c1f;--line:#2a2a2e;--t:#ededf0;--m:#8b8b93;--a:#8b5cf6;--a2:#6d28d9;--ok:#22c55e;
+  --r:14px;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,sans-serif}
-body{display:flex;flex-direction:column;max-width:42rem;margin:0 auto}
-.top{padding:14px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(9,9,11,.9);z-index:5}
-.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:grid;place-items:center;font-weight:700;font-size:13px}
-.top h1{font-size:15px;font-weight:600}.top p{font-size:11px;color:var(--mute)}
-#st{margin-left:auto;font-size:11px;color:var(--ok)}
-.nav{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;border-bottom:1px solid var(--line)}
-.nav button{flex:0 0 auto;padding:8px 14px;border-radius:999px;border:0;background:0;color:var(--mute);font-size:12px;font-weight:500}
-.nav button.on{background:var(--card);color:var(--text)}
-main{flex:1;overflow:auto;padding:16px 16px 120px}
-.panel{display:none}.panel.on{display:block}
-.msg{display:flex;margin-bottom:12px}.msg.me{justify-content:flex-end}
-.bubble{max-width:92%;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:14.5px}
-.msg.me .bubble{background:#7c3aed;color:#fff;border-bottom-right-radius:6px}
-.msg.ai .bubble{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px}
-.meta{display:block;margin-top:8px;font-size:10px;color:var(--mute);font-family:monospace}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--elev);color:var(--text);font-size:12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-.card h2{font-size:13px;font-weight:600;margin-bottom:6px}
-.hint{color:var(--mute);font-size:13px;line-height:1.5}
+html,body{height:100%;background:var(--bg);color:var(--t);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(12,12,14,.92);backdrop-filter:blur(16px);position:sticky;top:0;z-index:20}
+.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,var(--a2),var(--a));display:grid;place-items:center;font:700 12px/1 var(--font)}
+header .titles h1{font-size:15px;font-weight:600}
+header .titles p{font-size:11px;color:var(--m)}
+#st{margin-left:auto;font-size:11px;color:var(--m);display:flex;align-items:center;gap:6px}
+#st::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--m)}
+#st.on::before{background:var(--ok)}
+#st.load::before{background:#eab308;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.tabs{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{flex:0 0 auto;padding:8px 12px;border:0;border-radius:999px;background:0;color:var(--m);font:12px/1 var(--font);font-weight:500}
+.tabs button.on{background:var(--s2);color:var(--t)}
+main{flex:1;overflow:auto;padding:16px 16px 110px}
+.view{display:none}.view.on{display:block}
+.msg{display:flex;margin:0 0 14px}.msg.u{justify-content:flex-end}
+.bbl{max-width:min(92%,520px);padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px}
+.msg.u .bbl{background:var(--a2);color:#fff;border-bottom-right-radius:4px}
+.msg.a .bbl{background:var(--s1);border:1px solid var(--line);border-bottom-left-radius:4px}
+.bbl .tag{display:block;margin-top:8px;font:10px/1.3 ui-monospace,monospace;color:var(--m)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:12px}
+.card{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.card h2{font-size:13px;font-weight:600;margin:0 0 8px}
+.muted{color:var(--m);font-size:13px;line-height:1.55}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--elev);color:var(--text);font-size:13px}
-.btn.primary{background:#7c3aed;border-color:transparent;color:#fff}
-input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;outline:0}
+.btn{padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s2);color:var(--t);font:13px/1 var(--font);font-weight:500}
+.btn.p{background:var(--a2);border-color:transparent;color:#fff}
+.btn:disabled{opacity:.5}
+input[type=text],textarea,select{width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--t);font:inherit;outline:0}
 textarea{min-height:100px;resize:vertical}
-.composer{position:fixed;left:0;right:0;bottom:0;max-width:42rem;margin:0 auto;padding:12px 14px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 35%);z-index:10}
-.composer input{flex:1;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit}
-.composer button{width:50px;height:50px;border-radius:14px;border:0;background:#7c3aed;color:#fff;font-size:18px}
-.qbar{display:flex;gap:6px;height:56px;align-items:flex-end;margin-top:14px}
-.qbar i{flex:1;background:linear-gradient(180deg,#a78bfa,#7c3aed);border-radius:6px 6px 2px 2px;min-height:6px}
-.mono{font-family:monospace;font-size:12px;color:var(--mute);margin-top:10px}
-pre.out{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px;overflow:auto;font:12px/1.45 monospace;max-height:240px;white-space:pre-wrap}
-iframe.prev{width:100%;height:240px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-top:12px}
-.fact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--bg)}
-.fact button{float:right;background:0;border:0;color:var(--mute);font-size:16px}
+.bar{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 28%);z-index:30}
+.bar input{flex:1;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit}
+.bar button{width:48px;height:48px;border-radius:14px;border:0;background:var(--a2);color:#fff;font-size:18px;flex-shrink:0}
+.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:10px}
+.prog>i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
+.fact{padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;font-size:13px;background:var(--bg)}
+.fact button{float:right;border:0;background:0;color:var(--m);font-size:15px}
 </style>
 </head>
 <body>
-<header class="top"><div class="logo">A</div><div><h1>АКСИ</h1><p>личное ядро</p></div><span id="st">…</span></header>
-<nav class="nav">
-<button type="button" class="on" data-tab="chat">Чат</button>
-<button type="button" data-tab="quantum">Квант</button>
-<button type="button" data-tab="write">Писатель</button>
-<button type="button" data-tab="site">Сайт</button>
-<button type="button" data-tab="teach">Учить</button>
-<button type="button" data-tab="mem">Память</button>
+<header>
+  <div class="mark">A</div>
+  <div class="titles"><h1>АКСИ</h1><p>local · WebLLM</p></div>
+  <div id="st">офлайн-ядро</div>
+</header>
+<nav class="tabs">
+  <button type="button" class="on" data-v="chat">Чат</button>
+  <button type="button" data-v="brain">Нейросеть</button>
+  <button type="button" data-v="teach">Учить</button>
+  <button type="button" data-v="mem">Память</button>
+  <button type="button" data-v="about">О ядре</button>
 </nav>
 <main>
-<section class="panel on" id="tab-chat">
-<div id="thread"></div>
-<div class="chips">
-<button type="button" class="chip" data-ask="привет">привет</button>
-<button type="button" class="chip" data-ask="кто ты">кто ты</button>
-<button type="button" class="chip" data-ask="что умеешь">умеешь</button>
-<button type="button" class="chip" data-ask="что ты знаешь">память</button>
-<button type="button" class="chip" data-ask="собери сайт">сайт</button>
-</div>
-</section>
-<section class="panel" id="tab-quantum">
-<div class="card"><h2>Квант</h2><p class="hint">2 кубита · измерение в каждом ответе</p>
-<div class="row">
-<button type="button" class="btn primary" data-q="bell">Bell</button>
-<button type="button" class="btn" data-q="h0">H0</button>
-<button type="button" class="btn" data-q="h1">H1</button>
-<button type="button" class="btn" data-q="x0">X</button>
-<button type="button" class="btn" data-q="cx">CNOT</button>
-<button type="button" class="btn" data-q="m">Измерить</button>
-<button type="button" class="btn" data-q="reset">Сброс</button>
-</div>
-<div class="mono" id="qstate"></div><div class="qbar" id="qbar"></div>
-<p class="hint" id="qmsg" style="margin-top:10px">—</p></div>
-</section>
-<section class="panel" id="tab-write">
-<div class="card"><h2>Писатель</h2>
-<select id="wType"><option value="note">Заметка</option><option value="post">Пост</option><option value="code">Код</option><option value="letter">Письмо</option><option value="idea">Идея</option></select>
-<input type="text" id="wTopic" placeholder="Тема" style="margin-top:8px">
-<div class="row"><button type="button" class="btn primary" id="btnWrite">Сгенерировать</button><button type="button" class="btn" id="btnSaveW">В память</button></div>
-<pre class="out" id="wOut">—</pre></div>
-</section>
-<section class="panel" id="tab-site">
-<div class="card"><h2>Сайт</h2>
-<input type="text" id="siteTitle" value="АКСИ Studio">
-<input type="text" id="siteTheme" value="личный ИИ-контур" style="margin-top:8px">
-<div class="row"><button type="button" class="btn primary" id="btnSite">Собрать</button><button type="button" class="btn" id="btnPrev">Превью</button><button type="button" class="btn" id="btnDl">Скачать</button></div>
-<iframe class="prev" id="sitePrev" title="p"></iframe>
-<textarea id="siteCode" style="margin-top:12px;min-height:120px;font-family:monospace;font-size:12px"></textarea></div>
-</section>
-<section class="panel" id="tab-teach">
-<div class="card"><h2>Учить</h2>
-<p class="hint">Или в чате: запомни: факт</p>
-<textarea id="teachBox" placeholder="Факт на строку" style="margin-top:10px"></textarea>
-<div class="row"><button type="button" class="btn primary" id="btnTeach">Запомнить</button></div></div>
-</section>
-<section class="panel" id="tab-mem">
-<div class="card"><h2>Память · <span id="memN">0</span></h2>
-<div id="memList"></div>
-<div class="row"><button type="button" class="btn" id="btnExp">Экспорт</button><button type="button" class="btn" id="btnImp">Импорт</button><button type="button" class="btn" id="btnWipe">Стереть</button></div>
-<input type="file" id="impFile" accept=".json" hidden></div>
-</section>
+  <section class="view on" id="v-chat">
+    <div id="thread"></div>
+    <div class="chips">
+      <button type="button" class="chip" data-q="привет">привет</button>
+      <button type="button" class="chip" data-q="кто ты">кто ты</button>
+      <button type="button" class="chip" data-q="что умеешь">умеешь</button>
+      <button type="button" class="chip" data-q="что ты знаешь">память</button>
+    </div>
+  </section>
+  <section class="view" id="v-brain">
+    <div class="card">
+      <h2>Нейросеть в браузере</h2>
+      <p class="muted">Open source <b>WebLLM (MLC)</b>. Модель на устройстве через WebGPU. Пока не загружена — отвечает встроенное ядро.</p>
+      <select id="model" style="margin-top:12px">
+        <option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (лёгкая)</option>
+        <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B</option>
+        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
+        <option value="Phi-3.5-mini-instruct-q4f16_1-MLC">Phi-3.5 mini</option>
+      </select>
+      <div class="row">
+        <button type="button" class="btn p" id="btnLoad">Загрузить модель</button>
+        <button type="button" class="btn" id="btnUnload">Выгрузить</button>
+      </div>
+      <div class="prog" id="prog"><i id="progBar"></i></div>
+      <p class="muted" id="brainMsg" style="margin-top:10px">Модель не загружена</p>
+    </div>
+    <div class="card">
+      <h2>Ollama (на ПК)</h2>
+      <input type="text" id="ollamaUrl" value="http://127.0.0.1:11434" style="margin-top:8px">
+      <div class="row"><button type="button" class="btn" id="btnOllama">Проверить</button></div>
+      <p class="muted" id="ollamaMsg" style="margin-top:8px">—</p>
+    </div>
+  </section>
+  <section class="view" id="v-teach">
+    <div class="card">
+      <h2>Учить</h2>
+      <p class="muted">В чате тоже: <b>запомни: …</b></p>
+      <textarea id="teachBox" placeholder="Факт на строку" style="margin-top:10px"></textarea>
+      <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div>
+    </div>
+  </section>
+  <section class="view" id="v-mem">
+    <div class="card">
+      <h2>Память · <span id="memN">0</span></h2>
+      <div id="memList"></div>
+      <div class="row">
+        <button type="button" class="btn" id="btnExp">Экспорт</button>
+        <button type="button" class="btn" id="btnImp">Импорт</button>
+        <button type="button" class="btn" id="btnWipe">Стереть</button>
+      </div>
+      <input type="file" id="impFile" accept=".json" hidden>
+    </div>
+  </section>
+  <section class="view" id="v-about">
+    <div class="card">
+      <h2>Стек open source</h2>
+      <p class="muted">• WebLLM / MLC — inference в браузере<br>• Ollama — опционально<br>• Ядро АКСИ — память + знания всегда<br>• GitHub Pages, без своего бэкенда</p>
+      <p class="muted" style="margin-top:12px">aksilove@internet.ru</p>
+    </div>
+  </section>
 </main>
-<div class="composer"><input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off"><button type="button" id="send">↑</button></div>
-<script>
-(function(){
-"use strict";
-var KEY="aksi8_mem",VER="8.0",lastWrite="",lastSite="";
-var Q={state:[[1,0],[0,0],[0,0],[0,0]]};
-function cAdd(a,b){return[a[0]+b[0],a[1]+b[1]];}
-function cScale(a,s){return[a[0]*s,a[1]*s];}
-function abs2(a){return a[0]*a[0]+a[1]*a[1];}
-function qReset(){Q.state=[[1,0],[0,0],[0,0],[0,0]];qUI("сброс");}
-function qApply(gate,t0,t1){
-var dim=4,next=[[0,0],[0,0],[0,0],[0,0]],i,j,i1,a0,a1,inv;
-if(gate==="h"){inv=1/Math.SQRT2;for(i=0;i<dim;i++){if(((i>>t0)&1)!==0)continue;i1=i|(1<<t0);a0=Q.state[i];a1=Q.state[i1];next[i]=cAdd(cScale(a0,inv),cScale(a1,inv));next[i1]=cAdd(cScale(a0,inv),cScale(a1,-inv));}}
-else if(gate==="x"){for(i=0;i<dim;i++){j=i^(1<<t0);next[j]=cAdd(next[j],Q.state[i]);}}
-else if(gate==="z"){for(i=0;i<dim;i++)next[i]=((i>>t0)&1)?cScale(Q.state[i],-1):Q.state[i];}
-else if(gate==="cx"){for(i=0;i<dim;i++){if(((i>>t0)&1)===1){j=i^(1<<t1);next[j]=cAdd(next[j],Q.state[i]);}else next[i]=cAdd(next[i],Q.state[i]);}}
-Q.state=next;qUI(gate);
-}
-function qBell(){qReset();qApply("h",0);qApply("cx",0,1);qUI("Bell");}
-function qProbs(){return Q.state.map(function(a,i){return{i:i,p:abs2(a),bits:i.toString(2).padStart(2,"0")};});}
-function qMeasure(){var pr=qProbs(),r=Math.random(),acc=0,pick=0,k;for(k=0;k<pr.length;k++){acc+=pr[k].p;if(r<=acc){pick=pr[k].i;break;}}var ns=[[0,0],[0,0],[0,0],[0,0]];ns[pick]=[1,0];Q.state=ns;qUI("|"+pick.toString(2).padStart(2,"0")+">");return pick;}
-function qUI(msg){var pr=qProbs(),el=$("qstate"),bar=$("qbar"),m=$("qmsg");if(el)el.textContent=pr.map(function(x){return "|"+x.bits+"> "+(x.p*100).toFixed(0)+"%";}).join(" · ");if(bar){var mx=Math.max.apply(null,pr.map(function(x){return x.p;}))||1;bar.innerHTML=pr.map(function(x){return "<i style='height:"+Math.max(6,x.p/mx*56)+"px'></i>";}).join("");}if(m&&msg)m.textContent=msg;}
-function qEntropy(){var pr=qProbs(),e=0,i,p;for(i=0;i<pr.length;i++){p=pr[i].p;if(p>1e-12)e-=p*Math.log2(p);}return e;}
-function loadMem(){try{var a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a:[];}catch(e){return[];}}
-function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch(e){}renderMem();}
-function addFact(t,src){t=String(t||"").trim();if(!t)return;var a=loadMem();a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:t,src:src||"u",ts:Date.now()});if(a.length>500)a=a.slice(0,500);saveMem(a);}
-function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='hint'>Пусто — учи АКСИ</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+x.id+"'>×</button>"+esc(x.t)+"</div>";}).join("");}
-function $(id){return document.getElementById(id);}
-function status(t){var s=$("st");if(s)s.textContent=t;}
-function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function tok(s){return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(function(w){return w.length>1;});}
-function showTab(name){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll(".nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name);});var el=$("tab-"+name);if(el)el.classList.add("on");if(name==="mem")renderMem();if(name==="quantum")qUI();}
-function bubble(role,text,meta){var th=$("thread");if(!th)return;var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML="<div class='bubble'>"+esc(text)+(meta?"<span class='meta'>"+esc(meta)+"</span>":"")+"</div>";th.appendChild(d);var main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;}
-var KB=[
-{k:["кто ты","что ты","представься","ты кто","акси"],a:"Я АКСИ "+VER+" — твоё личное офлайн-ядро.\nУмею отвечать, учиться, квант, тексты и HTML-сайты.\naksilove@internet.ru"},
-{k:["привет","здравств","добрый","hello","hi"],a:"Привет. Я АКСИ — на связи.\nСпроси «кто ты», «что умеешь» или научи: запомни: …"},
-{k:["помоги","умеешь","что можешь","команд","help"],a:"1. Чат и память\n2. Учить (запомни: …)\n3. Квант 2 кубита\n4. Писатель\n5. Сайт HTML\n6. Экспорт JSON"},
-{k:["квант","кубит","bell","симулятор"],a:"Квант: statevector 2 кубита, H X Z CNOT, Bell. Каждый ответ чата — через измерение."},
-{k:["сайт","html","лендинг","страниц"],a:"Вкладка Сайт: название, тема, Собрать → превью → Скачать. Или «собери сайт» в чате."},
-{k:["писать","пост","текст","заметк","письмо","код"],a:"Вкладка Писатель — тип и тема → Сгенерировать. Можно в память."},
-{k:["учить","запомни","обуч","память","факт"],a:"запомни: любой факт — и я буду отвечать из твоих слов. Вкладка Учить — пачка фактов."},
-{k:["контакт","email","почта"],a:"aksilove@internet.ru"},
-{k:["продаж","цена","license","enterprise","бизнес"],a:"Personal runtime / Decision Integrity. Studio · Business · Enterprise. aksilove@internet.ru"},
-{k:["офлайн","облако","приват","безопасн"],a:"Всё локально в браузере. Факты в localStorage. Сервер не обязателен."},
-{k:["версия","version"],a:"АКСИ "+VER}
+<div class="bar">
+  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send">↑</button>
+</div>
+<script type="module">
+const KEY="aksi9_mem", VER="9.0";
+let engine=null, ollamaOk=false, busy=false;
+const $ = id => document.getElementById(id);
+const st = t => { const s=$("st"); if(!s)return; s.textContent=t; s.className = (t.includes("нейро")||t.includes("Ollama"))?"on": t.includes("груз")?"load":""; };
+function esc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function loadMem(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||"[]"); return Array.isArray(a)?a:[]; }catch{ return []; } }
+function saveMem(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch{} renderMem(); }
+function addFact(t, src="u"){ t=String(t||"").trim(); if(!t) return; const a=loadMem(); a.unshift({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,5), t, src, ts:Date.now() }); saveMem(a.slice(0,500)); }
+function renderMem(){ const a=loadMem(), n=$("memN"), list=$("memList"); if(n) n.textContent=String(a.length); if(!list) return; if(!a.length){ list.innerHTML="<p class='muted'>Пусто</p>"; return; } list.innerHTML=a.map(x=>`<div class="fact"><button type="button" data-del="${x.id}">×</button>${esc(x.t)}</div>`).join(""); }
+function bubble(role, text, tag){ const th=$("thread"); if(!th) return; const d=document.createElement("div"); d.className="msg "+(role==="u"?"u":"a"); d.innerHTML=`<div class="bbl">${esc(text)}${tag?`<span class="tag">${esc(tag)}</span>`:""}</div>`; th.appendChild(d); const main=document.querySelector("main"); if(main) main.scrollTop=main.scrollHeight; }
+const KB=[
+  {k:["кто ты","что ты","представься","акси"],a:`Я АКСИ ${VER} — личное ядро.\n\nСейчас: знания + твоя память.\nОпционально: WebLLM или Ollama.\n\naksilove@internet.ru`},
+  {k:["привет","здравств","добрый","hello","hi"],a:`Привет. АКСИ на связи.\n\nНейросеть: вкладка «Нейросеть» → Загрузить.`},
+  {k:["умеешь","помоги","команд","что можешь"],a:`• чат (ядро всегда)\n• запомни: факт\n• WebLLM\n• Ollama\n• память JSON`},
+  {k:["нейро","webllm","модель","загруз"],a:`Вкладка «Нейросеть»: модель + Загрузить. Нужен Chrome/Edge с WebGPU.`},
+  {k:["контакт","email","почта"],a:`aksilove@internet.ru`},
+  {k:["ollama"],a:`ollama pull qwen2.5:0.5b && ollama serve → Проверить Ollama`},
 ];
-function score(q,keys,text){var low=q.toLowerCase(),sc=0,i,qt=tok(q),tt=tok(text||""),j;if(keys)for(i=0;i<keys.length;i++)if(low.indexOf(keys[i])!==-1)sc+=3;for(i=0;i<qt.length;i++)for(j=0;j<tt.length;j++)if(qt[i]===tt[j])sc+=1;return sc;}
-function retrieve(q){var hits=[],a=loadMem(),i,s;for(i=0;i<a.length;i++){s=score(q,null,a[i].t);if(s>0)hits.push({text:a[i].t,score:s+4,src:"mem"});}for(i=0;i<KB.length;i++){s=score(q,KB[i].k,KB[i].a);if(s>0)hits.push({text:KB[i].a,score:s,src:"kb"});}hits.sort(function(x,y){return y.score-x.score;});return hits;}
-function nowMsk(){try{return new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"medium"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}
-function genText(type,topic){topic=(topic||"АКСИ").trim();if(type==="post")return "✦ "+topic+"\n\nЛичный ИИ на устройстве. АКСИ: память, квант, сайты.\n#АКСИ";if(type==="code")return "// "+topic+"\nfunction hello(n){return 'Привет, '+n;}\nconsole.log(hello('Альфия'));";if(type==="letter")return "Здравствуйте.\n\nПо теме: "+topic+".\n\nАКСИ\naksilove@internet.ru";if(type==="idea")return "Идея: "+topic+"\n• офлайн\n• обучение\n• квант\n• white-label";return "Заметка — "+topic+"\n\n• Суть\n• Шаг\n— АКСИ "+VER;}
-function genSite(title,theme){title=title||"АКСИ";theme=theme||"личный ИИ";return "<!DOCTYPE html>\n<html lang=ru><head><meta charset=utf-8><meta name=viewport content=\"width=device-width,initial-scale=1\"><title>"+title+"</title><style>body{margin:0;font-family:system-ui;background:#0a0a0f;color:#f4f2fa}header{padding:48px 24px;background:#1a1230}h1{margin:0 0 8px}main{max-width:720px;margin:0 auto;padding:32px 24px}.card{background:#14121c;border:1px solid #2a2438;border-radius:20px;padding:24px;margin-bottom:16px}</style></head><body><header><h1>"+title+"</h1><p>"+theme+"</p></header><main><div class=card><h2>О проекте</h2><p>"+theme+".</p></div><div class=card><h2>Контакт</h2><p>aksilove@internet.ru</p></div></main></body></html>";}
-function craft(q){
-var low=q.toLowerCase().trim();
-if(/^(запомни|выучи)\s*[:\s]/.test(low)){var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return "Напиши: запомни: факт";addFact(raw,"chat");return "Запомнила ✓\n«"+raw+"»\nФактов: "+loadMem().length;}
-if(/забудь всё|очисти память/.test(low)){saveMem([]);return "Память очищена.";}
-if(/что ты знаешь|что помнишь|покажи факт/.test(low)){var a=loadMem();if(!a.length)return "Фактов нет. Напиши: запомни: …";return "Помню "+a.length+":\n\n"+a.slice(0,12).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}
-if(/который час|сколько времени|время сейчас|дата/.test(low))return "МСК:\n"+nowMsk();
-if(/собери сайт|сделай сайт/.test(low)){lastSite=genSite("АКСИ","из чата");return "Сайт готов. Вкладка «Сайт» — превью и скачать.";}
-if(/^(напиши|сгенерируй)\s/.test(low)){lastWrite=genText("post",q.replace(/^(напиши|сгенерируй)\s*/i,"")||"АКСИ");return lastWrite;}
-var hits=retrieve(q);
-if(hits.length&&hits[0].score>=2){if(hits[0].src==="kb"&&hits[0].score>=3)return hits[0].text;if(hits[0].src==="mem"){var mems=hits.filter(function(h){return h.src==="mem";}).slice(0,4);return "Из памяти:\n\n"+mems.map(function(h,i){return (i+1)+". "+h.text;}).join("\n");}return hits[0].text;}
-return "Пока мало данных по запросу.\nНаучи: запомни: …\nИли спроси: кто ты / умеешь / сайт.\nФактов: "+loadMem().length;
+function tok(s){ return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(w=>w.length>1); }
+function score(q, keys, text){ const low=q.toLowerCase(); let sc=0; const qt=tok(q), tt=tok(text||""); if(keys) for(const k of keys) if(low.includes(k)) sc+=3; for(const a of qt) for(const b of tt) if(a===b) sc++; return sc; }
+function coreAnswer(q){
+  const low=q.toLowerCase().trim();
+  if(/^(запомни|выучи)\s*[:\s]/.test(low)){ const raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim(); if(!raw) return "Формат: запомни: факт"; addFact(raw,"chat"); return `Запомнила ✓\n«${raw}»\nФактов: ${loadMem().length}`; }
+  if(/забудь всё|очисти память/.test(low)){ saveMem([]); return "Память очищена."; }
+  if(/что ты знаешь|что помнишь|моя память/.test(low)){ const a=loadMem(); if(!a.length) return "Пусто. запомни: …"; return "Помню:\n\n"+a.slice(0,15).map((x,i)=>`${i+1}. ${x.t}`).join("\n"); }
+  let best={sc:0,a:null};
+  for(const row of KB){ const s=score(q,row.k,row.a); if(s>best.sc) best={sc:s,a:row.a}; }
+  for(const m of loadMem()){ const s=score(q,null,m.t)+2; if(s>best.sc) best={sc:s,a:"Из памяти:\n"+m.t}; }
+  if(best.sc>=2 && best.a) return best.a;
+  return `Мало данных по «${q.slice(0,60)}».\nНаучи: запомни: …\nИли загрузи нейросеть.\nФактов: ${loadMem().length}`;
 }
-function quantumPass(text){if(qEntropy()<0.08)qApply("h",0);var bit=qMeasure();if(bit===1)return text+"\n\n⟨"+bit.toString(2).padStart(2,"0")+"⟩";return text;}
-function chat(q){q=String(q||"").trim();if(!q)return;bubble("me",q);var inp=$("inp");if(inp)inp.value="";status("…");var t0=Date.now(),text;try{text=quantumPass(craft(q));}catch(e){text="Сбой: "+(e&&e.message?e.message:e);}bubble("ai",text,(Date.now()-t0)+" мс · "+VER);status("онлайн");showTab("chat");if(lastSite&&/сайт|html/i.test(q)){var sc=$("siteCode");if(sc)sc.value=lastSite;var fr=$("sitePrev");if(fr)fr.srcdoc=lastSite;}}
-document.addEventListener("click",function(e){var t=e.target;if(!t)return;var el=t.closest?t.closest("button,[data-tab],[data-ask],[data-del],[data-q]"):t;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}var g=el.getAttribute("data-q");if(g){if(g==="h0")qApply("h",0);else if(g==="h1")qApply("h",1);else if(g==="x0")qApply("x",0);else if(g==="cx")qApply("cx",0,1);else if(g==="bell")qBell();else if(g==="reset")qReset();else if(g==="m")qMeasure();return;}if(el.id==="send"){chat(($("inp")||{}).value);return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!v.trim()){status("пусто");return;}v.split(/\n+/).forEach(function(line){if(line.trim())addFact(line.trim(),"teach");});if(box)box.value="";bubble("ai","Сохранено. Фактов: "+loadMem().length);showTab("chat");return;}if(el.id==="btnWrite"){lastWrite=genText(($("wType")||{}).value||"note",($("wTopic")||{}).value||"АКСИ");var o=$("wOut");if(o)o.textContent=lastWrite;return;}if(el.id==="btnSaveW"){if(lastWrite){addFact(lastWrite.slice(0,600),"write");status("в памяти");}return;}if(el.id==="btnSite"){lastSite=genSite(($("siteTitle")||{}).value,($("siteTheme")||{}).value);var code=$("siteCode");if(code)code.value=lastSite;var fr=$("sitePrev");if(fr)fr.srcdoc=lastSite;status("сайт");return;}if(el.id==="btnPrev"){var code=$("siteCode"),fr=$("sitePrev");if(code&&fr){fr.srcdoc=code.value;lastSite=code.value;}return;}if(el.id==="btnDl"){var code=($("siteCode")||{}).value||lastSite;if(!code)return;var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([code],{type:"text/html"}));a.download="aksi-site.html";a.click();return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Стереть?"))saveMem([]);return;}});
-document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.id==="inp"){e.preventDefault();chat(e.target.value);}});
-var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result);var facts=j.facts||[];var cur=loadMem();facts.forEach(function(x){if(x&&x.t)cur.unshift(x);});saveMem(cur.slice(0,500));status("импорт");}catch(err){status("ошибка");}};r.readAsText(f);e.target.value="";});
-try{if(!localStorage.getItem("aksi8_seeded")){["АКСИ — личное офлайн-ядро","Контакт aksilove@internet.ru","Суверенный ИИ без облака"].forEach(function(t){addFact(t,"seed");});localStorage.setItem("aksi8_seeded","1");}}catch(e){}
-try{qBell();renderMem();status("онлайн");bubble("ai","АКСИ "+VER+"\nКвант Bell · память готова.\nНажми «привет» или научи фактом.","старт");}catch(e){status("ошибка");}
-})();
+function memContext(){ const a=loadMem().slice(0,12).map(x=>"- "+x.t).join("\n"); return a ? "Факты:\n"+a : ""; }
+async function tryOllama(q){
+  if(!ollamaOk) return null;
+  const base=($("ollamaUrl").value||"").replace(/\/$/,"");
+  try{
+    const r=await fetch(base+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"qwen2.5:0.5b",stream:false,messages:[{role:"system",content:"Ты АКСИ, кратко по-русски. "+memContext()},{role:"user",content:q}]})});
+    if(!r.ok) return null; const j=await r.json(); return j.message?.content || null;
+  }catch{ return null; }
+}
+async function tryWebLLM(q){
+  if(!engine) return null;
+  try{
+    const out=await engine.chat.completions.create({messages:[{role:"system",content:"Ты АКСИ. По-русски, кратко. "+memContext()},{role:"user",content:q}],temperature:0.7,max_tokens:400});
+    return out.choices?.[0]?.message?.content || null;
+  }catch{ return null; }
+}
+async function reply(q){
+  let text=null, tag="ядро";
+  if(engine){ st("нейросеть…"); text=await tryWebLLM(q); if(text) tag="WebLLM"; }
+  if(!text){ text=await tryOllama(q); if(text) tag="Ollama"; }
+  if(!text){ text=coreAnswer(q); tag="ядро "+VER; }
+  return {text, tag};
+}
+async function chat(q){
+  q=String(q||"").trim(); if(!q||busy) return;
+  busy=true; $("send").disabled=true; bubble("u", q); $("inp").value=""; const t0=Date.now(); st("думаю…");
+  try{ const {text, tag}=await reply(q); bubble("a", text, `${Date.now()-t0} мс · ${tag}`); }
+  catch(e){ bubble("a", "Ошибка: "+(e.message||e), "err"); }
+  st(engine?"нейросеть": ollamaOk?"Ollama":"офлайн-ядро"); if(engine||ollamaOk) $("st").className="on";
+  busy=false; $("send").disabled=false; show("chat");
+}
+function show(name){ document.querySelectorAll(".view").forEach(v=>v.classList.remove("on")); document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.v===name)); const el=$("v-"+name); if(el) el.classList.add("on"); if(name==="mem") renderMem(); }
+document.addEventListener("click", e=>{
+  const el=e.target.closest("button,[data-v],[data-q],[data-del]"); if(!el) return;
+  if(el.dataset.v){ show(el.dataset.v); return; }
+  if(el.dataset.q){ chat(el.dataset.q); return; }
+  if(el.dataset.del){ saveMem(loadMem().filter(x=>x.id!==el.dataset.del)); return; }
+  if(el.id==="send"){ chat($("inp").value); return; }
+  if(el.id==="btnTeach"){ const v=$("teachBox").value; if(!v.trim()) return; v.split(/\n+/).forEach(l=>{ if(l.trim()) addFact(l.trim(),"teach"); }); $("teachBox").value=""; bubble("a","Сохранено. Фактов: "+loadMem().length); show("chat"); return; }
+  if(el.id==="btnExp"){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"})); a.download="aksi-memory.json"; a.click(); return; }
+  if(el.id==="btnImp"){ $("impFile").click(); return; }
+  if(el.id==="btnWipe"){ if(confirm("Стереть?")) saveMem([]); return; }
+  if(el.id==="btnLoad"){ loadModel(); return; }
+  if(el.id==="btnUnload"){ engine=null; st("офлайн-ядро"); $("brainMsg").textContent="Выгружено"; $("progBar").style.width="0"; return; }
+  if(el.id==="btnOllama"){ pingOllama(); return; }
+});
+$("inp").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); chat($("inp").value); }});
+$("impFile").addEventListener("change", async e=>{ const f=e.target.files?.[0]; if(!f) return; try{ const j=JSON.parse(await f.text()); const cur=loadMem(); (j.facts||[]).forEach(x=>{ if(x?.t) cur.unshift(x); }); saveMem(cur.slice(0,500)); }catch{} e.target.value=""; });
+async function pingOllama(){ const base=($("ollamaUrl").value||"").replace(/\/$/,""); $("ollamaMsg").textContent="…"; try{ const r=await fetch(base+"/api/tags"); if(r.ok){ ollamaOk=true; $("ollamaMsg").textContent="Ollama OK"; st("Ollama"); $("st").className="on"; } else { ollamaOk=false; $("ollamaMsg").textContent="нет"; } }catch{ ollamaOk=false; $("ollamaMsg").textContent="недоступна"; } }
+async function loadModel(){
+  const id=$("model").value; $("btnLoad").disabled=true; $("brainMsg").textContent="Загрузка…"; st("загрузка"); $("progBar").style.width="5%";
+  try{
+    const webllm=await import("https://esm.sh/@mlc-ai/web-llm@0.2.79");
+    engine=await webllm.CreateMLCEngine(id,{ initProgressCallback: p=>{ const pct=Math.round((p.progress||0)*100); $("progBar").style.width=pct+"%"; $("brainMsg").textContent=p.text||(pct+"%"); st("загрузка "+pct+"%"); } });
+    $("brainMsg").textContent="Готово: "+id; $("progBar").style.width="100%"; st("нейросеть"); $("st").className="on";
+    bubble("a","Нейросеть загружена.\nПиши в чат.","WebLLM"); show("chat");
+  }catch(e){ engine=null; $("brainMsg").textContent="Ошибка: "+(e.message||e)+". Нужен Chrome/Edge + WebGPU. Ядро отвечает."; st("офлайн-ядро"); }
+  $("btnLoad").disabled=false;
+}
+try{ if(!localStorage.getItem("aksi9_seed")){ ["АКСИ — личное ядро","aksilove@internet.ru"].forEach(t=>addFact(t,"seed")); localStorage.setItem("aksi9_seed","1"); } }catch{}
+renderMem(); st("офлайн-ядро");
+bubble("a",`АКСИ ${VER}\n\nЯдро отвечает сразу.\nНастоящая нейросеть: «Нейросеть» → Загрузить (WebLLM/MLC).\n\nНажми «привет».`,"старт");
 </script>
 </body>
 </html>
