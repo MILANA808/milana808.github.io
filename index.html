@@ -4,68 +4,172 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
+<meta name="description" content="АКСИ — локальный помощник">
 <title>АКСИ</title>
 <style>
-:root{--bg:#0b1020;--side:#0f172a;--card:#141c2e;--line:#243044;--ink:#e8eef7;--muted:#94a3b8;--acc:#a855f7;--acc2:#3b82f6;--ok:#22c55e;--soft:rgba(168,85,247,.12);--side-w:210px}
-*{box-sizing:border-box;margin:0}html,body{height:100%}
-body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);display:flex}
-button,input,textarea{font:inherit}
-.side{width:var(--side-w);min-width:var(--side-w);background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:10px 8px;position:fixed;inset:0 auto 0 0;z-index:40;overflow:auto}
-.brand{display:flex;align-items:center;gap:8px;padding:6px 8px 12px}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#a855f7,#3b82f6);display:grid;place-items:center;font-weight:900;color:#fff}
-.brand b{font-size:14px}.brand span{display:block;font-size:10px;color:var(--muted);font-weight:400}
-.tab{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:transparent;color:#cbd5e1;padding:9px 10px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
-.tab:hover{background:#1e293b;color:#fff}.tab.on{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
-#st{margin-top:auto;padding:8px;font-size:11px;color:var(--muted);border-top:1px solid var(--line)}#st.ok{color:var(--ok)}
-.main{margin-left:var(--side-w);flex:1;min-width:0;display:flex;flex-direction:column;height:100vh;max-height:100dvh}
-.top{padding:12px 14px 6px;border-bottom:1px solid var(--line)}
-.top h1{font-size:1.1rem;font-weight:800}.top p{font-size:12px;color:var(--muted)}
-.content{flex:1;overflow:auto;padding:12px 14px 100px}
-.panel{display:none;max-width:720px}.panel.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
-h2{font-size:.95rem;font-weight:800;margin-bottom:6px}.muted{color:var(--muted);font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.app{border:1px solid var(--line);background:#0f172a;border-radius:12px;padding:12px;cursor:pointer;text-align:left;color:var(--ink)}
-.app:hover{border-color:#7c3aed}.app .ic{font-size:20px}.app b{display:block;font-size:13px;margin:4px 0}.app span{font-size:11px;color:var(--muted)}
-#thread{max-height:min(50vh,400px);overflow:auto;margin-top:8px}
-.msg{margin:8px 0}.msg .b{padding:10px 12px;border-radius:12px;font-size:14px;white-space:pre-wrap;word-break:break-word}
-.msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);margin-left:12%}
+:root{
+  --bg:#0b1020;--side:#0f172a;--card:#141c2e;--line:#243044;
+  --ink:#e8eef7;--muted:#94a3b8;--acc:#a855f7;--acc2:#3b82f6;
+  --ok:#22c55e;--soft:rgba(168,85,247,.12);--side-w:210px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:var(--bg);color:var(--ink);display:flex;overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.side{
+  width:var(--side-w);min-width:var(--side-w);background:var(--side);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+  padding:10px 8px;position:fixed;inset:0 auto 0 0;z-index:40;overflow-y:auto;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 8px 14px}
+.logo{
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(135deg,#a855f7,#3b82f6);
+  display:grid;place-items:center;font-weight:900;color:#fff;font-size:18px;
+  flex-shrink:0;
+}
+.brand b{font-size:15px;display:block}
+.brand span{font-size:10px;color:var(--muted);font-weight:400}
+.tab{
+  display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  border:0;background:transparent;color:#cbd5e1;padding:10px 12px;
+  border-radius:10px;font-size:13px;font-weight:600;margin-bottom:2px;
+}
+.tab:hover{background:#1e293b;color:#fff}
+.tab.on{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
+.side-foot{margin-top:auto;padding:8px 4px 4px;border-top:1px solid var(--line)}
+#st{font-size:11px;color:var(--muted)}
+#st.ok{color:var(--ok)}
+#clock{font-size:10px;color:var(--muted);margin-top:2px}
+.main{
+  margin-left:var(--side-w);flex:1;min-width:0;
+  display:flex;flex-direction:column;height:100vh;max-height:100dvh;
+}
+.top{padding:14px 16px 8px;border-bottom:1px solid var(--line);flex-shrink:0}
+.top h1{font-size:1.15rem;font-weight:800}
+.top p{font-size:12px;color:var(--muted);margin-top:2px}
+.content{flex:1;overflow-y:auto;padding:14px 16px 110px}
+.panel{display:none;max-width:740px}
+.panel.on{display:block}
+.card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:16px;margin-bottom:12px;
+}
+h2{font-size:1rem;font-weight:800;margin-bottom:6px}
+.muted{color:var(--muted);font-size:13px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+.app{
+  border:1px solid var(--line);background:#0f172a;border-radius:12px;
+  padding:14px;text-align:left;color:var(--ink);transition:border-color .15s;
+}
+.app:hover{border-color:#7c3aed}
+.app .ic{font-size:22px;margin-bottom:4px}
+.app b{display:block;font-size:13px;margin:2px 0}
+.app span{font-size:11px;color:var(--muted)}
+#thread{max-height:min(48vh,380px);overflow-y:auto;margin-top:10px;padding-right:4px}
+.msg{margin:10px 0}
+.msg .b{
+  padding:11px 14px;border-radius:12px;font-size:14px;
+  white-space:pre-wrap;word-break:break-word;line-height:1.45;
+}
+.msg.u .b{background:linear-gradient(135deg,#7c3aed,#4f46e5);margin-left:10%}
 .msg.a .b{background:var(--soft);border:1px solid var(--line)}
-.thought{font-size:11px;color:var(--muted);margin-top:3px}.meta{font-size:10px;color:var(--muted);font-family:ui-monospace,monospace;word-break:break-all}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.btn{border:1px solid var(--line);background:#0f172a;color:var(--ink);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer}
+.thought{font-size:11px;color:var(--muted);margin-top:4px}
+.meta{font-size:10px;color:var(--muted);font-family:ui-monospace,monospace;word-break:break-all;margin-top:3px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.btn{
+  border:1px solid var(--line);background:#0f172a;color:var(--ink);
+  border-radius:999px;padding:9px 14px;font-size:13px;font-weight:600;
+}
+.btn:hover{border-color:#7c3aed}
 .btn.p{background:linear-gradient(135deg,#7c3aed,#2563eb);border:0;color:#fff}
-.row{display:flex;gap:8px;margin-top:8px;align-items:center}
-.field{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1220;color:var(--ink);font-size:15px}
-.composer{position:fixed;left:var(--side-w);right:0;bottom:0;display:none;gap:8px;padding:10px 14px max(12px,env(safe-area-inset-bottom));background:rgba(15,23,42,.96);border-top:1px solid var(--line);z-index:30}
+.btn.p:hover{filter:brightness(1.08)}
+.row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.field{
+  flex:1;padding:11px 13px;border-radius:10px;border:1px solid var(--line);
+  background:#0b1220;color:var(--ink);font-size:15px;outline:none;
+}
+.field:focus{border-color:#7c3aed}
+.composer{
+  position:fixed;left:var(--side-w);right:0;bottom:0;
+  display:none;gap:8px;align-items:center;
+  padding:10px 14px max(14px,env(safe-area-inset-bottom));
+  background:rgba(15,23,42,.97);border-top:1px solid var(--line);z-index:30;
+}
 .composer.on{display:flex}
-#inp{flex:1;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:10px;background:#0b1220;color:var(--ink);font-size:16px}
-#send,#mic{width:46px;border:0;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;font-weight:800;cursor:pointer}
-#mic{background:#1e293b;border:1px solid var(--line)}
-#prog{display:none;font-size:13px;color:var(--acc2);font-weight:600}#prog.on{display:block}
-.probs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
-.probs div{text-align:center;padding:8px;border-radius:10px;background:var(--soft);border:1px solid var(--line);font-size:11px}
-.probs b{display:block;font-size:14px;color:var(--acc2)}
-.fact{display:flex;gap:8px;padding:10px;border:1px solid var(--line);border-radius:10px;margin-top:8px;background:#0f172a;font-size:13px}
-.fact button{border:0;background:0;color:var(--muted);cursor:pointer;font-size:16px}
-.mono{font-family:ui-monospace,monospace;font-size:11px;word-break:break-all;background:#0b1220;padding:8px;border-radius:8px;border:1px solid var(--line)}
-.metric{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:4px;font-size:12px}
-.metric b{display:block;font-size:15px;color:var(--acc)}
-.burger{display:none;position:fixed;top:8px;left:8px;z-index:50;border:0;border-radius:10px;padding:10px 12px;background:var(--side);color:#fff;font-weight:700}
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:35}
-@media(max-width:800px){
-:root{--side-w:0px}
-.side{transform:translateX(-110%);transition:.2s;width:220px;min-width:220px}
-.side.open{transform:none}.burger{display:block}.overlay.on{display:block}
-.main{margin-left:0}.composer{left:0}.top{padding-left:48px}
+#inp{
+  flex:1;min-height:46px;border:1px solid var(--line);border-radius:12px;
+  padding:11px 14px;background:#0b1220;color:var(--ink);font-size:16px;outline:none;
+}
+#inp:focus{border-color:#7c3aed}
+#send,#mic{
+  width:48px;height:48px;border:0;border-radius:12px;
+  background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff;
+  font-weight:800;font-size:18px;flex-shrink:0;
+}
+#mic{background:#1e293b;border:1px solid var(--line);font-size:16px}
+#prog{display:none;font-size:13px;color:var(--acc2);font-weight:600;margin:6px 0}
+#prog.on{display:block}
+.probs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.probs div{
+  text-align:center;padding:10px 6px;border-radius:10px;
+  background:var(--soft);border:1px solid var(--line);font-size:11px;
+}
+.probs b{display:block;font-size:15px;color:var(--acc2);margin-bottom:2px}
+.fact{
+  display:flex;gap:8px;align-items:flex-start;padding:12px;
+  border:1px solid var(--line);border-radius:10px;margin-top:8px;
+  background:#0f172a;font-size:13px;line-height:1.4;
+}
+.fact button{border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:0 4px}
+.mono{
+  font-family:ui-monospace,monospace;font-size:12px;word-break:break-all;
+  background:#0b1220;padding:10px;border-radius:8px;border:1px solid var(--line);
+}
+.metric{
+  display:inline-block;background:var(--soft);border:1px solid var(--line);
+  border-radius:10px;padding:10px 14px;margin:4px 4px 4px 0;font-size:12px;
+}
+.metric b{display:block;font-size:16px;color:var(--acc);margin-bottom:2px}
+.avatar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.avatar{
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(145deg,#1e1b4b,#312e81);
+  border:2px solid #7c3aed;display:grid;place-items:center;
+  font-size:28px;flex-shrink:0;
+}
+.live-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--ok);
+  display:inline-block;margin-right:6px;box-shadow:0 0 6px var(--ok);
+}
+.burger{
+  display:none;position:fixed;top:10px;left:10px;z-index:50;
+  border:0;border-radius:10px;padding:11px 13px;background:var(--side);
+  color:#fff;font-weight:700;font-size:16px;
+}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:35}
+@media(max-width:820px){
+  :root{--side-w:0px}
+  .side{transform:translateX(-110%);transition:transform .2s;width:240px;min-width:240px}
+  .side.open{transform:none}
+  .burger{display:block}
+  .overlay.on{display:block}
+  .main{margin-left:0}
+  .composer{left:0}
+  .top{padding-left:52px}
 }
 </style>
 </head>
 <body>
 <button type="button" class="burger" id="burger" aria-label="Меню">☰</button>
 <div class="overlay" id="overlay"></div>
+
 <aside class="side" id="side">
-  <div class="brand"><div class="logo">А</div><div><b>АКСИ</b><span>локальный помощник</span></div></div>
+  <div class="brand">
+    <div class="logo">А</div>
+    <div><b>АКСИ</b><span>локальный помощник</span></div>
+  </div>
   <button type="button" class="tab on" data-p="home">🏠 Главная</button>
   <button type="button" class="tab" data-p="chat">💬 Чат</button>
   <button type="button" class="tab" data-p="quantum">⚛ Квант</button>
@@ -77,355 +181,707 @@ h2{font-size:.95rem;font-weight:800;margin-bottom:6px}.muted{color:var(--muted);
   <button type="button" class="tab" data-p="files">📎 Файлы</button>
   <button type="button" class="tab" data-p="id">🔑 ID</button>
   <button type="button" class="tab" data-p="about">ℹ О продукте</button>
-  <div id="st">загрузка…</div><div id="clock" style="font-size:10px;color:var(--muted);padding:0 8px 4px"></div>
+  <div class="side-foot">
+    <div id="st">загрузка…</div>
+    <div id="clock"></div>
+  </div>
 </aside>
+
 <div class="main">
-  <div class="top"><h1 id="title">Главная</h1><p id="sub">Все модули работают здесь</p></div>
+  <div class="top">
+    <h1 id="title">Главная</h1>
+    <p id="sub">Все модули работают здесь</p>
+  </div>
   <div class="content">
+
     <section class="panel on" id="p-home">
       <div class="card">
-        <h2>АКСИ</h2>
-        <p class="muted">Один файл. Без сервера. Нажимайте плитки или вкладки слева.</p>
-        <div class="grid" style="margin-top:10px">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatar">🟣</div>
+          <div>
+            <h2>АКСИ</h2>
+            <p class="muted"><span class="live-dot"></span>Онлайн · offline-first · v23</p>
+          </div>
+        </div>
+        <p class="muted">Один HTML-файл. Без сервера. Данные на вашем устройстве. Нажимайте плитки или вкладки слева.</p>
+        <div class="grid">
           <button type="button" class="app" data-go="chat"><div class="ic">💬</div><b>Чат</b><span>Offline-ответы</span></button>
-          <button type="button" class="app" data-go="quantum"><div class="ic">⚛</div><b>Квант</b><span>Bell</span></button>
+          <button type="button" class="app" data-go="quantum"><div class="ic">⚛</div><b>Квант</b><span>Bell · 2 кубита</span></button>
           <button type="button" class="app" data-go="net"><div class="ic">🌐</div><b>Погода</b><span>wttr.in</span></button>
-          <button type="button" class="app" data-go="metrics"><div class="ic">📊</div><b>Метрики</b><span>QCLI · EQS</span></button>
+          <button type="button" class="app" data-go="metrics"><div class="ic">📊</div><b>Метрики</b><span>QCLI · Shannon</span></button>
           <button type="button" class="app" data-go="search"><div class="ic">🔍</div><b>Поиск</b><span>Википедия</span></button>
           <button type="button" class="app" data-go="notes"><div class="ic">📝</div><b>Заметки</b><span>Память</span></button>
+          <button type="button" class="app" data-go="voice"><div class="ic">🎙</div><b>Голос</b><span>Микрофон</span></button>
+          <button type="button" class="app" data-go="id"><div class="ic">🔑</div><b>ID</b><span>Локальный</span></button>
         </div>
       </div>
     </section>
+
     <section class="panel" id="p-chat">
       <div class="card">
         <h2>Чат</h2>
-        <p class="muted">Пишите внизу. Работает offline.</p>
+        <p class="muted">Пишите внизу. Работает без интернета (базовые ответы). Погода и Вики — при наличии сети.</p>
         <div class="chips">
           <button type="button" class="btn" data-q="кто ты">Кто ты?</button>
           <button type="button" class="btn" data-q="что умеешь">Возможности</button>
           <button type="button" class="btn" data-q="запутанность">Запутанность</button>
           <button type="button" class="btn" data-q="погода Москва">Погода</button>
-          <button type="button" class="btn" id="clearChat">Очистить</button>
+          <button type="button" class="btn" data-act="clearChat">Очистить</button>
         </div>
         <div id="prog"></div>
-        <div id="thread" role="log"></div>
+        <div id="thread" role="log" aria-live="polite"></div>
       </div>
     </section>
+
     <section class="panel" id="p-quantum">
       <div class="card">
-        <h2>Квант (учебный)</h2>
+        <h2>Квант (учебный симулятор)</h2>
+        <p class="muted">2 кубита. Состояние в браузере, без сервера.</p>
         <div class="chips">
-          <button type="button" class="btn p" id="qBell">Bell</button>
-          <button type="button" class="btn" id="qSuper">Суперпозиция</button>
+          <button type="button" class="btn p" data-act="qBell">Bell (запутанность)</button>
+          <button type="button" class="btn" data-act="qSuper">Суперпозиция</button>
         </div>
-        <p class="muted" id="qText" style="margin-top:8px">Нажмите кнопку</p>
+        <p class="muted" id="qText" style="margin-top:12px">Нажмите кнопку</p>
         <div class="probs" id="qProbs"></div>
       </div>
     </section>
+
     <section class="panel" id="p-net">
       <div class="card">
         <h2>Погода</h2>
-        <div class="row"><input class="field" id="wCity" value="Moscow"><button type="button" class="btn p" id="wBtn">Узнать</button></div>
-        <div id="wOut" class="muted" style="margin-top:10px"></div>
+        <p class="muted">Источник: wttr.in</p>
+        <div class="row">
+          <input class="field" id="wCity" value="Moscow" placeholder="Город">
+          <button type="button" class="btn p" data-act="weather">Узнать</button>
+        </div>
+        <div id="wOut" class="muted" style="margin-top:12px"></div>
       </div>
     </section>
+
     <section class="panel" id="p-metrics">
       <div class="card">
         <h2>Метрики текста</h2>
-        <textarea class="field" id="mText" style="width:100%;min-height:70px;resize:vertical" placeholder="Текст…"></textarea>
-        <div class="chips"><button type="button" class="btn p" id="mCalc">Посчитать</button></div>
-        <div id="mOut" style="margin-top:8px"></div>
+        <p class="muted">Shannon entropy · QCLI · fingerprint</p>
+        <textarea class="field" id="mText" style="width:100%;min-height:80px;resize:vertical;margin-top:8px" placeholder="Вставьте текст…"></textarea>
+        <div class="chips" style="margin-top:10px">
+          <button type="button" class="btn p" data-act="metrics">Посчитать</button>
+        </div>
+        <div id="mOut" style="margin-top:10px"></div>
       </div>
     </section>
+
     <section class="panel" id="p-search">
       <div class="card">
-        <h2>Поиск (Википедия)</h2>
-        <div class="row"><input class="field" id="sIn" placeholder="Запрос"><button type="button" class="btn p" id="sBtn">Найти</button></div>
-        <div id="sOut" class="muted" style="margin-top:10px"></div>
+        <h2>Поиск</h2>
+        <p class="muted">Википедия (ru)</p>
+        <div class="row">
+          <input class="field" id="sIn" placeholder="Запрос">
+          <button type="button" class="btn p" data-act="search">Найти</button>
+        </div>
+        <div id="sOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></div>
       </div>
     </section>
+
     <section class="panel" id="p-notes">
       <div class="card">
         <h2>Заметки</h2>
-        <div class="row"><input class="field" id="nIn" placeholder="Новая заметка"><button type="button" class="btn p" id="nBtn">+</button></div>
+        <p class="muted">Хранятся в localStorage. В чате: «запомни: …»</p>
+        <div class="row">
+          <input class="field" id="nIn" placeholder="Новая заметка">
+          <button type="button" class="btn p" data-act="noteAdd">+</button>
+        </div>
         <div id="nList"></div>
       </div>
     </section>
+
     <section class="panel" id="p-voice">
       <div class="card">
         <h2>Голос</h2>
-        <button type="button" class="btn p" id="vBtn" style="margin-top:8px">Говорить</button>
+        <p class="muted">Web Speech API (Chrome / Edge / Safari). Результат уходит в чат.</p>
+        <button type="button" class="btn p" data-act="voice" style="margin-top:12px">🎙 Говорить</button>
       </div>
     </section>
+
     <section class="panel" id="p-files">
       <div class="card">
         <h2>Файлы</h2>
-        <input type="file" id="fIn" accept=".txt,.md,text/plain" multiple style="margin-top:8px">
-        <div id="fOut" class="muted" style="margin-top:8px"></div>
+        <p class="muted">Только .txt / .md — текст сохраняется в заметки.</p>
+        <input type="file" id="fIn" accept=".txt,.md,text/plain" multiple style="margin-top:12px;display:block">
+        <div id="fOut" class="muted" style="margin-top:10px"></div>
       </div>
     </section>
+
     <section class="panel" id="p-id">
       <div class="card">
         <h2>Локальный ID</h2>
-        <div class="mono" id="didFull">—</div>
-        <div class="row" style="margin-top:8px"><input class="field" id="didName" placeholder="Имя"><button type="button" class="btn p" id="didGen">Создать</button></div>
-        <div id="didUser" class="muted" style="margin-top:6px"></div>
+        <p class="muted">SHA-256 фрагмент. Только на этом устройстве.</p>
+        <div class="mono" id="didFull" style="margin-top:10px">—</div>
+        <div class="row" style="margin-top:10px">
+          <input class="field" id="didName" placeholder="Имя (опционально)">
+          <button type="button" class="btn p" data-act="didGen">Создать</button>
+        </div>
+        <div id="didUser" class="muted" style="margin-top:8px"></div>
       </div>
     </section>
+
     <section class="panel" id="p-about">
       <div class="card">
         <h2>О продукте</h2>
-        <p class="muted">АКСИ — локальный помощник в одном HTML-файле. Данные на устройстве. Контакт: aksilove@internet.ru</p>
+        <p class="muted" style="margin-top:8px">
+          <b>АКСИ</b> — суверенный локальный помощник в одном HTML-файле.<br><br>
+          Работает offline. Чат, квант-демо, метрики, заметки, голос, локальный ID.<br>
+          Погода и Википедия — через публичные API при наличии сети.<br><br>
+          Контакт: <b>aksilove@internet.ru</b><br>
+          Версия: <b>v23</b> · GitHub Pages
+        </p>
       </div>
     </section>
+
   </div>
 </div>
+
 <div class="composer" id="composer">
-  <button type="button" id="mic" title="Микрофон">🎙</button>
-  <input id="inp" type="text" placeholder="Напишите…" enterkeyhint="send" autocomplete="off">
-  <button type="button" id="send">➤</button>
+  <button type="button" id="mic" title="Микрофон" data-act="voice">🎙</button>
+  <input id="inp" type="text" placeholder="Напишите сообщение…" enterkeyhint="send" autocomplete="off">
+  <button type="button" id="send" data-act="send">➤</button>
 </div>
+
 <script>
 (function(){
 "use strict";
-var ST=document.getElementById("st"), THREAD=document.getElementById("thread"), PROG=document.getElementById("prog");
-var INP=document.getElementById("inp"), SEND=document.getElementById("send"), COMP=document.getElementById("composer");
-var CHAT_KEY="aksi_chat_v1", mem=[];
-var titles={home:["Главная","Все модули работают здесь"],chat:["Чат","Offline"],quantum:["Квант","2 кубита"],net:["Сеть","Погода"],metrics:["Метрики","QCLI · EQS"],search:["Поиск","Википедия"],notes:["Заметки","Память"],voice:["Голос","Микрофон"],files:["Файлы",".txt"],id:["ID","Локальный"],about:["О продукте",""]};
 
-function esc(s){return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">");}
-function setSt(t,ok){if(!ST)return;ST.textContent=t;ST.classList.toggle("ok",!!ok);}
-function tickClock(){var el=document.getElementById("clock");if(!el)return;try{var now=new Date();el.textContent=now.toLocaleString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК · v22";}catch(e){el.textContent="v22";}}
-setInterval(tickClock,1000);tickClock();
-function showProg(t){if(!PROG)return;if(!t){PROG.classList.remove("on");PROG.textContent="";return;}PROG.textContent=t;PROG.classList.add("on");}
+var ST = document.getElementById("st");
+var THREAD = document.getElementById("thread");
+var PROG = document.getElementById("prog");
+var INP = document.getElementById("inp");
+var COMP = document.getElementById("composer");
+var CHAT_KEY = "aksi_chat_v23";
+var mem = [];
+var titles = {
+  home: ["Главная", "Все модули работают здесь"],
+  chat: ["Чат", "Offline + сеть"],
+  quantum: ["Квант", "2 кубита · учебный"],
+  net: ["Сеть", "Погода wttr.in"],
+  metrics: ["Метрики", "Shannon · QCLI"],
+  search: ["Поиск", "Википедия"],
+  notes: ["Заметки", "localStorage"],
+  voice: ["Голос", "Web Speech"],
+  files: ["Файлы", ".txt / .md"],
+  id: ["ID", "Локальный"],
+  about: ["О продукте", "v23"]
+};
+
+function esc(s){
+  return String(s)
+    .replace(/&/g,"&")
+    .replace(/</g,"<")
+    .replace(/>/g,">")
+    .replace(/"/g,""");
+}
+
+function setSt(t, ok){
+  if(!ST) return;
+  ST.textContent = t;
+  ST.classList.toggle("ok", !!ok);
+}
+
+function showProg(t){
+  if(!PROG) return;
+  if(!t){ PROG.classList.remove("on"); PROG.textContent = ""; return; }
+  PROG.textContent = t;
+  PROG.classList.add("on");
+}
+
+function tickClock(){
+  var el = document.getElementById("clock");
+  if(!el) return;
+  try{
+    var now = new Date();
+    el.textContent = now.toLocaleString("ru-RU", {
+      timeZone: "Europe/Moscow",
+      hour: "2-digit", minute: "2-digit", second: "2-digit"
+    }) + " МСК · v23";
+  }catch(e){ el.textContent = "v23"; }
+}
 
 function openPanel(name){
-  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
-  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-p")===name);});
-  var p=document.getElementById("p-"+name);if(p)p.classList.add("on");
-  var m=titles[name]||[name,""];
-  var th=document.getElementById("title"),sb=document.getElementById("sub");
-  if(th)th.textContent=m[0];if(sb)sb.textContent=m[1];
-  if(COMP)COMP.classList.toggle("on",name==="chat"||name==="voice");
-  try{history.replaceState(null,"","#"+name);}catch(e){}
+  if(!name || !titles[name]) name = "home";
+  document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("on"); });
+  document.querySelectorAll(".tab").forEach(function(t){
+    t.classList.toggle("on", t.getAttribute("data-p") === name);
+  });
+  var p = document.getElementById("p-" + name);
+  if(p) p.classList.add("on");
+  var m = titles[name];
+  var th = document.getElementById("title");
+  var sb = document.getElementById("sub");
+  if(th) th.textContent = m[0];
+  if(sb) sb.textContent = m[1];
+  if(COMP) COMP.classList.toggle("on", name === "chat" || name === "voice");
+  try{ history.replaceState(null, "", "#" + name); }catch(e){}
   closeSide();
+  if(name === "notes") renderNotes();
 }
-function closeSide(){var s=document.getElementById("side"),o=document.getElementById("overlay");if(s)s.classList.remove("open");if(o)o.classList.remove("on");}
-function openSide(){var s=document.getElementById("side"),o=document.getElementById("overlay");if(s)s.classList.add("open");if(o)o.classList.add("on");}
 
-function loadMem(){try{mem=JSON.parse(localStorage.getItem("aksi_facts")||"[]");}catch(e){mem=[];}}
-function saveFact(t){t=(t||"").trim();if(!t)return;mem.unshift({text:t.slice(0,2000),ts:Date.now()});mem=mem.slice(0,200);try{localStorage.setItem("aksi_facts",JSON.stringify(mem));}catch(e){}}
+function closeSide(){
+  var s = document.getElementById("side");
+  var o = document.getElementById("overlay");
+  if(s) s.classList.remove("open");
+  if(o) o.classList.remove("on");
+}
+
+function openSide(){
+  var s = document.getElementById("side");
+  var o = document.getElementById("overlay");
+  if(s) s.classList.add("open");
+  if(o) o.classList.add("on");
+}
+
+function loadMem(){
+  try{ mem = JSON.parse(localStorage.getItem("aksi_facts") || "[]"); }
+  catch(e){ mem = []; }
+}
+
+function saveFact(t){
+  t = (t || "").trim();
+  if(!t) return;
+  mem.unshift({ text: t.slice(0, 2000), ts: Date.now() });
+  mem = mem.slice(0, 200);
+  try{ localStorage.setItem("aksi_facts", JSON.stringify(mem)); }catch(e){}
+}
+
 function renderNotes(){
-  var list=document.getElementById("nList");if(!list)return;
-  if(!mem.length){list.innerHTML='<p class="muted" style="margin-top:8px">Пусто. В чате: запомни: …</p>';return;}
-  list.innerHTML=mem.slice(0,40).map(function(f,i){return '<div class="fact"><div style="flex:1">'+esc(f.text)+'</div><button type="button" data-del="'+i+'">×</button></div>';}).join("");
-  list.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){mem.splice(+b.getAttribute("data-del"),1);try{localStorage.setItem("aksi_facts",JSON.stringify(mem));}catch(e){}renderNotes();};});
+  var list = document.getElementById("nList");
+  if(!list) return;
+  if(!mem.length){
+    list.innerHTML = '<p class="muted" style="margin-top:10px">Пусто. В чате напишите: запомни: …</p>';
+    return;
+  }
+  list.innerHTML = mem.slice(0, 40).map(function(f, i){
+    return '<div class="fact"><div style="flex:1">' + esc(f.text) +
+      '</div><button type="button" data-del="' + i + '" title="Удалить">×</button></div>';
+  }).join("");
 }
 
-function addMsg(role,text,meta,thoughts){
-  if(!THREAD)return;
-  var d=document.createElement("div");d.className="msg "+(role==="u"?"u":"a");
-  var h='<div class="b">'+esc(text)+"</div>";
-  if(thoughts&&thoughts.length)h+='<div class="thought">Ход: '+esc(thoughts.join(" → "))+"</div>";
-  if(meta)h+='<div class="meta">'+esc(meta)+"</div>";
-  d.innerHTML=h;THREAD.appendChild(d);THREAD.scrollTop=THREAD.scrollHeight;persist();
+function addMsg(role, text, meta, thoughts){
+  if(!THREAD) return;
+  var d = document.createElement("div");
+  d.className = "msg " + (role === "u" ? "u" : "a");
+  var h = '<div class="b">' + esc(text) + "</div>";
+  if(thoughts && thoughts.length)
+    h += '<div class="thought">Ход: ' + esc(thoughts.join(" → ")) + "</div>";
+  if(meta) h += '<div class="meta">' + esc(meta) + "</div>";
+  d.innerHTML = h;
+  THREAD.appendChild(d);
+  THREAD.scrollTop = THREAD.scrollHeight;
+  persist();
 }
+
 function persist(){
-  try{var n=THREAD.querySelectorAll(".msg"),a=[];for(var i=0;i<n.length;i++){var b=n[i].querySelector(".b");if(b)a.push({role:n[i].classList.contains("u")?"u":"a",text:b.textContent});}localStorage.setItem(CHAT_KEY,JSON.stringify(a.slice(-40)));}catch(e){}
+  try{
+    var nodes = THREAD.querySelectorAll(".msg");
+    var a = [];
+    for(var i = 0; i < nodes.length; i++){
+      var b = nodes[i].querySelector(".b");
+      if(b) a.push({
+        role: nodes[i].classList.contains("u") ? "u" : "a",
+        text: b.textContent
+      });
+    }
+    localStorage.setItem(CHAT_KEY, JSON.stringify(a.slice(-50)));
+  }catch(e){}
 }
+
 function restore(){
-  try{var a=JSON.parse(localStorage.getItem(CHAT_KEY)||"[]");if(!a.length)return false;a.forEach(function(m){addMsg(m.role,m.text);});return true;}catch(e){return false;}
+  try{
+    var a = JSON.parse(localStorage.getItem(CHAT_KEY) || "[]");
+    if(!a.length) return false;
+    a.forEach(function(m){ addMsg(m.role, m.text); });
+    return true;
+  }catch(e){ return false; }
 }
 
 function shannonH(text){
-  var freq={},i,total=text.length||1,H=0;
-  for(i=0;i<text.length;i++)freq[text[i]]=(freq[text[i]]||0)+1;
-  for(var ch in freq){var p=freq[ch]/total;if(p>0)H-=p*Math.log(p)/Math.LN2;}
-  return Math.round(H*10000)/10000;
+  var freq = {}, i, total = text.length || 1, H = 0;
+  for(i = 0; i < text.length; i++) freq[text[i]] = (freq[text[i]] || 0) + 1;
+  for(var ch in freq){
+    var p = freq[ch] / total;
+    if(p > 0) H -= p * Math.log(p) / Math.LN2;
+  }
+  return Math.round(H * 10000) / 10000;
 }
+
 function qcli(text){
-  var H=shannonH(text),u={};
-  for(var i=0;i<text.length;i++)u[text[i]]=1;
-  var maxH=Math.log(Math.max(1,Object.keys(u).length))/Math.LN2;
-  return maxH>0?Math.min(1,Math.round((H/maxH)*10000)/10000):0;
+  var H = shannonH(text), u = {};
+  for(var i = 0; i < text.length; i++) u[text[i]] = 1;
+  var maxH = Math.log(Math.max(1, Object.keys(u).length)) / Math.LN2;
+  return maxH > 0 ? Math.min(1, Math.round((H / maxH) * 10000) / 10000) : 0;
 }
-function fp(text){var h=0xdeadbeef;for(var i=0;i<text.length;i++)h=(Math.imul(31,h)+text.charCodeAt(i))|0;return(h>>>0).toString(16).toUpperCase().padStart(8,"0");}
+
+function fp(text){
+  var h = 0xdeadbeef;
+  for(var i = 0; i < text.length; i++) h = (Math.imul(31, h) + text.charCodeAt(i)) | 0;
+  return (h >>> 0).toString(16).toUpperCase().padStart(8, "0");
+}
+
 function shaLocal(str){
-  if(window.crypto&&crypto.subtle){
-    return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){
-      return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("").slice(0,16);
+  if(window.crypto && crypto.subtle){
+    return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(function(buf){
+      return Array.from(new Uint8Array(buf)).map(function(b){
+        return b.toString(16).padStart(2, "0");
+      }).join("").slice(0, 16);
     });
   }
-  var h=0x811c9dc5;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}
-  return Promise.resolve(("00000000"+(h>>>0).toString(16)).slice(-8));
+  var h = 0x811c9dc5;
+  for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return Promise.resolve(("00000000" + (h >>> 0).toString(16)).slice(-8));
 }
 
 function statevector(gates){
-  var s=[1,0,0,0];
-  function applyH(q){var n=[0,0,0,0],inv=1/Math.SQRT2;
-    if(q===0){n[0]=inv*(s[0]+s[2]);n[1]=inv*(s[1]+s[3]);n[2]=inv*(s[0]-s[2]);n[3]=inv*(s[1]-s[3]);}
-    else{n[0]=inv*(s[0]+s[1]);n[1]=inv*(s[0]-s[1]);n[2]=inv*(s[2]+s[3]);n[3]=inv*(s[2]-s[3]);}s=n;}
-  function cnot(){var n=s.slice();n[2]=s[3];n[3]=s[2];s=n;}
-  gates.forEach(function(g){if(g==="H0")applyH(0);else if(g==="CNOT")cnot();});
-  return s.map(function(a){return a*a;});
-}
-function showQuantum(mode){
-  var gates=mode==="bell"?["H0","CNOT"]:["H0"];
-  var p=statevector(gates),labels=["|00⟩","|01⟩","|10⟩","|11⟩"];
-  var box=document.getElementById("qProbs"),txt=document.getElementById("qText");
-  if(box)box.innerHTML=labels.map(function(l,i){return "<div><b>"+(p[i]*100).toFixed(0)+"%</b>"+l+"</div>";}).join("");
-  if(txt)txt.innerHTML=mode==="bell"?"<b>Bell</b> — H + CNOT. |00⟩ и |11⟩ ≈ 50%.":"<b>Суперпозиция</b> — гейт H.";
-  return mode==="bell"?"Запутанность (Bell):\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\nУчебная симуляция в браузере.":"Суперпозиция: после измерения 0 или 1 ≈ поровну.";
-}
-function safeMath(expr){
-  var e=String(expr||"").replace(/,/g,".").replace(/\s/g,"");
-  if(!/^[\d+\-*/().^]+$/.test(e))return null;
-  e=e.replace(/\^/g,"**");
-  try{var v=Function('"use strict";return ('+e+')')();return typeof v==="number"&&isFinite(v)?v:null;}catch(err){return null;}
-}
-function searchWiki(q){
-  return fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(q))
-    .then(function(r){if(!r.ok)throw 0;return r.json();})
-    .then(function(j){return j&&j.extract?((j.title||"")+".\n\n"+String(j.extract).slice(0,900)):null;})
-    .catch(function(){return null;});
-}
-function getWeather(city){
-  return fetch("https://wttr.in/"+encodeURIComponent(city||"Moscow")+"?format=j1")
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var c=data.current_condition&&data.current_condition[0];
-      return{city:city||"Moscow",temp:parseInt(c&&c.temp_C||"0",10),cond:(c&&c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value)||"—",hum:parseInt(c&&c.humidity||"0",10),wind:parseInt(c&&c.windspeedKmph||"0",10),feel:parseInt(c&&c.FeelsLikeC||"0",10)};
-    }).catch(function(){return null;});
+  var s = [1, 0, 0, 0];
+  function applyH(q){
+    var n = [0, 0, 0, 0], inv = 1 / Math.SQRT2;
+    if(q === 0){
+      n[0] = inv * (s[0] + s[2]); n[1] = inv * (s[1] + s[3]);
+      n[2] = inv * (s[0] - s[2]); n[3] = inv * (s[1] - s[3]);
+    } else {
+      n[0] = inv * (s[0] + s[1]); n[1] = inv * (s[0] - s[1]);
+      n[2] = inv * (s[2] + s[3]); n[3] = inv * (s[2] - s[3]);
+    }
+    s = n;
+  }
+  function cnot(){
+    var n = s.slice();
+    n[2] = s[3]; n[3] = s[2];
+    s = n;
+  }
+  gates.forEach(function(g){
+    if(g === "H0") applyH(0);
+    else if(g === "CNOT") cnot();
+  });
+  return s.map(function(a){ return a * a; });
 }
 
-var KB=[
-  {q:["кто ты","что ты","представься"],a:"Я АКСИ — локальный помощник в браузере.\n\nЧат, заметки, поиск, квант-демо, погода, метрики. Данные остаются на устройстве."},
-  {q:["что умеешь","возможности","функции"],a:"• Чат offline\n• Погода («погода Москва»)\n• Квант Bell\n• Метрики текста\n• Поиск Википедия\n• Заметки, голос, файлы, ID"},
-  {q:["привет","здравствуй","добрый"],a:"Здравствуйте. Напишите вопрос или откройте модуль слева."},
-  {q:["помощь","help"],a:"Слева — вкладки. В чате: «запомни: …», «2+2», «запутанность», «погода Москва»."},
-  {q:["запутанность","белл","bell","кубит","квант"],a:"__QB__"},
-  {q:["суперпозиция"],a:"__QS__"}
+function showQuantum(mode){
+  var gates = mode === "bell" ? ["H0", "CNOT"] : ["H0"];
+  var p = statevector(gates);
+  var labels = ["|00⟩", "|01⟩", "|10⟩", "|11⟩"];
+  var box = document.getElementById("qProbs");
+  var txt = document.getElementById("qText");
+  if(box){
+    box.innerHTML = labels.map(function(l, i){
+      return "<div><b>" + (p[i] * 100).toFixed(0) + "%</b>" + l + "</div>";
+    }).join("");
+  }
+  if(txt){
+    txt.innerHTML = mode === "bell"
+      ? "<b>Bell</b> — H + CNOT. |00⟩ и |11⟩ ≈ 50%. Учебная запутанность."
+      : "<b>Суперпозиция</b> — гейт H на первом кубите.";
+  }
+  var av = document.getElementById("avatar");
+  if(av) av.textContent = mode === "bell" ? "⚛" : "✨";
+  return mode === "bell"
+    ? "Запутанность (Bell):\n• |00⟩ ≈ 50%\n• |11⟩ ≈ 50%\nУчебная симуляция 2 кубитов в браузере."
+    : "Суперпозиция: после измерения 0 или 1 примерно поровну.";
+}
+
+function safeMath(expr){
+  var e = String(expr || "").replace(/,/g, ".").replace(/\s/g, "");
+  if(!/^[\d+\-*/().^]+$/.test(e)) return null;
+  e = e.replace(/\^/g, "**");
+  try{
+    var v = Function('"use strict";return (' + e + ')')();
+    return typeof v === "number" && isFinite(v) ? v : null;
+  }catch(err){ return null; }
+}
+
+function searchWiki(q){
+  return fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(q))
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(j){
+      return j && j.extract ? ((j.title || "") + ".\n\n" + String(j.extract).slice(0, 900)) : null;
+    })
+    .catch(function(){ return null; });
+}
+
+function getWeather(city){
+  return fetch("https://wttr.in/" + encodeURIComponent(city || "Moscow") + "?format=j1")
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var c = data.current_condition && data.current_condition[0];
+      return {
+        city: city || "Moscow",
+        temp: parseInt(c && c.temp_C || "0", 10),
+        cond: (c && c.weatherDesc && c.weatherDesc[0] && c.weatherDesc[0].value) || "—",
+        hum: parseInt(c && c.humidity || "0", 10),
+        wind: parseInt(c && c.windspeedKmph || "0", 10),
+        feel: parseInt(c && c.FeelsLikeC || "0", 10)
+      };
+    })
+    .catch(function(){ return null; });
+}
+
+var KB = [
+  { q: ["кто ты", "что ты", "представься"], a: "Я АКСИ — локальный помощник в браузере.\n\nЧат, заметки, поиск, квант-демо, погода, метрики, голос, локальный ID.\nДанные остаются на устройстве." },
+  { q: ["что умеешь", "возможности", "функции"], a: "• Чат offline\n• Погода («погода Москва»)\n• Квант Bell / суперпозиция\n• Метрики текста (Shannon, QCLI)\n• Поиск Википедия\n• Заметки, голос, файлы, локальный ID" },
+  { q: ["привет", "здравствуй", "добрый"], a: "Здравствуйте. Напишите вопрос или откройте модуль слева." },
+  { q: ["помощь", "help"], a: "Слева — вкладки. В чате: «запомни: …», «2+2», «запутанность», «погода Москва»." },
+  { q: ["запутанность", "белл", "bell", "кубит", "квант"], a: "__QB__" },
+  { q: ["суперпозиция"], a: "__QS__" }
 ];
+
 function matchKB(text){
-  var t=(text||"").toLowerCase().replace(/ё/g,"е"),best=null,sc=0;
-  for(var i=0;i<KB.length;i++)for(var j=0;j<KB[i].q.length;j++){var k=KB[i].q[j];if(t===k)return KB[i];if(t.indexOf(k)!==-1&&k.length>sc){sc=k.length;best=KB[i];}}
+  var t = (text || "").toLowerCase().replace(/ё/g, "е");
+  var best = null, sc = 0;
+  for(var i = 0; i < KB.length; i++){
+    for(var j = 0; j < KB[i].q.length; j++){
+      var k = KB[i].q[j];
+      if(t === k) return KB[i];
+      if(t.indexOf(k) !== -1 && k.length > sc){ sc = k.length; best = KB[i]; }
+    }
+  }
   return best;
 }
 
 function answer(q){
-  var steps=["разбор"];
-  var m=q.match(/^запомни[:\s]+(.+)/i);
-  if(m){saveFact(m[1]);renderNotes();return Promise.resolve({text:"Запомнила: «"+m[1].slice(0,200)+"».",steps:steps.concat(["память"]),meta:"память"});}
-  var wm=q.match(/погода\s+(.+)/i)||(/^погода$/i.test(q.trim())?["","Moscow"]:null);
+  var steps = ["разбор"];
+  var m = q.match(/^запомни[:\s]+(.+)/i);
+  if(m){
+    saveFact(m[1]);
+    renderNotes();
+    return Promise.resolve({ text: "Запомнила: «" + m[1].slice(0, 200) + "».", steps: steps.concat(["память"]), meta: "память" });
+  }
+  var wm = q.match(/погода\s+(.+)/i) || (/^погода$/i.test(q.trim()) ? ["", "Moscow"] : null);
   if(wm){
-    steps.push("погода");showProg("Погода…");
-    return getWeather((wm[1]||"Moscow").trim()).then(function(w){
-      if(!w)return{text:"Погода недоступна.",steps:steps,meta:"net"};
-      return{text:"Погода в "+w.city+":\n"+w.temp+"°C, "+w.cond+"\nВлажность "+w.hum+"% · ветер "+w.wind+" км/ч · ощущается "+w.feel+"°C",steps:steps,meta:"wttr.in"};
+    steps.push("погода");
+    showProg("Погода…");
+    return getWeather((wm[1] || "Moscow").trim()).then(function(w){
+      if(!w) return { text: "Погода недоступна (нет сети или ошибка API).", steps: steps, meta: "net" };
+      return {
+        text: "Погода в " + w.city + ":\n" + w.temp + "°C, " + w.cond +
+          "\nВлажность " + w.hum + "% · ветер " + w.wind + " км/ч · ощущается " + w.feel + "°C",
+        steps: steps, meta: "wttr.in"
+      };
     });
   }
-  var mq=q.replace(/^(сколько будет|посчитай|вычисли)\s+/i,"").trim();
-  if(/^[\d+\-*/().^\s,]+$/.test(mq)&&/\d/.test(mq)){
-    var v=safeMath(mq);
-    if(v!==null)return Promise.resolve({text:"Результат: "+v,steps:steps.concat(["счёт"]),meta:"math"});
+  var mq = q.replace(/^(сколько будет|посчитай|вычисли)\s+/i, "").trim();
+  if(/^[\d+\-*/().^\s,]+$/.test(mq) && /\d/.test(mq)){
+    var v = safeMath(mq);
+    if(v !== null) return Promise.resolve({ text: "Результат: " + v, steps: steps.concat(["счёт"]), meta: "math" });
   }
-  var kb=matchKB(q);
+  var kb = matchKB(q);
   if(kb){
-    if(kb.a==="__QB__")return Promise.resolve({text:showQuantum("bell"),steps:steps.concat(["квант"]),meta:"квант"});
-    if(kb.a==="__QS__")return Promise.resolve({text:showQuantum("super"),steps:steps.concat(["квант"]),meta:"квант"});
-    return Promise.resolve({text:kb.a,steps:steps.concat(["база"]),meta:"KB"});
+    if(kb.a === "__QB__") return Promise.resolve({ text: showQuantum("bell"), steps: steps.concat(["квант"]), meta: "квант" });
+    if(kb.a === "__QS__") return Promise.resolve({ text: showQuantum("super"), steps: steps.concat(["квант"]), meta: "квант" });
+    return Promise.resolve({ text: kb.a, steps: steps.concat(["база"]), meta: "KB" });
   }
-  var ql=q.toLowerCase();
-  for(var i=0;i<mem.length;i++)if(mem[i].text&&mem[i].text.toLowerCase().indexOf(ql.slice(0,20))!==-1)
-    return Promise.resolve({text:"Из заметок:\n"+mem[i].text.slice(0,500),steps:steps.concat(["память"]),meta:"память"});
+  var ql = q.toLowerCase();
+  for(var i = 0; i < mem.length; i++){
+    if(mem[i].text && mem[i].text.toLowerCase().indexOf(ql.slice(0, 24)) !== -1)
+      return Promise.resolve({ text: "Из заметок:\n" + mem[i].text.slice(0, 500), steps: steps.concat(["память"]), meta: "память" });
+  }
   if(navigator.onLine){
     showProg("Ищу…");
-    var query=q.replace(/^(что такое|кто такой|расскажи про)\s+/i,"").trim();
+    var query = q.replace(/^(что такое|кто такой|расскажи про)\s+/i, "").trim();
     return searchWiki(query).then(function(w){
-      if(w)return{text:w,steps:steps.concat(["вики"]),meta:"Wikipedia"};
-      return{text:"Точного ответа нет. Попробуйте «кто ты» или «запомни: …».",steps:steps,meta:"fallback"};
+      if(w) return { text: w, steps: steps.concat(["вики"]), meta: "Wikipedia" };
+      return { text: "Точного ответа нет. Попробуйте «кто ты», «что умеешь» или «запомни: …».", steps: steps, meta: "fallback" };
     });
   }
-  return Promise.resolve({text:"Офлайн. Попробуйте «кто ты» или «что умеешь».",steps:steps.concat(["офлайн"]),meta:"offline"});
+  return Promise.resolve({ text: "Офлайн. Попробуйте «кто ты» или «что умеешь».", steps: steps.concat(["офлайн"]), meta: "offline" });
 }
 
 function sendText(raw){
-  var q=String(raw||"").trim();if(!q)return;
-  addMsg("u",q);if(INP)INP.value="";showProg("Думаю…");openPanel("chat");
+  var q = String(raw || "").trim();
+  if(!q) return;
+  addMsg("u", q);
+  if(INP) INP.value = "";
+  showProg("Думаю…");
+  openPanel("chat");
+  var av = document.getElementById("avatar");
+  if(av) av.textContent = "💭";
   answer(q).then(function(ans){
-    return shaLocal(ans.text+"|"+Date.now()).then(function(h){
+    return shaLocal(ans.text + "|" + Date.now()).then(function(h){
       showProg("");
-      addMsg("a",ans.text,(ans.meta||"")+" · "+h+" · QCLI "+qcli(ans.text),ans.steps);
+      if(av) av.textContent = "🟣";
+      addMsg("a", ans.text, (ans.meta || "") + " · " + h + " · QCLI " + qcli(ans.text), ans.steps);
     });
-  }).catch(function(){showProg("");addMsg("a","Ошибка. Попробуйте ещё раз.","error");});
+  }).catch(function(){
+    showProg("");
+    if(av) av.textContent = "🟣";
+    addMsg("a", "Ошибка. Попробуйте ещё раз.", "error");
+  });
+}
+
+function startVoice(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    addMsg("a", "Голос не поддерживается в этом браузере.", "голос");
+    openPanel("chat");
+    return;
+  }
+  var r = new SR();
+  r.lang = "ru-RU";
+  r.onresult = function(e){ sendText(e.results[0][0].transcript); };
+  r.onerror = function(){ setSt("готова", true); };
+  r.onend = function(){ setSt("готова", true); };
+  r.start();
+  setSt("слушаю…", false);
+}
+
+function doWeather(){
+  var city = (document.getElementById("wCity") || {}).value || "Moscow";
+  var out = document.getElementById("wOut");
+  if(out) out.textContent = "Загрузка…";
+  getWeather(city).then(function(w){
+    if(!out) return;
+    if(!w){ out.textContent = "Недоступно (сеть или API)"; return; }
+    out.textContent = w.city + ": " + w.temp + "°C, " + w.cond +
+      ", влажность " + w.hum + "%, ветер " + w.wind + " км/ч, ощущается " + w.feel + "°C";
+  });
+}
+
+function doMetrics(){
+  var t = (document.getElementById("mText") || {}).value || "";
+  var out = document.getElementById("mOut");
+  if(!t.trim()){ if(out) out.textContent = "Введите текст"; return; }
+  var H = shannonH(t), Q = qcli(t), F = fp(t);
+  if(out){
+    out.innerHTML =
+      '<span class="metric"><b>' + H + '</b>Shannon H</span>' +
+      '<span class="metric"><b>' + Q + '</b>QCLI</span>' +
+      '<span class="metric"><b>' + F + '</b>fingerprint</span>';
+  }
+}
+
+function doSearch(){
+  var sIn = document.getElementById("sIn");
+  var q = (sIn && sIn.value || "").trim();
+  if(!q) return;
+  var out = document.getElementById("sOut");
+  if(out) out.textContent = "Ищу…";
+  searchWiki(q).then(function(w){
+    if(out) out.textContent = w || "Ничего не найдено.";
+  });
+}
+
+function doDidGen(){
+  var name = (document.getElementById("didName") || {}).value || "aksi";
+  shaLocal(name + "|" + Date.now() + "|" + Math.random()).then(function(h){
+    var id = "local:" + h + h.slice(0, 8);
+    try{
+      localStorage.setItem("aksi_local_id", id);
+      localStorage.setItem("aksi_local_name", name);
+    }catch(e){}
+    var full = document.getElementById("didFull");
+    var user = document.getElementById("didUser");
+    if(full) full.textContent = id;
+    if(user) user.textContent = "Имя: " + name;
+  });
+}
+
+function handleAction(act){
+  if(act === "send"){ sendText(INP && INP.value); return; }
+  if(act === "clearChat"){
+    if(THREAD) THREAD.innerHTML = "";
+    try{ localStorage.removeItem(CHAT_KEY); }catch(e){}
+    addMsg("a", "История очищена.", "система");
+    return;
+  }
+  if(act === "qBell"){ showQuantum("bell"); return; }
+  if(act === "qSuper"){ showQuantum("super"); return; }
+  if(act === "weather"){ doWeather(); return; }
+  if(act === "metrics"){ doMetrics(); return; }
+  if(act === "search"){ doSearch(); return; }
+  if(act === "noteAdd"){
+    var nIn = document.getElementById("nIn");
+    if(nIn){ saveFact(nIn.value); nIn.value = ""; renderNotes(); }
+    return;
+  }
+  if(act === "voice"){ startVoice(); return; }
+  if(act === "didGen"){ doDidGen(); return; }
 }
 
 function bind(){
-  document.addEventListener("click",function(e){
-    var t=e.target.closest(".tab");if(t){e.preventDefault();openPanel(t.getAttribute("data-p"));return;}
-    var g=e.target.closest("[data-go]");if(g){e.preventDefault();openPanel(g.getAttribute("data-go"));return;}
-    var q=e.target.closest("[data-q]");if(q){e.preventDefault();sendText(q.getAttribute("data-q"));return;}
+  document.addEventListener("click", function(e){
+    var t = e.target.closest(".tab");
+    if(t){ e.preventDefault(); openPanel(t.getAttribute("data-p")); return; }
+
+    var g = e.target.closest("[data-go]");
+    if(g){ e.preventDefault(); openPanel(g.getAttribute("data-go")); return; }
+
+    var q = e.target.closest("[data-q]");
+    if(q){ e.preventDefault(); sendText(q.getAttribute("data-q")); return; }
+
+    var act = e.target.closest("[data-act]");
+    if(act){ e.preventDefault(); handleAction(act.getAttribute("data-act")); return; }
+
+    var del = e.target.closest("[data-del]");
+    if(del){
+      e.preventDefault();
+      var i = +del.getAttribute("data-del");
+      mem.splice(i, 1);
+      try{ localStorage.setItem("aksi_facts", JSON.stringify(mem)); }catch(err){}
+      renderNotes();
+      return;
+    }
+
+    if(e.target.id === "burger" || e.target.closest("#burger")){ openSide(); return; }
+    if(e.target.id === "overlay"){ closeSide(); return; }
   });
-  var burger=document.getElementById("burger"),overlay=document.getElementById("overlay");
-  if(burger)burger.onclick=openSide;if(overlay)overlay.onclick=closeSide;
-  if(SEND)SEND.onclick=function(){sendText(INP&&INP.value);};
-  if(INP)INP.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();sendText(INP.value);}});
-  var cc=document.getElementById("clearChat");
-  if(cc)cc.onclick=function(){if(THREAD)THREAD.innerHTML="";try{localStorage.removeItem(CHAT_KEY);}catch(e){}addMsg("a","История очищена.","система");};
-  var qBell=document.getElementById("qBell"),qSuper=document.getElementById("qSuper");
-  if(qBell)qBell.onclick=function(){showQuantum("bell");};if(qSuper)qSuper.onclick=function(){showQuantum("super");};
-  var wBtn=document.getElementById("wBtn");
-  if(wBtn)wBtn.onclick=function(){
-    var city=(document.getElementById("wCity")||{}).value||"Moscow";
-    var out=document.getElementById("wOut");if(out)out.textContent="Загрузка…";
-    getWeather(city).then(function(w){
-      if(!out)return;if(!w){out.textContent="Недоступно";return;}
-      out.textContent=w.city+": "+w.temp+"°C, "+w.cond+", влажность "+w.hum+"%, ветер "+w.wind+" км/ч";
+
+  if(INP){
+    INP.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){ e.preventDefault(); sendText(INP.value); }
     });
-  };
-  var mCalc=document.getElementById("mCalc");
-  if(mCalc)mCalc.onclick=function(){
-    var t=(document.getElementById("mText")||{}).value||"";
-    var out=document.getElementById("mOut");
-    if(!t.trim()){if(out)out.textContent="Введите текст";return;}
-    var H=shannonH(t),Q=qcli(t),F=fp(t);
-    if(out)out.innerHTML='<span class="metric"><b>'+H+'</b>Shannon H</span><span class="metric"><b>'+Q+'</b>QCLI</span><span class="metric"><b>'+F+'</b>fingerprint</span>';
-  };
-  var sBtn=document.getElementById("sBtn"),sIn=document.getElementById("sIn");
-  if(sBtn&&sIn)sBtn.onclick=function(){var q=sIn.value.trim();if(!q)return;document.getElementById("sOut").textContent="Ищу…";searchWiki(q).then(function(w){document.getElementById("sOut").textContent=w||"Ничего не найдено.";});};
-  var nBtn=document.getElementById("nBtn"),nIn=document.getElementById("nIn");
-  if(nBtn&&nIn)nBtn.onclick=function(){saveFact(nIn.value);nIn.value="";renderNotes();};
-  var fIn=document.getElementById("fIn");
-  if(fIn)fIn.onchange=function(){
-    var files=fIn.files,out=document.getElementById("fOut"),n=0;if(!files)return;
-    Array.prototype.forEach.call(files,function(file){
-      var r=new FileReader();r.onload=function(){saveFact("["+file.name+"] "+String(r.result||"").slice(0,600));n++;if(out)out.textContent="Загружено: "+n;renderNotes();};r.readAsText(file);
-    });
-  };
-  function startVoice(){
-    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){addMsg("a","Голос не поддерживается.","голос");openPanel("chat");return;}
-    var r=new SR();r.lang="ru-RU";r.onresult=function(e){sendText(e.results[0][0].transcript);};r.start();setSt("слушаю…");
   }
-  var vBtn=document.getElementById("vBtn"),mic=document.getElementById("mic");
-  if(vBtn)vBtn.onclick=startVoice;if(mic)mic.onclick=startVoice;
-  var didGen=document.getElementById("didGen");
-  if(didGen)didGen.onclick=function(){
-    var name=(document.getElementById("didName")||{}).value||"aksi";
-    shaLocal(name+"|"+Date.now()+"|"+Math.random()).then(function(h){
-      var id="local:"+h+h.slice(0,8);
-      try{localStorage.setItem("aksi_local_id",id);localStorage.setItem("aksi_local_name",name);}catch(e){}
-      document.getElementById("didFull").textContent=id;
-      document.getElementById("didUser").textContent="Имя: "+name;
+
+  var fIn = document.getElementById("fIn");
+  if(fIn){
+    fIn.addEventListener("change", function(){
+      var files = fIn.files, out = document.getElementById("fOut"), n = 0;
+      if(!files) return;
+      Array.prototype.forEach.call(files, function(file){
+        var r = new FileReader();
+        r.onload = function(){
+          saveFact("[" + file.name + "] " + String(r.result || "").slice(0, 600));
+          n++;
+          if(out) out.textContent = "Загружено: " + n;
+          renderNotes();
+        };
+        r.readAsText(file);
+      });
     });
-  };
-  try{var id=localStorage.getItem("aksi_local_id");if(id){document.getElementById("didFull").textContent=id;document.getElementById("didUser").textContent=localStorage.getItem("aksi_local_name")||"";}}catch(e){}
+  }
+
+  try{
+    var id = localStorage.getItem("aksi_local_id");
+    if(id){
+      var full = document.getElementById("didFull");
+      var user = document.getElementById("didUser");
+      if(full) full.textContent = id;
+      if(user) user.textContent = localStorage.getItem("aksi_local_name") || "";
+    }
+  }catch(e){}
 }
 
-loadMem();renderNotes();bind();setSt("готова",true);
-var hash=(location.hash||"").replace("#","");
-if(titles[hash])openPanel(hash);else openPanel("home");
-if(!restore()&&THREAD)addMsg("a","Здравствуйте. Я АКСИ.\n\nСлева — модули. Внизу — чат.\nПопробуйте «кто ты» или «погода Москва».","система");
+loadMem();
+renderNotes();
+bind();
+setInterval(tickClock, 1000);
+tickClock();
+setSt("готова", true);
+
+var hash = (location.hash || "").replace("#", "");
+if(titles[hash]) openPanel(hash);
+else openPanel("home");
+
+if(!restore() && THREAD){
+  addMsg("a",
+    "Здравствуйте. Я АКСИ.\n\nСлева — модули. Внизу — чат.\nПопробуйте «кто ты» или «погода Москва».",
+    "система"
+  );
+}
 })();
 </script>
 </body>
