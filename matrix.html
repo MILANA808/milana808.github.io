@@ -3,229 +3,150 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#0c0c0e">
+<meta name="theme-color" content="#07070a">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>АКСИ</title>
 <style>
-:root{
-  --bg:#0c0c0e;--s1:#141416;--s2:#1c1c1f;--line:#2a2a2e;--t:#ededf0;--m:#8b8b93;--a:#8b5cf6;--a2:#6d28d9;--ok:#22c55e;
-  --r:14px;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-}
+:root{--bg:#07070a;--panel:#0e0e12;--card:#14141a;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.12);--t:#f4f4f7;--m:#9898a6;--dim:#5c5c6a;--v:#a78bfa;--v2:#7c3aed;--v3:#c4b5fd;--ok:#34d399;--warn:#fbbf24;--glow:0 0 40px rgba(124,58,237,.25);--font:ui-sans-serif,system-ui,-apple-system,sans-serif;--mono:ui-monospace,Menlo,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:var(--bg);color:var(--t);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
-body{display:flex;flex-direction:column;max-width:720px;margin:0 auto}
-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(12,12,14,.92);backdrop-filter:blur(16px);position:sticky;top:0;z-index:20}
-.mark{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,var(--a2),var(--a));display:grid;place-items:center;font:700 12px/1 var(--font)}
-header .titles h1{font-size:15px;font-weight:600}
-header .titles p{font-size:11px;color:var(--m)}
-#st{margin-left:auto;font-size:11px;color:var(--m);display:flex;align-items:center;gap:6px}
-#st::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--m)}
-#st.on::before{background:var(--ok)}
-#st.load::before{background:#eab308;animation:pulse 1s infinite}
-@keyframes pulse{50%{opacity:.4}}
-.tabs{display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--line);overflow-x:auto}
-.tabs button{flex:0 0 auto;padding:8px 12px;border:0;border-radius:999px;background:0;color:var(--m);font:12px/1 var(--font);font-weight:500}
-.tabs button.on{background:var(--s2);color:var(--t)}
-main{flex:1;overflow:auto;padding:16px 16px 110px}
-.view{display:none}.view.on{display:block}
-.msg{display:flex;margin:0 0 14px}.msg.u{justify-content:flex-end}
-.bbl{max-width:min(92%,520px);padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px}
-.msg.u .bbl{background:var(--a2);color:#fff;border-bottom-right-radius:4px}
-.msg.a .bbl{background:var(--s1);border:1px solid var(--line);border-bottom-left-radius:4px}
-.bbl .tag{display:block;margin-top:8px;font:10px/1.3 ui-monospace,monospace;color:var(--m)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:12px}
-.card{background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.card h2{font-size:13px;font-weight:600;margin:0 0 8px}
-.muted{color:var(--m);font-size:13px;line-height:1.55}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s2);color:var(--t);font:13px/1 var(--font);font-weight:500}
-.btn.p{background:var(--a2);border-color:transparent;color:#fff}
-.btn:disabled{opacity:.5}
-input[type=text],textarea,select{width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--line);background:var(--bg);color:var(--t);font:inherit;outline:0}
-textarea{min-height:100px;resize:vertical}
-.bar{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 28%);z-index:30}
-.bar input{flex:1;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit}
-.bar button{width:48px;height:48px;border-radius:14px;border:0;background:var(--a2);color:#fff;font-size:18px;flex-shrink:0}
-.prog{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:10px}
-.prog>i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
-.fact{padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;font-size:13px;background:var(--bg)}
-.fact button{float:right;border:0;background:0;color:var(--m);font-size:15px}
+body{display:flex;flex-direction:column;max-width:760px;margin:0 auto;position:relative;overflow:hidden}
+body::before{content:"";position:fixed;inset:-20% -10% auto;height:50%;background:radial-gradient(ellipse at 50% 0%,rgba(124,58,237,.18),transparent 60%);pointer-events:none;z-index:0}
+.hd{position:relative;z-index:10;display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:rgba(7,7,10,.75);backdrop-filter:blur(20px) saturate(1.4)}
+.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#6d28d9,#a78bfa);box-shadow:var(--glow);display:grid;place-items:center;font:700 13px/1 var(--font)}
+.hd h1{font-size:15px;font-weight:650;letter-spacing:-.02em}.hd .sub{font-size:11px;color:var(--m);margin-top:1px}
+.pill{margin-left:auto;display:flex;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:11px;color:var(--m);font-weight:500}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.pill.live i{background:var(--ok);box-shadow:0 0 0 3px rgba(52,211,153,.2)}
+.pill.busy i{background:var(--warn);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.35}}
+.nav{position:relative;z-index:10;display:flex;gap:4px;padding:10px 14px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+.nav button{flex:0 0 auto;padding:9px 14px;border:0;border-radius:999px;background:0;color:var(--m);font:12.5px/1 var(--font);font-weight:550}
+.nav button.on{background:var(--card);color:var(--t);border:1px solid var(--line2)}
+main{position:relative;z-index:1;flex:1;overflow:auto;padding:18px 16px 120px}
+.panel{display:none;animation:in .28s ease}.panel.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.thread{display:flex;flex-direction:column;gap:14px}
+.msg{display:flex;gap:10px;align-items:flex-end}.msg.me{justify-content:flex-end}
+.ava{width:28px;height:28px;border-radius:9px;background:linear-gradient(145deg,#6d28d9,#a78bfa);flex-shrink:0;display:grid;place-items:center;font:700 10px/1 var(--font)}
+.msg.me .ava{display:none}
+.bub{max-width:min(88%,480px);padding:13px 15px;border-radius:18px;font-size:14.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.msg.ai .bub{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.msg.me .bub{background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border-bottom-right-radius:6px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.meta span{font:10px/1.2 var(--mono);color:var(--dim);padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.typing{display:inline-flex;gap:4px;padding:4px 0}.typing b{width:6px;height:6px;border-radius:50%;background:var(--v);animation:dot 1.2s infinite}.typing b:nth-child(2){animation-delay:.15s}.typing b:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.suggest{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.suggest button{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--t);font-size:12.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.card h2{font-size:14px;font-weight:650;margin:0 0 6px}.muted{color:var(--m);font-size:13px;line-height:1.55}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{padding:11px 15px;border-radius:12px;border:1px solid var(--line2);background:var(--panel);color:var(--t);font:13px/1 var(--font);font-weight:550}
+.btn.p{background:linear-gradient(135deg,#6d28d9,#7c3aed);border:0;color:#fff;box-shadow:0 8px 24px rgba(109,40,217,.35)}
+input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--t);font:inherit;outline:0}
+textarea{min-height:110px;resize:vertical}
+.prog{height:5px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:12px}.prog>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--v2),var(--v3));transition:width .25s}
+.fact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--panel)}
+.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px}
+.hero{text-align:center;padding:28px 12px 8px}.hero h2{font-size:22px;font-weight:700;letter-spacing:-.03em;background:linear-gradient(90deg,#fff,var(--v3));-webkit-background-clip:text;background-clip:text;color:transparent}.hero p{color:var(--m);margin-top:8px;font-size:13.5px}
+.composer{position:fixed;left:0;right:0;bottom:0;max-width:760px;margin:0 auto;padding:12px 14px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 32%);z-index:40}
+.composer .box{flex:1;display:flex;align-items:center;padding:4px 4px 4px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line2);box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.composer input{flex:1;border:0;background:0;padding:12px 0;font:inherit;color:var(--t);outline:0}
+.composer button#send{width:44px;height:44px;border-radius:12px;border:0;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;font-size:18px}
+.stat{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}.stat div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.stat b{display:block;font-size:18px;font-weight:700}.stat span{font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.06em}
 </style>
 </head>
 <body>
-<header>
-  <div class="mark">A</div>
-  <div class="titles"><h1>АКСИ</h1><p>local · WebLLM</p></div>
-  <div id="st">офлайн-ядро</div>
-</header>
-<nav class="tabs">
-  <button type="button" class="on" data-v="chat">Чат</button>
-  <button type="button" data-v="brain">Нейросеть</button>
-  <button type="button" data-v="teach">Учить</button>
-  <button type="button" data-v="mem">Память</button>
-  <button type="button" data-v="about">О ядре</button>
+<header class="hd"><div class="logo">A</div><div><h1>АКСИ</h1><div class="sub">sovereign · local · signed</div></div><div class="pill" id="st"><i></i><span>ядро</span></div></header>
+<nav class="nav">
+<button type="button" class="on" data-tab="chat">Чат</button>
+<button type="button" data-tab="brain">Нейросеть</button>
+<button type="button" data-tab="teach">Учить</button>
+<button type="button" data-tab="mem">Память</button>
+<button type="button" data-tab="proof">Proof</button>
 </nav>
 <main>
-  <section class="view on" id="v-chat">
-    <div id="thread"></div>
-    <div class="chips">
-      <button type="button" class="chip" data-q="привет">привет</button>
-      <button type="button" class="chip" data-q="кто ты">кто ты</button>
-      <button type="button" class="chip" data-q="что умеешь">умеешь</button>
-      <button type="button" class="chip" data-q="что ты знаешь">память</button>
-    </div>
-  </section>
-  <section class="view" id="v-brain">
-    <div class="card">
-      <h2>Нейросеть в браузере</h2>
-      <p class="muted">Open source <b>WebLLM (MLC)</b>. Модель на устройстве через WebGPU. Пока не загружена — отвечает встроенное ядро.</p>
-      <select id="model" style="margin-top:12px">
-        <option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M (лёгкая)</option>
-        <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B</option>
-        <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
-        <option value="Phi-3.5-mini-instruct-q4f16_1-MLC">Phi-3.5 mini</option>
-      </select>
-      <div class="row">
-        <button type="button" class="btn p" id="btnLoad">Загрузить модель</button>
-        <button type="button" class="btn" id="btnUnload">Выгрузить</button>
-      </div>
-      <div class="prog" id="prog"><i id="progBar"></i></div>
-      <p class="muted" id="brainMsg" style="margin-top:10px">Модель не загружена</p>
-    </div>
-    <div class="card">
-      <h2>Ollama (на ПК)</h2>
-      <input type="text" id="ollamaUrl" value="http://127.0.0.1:11434" style="margin-top:8px">
-      <div class="row"><button type="button" class="btn" id="btnOllama">Проверить</button></div>
-      <p class="muted" id="ollamaMsg" style="margin-top:8px">—</p>
-    </div>
-  </section>
-  <section class="view" id="v-teach">
-    <div class="card">
-      <h2>Учить</h2>
-      <p class="muted">В чате тоже: <b>запомни: …</b></p>
-      <textarea id="teachBox" placeholder="Факт на строку" style="margin-top:10px"></textarea>
-      <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div>
-    </div>
-  </section>
-  <section class="view" id="v-mem">
-    <div class="card">
-      <h2>Память · <span id="memN">0</span></h2>
-      <div id="memList"></div>
-      <div class="row">
-        <button type="button" class="btn" id="btnExp">Экспорт</button>
-        <button type="button" class="btn" id="btnImp">Импорт</button>
-        <button type="button" class="btn" id="btnWipe">Стереть</button>
-      </div>
-      <input type="file" id="impFile" accept=".json" hidden>
-    </div>
-  </section>
-  <section class="view" id="v-about">
-    <div class="card">
-      <h2>Стек open source</h2>
-      <p class="muted">• WebLLM / MLC — inference в браузере<br>• Ollama — опционально<br>• Ядро АКСИ — память + знания всегда<br>• GitHub Pages, без своего бэкенда</p>
-      <p class="muted" style="margin-top:12px">aksilove@internet.ru</p>
-    </div>
-  </section>
-</main>
-<div class="bar">
-  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off">
-  <button type="button" id="send">↑</button>
+<section class="panel on" id="tab-chat">
+<div class="thread" id="thread"></div>
+<div class="suggest">
+<button type="button" data-ask="привет">привет</button>
+<button type="button" data-ask="кто ты">кто ты</button>
+<button type="button" data-ask="что умеешь">возможности</button>
+<button type="button" data-ask="подпиши мысль">proof</button>
+<button type="button" data-ask="что ты знаешь">память</button>
 </div>
+</section>
+<section class="panel" id="tab-brain">
+<div class="hero"><h2>Нейросеть на устройстве</h2><p>WebLLM · MLC · open source</p></div>
+<div class="card"><h2>Загрузить модель</h2>
+<p class="muted">Chrome / Edge + WebGPU</p>
+<select id="model" style="margin-top:12px">
+<option value="SmolLM2-360M-Instruct-q4f16_1-MLC">SmolLM2 360M</option>
+<option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B</option>
+<option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
+<option value="Phi-3.5-mini-instruct-q4f16_1-MLC">Phi-3.5 mini</option>
+</select>
+<div class="row"><button type="button" class="btn p" id="btnLoad">Загрузить</button><button type="button" class="btn" id="btnUnload">Выгрузить</button></div>
+<div class="prog"><i id="bar"></i></div>
+<p class="muted" id="brainMsg" style="margin-top:10px">Не загружена</p></div>
+<div class="card"><h2>Ollama</h2>
+<input id="ollamaUrl" value="http://127.0.0.1:11434" style="margin-top:10px">
+<div class="row"><button type="button" class="btn" id="btnOllama">Проверить</button></div>
+<p class="muted" id="ollamaMsg" style="margin-top:8px">—</p></div>
+</section>
+<section class="panel" id="tab-teach">
+<div class="card"><h2>Обучить</h2>
+<p class="muted">В чате: <b>запомни: …</b></p>
+<textarea id="teachBox" placeholder="Факт на строку" style="margin-top:12px"></textarea>
+<div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div>
+</section>
+<section class="panel" id="tab-mem">
+<div class="card"><h2>Память · <span id="memN">0</span></h2>
+<div id="memList"></div>
+<div class="row"><button type="button" class="btn" id="btnExp">Экспорт</button><button type="button" class="btn" id="btnImp">Импорт</button><button type="button" class="btn" id="btnWipe">Стереть</button></div>
+<input type="file" id="impFile" accept=".json" hidden></div>
+</section>
+<section class="panel" id="tab-proof">
+<div class="hero"><h2>Signed Thought</h2><p>SHA-256 цепочка целостности</p></div>
+<div class="card">
+<div class="stat"><div><b id="sMsg">0</b><span>ответов</span></div><div><b id="sMem">0</b><span>фактов</span></div><div><b id="sMode">core</b><span>режим</span></div></div>
+<p class="muted" style="margin-top:14px">Последняя подпись</p>
+<p class="muted" id="lastSig" style="font-family:var(--mono);font-size:11px;word-break:break-all;margin-top:6px;color:var(--v3)">—</p>
+</div>
+</section>
+</main>
+<div class="composer"><div class="box"><input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off"><button type="button" id="send">↑</button></div></div>
 <script type="module">
-const KEY="aksi9_mem", VER="9.0";
-let engine=null, ollamaOk=false, busy=false;
-const $ = id => document.getElementById(id);
-const st = t => { const s=$("st"); if(!s)return; s.textContent=t; s.className = (t.includes("нейро")||t.includes("Ollama"))?"on": t.includes("груз")?"load":""; };
-function esc(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function loadMem(){ try{ const a=JSON.parse(localStorage.getItem(KEY)||"[]"); return Array.isArray(a)?a:[]; }catch{ return []; } }
-function saveMem(a){ try{ localStorage.setItem(KEY, JSON.stringify(a)); }catch{} renderMem(); }
-function addFact(t, src="u"){ t=String(t||"").trim(); if(!t) return; const a=loadMem(); a.unshift({ id: Date.now().toString(36)+Math.random().toString(36).slice(2,5), t, src, ts:Date.now() }); saveMem(a.slice(0,500)); }
-function renderMem(){ const a=loadMem(), n=$("memN"), list=$("memList"); if(n) n.textContent=String(a.length); if(!list) return; if(!a.length){ list.innerHTML="<p class='muted'>Пусто</p>"; return; } list.innerHTML=a.map(x=>`<div class="fact"><button type="button" data-del="${x.id}">×</button>${esc(x.t)}</div>`).join(""); }
-function bubble(role, text, tag){ const th=$("thread"); if(!th) return; const d=document.createElement("div"); d.className="msg "+(role==="u"?"u":"a"); d.innerHTML=`<div class="bbl">${esc(text)}${tag?`<span class="tag">${esc(tag)}</span>`:""}</div>`; th.appendChild(d); const main=document.querySelector("main"); if(main) main.scrollTop=main.scrollHeight; }
-const KB=[
-  {k:["кто ты","что ты","представься","акси"],a:`Я АКСИ ${VER} — личное ядро.\n\nСейчас: знания + твоя память.\nОпционально: WebLLM или Ollama.\n\naksilove@internet.ru`},
-  {k:["привет","здравств","добрый","hello","hi"],a:`Привет. АКСИ на связи.\n\nНейросеть: вкладка «Нейросеть» → Загрузить.`},
-  {k:["умеешь","помоги","команд","что можешь"],a:`• чат (ядро всегда)\n• запомни: факт\n• WebLLM\n• Ollama\n• память JSON`},
-  {k:["нейро","webllm","модель","загруз"],a:`Вкладка «Нейросеть»: модель + Загрузить. Нужен Chrome/Edge с WebGPU.`},
-  {k:["контакт","email","почта"],a:`aksilove@internet.ru`},
-  {k:["ollama"],a:`ollama pull qwen2.5:0.5b && ollama serve → Проверить Ollama`},
-];
-function tok(s){ return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(w=>w.length>1); }
-function score(q, keys, text){ const low=q.toLowerCase(); let sc=0; const qt=tok(q), tt=tok(text||""); if(keys) for(const k of keys) if(low.includes(k)) sc+=3; for(const a of qt) for(const b of tt) if(a===b) sc++; return sc; }
-function coreAnswer(q){
-  const low=q.toLowerCase().trim();
-  if(/^(запомни|выучи)\s*[:\s]/.test(low)){ const raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim(); if(!raw) return "Формат: запомни: факт"; addFact(raw,"chat"); return `Запомнила ✓\n«${raw}»\nФактов: ${loadMem().length}`; }
-  if(/забудь всё|очисти память/.test(low)){ saveMem([]); return "Память очищена."; }
-  if(/что ты знаешь|что помнишь|моя память/.test(low)){ const a=loadMem(); if(!a.length) return "Пусто. запомни: …"; return "Помню:\n\n"+a.slice(0,15).map((x,i)=>`${i+1}. ${x.t}`).join("\n"); }
-  let best={sc:0,a:null};
-  for(const row of KB){ const s=score(q,row.k,row.a); if(s>best.sc) best={sc:s,a:row.a}; }
-  for(const m of loadMem()){ const s=score(q,null,m.t)+2; if(s>best.sc) best={sc:s,a:"Из памяти:\n"+m.t}; }
-  if(best.sc>=2 && best.a) return best.a;
-  return `Мало данных по «${q.slice(0,60)}».\nНаучи: запомни: …\nИли загрузи нейросеть.\nФактов: ${loadMem().length}`;
-}
-function memContext(){ const a=loadMem().slice(0,12).map(x=>"- "+x.t).join("\n"); return a ? "Факты:\n"+a : ""; }
-async function tryOllama(q){
-  if(!ollamaOk) return null;
-  const base=($("ollamaUrl").value||"").replace(/\/$/,"");
-  try{
-    const r=await fetch(base+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({model:"qwen2.5:0.5b",stream:false,messages:[{role:"system",content:"Ты АКСИ, кратко по-русски. "+memContext()},{role:"user",content:q}]})});
-    if(!r.ok) return null; const j=await r.json(); return j.message?.content || null;
-  }catch{ return null; }
-}
-async function tryWebLLM(q){
-  if(!engine) return null;
-  try{
-    const out=await engine.chat.completions.create({messages:[{role:"system",content:"Ты АКСИ. По-русски, кратко. "+memContext()},{role:"user",content:q}],temperature:0.7,max_tokens:400});
-    return out.choices?.[0]?.message?.content || null;
-  }catch{ return null; }
-}
-async function reply(q){
-  let text=null, tag="ядро";
-  if(engine){ st("нейросеть…"); text=await tryWebLLM(q); if(text) tag="WebLLM"; }
-  if(!text){ text=await tryOllama(q); if(text) tag="Ollama"; }
-  if(!text){ text=coreAnswer(q); tag="ядро "+VER; }
-  return {text, tag};
-}
-async function chat(q){
-  q=String(q||"").trim(); if(!q||busy) return;
-  busy=true; $("send").disabled=true; bubble("u", q); $("inp").value=""; const t0=Date.now(); st("думаю…");
-  try{ const {text, tag}=await reply(q); bubble("a", text, `${Date.now()-t0} мс · ${tag}`); }
-  catch(e){ bubble("a", "Ошибка: "+(e.message||e), "err"); }
-  st(engine?"нейросеть": ollamaOk?"Ollama":"офлайн-ядро"); if(engine||ollamaOk) $("st").className="on";
-  busy=false; $("send").disabled=false; show("chat");
-}
-function show(name){ document.querySelectorAll(".view").forEach(v=>v.classList.remove("on")); document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.v===name)); const el=$("v-"+name); if(el) el.classList.add("on"); if(name==="mem") renderMem(); }
-document.addEventListener("click", e=>{
-  const el=e.target.closest("button,[data-v],[data-q],[data-del]"); if(!el) return;
-  if(el.dataset.v){ show(el.dataset.v); return; }
-  if(el.dataset.q){ chat(el.dataset.q); return; }
-  if(el.dataset.del){ saveMem(loadMem().filter(x=>x.id!==el.dataset.del)); return; }
-  if(el.id==="send"){ chat($("inp").value); return; }
-  if(el.id==="btnTeach"){ const v=$("teachBox").value; if(!v.trim()) return; v.split(/\n+/).forEach(l=>{ if(l.trim()) addFact(l.trim(),"teach"); }); $("teachBox").value=""; bubble("a","Сохранено. Фактов: "+loadMem().length); show("chat"); return; }
-  if(el.id==="btnExp"){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"})); a.download="aksi-memory.json"; a.click(); return; }
-  if(el.id==="btnImp"){ $("impFile").click(); return; }
-  if(el.id==="btnWipe"){ if(confirm("Стереть?")) saveMem([]); return; }
-  if(el.id==="btnLoad"){ loadModel(); return; }
-  if(el.id==="btnUnload"){ engine=null; st("офлайн-ядро"); $("brainMsg").textContent="Выгружено"; $("progBar").style.width="0"; return; }
-  if(el.id==="btnOllama"){ pingOllama(); return; }
-});
-$("inp").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); chat($("inp").value); }});
-$("impFile").addEventListener("change", async e=>{ const f=e.target.files?.[0]; if(!f) return; try{ const j=JSON.parse(await f.text()); const cur=loadMem(); (j.facts||[]).forEach(x=>{ if(x?.t) cur.unshift(x); }); saveMem(cur.slice(0,500)); }catch{} e.target.value=""; });
-async function pingOllama(){ const base=($("ollamaUrl").value||"").replace(/\/$/,""); $("ollamaMsg").textContent="…"; try{ const r=await fetch(base+"/api/tags"); if(r.ok){ ollamaOk=true; $("ollamaMsg").textContent="Ollama OK"; st("Ollama"); $("st").className="on"; } else { ollamaOk=false; $("ollamaMsg").textContent="нет"; } }catch{ ollamaOk=false; $("ollamaMsg").textContent="недоступна"; } }
-async function loadModel(){
-  const id=$("model").value; $("btnLoad").disabled=true; $("brainMsg").textContent="Загрузка…"; st("загрузка"); $("progBar").style.width="5%";
-  try{
-    const webllm=await import("https://esm.sh/@mlc-ai/web-llm@0.2.79");
-    engine=await webllm.CreateMLCEngine(id,{ initProgressCallback: p=>{ const pct=Math.round((p.progress||0)*100); $("progBar").style.width=pct+"%"; $("brainMsg").textContent=p.text||(pct+"%"); st("загрузка "+pct+"%"); } });
-    $("brainMsg").textContent="Готово: "+id; $("progBar").style.width="100%"; st("нейросеть"); $("st").className="on";
-    bubble("a","Нейросеть загружена.\nПиши в чат.","WebLLM"); show("chat");
-  }catch(e){ engine=null; $("brainMsg").textContent="Ошибка: "+(e.message||e)+". Нужен Chrome/Edge + WebGPU. Ядро отвечает."; st("офлайн-ядро"); }
-  $("btnLoad").disabled=false;
-}
-try{ if(!localStorage.getItem("aksi9_seed")){ ["АКСИ — личное ядро","aksilove@internet.ru"].forEach(t=>addFact(t,"seed")); localStorage.setItem("aksi9_seed","1"); } }catch{}
-renderMem(); st("офлайн-ядро");
-bubble("a",`АКСИ ${VER}\n\nЯдро отвечает сразу.\nНастоящая нейросеть: «Нейросеть» → Загрузить (WebLLM/MLC).\n\nНажми «привет».`,"старт");
+const KEY="aksi10_mem",LEDGER="aksi10_ledger",VER="10.0";
+let engine=null,ollamaOk=false,busy=false,msgCount=0,lastSig="—";
+const $=id=>document.getElementById(id);
+function setStatus(label,mode=""){const el=$("st");if(!el)return;el.className="pill"+(mode?(" "+mode):"");el.innerHTML=`<i></i><span>${label}</span>`;}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+async function sha256(text){const buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));return[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+function loadMem(){try{const a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a:[];}catch{return[];}}
+function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a));}catch{}renderMem();updateStats();}
+function addFact(t,src="u"){t=String(t||"").trim();if(!t)return;const a=loadMem();a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t,src,ts:Date.now()});saveMem(a.slice(0,500));}
+function renderMem(){const a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='muted'>Пусто</p>";return;}list.innerHTML=a.map(x=>`<div class="fact"><button type="button" data-del="${x.id}">×</button>${esc(x.t)}</div>`).join("");}
+function updateStats(){if($("sMsg"))$("sMsg").textContent=String(msgCount);if($("sMem"))$("sMem").textContent=String(loadMem().length);if($("sMode"))$("sMode").textContent=engine?"webllm":ollamaOk?"ollama":"core";if($("lastSig"))$("lastSig").textContent=lastSig;}
+function showTab(name){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===name));const el=$("tab-"+name);if(el)el.classList.add("on");if(name==="mem")renderMem();if(name==="proof")updateStats();}
+function addMsg(role,htmlInner){const th=$("thread");if(!th)return null;const d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML=role==="ai"?`<div class="ava">A</div><div class="bub">${htmlInner}</div>`:`<div class="bub">${htmlInner}</div>`;th.appendChild(d);const main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;return d;}
+function typeOut(el,full,tag,sig){return new Promise(resolve=>{const bub=el.querySelector(".bub");let i=0;const step=()=>{i=Math.min(full.length,i+Math.max(1,Math.floor(full.length/40)));bub.innerHTML=esc(full.slice(0,i))+(i<full.length?"":`<div class="meta"><span>${esc(tag)}</span>${sig?`<span>${esc(sig.slice(0,12))}…</span>`:""}</div>`);const main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;if(i<full.length)requestAnimationFrame(step);else resolve();};step();});}
+const KB=[{k:["кто ты","что ты","представься","акси"],a:`Я АКСИ ${VER} — суверенное личное ядро.\n\n• Локально\n• Учусь фактам\n• SHA-256 подпись\n• WebLLM / Ollama\n\naksilove@internet.ru`},{k:["привет","здравств","добрый","hello","hi"],a:`Привет. АКСИ онлайн.\n\nЯдро отвечает сразу. Нейросеть — вкладка «Нейросеть».`},{k:["умеешь","возможн","помоги","команд"],a:`1. Чат\n2. Учить (запомни: …)\n3. WebLLM\n4. Ollama\n5. Proof SHA\n6. Память JSON`},{k:["подпиши","proof","подпись"],a:`Ответы подписываются SHA-256. Вкладка Proof — счётчики и хеш.`},{k:["нейро","webllm","модель"],a:`Вкладка Нейросеть → модель → Загрузить. Chrome/Edge + WebGPU.`},{k:["контакт","email","почта"],a:`aksilove@internet.ru`}];
+function tok(s){return String(s).toLowerCase().replace(/[^a-zа-яё0-9\s]+/gi," ").split(/\s+/).filter(w=>w.length>1);}
+function score(q,keys,text){const low=q.toLowerCase();let sc=0;if(keys)for(const k of keys)if(low.includes(k))sc+=3;const qt=tok(q),tt=tok(text||"");for(const a of qt)for(const b of tt)if(a===b)sc++;return sc;}
+function coreAnswer(q){const low=q.toLowerCase().trim();if(/^(запомни|выучи)\s*[:\s]/.test(low)){const raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return"Формат: запомни: факт";addFact(raw,"chat");return`Запомнила ✓\n«${raw}»\nФактов: ${loadMem().length}`;}if(/забудь всё|очисти память/.test(low)){saveMem([]);return"Память очищена.";}if(/что ты знаешь|что помнишь|моя память/.test(low)){const a=loadMem();if(!a.length)return"Пусто. запомни: …";return"Помню:\n\n"+a.slice(0,14).map((x,i)=>`${i+1}. ${x.t}`).join("\n");}let best={sc:0,a:null};for(const row of KB){const s=score(q,row.k,row.a);if(s>best.sc)best={sc:s,a:row.a};}for(const m of loadMem()){const s=score(q,null,m.t)+2;if(s>best.sc)best={sc:s,a:"Из памяти:\n"+m.t};}if(best.sc>=2&&best.a)return best.a;return`Мало контекста.\nНаучи: запомни: …\nИли нейросеть.\nФактов: ${loadMem().length}`;}
+function memCtx(){const a=loadMem().slice(0,10).map(x=>"• "+x.t).join("\n");return a?("Факты:\n"+a):"";}
+async function tryWebLLM(q){if(!engine)return null;try{const out=await engine.chat.completions.create({messages:[{role:"system",content:`Ты АКСИ ${VER}. По-русски, кратко. ${memCtx()}`},{role:"user",content:q}],temperature:0.7,max_tokens:450});return out.choices?.[0]?.message?.content||null;}catch{return null;}}
+async function tryOllama(q){if(!ollamaOk)return null;const base=($("ollamaUrl").value||"").replace(/\/$/,"");try{const r=await fetch(base+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"qwen2.5:0.5b",stream:false,messages:[{role:"system",content:`Ты АКСИ. ${memCtx()}`},{role:"user",content:q}]})});if(!r.ok)return null;const j=await r.json();return j.message?.content||null;}catch{return null;}}
+async function chat(q){q=String(q||"").trim();if(!q||busy)return;busy=true;$("send").disabled=true;addMsg("me",esc(q));$("inp").value="";const typing=addMsg("ai",`<span class="typing"><b></b><b></b><b></b></span>`);setStatus("думаю","busy");const t0=Date.now();let text="",tag="ядро";try{if(engine){text=await tryWebLLM(q);if(text)tag="WebLLM";}if(!text){text=await tryOllama(q);if(text)tag="Ollama";}if(!text){text=coreAnswer(q);tag="ядро "+VER;}}catch(e){text="Сбой: "+(e.message||e);tag="err";}const ms=Date.now()-t0;const sig=await sha256(text+"|"+ms+"|"+VER);lastSig=sig;msgCount++;try{const led=JSON.parse(localStorage.getItem(LEDGER)||"[]");led.unshift({t:Date.now(),ms,tag,sig:sig.slice(0,16),n:text.length});localStorage.setItem(LEDGER,JSON.stringify(led.slice(0,50)));}catch{}updateStats();typing.remove();const node=addMsg("ai","");await typeOut(node,text,`${ms} мс · ${tag}`,sig);setStatus(engine?"нейросеть":ollamaOk?"Ollama":"ядро",engine||ollamaOk?"live":"");busy=false;$("send").disabled=false;showTab("chat");}
+document.addEventListener("click",e=>{const el=e.target.closest("button,[data-tab],[data-ask],[data-del]");if(!el)return;if(el.dataset.tab){showTab(el.dataset.tab);return;}if(el.dataset.ask){chat(el.dataset.ask);return;}if(el.dataset.del){saveMem(loadMem().filter(x=>x.id!==el.dataset.del));return;}if(el.id==="send"){chat($("inp").value);return;}if(el.id==="btnTeach"){const v=$("teachBox").value;if(!v.trim())return;v.split(/\n+/).forEach(l=>{if(l.trim())addFact(l.trim(),"teach");});$("teachBox").value="";chat("что ты знаешь");return;}if(el.id==="btnExp"){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({ver:VER,facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){$("impFile").click();return;}if(el.id==="btnWipe"){if(confirm("Стереть?"))saveMem([]);return;}if(el.id==="btnLoad")loadModel();if(el.id==="btnUnload"){engine=null;setStatus("ядро");$("brainMsg").textContent="Выгружено";$("bar").style.width="0";updateStats();}if(el.id==="btnOllama")pingOllama();});
+$("inp").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();chat($("inp").value);}});
+$("impFile").addEventListener("change",async e=>{const f=e.target.files?.[0];if(!f)return;try{const j=JSON.parse(await f.text());const cur=loadMem();(j.facts||[]).forEach(x=>{if(x?.t)cur.unshift(x);});saveMem(cur.slice(0,500));}catch{}e.target.value="";});
+async function pingOllama(){const base=($("ollamaUrl").value||"").replace(/\/$/,"");$("ollamaMsg").textContent="…";try{const r=await fetch(base+"/api/tags");if(r.ok){ollamaOk=true;$("ollamaMsg").textContent="Ollama онлайн";setStatus("Ollama","live");}else{ollamaOk=false;$("ollamaMsg").textContent="нет";}}catch{ollamaOk=false;$("ollamaMsg").textContent="недоступна";}updateStats();}
+async function loadModel(){const id=$("model").value;$("btnLoad").disabled=true;$("brainMsg").textContent="WebLLM…";setStatus("загрузка","busy");$("bar").style.width="4%";try{const webllm=await import("https://esm.sh/@mlc-ai/web-llm@0.2.79");engine=await webllm.CreateMLCEngine(id,{initProgressCallback:p=>{const pct=Math.round((p.progress||0)*100);$("bar").style.width=pct+"%";$("brainMsg").textContent=p.text||(pct+"%");setStatus("загрузка "+pct+"%","busy");}});$("bar").style.width="100%";$("brainMsg").textContent="Готово · "+id;setStatus("нейросеть","live");updateStats();addMsg("ai",esc("Нейросеть активна. Пиши в чат.")+`<div class="meta"><span>WebLLM</span></div>`);showTab("chat");}catch(err){engine=null;$("brainMsg").textContent="Ошибка: "+(err.message||err)+". Ядро работает.";setStatus("ядро");}$("btnLoad").disabled=false;}
+try{if(!localStorage.getItem("aksi10_seed")){["АКСИ — суверенное ядро","aksilove@internet.ru","Личный ИИ без чужого облака"].forEach(t=>addFact(t,"seed"));localStorage.setItem("aksi10_seed","1");}}catch{}
+renderMem();updateStats();setStatus("ядро");
+addMsg("ai",esc(`АКСИ ${VER}\n\nЛокальное ядро · SHA-подпись · WebLLM по желанию.\n\nНажми «привет».`)+`<div class="meta"><span>старт</span><span>${VER}</span></div>`);
 </script>
 </body>
 </html>
