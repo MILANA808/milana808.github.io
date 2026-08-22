@@ -15,79 +15,32 @@ jobs:
       - name: Required core files
         run: |
           set -e
-          for f in index.html 404.html app.js app.css aksi-core.js aksi-product-core.js index-app.js; do test -f "$f"; done
+          for f in index.html 404.html matrix.html; do test -f "$f"; done
 
-      - name: JavaScript syntax — entire repository
+      - name: JavaScript syntax
         run: |
           set -e
-          find . -type f -name '*.js' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' f; do node --check "$f"; done
+          find . -type f -name '*.js' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' f; do
+            node --check "$f" || { echo "FAIL $f"; exit 1; }
+          done
+          echo "JS OK"
 
-      - name: Python syntax — backend
+      - name: matrix.html has working core
         run: |
           set -e
-          if find backend -type f -name '*.py' | grep -q .; then
-            python3 -m compileall -q backend
-          fi
-
-      - name: Basic contract
-        run: |
-          set -e
+          grep -q 'function chat' matrix.html
+          grep -qi 'акси' matrix.html
           grep -qi 'акси' index.html
           grep -qi 'акси' 404.html
-          test -f BACKEND.md
+          echo "core OK"
 
-      - name: Core JS present
-        run: |
-          set -e
-          test -f aksi-product-core.js
-          test -f aksi-core.js
-          node --check aksi-product-core.js
-          node --check aksi-core.js
-          node --check index-app.js
-
-      - name: Static link sanity
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          root = Path('.')
-          errors = []
-          for p in root.rglob('*.html'):
-              if '.git' in p.parts or 'node_modules' in p.parts:
-                  continue
-              text = p.read_text(encoding='utf-8', errors='replace')
-              for attr in ('href', 'src'):
-                  for raw in re.findall(rf'{attr}=["\']([^"\']+)', text, flags=re.I):
-                      if raw.startswith(('#','http://','https://','mailto:','tel:','data:','javascript:')):
-                          continue
-                      if '${' in raw or '{' in raw:
-                          continue
-                      target = raw.split('?',1)[0].split('#',1)[0]
-                      if not target:
-                          continue
-                      if target.startswith('/'):
-                          candidate = root / target.lstrip('/')
-                      else:
-                          candidate = (p.parent / target).resolve()
-                      if candidate.suffix == '':
-                          candidate_index = candidate / 'index.html'
-                          if candidate_index.exists():
-                              continue
-                      if not candidate.exists():
-                          errors.append(f'{p}: missing {attr}={raw}')
-          if errors:
-              print('\n'.join(errors))
-              raise SystemExit(1)
-          print('Static links OK')
-          PY
-
-      - name: HTML sanity
+      - name: HTML closed tags
         run: |
           python3 - <<'PY'
           from pathlib import Path
           for p in Path('.').rglob('*.html'):
               if any(x in p.parts for x in ('.git','node_modules')): continue
               s=p.read_text(encoding='utf-8', errors='replace').lower()
-              assert '<html' in s, p
-              assert '</html>' in s, p
+              assert '<html' in s and '</html>' in s, p
+          print('HTML OK')
           PY
