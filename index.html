@@ -331,10 +331,10 @@ var ST=document.getElementById("st"),THREAD=document.getElementById("thread"),PR
 var INP=document.getElementById("inp"),COMP=document.getElementById("composer");
 var CHAT_KEY="aksi_chat_v25",mem=[],SEED="Alfiya_AKSI_DIMAX_v3_2026",AKSI_DID="did:aksi:local:core";
 var titles={home:["Главная","статус"],chat:["Чат","offline"],quantum:["Квант","2q"],net:["Погода","wttr"],metrics:["Метрики","EQS"],protocol:["Протокол","Agent-v1"],search:["Поиск","wiki"],notes:["Заметки","local"],voice:["Голос","STT"],files:["Файлы","txt"],id:["ID","DID"]};
-function esc(s){return String(s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/\"/g,""");}
+function esc(s){return String(s).replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/>/g,"&"+"gt;").replace(/\"/g,"&"+"quot;");}
 function setSt(t,ok){if(!ST)return;ST.textContent=t;ST.classList.toggle("ok",!!ok);}
 function showProg(t){if(!PROG)return;if(!t){PROG.classList.remove("on");PROG.textContent="";return;}PROG.textContent=t;PROG.classList.add("on");}
-function tick(){var el=document.getElementById("clock");if(!el)return;try{el.textContent=new Date().toLocaleString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit");}catch(e){}}
+function tick(){var el=document.getElementById("clock");if(!el)return;try{el.textContent=new Date().toLocaleString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"});}catch(e){}}
 function setAv(e){var a=document.getElementById("avatar");if(a)a.textContent=e||"🟣";}
 function openPanel(name){if(!titles[name])name="home";document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-p")===name);});var p=document.getElementById("p-"+name);if(p)p.classList.add("on");var m=titles[name],th=document.getElementById("title"),sb=document.getElementById("sub");if(th)th.textContent=m[0];if(sb)sb.textContent=m[1];if(COMP)COMP.classList.toggle("on",name==="chat"||name==="voice");try{history.replaceState(null,"","#"+name);}catch(e){}closeSide();if(name==="notes")renderNotes();if(name==="protocol")renderProto();if(name==="home")renderBoard();}
 function closeSide(){var s=document.getElementById("side"),o=document.getElementById("overlay");if(s)s.classList.remove("open");if(o)o.classList.remove("on");}
