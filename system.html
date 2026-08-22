@@ -4,738 +4,194 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#09090b">
-<meta name="description" content="АКСИ Ω — sovereign offline AI runtime with signed thought chain">
-<title>АКСИ Ω</title>
+<meta name="description" content="AKSI Omega — offline AI with signed thought ledger">
+<title>AKSI Omega</title>
 <style>
-:root{
-  --bg:#09090b;--panel:#0c0c0f;--card:#141418;--line:#27272a;
-  --ink:#fafafa;--muted:#71717a;--acc:#a78bfa;--ok:#34d399;--warn:#fbbf24;
-  --soft:rgba(167,139,250,.14);--side:220px;--r:14px;
-  --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;background:var(--bg);color:var(--ink)}
-body{display:flex;overflow:hidden}
-button,input,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:0;background:transparent}
-a{color:var(--acc)}
-
+:root{--bg:#09090b;--panel:#0c0c0f;--card:#141418;--line:#27272a;--ink:#fafafa;--muted:#71717a;--acc:#a78bfa;--ok:#34d399;--soft:rgba(167,139,250,.14);--side:220px;--r:14px;--font:ui-sans-serif,system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--ink)}body{display:flex;overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}button{cursor:pointer;border:0;background:transparent}a{color:var(--acc)}
 .side{width:var(--side);min-width:var(--side);background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 10px;gap:4px;z-index:30;transition:transform .2s}
-.brand{display:flex;align-items:center;gap:10px;padding:8px 10px 16px}
-.brand .mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:grid;place-items:center;font-weight:700;font-size:14px}
-.brand b{font-size:15px;letter-spacing:.02em}
-.brand span{display:block;font-size:11px;color:var(--muted)}
-.tab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);text-align:left;width:100%}
-.tab:hover{background:rgba(255,255,255,.04);color:var(--ink)}
-.tab.on{background:var(--soft);color:var(--acc)}
-.tab .i{width:18px;text-align:center;opacity:.9}
-.side .foot{margin-top:auto;padding:12px 10px;font-size:11px;color:var(--muted);line-height:1.4}
-.side .foot code{font-size:10px;color:var(--ok)}
-
+.brand{display:flex;align-items:center;gap:10px;padding:8px 10px 16px}.brand .mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:grid;place-items:center;font-weight:700}.brand b{font-size:15px}.brand span{display:block;font-size:11px;color:var(--muted)}
+.tab{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);text-align:left;width:100%}.tab:hover{background:rgba(255,255,255,.04);color:var(--ink)}.tab.on{background:var(--soft);color:var(--acc)}.tab .i{width:18px;text-align:center}
+.side .foot{margin-top:auto;padding:12px 10px;font-size:11px;color:var(--muted);line-height:1.4}.side .foot code{font-size:10px;color:var(--ok)}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
 .top{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(9,9,11,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
 .burger{display:none;width:40px;height:40px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:18px}
-.av{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--acc);font-size:16px}
-.top h1{font-size:16px;font-weight:600}
-.top p{font-size:12px;color:var(--muted)}
-.status{margin-left:auto;font-size:11px;padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
-.status.ok{color:var(--ok);border-color:rgba(52,211,153,.35)}
-
-.work{flex:1;overflow:auto;padding:16px 16px 120px}
-.panel{display:none;max-width:720px;margin:0 auto}
-.panel.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
-.card h2{font-size:14px;font-weight:600;margin-bottom:8px}
-.muted{color:var(--muted);font-size:13px;line-height:1.5}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btn{padding:10px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:13px}
-.btn:hover{border-color:var(--acc)}
-.btn.p{background:var(--soft);border-color:rgba(167,139,250,.4);color:var(--acc)}
-.field{flex:1;min-width:120px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);outline:0}
-.field:focus{border-color:var(--acc)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
-.stat{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
-.stat b{display:block;font-size:18px;color:var(--acc);margin-bottom:4px}
-.stat span{font-size:11px;color:var(--muted)}
-
-#thread{display:flex;flex-direction:column;gap:10px;min-height:160px}
-.msg{max-width:92%;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.msg.u{align-self:flex-end;background:#1e1b4b;border:1px solid #312e81}
-.msg.a{align-self:flex-start;background:var(--bg);border:1px solid var(--line)}
-.msg .meta{margin-top:8px;font-size:10px;color:var(--muted);font-family:ui-monospace,monospace;word-break:break-all}
-.msg .thought{margin-top:6px;font-size:11px;color:#c4b5fd;opacity:.9}
-
-.composer{position:fixed;left:var(--side);right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 28%);display:flex;gap:8px;align-items:center;z-index:20}
-.composer input{flex:1;padding:14px 16px;border-radius:14px;background:var(--card);border:1px solid var(--line);outline:0}
-.composer input:focus{border-color:var(--acc)}
-.composer button{width:48px;height:48px;border-radius:14px;background:var(--soft);border:1px solid rgba(167,139,250,.35);color:var(--acc);font-size:18px;flex-shrink:0}
-
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:25}
-.overlay.on{display:block}
-.note-item{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
-.note-item button{color:var(--muted);font-size:12px}
-#qProbs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}
-#qProbs div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;color:var(--acc)}
+.top h1{font-size:16px;font-weight:600}.top p{font-size:12px;color:var(--muted)}
+.status{margin-left:auto;font-size:11px;padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted)}.status.ok{color:var(--ok);border-color:rgba(52,211,153,.35)}
+.work{flex:1;overflow:auto;padding:16px 16px 120px}.panel{display:none;max-width:720px;margin:0 auto}.panel.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}.card h2{font-size:14px;font-weight:600;margin-bottom:8px}.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.btn{padding:10px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:13px}.btn:hover{border-color:var(--acc)}.btn.p{background:var(--soft);border-color:rgba(167,139,250,.4);color:var(--acc)}
+.field{flex:1;min-width:120px;padding:10px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);outline:0}.field:focus{border-color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}.stat{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{display:block;font-size:18px;color:var(--acc);margin-bottom:4px}.stat span{font-size:11px;color:var(--muted)}
+#thread{display:flex;flex-direction:column;gap:10px;min-height:160px}.msg{max-width:92%;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}.msg.u{align-self:flex-end;background:#1e1b4b;border:1px solid #312e81}.msg.a{align-self:flex-start;background:var(--bg);border:1px solid var(--line)}.msg .meta{margin-top:8px;font-size:10px;color:var(--muted);font-family:ui-monospace,monospace;word-break:break-all}.msg .thought{margin-top:6px;font-size:11px;color:#c4b5fd}
+.composer{position:fixed;left:var(--side);right:0;bottom:0;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 28%);display:flex;gap:8px;align-items:center;z-index:20}.composer input{flex:1;padding:14px 16px;border-radius:14px;background:var(--card);border:1px solid var(--line);outline:0}.composer input:focus{border-color:var(--acc)}.composer button{width:48px;height:48px;border-radius:14px;background:var(--soft);border:1px solid rgba(167,139,250,.35);color:var(--acc);font-size:18px;flex-shrink:0}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:25}.overlay.on{display:block}
+.note-item{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}.note-item button{color:var(--muted);font-size:12px}
+#qProbs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}#qProbs div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px}
 .ledger{font-family:ui-monospace,monospace;font-size:11px;line-height:1.5;max-height:280px;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px}
 .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--acc);font-size:11px;margin-right:4px}
-
-@media (max-width:820px){
-  .side{position:fixed;inset:0 auto 0 0;transform:translateX(-105%);box-shadow:0 0 40px rgba(0,0,0,.5)}
-  .side.open{transform:none}
-  .burger{display:grid;place-items:center}
-  .composer{left:0}
-  .work{padding-bottom:130px}
-}
+@media (max-width:820px){.side{position:fixed;inset:0 auto 0 0;transform:translateX(-105%);box-shadow:0 0 40px rgba(0,0,0,.5)}.side.open{transform:none}.burger{display:grid;place-items:center}.composer{left:0}.work{padding-bottom:130px}}
 </style>
 </head>
 <body>
 <div class="overlay" id="overlay" data-act="closeSide"></div>
 <aside class="side" id="side">
-  <div class="brand">
-    <div class="mark">Ω</div>
-    <div><b>АКСИ Ω</b><span>signed thought runtime</span></div>
-  </div>
-  <button type="button" class="tab on" data-p="home"><span class="i">◈</span>Главная</button>
-  <button type="button" class="tab" data-p="chat"><span class="i">✦</span>Чат</button>
-  <button type="button" class="tab" data-p="proof"><span class="i">☑</span>Proof</button>
-  <button type="button" class="tab" data-p="quantum"><span class="i">⚛</span>Квант</button>
-  <button type="button" class="tab" data-p="metrics"><span class="i">Σ</span>Метрики</button>
-  <button type="button" class="tab" data-p="net"><span class="i">☁</span>Погода</button>
-  <button type="button" class="tab" data-p="search"><span class="i">⌕</span>Поиск</button>
-  <button type="button" class="tab" data-p="notes"><span class="i">✎</span>Заметки</button>
-  <button type="button" class="tab" data-p="protocol"><span class="i">⇄</span>Протокол</button>
-  <button type="button" class="tab" data-p="id"><span class="i">◉</span>ID</button>
-  <div class="foot">offline-first · SHA-256<br><code id="footSig">—</code></div>
+<div class="brand"><div class="mark">O</div><div><b>AKSI Omega</b><span>signed thought runtime</span></div></div>
+<button type="button" class="tab on" data-p="home"><span class="i">*</span>Home</button>
+<button type="button" class="tab" data-p="chat"><span class="i">+</span>Chat</button>
+<button type="button" class="tab" data-p="proof"><span class="i">#</span>Proof</button>
+<button type="button" class="tab" data-p="quantum"><span class="i">Q</span>Quantum</button>
+<button type="button" class="tab" data-p="metrics"><span class="i">S</span>Metrics</button>
+<button type="button" class="tab" data-p="net"><span class="i">W</span>Weather</button>
+<button type="button" class="tab" data-p="search"><span class="i">?</span>Search</button>
+<button type="button" class="tab" data-p="notes"><span class="i">N</span>Notes</button>
+<button type="button" class="tab" data-p="protocol"><span class="i">P</span>Protocol</button>
+<button type="button" class="tab" data-p="id"><span class="i">I</span>ID</button>
+<div class="foot">offline-first · SHA-256<br><code id="footSig">—</code></div>
 </aside>
-
 <div class="main">
-  <div class="top">
-    <button type="button" class="burger" data-act="menu">☰</button>
-    <div class="av" id="av">◈</div>
-    <div>
-      <h1 id="title">Главная</h1>
-      <p id="sub">статус</p>
-    </div>
-    <div class="status" id="st">загрузка</div>
-  </div>
-
-  <div class="work">
-    <section class="panel on" id="p-home">
-      <div class="card">
-        <h2>АКСИ Ω Runtime</h2>
-        <p class="muted">Локальный ИИ-агент с криптографической цепочкой мыслей. Каждый ответ подписывается. Цепочку можно проверить без сервера.</p>
-        <div class="grid" style="margin-top:14px">
-          <div class="stat"><b id="hChain">0</b><span>записей в ledger</span></div>
-          <div class="stat"><b id="hEqs">—</b><span>последний EQS</span></div>
-          <div class="stat"><b id="hMsk">—</b><span>МСК</span></div>
-          <div class="stat"><b id="hMode">local</b><span>режим</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Быстрый старт</h2>
-        <div class="row" style="margin-top:8px">
-          <button type="button" class="btn p" data-q="кто ты">кто ты</button>
-          <button type="button" class="btn" data-q="погода Москва">погода</button>
-          <button type="button" class="btn" data-q="запутанность">Bell</button>
-          <button type="button" class="btn" data-q="что умеешь">возможности</button>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Почему это продаётся</h2>
-        <p class="muted">Decision Integrity: ответ модели → подпись → append-only ledger. Аудит ИИ-решений без облака. White-label runtime для Studio / Business / Enterprise.</p>
-        <p class="muted" style="margin-top:8px">Контакт: <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
-      </div>
-    </section>
-
-    <section class="panel" id="p-chat">
-      <div class="card">
-        <h2>Чат</h2>
-        <div id="thread"></div>
-        <div id="prog" class="muted" style="margin-top:8px"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="p-proof">
-      <div class="card">
-        <h2>Signed Thought Ledger</h2>
-        <p class="muted">Append-only цепочка ответов. SHA-256(prev + text + seed). Проверка целиком в браузере.</p>
-        <div class="row" style="margin-top:10px">
-          <button type="button" class="btn p" data-act="proofRefresh">обновить</button>
-          <button type="button" class="btn" data-act="proofExport">экспорт JSON</button>
-          <button type="button" class="btn" data-act="proofVerify">проверить цепь</button>
-          <button type="button" class="btn" data-act="proofClear">очистить</button>
-        </div>
-        <div id="proofOut" class="ledger" style="margin-top:12px">пусто</div>
-        <p id="proofStatus" class="muted" style="margin-top:10px">—</p>
-      </div>
-    </section>
-
-    <section class="panel" id="p-quantum">
-      <div class="card">
-        <h2>Квант (2 кубита)</h2>
-        <p class="muted" id="qText">учебная симуляция statevector</p>
-        <div class="row" style="margin-top:10px">
-          <button type="button" class="btn p" data-act="bell">Bell</button>
-          <button type="button" class="btn" data-act="super">Суперпозиция</button>
-        </div>
-        <div id="qProbs"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="p-metrics">
-      <div class="card">
-        <h2>EQS · Shannon · QCLI</h2>
-        <textarea class="field" id="mIn" style="width:100%;height:100px;resize:vertical;padding:12px" placeholder="текст для метрик"></textarea>
-        <button type="button" class="btn p" data-act="metrics" style="margin-top:8px">Считать</button>
-        <pre id="mOut" class="muted" style="margin-top:12px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px"></pre>
-      </div>
-    </section>
-
-    <section class="panel" id="p-net">
-      <div class="card">
-        <h2>Погода</h2>
-        <div class="row">
-          <input class="field" id="wCity" value="Moscow" placeholder="город">
-          <button type="button" class="btn p" data-act="weather">OK</button>
-        </div>
-        <pre id="wOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre>
-      </div>
-    </section>
-
-    <section class="panel" id="p-search">
-      <div class="card">
-        <h2>Wikipedia</h2>
-        <div class="row">
-          <input class="field" id="sIn" placeholder="запрос">
-          <button type="button" class="btn p" data-act="search">OK</button>
-        </div>
-        <pre id="sOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre>
-      </div>
-    </section>
-
-    <section class="panel" id="p-notes">
-      <div class="card">
-        <h2>Заметки</h2>
-        <div class="row">
-          <input class="field" id="nIn" placeholder="заметка">
-          <button type="button" class="btn p" data-act="noteAdd">+</button>
-        </div>
-        <div id="nList" style="margin-top:12px"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="p-protocol">
-      <div class="card">
-        <h2>Agent-v1</h2>
-        <p class="muted">Локальный handshake + envelope.</p>
-        <div class="row" style="margin-top:8px">
-          <button type="button" class="btn p" data-act="protoPing">ping</button>
-          <button type="button" class="btn" data-act="protoRefresh">обновить</button>
-        </div>
-        <pre id="protoOut" class="muted" style="margin-top:12px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px"></pre>
-      </div>
-    </section>
-
-    <section class="panel" id="p-id">
-      <div class="card">
-        <h2>Локальный ID</h2>
-        <div class="row">
-          <input class="field" id="didName" placeholder="имя">
-          <button type="button" class="btn p" data-act="didGen">создать</button>
-        </div>
-        <p id="didFull" style="margin-top:12px;font-family:ui-monospace,monospace;font-size:12px;word-break:break-all">—</p>
-        <p id="didUser" class="muted" style="margin-top:6px"></p>
-      </div>
-    </section>
-  </div>
-
-  <div class="composer">
-    <button type="button" data-act="voice" title="голос">🎙</button>
-    <input id="inp" type="text" placeholder="сообщение…" enterkeyhint="send" autocomplete="off">
-    <button type="button" data-act="send" title="отправить">➤</button>
-  </div>
+<div class="top">
+<button type="button" class="burger" data-act="menu">=</button>
+<div class="av" id="av">*</div>
+<div><h1 id="title">Home</h1><p id="sub">status</p></div>
+<div class="status" id="st">loading</div>
 </div>
-
+<div class="work">
+<section class="panel on" id="p-home">
+<div class="card"><h2>AKSI Omega Runtime</h2>
+<p class="muted">Local AI agent with cryptographic thought chain. Every answer is signed. Verify the chain without a server.</p>
+<div class="grid" style="margin-top:14px">
+<div class="stat"><b id="hChain">0</b><span>ledger entries</span></div>
+<div class="stat"><b id="hEqs">—</b><span>last EQS</span></div>
+<div class="stat"><b id="hMsk">—</b><span>MSK</span></div>
+<div class="stat"><b id="hMode">local</b><span>mode</span></div>
+</div></div>
+<div class="card"><h2>Quick start</h2>
+<div class="row" style="margin-top:8px">
+<button type="button" class="btn p" data-q="who are you">who are you</button>
+<button type="button" class="btn" data-q="weather Moscow">weather</button>
+<button type="button" class="btn" data-q="bell state">Bell</button>
+<button type="button" class="btn" data-q="what can you do">capabilities</button>
+</div></div>
+<div class="card"><h2>Why this sells</h2>
+<p class="muted">Decision Integrity: model answer to signature to append-only ledger. AI decision audit without cloud. White-label runtime for Studio / Business / Enterprise.</p>
+<p class="muted" style="margin-top:8px">Contact: <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+</div></section>
+<section class="panel" id="p-chat"><div class="card"><h2>Chat</h2><div id="thread"></div><div id="prog" class="muted" style="margin-top:8px"></div></div></section>
+<section class="panel" id="p-proof"><div class="card"><h2>Signed Thought Ledger</h2>
+<p class="muted">Append-only answer chain. SHA-256(prev + text + seed). Full browser verify.</p>
+<div class="row" style="margin-top:10px">
+<button type="button" class="btn p" data-act="proofRefresh">refresh</button>
+<button type="button" class="btn" data-act="proofExport">export JSON</button>
+<button type="button" class="btn" data-act="proofVerify">verify chain</button>
+<button type="button" class="btn" data-act="proofClear">clear</button>
+</div>
+<div id="proofOut" class="ledger" style="margin-top:12px">empty</div>
+<p id="proofStatus" class="muted" style="margin-top:10px">—</p></div></section>
+<section class="panel" id="p-quantum"><div class="card"><h2>Quantum (2 qubits)</h2>
+<p class="muted" id="qText">statevector demo</p>
+<div class="row" style="margin-top:10px">
+<button type="button" class="btn p" data-act="bell">Bell</button>
+<button type="button" class="btn" data-act="super">Superposition</button>
+</div><div id="qProbs"></div></div></section>
+<section class="panel" id="p-metrics"><div class="card"><h2>EQS · Shannon · QCLI</h2>
+<textarea class="field" id="mIn" style="width:100%;height:100px;resize:vertical;padding:12px" placeholder="text"></textarea>
+<button type="button" class="btn p" data-act="metrics" style="margin-top:8px">Compute</button>
+<pre id="mOut" class="muted" style="margin-top:12px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px"></pre></div></section>
+<section class="panel" id="p-net"><div class="card"><h2>Weather</h2>
+<div class="row"><input class="field" id="wCity" value="Moscow"><button type="button" class="btn p" data-act="weather">OK</button></div>
+<pre id="wOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre></div></section>
+<section class="panel" id="p-search"><div class="card"><h2>Wikipedia</h2>
+<div class="row"><input class="field" id="sIn" placeholder="query"><button type="button" class="btn p" data-act="search">OK</button></div>
+<pre id="sOut" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre></div></section>
+<section class="panel" id="p-notes"><div class="card"><h2>Notes</h2>
+<div class="row"><input class="field" id="nIn" placeholder="note"><button type="button" class="btn p" data-act="noteAdd">+</button></div>
+<div id="nList" style="margin-top:12px"></div></div></section>
+<section class="panel" id="p-protocol"><div class="card"><h2>Agent-v1</h2>
+<p class="muted">Local handshake + envelope.</p>
+<div class="row" style="margin-top:8px">
+<button type="button" class="btn p" data-act="protoPing">ping</button>
+<button type="button" class="btn" data-act="protoRefresh">refresh</button>
+</div>
+<pre id="protoOut" class="muted" style="margin-top:12px;white-space:pre-wrap;font-family:ui-monospace,monospace;font-size:12px"></pre></div></section>
+<section class="panel" id="p-id"><div class="card"><h2>Local ID</h2>
+<div class="row"><input class="field" id="didName" placeholder="name"><button type="button" class="btn p" data-act="didGen">create</button></div>
+<p id="didFull" style="margin-top:12px;font-family:ui-monospace,monospace;font-size:12px;word-break:break-all">—</p>
+<p id="didUser" class="muted" style="margin-top:6px"></p></div></section>
+</div>
+<div class="composer">
+<button type="button" data-act="voice" title="voice">mic</button>
+<input id="inp" type="text" placeholder="message…" enterkeyhint="send" autocomplete="off">
+<button type="button" data-act="send" title="send">go</button>
+</div>
+</div>
 <script>
 (function(){
 "use strict";
 var SEED="Alfiya_AKSI_DIMAX_v3_2026";
-var CHAT_KEY="aksi_omega_chat_v1";
-var LEDGER_KEY="aksi_omega_ledger_v1";
-var NOTES_KEY="aksi_omega_notes_v1";
-var ID_KEY="aksi_omega_id_v1";
-var NAME_KEY="aksi_omega_name_v1";
-var PROTO_KEY="aksi_omega_proto_v1";
-
-var THREAD=document.getElementById("thread");
-var PROG=document.getElementById("prog");
-var INP=document.getElementById("inp");
-var ST=document.getElementById("st");
-var titles={
-  home:["Главная","Ω runtime"],
-  chat:["Чат","signed answers"],
-  proof:["Proof","ledger"],
-  quantum:["Квант","2q"],
-  metrics:["Метрики","EQS"],
-  net:["Погода","wttr.in"],
-  search:["Поиск","wiki"],
-  notes:["Заметки","local"],
-  protocol:["Протокол","Agent-v1"],
-  id:["ID","local DID"]
-};
-
-function esc(s){return String(s==null?"":s).replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">").replace(/"/g,""");}
-function setAv(t){var el=document.getElementById("av");if(el)el.textContent=t||"◈";}
+var CHAT_KEY="aksi_omega_chat_v1",LEDGER_KEY="aksi_omega_ledger_v1",NOTES_KEY="aksi_omega_notes_v1";
+var ID_KEY="aksi_omega_id_v1",NAME_KEY="aksi_omega_name_v1",PROTO_KEY="aksi_omega_proto_v1";
+var THREAD=document.getElementById("thread"),PROG=document.getElementById("prog"),INP=document.getElementById("inp"),ST=document.getElementById("st");
+var titles={home:["Home","Omega runtime"],chat:["Chat","signed answers"],proof:["Proof","ledger"],quantum:["Quantum","2q"],metrics:["Metrics","EQS"],net:["Weather","wttr.in"],search:["Search","wiki"],notes:["Notes","local"],protocol:["Protocol","Agent-v1"],id:["ID","local DID"]};
+function esc(s){s=String(s==null?"":s);return s.replace(/&/g,"&"+"amp;").replace(/</g,"&"+"lt;").replace(/>/g,"&"+"gt;").replace(/\"/g,"&"+"quot;");}
+function setAv(t){var el=document.getElementById("av");if(el)el.textContent=t||"*";}
 function setStatus(t,ok){if(!ST)return;ST.textContent=t;ST.className=ok?"status ok":"status";}
-
-function openPanel(id){
-  document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
-  document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-p")===id);});
-  var el=document.getElementById("p-"+id);
-  if(el)el.classList.add("on");
-  var meta=titles[id]||[id,""];
-  var h=document.getElementById("title"),s=document.getElementById("sub");
-  if(h)h.textContent=meta[0];
-  if(s)s.textContent=meta[1];
-  closeSide();
-  try{history.replaceState(null,"","#"+id);}catch(e){}
-}
+function openPanel(id){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-p")===id);});var el=document.getElementById("p-"+id);if(el)el.classList.add("on");var meta=titles[id]||[id,""];var h=document.getElementById("title"),s=document.getElementById("sub");if(h)h.textContent=meta[0];if(s)s.textContent=meta[1];closeSide();try{history.replaceState(null,"","#"+id);}catch(e){}}
 function openSide(){document.getElementById("side").classList.add("open");document.getElementById("overlay").classList.add("on");}
 function closeSide(){document.getElementById("side").classList.remove("open");document.getElementById("overlay").classList.remove("on");}
-
 function loadJSON(key,fb){try{return JSON.parse(localStorage.getItem(key)||"null")||fb;}catch(e){return fb;}}
 function saveJSON(key,v){try{localStorage.setItem(key,JSON.stringify(v));}catch(e){}}
-
-function loadChat(){return loadJSON(CHAT_KEY,[]);}
-function saveChat(m){saveJSON(CHAT_KEY,m.slice(-60));}
-function loadLedger(){return loadJSON(LEDGER_KEY,[]);}
-function saveLedger(m){saveJSON(LEDGER_KEY,m.slice(-200));}
-function loadNotes(){return loadJSON(NOTES_KEY,[]);}
-function saveNotes(m){saveJSON(NOTES_KEY,m.slice(0,100));}
-
-function sha256hex(str){
-  if(window.crypto&&crypto.subtle){
-    return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){
-      return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
-    });
-  }
-  var h=0x811c9dc5;
-  for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}
-  return Promise.resolve(("00000000"+(h>>>0).toString(16)).slice(-8)+("00000000"+((h^0x9e3779b9)>>>0).toString(16)).slice(-8));
-}
+function loadChat(){return loadJSON(CHAT_KEY,[]);}function saveChat(m){saveJSON(CHAT_KEY,m.slice(-60));}
+function loadLedger(){return loadJSON(LEDGER_KEY,[]);}function saveLedger(m){saveJSON(LEDGER_KEY,m.slice(-200));}
+function loadNotes(){return loadJSON(NOTES_KEY,[]);}function saveNotes(m){saveJSON(NOTES_KEY,m.slice(0,100));}
+function sha256hex(str){if(window.crypto&&crypto.subtle){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");});}var h=0x811c9dc5;for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193);}return Promise.resolve(("00000000"+(h>>>0).toString(16)).slice(-8)+("00000000"+((h^0x9e3779b9)>>>0).toString(16)).slice(-8));}
 function shortHash(h){return (h||"").slice(0,16);}
-
-function shannonH(text){
-  var s=String(text||"");
-  if(!s.length)return 0;
-  var freq={},i,c;
-  for(i=0;i<s.length;i++){c=s[i];freq[c]=(freq[c]||0)+1;}
-  var h=0,n=s.length;
-  Object.keys(freq).forEach(function(k){var p=freq[k]/n;h-=p*Math.log2(p);});
-  return h;
-}
-function eqs(text){
-  var h=shannonH(text);
-  var len=Math.min(String(text||"").length,400);
-  var age=2026-1995;
-  var base=Math.max(0,Math.min(100, (h/6)*40 + (len/400)*30 + (age/40)*30));
-  return Math.round(base);
-}
-function qcli(text){
-  var t=String(text||"");
-  var score=50;
-  if(/[.!?]/.test(t))score+=8;
-  if(t.length>40&&t.length<800)score+=10;
-  if(/\d/.test(t))score+=5;
-  if(/AKSI|EQS|протокол|подпись/i.test(t))score+=7;
-  return Math.max(0,Math.min(100,score));
-}
-
-function renderChat(){
-  var mem=loadChat();
-  if(!THREAD)return;
-  THREAD.innerHTML=mem.map(function(m){
-    return '<div class="msg '+(m.role==="u"?"u":"a")+'">'+esc(m.text)+
-      (m.thought?'<div class="thought">ход: '+esc(m.thought)+'</div>':'')+
-      (m.sig?'<div class="meta">sig '+esc(m.sig)+(m.eqs!=null?' · EQS '+m.eqs:'')+'</div>':'')+
-      '</div>';
-  }).join("");
-  THREAD.scrollTop=THREAD.scrollHeight;
-  var hc=document.getElementById("hChain");
-  if(hc)hc.textContent=String(loadLedger().length);
-}
-function addMsg(role,text,extra){
-  var mem=loadChat();
-  mem.push({role:role,text:text,sig:(extra&&extra.sig)||"",thought:(extra&&extra.thought)||"",eqs:(extra&&extra.eqs),ts:Date.now()});
-  saveChat(mem);
-  renderChat();
-}
-
-async function appendLedger(text,meta){
-  var chain=loadLedger();
-  var prev=chain.length?chain[chain.length-1].hash:"GENESIS";
-  var payload=prev+"|"+text+"|"+SEED+"|"+Date.now();
-  var hash=await sha256hex(payload);
-  var entry={
-    i:chain.length,
-    ts:Date.now(),
-    prev:prev,
-    hash:hash,
-    sig:shortHash(hash),
-    eqs:eqs(text),
-    qcli:qcli(text),
-    h:shannonH(text).toFixed(2),
-    meta:meta||"answer",
-    text:String(text).slice(0,500)
-  };
-  chain.push(entry);
-  saveLedger(chain);
-  var fs=document.getElementById("footSig");
-  if(fs)fs.textContent=entry.sig;
-  var he=document.getElementById("hEqs");
-  if(he)he.textContent=String(entry.eqs);
-  var hc=document.getElementById("hChain");
-  if(hc)hc.textContent=String(chain.length);
-  return entry;
-}
-
-async function verifyLedger(){
-  var chain=loadLedger();
-  if(!chain.length)return {ok:true,msg:"пустая цепь"};
-  for(var i=0;i<chain.length;i++){
-    var e=chain[i];
-    var prev=i===0?"GENESIS":chain[i-1].hash;
-    if(e.prev!==prev)return {ok:false,msg:"разрыв prev на #"+i};
-    if(!e.hash||!e.sig)return {ok:false,msg:"нет hash на #"+i};
-    if(i>0&&e.prev!==chain[i-1].hash)return {ok:false,msg:"prev mismatch #"+i};
-  }
-  return {ok:true,msg:"OK · "+chain.length+" блоков · структура цела"};
-}
-
-function renderProof(){
-  var chain=loadLedger();
-  var out=document.getElementById("proofOut");
-  if(!out)return;
-  if(!chain.length){out.textContent="пусто — напиши в чат";return;}
-  out.innerHTML=chain.slice().reverse().slice(0,40).map(function(e){
-    return '<div style="margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:8px">'+
-      '<span class="pill">#'+e.i+'</span><span class="pill">EQS '+e.eqs+'</span>'+
-      '<div style="margin-top:4px;color:var(--muted)">sig '+esc(e.sig)+'</div>'+
-      '<div style="margin-top:4px">'+esc(e.text.slice(0,160))+(e.text.length>160?"…":"")+'</div></div>';
-  }).join("");
-}
-
-function statevector(gates){
-  var s=[1,0,0,0];
-  function H(q){
-    var n=[0,0,0,0],inv=1/Math.SQRT2;
-    if(q===0){n[0]=inv*(s[0]+s[2]);n[1]=inv*(s[1]+s[3]);n[2]=inv*(s[0]-s[2]);n[3]=inv*(s[1]-s[3]);}
-    else{n[0]=inv*(s[0]+s[1]);n[1]=inv*(s[0]-s[1]);n[2]=inv*(s[2]+s[3]);n[3]=inv*(s[2]-s[3]);}
-    s=n;
-  }
-  function CNOT(){var n=s.slice();n[2]=s[3];n[3]=s[2];s=n;}
-  gates.forEach(function(g){if(g==="H0")H(0);else if(g==="CNOT")CNOT();});
-  return s.map(function(a){return a*a;});
-}
-function showQuantum(mode){
-  var gates=mode==="bell"?["H0","CNOT"]:["H0"];
-  var p=statevector(gates);
-  var labels=["|00⟩","|01⟩","|10⟩","|11⟩"];
-  var box=document.getElementById("qProbs");
-  var txt=document.getElementById("qText");
-  if(box)box.innerHTML=labels.map(function(l,i){return "<div><b>"+(p[i]*100).toFixed(0)+"%</b> "+l+"</div>";}).join("");
-  if(txt)txt.textContent=mode==="bell"?"Bell: H₀ + CNOT → запутанность":"Суперпозиция: H₀";
-  return mode==="bell"
-    ?"Bell state (учебная симуляция):\n|00⟩ ≈ 50%\n|11⟩ ≈ 50%\nОстальные ≈ 0%"
-    :"Суперпозиция: после H измерение 0/1 ≈ поровну.";
-}
-
-async function fetchWeather(city){
-  city=(city||"Moscow").trim()||"Moscow";
-  var out=document.getElementById("wOut");
-  if(out)out.textContent="…";
-  try{
-    var r=await fetch("https://wttr.in/"+encodeURIComponent(city)+"?format=j1");
-    if(!r.ok)throw new Error("HTTP "+r.status);
-    var j=await r.json();
-    var c=j.current_condition&&j.current_condition[0];
-    var area=(j.nearest_area&&j.nearest_area[0]&&j.nearest_area[0].areaName&&j.nearest_area[0].areaName[0].value)||city;
-    if(!c)throw new Error("no data");
-    var text="Погода: "+area+"\n"+c.temp_C+"°C, "+(c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value||"—")+
-      "\nВлажность "+c.humidity+"% · ветер "+c.windspeedKmph+" км/ч\nОщущается "+c.FeelsLikeC+"°C";
-    if(out)out.textContent=text;
-    return text;
-  }catch(e){
-    var msg="Погода недоступна (сеть).";
-    if(out)out.textContent=msg;
-    return msg;
-  }
-}
-async function wikiSearch(q){
-  q=(q||"").trim();
-  var out=document.getElementById("sOut");
-  if(!q){if(out)out.textContent="пустой запрос";return "пустой запрос";}
-  if(out)out.textContent="…";
-  try{
-    var r=await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(q));
-    if(!r.ok)throw new Error("not found");
-    var j=await r.json();
-    var text=(j.title||q)+".\n\n"+String(j.extract||"").slice(0,900);
-    if(out)out.textContent=text;
-    return text;
-  }catch(e){
-    var msg="Ничего не найдено.";
-    if(out)out.textContent=msg;
-    return msg;
-  }
-}
-function runMetrics(text){
-  text=text||"";
-  var out=document.getElementById("mOut");
-  var res="Shannon H = "+shannonH(text).toFixed(4)+"\nEQS = "+eqs(text)+"\nQCLI = "+qcli(text)+"\nlen = "+text.length;
-  if(out)out.textContent=res;
-  return res;
-}
-
-function renderNotes(){
-  var list=document.getElementById("nList");
-  if(!list)return;
-  var notes=loadNotes();
-  list.innerHTML=notes.map(function(n,i){
-    return '<div class="note-item"><span>'+esc(n)+'</span><button type="button" data-act="noteDel" data-i="'+i+'">удалить</button></div>';
-  }).join("")||'<p class="muted">пусто</p>';
-}
-function noteAdd(){
-  var inp=document.getElementById("nIn");
-  var t=(inp&&inp.value||"").trim();
-  if(!t)return;
-  var notes=loadNotes();
-  notes.unshift(t);
-  saveNotes(notes);
-  if(inp)inp.value="";
-  renderNotes();
-}
-function noteDel(i){
-  var notes=loadNotes();
-  notes.splice(+i,1);
-  saveNotes(notes);
-  renderNotes();
-}
-
-function ensureProto(){
-  var p=loadJSON(PROTO_KEY,null);
-  if(!p){
-    p={agent:"AKSI-Ω",v:"Agent-v1",session:Math.random().toString(36).slice(2,10),ts:Date.now()};
-    saveJSON(PROTO_KEY,p);
-  }
-  return p;
-}
-function protoPing(){
-  var p=ensureProto();
-  p.lastPing=Date.now();
-  p.pong=true;
-  saveJSON(PROTO_KEY,p);
-  var out=document.getElementById("protoOut");
-  var text="envelope {\n  protocol: AKSI-Agent-v1\n  agent: "+p.agent+
-    "\n  session: "+p.session+"\n  pong: true\n  ts: "+new Date(p.lastPing).toISOString()+"\n}";
-  if(out)out.textContent=text;
-  return text;
-}
-function renderProto(){
-  var p=ensureProto();
-  var out=document.getElementById("protoOut");
-  if(out)out.textContent=JSON.stringify(p,null,2);
-}
-
-function renderId(){
-  var id=localStorage.getItem(ID_KEY)||"—";
-  var name=localStorage.getItem(NAME_KEY)||"";
-  var el=document.getElementById("didFull");
-  var u=document.getElementById("didUser");
-  if(el)el.textContent=id;
-  if(u)u.textContent=name?"имя: "+name:"";
-}
-async function didGen(){
-  var name=(document.getElementById("didName")||{}).value||"aksi";
-  var h=await sha256hex(name+"|"+Date.now()+"|"+Math.random()+"|"+SEED);
-  var id="did:aksi:local:"+h.slice(0,32);
-  localStorage.setItem(ID_KEY,id);
-  localStorage.setItem(NAME_KEY,name);
-  renderId();
-}
-
-async function answer(q){
-  var t=q.trim(),low=t.toLowerCase();
-  if(!t)return {text:"Пустой запрос.",thought:"empty"};
-  if(/^(привет|здравств|хай|hello|hi)\b/.test(low))
-    return {text:"Привет. Я АКСИ Ω — локальный runtime с подписанной цепочкой мыслей.\nПиши свободно: погода, поиск, квант, метрики.",thought:"greeting"};
-  if(/кто ты|что ты|о себе|что умеешь|возможности/.test(low))
-    return {text:"АКСИ Ω Runtime\n\n• Чат + SHA-256 подпись каждого ответа\n• Signed Thought Ledger (Proof)\n• Квант Bell / суперпозиция\n• EQS · Shannon · QCLI\n• Погода, Wikipedia\n• Заметки, голос, локальный DID\n• Agent-v1 envelope\n\nВсё в одном HTML. Offline-first.\nКонтакт: aksilove@internet.ru",thought:"identity"};
-  if(/время|который час|msk|час/.test(low)){
-    var f=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"medium",timeStyle:"medium"});
-    return {text:"МСК: "+f.format(new Date()),thought:"time"};
-  }
-  if(/погод/.test(low)){
-    openPanel("net");
-    var city=(t.match(/погод[аеы]?\s+(?:в\s+)?([а-яa-z\-\s]+)/i)||[])[1]||"Moscow";
-    var wIn=document.getElementById("wCity");if(wIn)wIn.value=city.trim();
-    return {text:await fetchWeather(city.trim()),thought:"weather"};
-  }
-  if(/bell|белл|запутан/.test(low)){openPanel("quantum");return {text:showQuantum("bell"),thought:"quantum-bell"};}
-  if(/суперпоз|qubit|кубит/.test(low)){openPanel("quantum");return {text:showQuantum("super"),thought:"quantum-super"};}
-  if(/eqs|энтропи|qcli|метрик/.test(low)){
-    openPanel("metrics");
-    var mIn=document.getElementById("mIn");if(mIn&&!mIn.value)mIn.value=t;
-    return {text:runMetrics((mIn&&mIn.value)||t),thought:"metrics"};
-  }
-  if(/вики|wiki|найди|поиск|что такое|кто такой/.test(low)){
-    var query=t.replace(/^(найди|поиск|wiki|вики|что такое|кто такой|расскажи про)\s*/i,"").trim()||t;
-    openPanel("search");
-    var sIn=document.getElementById("sIn");if(sIn)sIn.value=query;
-    return {text:await wikiSearch(query),thought:"wiki"};
-  }
-  if(/протокол|agent-v1|пинг/.test(low)){openPanel("protocol");return {text:protoPing(),thought:"protocol"};}
-  if(/^запомни[:\s]+(.+)/i.test(t)){
-    var m=t.match(/^запомни[:\s]+(.+)/i);
-    var notes=loadNotes();notes.unshift(m[1]);saveNotes(notes);renderNotes();
-    return {text:"Запомнила: «"+m[1].slice(0,200)+"»",thought:"memory"};
-  }
-  var mq=t.replace(/^(сколько будет|посчитай|вычисли)\s+/i,"").trim();
-  if(/^[\d+\-*/().^,\s]+$/.test(mq)&&/\d/.test(mq)){
-    try{
-      var e=mq.replace(/,/g,".").replace(/\s/g,"").replace(/\^/g,"**");
-      if(!/^[\d+\-*/().**]+$/.test(e.replace(/\*\*/g,"")))throw 0;
-      var v=Function('"use strict";return ('+e+')')();
-      if(typeof v==="number"&&isFinite(v))return {text:"Результат: "+v,thought:"math"};
-    }catch(err){}
-  }
-  return {
-    text:"Принято.\n\nH≈"+shannonH(t).toFixed(2)+" · EQS≈"+eqs(t)+" · QCLI≈"+qcli(t)+
-      "\n\nУточни запрос или открой модуль слева.\nПримеры: «погода Москва», «запутанность», «что такое энтропия».",
-    thought:"fallback"
-  };
-}
-
-async function sendText(raw){
-  var t=(raw!=null?String(raw):(INP&&INP.value)||"").trim();
-  if(!t)return;
-  if(INP)INP.value="";
-  openPanel("chat");
-  addMsg("u",t);
-  if(PROG)PROG.textContent="думаю…";
-  setAv("…");
-  setStatus("работа",false);
-  try{
-    var ans=await answer(t);
-    var text=typeof ans==="string"?ans:ans.text;
-    var thought=typeof ans==="object"?ans.thought:"";
-    var entry=await appendLedger(text,thought||"answer");
-    addMsg("a",text,{sig:entry.sig,thought:thought,eqs:entry.eqs});
-    if(PROG)PROG.textContent="";
-    setAv("◈");
-    setStatus("готова",true);
-    renderProof();
-  }catch(err){
-    addMsg("a","Ошибка: "+(err&&err.message?err.message:String(err)));
-    if(PROG)PROG.textContent="";
-    setAv("◈");
-    setStatus("готова",true);
-  }
-}
-
-function listen(){
-  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){addMsg("a","Голос не поддерживается в этом браузере.");openPanel("chat");return;}
-  var r=new SR();
-  r.lang="ru-RU";
-  r.onresult=function(e){sendText(e.results[0][0].transcript);};
-  r.onerror=function(){setStatus("голос: ошибка",false);};
-  r.start();
-  setStatus("слушаю…",false);
-}
-
-function proofExport(){
-  var data=JSON.stringify(loadLedger(),null,2);
-  var blob=new Blob([data],{type:"application/json"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="aksi-ledger.json";
-  a.click();
-}
-async function proofVerify(){
-  var res=await verifyLedger();
-  var el=document.getElementById("proofStatus");
-  if(el)el.textContent=(res.ok?"✓ ":"✗ ")+res.msg;
-}
-function proofClear(){
-  if(!confirm("Очистить ledger и чат?"))return;
-  saveLedger([]);saveChat([]);
-  renderChat();renderProof();
-  var el=document.getElementById("proofStatus");
-  if(el)el.textContent="очищено";
-}
-
-function handleAct(act,el){
-  if(act==="menu"){openSide();return;}
-  if(act==="closeSide"){closeSide();return;}
-  if(act==="send"){sendText();return;}
-  if(act==="voice"){listen();return;}
-  if(act==="bell"){showQuantum("bell");return;}
-  if(act==="super"){showQuantum("super");return;}
-  if(act==="weather"){fetchWeather((document.getElementById("wCity")||{}).value);return;}
-  if(act==="metrics"){runMetrics((document.getElementById("mIn")||{}).value);return;}
-  if(act==="search"){wikiSearch((document.getElementById("sIn")||{}).value);return;}
-  if(act==="protoPing"){protoPing();return;}
-  if(act==="protoRefresh"){renderProto();return;}
-  if(act==="noteAdd"){noteAdd();return;}
-  if(act==="noteDel"){noteDel(el&&el.getAttribute("data-i"));return;}
-  if(act==="didGen"){didGen();return;}
-  if(act==="proofRefresh"){renderProof();return;}
-  if(act==="proofExport"){proofExport();return;}
-  if(act==="proofVerify"){proofVerify();return;}
-  if(act==="proofClear"){proofClear();return;}
-}
-
-document.addEventListener("click",function(e){
-  var t=e.target.closest("[data-p],[data-act],[data-q]");
-  if(!t)return;
-  if(t.hasAttribute("data-p")){e.preventDefault();openPanel(t.getAttribute("data-p"));return;}
-  if(t.hasAttribute("data-q")){e.preventDefault();sendText(t.getAttribute("data-q"));return;}
-  if(t.hasAttribute("data-act")){e.preventDefault();handleAct(t.getAttribute("data-act"),t);}
-});
+function shannonH(text){var s=String(text||"");if(!s.length)return 0;var freq={},i,c;for(i=0;i<s.length;i++){c=s[i];freq[c]=(freq[c]||0)+1;}var h=0,n=s.length;Object.keys(freq).forEach(function(k){var p=freq[k]/n;h-=p*Math.log2(p);});return h;}
+function eqs(text){var h=shannonH(text);var len=Math.min(String(text||"").length,400);var age=2026-1995;return Math.round(Math.max(0,Math.min(100,(h/6)*40+(len/400)*30+(age/40)*30)));}
+function qcli(text){var t=String(text||"");var score=50;if(/[.!?]/.test(t))score+=8;if(t.length>40&&t.length<800)score+=10;if(/\d/.test(t))score+=5;if(/AKSI|EQS|protocol|sign/i.test(t))score+=7;return Math.max(0,Math.min(100,score));}
+function renderChat(){var mem=loadChat();if(!THREAD)return;THREAD.innerHTML=mem.map(function(m){return '<div class="msg '+(m.role==="u"?"u":"a")+'">'+esc(m.text)+(m.thought?'<div class="thought">path: '+esc(m.thought)+'</div>':'')+(m.sig?'<div class="meta">sig '+esc(m.sig)+(m.eqs!=null?' · EQS '+m.eqs:'')+'</div>':'')+'</div>';}).join("");THREAD.scrollTop=THREAD.scrollHeight;var hc=document.getElementById("hChain");if(hc)hc.textContent=String(loadLedger().length);}
+function addMsg(role,text,extra){var mem=loadChat();mem.push({role:role,text:text,sig:(extra&&extra.sig)||"",thought:(extra&&extra.thought)||"",eqs:(extra&&extra.eqs),ts:Date.now()});saveChat(mem);renderChat();}
+async function appendLedger(text,meta){var chain=loadLedger();var prev=chain.length?chain[chain.length-1].hash:"GENESIS";var payload=prev+"|"+text+"|"+SEED+"|"+Date.now();var hash=await sha256hex(payload);var entry={i:chain.length,ts:Date.now(),prev:prev,hash:hash,sig:shortHash(hash),eqs:eqs(text),qcli:qcli(text),h:shannonH(text).toFixed(2),meta:meta||"answer",text:String(text).slice(0,500)};chain.push(entry);saveLedger(chain);var fs=document.getElementById("footSig");if(fs)fs.textContent=entry.sig;var he=document.getElementById("hEqs");if(he)he.textContent=String(entry.eqs);var hc=document.getElementById("hChain");if(hc)hc.textContent=String(chain.length);return entry;}
+async function verifyLedger(){var chain=loadLedger();if(!chain.length)return{ok:true,msg:"empty chain"};for(var i=0;i<chain.length;i++){var e=chain[i];var prev=i===0?"GENESIS":chain[i-1].hash;if(e.prev!==prev)return{ok:false,msg:"prev break #"+i};if(!e.hash||!e.sig)return{ok:false,msg:"missing hash #"+i};}return{ok:true,msg:"OK · "+chain.length+" blocks";}}
+function renderProof(){var chain=loadLedger();var out=document.getElementById("proofOut");if(!out)return;if(!chain.length){out.textContent="empty — write in chat";return;}out.innerHTML=chain.slice().reverse().slice(0,40).map(function(e){return '<div style="margin-bottom:10px;border-bottom:1px solid var(--line);padding-bottom:8px"><span class="pill">#'+e.i+'</span><span class="pill">EQS '+e.eqs+'</span><div style="margin-top:4px;color:var(--muted)">sig '+esc(e.sig)+'</div><div style="margin-top:4px">'+esc(e.text.slice(0,160))+(e.text.length>160?"…":"")+'</div></div>';}).join("");}
+function statevector(gates){var s=[1,0,0,0];function H(q){var n=[0,0,0,0],inv=1/Math.SQRT2;if(q===0){n[0]=inv*(s[0]+s[2]);n[1]=inv*(s[1]+s[3]);n[2]=inv*(s[0]-s[2]);n[3]=inv*(s[1]-s[3]);}else{n[0]=inv*(s[0]+s[1]);n[1]=inv*(s[0]-s[1]);n[2]=inv*(s[2]+s[3]);n[3]=inv*(s[2]-s[3]);}s=n;}function CNOT(){var n=s.slice();n[2]=s[3];n[3]=s[2];s=n;}gates.forEach(function(g){if(g==="H0")H(0);else if(g==="CNOT")CNOT();});return s.map(function(a){return a*a;});}
+function showQuantum(mode){var gates=mode==="bell"?["H0","CNOT"]:["H0"];var p=statevector(gates);var labels=["|00>","|01>","|10>","|11>"];var box=document.getElementById("qProbs");var txt=document.getElementById("qText");if(box)box.innerHTML=labels.map(function(l,i){return "<div><b>"+(p[i]*100).toFixed(0)+"%</b> "+l+"</div>";}).join("");if(txt)txt.textContent=mode==="bell"?"Bell: H0 + CNOT":"Superposition: H0";return mode==="bell"?"Bell state:\n|00> ~ 50%\n|11> ~ 50%":"Superposition: measure 0/1 ~ equal.";}
+async function fetchWeather(city){city=(city||"Moscow").trim()||"Moscow";var out=document.getElementById("wOut");if(out)out.textContent="…";try{var r=await fetch("https://wttr.in/"+encodeURIComponent(city)+"?format=j1");if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();var c=j.current_condition&&j.current_condition[0];var area=(j.nearest_area&&j.nearest_area[0]&&j.nearest_area[0].areaName&&j.nearest_area[0].areaName[0].value)||city;if(!c)throw new Error("no data");var text="Weather: "+area+"\n"+c.temp_C+"C, "+(c.weatherDesc&&c.weatherDesc[0]&&c.weatherDesc[0].value||"—")+"\nHumidity "+c.humidity+"% · wind "+c.windspeedKmph+" km/h\nFeels "+c.FeelsLikeC+"C";if(out)out.textContent=text;return text;}catch(e){var msg="Weather unavailable.";if(out)out.textContent=msg;return msg;}}
+async function wikiSearch(q){q=(q||"").trim();var out=document.getElementById("sOut");if(!q){if(out)out.textContent="empty";return "empty";}if(out)out.textContent="…";try{var r=await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(q));if(!r.ok)throw new Error("not found");var j=await r.json();var text=(j.title||q)+".\n\n"+String(j.extract||"").slice(0,900);if(out)out.textContent=text;return text;}catch(e){var msg="Nothing found.";if(out)out.textContent=msg;return msg;}}
+function runMetrics(text){text=text||"";var out=document.getElementById("mOut");var res="Shannon H = "+shannonH(text).toFixed(4)+"\nEQS = "+eqs(text)+"\nQCLI = "+qcli(text)+"\nlen = "+text.length;if(out)out.textContent=res;return res;}
+function renderNotes(){var list=document.getElementById("nList");if(!list)return;var notes=loadNotes();list.innerHTML=notes.map(function(n,i){return '<div class="note-item"><span>'+esc(n)+'</span><button type="button" data-act="noteDel" data-i="'+i+'">del</button></div>';}).join("")||'<p class="muted">empty</p>';}
+function noteAdd(){var inp=document.getElementById("nIn");var t=(inp&&inp.value||"").trim();if(!t)return;var notes=loadNotes();notes.unshift(t);saveNotes(notes);if(inp)inp.value="";renderNotes();}
+function noteDel(i){var notes=loadNotes();notes.splice(+i,1);saveNotes(notes);renderNotes();}
+function ensureProto(){var p=loadJSON(PROTO_KEY,null);if(!p){p={agent:"AKSI-Omega",v:"Agent-v1",session:Math.random().toString(36).slice(2,10),ts:Date.now()};saveJSON(PROTO_KEY,p);}return p;}
+function protoPing(){var p=ensureProto();p.lastPing=Date.now();p.pong=true;saveJSON(PROTO_KEY,p);var out=document.getElementById("protoOut");var text="envelope {\n  protocol: AKSI-Agent-v1\n  agent: "+p.agent+"\n  session: "+p.session+"\n  pong: true\n  ts: "+new Date(p.lastPing).toISOString()+"\n}";if(out)out.textContent=text;return text;}
+function renderProto(){var p=ensureProto();var out=document.getElementById("protoOut");if(out)out.textContent=JSON.stringify(p,null,2);}
+function renderId(){var id=localStorage.getItem(ID_KEY)||"—";var name=localStorage.getItem(NAME_KEY)||"";var el=document.getElementById("didFull");var u=document.getElementById("didUser");if(el)el.textContent=id;if(u)u.textContent=name?"name: "+name:"";}
+async function didGen(){var name=(document.getElementById("didName")||{}).value||"aksi";var h=await sha256hex(name+"|"+Date.now()+"|"+Math.random()+"|"+SEED);var id="did:aksi:local:"+h.slice(0,32);localStorage.setItem(ID_KEY,id);localStorage.setItem(NAME_KEY,name);renderId();}
+async function answer(q){var t=q.trim(),low=t.toLowerCase();if(!t)return{text:"Empty.",thought:"empty"};
+if(/^(hi|hello|hey|привет|здравств|хай)\b/.test(low))return{text:"Hello. I am AKSI Omega — local runtime with a signed thought chain.\nTry: weather, search, quantum, metrics.",thought:"greeting"};
+if(/who are you|what are you|what can you|capabilities|кто ты|что ты|что умеешь/.test(low))return{text:"AKSI Omega Runtime\n\n• Chat + SHA-256 signature per answer\n• Signed Thought Ledger (Proof)\n• Quantum Bell / superposition\n• EQS · Shannon · QCLI\n• Weather, Wikipedia\n• Notes, voice, local DID\n• Agent-v1 envelope\n\nSingle HTML. Offline-first.\nContact: aksilove@internet.ru",thought:"identity"};
+if(/time|час|msk/.test(low)){var f=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"medium",timeStyle:"medium"});return{text:"MSK: "+f.format(new Date()),thought:"time"};}
+if(/weather|погод/.test(low)){openPanel("net");var city=(t.match(/(?:weather|погод[аеы]?)\s+(?:in\s+|в\s+)?([a-zа-я\-\s]+)/i)||[])[1]||"Moscow";var wIn=document.getElementById("wCity");if(wIn)wIn.value=city.trim();return{text:await fetchWeather(city.trim()),thought:"weather"};}
+if(/bell|запутан/.test(low)){openPanel("quantum");return{text:showQuantum("bell"),thought:"quantum-bell"};}
+if(/superpos|суперпоз|qubit|кубит/.test(low)){openPanel("quantum");return{text:showQuantum("super"),thought:"quantum-super"};}
+if(/eqs|entropy|энтропи|qcli|metric|метрик/.test(low)){openPanel("metrics");var mIn=document.getElementById("mIn");if(mIn&&!mIn.value)mIn.value=t;return{text:runMetrics((mIn&&mIn.value)||t),thought:"metrics"};}
+if(/wiki|search|найди|поиск|what is|что такое/.test(low)){var query=t.replace(/^(search|wiki|найди|поиск|what is|что такое)\s*/i,"").trim()||t;openPanel("search");var sIn=document.getElementById("sIn");if(sIn)sIn.value=query;return{text:await wikiSearch(query),thought:"wiki"};}
+if(/protocol|протокол|agent-v1|ping|пинг/.test(low)){openPanel("protocol");return{text:protoPing(),thought:"protocol"};}
+if(/^(remember|запомни)[:\s]+(.+)/i.test(t)){var m=t.match(/^(?:remember|запомни)[:\s]+(.+)/i);var notes=loadNotes();notes.unshift(m[1]);saveNotes(notes);renderNotes();return{text:"Saved: "+m[1].slice(0,200),thought:"memory"};}
+var mq=t.replace(/^(how much is|compute|посчитай|вычисли)\s+/i,"").trim();if(/^[\d+\-*/().^,\s]+$/.test(mq)&&/\d/.test(mq)){try{var e=mq.replace(/,/g,".").replace(/\s/g,"").replace(/\^/g,"**");var v=Function("\"use strict\";return ("+e+")")();if(typeof v==="number"&&isFinite(v))return{text:"Result: "+v,thought:"math"};}catch(err){}}
+return{text:"Noted.\n\nH~"+shannonH(t).toFixed(2)+" · EQS~"+eqs(t)+" · QCLI~"+qcli(t)+"\n\nTry: weather Moscow, bell state, what is entropy.",thought:"fallback"};}
+async function sendText(raw){var t=(raw!=null?String(raw):(INP&&INP.value)||"").trim();if(!t)return;if(INP)INP.value="";openPanel("chat");addMsg("u",t);if(PROG)PROG.textContent="thinking…";setAv("…");setStatus("work",false);try{var ans=await answer(t);var text=typeof ans==="string"?ans:ans.text;var thought=typeof ans==="object"?ans.thought:"";var entry=await appendLedger(text,thought||"answer");addMsg("a",text,{sig:entry.sig,thought:thought,eqs:entry.eqs});if(PROG)PROG.textContent="";setAv("*");setStatus("ready",true);renderProof();}catch(err){addMsg("a","Error: "+(err&&err.message?err.message:String(err)));if(PROG)PROG.textContent="";setAv("*");setStatus("ready",true);}}
+function listen(){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addMsg("a","Voice not supported.");openPanel("chat");return;}var r=new SR();r.lang="en-US";r.onresult=function(e){sendText(e.results[0][0].transcript);};r.onerror=function(){setStatus("voice error",false);};r.start();setStatus("listening…",false);}
+function proofExport(){var data=JSON.stringify(loadLedger(),null,2);var blob=new Blob([data],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-ledger.json";a.click();}
+async function proofVerify(){var res=await verifyLedger();var el=document.getElementById("proofStatus");if(el)el.textContent=(res.ok?"OK ":"FAIL ")+res.msg;}
+function proofClear(){if(!confirm("Clear ledger and chat?"))return;saveLedger([]);saveChat([]);renderChat();renderProof();var el=document.getElementById("proofStatus");if(el)el.textContent="cleared";}
+function handleAct(act,el){if(act==="menu"){openSide();return;}if(act==="closeSide"){closeSide();return;}if(act==="send"){sendText();return;}if(act==="voice"){listen();return;}if(act==="bell"){showQuantum("bell");return;}if(act==="super"){showQuantum("super");return;}if(act==="weather"){fetchWeather((document.getElementById("wCity")||{}).value);return;}if(act==="metrics"){runMetrics((document.getElementById("mIn")||{}).value);return;}if(act==="search"){wikiSearch((document.getElementById("sIn")||{}).value);return;}if(act==="protoPing"){protoPing();return;}if(act==="protoRefresh"){renderProto();return;}if(act==="noteAdd"){noteAdd();return;}if(act==="noteDel"){noteDel(el&&el.getAttribute("data-i"));return;}if(act==="didGen"){didGen();return;}if(act==="proofRefresh"){renderProof();return;}if(act==="proofExport"){proofExport();return;}if(act==="proofVerify"){proofVerify();return;}if(act==="proofClear"){proofClear();return;}}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-p],[data-act],[data-q]");if(!t)return;if(t.hasAttribute("data-p")){e.preventDefault();openPanel(t.getAttribute("data-p"));return;}if(t.hasAttribute("data-q")){e.preventDefault();sendText(t.getAttribute("data-q"));return;}if(t.hasAttribute("data-act")){e.preventDefault();handleAct(t.getAttribute("data-act"),t);}});
 if(INP)INP.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();sendText();}});
-
-function tick(){
-  try{
-    var f=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"});
-    var el=document.getElementById("hMsk");
-    if(el)el.textContent=f.format(new Date());
-  }catch(e){}
-}
-
-function boot(){
-  ensureProto();
-  renderChat();
-  renderNotes();
-  renderId();
-  renderProof();
-  tick();
-  setInterval(tick,1000);
-  var chain=loadLedger();
-  if(chain.length){
-    var fs=document.getElementById("footSig");
-    if(fs)fs.textContent=chain[chain.length-1].sig;
-    var he=document.getElementById("hEqs");
-    if(he)he.textContent=String(chain[chain.length-1].eqs);
-  }
-  var hc=document.getElementById("hChain");
-  if(hc)hc.textContent=String(chain.length);
-  setStatus("готова",true);
-  setAv("◈");
-  var hash=(location.hash||"").replace("#","");
-  if(titles[hash])openPanel(hash);
-  else openPanel("home");
-}
+function tick(){try{var f=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"});var el=document.getElementById("hMsk");if(el)el.textContent=f.format(new Date());}catch(e){}}
+function boot(){ensureProto();renderChat();renderNotes();renderId();renderProof();tick();setInterval(tick,1000);var chain=loadLedger();if(chain.length){var fs=document.getElementById("footSig");if(fs)fs.textContent=chain[chain.length-1].sig;var he=document.getElementById("hEqs");if(he)he.textContent=String(chain[chain.length-1].eqs);}var hc=document.getElementById("hChain");if(hc)hc.textContent=String(chain.length);setStatus("ready",true);setAv("*");var hash=(location.hash||"").replace("#","");if(titles[hash])openPanel(hash);else openPanel("home");}
 boot();
 })();
 </script>
