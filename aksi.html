@@ -3,132 +3,105 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#09090b">
+<meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — личный помощник">
+<meta name="apple-mobile-web-app-title" content="АКСИ">
+<meta name="description" content="АКСИ — личный помощник. Отвечает, запоминает, работает на вашем устройстве.">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>АКСИ</title>
 <style>
-:root{--bg:#09090b;--elev:#111113;--card:#18181b;--line:#27272a;--t:#fafafa;--m:#a1a1aa;--dim:#71717a;--a2:#7c3aed;--ok:#4ade80;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px}
-*{box-sizing:border-box;margin:0;padding:0}html{height:100%}
-body{min-height:100%;min-height:100dvh;background:var(--bg);color:var(--t);font:15px/1.5 var(--font);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;padding-top:env(safe-area-inset-top,0px)}
-@media(min-width:768px){:root{--pad:20px;--max:800px}body{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
-header{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px var(--pad);border-bottom:1px solid var(--line);background:rgba(9,9,11,.94);backdrop-filter:blur(16px);position:sticky;top:0;z-index:30}
-.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#6d28d9,#a78bfa);display:grid;place-items:center;font:700 13px/1 var(--font)}
-header h1{font-size:15px;font-weight:650}header .sub{font-size:11px;color:var(--m)}
-#st{margin-left:auto;font-size:11px;color:var(--ok)}
-nav{display:flex;gap:4px;padding:8px var(--pad);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;position:sticky;top:56px;z-index:20;background:var(--bg)}
-nav::-webkit-scrollbar{display:none}
-nav button{flex:0 0 auto;min-height:36px;padding:8px 14px;border-radius:999px;border:0;background:0;color:var(--m);font:12.5px/1 var(--font);font-weight:500}
-nav button.on{background:var(--card);color:var(--t)}
-main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(88px + var(--safe-b))}
-.panel{display:none}.panel.on{display:block}
-#thread{display:flex;flex-direction:column;gap:12px}
-.msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:min(92%,440px);padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.5}
-.msg.me .bub{background:var(--a2);color:#fff;border-bottom-right-radius:5px}
-.msg.ai .bub{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:5px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.chip{min-height:36px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--elev);color:var(--t);font-size:12.5px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-.card h2{font-size:14px;margin:0 0 8px}.muted{color:var(--m);font-size:13px;line-height:1.55}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{min-height:42px;padding:10px 16px;border-radius:12px;border:1px solid var(--line);background:var(--elev);color:var(--t);font:13px/1 var(--font)}.btn.p{background:var(--a2);border:0;color:#fff}
-input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--t);font:inherit;outline:0}
-textarea{min-height:110px;resize:vertical}
-.fact{padding:12px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13px;background:var(--bg)}
-.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;min-width:28px;min-height:28px}
-.bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));display:flex;gap:10px;background:linear-gradient(transparent,var(--bg) 35%);z-index:40}
-.bar input{flex:1;min-height:48px;padding:12px 16px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--t);font:inherit}
-.bar button{width:48px;height:48px;border-radius:14px;border:0;background:var(--a2);color:#fff;font-size:18px;flex-shrink:0}
+:root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--accent:#8b5cf6;--accent2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:16px;--max:680px}
+*{box-sizing:border-box;margin:0;padding:0}html{height:100%;-webkit-text-size-adjust:100%}
+body{min-height:100%;min-height:100dvh;background:var(--bg);color:var(--t);font:15px/1.55 var(--font);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;padding-top:env(safe-area-inset-top,0px);-webkit-font-smoothing:antialiased}
+@media(min-width:768px){:root{--pad:24px;--max:720px}body{border-left:1px solid var(--line);border-right:1px solid var(--line);font-size:15.5px}}
+header{display:flex;align-items:center;gap:12px;padding:14px var(--pad);border-bottom:1px solid var(--line);background:rgba(10,10,12,.9);backdrop-filter:blur(20px);position:sticky;top:0;z-index:40}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:grid;place-items:center;font:700 14px/1 var(--font);color:#fff;box-shadow:0 4px 20px rgba(139,92,246,.3)}
+header h1{font-size:16px;font-weight:650;letter-spacing:-.02em}header p{font-size:12px;color:var(--m);margin-top:1px}
+#dot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px rgba(52,211,153,.5)}
+nav{display:flex;gap:2px;padding:8px var(--pad);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;background:var(--bg);position:sticky;top:68px;z-index:30}nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;padding:9px 14px;border:0;border-radius:10px;background:transparent;color:var(--m);font:13px/1 var(--font);font-weight:500;-webkit-tap-highlight-color:transparent}nav button.on{background:var(--s2);color:var(--t)}
+main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(96px + var(--safe-b));-webkit-overflow-scrolling:touch}.panel{display:none}.panel.on{display:block}
+#thread{display:flex;flex-direction:column;gap:14px;min-height:120px}.msg{display:flex;animation:up .25s ease}@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.msg.me{justify-content:flex-end}
+.bub{max-width:min(90%,420px);padding:12px 15px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.5}
+.msg.me .bub{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;border-bottom-right-radius:6px}.msg.ai .bub{background:var(--s2);border:1px solid var(--line);border-bottom-left-radius:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.chip{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:13px;-webkit-tap-highlight-color:transparent}
+@media(min-width:768px){.chip:hover{border-color:var(--accent);background:rgba(139,92,246,.08);cursor:pointer}}
+.card{background:var(--s2);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px}.card h2{font-size:14px;font-weight:600;margin:0 0 8px}.muted{color:var(--m);font-size:13.5px;line-height:1.55}.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{min-height:44px;padding:11px 18px;border-radius:12px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:13.5px/1 var(--font);font-weight:500}.btn.p{background:linear-gradient(135deg,var(--accent2),var(--accent));border:0;color:#fff}
+input,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit;outline:0}textarea{min-height:120px;resize:vertical}input:focus,textarea:focus{border-color:rgba(139,92,246,.5)}
+.fact{padding:13px 14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;font-size:13.5px;background:var(--s1);line-height:1.4}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:18px;line-height:1;padding:0 4px;min-width:28px;min-height:28px}
+.bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:12px var(--pad) calc(12px + var(--safe-b));display:flex;gap:10px;align-items:center;background:linear-gradient(transparent,var(--bg) 28%);z-index:50}
+.bar input{flex:1;min-height:50px;padding:13px 16px;border-radius:16px;border:1px solid var(--line);background:var(--s2);color:var(--t);font:inherit}.bar button{width:50px;height:50px;border-radius:16px;border:0;background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;font-size:18px;flex-shrink:0;box-shadow:0 4px 16px rgba(109,40,217,.35)}
+.hero{text-align:center;padding:28px 12px 8px}.hero h2{font-size:22px;font-weight:650;letter-spacing:-.03em;margin-bottom:8px}.hero p{color:var(--m);font-size:14px;line-height:1.5;max-width:320px;margin:0 auto}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">A</div>
-  <div><h1>АКСИ</h1><div class="sub">личный помощник</div></div>
-  <span id="st">онлайн</span>
-</header>
+<header><div class="logo">A</div><div><h1>АКСИ</h1><p>личный помощник</p></div><span id="dot" title="на связи"></span></header>
 <nav>
-  <button type="button" class="on" data-tab="chat">Чат</button>
-  <button type="button" data-tab="teach">Учить</button>
-  <button type="button" data-tab="mem">Память</button>
-  <button type="button" data-tab="about">О себе</button>
+<button type="button" class="on" data-tab="chat">Чат</button>
+<button type="button" data-tab="teach">Учить</button>
+<button type="button" data-tab="mem">Память</button>
+<button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
 <section class="panel on" id="tab-chat">
-  <div id="thread"></div>
-  <div class="chips">
-    <button type="button" class="chip" data-ask="привет">привет</button>
-    <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-    <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
-    <button type="button" class="chip" data-ask="что ты знаешь">что помнишь</button>
-  </div>
+<div id="thread"></div>
+<div class="chips" id="chips">
+<button type="button" class="chip" data-ask="привет">привет</button>
+<button type="button" class="chip" data-ask="кто ты">кто ты</button>
+<button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
+<button type="button" class="chip" data-ask="что ты знаешь">что помнишь</button>
+</div>
 </section>
 <section class="panel" id="tab-teach">
-  <div class="card">
-    <h2>Научи меня</h2>
-    <p class="muted">Или напиши в чате: <b>запомни: …</b></p>
-    <textarea id="teachBox" placeholder="Меня зовут Альфия" style="margin-top:10px"></textarea>
-    <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div>
-  </div>
+<div class="card"><h2>Научи меня</h2>
+<p class="muted">Напиши факты — я запомню. В чате: <b>запомни: …</b></p>
+<textarea id="teachBox" placeholder="Меня зовут Альфия" style="margin-top:12px"></textarea>
+<div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div>
 </section>
 <section class="panel" id="tab-mem">
-  <div class="card">
-    <h2>Что я помню · <span id="memN">0</span></h2>
-    <div id="memList"></div>
-    <div class="row">
-      <button type="button" class="btn" id="btnExp">Сохранить</button>
-      <button type="button" class="btn" id="btnImp">Загрузить</button>
-      <button type="button" class="btn" id="btnWipe">Забыть всё</button>
-    </div>
-    <input type="file" id="impFile" accept=".json" hidden>
-  </div>
+<div class="card"><h2>Что я помню · <span id="memN">0</span></h2><div id="memList"></div>
+<div class="row">
+<button type="button" class="btn" id="btnExp">Сохранить файл</button>
+<button type="button" class="btn" id="btnImp">Загрузить файл</button>
+<button type="button" class="btn" id="btnWipe">Забыть всё</button>
+</div>
+<input type="file" id="impFile" accept=".json" hidden></div>
 </section>
 <section class="panel" id="tab-about">
-  <div class="card">
-    <h2>Кто я</h2>
-    <p class="muted">АКСИ — твой личный помощник. Отвечаю, учусь фактам и храню их у тебя на устройстве.</p>
-  </div>
-  <div class="card">
-    <h2>Связь</h2>
-    <p class="muted">aksilove@internet.ru</p>
-  </div>
+<div class="hero"><h2>АКСИ</h2><p>Личный помощник, который отвечает и запоминает то, чему вы его учите.</p></div>
+<div class="card"><h2>Что внутри</h2><p class="muted">Чат · обучение фактам · память на вашем устройстве · сохранение и перенос памяти файлом</p></div>
+<div class="card"><h2>Связь</h2><p class="muted">aksilove@internet.ru</p></div>
 </section>
 </main>
-<div class="bar">
-  <input id="inp" type="text" placeholder="Напиши мне…" enterkeyhint="send" autocomplete="off">
-  <button type="button" id="send">↑</button>
-</div>
+<div class="bar"><input id="inp" type="text" placeholder="Написать АКСИ…" enterkeyhint="send" autocomplete="off"><button type="button" id="send" aria-label="Отправить">↑</button></div>
 <script>
 (function(){
 "use strict";
-var KEY="aksi_v12_mem", VER="1.2", busy=false;
+var KEY="aksi_mem_v2",busy=false;
 function $(id){return document.getElementById(id);}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function status(t){var el=$("st");if(el)el.textContent=t;}
 function loadMem(){try{var a=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(a)?a.filter(function(x){return x&&typeof x.t==="string"&&x.t.trim();}):[];}catch(e){return[];}}
-function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a.slice(0,500)));}catch(e){}renderMem();}
-function addFact(t,src){t=String(t||"").trim();if(!t||t.length>2000)return false;var a=loadMem();for(var i=0;i<a.length;i++)if(a[i].t.toLowerCase()===t.toLowerCase()){a.splice(i,1);break;}a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t:t,src:src||"u",ts:Date.now()});saveMem(a);return true;}
-function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='muted'>Пока пусто — научи меня</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+esc(x.id)+"'>×</button>"+esc(x.t)+"</div>";}).join("");}
+function saveMem(a){try{localStorage.setItem(KEY,JSON.stringify(a.slice(0,400)));}catch(e){}renderMem();}
+function addFact(t){t=String(t||"").trim();if(!t||t.length>1800)return false;var a=loadMem(),low=t.toLowerCase();for(var i=0;i<a.length;i++)if(a[i].t.toLowerCase()===low){a.splice(i,1);break;}a.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:t,ts:Date.now()});saveMem(a);return true;}
+function renderMem(){var a=loadMem(),n=$("memN"),list=$("memList");if(n)n.textContent=String(a.length);if(!list)return;if(!a.length){list.innerHTML="<p class='muted'>Пока пусто. Научите меня во вкладке «Учить».</p>";return;}list.innerHTML=a.map(function(x){return "<div class='fact'><button type='button' data-del='"+esc(x.id)+"' aria-label='удалить'>×</button>"+esc(x.t)+"</div>";}).join("");}
 function showTab(name){document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name);});var el=$("tab-"+name);if(el)el.classList.add("on");if(name==="mem")renderMem();}
-function bubble(role,text){var th=$("thread");if(!th)return;var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML="<div class='bub'>"+esc(text)+"</div>";th.appendChild(d);var main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;}
+function bubble(role,text){var th=$("thread");if(!th)return;var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"ai");d.innerHTML="<div class='bub'>"+esc(text)+"</div>";th.appendChild(d);var main=document.querySelector("main");if(main)main.scrollTop=main.scrollHeight;var chips=$("chips");if(chips&&th.children.length>2)chips.style.display="none";}
 var STOP={"и":1,"в":1,"не":1,"на":1,"я":1,"с":1,"что":1,"а":1,"то":1,"как":1,"это":1,"по":1,"из":1,"за":1,"от":1,"для":1,"но":1,"да":1,"ты":1,"вы":1,"мы":1,"он":1,"она":1,"они":1,"же":1,"бы":1,"ли":1,"или":1,"если":1,"уже":1,"еще":1,"ещё":1,"только":1,"может":1,"есть":1,"the":1,"a":1,"is":1,"to":1,"of":1};
 function stem(w){w=w.toLowerCase();if(w.length<5)return w;var ends=["иями","ями","ами","иях","ях","ов","ев","ом","ем","ах","ию","ью","ия","ья","ие","ье","ый","ий","ой","ая","яя","ое","ее","ые","ишь","ешь","ите","ете","ать","ять","ить"];for(var i=0;i<ends.length;i++){var e=ends[i];if(w.length-e.length>=3&&w.slice(-e.length)===e)return w.slice(0,-e.length);}return w;}
 function tokens(s){return String(s).toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-я0-9\s]+/g," ").split(/\s+/).map(stem).filter(function(w){return w.length>1&&!STOP[w];});}
-function uniq(arr){var o={},out=[],i;for(i=0;i<arr.length;i++)if(!o[arr[i]]){o[arr[i]]=1;out.push(arr[i]);}return out;}
-function overlapScore(qTokens,text){var tt=tokens(text),set={},i,sc=0;for(i=0;i<tt.length;i++)set[tt[i]]=1;for(i=0;i<qTokens.length;i++)if(set[qTokens[i]])sc+=1;if(tt.length)sc+=sc/Math.max(tt.length,1)*0.5;return sc;}
-var KB=[{k:["кто","ты","представься","акси"],a:"Я АКСИ — твой личный помощник.\n\nОтвечаю на вопросы и запоминаю то, чему ты меня учишь.\n\naksilove@internet.ru"},{k:["привет","здравств","добрый","hello","hi"],a:"Привет. Я здесь.\n\nМожешь спросить что угодно или сразу: запомни: …"},{k:["умеешь","возможн","команд","help","помоги","функци"],a:"Могу:\n• отвечать на вопросы\n• запоминать факты — напиши «запомни: …»\n• показывать, что помню\n• сохранять и загружать память"},{k:["контакт","email","почта"],a:"aksilove@internet.ru"},{k:["продукт","прода","цена","куп"],a:"По вопросам — aksilove@internet.ru"},{k:["офлайн","облако","приват","безопас"],a:"Всё хранится у тебя на устройстве. Я не отправляю твои факты на чужие серверы."},{k:["учить","запомн","обуч","памят","факт"],a:"Напиши: запомни: любой факт\nИли открой вкладку «Учить».\nПотом спроси: что ты знаешь"}];
-function intent(q){var low=q.toLowerCase().trim();if(/^(запомни|выучи|remember)\s*[:\s]/.test(low))return"teach";if(/забудь всё|очисти память/.test(low))return"wipe";if(/что ты знаешь|что помнишь|моя память|покажи факт/.test(low))return"list";if(/который час|сколько времени|время сейчас|какая дата|какое число/.test(low))return"time";if(/^(привет|здравств|добрый|hello|hi)\b/.test(low))return"hi";return"ask";}
-function retrieve(q){var qt=uniq(tokens(q)),hits=[],i,s,low=q.toLowerCase();var mem=loadMem();for(i=0;i<mem.length;i++){s=overlapScore(qt,mem[i].t);if(low.length>2&&mem[i].t.toLowerCase().indexOf(low)!==-1)s+=3;if(s>0)hits.push({text:mem[i].t,score:s+1.5,src:"mem"});}for(i=0;i<KB.length;i++){s=overlapScore(qt,KB[i].k.join(" ")+" "+KB[i].a);for(var j=0;j<KB[i].k.length;j++)if(low.indexOf(KB[i].k[j])!==-1)s+=2.5;if(s>0)hits.push({text:KB[i].a,score:s,src:"kb"});}hits.sort(function(a,b){return b.score-a.score;});return hits;}
-function answer(q){q=String(q||"").trim();if(!q)return"";var it=intent(q);if(it==="teach"){var raw=q.replace(/^(запомни|выучи|remember)\s*[:\s]*/i,"").trim();if(!raw)return"Напиши так:\nзапомни: меня зовут Альфия";addFact(raw,"chat");return"Запомнила.\n«"+raw+"»";}if(it==="wipe"){saveMem([]);return"Хорошо, всё забыла.";}if(it==="list"){var a=loadMem();if(!a.length)return"Пока ничего не помню.\nНаучи меня: запомни: …";return"Вот что помню:\n\n"+a.slice(0,20).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}if(it==="time"){try{return"Сейчас:\n"+new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"medium"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}if(it==="hi")return"Привет. Чем могу помочь?";var hits=retrieve(q);if(!hits.length)return"Не уверена. Попробуй иначе — или научи меня:\nзапомни: …";if(hits[0].src==="kb"&&hits[0].score>=3)return hits[0].text;var memHits=hits.filter(function(h){return h.src==="mem"&&h.score>=1;}).slice(0,5);if(memHits.length){if(memHits.length===1)return memHits[0].text;return memHits.map(function(h,i){return (i+1)+". "+h.text;}).join("\n");}if(hits[0].score>=1.5)return hits[0].text;return hits[0].text;}
-function chat(q){q=String(q||"").trim();if(!q||busy)return;busy=true;try{bubble("me",q);var inp=$("inp");if(inp)inp.value="";status("…");var text=answer(q)||"Попробуй переформулировать.";bubble("ai",text);status("онлайн");showTab("chat");}catch(e){bubble("ai","Что-то пошло не так. Попробуй ещё раз.");status("онлайн");}busy=false;}
-document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("button,[data-tab],[data-ask],[data-del]"):e.target;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}if(el.id==="send"){chat(($("inp")||{}).value||"");return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!String(v).trim())return;var n=0;String(v).split(/\n+/).forEach(function(line){if(line.trim()&&addFact(line.trim(),"teach"))n++;});if(box)box.value="";bubble("ai","Запомнила"+(n>1?" ("+n+")":"")+".");showTab("chat");return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Забыть всё?"))saveMem([]);return;}});
+function uniq(a){var o={},r=[],i;for(i=0;i<a.length;i++)if(!o[a[i]]){o[a[i]]=1;r.push(a[i]);}return r;}
+function score(qt,text){var tt=tokens(text),set={},i,sc=0;for(i=0;i<tt.length;i++)set[tt[i]]=1;for(i=0;i<qt.length;i++)if(set[qt[i]])sc++;if(tt.length)sc+=sc/Math.max(tt.length,1)*0.4;return sc;}
+var KB=[{k:["кто","ты","представься","акси"],a:"Я АКСИ — ваш личный помощник.\n\nОтвечаю на вопросы и запоминаю то, чему вы меня учите. Всё остаётся у вас на устройстве.\n\naksilove@internet.ru"},{k:["привет","здравств","добрый","hello","hi"],a:"Привет. Рада вас видеть.\n\nСпросите что угодно — или научите меня: запомни: …"},{k:["умеешь","возможн","команд","помоги","функци"],a:"Я умею:\n• отвечать на ваши вопросы\n• запоминать факты (напишите «запомни: …»)\n• показывать, что помню\n• сохранять память в файл и загружать обратно"},{k:["контакт","email","почта","связь"],a:"aksilove@internet.ru"},{k:["спасибо","благодар"],a:"Пожалуйста. Я рядом, если понадоблюсь."},{k:["офлайн","приват","безопас","данн","сервер"],a:"Ваши факты хранятся только на этом устройстве. Я не отправляю их на чужие серверы."},{k:["учить","запомн","обуч","памят","факт"],a:"Напишите в чате:\nзапомни: любой факт\n\nИли откройте вкладку «Учить» и вставьте несколько строк."}];
+function intent(q){var low=q.toLowerCase().trim();if(/^(запомни|выучи)\s*[:\s]/.test(low))return"teach";if(/забудь всё|очисти память|забыть всё/.test(low))return"wipe";if(/что ты знаешь|что помнишь|моя память|покажи что помн/.test(low))return"list";if(/который час|сколько времени|время сейчас|какая дата|какое число|какой сегодня/.test(low))return"time";if(/^(привет|здравств|добрый день|добрый вечер|hello|hi)\b/.test(low))return"hi";return"ask";}
+function retrieve(q){var qt=uniq(tokens(q)),hits=[],i,s,low=q.toLowerCase();var mem=loadMem();for(i=0;i<mem.length;i++){s=score(qt,mem[i].t);if(low.length>3&&mem[i].t.toLowerCase().indexOf(low)!==-1)s+=3;if(s>0)hits.push({text:mem[i].t,score:s+1.2,src:"mem"});}for(i=0;i<KB.length;i++){s=score(qt,KB[i].k.join(" ")+" "+KB[i].a);for(var j=0;j<KB[i].k.length;j++)if(low.indexOf(KB[i].k[j])!==-1)s+=2.2;if(s>0)hits.push({text:KB[i].a,score:s,src:"kb"});}hits.sort(function(a,b){return b.score-a.score;});return hits;}
+function answer(q){q=String(q||"").trim();if(!q)return"";var it=intent(q);if(it==="teach"){var raw=q.replace(/^(запомни|выучи)\s*[:\s]*/i,"").trim();if(!raw)return"Напишите так:\nзапомни: меня зовут Альфия";addFact(raw);return"Запомнила.\n«"+raw+"»";}if(it==="wipe"){saveMem([]);return"Хорошо. Всё забыла.";}if(it==="list"){var a=loadMem();if(!a.length)return"Пока ничего не помню.\nНаучите меня: запомни: …";return"Вот что помню:\n\n"+a.slice(0,20).map(function(x,i){return (i+1)+". "+x.t;}).join("\n");}if(it==="time"){try{return new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",dateStyle:"full",timeStyle:"short"}).format(new Date());}catch(e){return new Date().toLocaleString("ru-RU");}}if(it==="hi")return"Привет. Чем могу помочь?";var hits=retrieve(q);if(!hits.length)return"Не уверена. Попробуйте иначе — или научите меня:\nзапомни: …";if(hits[0].src==="kb"&&hits[0].score>=2.8)return hits[0].text;var memHits=hits.filter(function(h){return h.src==="mem"&&h.score>=1;}).slice(0,4);if(memHits.length===1)return memHits[0].text;if(memHits.length>1)return memHits.map(function(h,i){return (i+1)+". "+h.text;}).join("\n");return hits[0].text;}
+function chat(q){q=String(q||"").trim();if(!q||busy)return;busy=true;try{bubble("me",q);var inp=$("inp");if(inp)inp.value="";var text=answer(q)||"Попробуйте переформулировать.";bubble("ai",text);showTab("chat");}catch(e){bubble("ai","Что-то пошло не так. Попробуйте ещё раз.");}busy=false;}
+document.addEventListener("click",function(e){var el=e.target.closest?e.target.closest("button,[data-tab],[data-ask],[data-del]"):e.target;if(!el)return;var tab=el.getAttribute("data-tab");if(tab){showTab(tab);return;}var ask=el.getAttribute("data-ask");if(ask){chat(ask);return;}var del=el.getAttribute("data-del");if(del){saveMem(loadMem().filter(function(x){return x.id!==del;}));return;}if(el.id==="send"){chat(($("inp")||{}).value||"");return;}if(el.id==="btnTeach"){var box=$("teachBox"),v=box&&box.value;if(!v||!String(v).trim())return;var n=0;String(v).split(/\n+/).forEach(function(line){if(line.trim()&&addFact(line.trim()))n++;});if(box)box.value="";bubble("ai",n===1?"Запомнила.":"Запомнила "+n+" фактов.");showTab("chat");return;}if(el.id==="btnExp"){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({facts:loadMem()},null,2)],{type:"application/json"}));a.download="aksi-memory.json";a.click();return;}if(el.id==="btnImp"){var f=$("impFile");if(f)f.click();return;}if(el.id==="btnWipe"){if(confirm("Забыть всё, чему вы меня учили?"))saveMem([]);return;}});
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target&&e.target.id==="inp"){e.preventDefault();chat(e.target.value);}});
-var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result),facts=j.facts||[],cur=loadMem();facts.forEach(function(x){if(x&&x.t)cur.unshift({id:x.id||Date.now().toString(36),t:String(x.t),src:"imp",ts:Date.now()});});saveMem(cur);}catch(err){}};r.readAsText(f);e.target.value="";});
-try{if(!localStorage.getItem("aksi_v12_seed")){["Контакт: aksilove@internet.ru"].forEach(function(t){addFact(t,"seed");});localStorage.setItem("aksi_v12_seed","1");}}catch(e){}
-renderMem();status("онлайн");
-bubble("ai","Привет. Я АКСИ.\n\nМожешь сразу спросить или научить меня: запомни: …");
+var imp=$("impFile");if(imp)imp.addEventListener("change",function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var j=JSON.parse(r.result),facts=j.facts||[],cur=loadMem();facts.forEach(function(x){if(x&&x.t)cur.unshift({id:x.id||Date.now().toString(36),t:String(x.t),ts:Date.now()});});saveMem(cur);bubble("ai","Память загружена.");showTab("chat");}catch(err){}};r.readAsText(f);e.target.value="";});
+renderMem();
+bubble("ai","Привет. Я АКСИ — ваш личный помощник.\n\nСпросите что угодно или научите меня: запомни: …");
 })();
 </script>
 </body>
