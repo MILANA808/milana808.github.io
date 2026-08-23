@@ -1,4 +1,4 @@
-name: AKSI site verification
+name: AKSI verification
 on:
   push:
     branches: [main]
@@ -11,33 +11,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Required files
+      - name: Required runtime files
         run: |
           set -e
           test -f index.html
-          test -f matrix.html
+          test -f aksi.html
           test -f 404.html
-      - name: matrix has chat core
+          test -f aksi-core.js
+          test -f aksi-runtime.js
+          test -f aksi-global.js
+          test -f aksi-global.css
+      - name: JavaScript syntax
         run: |
           set -e
-          grep -q 'function chat' matrix.html
-          grep -qi 'акси' matrix.html
-          grep -qi 'акси' index.html
-          grep -qi 'акси' 404.html
-      - name: JS syntax
+          for f in aksi-core.js aksi-runtime.js aksi-global.js; do node --check "$f"; done
+      - name: HTML sanity
         run: |
-          set -e
-          find . -type f -name '*.js' -not -path './.git/*' -not -path './node_modules/*' -print0 | while IFS= read -r -d '' f; do
-            node --check "$f" || exit 1
-          done
-          echo OK
-      - name: HTML tags
+          python3 - <<'PY'
+          from pathlib import Path
+          for p in Path('.').rglob('*.html'):
+              if '.git' in p.parts or 'node_modules' in p.parts: continue
+              s=p.read_text(encoding='utf-8',errors='replace').lower()
+              assert '<html' in s and '</html>' in s, p
+          print('HTML OK')
+          PY
+      - name: Runtime contract
         run: |
-          python3 -c "
-from pathlib import Path
-for p in Path('.').rglob('*.html'):
-  if '.git' in p.parts or 'node_modules' in p.parts: continue
-  s=p.read_text(encoding='utf-8',errors='replace').lower()
-  assert '<html' in s and '</html>' in s, p
-print('HTML OK')
-"
+          grep -q 'AKSI-RESULT-1' aksi-runtime.js
+          grep -q 'localFirst:true' aksi-runtime.js
+          grep -q 'AKSI-EVENT-4' aksi-core.js
+          grep -q 'SHA-256' aksi-core.js
+      - name: No obvious secret literals
+        run: |
+          ! grep -RInE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}' --exclude-dir=.git --exclude='*.map' .
