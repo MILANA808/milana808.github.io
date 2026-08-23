@@ -1,36 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0a0a0c">
-<meta name="description" content="AKSI — Sovereign Agent Layer. Личный агент и платформа владения.">
-<title>AKSI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#09090b">
+<meta name="description" content="АКСИ — персональная local-first когнитивная система.">
+<title>АКСИ — личная когнитивная система</title>
 <style>
-:root{--bg:#0a0a0c;--card:#141418;--line:#2a2a32;--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--a2:#7c3aed;--font:system-ui,-apple-system,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-body{min-height:100vh;background:var(--bg);color:var(--t);font:16px/1.5 var(--font);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;-webkit-font-smoothing:antialiased}
-.logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 20px/1 var(--font);margin:0 auto 20px;box-shadow:0 8px 32px rgba(124,58,237,.35)}
-h1{font-size:28px;font-weight:700;letter-spacing:-.03em;text-align:center;margin-bottom:8px}
-.sub{color:var(--m);text-align:center;max-width:360px;margin:0 auto 28px;font-size:15px;line-height:1.5}
-.actions{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px}
-a.btn{display:block;text-align:center;padding:14px 18px;border-radius:14px;text-decoration:none;font-weight:600;font-size:15px}
-a.p{background:linear-gradient(135deg,var(--a2),var(--a));color:#fff}
-a.g{border:1px solid var(--line);color:var(--t);background:var(--card)}
-footer{margin-top:36px;font-size:13px;color:var(--m);text-align:center}
-footer a{color:var(--a);text-decoration:none}
+:root{--bg:#09090b;--panel:#141416;--line:#27272a;--text:#f4f4f5;--muted:#a1a1aa;--accent:#8b5cf6;--ok:#86efac;font-family:system-ui,-apple-system,sans-serif}*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:var(--bg);color:var(--text);display:grid;place-items:center;padding:24px}main{width:min(680px,100%)}.mark{width:54px;height:54px;border-radius:16px;background:var(--accent);display:grid;place-items:center;font-weight:800;margin-bottom:18px}h1{font-size:34px;letter-spacing:-.04em;margin:0 0 8px}p{color:var(--muted);line-height:1.55}.lead{font-size:17px;max-width:570px}.status{margin:24px 0;padding:14px 16px;border:1px solid var(--line);background:var(--panel);border-radius:14px;font-size:13px}.ok{color:var(--ok)}.actions{display:grid;gap:10px;margin-top:18px}.btn{display:block;text-align:center;text-decoration:none;padding:14px 16px;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-weight:650}.primary{background:var(--accent);border-color:var(--accent)}.small{font-size:12px;margin-top:22px}code{font-family:ui-monospace,monospace}
 </style>
 </head>
 <body>
-  <div>
-    <div class="logo">A</div>
-    <h1>AKSI</h1>
-    <p class="sub">Sovereign Agent Layer — слой личных агентов. Память и владение у вас.</p>
-    <div class="actions">
-      <a class="btn p" href="aksi.html?v=2">Открыть агента</a>
-      <a class="btn g" href="platform.html">Манифест платформы</a>
-    </div>
-    <footer>aksilove@internet.ru</footer>
-  </div>
-</body>
-</html>
+<main>
+<div class="mark">A</div>
+<h1>АКСИ</h1>
+<p class="lead">Персональная <b>local-first</b> когнитивная система: диалог, память, обучение и проверяемый след результата.</p>
+<div class="status"><span class="ok">●</span> <span id="state">Запускаю локальное ядро…</span></div>
+<div class="actions">
+<a class="btn primary" href="aksi.html">Начать диалог</a>
+<a class="btn" href="aksi-verifier.html">Проверить результат</a>
+<a class="btn" href="aksi-quantum.html">Инженерный режим</a>
+</div>
+<p class="small">АКСИ не заявляет AGI или квантовое превосходство. Хэш подтверждает целостность записи, а не истинность утверждения.</p>
+</main>
+<script src="/aksi-runtime.js"></script>
+<script src="/aksi-global.js" defer></script>
+<script>
+(async()=>{try{const a=await window.AKSI_BOOT;const s=await a.status();document.getElementById('state').textContent='Local-first · '+(s.modules.core?'ядро доступно':'ядро недоступно')+' · '+(s.modules.crypto?'криптография доступна':'криптография недоступна')}catch(e){document.getElementById('state').textContent='Локальный режим · диагностика недоступна'}})();
+</script>
+</body></html>
