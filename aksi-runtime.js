@@ -1,24 +1,25 @@
-/* AKSI Runtime v2 — local identity, memory, proof and universal UI loader. */
-(function(){'use strict';
-const LEDGER='AKSI_COGNITIVE_LEDGER_V2',enc=new TextEncoder();
+/* AKSI Runtime v5 — one browser runtime. Local-first; proof is integrity, not truth. */
+(function(g){'use strict';
+const VERSION='5.0.0', enc=new TextEncoder();
 const stable=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(stable).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';
-async function sha256(t){const b=await crypto.subtle.digest('SHA-256',enc.encode(String(t)));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function db(){return new Promise((r,j)=>{const q=indexedDB.open('aksi-runtime-v2',1);q.onupgradeneeded=()=>{const d=q.result;if(!d.objectStoreNames.contains('identity'))d.createObjectStore('identity',{keyPath:'id'});if(!d.objectStoreNames.contains('memory'))d.createObjectStore('memory',{keyPath:'id',autoIncrement:true})};q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
-async function get(store,key){const d=await db();return new Promise((r,j)=>{const q=d.transaction(store).objectStore(store).get(key);q.onsuccess=()=>r(q.result||null);q.onerror=()=>j(q.error)})}
-async function put(store,v){const d=await db();return new Promise((r,j)=>{const t=d.transaction(store,'readwrite');t.objectStore(store).put(v);t.oncomplete=()=>r(v);t.onerror=()=>j(t.error)})}
-async function identity(){let s=await get('identity','primary');if(s)return s;let pair,algorithm='Ed25519';try{pair=await crypto.subtle.generateKey({name:'Ed25519'},false,['sign','verify'])}catch(_){algorithm='ECDSA-P256';pair=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},false,['sign','verify'])}s={id:'primary',schema:'AKSI-IDENTITY-2',algorithm,publicKey:await crypto.subtle.exportKey('jwk',pair.publicKey),privateKey:pair.privateKey,createdAt:new Date().toISOString()};return put('identity',s)}
-function b64(bytes){return btoa(String.fromCharCode(...new Uint8Array(bytes)))}
-function unb64(value){const raw=atob(value);return Uint8Array.from(raw,c=>c.charCodeAt(0))}
-async function sign(data){const s=await identity();try{const a=s.algorithm==='Ed25519'?{name:'Ed25519'}:{name:'ECDSA',hash:'SHA-256'};return b64(await crypto.subtle.sign(a,s.privateKey,enc.encode(stable(data))))}catch(_){return null}}
-async function verifySignature(data,signature,publicKey,algorithm){if(!signature||!publicKey)return false;try{const key=await crypto.subtle.importKey('jwk',publicKey,algorithm==='Ed25519'?{name:'Ed25519'}:{name:'ECDSA',namedCurve:'P-256'},false,['verify']);const a=algorithm==='Ed25519'?{name:'Ed25519'}:{name:'ECDSA',hash:'SHA-256'};return await crypto.subtle.verify(a,key,unb64(signature),enc.encode(stable(data)))}catch(_){return false}}
-function ledger(){try{return JSON.parse(localStorage.getItem(LEDGER)||'[]')}catch(_){return[]}}
-async function appendEvidence(subject,source,status,extra){const l=ledger(),prev=l.length?l[l.length-1].event_hash:'GENESIS',id=await identity();const e={schema:'AKSI-EVIDENCE-4',subject:String(subject),source:source||'local',status:status||'unverified',created_at:new Date().toISOString(),previous_hash:prev,extra:extra||null,algorithm:id.algorithm,public_key:id.publicKey};e.canonical=stable(e);e.event_hash=await sha256(e.canonical);e.signature=await sign(e);l.push(e);localStorage.setItem(LEDGER,JSON.stringify(l));return e}
-async function verifyLedger(){const l=ledger();let p='GENESIS';let legacy=0;for(let i=0;i<l.length;i++){const e=l[i],x={schema:e.schema,subject:e.subject,source:e.source,status:e.status,created_at:e.created_at,previous_hash:p,extra:e.extra||null};if(e.algorithm)x.algorithm=e.algorithm;if(e.public_key)x.public_key=e.public_key;if(e.previous_hash!==p||e.canonical!==stable(x)||e.event_hash!==await sha256(stable(x)))return{ok:false,index:i,count:l.length,reason:'hash-chain'};if(e.signature&&e.public_key&&e.algorithm){const signed={...x,event_hash:e.event_hash};if(!(await verifySignature(signed,e.signature,e.public_key,e.algorithm)))return{ok:false,index:i,count:l.length,reason:'signature'}}else legacy++;p=e.event_hash}return{ok:true,count:l.length,head:p,legacy_signatures:legacy}}
-async function remember(type,content,source){const v={type:type||'note',content:String(content||''),source:source||'user',created_at:new Date().toISOString()};v.hash=await sha256(stable(v));await put('memory',v);await appendEvidence('memory:'+v.hash,source||'user','stored',{type:v.type});return v}
-async function memory(){const d=await db();return new Promise((r,j)=>{const q=d.transaction('memory').objectStore('memory').getAll();q.onsuccess=()=>r(q.result||[]);q.onerror=()=>j(q.error)})}
-async function selfTest(){const t=[];try{t.push(['WebCrypto',!!crypto.subtle]);t.push(['SHA-256',/^[0-9a-f]{64}$/.test(await sha256('AKSI'))]);await identity();t.push(['Identity',true]);await appendEvidence('runtime self-test','aksi-runtime','computed');t.push(['Ledger',(await verifyLedger()).ok]);const l=ledger();l.pop();localStorage.setItem(LEDGER,JSON.stringify(l));t.push(['IndexedDB',!!indexedDB])}catch(_){t.push(['Runtime',false])}return{ok:t.every(x=>x[1]),tests:t}}
-function loadGlobal(){if(document.querySelector('script[data-aksi-global]')||document.querySelector('script[src="/aksi-global.js"]'))return;const s=document.createElement('script');s.src='/aksi-global.js';s.dataset.aksiGlobal='1';s.async=true;document.head.appendChild(s)}
-window.AKSI=Object.assign(window.AKSI||{},{runtime:{version:'2.1.0',localOnly:true,stable,sha256,identity,sign,verifySignature,appendEvidence,verifyLedger,remember,memory,selfTest}});
-function ready(){window.dispatchEvent(new CustomEvent('aksi:runtime-ready',{detail:{version:'2.1.0',localOnly:true}}));loadGlobal();identity().catch(()=>{})}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
-})();
+const sha256=async v=>{const b=await crypto.subtle.digest('SHA-256',enc.encode(typeof v==='string'?v:stable(v)));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')};
+function loadScript(src){return new Promise(resolve=>{if(document.querySelector('script[src="'+src+'"]'))return resolve(true);const s=document.createElement('script');s.src=src;s.async=false;s.onload=()=>resolve(true);s.onerror=()=>resolve(false);document.head.appendChild(s)})}
+const events=[];function emit(type,data){const e={type,data:data||null,t:new Date().toISOString()};events.push(e);g.dispatchEvent(new CustomEvent('aksi:event',{detail:e}));return e}
+async function boot(){
+ if(g.AKSI&&g.AKSI.runtimeVersion===VERSION)return g.AKSI;
+ await loadScript('/aksi-core.js');
+ const core=g.AksiCore||null;
+ const runtime={runtimeVersion:VERSION,core,events,localFirst:true,
+   async ask(input){const q=String(input||'').trim();if(!q)return{schema:'AKSI-RESULT-1',status:'error',error:'empty-input'};emit('request',{input:q});let r;if(core&&typeof core.reply==='function'){try{r=await core.reply(q)}catch(e){r={text:'АКСИ не смогла выполнить запрос.',source:'runtime',status:'error',error:String(e.message||e)}}}else r={text:'AKSI Core недоступен. Внешний ответ не имитируется.',source:null,status:'unverified'};const out={schema:'AKSI-RESULT-1',id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36),input:q,answer:String(r.text||''),source:r.source||null,status:r.status||'unverified',proof:r.event?{hash:r.event.event_hash,previousHash:r.event.previous_hash,type:r.event.type}:null,timestamp:new Date().toISOString()};emit('answer',out);return out},
+   async status(){let self=null;try{self=core&&core.selfTest?await core.selfTest():null}catch(e){self={ok:false,error:String(e.message||e)}}return{runtime:VERSION,online:navigator.onLine,localFirst:true,modules:{core:!!core,crypto:!!g.crypto?.subtle,indexedDB:!!g.indexedDB,webAssembly:!!g.WebAssembly},selfTest:self,eventCount:events.length}},
+   memory:()=>core&&core.memory?core.memory():[],
+   verify:()=>core&&core.verify?core.verify():Promise.resolve({ok:false,reason:'core-unavailable'}),
+   prove:(subject,source,status,extra)=>core&&core.append?core.append('evidence',subject,source,status,extra):Promise.resolve(null),
+   identity:()=>core&&core.identity?core.identity():Promise.resolve({available:false,reason:'core-unavailable'}),
+   hash:v=>core&&core.sha?core.sha(v):sha256(v),
+   learn:(text,meta)=>core&&core.saveMem?core.saveMem('lesson',text,meta):false
+ };
+ g.AKSI=runtime;emit('ready',{version:VERSION,core:!!core});return runtime;
+}
+g.AKSI_BOOT=boot();
+})(window);
