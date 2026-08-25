@@ -13,15 +13,20 @@ body{min-height:100vh;min-height:100dvh;background:var(--bg);color:var(--t);font
 .wrap{max-width:440px;margin:0 auto}
 .logo{width:52px;height:52px;border-radius:15px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 18px/1 var(--font);margin:0 auto 16px;box-shadow:0 8px 28px rgba(124,58,237,.35);color:#fff}
 h1{font-size:26px;font-weight:700;letter-spacing:-.03em;text-align:center;margin-bottom:6px}
-.sub{color:var(--m);text-align:center;margin:0 auto 22px;font-size:14px;line-height:1.5;max-width:340px}
-.primary{display:block;text-align:center;padding:15px 18px;border-radius:14px;text-decoration:none;font-weight:650;font-size:15px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;margin-bottom:18px}
+.sub{color:var(--m);text-align:center;margin:0 auto 18px;font-size:14px;line-height:1.5;max-width:340px}
+.primary{display:block;text-align:center;padding:15px 18px;border-radius:14px;text-decoration:none;font-weight:650;font-size:15px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;margin-bottom:10px;box-shadow:0 6px 20px rgba(124,58,237,.25)}
+.hint{text-align:center;font-size:12px;color:var(--dim);margin-bottom:18px;line-height:1.45}
 .section{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:18px 0 8px;font-weight:600}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-a.card{display:block;padding:14px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);text-decoration:none;color:var(--t);min-height:72px}
+a.card{display:block;padding:14px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);text-decoration:none;color:var(--t);min-height:72px;transition:border-color .15s,background .15s}
+a.card:hover{border-color:var(--a);background:#1a1a20}
 a.card b{display:block;font-size:13.5px;font-weight:600;margin-bottom:4px}
 a.card span{font-size:12px;color:var(--m);line-height:1.35}
 a.card:active{opacity:.85}
+.full{grid-column:1/-1}
 footer{margin-top:28px;font-size:12.5px;color:var(--dim);text-align:center;line-height:1.6}
+footer a{color:var(--a);text-decoration:none}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:rgba(52,211,153,.12);color:var(--ok);font-size:11px;margin-left:6px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -29,18 +34,23 @@ footer{margin-top:28px;font-size:12.5px;color:var(--dim);text-align:center;line-
   <div class="logo">A</div>
   <h1>АКСИ</h1>
   <p class="sub">Цифровой напарник · Agent-v1 · EQS · память · квант · Edge</p>
-  <a class="primary" href="aksi.html">Открыть агента</a>
-  <div class="section">Агент</div>
+
+  <a class="primary" href="aksi.html?v=6">Открыть агента</a>
+  <p class="hint">Полный offline SPA · чат отвечает сразу · данные только на устройстве</p>
+
+  <div class="section">Агент <span class="badge">live</span></div>
   <div class="grid">
-    <a class="card" href="aksi.html"><b>Чат</b><span>диалог и обучение</span></a>
-    <a class="card" href="aksi.html#mem"><b>Память</b><span>факты на устройстве</span></a>
-    <a class="card" href="aksi.html#metrics"><b>Метрики</b><span>EQS · QCLI · H</span></a>
-    <a class="card" href="aksi.html#quantum"><b>Квант</b><span>Bell · суперпозиция</span></a>
-    <a class="card" href="aksi.html#proof"><b>Цепочка</b><span>ledger решений</span></a>
-    <a class="card" href="aksi.html#protocol"><b>Протокол</b><span>Agent-v1 handshake</span></a>
-    <a class="card" href="aksi.html#edge"><b>Edge</b><span>ускоритель pipeline</span></a>
-    <a class="card" href="aksi.html#about"><b>О себе</b><span>бэкап · DID</span></a>
+    <a class="card" href="aksi.html?v=6"><b>Чат</b><span>диалог и обучение</span></a>
+    <a class="card" href="aksi.html?v=6#teach"><b>Учить</b><span>запомни: факт</span></a>
+    <a class="card" href="aksi.html?v=6#mem"><b>Память</b><span>факты на устройстве</span></a>
+    <a class="card" href="aksi.html?v=6#metrics"><b>Метрики</b><span>EQS · QCLI · H</span></a>
+    <a class="card" href="aksi.html?v=6#quantum"><b>Квант</b><span>Bell · суперпозиция</span></a>
+    <a class="card" href="aksi.html?v=6#proof"><b>Цепочка</b><span>ledger решений</span></a>
+    <a class="card" href="aksi.html?v=6#protocol"><b>Протокол</b><span>Agent-v1 handshake</span></a>
+    <a class="card" href="aksi.html?v=6#edge"><b>Edge</b><span>ускоритель pipeline</span></a>
+    <a class="card full" href="aksi.html?v=6#about"><b>О себе · бэкап · DID</b><span>полный экспорт, идентичность, контакт</span></a>
   </div>
+
   <div class="section">Платформа</div>
   <div class="grid">
     <a class="card" href="algorithm.html"><b>ADIA</b><span>алгоритм целостности</span></a>
@@ -50,6 +60,7 @@ footer{margin-top:28px;font-size:12.5px;color:var(--dim);text-align:center;line-
     <a class="card" href="matrix/"><b>Matrix</b><span>лаборатория агента</span></a>
     <a class="card" href="hub/"><b>Hub</b><span>карта экосистемы</span></a>
   </div>
+
   <footer>
     aksilove@internet.ru · @AKSILOVE<br>
     данные агента только на вашем устройстве
