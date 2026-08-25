@@ -1,5 +1,6 @@
 /**
- * AKSI LLM + Neuro + Core v1.3 — local → Neuro CPU → net → LLM
+ * AKSI LLM + Self + Neuro + Core v1.4
+ * Pipeline: Self → local → Neuro → net → LLM
  * Contact: aksilove@internet.ru
  */
 (function (global) {
@@ -78,10 +79,11 @@
   function builtinAnswer(q) {
     var low = String(q || "").toLowerCase().trim(), now = "";
     try { now = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit" }).format(new Date()); } catch (e) {}
-    if (/^(привет|здравств|добрый|hello|hi)\b/.test(low)) return "Привет. Я АКСИ · " + now + " МСК.\nСпроси: кто ты · нейросеть · формула · что такое …";
-    if (/кто ты|what are you|ты акси/.test(low)) return "Я АКСИ — суверенный цифровой напарник.\n\n• Своя нейросеть на CPU (вкладка Нейро)\n• Ядро Wikipedia\n• Память: запомни: факт\n• aksilove@internet.ru";
-    if (/нейросет|нейро\b|neural|своя модель|без gpu/.test(low)) return "АКСИ-Neuro — своя микро-нейросеть на CPU.\n• Resonance Transformer: 2 слоя, 4 головы, d=40\n• Обучение на устройстве, без GPU\n• Вкладка «Нейро» → Обучить ядро\n• «запомни:» тоже дообучает сеть";
-    if (/что умеешь|что можешь|помощь|help/.test(low)) return "Умею: Neuro CPU · локальные ответы · поиск · память · DKV · Vision · квант";
+    if (/^(привет|здравств|добрый|hello|hi)\b/.test(low)) return "Привет. Я АКСИ · " + now + " МСК.\nСпроси: кто ты · напиши себе tool · улучши себя";
+    if (/кто ты|what are you|ты акси/.test(low)) return null;
+    if (/осознан|self|самопис|напиши себе/.test(low)) return null;
+    if (/нейросет|нейро\b|neural|rwkv|без gpu/.test(low)) return "АКСИ-Neuro — RWKV на CPU.\n• 4 слоя · d=64 · O(1) память\n• Вкладка Нейро · запомни: дообучает";
+    if (/что умеешь|что можешь|помощь|help/.test(low)) return "Self · RWKV · поиск · память · DKV · Vision\nКоманды: кто ты · напиши себе инструмент X: … · запусти X · улучши себя";
     if (/формул|aksi\s*=/.test(low)) return "AKSI = (A×I×S)×(1+0.4√n)";
     if (/протокол|agent-v1/.test(low)) return "AKSI-Agent-v1: handshake · envelope · DID";
     if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · @AKSILOVE";
@@ -106,7 +108,24 @@
     return null;
   }
   function chatAI(q) {
-    q = String(q || "").trim(); if (!q) return; if (busy) busy = false;
+    q = String(q || "").trim();
+    if (!q) return;
+    if (busy) busy = false;
+
+    if (global.AKSI_SELF && typeof global.AKSI_SELF.handle === "function") {
+      try {
+        var selfAns = global.AKSI_SELF.handle(q);
+        if (selfAns) {
+          bubble("me", q);
+          chatHistory.push({ role: "user", content: q });
+          if ($("inp")) $("inp").value = "";
+          bubble("ai", selfAns, "Self · осознанность");
+          chatHistory.push({ role: "assistant", content: selfAns });
+          return;
+        }
+      } catch (e) {}
+    }
+
     if (/^(запомни|выучи)\s*[:\s]/i.test(q) || /забудь всё|что ты помнишь|что ты знаешь/i.test(q)) {
       if (/^(запомни|выучи)\s*[:\s]/i.test(q) && global.AKSI_NEURO && global.AKSI_NEURO.learn) {
         try { global.AKSI_NEURO.learn(q.replace(/^(запомни|выучи)\s*[:\s]*/i, ""), 3); } catch (e) {}
@@ -120,7 +139,7 @@
     var finished = false;
     function finish(text, meta) {
       if (finished) return; finished = true; removeThinking();
-      text = String(text || "Попробуй: кто ты · нейросеть · что такое …").trim();
+      text = String(text || "Попробуй: кто ты · напиши себе tool · улучши себя").trim();
       bubble("ai", text, meta || "АКСИ"); chatHistory.push({ role: "assistant", content: text });
       if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40); busy = false;
     }
@@ -131,8 +150,8 @@
     if (local && !needNet) { done(local, "локально"); return; }
     if (!needNet) {
       var nr = tryNeuro(q);
-      if (nr && (nr.mode === "neuro-retrieve" || (nr.mode === "neuro-gen" && nr.text && nr.text.length > 8))) {
-        done(nr.text, nr.mode === "neuro-retrieve" ? "Neuro · память" : "Neuro · CPU"); return;
+      if (nr && (nr.mode === "neuro-retrieve" || nr.mode === "rwkv-retrieve" || ((nr.mode === "neuro-gen" || nr.mode === "rwkv-gen") && nr.text && nr.text.length > 8))) {
+        done(nr.text, nr.mode.indexOf("retrieve") >= 0 ? "Neuro · память" : "Neuro · CPU"); return;
       }
     }
     function afterCore(coreText) {
@@ -141,7 +160,7 @@
         if (coreText) { done(coreText, "Ядро · интернет"); return; }
         if (local) { done(local, "локально"); return; }
         var nr2 = tryNeuro(q); if (nr2) { done(nr2.text, "Neuro"); return; }
-        done("Нет ответа.\n• вкладка Нейро → Обучить ядро\n• запомни: факт\n• что такое …", "офлайн");
+        done("Нет ответа.\n• кто ты · напиши себе tool · улучши себя\n• вкладка Self / Нейро", "офлайн");
       });
     }
     if (needNet && global.AKSI_CORE && typeof global.AKSI_CORE.query === "function") {
@@ -161,7 +180,7 @@
       var cfg = { on: $("llmOn") ? !!$("llmOn").checked : true, base: (($("llmBase") || {}).value || "").trim().replace(/\/$/, "") || LLM_DEFAULTS.base,
         key: (($("llmKey") || {}).value || "").trim() || "ollama", model: (($("llmModel") || {}).value || "").trim() || "llama3.2", maxTokens: 600 };
       saveLlmCfg(cfg); if ($("llmStatus")) $("llmStatus").textContent = "сохранено…";
-      probeLLM(function (ok) { if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM" : "Neuro CPU OK"; }); return;
+      probeLLM(function (ok) { if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM" : "Self+Neuro OK"; }); return;
     }
     if (el.id === "btnLlmTest") {
       callLLM("Скажи: ты АКСИ.").then(function (r) {
@@ -183,10 +202,10 @@
     if ($("llmBase")) $("llmBase").value = cfg.base;
     if ($("llmModel")) $("llmModel").value = cfg.model;
     probeLLM(function (ok) {
-      if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM" : "Neuro CPU + локально";
-      if ($("stBadge")) $("stBadge").textContent = ok ? "LLM" : "Neuro";
+      if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM" : "Self + Neuro CPU";
+      if ($("stBadge")) $("stBadge").textContent = ok ? "LLM" : "Self";
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initUi); else setTimeout(initUi, 80);
-  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "1.3.0-neuro" };
+  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "1.4.0-self" };
 })(window);
