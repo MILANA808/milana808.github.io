@@ -21,10 +21,10 @@
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s)
-      .replace(/&/g, "&")
-      .replace(/</g, "<")
-      .replace(/>/g, ">")
-      .replace(/"/g, """);
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
   function shannonH(text) {
     text = String(text || "");
@@ -330,6 +330,7 @@
     if (!q || busy) return;
     busy = true;
     try {
+      showTab("chat");
       bubble("me", q);
       if ($("inp")) $("inp").value = "";
       var text = answer(q) || "…";
@@ -338,7 +339,6 @@
       appendLedger("reply", { q: q.slice(0, 90), fp: fp }, e);
       createEnvelope("user", "response", text.slice(0, 200));
       bubble("ai", text, "EQS " + e + " · QCLI " + qc.toFixed(2) + " · " + quantumLevel(qc) + " · fp " + fp.slice(0, 8));
-      showTab("chat");
     } catch (err) { bubble("ai", "Сбой: " + String(err && err.message || err)); }
     busy = false;
   }
@@ -493,5 +493,9 @@
       if (h && document.getElementById("tab-" + h)) showTab(h);
     });
   } catch (e) {}
-  bubble("ai", "Привет. Я АКСИ — цифровой напарник.\n\nПолная платформа:\nчат · учить · память · EQS/QCLI · квант · цепочка · Agent-v1 · Edge · голос.\n\nзапомни: … · 🎤");
+  bubble("ai", "Привет. Я АКСИ — цифровой напарник.\n\nПолная платформа:\nчат · учить · память · EQS/QCLI · квант · цепочка · Agent-v1 · Edge · голос.\n\nНажми чип «кто ты» или напиши внизу.\nзапомни: … · 🎤");
+  try {
+    var logo = $("logoPulse");
+    if (logo) { logo.classList.add("pulse"); setTimeout(function(){ logo.classList.remove("pulse"); }, 1200); }
+  } catch (e) {}
 })();
