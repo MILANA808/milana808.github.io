@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · цепочка">
 <title>АКСИ</title>
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;АКСИ&quot;,&quot;short_name&quot;:&quot;АКСИ&quot;,&quot;start_url&quot;:&quot;/aksi.html&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0a0a0c&quot;,&quot;theme_color&quot;:&quot;#0a0a0c&quot;}">
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
 *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
 body{min-height:100%;min-height:100dvh;background:var(--bg);color:var(--t);font:14.5px/1.5 var(--font);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;padding-top:env(safe-area-inset-top,0)}
 @media(min-width:768px){:root{--pad:20px}body{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
 header{display:flex;align-items:center;gap:10px;padding:12px var(--pad);border-bottom:1px solid var(--line);background:rgba(10,10,12,.92);backdrop-filter:blur(14px);position:sticky;top:0;z-index:40}
-.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff;transition:box-shadow .35s}
-.logo.pulse{box-shadow:0 0 0 4px rgba(139,92,246,.4)}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff;transition:box-shadow .35s}.logo.pulse{box-shadow:0 0 0 4px rgba(139,92,246,.4)}
 header h1{font-size:15px;font-weight:650}header p{font-size:11px;color:var(--m)}
 .stats{margin-left:auto;display:flex;gap:6px;font-size:10px;color:var(--dim);flex-wrap:wrap;justify-content:flex-end;max-width:58%}.stats b{color:var(--ok);font-weight:600}
 nav{display:flex;gap:2px;padding:6px var(--pad);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;background:var(--bg);position:sticky;top:61px;z-index:30}nav::-webkit-scrollbar{display:none}
@@ -60,66 +60,67 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
-<section class="panel on" id="tab-chat"><div id="thread"></div>
-<div class="chips" id="chips">
-<button type="button" class="chip" data-ask="привет">привет</button>
-<button type="button" class="chip" data-ask="кто ты">кто ты</button>
-<button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
-<button type="button" class="chip" data-ask="протокол">протокол</button>
-<button type="button" class="chip" data-ask="метрики">метрики</button>
-</div></section>
-<section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или в чате: <b>запомни: …</b></p>
-<textarea id="teachBox" placeholder="Важный факт для памяти" style="margin-top:10px"></textarea>
-<div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
-<section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
-<div class="row"><button type="button" class="btn" id="btnExp">Сохранить</button><button type="button" class="btn" id="btnImp">Загрузить</button><button type="button" class="btn" id="btnWipe">Забыть</button></div>
-<input type="file" id="impFile" accept=".json,application/json" hidden></div></section>
-<section class="panel" id="tab-metrics"><div class="card"><h2>EQS · QCLI · H · H_eff</h2>
-<p class="muted">EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age</p>
-<textarea id="mIn" placeholder="Текст для разбора" style="margin-top:10px"></textarea>
-<div class="row"><button type="button" class="btn p" id="btnMet">Посчитать</button></div>
-<div class="kv" style="margin-top:12px">
-<div class="cell"><b id="mEqs">—</b><span>EQS</span></div>
-<div class="cell"><b id="mQcli">—</b><span>QCLI</span></div>
-<div class="cell"><b id="mH">—</b><span>H</span></div>
-<div class="cell"><b id="mHeff">—</b><span>H_eff</span></div>
-</div><div id="mLevel" class="badge">—</div></div></section>
-<section class="panel" id="tab-quantum"><div class="card"><h2>Квантовый симулятор</h2><p class="muted">Локальный RNG · Bell и суперпозиция</p>
-<div class="row"><button type="button" class="btn p" id="btnBell">Bell Φ+</button><button type="button" class="btn" id="btnSuper">Суперпозиция</button></div>
-<pre class="out" id="qOut">Нажми Bell или Суперпозиция</pre></div></section>
-<section class="panel" id="tab-proof"><div class="card"><h2>Цепочка решений</h2><p class="muted">Append-only ledger · prev_hash · verify</p>
-<div class="row"><button type="button" class="btn p" id="btnProof">Проверить</button><button type="button" class="btn" id="btnProofClear">Очистить</button></div>
-<pre class="out" id="pOut">—</pre></div></section>
-<section class="panel" id="tab-protocol"><div class="card"><h2>AKSI-Agent-v1</h2><p class="muted">Handshake · envelope · fingerprint · DID</p>
-<div class="kv" style="margin-top:10px">
-<div class="cell"><b id="prDid">—</b><span>DID</span></div>
-<div class="cell"><b id="prMsg">0</b><span>msg</span></div>
-<div class="cell"><b id="prEqs">—</b><span>EQS</span></div>
-<div class="cell"><b>v1</b><span>protocol</span></div>
-</div>
-<div class="row"><button type="button" class="btn p" id="btnHandshake">Handshake</button><button type="button" class="btn" id="btnEnvelope">Envelope</button></div>
-<pre class="out" id="prOut">—</pre></div></section>
-<section class="panel" id="tab-edge"><div class="card"><h2>Edge AI Accelerator</h2><p class="muted">intent → index → retrieve → compose → metrics → ledger</p>
-<div class="kv" style="margin-top:12px">
-<div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
-<div class="cell"><b id="eMs">—</b><span>ms</span></div>
-<div class="cell"><b id="eHits">—</b><span>hits</span></div>
-<div class="cell"><b id="eCache">0</b><span>cache</span></div>
-</div>
-<textarea id="eQuery" placeholder="Запрос для Edge pipeline" style="margin-top:12px">что умеешь</textarea>
-<div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
-<pre class="out" id="eOut">—</pre></div></section>
-<section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-<p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель. Без обязательного чужого облака.</p></div>
-<div class="card"><h2>Слой</h2>
-<p class="muted">Agent-v1 · ADIA<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
-<div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
+  <section class="panel on" id="tab-chat"><div id="thread"></div>
+    <div class="chips" id="chips">
+      <button type="button" class="chip" data-ask="привет">привет</button>
+      <button type="button" class="chip" data-ask="кто ты">кто ты</button>
+      <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
+      <button type="button" class="chip" data-ask="протокол">протокол</button>
+      <button type="button" class="chip" data-ask="метрики">метрики</button>
+    </div>
+  </section>
+  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или в чате: <b>запомни: …</b></p>
+    <textarea id="teachBox" placeholder="Важный факт для памяти" style="margin-top:10px"></textarea>
+    <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
+  <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
+    <div class="row"><button type="button" class="btn" id="btnExp">Сохранить</button><button type="button" class="btn" id="btnImp">Загрузить</button><button type="button" class="btn" id="btnWipe">Забыть</button></div>
+    <input type="file" id="impFile" accept=".json,application/json" hidden></div></section>
+  <section class="panel" id="tab-metrics"><div class="card"><h2>EQS · QCLI · H · H_eff</h2>
+    <p class="muted">EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age</p>
+    <textarea id="mIn" placeholder="Текст для разбора" style="margin-top:10px"></textarea>
+    <div class="row"><button type="button" class="btn p" id="btnMet">Посчитать</button></div>
+    <div class="kv" style="margin-top:12px">
+      <div class="cell"><b id="mEqs">—</b><span>EQS</span></div>
+      <div class="cell"><b id="mQcli">—</b><span>QCLI</span></div>
+      <div class="cell"><b id="mH">—</b><span>H</span></div>
+      <div class="cell"><b id="mHeff">—</b><span>H_eff</span></div>
+    </div><div id="mLevel" class="badge">—</div></div></section>
+  <section class="panel" id="tab-quantum"><div class="card"><h2>Квантовый симулятор</h2><p class="muted">Локальный RNG · Bell и суперпозиция</p>
+    <div class="row"><button type="button" class="btn p" id="btnBell">Bell Φ+</button><button type="button" class="btn" id="btnSuper">Суперпозиция</button></div>
+    <pre class="out" id="qOut">Нажми Bell или Суперпозиция</pre></div></section>
+  <section class="panel" id="tab-proof"><div class="card"><h2>Цепочка решений</h2><p class="muted">Append-only ledger · prev_hash · verify</p>
+    <div class="row"><button type="button" class="btn p" id="btnProof">Проверить</button><button type="button" class="btn" id="btnProofClear">Очистить</button></div>
+    <pre class="out" id="pOut">—</pre></div></section>
+  <section class="panel" id="tab-protocol"><div class="card"><h2>AKSI-Agent-v1</h2><p class="muted">Handshake · envelope · fingerprint · DID</p>
+    <div class="kv" style="margin-top:10px">
+      <div class="cell"><b id="prDid">—</b><span>DID</span></div>
+      <div class="cell"><b id="prMsg">0</b><span>msg</span></div>
+      <div class="cell"><b id="prEqs">—</b><span>EQS</span></div>
+      <div class="cell"><b>v1</b><span>protocol</span></div>
+    </div>
+    <div class="row"><button type="button" class="btn p" id="btnHandshake">Handshake</button><button type="button" class="btn" id="btnEnvelope">Envelope</button></div>
+    <pre class="out" id="prOut">—</pre></div></section>
+  <section class="panel" id="tab-edge"><div class="card"><h2>Edge AI Accelerator</h2><p class="muted">intent → index → retrieve → compose → metrics → ledger</p>
+    <div class="kv" style="margin-top:12px">
+      <div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
+      <div class="cell"><b id="eMs">—</b><span>ms</span></div>
+      <div class="cell"><b id="eHits">—</b><span>hits</span></div>
+      <div class="cell"><b id="eCache">0</b><span>cache</span></div>
+    </div>
+    <textarea id="eQuery" placeholder="Запрос для Edge pipeline" style="margin-top:12px">что умеешь</textarea>
+    <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
+    <pre class="out" id="eOut">—</pre></div></section>
+  <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
+    <p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель. Без обязательного чужого облака.</p></div>
+    <div class="card"><h2>Слой</h2>
+    <p class="muted">Agent-v1 · ADIA<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
+    <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
 </main>
 <div class="bar">
-<input id="inp" type="text" placeholder="Написать АКСИ…" enterkeyhint="send" autocomplete="off">
-<button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
-<button type="button" class="send" id="send" title="Отправить">↑</button>
+  <input id="inp" type="text" placeholder="Написать АКСИ…" enterkeyhint="send" autocomplete="off">
+  <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
+  <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
-<script src="data:text/javascript;base64,PLACEHOLDER"></script>
+<script src="aksi-app.js?v=3"></script>
 </body>
 </html>
