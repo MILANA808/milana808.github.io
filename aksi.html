@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — полноценный ИИ-напарник. LLM · Agent-v1 · DKV · Vision OCR">
+<meta name="description" content="АКСИ — ИИ с собственным ядром: интернет → обработка → ответ">
 <title>АКСИ</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -40,7 +40,7 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>ИИ-напарник · Agent-v1 · LLM</p></div>
+  <div><h1>АКСИ</h1><p>ИИ · Ядро · интернет · Agent-v1</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -66,10 +66,10 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
     <div class="chips" id="chips">
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
+      <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
+      <button type="button" class="chip" data-ask="найди квантовые компьютеры">поиск</button>
       <button type="button" class="chip" data-ask="формула">формула</button>
       <button type="button" class="chip" data-ask="протокол">протокол</button>
-      <button type="button" class="chip" data-ask="wiki: АКСИ">wiki</button>
     </div>
   </section>
   <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или в чате: <b>запомни: …</b></p>
@@ -103,59 +103,59 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
     </div>
     <div class="row"><button type="button" class="btn p" id="btnHandshake">Handshake</button><button type="button" class="btn" id="btnEnvelope">Envelope</button></div>
     <pre class="out" id="prOut">—</pre></div></section>
-  <section class="panel" id="tab-edge"><div class="card"><h2>Edge AI Accelerator</h2><p class="muted">intent → index → retrieve → compose → metrics → ledger</p>
+  <section class="panel" id="tab-edge"><div class="card"><h2>Edge AI Accelerator</h2><p class="muted">intent → retrieve → compose → metrics → ledger</p>
     <div class="kv" style="margin-top:12px">
       <div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
       <div class="cell"><b id="eMs">—</b><span>ms</span></div>
       <div class="cell"><b id="eHits">—</b><span>hits</span></div>
       <div class="cell"><b id="eCache">0</b><span>cache</span></div>
     </div>
-    <textarea id="eQuery" placeholder="Запрос для Edge pipeline" style="margin-top:12px">что умеешь</textarea>
+    <textarea id="eQuery" placeholder="Запрос" style="margin-top:12px">что умеешь</textarea>
     <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
     <pre class="out" id="eOut">—</pre></div></section>
   <section class="panel" id="tab-vision"><div id="vision-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">OCR файлов + камера · Tesseract rus+eng</p></section>
+    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">OCR файлов + камера</p></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">Полная страница: <a href="aksi-dkv.html" style="color:var(--a)">aksi-dkv.html</a></p></section>
+    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)"><a href="aksi-dkv.html" style="color:var(--a)">aksi-dkv.html</a></p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Полноценный ИИ-напарник: LLM (Ollama/API), память, EQS, DKV, Vision OCR, Agent-v1.</p></div>
-    <div class="card"><h2>Нейросеть · LLM</h2>
-    <p class="muted">Для полноценного ИИ подключи <b>Ollama</b> на ПК или любой OpenAI-compatible API.</p>
+    <p class="muted">Своё <b>Ядро</b>: интернет-поиск → обработка → ответ. Опционально LLM (Ollama/API). DKV · Vision · Agent-v1.</p></div>
+    <div class="card"><h2>Нейросеть · LLM (опционально)</h2>
+    <p class="muted">Ядро интернета работает <b>без</b> Ollama. LLM усиливает ответы, если подключён.</p>
     <label class="muted" style="display:flex;align-items:center;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить нейросеть</label>
     <input id="llmBase" placeholder="http://127.0.0.1:11434" style="margin-bottom:8px" value="http://127.0.0.1:11434">
-    <input id="llmModel" placeholder="модель: llama3.2 / mistral / gpt-4o-mini" style="margin-bottom:8px" value="llama3.2">
-    <input id="llmKey" placeholder="API key (для OpenAI; для Ollama можно пусто)" style="margin-bottom:8px" type="password" autocomplete="off">
+    <input id="llmModel" placeholder="llama3.2" style="margin-bottom:8px" value="llama3.2">
+    <input id="llmKey" placeholder="API key (для OpenAI)" style="margin-bottom:8px" type="password" autocomplete="off">
     <div class="row">
       <button type="button" class="btn p" id="btnLlmSave">Сохранить</button>
       <button type="button" class="btn" id="btnLlmTest">Тест</button>
     </div>
     <p class="muted" id="llmStatus" style="margin-top:10px">—</p>
-    <p class="muted" style="margin-top:8px;font-size:12px">Ollama: <code>ollama run llama3.2</code><br>Затем пиши в чат — АКСИ ответит как полноценный ИИ.</p>
     </div>
     <div class="card"><h2>Слой</h2>
-    <p class="muted">Agent-v1 · ADIA · DKV · Vision · LLM<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
+    <p class="muted">Ядро · Agent-v1 · DKV · Vision<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
 </main>
 <div class="bar">
-  <input id="inp" type="text" placeholder="Написать АКСИ…" enterkeyhint="send" autocomplete="off">
+  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
   <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
   <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
 <script src="aksi-dkv.js?v=14"></script>
 <script src="aksi-vision.js?v=2"></script>
 <script src="aksi-app.js?v=13"></script>
-<script src="aksi-llm.js?v=1"></script>
+<script src="aksi-net.js?v=1"></script>
+<script src="aksi-llm.js?v=2"></script>
 <script>
 (function(){
   setTimeout(function(){
     var th=document.getElementById("thread");
     if(th && th.children.length===0){
-      th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Обнови (Ctrl+F5).</div></div>';
+      th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Ctrl+F5.</div></div>';
     }
   }, 2000);
   var dkvOn=false, visOn=false;
-  function mountDkv(){ if(dkvOn||!window.DKV)return; var root=document.getElementById("dkv-root"); if(!root)return; try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){console.warn("DKV",e);} }
-  function mountVis(){ if(visOn||!window.AKSI_VISION)return; var root=document.getElementById("vision-root"); if(!root)return; try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){console.warn("Vision",e);} }
+  function mountDkv(){ if(dkvOn||!window.DKV)return; var root=document.getElementById("dkv-root"); if(!root)return; try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){} }
+  function mountVis(){ if(visOn||!window.AKSI_VISION)return; var root=document.getElementById("vision-root"); if(!root)return; try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){} }
   document.addEventListener("click",function(e){ var el=e.target.closest&&e.target.closest("[data-tab]"); if(!el)return; var t=el.getAttribute("data-tab"); if(t==="dkv")setTimeout(mountDkv,40); if(t==="vision")setTimeout(mountVis,40); },true);
   function fromHash(){ var h=(location.hash||"").replace(/^#/,""); if(h==="dkv")setTimeout(mountDkv,300); if(h==="vision")setTimeout(mountVis,300); }
   window.addEventListener("hashchange",fromHash); fromHash();
