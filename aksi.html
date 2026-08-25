@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — ИИ с собственным ядром: интернет → обработка → ответ">
+<meta name="description" content="АКСИ — полный агент: чат, ядро, LLM, DKV, Vision">
 <title>АКСИ</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -13,20 +13,20 @@
 body{min-height:100%;min-height:100dvh;background:var(--bg);color:var(--t);font:14.5px/1.5 var(--font);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;padding-top:env(safe-area-inset-top,0)}
 @media(min-width:768px){:root{--pad:20px}body{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
 header{display:flex;align-items:center;gap:10px;padding:12px var(--pad);border-bottom:1px solid var(--line);background:rgba(10,10,12,.92);backdrop-filter:blur(14px);position:sticky;top:0;z-index:40}
-.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff;transition:box-shadow .35s}.logo.pulse{box-shadow:0 0 0 4px rgba(139,92,246,.4)}
+.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff}.logo.pulse{box-shadow:0 0 0 4px rgba(139,92,246,.4)}
 header h1{font-size:15px;font-weight:650}header p{font-size:11px;color:var(--m)}
 .stats{margin-left:auto;display:flex;gap:6px;font-size:10px;color:var(--dim);flex-wrap:wrap;justify-content:flex-end;max-width:58%}.stats b{color:var(--ok);font-weight:600}
 nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:61px;z-index:30}
-nav button{flex:0 0 auto;padding:8px 10px;border:0;border-radius:9px;background:0;color:var(--m);font:11.5px/1 var(--font);font-weight:500;cursor:pointer}nav button.on{background:var(--s2);color:var(--t)}
-main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(108px + var(--safe-b));-webkit-overflow-scrolling:touch}.panel{display:none}.panel.on{display:block}
+nav button{flex:0 0 auto;padding:8px 10px;border:0;border-radius:9px;background:0;color:var(--m);font:11.5px/1 var(--font);cursor:pointer}nav button.on{background:var(--s2);color:var(--t)}
+main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(108px + var(--safe-b))}.panel{display:none}.panel.on{display:block}
 #thread{display:flex;flex-direction:column;gap:12px}.msg{display:flex}.msg.me{justify-content:flex-end}
 .bub{max-width:min(92%,420px);padding:11px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.5}
 .msg.me .bub{background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;border-bottom-right-radius:5px}.msg.ai .bub{background:var(--s2);border:1px solid var(--line);border-bottom-left-radius:5px}
 .meta{font-size:10px;color:var(--dim);margin-top:4px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:12.5px;cursor:pointer}
 .card{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px}.card h2{font-size:13px;margin:0 0 8px;font-weight:600}.muted{color:var(--m);font-size:13px;line-height:1.55}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:42px;padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:13px/1 var(--font);cursor:pointer}.btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}.btn:active{opacity:.85}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:42px;padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:13px/1 var(--font);cursor:pointer}.btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
 input,textarea{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit;outline:0}textarea{min-height:90px;resize:vertical}
-.fact{padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px;background:var(--s1)}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;cursor:pointer;line-height:1}
+.fact{padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px;background:var(--s1)}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;cursor:pointer}
 .bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 28%);z-index:50}
 .bar input{flex:1;min-height:48px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s2);color:var(--t)}
 .bar .icon{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:17px;flex-shrink:0;cursor:pointer}
@@ -40,7 +40,7 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>ИИ · Ядро · интернет · Agent-v1</p></div>
+  <div><h1>АКСИ</h1><p>полный агент · ядро · интернет · LLM</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -69,18 +69,17 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
       <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
       <button type="button" class="chip" data-ask="найди квантовые компьютеры">поиск</button>
       <button type="button" class="chip" data-ask="формула">формула</button>
-      <button type="button" class="chip" data-ask="протокол">протокол</button>
+      <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
     </div>
   </section>
-  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или в чате: <b>запомни: …</b></p>
-    <textarea id="teachBox" placeholder="Важный факт для памяти" style="margin-top:10px"></textarea>
+  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или: <b>запомни: …</b></p>
+    <textarea id="teachBox" placeholder="Факт" style="margin-top:10px"></textarea>
     <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
   <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
     <div class="row"><button type="button" class="btn" id="btnExp">Сохранить</button><button type="button" class="btn" id="btnImp">Загрузить</button><button type="button" class="btn" id="btnWipe">Забыть</button></div>
-    <input type="file" id="impFile" accept=".json,application/json" hidden></div></section>
-  <section class="panel" id="tab-metrics"><div class="card"><h2>EQS · QCLI · H · H_eff</h2>
-    <p class="muted">EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age</p>
-    <textarea id="mIn" placeholder="Текст для разбора" style="margin-top:10px"></textarea>
+    <input type="file" id="impFile" accept=".json" hidden></div></section>
+  <section class="panel" id="tab-metrics"><div class="card"><h2>EQS · QCLI</h2>
+    <textarea id="mIn" placeholder="Текст" style="margin-top:10px"></textarea>
     <div class="row"><button type="button" class="btn p" id="btnMet">Посчитать</button></div>
     <div class="kv" style="margin-top:12px">
       <div class="cell"><b id="mEqs">—</b><span>EQS</span></div>
@@ -88,13 +87,13 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
       <div class="cell"><b id="mH">—</b><span>H</span></div>
       <div class="cell"><b id="mHeff">—</b><span>H_eff</span></div>
     </div><div id="mLevel" class="badge">—</div></div></section>
-  <section class="panel" id="tab-quantum"><div class="card"><h2>Квантовый симулятор</h2><p class="muted">Локальный RNG · Bell и суперпозиция</p>
+  <section class="panel" id="tab-quantum"><div class="card"><h2>Квант</h2>
     <div class="row"><button type="button" class="btn p" id="btnBell">Bell Φ+</button><button type="button" class="btn" id="btnSuper">Суперпозиция</button></div>
-    <pre class="out" id="qOut">Нажми Bell или Суперпозиция</pre></div></section>
-  <section class="panel" id="tab-proof"><div class="card"><h2>Цепочка решений</h2><p class="muted">Append-only ledger · prev_hash · verify</p>
+    <pre class="out" id="qOut">—</pre></div></section>
+  <section class="panel" id="tab-proof"><div class="card"><h2>Цепочка</h2>
     <div class="row"><button type="button" class="btn p" id="btnProof">Проверить</button><button type="button" class="btn" id="btnProofClear">Очистить</button></div>
     <pre class="out" id="pOut">—</pre></div></section>
-  <section class="panel" id="tab-protocol"><div class="card"><h2>AKSI-Agent-v1</h2><p class="muted">Handshake · envelope · fingerprint · DID</p>
+  <section class="panel" id="tab-protocol"><div class="card"><h2>Agent-v1</h2>
     <div class="kv" style="margin-top:10px">
       <div class="cell"><b id="prDid">—</b><span>DID</span></div>
       <div class="cell"><b id="prMsg">0</b><span>msg</span></div>
@@ -103,62 +102,47 @@ code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
     </div>
     <div class="row"><button type="button" class="btn p" id="btnHandshake">Handshake</button><button type="button" class="btn" id="btnEnvelope">Envelope</button></div>
     <pre class="out" id="prOut">—</pre></div></section>
-  <section class="panel" id="tab-edge"><div class="card"><h2>Edge AI Accelerator</h2><p class="muted">intent → retrieve → compose → metrics → ledger</p>
+  <section class="panel" id="tab-edge"><div class="card"><h2>Edge</h2>
     <div class="kv" style="margin-top:12px">
       <div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
       <div class="cell"><b id="eMs">—</b><span>ms</span></div>
       <div class="cell"><b id="eHits">—</b><span>hits</span></div>
       <div class="cell"><b id="eCache">0</b><span>cache</span></div>
     </div>
-    <textarea id="eQuery" placeholder="Запрос" style="margin-top:12px">что умеешь</textarea>
-    <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
+    <textarea id="eQuery" style="margin-top:12px">что умеешь</textarea>
+    <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс</button></div>
     <pre class="out" id="eOut">—</pre></div></section>
-  <section class="panel" id="tab-vision"><div id="vision-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">OCR файлов + камера</p></section>
-  <section class="panel" id="tab-dkv"><div id="dkv-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)"><a href="aksi-dkv.html" style="color:var(--a)">aksi-dkv.html</a></p></section>
+  <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
+  <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Своё <b>Ядро</b>: интернет-поиск → обработка → ответ. Опционально LLM (Ollama/API). DKV · Vision · Agent-v1.</p></div>
-    <div class="card"><h2>Нейросеть · LLM (опционально)</h2>
-    <p class="muted">Ядро интернета работает <b>без</b> Ollama. LLM усиливает ответы, если подключён.</p>
-    <label class="muted" style="display:flex;align-items:center;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить нейросеть</label>
-    <input id="llmBase" placeholder="http://127.0.0.1:11434" style="margin-bottom:8px" value="http://127.0.0.1:11434">
-    <input id="llmModel" placeholder="llama3.2" style="margin-bottom:8px" value="llama3.2">
-    <input id="llmKey" placeholder="API key (для OpenAI)" style="margin-bottom:8px" type="password" autocomplete="off">
-    <div class="row">
-      <button type="button" class="btn p" id="btnLlmSave">Сохранить</button>
-      <button type="button" class="btn" id="btnLlmTest">Тест</button>
-    </div>
-    <p class="muted" id="llmStatus" style="margin-top:10px">—</p>
-    </div>
-    <div class="card"><h2>Слой</h2>
-    <p class="muted">Ядро · Agent-v1 · DKV · Vision<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
-    <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
+    <p class="muted">Ядро интернет · LLM · DKV · Vision · Agent-v1</p></div>
+    <div class="card"><h2>Нейросеть</h2>
+    <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> LLM</label>
+    <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
+    <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
+    <input id="llmKey" type="password" placeholder="API key" style="margin-bottom:8px">
+    <div class="row"><button type="button" class="btn p" id="btnLlmSave">Сохранить</button><button type="button" class="btn" id="btnLlmTest">Тест</button></div>
+    <p class="muted" id="llmStatus" style="margin-top:10px">—</p></div>
+    <div class="card"><h2>Слой</h2><p class="muted">DID: <b id="didVal">—</b><br>aksilove@internet.ru</p></div>
+    <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Бэкап</button></div></div></section>
 </main>
 <div class="bar">
   <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
-  <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
-  <button type="button" class="send" id="send" title="Отправить">↑</button>
+  <button type="button" class="icon" id="btnVoice">🎤</button>
+  <button type="button" class="send" id="send">↑</button>
 </div>
-<script src="aksi-dkv.js?v=14"></script>
-<script src="aksi-vision.js?v=2"></script>
-<script src="aksi-app.js?v=13"></script>
-<script src="aksi-net.js?v=1"></script>
-<script src="aksi-llm.js?v=2"></script>
+<script src="aksi-dkv.js?v=15"></script>
+<script src="aksi-vision.js?v=3"></script>
+<script src="aksi-app.js?v=14"></script>
+<script src="aksi-net.js?v=2"></script>
+<script src="aksi-llm.js?v=3"></script>
 <script>
 (function(){
-  setTimeout(function(){
-    var th=document.getElementById("thread");
-    if(th && th.children.length===0){
-      th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Ctrl+F5.</div></div>';
-    }
-  }, 2000);
-  var dkvOn=false, visOn=false;
-  function mountDkv(){ if(dkvOn||!window.DKV)return; var root=document.getElementById("dkv-root"); if(!root)return; try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){} }
-  function mountVis(){ if(visOn||!window.AKSI_VISION)return; var root=document.getElementById("vision-root"); if(!root)return; try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){} }
-  document.addEventListener("click",function(e){ var el=e.target.closest&&e.target.closest("[data-tab]"); if(!el)return; var t=el.getAttribute("data-tab"); if(t==="dkv")setTimeout(mountDkv,40); if(t==="vision")setTimeout(mountVis,40); },true);
-  function fromHash(){ var h=(location.hash||"").replace(/^#/,""); if(h==="dkv")setTimeout(mountDkv,300); if(h==="vision")setTimeout(mountVis,300); }
-  window.addEventListener("hashchange",fromHash); fromHash();
+  var dkvOn=false,visOn=false;
+  function mountDkv(){if(dkvOn||!window.DKV)return;try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){}}
+  function mountVis(){if(visOn||!window.AKSI_VISION)return;try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){}}
+  document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest("[data-tab]");if(!el)return;var t=el.getAttribute("data-tab");if(t==="dkv")setTimeout(mountDkv,40);if(t==="vision")setTimeout(mountVis,40);},true);
+  var h=(location.hash||"").replace(/^#/,"");if(h==="dkv")setTimeout(mountDkv,300);if(h==="vision")setTimeout(mountVis,300);
 })();
 </script>
 </body>
