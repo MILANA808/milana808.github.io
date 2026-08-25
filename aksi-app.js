@@ -1,5 +1,17 @@
 (function () {
   "use strict";
+
+  if (!Element.prototype.closest) {
+    Element.prototype.closest = function(s) {
+      var el = this;
+      while (el && el.nodeType === 1) {
+        if (el.matches ? el.matches(s) : (el.msMatchesSelector && el.msMatchesSelector(s))) return el;
+        el = el.parentElement || el.parentNode;
+      }
+      return null;
+    };
+  }
+
   var MEM_KEY = "aksi_whole_mem_v2";
   var LEDGER_KEY = "aksi_whole_ledger_v2";
   var DID_KEY = "aksi_did_fp_v2";
@@ -9,10 +21,10 @@
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+      .replace(/&/g, "&")
+      .replace(/</g, "<")
+      .replace(/>/g, ">")
+      .replace(/"/g, """);
   }
   function shannonH(text) {
     text = String(text || "");
@@ -213,10 +225,10 @@
     var low = q.toLowerCase();
     if (/^(привет|здравств|добрый|hello|hi)\b/.test(low)) return "Привет. На связи · " + getMSK() + " МСК.";
     if (/кто ты|что ты|расскажи о себе|who are you|ты акси/.test(low)) return "Я АКСИ — цифровой напарник и суверенный агентный слой.\n\nAgent-v1 · EQS/QCLI · память · Edge · цепочка · квант.\nДанные только на твоём устройстве.\n\naksilove@internet.ru · @AKSILOVE";
-    if (/что умеешь|что можешь|возможност|функци|help|помощь/.test(low)) return "• чат и обучение (запомни: …)\n• EQS · QCLI · H · H_eff\n• Agent-v1 handshake / envelope\n• цепочка решений · квант · Edge\n• голос 🎤 · полный бэкап";
+    if (/что умеешь|что можешь|возможност|функци|help|помощь/.test(low)) return "• чат и обучение (запомни: …)\n• EQS · QCLI · H · H_eff\n• Agent-v1 handshake / envelope\n• цепочка решений · квант · Edge\n• голос · полный бэкап";
     if (/протокол|agent-v1|handshake|envelope/.test(low)) return "Протокол AKSI-Agent-v1:\n• handshake · envelope · fingerprint · DID\nОткрой вкладку «Протокол».";
     if (/метрик|eqs|qcli|энтропи/.test(low)) return "EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age\nВкладка «Метрики».";
-    if (/квант|bell|суперпоз|кубит/.test(low)) return "Вкладка «Квант» — Bell Φ+ и суперпозиция (локальный симулятор).";
+    if (/квант|bell|суперпоз|кубит/.test(low)) return "Вкладка «Квант» — Bell и суперпозиция.";
     if (/edge|ускор/.test(low)) return "Edge AI: intent → retrieve → metrics → ledger.\nВкладка «Edge».";
     if (/время|который час|дата/.test(low)) return getMSKFull() + " (MSK)";
     if (/контакт|почта|email|связь/.test(low)) return "aksilove@internet.ru · @AKSILOVE";
@@ -473,5 +485,13 @@
   tickClock();
   setInterval(tickClock, 30000);
   refreshProtocol();
+  try {
+    var hash = (location.hash || "").replace(/^#/, "");
+    if (hash && document.getElementById("tab-" + hash)) showTab(hash);
+    window.addEventListener("hashchange", function () {
+      var h = (location.hash || "").replace(/^#/, "");
+      if (h && document.getElementById("tab-" + h)) showTab(h);
+    });
+  } catch (e) {}
   bubble("ai", "Привет. Я АКСИ — цифровой напарник.\n\nПолная платформа:\nчат · учить · память · EQS/QCLI · квант · цепочка · Agent-v1 · Edge · голос.\n\nзапомни: … · 🎤");
 })();
