@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · цепочка">
 <title>АКСИ</title>
-<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;АКСИ&quot;,&quot;short_name&quot;:&quot;АКСИ&quot;,&quot;start_url&quot;:&quot;/aksi.html&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0a0a0c&quot;,&quot;theme_color&quot;:&quot;#0a0a0c&quot;}">
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
 *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
@@ -17,8 +16,8 @@ header{display:flex;align-items:center;gap:10px;padding:12px var(--pad);border-b
 .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff;transition:box-shadow .35s}.logo.pulse{box-shadow:0 0 0 4px rgba(139,92,246,.4)}
 header h1{font-size:15px;font-weight:650}header p{font-size:11px;color:var(--m)}
 .stats{margin-left:auto;display:flex;gap:6px;font-size:10px;color:var(--dim);flex-wrap:wrap;justify-content:flex-end;max-width:58%}.stats b{color:var(--ok);font-weight:600}
-nav{display:flex;gap:2px;padding:6px var(--pad);border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none;background:var(--bg);position:sticky;top:61px;z-index:30}nav::-webkit-scrollbar{display:none}
-nav button{flex:0 0 auto;padding:8px 11px;border:0;border-radius:9px;background:0;color:var(--m);font:12px/1 var(--font);font-weight:500;cursor:pointer}nav button.on{background:var(--s2);color:var(--t)}
+nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:61px;z-index:30}
+nav button{flex:0 0 auto;padding:8px 10px;border:0;border-radius:9px;background:0;color:var(--m);font:11.5px/1 var(--font);font-weight:500;cursor:pointer}nav button.on{background:var(--s2);color:var(--t)}
 main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(108px + var(--safe-b));-webkit-overflow-scrolling:touch}.panel{display:none}.panel.on{display:block}
 #thread{display:flex;flex-direction:column;gap:12px}.msg{display:flex}.msg.me{justify-content:flex-end}
 .bub{max-width:min(92%,420px);padding:11px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.5}
@@ -111,7 +110,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
     <pre class="out" id="eOut">—</pre></div></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель. Без обязательного чужого облака.</p></div>
+    <p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель.</p></div>
     <div class="card"><h2>Слой</h2>
     <p class="muted">Agent-v1 · ADIA<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
@@ -121,6 +120,16 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
   <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
-<script src="aksi-app.js?v=4"></script>
+<script src="aksi-app.js?v=5"></script>
+<script>
+(function(){
+  setTimeout(function(){
+    var th=document.getElementById('thread');
+    if(th && th.children.length===0){
+      th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт агента. Обнови страницу.</div></div>';
+    }
+  }, 2500);
+})();
+</script>
 </body>
 </html>
