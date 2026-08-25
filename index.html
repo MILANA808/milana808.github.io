@@ -4,8 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — полный агент: чат, ядро, LLM, DKV, Vision">
+<meta name="description" content="АКСИ — своя нейросеть на CPU, чат, ядро, DKV, Vision">
 <title>АКСИ — цифровой напарник</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -25,20 +24,19 @@ main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(108px + var(--s
 .card{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px}.card h2{font-size:13px;margin:0 0 8px}.muted{color:var(--m);font-size:13px}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:42px;padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:13px/1 var(--font);cursor:pointer}.btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
 input,textarea{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit}textarea{min-height:90px}
-.fact{padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px;background:var(--s1)}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;cursor:pointer}
 .bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 28%);z-index:50}
 .bar input{flex:1;min-height:48px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s2);color:var(--t)}
 .bar .icon,.bar .send{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:17px;cursor:pointer;flex-shrink:0}
 .bar .send{border:0;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv .cell{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:12px}.kv .cell b{display:block;font-size:17px;color:var(--ok)}.kv .cell span{font-size:11px;color:var(--dim)}
 pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(139,92,246,.18);color:var(--a);font-size:11px;margin-top:8px}
+.fact{padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px;background:var(--s1)}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;cursor:pointer}
 </style>
 </head>
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>полный агент · ядро · интернет</p></div>
+  <div><h1>АКСИ</h1><p>своя Neuro · CPU · без GPU</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -57,6 +55,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" data-tab="edge">Edge</button>
   <button type="button" data-tab="dkv">DKV</button>
   <button type="button" data-tab="vision">Зрение</button>
+  <button type="button" data-tab="neuro">Нейро</button>
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
@@ -64,12 +63,12 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <div class="chips" id="chips">
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
+      <button type="button" class="chip" data-ask="нейросеть">нейросеть</button>
       <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
       <button type="button" class="chip" data-ask="формула">формула</button>
     </div>
   </section>
-  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт</p>
+  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт — и Neuro тоже учится</p>
     <textarea id="teachBox" style="margin-top:10px"></textarea>
     <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
   <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
@@ -83,7 +82,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
       <div class="cell"><b id="mQcli">—</b><span>QCLI</span></div>
       <div class="cell"><b id="mH">—</b><span>H</span></div>
       <div class="cell"><b id="mHeff">—</b><span>H_eff</span></div>
-    </div><div id="mLevel" class="badge">—</div></div></section>
+    </div></div></section>
   <section class="panel" id="tab-quantum"><div class="card"><h2>Квант</h2>
     <div class="row"><button type="button" class="btn p" id="btnBell">Bell</button><button type="button" class="btn" id="btnSuper">Суперпозиция</button></div>
     <pre class="out" id="qOut">—</pre></div></section>
@@ -111,9 +110,11 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <pre class="out" id="eOut">—</pre></div></section>
   <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
+  <section class="panel" id="tab-neuro"><div id="neuro-root"></div>
+    <p class="muted" style="margin-top:8px;font-size:12px">Своя нейросеть · CPU · без GPU · веса в localStorage</p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Локальные ответы + ядро Wikipedia + LLM опционально</p></div>
-    <div class="card"><h2>LLM</h2>
+    <p class="muted">АКСИ-Neuro (CPU) + ядро Wikipedia + LLM опционально</p></div>
+    <div class="card"><h2>LLM (опционально)</h2>
     <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить</label>
     <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
     <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
@@ -132,13 +133,21 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <script src="aksi-vision.js?v=3"></script>
 <script src="aksi-app.js?v=14"></script>
 <script src="aksi-net.js?v=4"></script>
-<script src="aksi-llm.js?v=5"></script>
+<script src="aksi-neuro.js?v=1"></script>
+<script src="aksi-llm.js?v=6"></script>
 <script>
 (function(){
-  var dkvOn=false,visOn=false;
+  var dkvOn=false,visOn=false,neuroOn=false;
   function mountDkv(){if(dkvOn||!window.DKV)return;try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){}}
   function mountVis(){if(visOn||!window.AKSI_VISION)return;try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){}}
-  document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest("[data-tab]");if(!el)return;var t=el.getAttribute("data-tab");if(t==="dkv")setTimeout(mountDkv,40);if(t==="vision")setTimeout(mountVis,40);},true);
+  function mountNeuro(){if(neuroOn||!window.AKSI_NEURO)return;try{AKSI_NEURO.mount("#neuro-root");neuroOn=true;}catch(e){}}
+  document.addEventListener("click",function(e){
+    var el=e.target.closest&&e.target.closest("[data-tab]");if(!el)return;
+    var t=el.getAttribute("data-tab");
+    if(t==="dkv")setTimeout(mountDkv,40);
+    if(t==="vision")setTimeout(mountVis,40);
+    if(t==="neuro")setTimeout(mountNeuro,40);
+  },true);
 })();
 </script>
 </body>
