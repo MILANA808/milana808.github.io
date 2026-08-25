@@ -1,11 +1,14 @@
 name: AKSI verification
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 permissions:
   contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -34,6 +37,10 @@ jobs:
               raise SystemExit(1)
           print("HTML OK")
           PY
+      - name: JavaScript syntax sanity
+        run: |
+          set -e
+          find . -type f -name '*.js' -not -path './.git/*' -print0 | xargs -0 -n1 node --check
       - name: aksi runtime size
         run: |
           set -e
