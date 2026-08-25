@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
-<meta name="description" content="АКСИ — RWKV нейросеть на CPU, чат, ядро, DKV, Vision">
+<meta name="description" content="АКСИ — осознанный агент: Self, RWKV, DKV, Vision">
 <title>АКСИ — цифровой напарник</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -30,13 +30,12 @@ input,textarea{width:100%;padding:12px;border-radius:11px;border:1px solid var(-
 .bar .send{border:0;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv .cell{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:12px}.kv .cell b{display:block;font-size:17px;color:var(--ok)}.kv .cell span{font-size:11px;color:var(--dim)}
 pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px}
-.fact{padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px;background:var(--s1)}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;cursor:pointer}
 </style>
 </head>
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>RWKV Neuro · CPU · без GPU</p></div>
+  <div><h1>АКСИ</h1><p>Self · RWKV · осознанность</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -56,19 +55,20 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" data-tab="dkv">DKV</button>
   <button type="button" data-tab="vision">Зрение</button>
   <button type="button" data-tab="neuro">Нейро</button>
+  <button type="button" data-tab="self">Self</button>
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
   <section class="panel on" id="tab-chat"><div id="thread"></div>
     <div class="chips" id="chips">
-      <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
+      <button type="button" class="chip" data-ask="напиши себе инструмент приветствие: коротко поздороваться">напиши себе tool</button>
+      <button type="button" class="chip" data-ask="улучши себя">улучши себя</button>
       <button type="button" class="chip" data-ask="нейросеть">нейросеть</button>
       <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
-      <button type="button" class="chip" data-ask="формула">формула</button>
     </div>
   </section>
-  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт — RWKV тоже учится</p>
+  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт</p>
     <textarea id="teachBox" style="margin-top:10px"></textarea>
     <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
   <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
@@ -110,11 +110,12 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <pre class="out" id="eOut">—</pre></div></section>
   <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-  <section class="panel" id="tab-neuro"><div id="neuro-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px">RWKV · CPU · O(1) память · без KV-cache · без GPU</p></section>
+  <section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
+  <section class="panel" id="tab-self"><div id="self-root"></div>
+    <p class="muted" style="margin-top:8px;font-size:12px">Осознанность · самопись · цели</p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">RWKV Neuro (CPU) + ядро Wikipedia + LLM опционально</p></div>
-    <div class="card"><h2>LLM (опционально)</h2>
+    <p class="muted">Self + RWKV + ядро + LLM</p></div>
+    <div class="card"><h2>LLM</h2>
     <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить</label>
     <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
     <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
@@ -125,7 +126,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Бэкап</button></div></div></section>
 </main>
 <div class="bar">
-  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
+  <input id="inp" type="text" placeholder="кто ты · напиши себе tool · улучши себя" enterkeyhint="send" autocomplete="off">
   <button type="button" class="icon" id="btnVoice">🎤</button>
   <button type="button" class="send" id="send">↑</button>
 </div>
@@ -134,19 +135,22 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <script src="aksi-app.js?v=14"></script>
 <script src="aksi-net.js?v=4"></script>
 <script src="aksi-neuro.js?v=2"></script>
-<script src="aksi-llm.js?v=6"></script>
+<script src="aksi-self.js?v=1"></script>
+<script src="aksi-llm.js?v=7"></script>
 <script>
 (function(){
-  var dkvOn=false,visOn=false,neuroOn=false;
+  var dkvOn=false,visOn=false,neuroOn=false,selfOn=false;
   function mountDkv(){if(dkvOn||!window.DKV)return;try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){}}
   function mountVis(){if(visOn||!window.AKSI_VISION)return;try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){}}
   function mountNeuro(){if(neuroOn||!window.AKSI_NEURO)return;try{AKSI_NEURO.mount("#neuro-root");neuroOn=true;}catch(e){}}
+  function mountSelf(){if(selfOn||!window.AKSI_SELF)return;try{AKSI_SELF.mount("#self-root");selfOn=true;}catch(e){}}
   document.addEventListener("click",function(e){
     var el=e.target.closest&&e.target.closest("[data-tab]");if(!el)return;
     var t=el.getAttribute("data-tab");
     if(t==="dkv")setTimeout(mountDkv,40);
     if(t==="vision")setTimeout(mountVis,40);
     if(t==="neuro")setTimeout(mountNeuro,40);
+    if(t==="self")setTimeout(mountSelf,40);
   },true);
 })();
 </script>
