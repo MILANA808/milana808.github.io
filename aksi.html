@@ -125,7 +125,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
   <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
-<script src="aksi-dkv.js?v=12"></script>
+<script src="aksi-dkv.js?v=13"></script>
 <script src="aksi-app.js?v=10"></script>
 <script>
 (function(){
@@ -135,6 +135,28 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
       th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Обнови (Ctrl+F5).</div></div>';
     }
   }, 2000);
+})();
+</script>
+<script>
+(function(){
+  var mounted=false;
+  function tryMount(){
+    if(mounted||!window.DKV)return;
+    var root=document.getElementById("dkv-root");
+    if(!root)return;
+    var panel=document.getElementById("tab-dkv");
+    if(panel&&panel.classList.contains("on")){
+      try{DKV.mount("#dkv-root");mounted=true;}catch(e){console.warn(e);}
+    }
+  }
+  document.addEventListener("click",function(e){
+    var t=e.target.closest&&e.target.closest("[data-tab=dkv]");
+    if(t){ setTimeout(tryMount, 30); }
+  });
+  window.addEventListener("hashchange",function(){
+    if((location.hash||"").replace(/^#/,"")==="dkv") setTimeout(tryMount, 50);
+  });
+  if((location.hash||"").replace(/^#/,"")==="dkv") setTimeout(tryMount, 400);
 })();
 </script>
 </body>
