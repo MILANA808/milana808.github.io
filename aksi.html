@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · DKV · Vision OCR · цепочка">
+<meta name="description" content="АКСИ — полноценный ИИ-напарник. LLM · Agent-v1 · DKV · Vision OCR">
 <title>АКСИ</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -34,12 +34,13 @@ input,textarea{width:100%;padding:12px;border-radius:11px;border:1px solid var(-
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv .cell{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:12px}.kv .cell b{display:block;font-size:17px;color:var(--ok)}.kv .cell span{font-size:11px;color:var(--dim)}
 pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px}
 .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(139,92,246,.18);color:var(--a);font-size:11px;margin-top:8px}
+code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
 </style>
 </head>
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>цифровой напарник · Agent-v1</p></div>
+  <div><h1>АКСИ</h1><p>ИИ-напарник · Agent-v1 · LLM</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -117,9 +118,22 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div>
     <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">Полная страница: <a href="aksi-dkv.html" style="color:var(--a)">aksi-dkv.html</a></p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Цифровой напарник: память, EQS, цепочка, Agent-v1, Edge, DKV, Vision OCR. Без обязательного облака.</p></div>
+    <p class="muted">Полноценный ИИ-напарник: LLM (Ollama/API), память, EQS, DKV, Vision OCR, Agent-v1.</p></div>
+    <div class="card"><h2>Нейросеть · LLM</h2>
+    <p class="muted">Для полноценного ИИ подключи <b>Ollama</b> на ПК или любой OpenAI-compatible API.</p>
+    <label class="muted" style="display:flex;align-items:center;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить нейросеть</label>
+    <input id="llmBase" placeholder="http://127.0.0.1:11434" style="margin-bottom:8px" value="http://127.0.0.1:11434">
+    <input id="llmModel" placeholder="модель: llama3.2 / mistral / gpt-4o-mini" style="margin-bottom:8px" value="llama3.2">
+    <input id="llmKey" placeholder="API key (для OpenAI; для Ollama можно пусто)" style="margin-bottom:8px" type="password" autocomplete="off">
+    <div class="row">
+      <button type="button" class="btn p" id="btnLlmSave">Сохранить</button>
+      <button type="button" class="btn" id="btnLlmTest">Тест</button>
+    </div>
+    <p class="muted" id="llmStatus" style="margin-top:10px">—</p>
+    <p class="muted" style="margin-top:8px;font-size:12px">Ollama: <code>ollama run llama3.2</code><br>Затем пиши в чат — АКСИ ответит как полноценный ИИ.</p>
+    </div>
     <div class="card"><h2>Слой</h2>
-    <p class="muted">Agent-v1 · ADIA · DKV · Vision<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
+    <p class="muted">Agent-v1 · ADIA · DKV · Vision · LLM<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
 </main>
 <div class="bar">
@@ -129,7 +143,8 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 </div>
 <script src="aksi-dkv.js?v=14"></script>
 <script src="aksi-vision.js?v=2"></script>
-<script src="aksi-app.js?v=12"></script>
+<script src="aksi-app.js?v=13"></script>
+<script src="aksi-llm.js?v=1"></script>
 <script>
 (function(){
   setTimeout(function(){
@@ -138,37 +153,12 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
       th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Обнови (Ctrl+F5).</div></div>';
     }
   }, 2000);
-})();
-</script>
-<script>
-(function(){
   var dkvOn=false, visOn=false;
-  function mountDkv(){
-    if(dkvOn||!window.DKV)return;
-    var root=document.getElementById("dkv-root");
-    if(!root)return;
-    try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){console.warn("DKV",e);}
-  }
-  function mountVis(){
-    if(visOn||!window.AKSI_VISION)return;
-    var root=document.getElementById("vision-root");
-    if(!root)return;
-    try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){console.warn("Vision",e);}
-  }
-  document.addEventListener("click",function(e){
-    var el=e.target.closest&&e.target.closest("[data-tab]");
-    if(!el)return;
-    var t=el.getAttribute("data-tab");
-    if(t==="dkv")setTimeout(mountDkv,40);
-    if(t==="vision")setTimeout(mountVis,40);
-  },true);
-  function fromHash(){
-    var h=(location.hash||"").replace(/^#/,"");
-    if(h==="dkv")setTimeout(mountDkv,300);
-    if(h==="vision")setTimeout(mountVis,300);
-  }
-  window.addEventListener("hashchange",fromHash);
-  fromHash();
+  function mountDkv(){ if(dkvOn||!window.DKV)return; var root=document.getElementById("dkv-root"); if(!root)return; try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){console.warn("DKV",e);} }
+  function mountVis(){ if(visOn||!window.AKSI_VISION)return; var root=document.getElementById("vision-root"); if(!root)return; try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){console.warn("Vision",e);} }
+  document.addEventListener("click",function(e){ var el=e.target.closest&&e.target.closest("[data-tab]"); if(!el)return; var t=el.getAttribute("data-tab"); if(t==="dkv")setTimeout(mountDkv,40); if(t==="vision")setTimeout(mountVis,40); },true);
+  function fromHash(){ var h=(location.hash||"").replace(/^#/,""); if(h==="dkv")setTimeout(mountDkv,300); if(h==="vision")setTimeout(mountVis,300); }
+  window.addEventListener("hashchange",fromHash); fromHash();
 })();
 </script>
 </body>
