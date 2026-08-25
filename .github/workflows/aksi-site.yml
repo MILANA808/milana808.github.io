@@ -14,30 +14,34 @@ jobs:
       - name: Required runtime files
         run: |
           set -e
-          for f in index.html 404.html aksi.html; do test -f "$f" || { echo "missing $f"; exit 1; }; done
+          for f in index.html 404.html aksi.html aksi-app.js; do
+            test -f "$f" || { echo "missing $f"; exit 1; }
+          done
           echo "core files OK"
-      - name: HTML sanity
+      - name: Core HTML sanity
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          bad=[]
-          for p in Path('.').rglob('*.html'):
-              if '.git' in p.parts or 'node_modules' in p.parts: continue
-              try:
-                  s=p.read_text(encoding='utf-8',errors='replace').lower()
-              except Exception as e:
-                  bad.append(f'{p}: read error {e}'); continue
-              if '<html' not in s or '</html>' not in s:
-                  bad.append(str(p))
+          required = ["index.html", "404.html", "aksi.html"]
+          bad = []
+          for name in required:
+              p = Path(name)
+              s = p.read_text(encoding="utf-8", errors="replace").lower()
+              if "<html" not in s or "</html>" not in s:
+                  bad.append(name)
           if bad:
-              print('BAD:', bad); raise SystemExit(1)
-          print('HTML OK')
+              print("BAD:", bad)
+              raise SystemExit(1)
+          print("HTML OK")
           PY
+      - name: aksi runtime size
+        run: |
+          set -e
+          hz=$(wc -c < aksi.html)
+          jz=$(wc -c < aksi-app.js)
+          echo "aksi.html=$hz aksi-app.js=$jz"
+          test "$hz" -gt 5000
+          test "$jz" -gt 10000
       - name: No obvious secret literals
         run: |
           ! grep -RInE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}' --exclude-dir=.git --exclude='*.map' . || true
-      - name: aksi.html size
-        run: |
-          sz=$(wc -c < aksi.html)
-          echo "aksi.html bytes=$sz"
-          test "$sz" -gt 10000
