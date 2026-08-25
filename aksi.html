@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · цепочка">
+<meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · DKV · цепочка">
 <title>АКСИ</title>
+<link rel="manifest" href="data:application/manifest+json,{"name":"АКСИ","short_name":"АКСИ","start_url":"/aksi.html","display":"standalone","background_color":"#0a0a0c","theme_color":"#0a0a0c"}">
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
 *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
@@ -56,6 +57,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" data-tab="proof">Цепочка</button>
   <button type="button" data-tab="protocol">Протокол</button>
   <button type="button" data-tab="edge">Edge</button>
+  <button type="button" data-tab="dkv">DKV</button>
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
@@ -66,7 +68,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
       <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
       <button type="button" class="chip" data-ask="формула">формула</button>
       <button type="button" class="chip" data-ask="протокол">протокол</button>
-      <button type="button" class="chip" data-ask="wiki: искусственный интеллект">wiki</button>
+      <button type="button" class="chip" data-ask="wiki: АКСИ">wiki</button>
     </div>
   </section>
   <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или в чате: <b>запомни: …</b></p>
@@ -110,10 +112,12 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <textarea id="eQuery" placeholder="Запрос для Edge pipeline" style="margin-top:12px">что умеешь</textarea>
     <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
     <pre class="out" id="eOut">—</pre></div></section>
+  <section class="panel" id="tab-dkv"><div id="dkv-root"></div>
+    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">Полная страница: <a href="aksi-dkv.html" style="color:var(--a)">aksi-dkv.html</a></p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель. Без обязательного чужого облака.</p></div>
+    <p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель, DKV. Без обязательного чужого облака.</p></div>
     <div class="card"><h2>Слой</h2>
-    <p class="muted">Agent-v1 · ADIA<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
+    <p class="muted">Agent-v1 · ADIA · DKV<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
 </main>
 <div class="bar">
@@ -121,15 +125,16 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
   <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
-<script src="aksi-app.js?v=9"></script>
+<script src="aksi-dkv.js?v=12"></script>
+<script src="aksi-app.js?v=10"></script>
 <script>
 (function(){
   setTimeout(function(){
-    var th=document.getElementById('thread');
+    var th=document.getElementById("thread");
     if(th && th.children.length===0){
-      th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Обнови страницу (Ctrl+F5).</div></div>';
+      th.innerHTML='<div class="msg ai"><div class="bub">Не загрузился скрипт. Обнови (Ctrl+F5).</div></div>';
     }
-  }, 2500);
+  }, 2000);
 })();
 </script>
 </body>
