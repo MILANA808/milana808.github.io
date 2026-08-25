@@ -16,6 +16,7 @@ def test_release_docs_exist_and_are_consistent():
         "PLATFORM.md",
         "WHOLE-AKSI.md",
         "TEST.md",
+        "RELEASE.md",
         "about/index.html",
         "index.html",
     ]
@@ -25,11 +26,13 @@ def test_release_docs_exist_and_are_consistent():
     readme = read("README.md")
     product = read("PRODUCT.md")
     about = read("about/index.html")
+    release = read("RELEASE.md")
     assert "local-first" in readme
     assert "Proof" in readme
     assert "не доказывает истинность" in readme
     assert "Критерий готового релиза" in product
     assert "персональная local-first когнитивная система" in about
+    assert "Release Candidate" in release
 
 
 def test_docs_do_not_make_forbidden_product_claims():
