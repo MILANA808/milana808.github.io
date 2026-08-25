@@ -1,6 +1,7 @@
 /**
- * AKSI LLM bridge — full AI via Ollama / OpenAI-compatible API
- * Loads after aksi-app.js and overrides chat()
+ * AKSI LLM + Core bridge v1.1
+ * Pipeline: memory cmds → Internet Core → LLM → local agent
+ * Contact: aksilove@internet.ru · @AKSILOVE
  */
 (function (global) {
   "use strict";
@@ -100,10 +101,11 @@
     var th = $("thread");
     if (!th || !th.lastChild) return;
     var b = th.lastChild.querySelector && th.lastChild.querySelector(".bub");
-    if (b && /Думаю/.test(b.textContent || "")) th.removeChild(th.lastChild);
+    if (b && /(Думаю|Ядро ищет)/.test(b.textContent || "")) th.removeChild(th.lastChild);
   }
 
   var origChat = global.AKSI_CHAT;
+
   function chatAI(q) {
     q = String(q || "").trim();
     if (!q || busy) return;
@@ -114,19 +116,73 @@
     bubble("me", q);
     chatHistory.push({ role: "user", content: q });
     if ($("inp")) $("inp").value = "";
-    bubble("ai", "Думаю…");
-    callLLM(q).then(function (llm) {
+    bubble("ai", "Ядро ищет…");
+
+    function finish(text, meta) {
       removeThinking();
-      if (llm && llm.text) {
-        bubble("ai", llm.text, "LLM · АКСИ");
-        chatHistory.push({ role: "assistant", content: llm.text });
-        if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
-        busy = false;
-        return;
-      }
+      bubble("ai", text, meta || "АКСИ");
+      chatHistory.push({ role: "assistant", content: text });
+      if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
+      busy = false;
+    }
+
+    function tryLLM(context) {
+      var prompt = context
+        ? ("Контекст из интернета (Ядро АКСИ):\n" + String(context).slice(0, 2500) +
+           "\n\nВопрос пользователя: " + q +
+           "\n\nОтветь по-русски, опираясь на контекст. Не выдумывай факты сверх данных.")
+        : q;
+      return callLLM(prompt).then(function (llm) {
+        if (llm && llm.text) {
+          finish(llm.text, context ? "Ядро+LLM" : "LLM · АКСИ");
+          return true;
+        }
+        return false;
+      }).catch(function () { return false; });
+    }
+
+    var useCore = global.AKSI_CORE && (
+      (typeof global.AKSI_CORE.needsNet === "function" && global.AKSI_CORE.needsNet(q)) ||
+      /^(поиск|найди|search|что такое|кто такой|wiki)/i.test(q)
+    );
+
+    if (useCore && typeof global.AKSI_CORE.ask === "function") {
+      global.AKSI_CORE.ask(q).then(function (res) {
+        if (res && res.ok && res.text) {
+          if (res.refined) {
+            finish(res.text, "Ядро+LLM");
+            return;
+          }
+          tryLLM(res.text).then(function (ok) {
+            if (ok) return;
+            finish(res.text, "Ядро · интернет");
+          });
+          return;
+        }
+        tryLLM(null).then(function (ok) {
+          if (ok) return;
+          busy = false;
+          if (typeof origChat === "function") origChat(q);
+          else finish("Сеть не дала ответа. Уточни вопрос.", "ядро");
+        });
+      }).catch(function () {
+        tryLLM(null).then(function (ok) {
+          if (ok) return;
+          busy = false;
+          if (typeof origChat === "function") origChat(q);
+        });
+      });
+      return;
+    }
+
+    tryLLM(null).then(function (ok) {
+      if (ok) return;
       busy = false;
       if (typeof origChat === "function") origChat(q);
-      else bubble("ai", "Нейросеть недоступна.\n\n1) Установи Ollama: https://ollama.com\n2) ollama run llama3.2\n3) Вкладка «О себе» → Сохранить → Тест\n\nИли укажи OpenAI-compatible URL + API key.");
+      else finish(
+        "Нейросеть offline. Ядро интернета: спроси «что такое …» / «кто такой …» / «найди …».\nOllama: вкладка О себе.",
+        "локально"
+      );
     });
   }
 
@@ -152,14 +208,14 @@
       saveLlmCfg(cfg);
       if ($("llmStatus")) $("llmStatus").textContent = "сохранено · проверка…";
       probeLLM(function (ok) {
-        if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ нейросеть online · " + cfg.model : "офлайн — запусти Ollama или укажи API";
+        if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ нейросеть online · " + cfg.model : "офлайн — Ollama/API · Ядро интернета работает без них";
       });
       return;
     }
     if (el.id === "btnLlmTest") {
       if ($("llmStatus")) $("llmStatus").textContent = "тест…";
       callLLM("Скажи одним предложением: ты АКСИ и готова помогать.").then(function (r) {
-        if ($("llmStatus")) $("llmStatus").textContent = r ? "✓ OK" : "нет ответа";
+        if ($("llmStatus")) $("llmStatus").textContent = r ? "✓ OK" : "LLM нет · Ядро интернета всё равно доступно";
         if (r) bubble("ai", "LLM тест: " + r.text, "тест");
       });
     }
@@ -187,12 +243,16 @@
     if ($("llmKey") && cfg.key !== "ollama") $("llmKey").value = cfg.key;
     if ($("llmModel")) $("llmModel").value = cfg.model;
     probeLLM(function (ok) {
-      if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ нейросеть online · " + cfg.model : "локальное ядро — подключи Ollama для полного ИИ";
-      if (ok && $("stBadge")) $("stBadge").textContent = "LLM";
+      if ($("llmStatus")) {
+        $("llmStatus").textContent = ok
+          ? "✓ нейросеть online · " + cfg.model
+          : "Ядро интернета ON · LLM опционально (Ollama/API)";
+      }
+      if ($("stBadge")) $("stBadge").textContent = ok ? "LLM" : "Ядро";
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initUi);
   else setTimeout(initUi, 100);
 
-  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "1.0.0" };
+  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "1.1.0-core" };
 })(window);
