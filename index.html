@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
-<meta name="description" content="АКСИ — осознанный агент: Self, RWKV, DKV, Vision">
+<meta name="description" content="АКСИ — отвечает живо: Self, RWKV, поиск, LLM">
 <title>АКСИ — цифровой напарник</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -35,7 +35,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>Self · RWKV · осознанность</p></div>
+  <div><h1>АКСИ</h1><p>живой ответ · Self · RWKV</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -61,11 +61,11 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <main>
   <section class="panel on" id="tab-chat"><div id="thread"></div>
     <div class="chips" id="chips">
+      <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-ask="напиши себе инструмент приветствие: коротко поздороваться">напиши себе tool</button>
-      <button type="button" class="chip" data-ask="улучши себя">улучши себя</button>
-      <button type="button" class="chip" data-ask="нейросеть">нейросеть</button>
+      <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
       <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
+      <button type="button" class="chip" data-ask="как подключить LLM">LLM</button>
     </div>
   </section>
   <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт</p>
@@ -111,22 +111,22 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
   <section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
-  <section class="panel" id="tab-self"><div id="self-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px">Осознанность · самопись · цели</p></section>
+  <section class="panel" id="tab-self"><div id="self-root"></div></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Self + RWKV + ядро + LLM</p></div>
-    <div class="card"><h2>LLM</h2>
+    <p class="muted">Живые ответы · поиск · Self · RWKV · LLM (Ollama)</p></div>
+    <div class="card"><h2>LLM — чтобы отвечала «как большая модель»</h2>
+    <p class="muted" style="margin-bottom:10px">1) Установи Ollama · 2) ollama run llama3.2 · 3) Сохранить</p>
     <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить</label>
     <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
     <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
-    <input id="llmKey" type="password" placeholder="API key" style="margin-bottom:8px">
+    <input id="llmKey" type="password" placeholder="API key (ollama)" style="margin-bottom:8px">
     <div class="row"><button type="button" class="btn p" id="btnLlmSave">Сохранить</button><button type="button" class="btn" id="btnLlmTest">Тест</button></div>
     <p class="muted" id="llmStatus" style="margin-top:10px">—</p></div>
     <div class="card"><h2>Слой</h2><p class="muted">DID: <b id="didVal">—</b><br>aksilove@internet.ru</p></div>
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Бэкап</button></div></div></section>
 </main>
 <div class="bar">
-  <input id="inp" type="text" placeholder="кто ты · напиши себе tool · улучши себя" enterkeyhint="send" autocomplete="off">
+  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
   <button type="button" class="icon" id="btnVoice">🎤</button>
   <button type="button" class="send" id="send">↑</button>
 </div>
@@ -136,7 +136,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <script src="aksi-net.js?v=4"></script>
 <script src="aksi-neuro.js?v=2"></script>
 <script src="aksi-self.js?v=1"></script>
-<script src="aksi-llm.js?v=7"></script>
+<script src="aksi-llm.js?v=8"></script>
 <script>
 (function(){
   var dkvOn=false,visOn=false,neuroOn=false,selfOn=false;
