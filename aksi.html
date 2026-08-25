@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · DKV · цепочка">
+<meta name="description" content="АКСИ — цифровой напарник. Agent-v1 · EQS · Edge · квант · DKV · Vision · цепочка">
 <title>АКСИ</title>
-<link rel="manifest" href="data:application/manifest+json,{"name":"АКСИ","short_name":"АКСИ","start_url":"/aksi.html","display":"standalone","background_color":"#0a0a0c","theme_color":"#0a0a0c"}">
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
 *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
@@ -58,6 +57,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" data-tab="protocol">Протокол</button>
   <button type="button" data-tab="edge">Edge</button>
   <button type="button" data-tab="dkv">DKV</button>
+  <button type="button" data-tab="vision">Зрение</button>
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
@@ -112,12 +112,14 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
     <textarea id="eQuery" placeholder="Запрос для Edge pipeline" style="margin-top:12px">что умеешь</textarea>
     <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс cache</button></div>
     <pre class="out" id="eOut">—</pre></div></section>
+  <section class="panel" id="tab-vision"><div id="vision-root"></div>
+    <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">Камера только на устройстве · offline CV</p></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div>
     <p class="muted" style="margin-top:8px;font-size:12px;color:var(--dim)">Полная страница: <a href="aksi-dkv.html" style="color:var(--a)">aksi-dkv.html</a></p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Цифровой напарник и суверенный агентный слой: память на устройстве, свои метрики мысли (EQS/QCLI), прозрачная цепочка решений, Agent-v1, Edge-ускоритель, DKV. Без обязательного чужого облака.</p></div>
+    <p class="muted">Цифровой напарник: память, EQS, цепочка, Agent-v1, Edge, DKV, Vision. Без обязательного облака.</p></div>
     <div class="card"><h2>Слой</h2>
-    <p class="muted">Agent-v1 · ADIA · DKV<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
+    <p class="muted">Agent-v1 · ADIA · DKV · Vision<br>EQS: H0.30 · rel0.35 · coh0.25 · age0.10<br>DID: <b id="didVal">—</b><br>aksilove@internet.ru · @AKSILOVE</p></div>
     <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Полный бэкап</button></div></div></section>
 </main>
 <div class="bar">
@@ -125,8 +127,9 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <button type="button" class="icon" id="btnVoice" title="Голос">🎤</button>
   <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
-<script src="aksi-dkv.js?v=13"></script>
-<script src="aksi-app.js?v=10"></script>
+<script src="aksi-dkv.js?v=14"></script>
+<script src="aksi-vision.js?v=1"></script>
+<script src="aksi-app.js?v=11"></script>
 <script>
 (function(){
   setTimeout(function(){
@@ -139,24 +142,33 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 </script>
 <script>
 (function(){
-  var mounted=false;
-  function tryMount(){
-    if(mounted||!window.DKV)return;
+  var dkvOn=false, visOn=false;
+  function mountDkv(){
+    if(dkvOn||!window.DKV)return;
     var root=document.getElementById("dkv-root");
     if(!root)return;
-    var panel=document.getElementById("tab-dkv");
-    if(panel&&panel.classList.contains("on")){
-      try{DKV.mount("#dkv-root");mounted=true;}catch(e){console.warn(e);}
-    }
+    try{DKV.mount("#dkv-root");dkvOn=true;}catch(e){console.warn("DKV",e);}
+  }
+  function mountVis(){
+    if(visOn||!window.AKSI_VISION)return;
+    var root=document.getElementById("vision-root");
+    if(!root)return;
+    try{AKSI_VISION.mount("#vision-root");visOn=true;}catch(e){console.warn("Vision",e);}
   }
   document.addEventListener("click",function(e){
-    var t=e.target.closest&&e.target.closest("[data-tab=dkv]");
-    if(t){ setTimeout(tryMount, 30); }
-  });
-  window.addEventListener("hashchange",function(){
-    if((location.hash||"").replace(/^#/,"")==="dkv") setTimeout(tryMount, 50);
-  });
-  if((location.hash||"").replace(/^#/,"")==="dkv") setTimeout(tryMount, 400);
+    var el=e.target.closest&&e.target.closest("[data-tab]");
+    if(!el)return;
+    var t=el.getAttribute("data-tab");
+    if(t==="dkv")setTimeout(mountDkv,40);
+    if(t==="vision")setTimeout(mountVis,40);
+  },true);
+  function fromHash(){
+    var h=(location.hash||"").replace(/^#/,"");
+    if(h==="dkv")setTimeout(mountDkv,300);
+    if(h==="vision")setTimeout(mountVis,300);
+  }
+  window.addEventListener("hashchange",fromHash);
+  fromHash();
 })();
 </script>
 </body>
