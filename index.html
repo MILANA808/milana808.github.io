@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
-<meta name="description" content="АКСИ — своя нейросеть на CPU, чат, ядро, DKV, Vision">
+<meta name="description" content="АКСИ — RWKV нейросеть на CPU, чат, ядро, DKV, Vision">
 <title>АКСИ — цифровой напарник</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -36,7 +36,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>своя Neuro · CPU · без GPU</p></div>
+  <div><h1>АКСИ</h1><p>RWKV Neuro · CPU · без GPU</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -68,7 +68,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
       <button type="button" class="chip" data-ask="формула">формула</button>
     </div>
   </section>
-  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт — и Neuro тоже учится</p>
+  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт — RWKV тоже учится</p>
     <textarea id="teachBox" style="margin-top:10px"></textarea>
     <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
   <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
@@ -111,9 +111,9 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
   <section class="panel" id="tab-neuro"><div id="neuro-root"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px">Своя нейросеть · CPU · без GPU · веса в localStorage</p></section>
+    <p class="muted" style="margin-top:8px;font-size:12px">RWKV · CPU · O(1) память · без KV-cache · без GPU</p></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">АКСИ-Neuro (CPU) + ядро Wikipedia + LLM опционально</p></div>
+    <p class="muted">RWKV Neuro (CPU) + ядро Wikipedia + LLM опционально</p></div>
     <div class="card"><h2>LLM (опционально)</h2>
     <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить</label>
     <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
@@ -133,7 +133,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <script src="aksi-vision.js?v=3"></script>
 <script src="aksi-app.js?v=14"></script>
 <script src="aksi-net.js?v=4"></script>
-<script src="aksi-neuro.js?v=1"></script>
+<script src="aksi-neuro.js?v=2"></script>
 <script src="aksi-llm.js?v=6"></script>
 <script>
 (function(){
