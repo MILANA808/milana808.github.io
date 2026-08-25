@@ -1,6 +1,6 @@
 /**
- * AKSI LLM + Core bridge v1.2 — always answers, never hangs
- * Pipeline: local agent → net core (timeout) → LLM (short timeout)
+ * AKSI LLM + Core bridge v1.2.1 — always answers, never hangs
+ * local builtin KB → net core → LLM (timeouts)
  * Contact: aksilove@internet.ru · @AKSILOVE
  */
 (function (global) {
@@ -36,9 +36,7 @@
   }
   function systemPrompt() {
     var mem = getMemFacts();
-    return "Ты — АКСИ, суверенный цифровой напарник. Отвечай по-русски, кратко и по делу.\n" +
-      "Контакт: aksilove@internet.ru · @AKSILOVE. Не выдумывай факты.\n" +
-      (mem ? ("Память пользователя:\n" + mem) : "");
+    return "Ты — АКСИ. Отвечай по-русски, кратко.\nКонтакт: aksilove@internet.ru\n" + (mem ? ("Память:\n" + mem) : "");
   }
   function buildMessages(q) {
     var msgs = [{ role: "system", content: systemPrompt() }];
@@ -61,20 +59,15 @@
         try { if (ctrl) ctrl.abort(); } catch (e) {}
         reject(new Error("timeout"));
       }, ms);
-      var o = {};
-      var k;
+      var o = {}, k;
       for (k in opts) o[k] = opts[k];
       if (ctrl) o.signal = ctrl.signal;
       fetch(url, o).then(function (r) {
         if (done) return;
-        done = true;
-        clearTimeout(t);
-        resolve(r);
+        done = true; clearTimeout(t); resolve(r);
       }).catch(function (e) {
         if (done) return;
-        done = true;
-        clearTimeout(t);
-        reject(e);
+        done = true; clearTimeout(t); reject(e);
       });
     });
   }
@@ -93,7 +86,7 @@
         temperature: 0.7,
         max_tokens: cfg.maxTokens || 600
       })
-    }, 6000).then(function (r) {
+    }, 5000).then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     }).then(function (j) {
@@ -108,9 +101,7 @@
     if (!cfg.base) { if (cb) cb(false); return; }
     fetchTimeout(cfg.base + "/v1/models", {
       headers: cfg.key ? { Authorization: "Bearer " + cfg.key } : {}
-    }, 2500).then(function (r) {
-      if (cb) cb(!!r.ok);
-    }).catch(function () { if (cb) cb(false); });
+    }, 2000).then(function (r) { if (cb) cb(!!r.ok); }).catch(function () { if (cb) cb(false); });
   }
 
   function bubble(role, text, meta) {
@@ -147,6 +138,32 @@
     }
   }
 
+  function builtinAnswer(q) {
+    var low = String(q || "").toLowerCase().trim();
+    var now = "";
+    try {
+      now = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit" }).format(new Date());
+    } catch (e) {}
+    if (/^(привет|здравств|добрый|hello|hi)\b/.test(low))
+      return "Привет. Я АКСИ · " + now + " МСК.\nСпроси: кто ты · что умеешь · формула · что такое …";
+    if (/кто ты|что ты такое|who are you|ты акси/.test(low))
+      return "Я АКСИ — суверенный цифровой напарник.\n\n• Ядро: поиск Wikipedia\n• Память: запомни: факт\n• EQS · квант · DKV · Vision · Agent-v1\n• aksilove@internet.ru · @AKSILOVE";
+    if (/что умеешь|что можешь|функци|помощь|help|команды/.test(low))
+      return "Умею:\n• локальные ответы (кто ты, формула…)\n• поиск: что такое … / кто такой …\n• запомни: факт\n• вкладки DKV · Зрение · Метрики · Квант\n• LLM опционально (О себе)";
+    if (/формул|aksi\s*=/.test(low))
+      return "AKSI = (A×I×S)×(1+0.4√n)\nEQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age";
+    if (/протокол|agent-v1|handshake/.test(low))
+      return "AKSI-Agent-v1: handshake · envelope · DID. Вкладка Протокол.";
+    if (/контакт|почта|email/.test(low))
+      return "aksilove@internet.ru · @AKSILOVE";
+    if (/время|который час|дата|сегодня/.test(low)) {
+      try {
+        return new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date()) + " (MSK)";
+      } catch (e) { return new Date().toLocaleString("ru-RU"); }
+    }
+    return null;
+  }
+
   function localAnswer(q) {
     try {
       if (typeof global.AKSI_ANSWER === "function") {
@@ -154,7 +171,7 @@
         if (t && t !== "__WIKI__" && t !== "__FALLBACK__" && String(t).trim()) return String(t);
       }
     } catch (e) {}
-    return null;
+    return builtinAnswer(q);
   }
 
   function chatAI(q) {
@@ -164,15 +181,10 @@
 
     if (/^(запомни|выучи)\s*[:\s]/i.test(q) || /забудь всё|что ты помнишь|что ты знаешь/i.test(q)) {
       if (typeof global.AKSI_CHAT_LOCAL === "function") return global.AKSI_CHAT_LOCAL(q);
-      if (typeof global.AKSI_ANSWER === "function") {
-        busy = true;
-        bubble("me", q);
-        if ($("inp")) $("inp").value = "";
-        var a = localAnswer(q);
-        bubble("ai", a || "Готово.", "память");
-        busy = false;
-        return;
-      }
+      bubble("me", q);
+      if ($("inp")) $("inp").value = "";
+      bubble("ai", localAnswer(q) || "Напиши: запомни: твой факт", "память");
+      return;
     }
 
     busy = true;
@@ -186,7 +198,7 @@
       if (finished) return;
       finished = true;
       removeThinking();
-      text = String(text || "Не удалось получить ответ. Попробуй: кто ты · что умеешь · что такое …").trim();
+      text = String(text || "Попробуй: кто ты · что умеешь · что такое …").trim();
       bubble("ai", text, meta || "АКСИ");
       chatHistory.push({ role: "assistant", content: text });
       if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
@@ -194,11 +206,8 @@
     }
 
     var watchdog = setTimeout(function () {
-      if (!finished) {
-        var loc = localAnswer(q);
-        finish(loc || "Сейчас сеть/модель не ответили.\n\nПопробуй:\n• кто ты · что умеешь · формула\n• что такое … (поиск)\n• запомни: факт", "таймаут");
-      }
-    }, 10000);
+      if (!finished) finish(localAnswer(q) || "Сеть не успела. Спроси: кто ты · формула · что такое ИИ", "таймаут");
+    }, 9000);
 
     function done(text, meta) {
       clearTimeout(watchdog);
@@ -210,43 +219,29 @@
       ? global.AKSI_CORE.needsNet(q)
       : /^(что такое|кто такой|найди|поиск|wiki)/i.test(q);
 
-    if (local && !/^(что такое|кто такой|найди|поиск|wiki\s*:)/i.test(q) && !needNet) {
-      done(local, "локально");
-      return;
-    }
-    if (local && !needNet && local.length > 40) {
+    if (local && !needNet) {
       done(local, "локально");
       return;
     }
 
     function afterCore(coreText) {
-      var prompt = coreText
-        ? ("Кратко по-русски ответь на вопрос, опираясь только на данные:\n" + String(coreText).slice(0, 1800) + "\n\nВопрос: " + q)
-        : q;
-      callLLM(prompt).then(function (llm) {
-        if (llm && llm.text) {
-          done(llm.text, coreText ? "Ядро+LLM" : "LLM");
-          return;
-        }
+      callLLM(coreText
+        ? ("Кратко по-русски по данным:\n" + String(coreText).slice(0, 1600) + "\n\nВопрос: " + q)
+        : q
+      ).then(function (llm) {
+        if (llm && llm.text) { done(llm.text, coreText ? "Ядро+LLM" : "LLM"); return; }
         if (coreText) done(coreText, "Ядро · интернет");
         else if (local) done(local, "локально");
-        else done(
-          "Пока нет ответа из сети и нейросети.\n\n• «что такое …» / «кто такой …» — поиск Wikipedia\n• «кто ты» · «формула» · «протокол» — локальные знания\n• Ollama (опционально): вкладка О себе",
-          "офлайн"
-        );
+        else done("Нет ответа из сети.\n• что такое … · кто такой …\n• кто ты · формула\n• Ollama — вкладка О себе", "офлайн");
       });
     }
 
     if (needNet && global.AKSI_CORE && typeof global.AKSI_CORE.query === "function") {
-      var timed = Promise.race([
+      Promise.race([
         global.AKSI_CORE.query(q),
-        new Promise(function (resolve) {
-          setTimeout(function () { resolve({ ok: false, text: "", hits: [] }); }, 7000);
-        })
-      ]);
-      timed.then(function (res) {
-        if (res && res.ok && res.text) afterCore(res.text);
-        else afterCore(null);
+        new Promise(function (r) { setTimeout(function () { r({ ok: false }); }, 6500); })
+      ]).then(function (res) {
+        afterCore(res && res.ok && res.text ? res.text : null);
       }).catch(function () { afterCore(null); });
       return;
     }
@@ -260,8 +255,7 @@
     var el = e.target.closest ? e.target.closest("#send, #btnLlmSave, #btnLlmTest") : e.target;
     if (!el) return;
     if (el.id === "send") {
-      e.stopPropagation();
-      e.preventDefault();
+      e.stopPropagation(); e.preventDefault();
       chatAI(($("inp") || {}).value || "");
       return;
     }
@@ -274,27 +268,23 @@
         maxTokens: 600
       };
       saveLlmCfg(cfg);
-      if ($("llmStatus")) $("llmStatus").textContent = "сохранено · проверка…";
+      if ($("llmStatus")) $("llmStatus").textContent = "сохранено…";
       probeLLM(function (ok) {
-        if ($("llmStatus")) $("llmStatus").textContent = ok
-          ? "✓ нейросеть online · " + cfg.model
-          : "LLM офлайн · Ядро и локальные ответы работают";
+        if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM online" : "LLM офлайн · локальные ответы OK";
       });
       return;
     }
     if (el.id === "btnLlmTest") {
-      if ($("llmStatus")) $("llmStatus").textContent = "тест…";
-      callLLM("Скажи одним предложением: ты АКСИ.").then(function (r) {
-        if ($("llmStatus")) $("llmStatus").textContent = r ? "✓ OK" : "LLM недоступна (это нормально без Ollama)";
-        if (r) bubble("ai", "LLM: " + r.text, "тест");
+      callLLM("Скажи: ты АКСИ.").then(function (r) {
+        if ($("llmStatus")) $("llmStatus").textContent = r ? "✓ OK" : "без Ollama — норма";
+        if (r) bubble("ai", r.text, "тест");
       });
     }
   }, true);
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && e.target && e.target.id === "inp") {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault(); e.stopPropagation();
       chatAI(e.target.value);
     }
   }, true);
@@ -302,8 +292,7 @@
   document.addEventListener("click", function (e) {
     var el = e.target.closest && e.target.closest("[data-ask]");
     if (!el) return;
-    e.stopPropagation();
-    e.preventDefault();
+    e.stopPropagation(); e.preventDefault();
     chatAI(el.getAttribute("data-ask"));
   }, true);
 
@@ -311,19 +300,14 @@
     var cfg = loadLlmCfg();
     if ($("llmOn")) $("llmOn").checked = !!cfg.on;
     if ($("llmBase")) $("llmBase").value = cfg.base;
-    if ($("llmKey") && cfg.key !== "ollama") $("llmKey").value = cfg.key;
     if ($("llmModel")) $("llmModel").value = cfg.model;
     probeLLM(function (ok) {
-      if ($("llmStatus")) {
-        $("llmStatus").textContent = ok
-          ? "✓ нейросеть online · " + cfg.model
-          : "Ядро + локально ON · LLM опционально";
-      }
+      if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM" : "локально + ядро ON";
       if ($("stBadge")) $("stBadge").textContent = ok ? "LLM" : "Ядро";
     });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initUi);
   else setTimeout(initUi, 80);
 
-  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "1.2.0" };
+  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "1.2.1" };
 })(window);
