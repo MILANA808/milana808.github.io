@@ -1,109 +1,84 @@
-# AKSI — Sovereign Agent Layer
+# AKSI — Platform
 
-**Status:** Platform direction locked  
-**Public:** https://milana808.github.io  
-**Contact:** aksilove@internet.ru  
+**AKSI** — персональная local-first когнитивная система и суверенный агентный слой.
 
----
+## Миссия
 
-## Mission
+Дать человеку агента, чья память, identity, правила действий и история решений находятся под его контролем и могут быть перенесены между моделями и инструментами.
 
-Build the layer where every person can own an agent:
-identity, memory, decisions — under their control, not locked inside a vendor chat box.
+Модели меняются. Пользовательская память и контроль над агентом не должны зависеть от одной модели.
 
-Models change every year.  
-Ownership of the agent should not.
+## Один runtime
 
----
-
-## One sentence
-
-**AKSI is the sovereign agent layer: personal agents with memory and accountable decisions, portable across tools and optional networks.**
-
----
-
-## Not this
-
-- Not a ChatGPT clone
-- Not a social feed
-- Not “AGI in a browser tab”
-- Not a pile of experimental pages
-
-## This
-
-| Layer | Role |
-|-------|------|
-| **1. Identity** | The agent is *yours* (stable id, portable profile) |
-| **2. Runtime** | Learns facts, answers, keeps memory on-device by default |
-| **3. Integrity** | Optional signed decision trail for audit |
-| **4. Network** | Later: agent↔agent protocol (opt-in) |
-
----
-
-## System map
-
-```
-                 humans / products
-                        │
-           ┌────────────┴────────────┐
-           │     AKSI SURFACE        │
-           │  demo agent · license   │
-           └────────────┬────────────┘
-                        │
-           ┌────────────┴────────────┐
-           │     AKSI RUNTIME        │
-           │  intent · memory · I/O  │
-           │  optional model adapter │
-           └────────────┬────────────┘
-                        │
-     ┌──────────────────┼──────────────────┐
-     │                  │                  │
- Identity            Memory            Integrity
- (who)             (what known)      (what decided)
-     │                  │                  │
-     └──────────────────┼──────────────────┘
-                        │
-              Protocol (Agent-v1)
-           handshake · envelope · peer
+```text
+Surface
+   ↓
+Runtime
+ ├─ Intent / request
+ ├─ Core
+ ├─ Memory / lessons
+ ├─ Model adapter
+ ├─ Tools / permissions
+ ├─ Identity
+ ├─ Provenance / uncertainty
+ └─ Proof ledger
 ```
 
----
+## Слои
 
-## Public surfaces
+| Слой | Назначение |
+|---|---|
+| Identity | кто является агентом и кому принадлежит его identity |
+| Runtime | координация основного пользовательского пути |
+| Core | базовая обработка и policy |
+| Memory | локальные факты и lessons |
+| Tools | внешние возможности через permissions |
+| Integrity | hash-linked proof и проверка целостности |
+| Network | опциональные внешние соединения |
 
-| URL | Role |
-|-----|------|
-| `/` | Platform entry |
-| `/platform.html` | Manifesto + map |
-| `/aksi.html` | Personal agent demo (teach · memory · chat) |
-| contact | aksilove@internet.ru only |
+## Принцип
 
----
+> **Модель — двигатель. AKSI — транспорт, ключи, память, правила и журнал.**
 
-## Build order
+Это инженерная метафора, а не утверждение о независимом сознании системы.
 
-1. **One demo agent** that is clearly valuable alone (memory + teach + chat)
-2. **One runtime package** for licensees
-3. **Protocol spec** as IP
-4. **Network** only after (1) is loved
+## Что не является целью платформы
 
----
+- копировать интерфейс конкретного AI-сервиса;
+- выдавать экспериментальные метрики за научное доказательство интеллекта;
+- автоматически выполнять опасные действия без human gate;
+- требовать облако для базовой работы;
+- скрывать сетевые действия от пользователя.
 
-## Commercial frame
+## Публичный путь
 
-- Studio — runtime for one product
-- Business — white-label
-- Enterprise — integrity + integration
+`/` — основной пользовательский интерфейс.
 
-Sell **layer and rights**, not “smarter small talk”.
+`/about/` — объяснение продукта.
 
----
+`/aksi-console.html` — расширенная рабочая консоль.
 
-## Principle
+`START.md` — быстрый старт.
 
-> The model is a motor.  
-> AKSI is the vehicle registration, the keys, and the logbook.
+`PRODUCT.md` — продуктовая спецификация.
 
----
+`TEST.md` — тестовый план.
 
-*AKSI Platform — locked direction. Build only what serves this map.*
+## Порядок разработки
+
+1. Надёжный локальный агент.
+2. Память и обучение на исправлениях.
+3. Identity и proof.
+4. Permissioned tools и human gate.
+5. SDK/API для интеграции.
+6. Сеть агентов только после стабилизации локального продукта.
+
+## Коммерческая рамка
+
+Studio → один продукт.
+
+Business → интеграция и white-label.
+
+Enterprise → self-hosted deployment, policies, audit и интеграции.
+
+Ценность продаётся через измеримые свойства системы, а не через заявление «АКСИ умнее всех».
