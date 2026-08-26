@@ -18,7 +18,7 @@ jobs:
       - name: Required runtime files
         run: |
           set -euo pipefail
-          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js; do
+          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
           echo "core files OK"
@@ -34,6 +34,9 @@ jobs:
 
       - name: Answer quality tests
         run: node tests/aksi-answer-quality.test.js
+
+      - name: Runtime contract tests
+        run: node tests/aksi-runtime.test.js
 
       - name: Referenced scripts exist
         run: |
