@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0c">
-<meta name="description" content="АКСИ — отвечает живо: Self, RWKV, поиск, LLM">
+<meta name="description" content="АКСИ — Core v5, Self, RWKV, MATRIX">
 <title>АКСИ — цифровой напарник</title>
 <style>
 :root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
@@ -20,7 +20,7 @@ main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(108px + var(--s
 #thread{display:flex;flex-direction:column;gap:12px}.msg{display:flex}.msg.me{justify-content:flex-end}
 .bub{max-width:min(92%,420px);padding:11px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.5}
 .msg.me .bub{background:linear-gradient(135deg,var(--a2),var(--a));color:#fff}.msg.ai .bub{background:var(--s2);border:1px solid var(--line)}
-.meta{font-size:10px;color:var(--dim);margin-top:4px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:12.5px;cursor:pointer}
+.meta{font-size:10px;color:var(--dim);margin-top:4px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:12.5px;cursor:pointer;text-decoration:none;display:inline-block}
 .card{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px}.card h2{font-size:13px;margin:0 0 8px}.muted{color:var(--m);font-size:13px}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:42px;padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:13px/1 var(--font);cursor:pointer}.btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
 input,textarea{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit}textarea{min-height:90px}
@@ -35,7 +35,7 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <body>
 <header>
   <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>живой ответ · Self · RWKV</p></div>
+  <div><h1>АКСИ</h1><p>Core v5 · Self · RWKV</p></div>
   <div class="stats">
     <span id="stClock">MSK —</span>
     <span>EQS <b id="stEqs">—</b></span>
@@ -61,11 +61,11 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <main>
   <section class="panel on" id="tab-chat"><div id="thread"></div>
     <div class="chips" id="chips">
+      <a class="chip" href="/aksi-matrix/">MATRIX</a>
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
       <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
       <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
-      <button type="button" class="chip" data-ask="как подключить LLM">LLM</button>
     </div>
   </section>
   <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">запомни: факт</p>
@@ -113,7 +113,8 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
   <section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
   <section class="panel" id="tab-self"><div id="self-root"></div></section>
   <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Живые ответы · поиск · Self · RWKV · LLM (Ollama)</p></div>
+    <p class="muted">Живые ответы · Core v5 · Self · RWKV · LLM</p>
+    <p class="muted" style="margin-top:8px"><a href="/aksi-matrix/" style="color:#a78bfa">Открыть АКСИ MATRIX →</a></p></div>
     <div class="card"><h2>LLM — чтобы отвечала «как большая модель»</h2>
     <p class="muted" style="margin-bottom:10px">1) Установи Ollama · 2) ollama run llama3.2 · 3) Сохранить</p>
     <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> Включить</label>
@@ -133,10 +134,11 @@ pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;pad
 <script src="aksi-dkv.js?v=15"></script>
 <script src="aksi-vision.js?v=3"></script>
 <script src="aksi-app.js?v=14"></script>
+<script src="aksi-core.js?v=5"></script>
 <script src="aksi-net.js?v=4"></script>
 <script src="aksi-neuro.js?v=2"></script>
 <script src="aksi-self.js?v=1"></script>
-<script src="aksi-llm.js?v=8"></script>
+<script src="aksi-llm.js?v=9"></script>
 <script>
 (function(){
   var dkvOn=false,visOn=false,neuroOn=false,selfOn=false;
