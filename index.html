@@ -4,95 +4,141 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ — Neuro · WebLLM · MATRIX. Суверенный напарник. aksilove@internet.ru">
+<meta name="description" content="АКСИ — Neuro · WebLLM · чат. Local-first. aksilove@internet.ru">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>АКСИ — Neuro · WebLLM · MATRIX</title>
+<title>АКСИ — Neuro · WebLLM</title>
 <style>
-:root{--bg:#06050b;--s1:#13111c;--s2:#1b1726;--line:rgba(167,139,250,.14);--line2:rgba(255,255,255,.06);--t:#f7f5ff;--m:#a8a0bd;--dim:#7a738f;--a:#a78bfa;--a2:#7c3aed;--a3:#c4b5fd;--ok:#34d399;--font:system-ui,-apple-system,"Segoe UI",sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px}
-*{box-sizing:border-box;margin:0;padding:0}html{height:100%}
-body{min-height:100%;min-height:100dvh;color:var(--t);font:15px/1.55 var(--font);background:radial-gradient(ellipse 90% 55% at 50% -15%,rgba(124,58,237,.32),transparent 55%),var(--bg);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto}
-header{display:flex;align-items:center;gap:12px;padding:14px var(--pad);border-bottom:1px solid var(--line2);background:rgba(6,5,11,.82);backdrop-filter:blur(18px);position:sticky;top:0;z-index:50}
-.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(145deg,#6d28d9,#a78bfa 55%,#c4b5fd);display:grid;place-items:center;font:800 15px/1 var(--font);color:#fff;box-shadow:0 0 0 1px rgba(167,139,250,.35),0 8px 28px rgba(124,58,237,.4)}
-header h1{font-size:17px;font-weight:750}header .sub{font-size:12px;color:var(--m);margin-top:2px}
+:root{
+  --bg:#06050b;--s1:#13111c;--s2:#1b1726;
+  --line:rgba(167,139,250,.18);--line2:rgba(255,255,255,.07);
+  --t:#f7f5ff;--m:#a8a0bd;--dim:#7a738f;
+  --a:#a78bfa;--a2:#7c3aed;--ok:#34d399;
+  --font:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{
+  min-height:100%;min-height:100dvh;color:var(--t);font:15px/1.55 var(--font);
+  background:radial-gradient(ellipse 90% 55% at 50% -15%,rgba(124,58,237,.32),transparent 55%),var(--bg);
+  display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;
+}
+header{
+  display:flex;align-items:center;gap:12px;padding:14px var(--pad);
+  border-bottom:1px solid var(--line2);background:rgba(6,5,11,.85);backdrop-filter:blur(16px);
+  position:sticky;top:0;z-index:50;
+}
+.logo{
+  width:42px;height:42px;border-radius:13px;flex-shrink:0;
+  background:linear-gradient(145deg,#6d28d9,#a78bfa 55%,#c4b5fd);
+  display:grid;place-items:center;font:800 15px/1 var(--font);color:#fff;
+  box-shadow:0 8px 28px rgba(124,58,237,.4);
+}
+header h1{font-size:17px;font-weight:750}
+header .sub{font-size:12px;color:var(--m);margin-top:2px}
 .pill{display:inline-flex;margin-left:6px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;background:rgba(52,211,153,.12);color:var(--ok)}
 .stats{margin-left:auto;text-align:right;font-size:11px;color:var(--dim)}.stats b{color:var(--ok)}
-.guide{margin:14px var(--pad) 0;padding:18px 16px 16px;border-radius:18px;border:1px solid rgba(167,139,250,.28);background:linear-gradient(160deg,rgba(124,58,237,.22),rgba(27,23,38,.92) 55%),var(--s1);box-shadow:0 12px 40px rgba(0,0,0,.35)}
-.guide h2{font-size:19px;font-weight:750;margin-bottom:8px}.guide .lead{font-size:13.5px;color:var(--m);line-height:1.55;margin-bottom:14px}
-.steps{display:grid;gap:8px;margin-bottom:14px}
-.step{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid var(--line2)}
-.step .n{width:24px;height:24px;border-radius:8px;flex-shrink:0;background:rgba(167,139,250,.2);color:var(--a3);display:grid;place-items:center;font:700 12px/1 var(--font)}
-.step p{font-size:13px}.step span{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
-.guide .actions{display:flex;flex-wrap:wrap;gap:8px}
-.btn-cta{display:inline-flex;align-items:center;min-height:42px;padding:10px 16px;border-radius:12px;border:0;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font:650 13.5px/1 var(--font);text-decoration:none;cursor:pointer}
-.btn-ghost{display:inline-flex;align-items:center;min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(18,16,26,.55);color:var(--t);font:500 13px/1 var(--font);text-decoration:none;cursor:pointer}
 .feat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px var(--pad) 0}
-.feat .f{padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--s1);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;text-decoration:none;display:block}
-.feat .f:hover{border-color:rgba(167,139,250,.35);background:var(--s2)}
-.feat .f strong{display:block;font-size:13px;font-weight:650;margin-bottom:3px}.feat .f span{font-size:11.5px;color:var(--dim)}
-nav{display:flex;flex-wrap:nowrap;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.9);overflow-x:auto;scrollbar-width:none}
-nav button{flex-shrink:0;padding:8px 12px;border:0;border-radius:10px;background:0;color:var(--m);font:600 12px/1 var(--font);cursor:pointer}
-nav button.on{background:var(--s2);color:var(--t)}
-main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(112px + var(--safe-b))}
+.feat .f{
+  padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--s1);
+  cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;text-decoration:none;display:block;
+}
+.feat .f:hover{border-color:rgba(167,139,250,.4);background:var(--s2)}
+.feat .f strong{display:block;font-size:13px;font-weight:650;margin-bottom:3px}
+.feat .f span{font-size:11.5px;color:var(--dim)}
+nav{
+  display:flex;flex-wrap:nowrap;gap:4px;padding:10px var(--pad);
+  border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;
+  background:rgba(6,5,11,.92);overflow-x:auto;scrollbar-width:none;
+}
+nav::-webkit-scrollbar{display:none}
+nav button,nav a{
+  flex-shrink:0;padding:8px 12px;border:0;border-radius:10px;background:0;
+  color:var(--m);font:600 12px/1 var(--font);cursor:pointer;text-decoration:none;
+}
+nav button.on{background:var(--s2);color:var(--t);box-shadow:inset 0 0 0 1px var(--line)}
+main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--safe))}
 .panel{display:none}.panel.on{display:block}
-#thread{display:flex;flex-direction:column;gap:12px;min-height:60px}
+#thread{display:flex;flex-direction:column;gap:12px;min-height:48px}
 .msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:min(94%,460px);padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:14.5px}
-.msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff}.msg.ai .bub{background:var(--s2);border:1px solid var(--line2)}
+.bub{
+  max-width:min(94%,460px);padding:12px 14px;border-radius:18px;
+  white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.5;
+}
+.msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff;border-bottom-right-radius:6px}
+.msg.ai .bub{background:var(--s2);border:1px solid var(--line2);border-bottom-left-radius:6px}
 .meta{font-size:10.5px;color:var(--dim);margin-top:6px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.chip{padding:9px 13px;border-radius:999px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font-size:13px;cursor:pointer;text-decoration:none;display:inline-block}
+.chip{
+  padding:9px 13px;border-radius:999px;border:1px solid var(--line2);background:var(--s1);
+  color:var(--t);font-size:13px;cursor:pointer;text-decoration:none;display:inline-block;font:inherit;
+}
 .chip.hot{border-color:rgba(167,139,250,.45);background:rgba(124,58,237,.18);color:#e9d5ff;font-weight:650}
 .card{background:var(--s2);border:1px solid var(--line2);border-radius:14px;padding:16px;margin-bottom:10px}
-.card h2{font-size:14px;font-weight:650;margin:0 0 8px}.muted{color:var(--m);font-size:13.5px}
+.card h2{font-size:14px;font-weight:650;margin:0 0 8px}
+.muted{color:var(--m);font-size:13.5px;line-height:1.5}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:600 13px/1 var(--font);cursor:pointer}
+.btn{
+  min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);
+  background:var(--s1);color:var(--t);font:600 13px/1 var(--font);cursor:pointer;
+}
 .btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
-input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:inherit}
-textarea{min-height:96px}.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kv .cell{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px}.kv .cell b{display:block;font-size:18px;color:var(--ok)}.kv .cell span{font-size:11px;color:var(--dim)}
-pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px}
-.bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:12px var(--pad) calc(12px + var(--safe-b));display:flex;gap:8px;z-index:60;background:linear-gradient(transparent,var(--bg) 32%)}
-.bar input{flex:1;min-height:50px;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--s2);color:var(--t)}
-.bar .icon,.bar .send{width:50px;height:50px;border-radius:16px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font-size:18px;cursor:pointer;flex-shrink:0}
-.bar .send{border:0;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff}
-.hint{text-align:center;font-size:11.5px;color:var(--dim);margin-top:10px}.hint a{color:var(--a)}
+input,textarea{
+  width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);
+  background:var(--s1);color:var(--t);font:inherit;
+}
+textarea{min-height:88px;resize:vertical}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv .cell,.kv > div{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px}
+.kv b{display:block;font-size:16px;color:var(--ok)}.kv span{font-size:11px;color:var(--dim)}
+pre.out,pre#nOut{
+  background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px;
+  font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px;color:var(--m);
+}
+.bar{
+  position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;
+  padding:12px var(--pad) calc(12px + var(--safe));display:flex;gap:8px;z-index:60;
+  background:linear-gradient(transparent,var(--bg) 28%);
+}
+.bar input{
+  flex:1;min-height:50px;padding:12px 16px;border-radius:16px;border:1px solid var(--line);
+  background:var(--s2);color:var(--t);box-shadow:0 8px 32px rgba(0,0,0,.35);
+}
+.bar .send{
+  width:50px;height:50px;border-radius:16px;border:0;
+  background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font-size:18px;cursor:pointer;
+  flex-shrink:0;box-shadow:0 6px 18px rgba(124,58,237,.4);
+}
+.hint{text-align:center;font-size:11.5px;color:var(--dim);margin-top:12px}.hint a{color:var(--a)}
 @media(max-width:420px){.feat{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ <span class="pill">● online</span></h1><div class="sub">Neuro · WebLLM · MATRIX</div></div>
-  <div class="stats"><div id="stClock">MSK —</div><div>EQS <b id="stEqs">—</b> · <span id="stBadge">ONE</span></div></div>
+  <div>
+    <h1>АКСИ <span class="pill">● online</span></h1>
+    <div class="sub">Нейро · WebLLM · чат на устройстве</div>
+  </div>
+  <div class="stats">
+    <div id="stClock">MSK —</div>
+    <div>EQS <b id="stEqs">—</b> · <span id="stBadge">boot</span></div>
+  </div>
 </header>
-<div class="guide" id="guide">
-  <h2>Что это и как пользоваться</h2>
-  <p class="lead">АКСИ — не облачный бот. Диалог, <b>Нейро</b>, <b>WebLLM</b> и proof живут в браузере. MATRIX — полная ОС-поверхность.</p>
-  <div class="steps">
-    <div class="step"><div class="n">1</div><p>Чат или MATRIX<span>подсказки ниже · /demo в MATRIX</span></p></div>
-    <div class="step"><div class="n">2</div><p>Нейро + WebLLM<span>плитки ниже · Ollama на localhost</span></p></div>
-    <div class="step"><div class="n">3</div><p>запомни: факт<span>память + граф в MATRIX</span></p></div>
-  </div>
-  <div class="actions">
-    <button type="button" class="btn-cta" id="btnStartChat">Начать чат</button>
-    <a class="btn-ghost" href="/aksi-matrix/">MATRIX →</a>
-    <button type="button" class="btn-ghost" id="btnHideGuide">Скрыть</button>
-  </div>
-</div>
+
 <div class="feat" id="featGrid">
-  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Ответы · поиск · память</span></button>
-  <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV · граф памяти</span></button>
-  <button type="button" class="f" data-tab="about"><strong>🌐 WebLLM</strong><span>Ollama localhost</span></button>
-  <button type="button" class="f" data-tab="quantum"><strong>⚛️ Квант</strong><span>Bell · суперпозиция</span></button>
-  <button type="button" class="f" data-tab="proof"><strong>🔗 Цепочка</strong><span>Proof ledger</span></button>
-  <a class="f" href="/aksi-matrix/"><strong>✦ MATRIX</strong><span>Neuro · WebLLM · OS</span></a>
+  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Всегда отвечает · Core + LLM</span></button>
+  <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV на CPU · учится</span></button>
+  <button type="button" class="f" data-tab="llm"><strong>🌐 WebLLM</strong><span>Ollama offline-first</span></button>
+  <a class="f" href="/aksi-matrix/"><strong>✦ MATRIX</strong><span>Полная поверхность</span></a>
 </div>
+
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
+  <button type="button" data-tab="neuro">Нейро</button>
+  <button type="button" data-tab="llm">WebLLM</button>
   <button type="button" data-tab="teach">Учить</button>
   <button type="button" data-tab="mem">Память</button>
-  <button type="button" data-tab="neuro">Нейро</button>
-  <button type="button" data-tab="about">WebLLM</button>
   <button type="button" data-tab="metrics">Метрики</button>
   <button type="button" data-tab="quantum">Квант</button>
   <button type="button" data-tab="proof">Цепочка</button>
@@ -101,79 +147,242 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   <button type="button" data-tab="dkv">DKV</button>
   <button type="button" data-tab="vision">Зрение</button>
   <button type="button" data-tab="self">Self</button>
+  <button type="button" data-tab="about">О себе</button>
 </nav>
+
 <main>
   <section class="panel on" id="tab-chat">
     <div id="thread"></div>
     <div class="chips">
-      <a class="chip hot" href="/aksi-matrix/">✦ MATRIX</a>
-      <button type="button" class="chip" data-tab="neuro">Нейро</button>
-      <button type="button" class="chip" data-tab="about">WebLLM</button>
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
       <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
+      <button type="button" class="chip" data-ask="время">время</button>
+      <button type="button" class="chip hot" data-tab="neuro">→ Нейро</button>
+      <button type="button" class="chip hot" data-tab="llm">→ WebLLM</button>
+      <a class="chip hot" href="/aksi-matrix/">MATRIX</a>
     </div>
-    <p class="hint"><b>Ctrl+F5</b> · <a href="/aksi-matrix/">MATRIX</a> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+    <p class="hint">Один мозг · без дублей · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
   </section>
-  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или: запомни: …</p><textarea id="teachBox" style="margin-top:10px"></textarea><div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
-  <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div><div class="row"><button type="button" class="btn" id="btnExp">Сохранить</button><button type="button" class="btn" id="btnImp">Загрузить</button><button type="button" class="btn" id="btnWipe">Забыть</button></div><input type="file" id="impFile" accept=".json" hidden></div></section>
-  <section class="panel" id="tab-metrics"><div class="card"><h2>EQS</h2><textarea id="mIn" style="margin-top:10px"></textarea><div class="row"><button type="button" class="btn p" id="btnMet">Посчитать</button></div><div class="kv" style="margin-top:12px"><div class="cell"><b id="mEqs">—</b><span>EQS</span></div><div class="cell"><b id="mQcli">—</b><span>QCLI</span></div><div class="cell"><b id="mH">—</b><span>H</span></div><div class="cell"><b id="mHeff">—</b><span>H_eff</span></div></div></div></section>
-  <section class="panel" id="tab-quantum"><div class="card"><h2>Квант</h2><div class="row"><button type="button" class="btn p" id="btnBell">Bell</button><button type="button" class="btn" id="btnSuper">Суперпозиция</button></div><pre class="out" id="qOut">—</pre></div></section>
-  <section class="panel" id="tab-proof"><div class="card"><h2>Цепочка</h2><div class="row"><button type="button" class="btn p" id="btnProof">Проверить</button><button type="button" class="btn" id="btnProofClear">Очистить</button></div><pre class="out" id="pOut">—</pre></div></section>
-  <section class="panel" id="tab-protocol"><div class="card"><h2>Протокол</h2><div class="kv" style="margin-top:10px"><div class="cell"><b id="prDid">—</b><span>DID</span></div><div class="cell"><b id="prMsg">0</b><span>msg</span></div><div class="cell"><b id="prEqs">—</b><span>EQS</span></div><div class="cell"><b>v1</b><span>protocol</span></div></div><div class="row"><button type="button" class="btn p" id="btnHandshake">Handshake</button><button type="button" class="btn" id="btnEnvelope">Envelope</button></div><pre class="out" id="prOut">—</pre></div></section>
-  <section class="panel" id="tab-edge"><div class="card"><h2>Edge</h2><div class="kv" style="margin-top:12px"><div class="cell"><b id="eMode">cpu</b><span>режим</span></div><div class="cell"><b id="eMs">—</b><span>ms</span></div><div class="cell"><b id="eHits">—</b><span>hits</span></div><div class="cell"><b id="eCache">0</b><span>cache</span></div></div><textarea id="eQuery" style="margin-top:12px">что умеешь</textarea><div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс</button></div><pre class="out" id="eOut">—</pre></div></section>
-  <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
-  <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-  <section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
-  <section class="panel" id="tab-self"><div id="self-root"></div></section>
-  <section class="panel" id="tab-about">
-    <div class="card"><h2>WebLLM / Ollama</h2><p class="muted" style="margin-bottom:10px">ollama run llama3.2 → Сохранить</p>
-      <label class="muted" style="display:flex;gap:8px;margin:10px 0;align-items:center"><input type="checkbox" id="llmOn" checked> Включить LLM</label>
+
+  <section class="panel" id="tab-neuro">
+    <div id="neuro-root">
+      <div class="card">
+        <h2>Нейро · RWKV</h2>
+        <p class="muted">Загрузка модуля… Если пусто после 2 сек — Ctrl+F5.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-llm">
+    <div class="card">
+      <h2>WebLLM · Ollama (offline-first)</h2>
+      <p class="muted">Модель на <b>твоём</b> ПК. UI без сети; ответы LLM — когда Ollama запущена на localhost.</p>
+      <label class="muted" style="display:flex;gap:8px;margin:12px 0;align-items:center">
+        <input type="checkbox" id="llmOn" checked> Включить LLM
+      </label>
       <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
       <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
-      <input id="llmKey" type="password" placeholder="API key" style="margin-bottom:8px">
-      <div class="row"><button type="button" class="btn p" id="btnLlmSave">Сохранить</button><button type="button" class="btn" id="btnLlmTest">Тест</button></div>
-      <p class="muted" id="llmStatus" style="margin-top:10px">—</p></div>
-    <div class="card"><h2>АКСИ</h2><p class="muted">MATRIX: <a href="/aksi-matrix/" style="color:var(--a)">/aksi-matrix/</a><br>aksilove@internet.ru</p></div>
+      <div class="row">
+        <button type="button" class="btn p" id="btnLlmSave">Сохранить</button>
+        <button type="button" class="btn" id="btnLlmTest">Тест связи</button>
+      </div>
+      <p class="muted" id="llmStatus" style="margin-top:12px">Статус: не проверен</p>
+      <p class="muted" style="margin-top:12px">
+        1) <a href="https://ollama.com" style="color:var(--a)" target="_blank" rel="noopener">Ollama</a><br>
+        2) <code>ollama run llama3.2</code><br>
+        3) Сохранить → Тест → чат
+      </p>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-teach">
+    <div class="card">
+      <h2>Научи меня</h2>
+      <p class="muted">Или в чате: <code>запомни: факт</code></p>
+      <textarea id="teachBox" style="margin-top:10px" placeholder="мой проект называется АКСИ"></textarea>
+      <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-mem">
+    <div class="card">
+      <h2>Память · <span id="memN">0</span></h2>
+      <div id="memList"></div>
+      <div class="row"><button type="button" class="btn" id="btnWipe">Забыть всё</button></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-metrics">
+    <div class="card">
+      <h2>Метрики EQS</h2>
+      <textarea id="mIn" style="margin-top:10px"></textarea>
+      <div class="row"><button type="button" class="btn p" id="btnMet">Посчитать</button></div>
+      <div class="kv" style="margin-top:12px">
+        <div class="cell"><b id="mEqs">—</b><span>EQS</span></div>
+        <div class="cell"><b id="mQcli">—</b><span>QCLI</span></div>
+        <div class="cell"><b id="mH">—</b><span>H</span></div>
+        <div class="cell"><b id="mHeff">—</b><span>H_eff</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-quantum">
+    <div class="card">
+      <h2>Квант</h2>
+      <div class="row">
+        <button type="button" class="btn p" id="btnBell">Bell</button>
+        <button type="button" class="btn" id="btnSuper">Суперпозиция</button>
+      </div>
+      <pre class="out" id="qOut">—</pre>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-proof">
+    <div class="card">
+      <h2>Цепочка</h2>
+      <div class="row">
+        <button type="button" class="btn p" id="btnProof">Проверить</button>
+        <button type="button" class="btn" id="btnProofClear">Очистить</button>
+      </div>
+      <pre class="out" id="pOut">—</pre>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-protocol">
+    <div class="card">
+      <h2>Протокол</h2>
+      <div class="kv" style="margin-top:10px">
+        <div class="cell"><b id="prDid">—</b><span>DID</span></div>
+        <div class="cell"><b id="prMsg">0</b><span>msg</span></div>
+      </div>
+      <div class="row">
+        <button type="button" class="btn p" id="btnHandshake">Handshake</button>
+        <button type="button" class="btn" id="btnEnvelope">Envelope</button>
+      </div>
+      <pre class="out" id="prOut">—</pre>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-edge">
+    <div class="card">
+      <h2>Edge</h2>
+      <div class="kv" style="margin-top:12px">
+        <div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
+        <div class="cell"><b id="eMs">—</b><span>ms</span></div>
+        <div class="cell"><b id="eHits">0</b><span>hits</span></div>
+        <div class="cell"><b id="eCache">0</b><span>cache</span></div>
+      </div>
+      <textarea id="eQuery" style="margin-top:12px">что умеешь</textarea>
+      <div class="row">
+        <button type="button" class="btn p" id="btnEdge">Прогнать</button>
+        <button type="button" class="btn" id="btnEdgeClear">Сброс</button>
+      </div>
+      <pre class="out" id="eOut">—</pre>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-dkv"><div id="dkv-root"><div class="card"><h2>DKV</h2><p class="muted">Открой вкладку после загрузки.</p></div></div></section>
+  <section class="panel" id="tab-vision"><div id="vision-root"><div class="card"><h2>Зрение</h2><p class="muted">Открой вкладку после загрузки.</p></div></div></section>
+  <section class="panel" id="tab-self"><div id="self-root"><div class="card"><h2>Self</h2><p class="muted">Открой вкладку после загрузки.</p></div></div></section>
+
+  <section class="panel" id="tab-about">
+    <div class="card">
+      <h2>АКСИ</h2>
+      <p class="muted">Local-first. Чат → Core → Ollama. Нейро RWKV на CPU.</p>
+      <p class="muted" style="margin-top:10px">Контакт: <b>aksilove@internet.ru</b><br>
+      MATRIX: <a href="/aksi-matrix/" style="color:var(--a)">/aksi-matrix/</a></p>
+    </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
-    <div class="card"><h2>Бэкап</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Скачать</button></div></div>
+    <div class="card">
+      <h2>Бэкап</h2>
+      <div class="row"><button type="button" class="btn p" id="btnFullExp">Скачать память + ledger</button></div>
+    </div>
   </section>
 </main>
+
 <div class="bar">
   <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
-  <button type="button" class="icon" id="btnVoice">🎤</button>
-  <button type="button" class="send" id="send">↑</button>
+  <button type="button" class="send" id="send" title="Отправить">↑</button>
 </div>
-<script>
-(function(){
-  function goTab(t){if(!t)return;document.querySelectorAll("nav [data-tab]").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===t)});document.querySelectorAll("main .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t)})}
-  function boot(){
-    var th=document.getElementById("thread");
-    if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Привет. На главной теперь явно: <b>Нейро</b>, <b>WebLLM</b>, <b>MATRIX</b>.\n\nПлитки выше · вкладки в меню · MATRIX для полного UI.<div class="meta">welcome</div></div>';th.appendChild(d)}
-    var el=document.getElementById("stClock");function tick(){try{el.textContent=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit"}).format(new Date())+" MSK"}catch(e){el.textContent=new Date().toLocaleTimeString("ru-RU")}}if(el){tick();setInterval(tick,30000)}
-    var hide=document.getElementById("btnHideGuide");if(hide)hide.onclick=function(){var g=document.getElementById("guide");if(g)g.style.display="none";var f=document.getElementById("featGrid");if(f)f.style.display="none";try{localStorage.setItem("aksi_hide_guide_v28","1")}catch(e){}};
-    try{if(localStorage.getItem("aksi_hide_guide_v28")==="1"){var g=document.getElementById("guide");if(g)g.style.display="none";var f=document.getElementById("featGrid");if(f)f.style.display="none"}}catch(e){}
-    var start=document.getElementById("btnStartChat");if(start)start.onclick=function(){goTab("chat");var inp=document.getElementById("inp");if(inp)inp.focus()};
-    document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(!x)return;var t=x.getAttribute("data-tab");if(t)goTab(t)},true);
-  }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
-})();
-</script>
+
+<script src="aksi-core.js?v=51"></script>
+<script src="aksi-neuro.js?v=4"></script>
 <script src="aksi-dkv.js?v=16"></script>
 <script src="aksi-vision.js?v=4"></script>
-<script src="aksi-app.js?v=15"></script>
-<script src="aksi-core.js?v=51"></script>
-<script src="aksi-net.js?v=5"></script>
-<script src="aksi-neuro.js?v=3"></script>
 <script src="aksi-self.js?v=2"></script>
-<script src="aksi-llm.js?v=10"></script>
-<script src="aksi-one.js?v=3"></script>
+<script src="aksi-one.js?v=4"></script>
 <script>
-(function(){
-  var on={};function eng(n){if(n==="dkv")return window.AKSI_DKV||window.DKV;if(n==="vision")return window.AKSI_VISION;if(n==="neuro")return window.AKSI_NEURO;if(n==="self")return window.AKSI_SELF;return null}
-  function mount(n,s){if(on[n])return;var m=eng(n);if(!m||typeof m.mount!=="function"){var r=document.querySelector(s);if(r&&!r.dataset.fb){r.dataset.fb="1";r.innerHTML='<div class="card"><h2>'+n+'</h2><p class="muted">Ctrl+F5 или снова вкладка</p></div>'}return}try{m.mount(s);on[n]=true}catch(e){var r=document.querySelector(s);if(r)r.innerHTML='<div class="card"><h2>'+n+'</h2><p class="muted">'+((e&&e.message)||e)+'</p></div>'}}
-  if(window.AKSI_DKV&&!window.DKV)window.DKV=window.AKSI_DKV;
-  document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest("[data-tab]");if(!el)return;var t=el.getAttribute("data-tab");if(t==="dkv")setTimeout(function(){mount("dkv","#dkv-root")},50);if(t==="vision")setTimeout(function(){mount("vision","#vision-root")},50);if(t==="neuro")setTimeout(function(){mount("neuro","#neuro-root")},50);if(t==="self")setTimeout(function(){mount("self","#self-root")},50)},true);
+(function () {
+  "use strict";
+  function goTab(t) {
+    if (!t) return;
+    document.querySelectorAll("nav [data-tab]").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-tab") === t);
+    });
+    document.querySelectorAll("main .panel").forEach(function (p) {
+      p.classList.toggle("on", p.id === "tab-" + t);
+    });
+    if (t === "neuro") mountNeuro();
+    if (t === "dkv") mountMod("dkv", "#dkv-root");
+    if (t === "vision") mountMod("vision", "#vision-root");
+    if (t === "self") mountMod("self", "#self-root");
+  }
+  var mounted = {};
+  function eng(n) {
+    if (n === "dkv") return window.AKSI_DKV || window.DKV;
+    if (n === "vision") return window.AKSI_VISION;
+    if (n === "neuro") return window.AKSI_NEURO;
+    if (n === "self") return window.AKSI_SELF;
+    return null;
+  }
+  function mountMod(name, sel) {
+    if (mounted[name]) return;
+    var m = eng(name);
+    var root = document.querySelector(sel);
+    if (!m || typeof m.mount !== "function") {
+      if (root && !root.dataset.fb) {
+        root.dataset.fb = "1";
+        root.innerHTML = '<div class="card"><h2>' + name + '</h2><p class="muted">Модуль не загрузился. Ctrl+F5.</p></div>';
+      }
+      return;
+    }
+    try { m.mount(sel); mounted[name] = true; }
+    catch (e) {
+      if (root) root.innerHTML = '<div class="card"><h2>' + name + '</h2><p class="muted">Ошибка: ' + (e && e.message || e) + '</p></div>';
+    }
+  }
+  function mountNeuro() { mountMod("neuro", "#neuro-root"); }
+  function bootUi() {
+    var th = document.getElementById("thread");
+    if (th && !th.children.length) {
+      var d = document.createElement("div");
+      d.className = "msg ai";
+      d.innerHTML = '<div class="bub">Привет. Чат починен: один мозг (ONE).\n\n• Подсказка или вопрос\n• <b>Нейро</b> — RWKV\n• <b>WebLLM</b> — Ollama localhost<div class="meta">ONE · fixed</div></div>';
+      th.appendChild(d);
+    }
+    var el = document.getElementById("stClock");
+    function tick() {
+      try {
+        el.textContent = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit" }).format(new Date()) + " MSK";
+      } catch (e) { el.textContent = new Date().toLocaleTimeString("ru-RU"); }
+    }
+    if (el) { tick(); setInterval(tick, 30000); }
+    document.addEventListener("click", function (e) {
+      var x = e.target.closest && e.target.closest("[data-tab]");
+      if (!x) return;
+      var t = x.getAttribute("data-tab");
+      if (t) goTab(t);
+    }, true);
+    setTimeout(mountNeuro, 400);
+    setTimeout(function () { if (!mounted.neuro && window.AKSI_NEURO) mountNeuro(); }, 1200);
+    setTimeout(function () {
+      var b = document.getElementById("stBadge");
+      if (b && window.AKSI_ONE && window.AKSI_ONE.version) b.textContent = "ONE " + window.AKSI_ONE.version;
+    }, 300);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootUi);
+  else bootUi();
 })();
 </script>
 </body>
