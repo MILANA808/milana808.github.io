@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ — Mesh · Neuro · WebLLM · P2P. Proprietary. aksilove@internet.ru">
+<meta name="description" content="АКСИ — LLM Router · Mesh · Neuro · P2P. Proprietary. aksilove@internet.ru">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>АКСИ — Mesh · Neuro · P2P</title>
+<title>АКСИ — LLM Router · Mesh · P2P</title>
 <style>
 :root{
   --bg:#06050b;--s1:#13111c;--s2:#1b1726;
@@ -83,7 +83,7 @@ main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--s
   background:var(--s1);color:var(--t);font:600 13px/1 var(--font);cursor:pointer;
 }
 .btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
-input,textarea{
+input,textarea,select{
   width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);
   background:var(--s1);color:var(--t);font:inherit;
 }
@@ -118,7 +118,7 @@ pre.out,pre#nOut{
   <div class="logo">A</div>
   <div>
     <h1>АКСИ <span class="pill">● online</span></h1>
-    <div class="sub">Mesh · Нейро · WebLLM · P2P</div>
+    <div class="sub">LLM Router · Mesh · Нейро · P2P</div>
   </div>
   <div class="stats">
     <div id="stClock">MSK —</div>
@@ -127,19 +127,19 @@ pre.out,pre#nOut{
 </header>
 
 <div class="feat" id="featGrid">
-  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Всегда отвечает · Core + LLM</span></button>
-  <button type="button" class="f" data-tab="mesh"><strong>⬡ Mesh</strong><span>С нуля · вкладки+P2P</span></button>
+  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Local → Core → LLM</span></button>
+  <button type="button" class="f" data-tab="llm"><strong>🌐 LLM Router</strong><span>Ollama · GPT · Grok · Claude</span></button>
+  <button type="button" class="f" data-tab="mesh"><strong>⬡ Mesh</strong><span>Вкладки + P2P</span></button>
   <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV на CPU</span></button>
-  <button type="button" class="f" data-tab="llm"><strong>🌐 WebLLM</strong><span>Ollama offline-first</span></button>
   <a class="f" href="/mesh.html"><strong>⬡ Mesh page</strong><span>Отдельная страница</span></a>
   <a class="f" href="/aksi-matrix/"><strong>✦ MATRIX</strong><span>Полная поверхность</span></a>
 </div>
 
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
+  <button type="button" data-tab="llm">LLM</button>
   <button type="button" data-tab="mesh">Mesh</button>
   <button type="button" data-tab="neuro">Нейро</button>
-  <button type="button" data-tab="llm">WebLLM</button>
   <button type="button" data-tab="p2p">P2P</button>
   <button type="button" data-tab="teach">Учить</button>
   <button type="button" data-tab="mem">Память</button>
@@ -161,11 +161,14 @@ pre.out,pre#nOut{
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
       <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
+      <button type="button" class="chip hot" data-tab="llm">→ LLM</button>
       <button type="button" class="chip hot" data-tab="mesh">→ Mesh</button>
-      <button type="button" class="chip hot" data-tab="neuro">→ Нейро</button>
-      <a class="chip hot" href="/mesh.html">Mesh page</a>
     </div>
-    <p class="hint">ONE · P2P v5 · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+    <p class="hint">ONE 1.3 · LLM Router · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+  </section>
+
+  <section class="panel" id="tab-llm">
+    <div id="llm-root"><div class="card"><h2>LLM Router</h2><p class="muted">Загрузка…</p></div></div>
   </section>
 
   <section class="panel" id="tab-mesh">
@@ -174,23 +177,6 @@ pre.out,pre#nOut{
 
   <section class="panel" id="tab-neuro">
     <div id="neuro-root"><div class="card"><h2>Нейро · RWKV</h2><p class="muted">Загрузка…</p></div></div>
-  </section>
-
-  <section class="panel" id="tab-llm">
-    <div class="card">
-      <h2>WebLLM · Ollama</h2>
-      <p class="muted">UI offline; LLM — когда Ollama на localhost.</p>
-      <label class="muted" style="display:flex;gap:8px;margin:12px 0;align-items:center">
-        <input type="checkbox" id="llmOn" checked> Включить LLM
-      </label>
-      <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
-      <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
-      <div class="row">
-        <button type="button" class="btn p" id="btnLlmSave">Сохранить</button>
-        <button type="button" class="btn" id="btnLlmTest">Тест</button>
-      </div>
-      <p class="muted" id="llmStatus" style="margin-top:12px">—</p>
-    </div>
   </section>
 
   <section class="panel" id="tab-p2p">
@@ -270,14 +256,9 @@ pre.out,pre#nOut{
       <div class="kv" style="margin-top:12px">
         <div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
         <div class="cell"><b id="eMs">—</b><span>ms</span></div>
-        <div class="cell"><b id="eHits">0</b><span>hits</span></div>
-        <div class="cell"><b id="eCache">0</b><span>cache</span></div>
       </div>
       <textarea id="eQuery" style="margin-top:12px">что умеешь</textarea>
-      <div class="row">
-        <button type="button" class="btn p" id="btnEdge">Прогнать</button>
-        <button type="button" class="btn" id="btnEdgeClear">Сброс</button>
-      </div>
+      <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button></div>
       <pre class="out" id="eOut">—</pre>
     </div>
   </section>
@@ -289,10 +270,8 @@ pre.out,pre#nOut{
   <section class="panel" id="tab-about">
     <div class="card">
       <h2>АКСИ · proprietary</h2>
-      <p class="muted">Mesh с нуля · local-first · P2P v5</p>
-      <p class="muted" style="margin-top:10px">aksilove@internet.ru ·
-        <a href="/mesh.html" style="color:var(--a)">Mesh</a> ·
-        <a href="/aksi-matrix/" style="color:var(--a)">MATRIX</a></p>
+      <p class="muted">LLM Router · Mesh · local-first · BYOK</p>
+      <p class="muted" style="margin-top:10px">aksilove@internet.ru</p>
     </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
     <div class="card">
@@ -314,7 +293,8 @@ pre.out,pre#nOut{
 <script src="aksi-self.js?v=2"></script>
 <script src="aksi-mesh.js?v=1"></script>
 <script src="aksi-p2p.js?v=5"></script>
-<script src="aksi-one.js?v=4"></script>
+<script src="aksi-llm.js?v=1"></script>
+<script src="aksi-one.js?v=5"></script>
 <script>
 (function () {
   "use strict";
@@ -331,6 +311,7 @@ pre.out,pre#nOut{
     if (t === "vision") mountMod("vision", "#vision-root");
     if (t === "self") mountMod("self", "#self-root");
     if (t === "mesh") mountMod("mesh", "#mesh-root");
+    if (t === "llm") mountMod("llm", "#llm-root");
     if (t === "p2p") mountMod("p2p", "#p2p-root");
   }
   var mounted = {};
@@ -340,6 +321,7 @@ pre.out,pre#nOut{
     if (n === "neuro") return window.AKSI_NEURO;
     if (n === "self") return window.AKSI_SELF;
     if (n === "mesh") return window.AKSI_MESH;
+    if (n === "llm") return window.AKSI_LLM;
     if (n === "p2p") return window.AKSI_P2P;
     return null;
   }
@@ -364,7 +346,7 @@ pre.out,pre#nOut{
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">Привет. P2P <b>v5</b>: честный статус, локальный канал вкладок, лимит reconnect.\n\nХост: Создать зал и не закрывать. Гость: тот же ID → Войти.<div class="meta">ONE · P2P 5</div></div>';
+      d.innerHTML = '<div class="bub">Привет. <b>LLM Router</b> online: Ollama → xAI → OpenAI → Claude → Gemini.\n\nКлючи только в браузере (BYOK). Вкладка LLM → Health / key / Тест.<div class="meta">ONE 1.3 · LLM</div></div>';
       th.appendChild(d);
     }
     var el = document.getElementById("stClock");
