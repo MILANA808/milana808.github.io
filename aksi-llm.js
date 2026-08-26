@@ -375,7 +375,7 @@
       '<label class="muted" style="display:flex;gap:8px;align-items:center;margin:12px 0">' +
       '<input type="checkbox" id="llmROn"' +
       (c.enabled !== false ? " checked" : "") +
-      "> Включить router</label>' +
+      '> Включить router</label>' +
       '<p class="muted" style="margin-bottom:6px">Провайдер (приоритет сверху)</p>' +
       '<select id="llmPrefer" style="margin-bottom:8px"></select>' +
       '<p class="muted" style="margin-bottom:6px">API key (для облака)</p>' +
