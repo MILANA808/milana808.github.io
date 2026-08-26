@@ -1,23 +1,57 @@
 name: AKSI verification
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 permissions:
   contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Required runtime files
         run: |
-          set -e
-          for f in index.html 404.html aksi.html aksi-app.js; do
+          set -euo pipefail
+          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
           echo "core files OK"
+
+      - name: JavaScript syntax
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.js' -not -path './.git/*' -not -name '*.min.js' -print0 |
+            while IFS= read -r -d '' f; do
+              node --check "$f" || exit 1
+            done
+          echo "all JavaScript files parse successfully"
+
+      - name: Referenced scripts exist
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("index.html").read_text(encoding="utf-8", errors="replace")
+          scripts = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, re.I)
+          missing = []
+          for src in scripts:
+              if src.startswith(("http://", "https://", "//")):
+                  continue
+              path = Path(src.split("?", 1)[0].split("#", 1)[0])
+              if not path.is_file():
+                  missing.append(str(path))
+          if missing:
+              print("Missing scripts:", *missing, sep="\n- ")
+              raise SystemExit(1)
+          print(f"Referenced local scripts OK: {len(scripts)}")
+          PY
+
       - name: Core HTML sanity
         run: |
           python3 - <<'PY'
@@ -25,8 +59,7 @@ jobs:
           required = ["index.html", "404.html", "aksi.html"]
           bad = []
           for name in required:
-              p = Path(name)
-              s = p.read_text(encoding="utf-8", errors="replace").lower()
+              s = Path(name).read_text(encoding="utf-8", errors="replace").lower()
               if "<html" not in s or "</html>" not in s:
                   bad.append(name)
           if bad:
@@ -34,14 +67,21 @@ jobs:
               raise SystemExit(1)
           print("HTML OK")
           PY
-      - name: aksi runtime size
+
+      - name: Runtime size sanity
         run: |
-          set -e
+          set -euo pipefail
           hz=$(wc -c < aksi.html)
           jz=$(wc -c < aksi-app.js)
           echo "aksi.html=$hz aksi-app.js=$jz"
           test "$hz" -gt 5000
           test "$jz" -gt 10000
+
       - name: No obvious secret literals
         run: |
-          ! grep -RInE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}' --exclude-dir=.git --exclude='*.map' . || true
+          set -euo pipefail
+          if grep -RInE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}' --exclude-dir=.git --exclude='*.map' .; then
+            echo "Possible secret literal found"
+            exit 1
+          fi
+          echo "No obvious secret literals found"
