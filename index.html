@@ -336,21 +336,41 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <script src="aksi-neuro.js?v=3"></script>
 <script src="aksi-self.js?v=2"></script>
 <script src="aksi-llm.js?v=10"></script>
-<script src="aksi-one.js?v=2"></script>
+<script src="aksi-one.js?v=3"></script>
 <script>
 (function(){
-  var dkvOn=false,visOn=false,neuroOn=false,selfOn=false;
-  function mountDkv(){if(dkvOn||!window.DKV)return;try{DKV.mount("#dkv-root");dkvOn=true}catch(e){}}
-  function mountVis(){if(visOn||!window.AKSI_VISION)return;try{AKSI_VISION.mount("#vision-root");visOn=true}catch(e){}}
-  function mountNeuro(){if(neuroOn||!window.AKSI_NEURO)return;try{AKSI_NEURO.mount("#neuro-root");neuroOn=true}catch(e){}}
-  function mountSelf(){if(selfOn||!window.AKSI_SELF)return;try{AKSI_SELF.mount("#self-root");selfOn=true}catch(e){}}
+  var on={};
+  function eng(name){
+    if(name==="dkv") return window.AKSI_DKV || window.DKV;
+    if(name==="vision") return window.AKSI_VISION;
+    if(name==="neuro") return window.AKSI_NEURO;
+    if(name==="self") return window.AKSI_SELF;
+    return null;
+  }
+  function mount(name, sel){
+    if(on[name]) return;
+    var m=eng(name);
+    if(!m || typeof m.mount!=="function"){
+      var root=document.querySelector(sel);
+      if(root && !root.dataset.fallback){
+        root.dataset.fallback="1";
+        root.innerHTML='<div class="card"><h2>'+name+'</h2><p class="muted">Модуль грузится — Ctrl+F5 или открой вкладку снова.</p></div>';
+      }
+      return;
+    }
+    try{ m.mount(sel); on[name]=true; }catch(e){
+      var root=document.querySelector(sel);
+      if(root) root.innerHTML='<div class="card"><h2>'+name+'</h2><p class="muted">Ошибка: '+(e&&e.message||e)+'</p></div>';
+    }
+  }
+  if(window.AKSI_DKV && !window.DKV) window.DKV=window.AKSI_DKV;
   document.addEventListener("click",function(e){
-    var el=e.target.closest&&e.target.closest("[data-tab]");if(!el)return;
+    var el=e.target.closest&&e.target.closest("[data-tab]"); if(!el) return;
     var t=el.getAttribute("data-tab");
-    if(t==="dkv")setTimeout(mountDkv,40);
-    if(t==="vision")setTimeout(mountVis,40);
-    if(t==="neuro")setTimeout(mountNeuro,40);
-    if(t==="self")setTimeout(mountSelf,40);
+    if(t==="dkv") setTimeout(function(){mount("dkv","#dkv-root");},50);
+    if(t==="vision") setTimeout(function(){mount("vision","#vision-root");},50);
+    if(t==="neuro") setTimeout(function(){mount("neuro","#neuro-root");},50);
+    if(t==="self") setTimeout(function(){mount("self","#self-root");},50);
   },true);
 })();
 </script>
