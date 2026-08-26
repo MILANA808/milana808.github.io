@@ -1,14 +1,14 @@
 /**
- * AKSI P2P v4.1 — stable WebRTC chat (PeerJS)
- * Fixes: false timeouts, reconnect storms, NAT (TURN), host keep-alive
+ * AKSI P2P v4.2 — stable WebRTC + TURN loader
+ * STUN/TURN: static AKSI_P2P_TURN or fetch AKSI_P2P_TURN_URL
  * Contact: aksilove@internet.ru
  */
 (function (global) {
   "use strict";
 
-  var VER = "4.1.0-stable";
+  var VER = "4.2.0-turn";
   var PEERJS_CDN = "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
-  var ICE = [
+  var ICE_FALLBACK = [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
     { urls: "stun:stun.cloudflare.com:3478" },
@@ -22,6 +22,8 @@
       credential: "openrelayproject"
     }
   ];
+  var iceCache = null;
+  var iceReady = null;
   var PING_EVERY = 4000;
   var PONG_DEAD = 45000;
   var CONNECT_WAIT = 20000;
@@ -38,14 +40,63 @@
   function text(v) { return String(v == null ? "" : v).trim(); }
   function now() { return Date.now(); }
 
+  function normalizeIce(entry) {
+    if (!entry) return null;
+    if (Array.isArray(entry)) return entry.filter(function (x) { return x && x.urls; });
+    if (entry.iceServers) return normalizeIce(entry.iceServers);
+    if (entry.urls) return [entry];
+    return null;
+  }
+
   function iceServers() {
+    if (iceCache && iceCache.length) return iceCache.slice();
+    var list = ICE_FALLBACK.slice();
     var extra = global.AKSI_P2P_TURN;
-    var list = ICE.slice();
-    if (extra) {
-      var a = Array.isArray(extra) ? extra : [extra];
-      a.forEach(function (x) { if (x && x.urls) list.push(x); });
-    }
+    var own = normalizeIce(extra);
+    if (own && own.length) list = own.concat(list);
     return list;
+  }
+
+  function loadIceServers() {
+    if (iceReady) return iceReady;
+    iceReady = new Promise(function (resolve) {
+      var url = global.AKSI_P2P_TURN_URL;
+      var staticIce = normalizeIce(global.AKSI_P2P_TURN);
+      if (staticIce && staticIce.length) {
+        iceCache = staticIce.concat(ICE_FALLBACK);
+        logLine("TURN: static config (" + staticIce.length + ")");
+        resolve(iceCache);
+        return;
+      }
+      if (!url) {
+        iceCache = ICE_FALLBACK.slice();
+        resolve(iceCache);
+        return;
+      }
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var t = setTimeout(function () { if (ctrl) ctrl.abort(); }, 6000);
+      fetch(String(url), { signal: ctrl && ctrl.signal, cache: "no-store" })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          clearTimeout(t);
+          var own = normalizeIce(data);
+          if (own && own.length) {
+            iceCache = own.concat(ICE_FALLBACK);
+            logLine("TURN: API ok (" + own.length + " servers)");
+          } else {
+            iceCache = ICE_FALLBACK.slice();
+            logLine("TURN: API empty → fallback");
+          }
+          resolve(iceCache);
+        })
+        .catch(function () {
+          clearTimeout(t);
+          iceCache = ICE_FALLBACK.slice();
+          logLine("TURN: API fail → fallback");
+          resolve(iceCache);
+        });
+    });
+    return iceReady;
   }
 
   function logLine(v) {
@@ -60,24 +111,15 @@
     var b = $("p2pLinkBadge");
     var online = !!(conn && conn.open);
     if (b) {
-      if (online) {
-        b.textContent = "ЗАШИФРОВАНО";
-        b.style.color = "#34d399";
-      } else if (role && !destroyed) {
-        b.textContent = "переподключение…";
-        b.style.color = "#fbbf24";
-      } else {
-        b.textContent = "offline";
-        b.style.color = "#7a738f";
-      }
+      if (online) { b.textContent = "ЗАШИФРОВАНО"; b.style.color = "#34d399"; }
+      else if (role && !destroyed) { b.textContent = "переподключение…"; b.style.color = "#fbbf24"; }
+      else { b.textContent = "offline"; b.style.color = "#7a738f"; }
     }
     var bar = $("p2pBar");
     if (bar) {
       bar.style.display = online || (role && !destroyed) ? "flex" : "none";
       var p = $("p2pPing");
-      if (p && online) {
-        p.textContent = (typeof bar._rtt === "number" ? bar._rtt + " ms" : "…");
-      }
+      if (p && online) p.textContent = (typeof bar._rtt === "number" ? bar._rtt + " ms" : "…");
       var r = $("p2pRole");
       if (r) r.textContent = role === "host" ? "хост" : (role === "guest" ? "гость" : "—");
     }
@@ -106,9 +148,7 @@
       var s = document.createElement("script");
       s.src = PEERJS_CDN;
       s.async = true;
-      s.onload = function () {
-        global.Peer ? resolve(global.Peer) : reject(new Error("PeerJS unavailable"));
-      };
+      s.onload = function () { global.Peer ? resolve(global.Peer) : reject(new Error("PeerJS unavailable")); };
       s.onerror = function () { reject(new Error("PeerJS CDN failed")); };
       document.head.appendChild(s);
     });
@@ -148,18 +188,11 @@
 
   function handle(raw) {
     var msg;
-    try {
-      msg = typeof raw === "string" ? JSON.parse(raw) : raw;
-    } catch (e) {
-      bubble(String(raw), "p2p · raw");
-      return;
-    }
+    try { msg = typeof raw === "string" ? JSON.parse(raw) : raw; }
+    catch (e) { bubble(String(raw), "p2p · raw"); return; }
     if (!msg || !msg.type) return;
 
-    if (msg.type === "ping") {
-      send({ type: "pong", t: msg.t, t1: now() });
-      return;
-    }
+    if (msg.type === "ping") { send({ type: "pong", t: msg.t, t1: now() }); return; }
     if (msg.type === "pong") {
       lastPong = now();
       if (msg.t) {
@@ -191,10 +224,7 @@
       }
       return;
     }
-    if (msg.type === "reply") {
-      bubble(text(msg.text), "p2p · reply");
-      return;
-    }
+    if (msg.type === "reply") { bubble(text(msg.text), "p2p · reply"); return; }
   }
 
   function stopHeartbeat() {
@@ -240,13 +270,8 @@
   }
 
   function wire(c) {
-    if (conn && conn !== c && conn.open) {
-      try { c.close(); } catch (e) {}
-      return;
-    }
-    if (conn && conn !== c) {
-      try { conn.close(); } catch (e) {}
-    }
+    if (conn && conn !== c && conn.open) { try { c.close(); } catch (e) {} return; }
+    if (conn && conn !== c) { try { conn.close(); } catch (e) {} }
     conn = c;
     remotePeerId = text(c.peer) || remotePeerId;
 
@@ -262,9 +287,7 @@
       bubble("Прямая связь установлена (DTLS).", "p2p · link");
       logLine("connected → " + (remotePeerId || "?"));
     });
-
     c.on("data", handle);
-
     c.on("close", function () {
       if (conn === c) conn = null;
       stopHeartbeat();
@@ -272,7 +295,6 @@
       if (!destroyed) scheduleReconnect("channel-close");
       setStatus(role ? "Канал закрыт · переподключение…" : "offline");
     });
-
     c.on("error", function (e) {
       logLine("data err: " + (e && e.message || e));
       if (!c.open && !destroyed) scheduleReconnect("channel-error");
@@ -283,30 +305,17 @@
     clearReconnect();
     stopHeartbeat();
     connecting = false;
-    if (conn) {
-      try { conn.close(); } catch (e) {}
-      conn = null;
-    }
-    if (peer) {
-      try { peer.destroy(); } catch (e) {}
-      peer = null;
-    }
+    if (conn) { try { conn.close(); } catch (e) {} conn = null; }
+    if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
   }
 
   function attachPeerEvents() {
     if (!peer) return;
-    peer.on("connection", function (c) {
-      logLine("incoming connection");
-      wire(c);
-    });
+    peer.on("connection", function (c) { logLine("incoming connection"); wire(c); });
     peer.on("disconnected", function () {
       logLine("signaling disconnected");
       if (destroyed) return;
-      try {
-        peer.reconnect();
-      } catch (e) {
-        scheduleReconnect("signal-disc");
-      }
+      try { peer.reconnect(); } catch (e) { scheduleReconnect("signal-disc"); }
     });
     peer.on("close", function () {
       logLine("peer closed");
@@ -331,42 +340,45 @@
 
   function makePeer(preferredId) {
     return loadPeerJS().then(function (Peer) {
-      return new Promise(function (resolve, reject) {
-        var opts = {
-          debug: 0,
-          config: {
-            iceServers: iceServers(),
-            sdpSemantics: "unified-plan"
+      return loadIceServers().then(function () {
+        return new Promise(function (resolve, reject) {
+          var opts = {
+            debug: 0,
+            config: {
+              iceServers: iceServers(),
+              iceTransportPolicy: "all",
+              sdpSemantics: "unified-plan"
+            }
+          };
+          var p;
+          try {
+            p = preferredId ? new Peer(preferredId, opts) : new Peer(opts);
+          } catch (e) {
+            reject(e);
+            return;
           }
-        };
-        var p;
-        try {
-          p = preferredId ? new Peer(preferredId, opts) : new Peer(opts);
-        } catch (e) {
-          reject(e);
-          return;
-        }
-        peer = p;
-        var settled = false;
-        var timer = setTimeout(function () {
-          if (settled) return;
-          settled = true;
-          reject(new Error("Peer open timeout"));
-        }, CONNECT_WAIT);
-        p.on("open", function (id) {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timer);
-          attachPeerEvents();
-          resolve(id);
-        });
-        p.on("error", function (e) {
-          if (settled) return;
-          if (e && e.type === "unavailable-id") {
+          peer = p;
+          var settled = false;
+          var timer = setTimeout(function () {
+            if (settled) return;
+            settled = true;
+            reject(new Error("Peer open timeout"));
+          }, CONNECT_WAIT);
+          p.on("open", function (id) {
+            if (settled) return;
             settled = true;
             clearTimeout(timer);
-            reject(e);
-          }
+            attachPeerEvents();
+            resolve(id);
+          });
+          p.on("error", function (e) {
+            if (settled) return;
+            if (e && e.type === "unavailable-id") {
+              settled = true;
+              clearTimeout(timer);
+              reject(e);
+            }
+          });
         });
       });
     });
@@ -426,17 +438,13 @@
     destroyPeerHard();
     return makePeer().then(function () {
       return new Promise(function (resolve, reject) {
-        var c = peer.connect(id, {
-          reliable: true,
-          serialization: "json",
-          metadata: { aksi: true }
-        });
+        var c = peer.connect(id, { reliable: true, serialization: "json", metadata: { aksi: true } });
         wire(c);
         var timer = setTimeout(function () {
           if (!c.open) {
             try { c.close(); } catch (e) {}
             connecting = false;
-            reject(new Error("Таймаут 20с — проверьте ID и NAT/TURN"));
+            reject(new Error("Таймаут 20с — проверьте ID и TURN"));
             scheduleReconnect("guest-timeout");
           }
         }, CONNECT_WAIT);
@@ -454,7 +462,7 @@
     var message = text(value).slice(0, MAX_TEXT);
     if (!message) return false;
     if (!conn || !conn.open) {
-      setStatus("Нет связи — сначала создайте/присоединитесь к залу");
+      setStatus("Нет связи — создайте/присоединитесь к залу");
       return false;
     }
     bubble(message, "вы · p2p", true);
@@ -503,7 +511,7 @@
     root.innerHTML =
       '<div class="card">' +
       '<h2>P2P · WebRTC <span id="p2pLinkBadge" style="font-size:11px;margin-left:8px;color:#7a738f">offline</span></h2>' +
-      '<p class="muted">Стабильный канал (STUN+TURN). Чаты и Core.query зеркалируются. Auto-reply — локальный ONE.</p>' +
+      '<p class="muted">STUN+TURN. Свой сервер: <code>window.AKSI_P2P_TURN</code> или <code>AKSI_P2P_TURN_URL</code>.</p>' +
       '<div id="p2pStatus" class="muted" style="margin:12px 0;padding:12px;border-radius:12px;background:rgba(0,0,0,.28)">P2P offline</div>' +
       '<p class="muted">Room ID: <code id="p2pRoomId" style="user-select:all">—</code></p>' +
       '<div class="row">' +
@@ -518,9 +526,9 @@
       '<button type="button" class="btn p" id="p2pSend">→</button>' +
       "</div>" +
       '<label class="muted" style="display:flex;gap:8px;align-items:center;margin-top:12px;cursor:pointer">' +
-      '<input type="checkbox" id="p2pAuto" checked> Auto-reply (локальный ИИ отвечает партнёру)' +
+      '<input type="checkbox" id="p2pAuto" checked> Auto-reply' +
       "</label>" +
-      '<p class="muted" style="margin-top:10px;font-size:12px">Оба устройства онлайн · один ID · если падает — ждите auto-reconnect (до 20с)</p>' +
+      '<p class="muted" style="margin-top:10px;font-size:12px">Оба онлайн · один ID · TURN на VPS → /turn/</p>' +
       '<pre id="p2pLog" class="out" style="max-height:140px;font-size:11px;margin-top:10px">лог…</pre>' +
       "</div>";
 
@@ -562,6 +570,7 @@
     }
     if (roomId && $("p2pRoomId")) $("p2pRoomId").textContent = roomId;
     setStatus(conn && conn.open ? "● Прямая связь: ЗАШИФРОВАНО" : "P2P offline");
+    loadIceServers();
   }
 
   function onOnline() {
@@ -572,11 +581,8 @@
   function onVis() {
     if (document.visibilityState !== "visible") return;
     if (destroyed || !role) return;
-    if (conn && conn.open) {
-      send({ type: "ping", t: now() });
-    } else {
-      scheduleReconnect("visible");
-    }
+    if (conn && conn.open) send({ type: "ping", t: now() });
+    else scheduleReconnect("visible");
   }
 
   function boot() {
@@ -607,6 +613,8 @@
     },
     getRoomId: function () { return roomId; },
     getRemotePeerId: function () { return remotePeerId; },
-    setAutoReply: function (v) { autoReply = !!v; }
+    setAutoReply: function (v) { autoReply = !!v; },
+    loadIceServers: loadIceServers,
+    getIceServers: iceServers
   };
 })(typeof window !== "undefined" ? window : this);
