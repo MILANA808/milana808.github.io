@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#050508"/><title>АКСИ MATRIX</title>
+<style>
+body{margin:0;background:#050508;color:#f4f4f5;font:14px/1.5 system-ui;height:100vh;display:flex;flex-direction:column}
+header{padding:12px 16px;border-bottom:1px solid #2a2a30;display:flex;gap:10px;align-items:center}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:grid;place-items:center;font-weight:700;color:#fff}
+#chat{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:90%}.me{align-self:flex-end}.bub{padding:10px 14px;border-radius:14px;white-space:pre-wrap;background:#1a1a1e;border:1px solid #2a2a30}
+.me .bub{background:linear-gradient(135deg,#7c3aed,#a78bfa);border:0}
+.bar{display:flex;gap:8px;padding:12px;border-top:1px solid #2a2a30}
+input{flex:1;padding:12px;border-radius:12px;border:1px solid #2a2a30;background:#121214;color:#fff}
+button{width:44px;border:0;border-radius:12px;background:#7c3aed;color:#fff;font-size:16px}
+a{color:#a78bfa;font-size:12px}
+</style></head><body>
+<header><div class="logo">A</div><div><b>АКСИ MATRIX</b><div style="font-size:11px;color:#a1a1aa">Core v5 · <a href="/">главная</a></div></div></header>
+<div id="chat"></div>
+<form class="bar" id="f"><input id="q" placeholder="Спроси или /demo"/><button>↑</button></form>
+<script src="/aksi-core.js?v=5"></script>
+<script>
+(function(){
+var C=document.getElementById("chat"),Q=document.getElementById("q");
+function bub(role,t,m){var d=document.createElement("div");d.className="msg "+(role==="me"?"me":"");d.innerHTML='<div class="bub"></div>';d.querySelector(".bub").textContent=t+(m?"\n· "+m:"");C.appendChild(d);C.scrollTop=C.scrollHeight}
+function run(t){t=(t||"").trim();if(!t)return;bub("me",t);Q.value="";
+var low=t.toLowerCase();
+if(low==="/demo"){bub("ai","whoami · что такое … · запомни: …","demo");return}
+if(low==="whoami"){bub("ai","АКСИ MATRIX · Core "+((window.AKSI_CORE&&AKSI_CORE.version)||"?"),"id");return}
+var core=window.AKSI_CORE;if(!core){bub("ai","Core loading… Ctrl+F5");return}
+var loc=core.localKnowledge&&core.localKnowledge(t);
+if(loc&&!core.needsNet(t)){bub("ai",loc,"local");return}
+bub("ai","Ищу…","net");
+core.query(t).then(function(r){C.removeChild(C.lastChild);bub("ai",(r&&r.text)||"нет ответа",r&&r.local?"local":"net")})
+.catch(function(e){bub("ai",String(e),"err")})}
+document.getElementById("f").onsubmit=function(e){e.preventDefault();run(Q.value)};
+bub("ai","MATRIX online. Core v5.\n/demo · whoami · вопрос","boot");
+})();
+</script></body></html>
