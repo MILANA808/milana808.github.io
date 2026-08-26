@@ -2,7 +2,7 @@
   "use strict";
 
   if (!Element.prototype.closest) {
-    Element.prototype.closest = function(s) {
+    Element.prototype.closest = function (s) {
       var el = this;
       while (el && el.nodeType === 1) {
         if (el.matches ? el.matches(s) : (el.msMatchesSelector && el.msMatchesSelector(s))) return el;
@@ -20,31 +20,31 @@
   var PROTO = { protocol: "AKSI-Agent-v1", msgCount: 0, lastEnvelope: null };
   var edgeCache = {};
   var RESONANCE_SEED = "Alfiya_AKSI_DIMAX_v3_2026";
-  var BIRTH_YEAR = 1995;
+  var BIRTH = new Date("1995-02-14T08:10:00+03:00");
 
   var CORE = [
     "АКСИ — суверенный цифровой напарник и агентный слой. Offline-first: память и решения на устройстве пользователя.",
     "Протокол AKSI-Agent-v1: handshake, envelope, fingerprint, DID (did:aksi:…). Сообщения подписываются локально.",
-    "EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age. H — энтропия Шеннона текста; age связан с годом 1995.",
+    "EQS = 0.30·(H/5) + 0.35·R + 0.25·C + 0.10·A. H — энтропия Шеннона; A — age_factor от 14.02.1995.",
     "QCLI — нормированная энтропия (0…1). H_eff = H × (уникальные слова / все слова).",
-    "Формула роста: AKSI = (A×I×S)×(1+0.4√n), где A/I/S — внимание, интеллект, структура; n — опыт/события.",
+    "Формула роста: AKSI = (A×I×S)×(1+0.4√n), где A/I/S — внимание, интеллект, структура; n — опыт.",
     "Цепочка решений (ledger): append-only, prev_hash, verify. Каждое важное действие попадает в ledger.",
     "Edge AI Accelerator: intent → retrieve → compose → metrics → ledger. Кэш на устройстве.",
     "Квант: локальный симулятор Bell |Φ+⟩ и суперпозиции |+⟩ (RNG, не физический квантовый компьютер).",
     "Память: localStorage. Команды: запомни: факт · что ты помнишь · забудь всё. Экспорт JSON.",
-    "Платформа: milana808.github.io (MATRIX), Milana-backend (API), aksi_apps. Публичный контакт: aksilove@internet.ru · @AKSILOVE",
-    "ADIA — алгоритм целостности решений. Resonance Field + DIMAX v3 — индикаторы резонанса в UI.",
-    "Создатель: Альфия (MILANA808). Год опоры формулы: 1995. GitHub: MILANA808.",
+    "ADIA — Decision Integrity Algorithm. Стандарт целостности решений. Страница /algorithm.html",
+    "Создатель: Альфия (MILANA808). Год опоры: 1995. Контакт: aksilove@internet.ru · @AKSILOVE",
     "Голос: Web Speech API, язык ru-RU. Нажми микрофон и говори.",
     "Вкладки: Чат · Учить · Память · Метрики · Квант · Цепочка · Протокол · Edge · О себе.",
-    "Бэкап: вкладка О себе → Полный бэкап (память + ledger + DID + протокол)."
+    "Бэкап: вкладка О себе → Бэкап (память + ledger + DID + протокол)."
   ];
 
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     s = String(s == null ? "" : s);
-    return s.replace(/&/g, "&" + "amp;").replace(/</g, "&" + "lt;").replace(/>/g, "&" + "gt;").replace(/"/g, "&" + "quot;");
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
+
   function shannonH(text) {
     text = String(text || "");
     if (!text.length) return 0;
@@ -72,20 +72,20 @@
     return Math.round(shannonH(text) * (Object.keys(set).length / words.length) * 1000) / 1000;
   }
   function ageFactor() {
-    var y = new Date().getFullYear();
-    var span = Math.max(1, y - BIRTH_YEAR);
-    return Math.min(1, Math.round((span / 40) * 1000) / 1000);
+    var years = (Date.now() - BIRTH.getTime()) / (365.25 * 24 * 3600 * 1000);
+    return Math.min(1, Math.max(0.4, 1 / (1 + Math.exp(-(years - 28) / 4.5))));
   }
   function eqs(text) {
     var H = shannonH(text || "");
     var hN = Math.min(1, H / 5);
     var reliability = 0.88, coherence = 0.82, age = ageFactor();
-    var raw = 0.30 * hN * 100 + 0.35 * reliability * 100 + 0.25 * coherence * 100 + 0.10 * age * 100;
-    return Math.round(raw * 10) / 10;
+    var raw = 0.30 * hN + 0.35 * reliability + 0.25 * coherence + 0.10 * age;
+    return Math.round(Math.max(0, Math.min(1, raw)) * 1000) / 10;
   }
   function quantumFingerprint(text) {
     var h = 0xDEADBEEF | 0, i;
-    for (i = 0; i < String(text).length; i++) h = (Math.imul(31, h) + text.charCodeAt(i)) | 0;
+    text = String(text || "");
+    for (i = 0; i < text.length; i++) h = (Math.imul(31, h) + text.charCodeAt(i)) | 0;
     return (h >>> 0).toString(16).toUpperCase().padStart(8, "0");
   }
   function quantumLevel(q) {
@@ -110,12 +110,16 @@
     return ("00000000" + (h >>> 0).toString(16)).slice(-8);
   }
   function ensureDid() {
-    var d = localStorage.getItem(DID_KEY);
-    if (d) return d;
-    var seed = "aksi-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
-    d = "did:aksi:" + simpleHash(seed + navigator.userAgent) + simpleHash(seed).slice(0, 8);
-    try { localStorage.setItem(DID_KEY, d); } catch (e) {}
-    return d;
+    try {
+      var d = localStorage.getItem(DID_KEY);
+      if (d) return d;
+      var seed = "aksi-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+      d = "did:aksi:" + simpleHash(seed + (navigator.userAgent || "")) + simpleHash(seed).slice(0, 8);
+      localStorage.setItem(DID_KEY, d);
+      return d;
+    } catch (e) {
+      return "did:aksi:local-fallback";
+    }
   }
   function getMSK() {
     try {
@@ -132,7 +136,7 @@
     return {
       protocol: "AKSI-Agent-v1",
       from: ensureDid(),
-      capabilities: ["natural_language", "quantum_metrics", "memory", "edge", "ledger", "signing", "wiki"],
+      capabilities: ["natural_language", "quantum_metrics", "memory", "edge", "ledger", "signing"],
       publicKey: "local-fp-" + quantumFingerprint(ensureDid()),
       nonce: nonce,
       signature: simpleHash(nonce + ensureDid() + RESONANCE_SEED).toUpperCase(),
@@ -230,11 +234,12 @@
     }
     return { ok: true, msg: "OK · " + chain.length + " событий" };
   }
-  var STOP = { "и": 1, "в": 1, "не": 1, "на": 1, "я": 1, "с": 1, "что": 1, "а": 1, "то": 1, "как": 1, "это": 1, "по": 1, "из": 1, "у": 1, "за": 1, "от": 1, "the": 1, "a": 1, "is": 1, "to": 1, "of": 1, "and": 1, "in": 1, "для": 1, "или": 1, "но": 1, "же": 1, "бы": 1, "ли": 1 };
+
+  var STOP = { "и":1,"в":1,"не":1,"на":1,"я":1,"с":1,"что":1,"а":1,"то":1,"как":1,"это":1,"по":1,"из":1,"у":1,"за":1,"от":1,"the":1,"a":1,"is":1,"to":1,"of":1,"and":1,"in":1,"для":1,"или":1,"но":1,"же":1,"бы":1,"ли":1 };
   function stem(w) {
     w = w.toLowerCase();
     if (w.length < 5) return w;
-    var ends = ["ями", "ами", "ов", "ев", "ом", "ем", "ах", "ию", "ью", "ия", "ья", "ие", "ый", "ий", "ой", "ая", "ое", "ые", "ать", "ять", "ить"];
+    var ends = ["ями","ами","ов","ев","ом","ем","ах","ию","ью","ия","ья","ие","ый","ий","ой","ая","ое","ые","ать","ять","ить"];
     var i, e;
     for (i = 0; i < ends.length; i++) {
       e = ends[i];
@@ -271,27 +276,28 @@
     }
     return uniq;
   }
+
   function answerKB(q) {
     var low = q.toLowerCase().trim();
     if (/^(привет|здравств|добрый|hello|hi|салют)\b/.test(low)) return "Привет. На связи · " + getMSK() + " МСК.\nЯ АКСИ — спрашивай о протоколе, метриках, памяти или мире.";
-    if (/кто ты|что ты|расскажи о себе|who are you|ты акси|о себе/.test(low)) return "Я АКСИ — суверенный цифровой напарник.\n\n• Agent-v1 · EQS/QCLI · память на устройстве\n• Edge · цепочка решений · квант\n• Создатель: Альфия (MILANA808) · опора формулы: 1995\n• Контакт: aksilove@internet.ru · @AKSILOVE\n\nДанные только у тебя. Научи меня: запомни: …";
-    if (/что умеешь|что можешь|возможност|функци|help|помощь|команды/.test(low)) return "Умею:\n• чат и обучение — запомни: факт\n• EQS · QCLI · H · H_eff (вкладка Метрики)\n• Agent-v1 handshake / envelope / DID\n• цепочка решений (ledger) + verify\n• квант Bell / суперпозиция\n• Edge pipeline\n• голос · полный бэкап\n• поиск Wikipedia: wiki: тема или что такое …\n• что ты помнишь · забудь всё";
-    if (/альфия|создател|автор|milana808|кто сделал/.test(low)) return "Создатель АКСИ — Альфия (MILANA808).\nГод опоры в формуле age: 1995.\nРепозитории: milana808.github.io · Milana-backend.\nПубличный контакт: aksilove@internet.ru · @AKSILOVE";
-    if (/формул|adia|рост|aksi\s*=/.test(low)) return "Формула: AKSI = (A×I×S)×(1+0.4√n)\nA — внимание · I — интеллект · S — структура · n — опыт.\nADIA — алгоритм целостности решений.\nEQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age (age от 1995).";
-    if (/протокол|agent-v1|handshake|envelope|did/.test(low)) return "AKSI-Agent-v1:\n• handshake — приветствие агентов\n• envelope — подписанное сообщение\n• fingerprint / DID — идентичность\n• signature на RESONANCE_SEED\nОткрой вкладку Протокол и нажми Handshake.";
-    if (/метрик|eqs|qcli|энтропи|h_eff|shannon/.test(low)) return "EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age\nQCLI — нормированная энтропия 0…1\nH — Shannon entropy · H_eff — с учётом уникальных слов\nage = f(год − 1995)\nВкладка Метрики — вставь любой текст.";
-    if (/квант|bell|суперпоз|кубит|qubit/.test(low)) return "Локальный квантовый симулятор:\n• Bell |Φ+⟩ — корреляции\n• |+⟩ — суперпозиция\nНе облако, только RNG на устройстве.\nВкладка Квант.";
-    if (/edge|ускор|pipeline/.test(low)) return "Edge AI Accelerator:\nintent → retrieve (память) → compose → metrics → ledger\nКэш запросов на устройстве.\nВкладка Edge → Прогнать.";
-    if (/цепочк|ledger|proof|хэш|hash/.test(low)) return "Цепочка решений: append-only ledger.\nКаждое событие: type · prev_hash · eqs · fingerprint.\nverify проверяет целостность.\nВкладка Цепочка.";
-    if (/памят|запомн|учить|обуч/.test(low) && !/что ты (знаешь|помнишь)/.test(low)) return "Память на устройстве (localStorage).\n• запомни: важный факт\n• что ты помнишь\n• забудь всё\nВкладки Учить и Память · экспорт JSON.";
+    if (/кто ты|что ты|расскажи о себе|who are you|ты акси|о себе/.test(low)) return "Я АКСИ — суверенный цифровой напарник.\n\n• Agent-v1 · EQS/QCLI · память на устройстве\n• Edge · цепочка решений · квант\n• ADIA — целостность решений\n• Создатель: Альфия (MILANA808) · 1995\n• Контакт: aksilove@internet.ru\n\nДанные только у тебя. Научи: запомни: …";
+    if (/что умеешь|что можешь|возможност|функци|help|помощь|команды/.test(low)) return "Умею:\n• чат и обучение — запомни: факт\n• EQS · QCLI · H · H_eff\n• Agent-v1 handshake / envelope / DID\n• цепочка решений (ledger) + verify\n• квант Bell / суперпозиция\n• Edge pipeline\n• голос · полный бэкап\n• поиск Wikipedia: wiki: тема\n• что ты помнишь · забудь всё";
+    if (/альфия|создател|автор|milana808|кто сделал/.test(low)) return "Создатель АКСИ — Альфия (MILANA808).\nГод опоры age_factor: 1995.\nСайт: milana808.github.io\nКонтакт: aksilove@internet.ru";
+    if (/формул|adia|рост|aksi\s*=/.test(low)) return "Формула: AKSI = (A×I×S)×(1+0.4√n)\nADIA — алгоритм целостности решений (/algorithm.html)\nEQS = 0.30·(H/5) + 0.35·R + 0.25·C + 0.10·A (A от 14.02.1995)";
+    if (/протокол|agent-v1|handshake|envelope|did/.test(low)) return "AKSI-Agent-v1:\n• handshake — приветствие агентов\n• envelope — подписанное сообщение\n• fingerprint / DID — идентичность\nОткрой вкладку Протокол и нажми Handshake.";
+    if (/метрик|eqs|qcli|энтропи|h_eff|shannon/.test(low)) return "EQS = 0.30·(H/5) + 0.35·R + 0.25·C + 0.10·A\nQCLI — нормированная энтропия 0…1\nВкладка Метрики — вставь любой текст.";
+    if (/квант|bell|суперпоз|кубит|qubit/.test(low)) return "Локальный квантовый симулятор:\n• Bell |Φ+⟩\n• |+⟩ — суперпозиция\nВкладка Квант.";
+    if (/edge|ускор|pipeline/.test(low)) return "Edge AI Accelerator:\nintent → retrieve → compose → metrics → ledger\nВкладка Edge → Прогнать.";
+    if (/цепочк|ledger|proof|хэш|hash/.test(low)) return "Цепочка решений: append-only ledger.\nverify проверяет целостность.\nВкладка Цепочка.";
+    if (/памят|запомн|учить|обуч/.test(low) && !/что ты (знаешь|помнишь)/.test(low)) return "Память на устройстве.\n• запомни: важный факт\n• что ты помнишь\n• забудь всё";
     if (/время|который час|дата|сегодня/.test(low)) return getMSKFull() + " (MSK)";
-    if (/контакт|почта|email|связь|написать/.test(low)) return "aksilove@internet.ru · X @AKSILOVE\nПубличный контакт проекта АКСИ.";
-    if (/резонанс|dimax|resonance/.test(low)) return "Resonance Field + DIMAX v3 — слой резонанса в UI.\nSeed: Alfiya_AKSI_DIMAX_v3_2026 (клиентские подписи).";
-    if (/бэкап|export|экспорт|backup/.test(low)) return "Полный бэкап: вкладка О себе → Полный бэкап.\nВ файл: факты, ledger, DID, счётчик протокола.";
-    if (/оффлайн|offline|без.?интернет|локальн/.test(low)) return "Я offline-first: чат, память, метрики, квант, ledger, протокол работают без сети.\nСеть нужна только для wiki-поиска (Wikipedia API).";
-    if (/github|репозитор|сайт|matrix/.test(low)) return "Сайт: milana808.github.io\nBackend: Milana-backend\nАгент: /aksi.html\nMATRIX / quantum / hub — лаборатории на том же домене.";
+    if (/контакт|почта|email|связь|написать/.test(low)) return "aksilove@internet.ru · X @AKSILOVE";
+    if (/бэкап|export|экспорт|backup/.test(low)) return "Полный бэкап: вкладка О себе → Бэкап.";
+    if (/оффлайн|offline|без.?интернет|локальн/.test(low)) return "Я offline-first. Сеть нужна только для wiki-поиска.";
+    if (/github|репозитор|сайт|matrix/.test(low)) return "Сайт: milana808.github.io\nАгент: /aksi.html\nADIA: /algorithm.html";
     return null;
   }
+
   function intent(q) {
     var low = q.toLowerCase().trim();
     if (/^(запомни|выучи)\s*[:\s]/.test(low)) return "teach";
@@ -339,7 +345,7 @@
       createEnvelope("self", "announce", "remember:" + raw.slice(0, 40));
       return "Запомнила.\n«" + raw + "»\nEQS ≈ " + e + " · fp " + quantumFingerprint(raw).slice(0, 8);
     }
-    if (it === "wipe") { saveMem([]); try { localStorage.removeItem(SEED_KEY); } catch (e) {} seedCore(); return "Память очищена. Ядро знаний восстановлено."; }
+    if (it === "wipe") { saveMem([]); try { localStorage.removeItem(SEED_KEY); } catch (e) {} seedCore(); return "Память очищена. Ядро восстановлено."; }
     if (it === "list") {
       var a = loadMem().filter(function (x) { return x.src !== "core"; });
       var coreN = loadMem().filter(function (x) { return x.src === "core"; }).length;
@@ -361,6 +367,7 @@
     }
     return "__FALLBACK__";
   }
+
   function updateStatus(sample) {
     var e = eqs(sample || "АКСИ");
     var q = qcli(sample || "АКСИ");
@@ -384,7 +391,7 @@
     if (name === "protocol") refreshProtocol();
     if (name === "edge") {
       if ($("eCache")) $("eCache").textContent = String(Object.keys(edgeCache).length);
-      try { if (navigator.gpu) $("eMode").textContent = "webgpu?"; else $("eMode").textContent = "cpu"; }
+      try { if (navigator.gpu) { if ($("eMode")) $("eMode").textContent = "webgpu?"; } else { if ($("eMode")) $("eMode").textContent = "cpu"; } }
       catch (e) { if ($("eMode")) $("eMode").textContent = "cpu"; }
     }
   }
@@ -432,7 +439,7 @@
           else if (text === "__FALLBACK__") {
             var hits = retrieve(q);
             if (hits.length) out = hits.slice(0, 4).map(function (h, i) { return (i + 1) + ". " + h.text; }).join("\n");
-            else out = "Пока не знаю точный ответ.\n\n• Научи: запомни: …\n• Спроси кто ты / что умеешь / формула\n• Wiki: wiki: тема  или  что такое …";
+            else out = "Пока не знаю точный ответ.\n\n• Научи: запомни: …\n• Спроси кто ты / что умеешь / формула\n• Wiki: wiki: тема";
           } else out = "Wikipedia не ответила. Попробуй иначе или: запомни: …";
           finishReply(out, q);
           busy = false;
@@ -475,6 +482,7 @@
     appendLedger("edge", { q: q.slice(0, 80), hits: hits.length, ms: ms }, e);
     return { query: q, intent: intent(q), hits: hits.length, top: hits.slice(0, 3).map(function (h) { return h.text.slice(0, 80); }), composed: String(composed).slice(0, 300), eqs: e, qcli: qc, ms: ms, cache: fromCache, mode: ($("eMode") && $("eMode").textContent) || "cpu" };
   }
+
   document.addEventListener("click", function (e) {
     var el = e.target.closest ? e.target.closest("button,[data-tab],[data-ask],[data-del]") : e.target;
     if (!el) return;
@@ -541,7 +549,7 @@
       refreshProtocol(); return;
     }
     if (el.id === "btnEnvelope") {
-      var env = createEnvelope("broadcast", "announce", "АКСИ online · Agent-v1 · knowledge core");
+      var env = createEnvelope("broadcast", "announce", "АКСИ online · Agent-v1");
       if ($("prOut")) $("prOut").textContent = JSON.stringify(env, null, 2);
       refreshProtocol(); return;
     }
@@ -590,7 +598,7 @@
   seedCore();
   if ($("didVal")) $("didVal").textContent = ensureDid();
   renderMem();
-  updateStatus("АКСИ Agent-v1 online · core knowledge");
+  updateStatus("АКСИ Agent-v1 online");
   tickClock();
   setInterval(tickClock, 30000);
   refreshProtocol();
@@ -604,9 +612,9 @@
     });
   } catch (e) {}
 
-  bubble("ai", "Привет. Я АКСИ — цифровой напарник с ядром знаний.\n\nЗнаю: протокол · EQS · формулу · память · квант · Edge · ledger.\nМогу искать в Wikipedia: wiki: тема или что такое …\n\nСпроси кто ты · формула · что умеешь.\nзапомни: … · голос");
+  bubble("ai", "Привет. Я АКСИ — цифровой напарник.\n\nРаботает offline:\n• память · EQS · ledger · Agent-v1\n• квант · Edge · голос\n\nСпроси: кто ты · формула · что умеешь\nзапомни: … · wiki: тема");
   try {
     var logo = $("logoPulse");
-    if (logo) { logo.classList.add("pulse"); setTimeout(function(){ logo.classList.remove("pulse"); }, 1200); }
+    if (logo) { logo.classList.add("pulse"); setTimeout(function () { logo.classList.remove("pulse"); }, 1200); }
   } catch (e) {}
 })();
