@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#06050b">
+<title>AKSI Link Protocol</title>
+<style>
+:root{--bg:#06050b;--s1:#13111c;--s2:#1b1726;--t:#f7f5ff;--m:#a8a0bd;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--line2:rgba(255,255,255,.07);--font:system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100dvh;color:var(--t);font:15px/1.55 var(--font);background:radial-gradient(ellipse 90% 50% at 50% -10%,rgba(124,58,237,.35),transparent 55%),var(--bg);max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:22px;font-weight:750;margin-bottom:6px}
+.sub{color:var(--m);font-size:13px;margin-bottom:18px}
+.card{background:var(--s2);border:1px solid var(--line2);border-radius:14px;padding:16px;margin-bottom:12px}
+.card h2{font-size:14px;font-weight:650;margin-bottom:8px}
+.muted{color:var(--m);font-size:13.5px;line-height:1.5}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kv .cell{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px}
+.kv b{display:block;font-size:13px;color:var(--ok);word-break:break-all}.kv span{font-size:11px;color:var(--m)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:600 13px var(--font);cursor:pointer}
+.btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
+input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:inherit}
+pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px;font-size:11px;overflow:auto;white-space:pre-wrap;color:var(--m);max-height:280px}
+a{color:var(--a)}
+.pill{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;background:rgba(52,211,153,.12);color:var(--ok)}
+ul{margin:8px 0 0 18px;color:var(--m);font-size:13.5px}
+</style>
+</head>
+<body>
+<h1>AKSI Link <span class="pill">v1</span></h1>
+<p class="sub">Проприетарная технология протокола · не open source · aksilove@internet.ru</p>
+<div class="card">
+  <h2>Стек</h2>
+  <ul>
+    <li><b>DID</b> — ECDSA P-256 в Web Crypto, ключ не покидает браузер</li>
+    <li><b>Envelope</b> — canonical JSON + SHA-256 + подпись</li>
+    <li><b>Proof chain</b> — prev_hash, append-only ledger</li>
+    <li><b>Resonance</b> — EQS 0.30·structure + 0.35·signal + 0.25·novelty + 0.10·trust</li>
+    <li><b>Transport</b> — AKSI Mesh / PeerJS / BroadcastChannel</li>
+  </ul>
+</div>
+<div id="lab"></div>
+<p class="muted" style="margin-top:16px">
+  <a href="/">АКСИ</a> · <a href="/mesh.html">Mesh</a> · <a href="/PROPRIETARY.md">License</a>
+</p>
+<script src="aksi-link.js?v=1"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.AKSI_LINK) window.AKSI_LINK.mount("#lab");
+});
+</script>
+</body>
+</html>
