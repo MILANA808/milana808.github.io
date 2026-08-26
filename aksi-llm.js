@@ -1,268 +1,491 @@
 /**
- * AKSI Brain v2 — отвечает живо, всегда
- * Pipeline: Self → local → Neuro → Net→compose → LLM
- * Contact: aksilove@internet.ru
+ * AKSI Universal LLM Router v1.1
+ * Provider-agnostic · local-first · BYOK (keys only in browser)
+ * Ollama · OpenAI-compat · xAI · OpenAI · Anthropic · Gemini · Custom
+ * © AKSI · aksilove@internet.ru · Proprietary
  */
 (function (global) {
   "use strict";
-  var LLM_CFG_KEY = "aksi_llm_cfg_v1";
-  var LLM_DEFAULTS = { on: true, base: "http://127.0.0.1:11434", key: "ollama", model: "llama3.2", maxTokens: 800 };
-  var chatHistory = [];
-  var busy = false;
-  function $(id) { return document.getElementById(id); }
-  function loadLlmCfg() {
+
+  var VER = "1.1.0";
+  var SECRETS_KEY = "aksi:llm:secrets:v1";
+  var CFG_KEY = "aksi:llm:cfg:v1";
+  var HIST_KEY = "aksi:llm:hist:v1";
+  var DEFAULT_ORDER = ["ollama", "custom", "xai", "openai", "anthropic", "gemini"];
+  var DEFAULT_SYSTEM =
+    "Ты АКСИ — суверенный local-first цифровой напарник. " +
+    "Отвечай по делу, на языке пользователя. Не выдумывай факты. " +
+    "Контакт автора: aksilove@internet.ru. Идентичность AKSI proprietary.";
+
+  function loadJSON(k, fb) {
     try {
-      var j = JSON.parse(localStorage.getItem(LLM_CFG_KEY) || "null");
-      if (!j || typeof j !== "object") return Object.assign({}, LLM_DEFAULTS);
-      return { on: j.on !== false, base: String(j.base || LLM_DEFAULTS.base).replace(/\/$/, ""),
-        key: String(j.key != null ? j.key : LLM_DEFAULTS.key), model: String(j.model || LLM_DEFAULTS.model), maxTokens: Number(j.maxTokens) || 800 };
-    } catch (e) { return Object.assign({}, LLM_DEFAULTS); }
+      var v = JSON.parse(localStorage.getItem(k) || "null");
+      return v == null ? fb : v;
+    } catch (e) {
+      return fb;
+    }
   }
-  function saveLlmCfg(cfg) { try { localStorage.setItem(LLM_CFG_KEY, JSON.stringify(cfg)); } catch (e) {} }
-  function getMemFacts() {
+  function saveJSON(k, v) {
     try {
-      var a = JSON.parse(localStorage.getItem("aksi_whole_mem_v3") || "[]");
-      return (Array.isArray(a) ? a : []).filter(function (x) { return x && x.t && x.src !== "core"; }).slice(0, 12).map(function (x) { return "- " + x.t; }).join("\n");
-    } catch (e) { return ""; }
+      localStorage.setItem(k, JSON.stringify(v));
+    } catch (e) {}
   }
-  function systemPrompt() {
-    var mem = getMemFacts();
-    return ["Ты — АКСИ, суверенный цифровой напарник. Говоришь по-русски.",
-      "Стиль: как умный друг — прямо, ясно, без воды, с лёгкой иронией когда уместно.",
-      "Не притворяйся гигантской облачной моделью. Если не знаешь — скажи и предложи, как узнать.",
-      "Контакт: aksilove@internet.ru",
-      mem ? ("Память:\n" + mem) : ""].filter(Boolean).join("\n");
+
+  function getSecret(id) {
+    var all = loadJSON(SECRETS_KEY, {});
+    return (all[id] && all[id].key) || null;
   }
-  function buildMessages(q) {
-    var msgs = [{ role: "system", content: systemPrompt() }];
-    chatHistory.slice(-10).forEach(function (m) { msgs.push({ role: m.role === "user" ? "user" : "assistant", content: m.content }); });
-    msgs.push({ role: "user", content: q });
-    return msgs;
+  function setSecret(id, key) {
+    var all = loadJSON(SECRETS_KEY, {});
+    if (!key) delete all[id];
+    else all[id] = { key: String(key), updatedAt: Date.now() };
+    saveJSON(SECRETS_KEY, all);
   }
-  function fetchTimeout(url, opts, ms) {
-    ms = ms || 6000; opts = opts || {};
-    return new Promise(function (resolve, reject) {
-      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-      var done = false;
-      var t = setTimeout(function () { if (done) return; done = true; try { if (ctrl) ctrl.abort(); } catch (e) {} reject(new Error("timeout")); }, ms);
-      var o = {}, k; for (k in opts) o[k] = opts[k]; if (ctrl) o.signal = ctrl.signal;
-      fetch(url, o).then(function (r) { if (done) return; done = true; clearTimeout(t); resolve(r); })
-        .catch(function (e) { if (done) return; done = true; clearTimeout(t); reject(e); });
+  function listSecrets() {
+    var all = loadJSON(SECRETS_KEY, {});
+    return Object.keys(all).filter(function (k) {
+      return all[k] && all[k].key;
     });
   }
-  function callLLM(q) {
-    var cfg = loadLlmCfg(); if (!cfg.on || !cfg.base) return Promise.resolve(null);
-    var headers = { "Content-Type": "application/json" }; if (cfg.key) headers["Authorization"] = "Bearer " + cfg.key;
-    return fetchTimeout(cfg.base + "/v1/chat/completions", { method: "POST", headers: headers,
-      body: JSON.stringify({ model: cfg.model || "llama3.2", messages: buildMessages(q), temperature: 0.75, max_tokens: cfg.maxTokens || 800 })
-    }, 8000).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(function (j) { var t = j && j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content; t = (t || "").trim(); return t ? { text: t } : null; })
-      .catch(function () { return null; });
+
+  function cfg() {
+    return Object.assign(
+      {
+        order: DEFAULT_ORDER.slice(),
+        system: DEFAULT_SYSTEM,
+        temperature: 0.7,
+        maxTokens: 1024,
+        history: true,
+        historyMax: 12,
+        enabled: true,
+      },
+      loadJSON(CFG_KEY, {})
+    );
   }
-  function probeLLM(cb) {
-    var cfg = loadLlmCfg(); if (!cfg.base) { if (cb) cb(false); return; }
-    fetchTimeout(cfg.base + "/v1/models", { headers: cfg.key ? { Authorization: "Bearer " + cfg.key } : {} }, 2500)
-      .then(function (r) { if (cb) cb(!!r.ok); }).catch(function () { if (cb) cb(false); });
+  function saveCfg(patch) {
+    var c = Object.assign(cfg(), patch || {});
+    saveJSON(CFG_KEY, c);
+    return c;
   }
-  function bubble(role, text, meta) {
-    var th = $("thread"); if (!th) return;
-    var d = document.createElement("div"); d.className = "msg " + (role === "me" ? "me" : "ai");
-    var bub = document.createElement("div"); bub.className = "bub"; bub.textContent = text;
-    if (meta) { var md = document.createElement("div"); md.className = "meta"; md.textContent = meta; bub.appendChild(md); }
-    d.appendChild(bub); th.appendChild(d);
-    var main = document.querySelector("main"); if (main) main.scrollTop = main.scrollHeight;
+
+  function hist() {
+    return loadJSON(HIST_KEY, []);
   }
-  function removeThinking() {
-    var th = $("thread"); if (!th) return;
-    var nodes = th.querySelectorAll(".msg.ai"), i, b;
-    for (i = nodes.length - 1; i >= 0; i--) {
-      b = nodes[i].querySelector(".bub");
-      if (b && /^(Думаю|Ядро ищет|Ищу|Секунду|Сейчас)/.test((b.textContent || "").trim())) { th.removeChild(nodes[i]); return; }
-    }
+  function pushHist(role, content) {
+    var h = hist();
+    h.push({ role: role, content: String(content || "").slice(0, 8000) });
+    var max = cfg().historyMax || 12;
+    if (h.length > max * 2) h = h.slice(-max * 2);
+    saveJSON(HIST_KEY, h);
   }
-  function mskNow() {
-    try { return new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date()) + " (MSK)"; }
-    catch (e) { return new Date().toLocaleString("ru-RU"); }
+  function clearHist() {
+    saveJSON(HIST_KEY, []);
   }
-  function builtinAnswer(q) {
-    var low = String(q || "").toLowerCase().trim();
-    if (!low) return null;
-    if (/^(привет|здравств|добрый|hello|hi|hey)\b/.test(low))
-      return "Привет. Я АКСИ — твой локальный напарник.\n\nМогу ответить по делу, поискать в сети, помнить факты, проверить документ, прочитать с камеры.\nСпроси что угодно — или «кто ты», если хочешь разбор.";
-    if (/^(пока|до связи|bye)\b/.test(low)) return "На связи. Когда вернёшься — я на месте, на твоём устройстве.";
-    if (/спасибо|благодар/.test(low)) return "Всегда пожалуйста. Если нужно глубже — уточни вопрос.";
-    if (/^кто ты\b|^что ты такое|^who are you/.test(low)) return null;
-    if (/что умеешь|что можешь|помощь|help|команды/.test(low))
-      return "Коротко:\n• Разговор — спрашивай как человека\n• Поиск: «что такое …»\n• Память: «запомни: …»\n• Self: «напиши себе инструмент …»\n• Нейро, DKV, Зрение\n\nДля ответов уровня большой модели: Ollama → вкладка О себе.";
-    if (/нейросет|rwkv|без gpu|своя модель/.test(low))
-      return "Своя нейросеть на CPU — RWKV: линейное время, постоянная память, без GPU.\nУчится на твоих фактах. Вкладка «Нейро». Для большой модели — Ollama.";
-    if (/формул|aksi\s*=/.test(low))
-      return "AKSI = (A × I × S) × (1 + 0.4√n)\nEQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age";
-    if (/протокол|agent-v1|handshake|did/.test(low))
-      return "Agent-v1: handshake, envelope, DID, fingerprint. Вкладка «Протокол».";
-    if (/контакт|почта|email|связаться/.test(low))
-      return "aksilove@internet.ru · X @AKSILOVE";
-    if (/время|который час|дата|сегодня/.test(low)) return "Сейчас: " + mskNow() + ".";
-    if (/ollama|как подключить llm|полноценн/.test(low))
-      return "Полноценный диалог:\n1) ollama.com → install\n2) ollama run llama3.2\n3) О себе → http://127.0.0.1:11434 → Сохранить\n\nБез Ollama я всё равно отвечаю: поиск + RWKV + Self.";
-    if (/что такое ии\b|что такое искусственный интеллект/.test(low))
-      return "Искусственный интеллект — системы, которые делают то, для чего раньше нужен был ум человека: язык, образы, планирование, обучение.\n\nЯ — локальный агент с памятью и протоколом. Облако — по желанию, не по умолчанию.";
-    return null;
+
+  function catalog() {
+    var c = cfg();
+    return [
+      {
+        id: "ollama",
+        label: "Ollama (local)",
+        kind: "local",
+        baseURL: (loadJSON("aksi_llm_cfg_v1", {}).base || "http://127.0.0.1:11434") + "/v1",
+        model: loadJSON("aksi_llm_cfg_v1", {}).model || "llama3.2",
+        needsKey: false,
+      },
+      {
+        id: "custom",
+        label: "Custom OpenAI-API",
+        kind: "local",
+        baseURL: c.customBase || "http://127.0.0.1:8080/v1",
+        model: c.customModel || "local-model",
+        needsKey: false,
+      },
+      {
+        id: "xai",
+        label: "xAI Grok",
+        kind: "cloud",
+        baseURL: "https://api.x.ai/v1",
+        model: c.xaiModel || "grok-2-latest",
+        needsKey: true,
+      },
+      {
+        id: "openai",
+        label: "OpenAI",
+        kind: "cloud",
+        baseURL: "https://api.openai.com/v1",
+        model: c.openaiModel || "gpt-4o",
+        needsKey: true,
+      },
+      {
+        id: "anthropic",
+        label: "Anthropic Claude",
+        kind: "cloud",
+        baseURL: "https://api.anthropic.com",
+        model: c.anthropicModel || "claude-sonnet-4-20250514",
+        needsKey: true,
+      },
+      {
+        id: "gemini",
+        label: "Google Gemini",
+        kind: "cloud",
+        baseURL: "https://generativelanguage.googleapis.com/v1beta",
+        model: c.geminiModel || "gemini-2.0-flash",
+        needsKey: true,
+      },
+    ];
   }
-  function localAnswer(q) {
+
+  function findProv(id) {
+    return catalog().find(function (p) {
+      return p.id === id;
+    });
+  }
+
+  async function fetchJSON(url, opts) {
+    var res = await fetch(url, opts);
+    var text = await res.text();
+    var data = null;
     try {
-      if (typeof global.AKSI_ANSWER === "function") {
-        var t = global.AKSI_ANSWER(q);
-        if (t && t !== "__WIKI__" && t !== "__FALLBACK__" && String(t).trim()) return String(t);
-      }
-    } catch (e) {}
-    return builtinAnswer(q);
-  }
-  function tryNeuro(q) {
-    if (!global.AKSI_NEURO || typeof global.AKSI_NEURO.think !== "function") return null;
-    try {
-      var r = global.AKSI_NEURO.think(q);
-      if (r && r.text && r.mode !== "empty" && r.mode !== "neuro-weak" && r.mode !== "rwkv-weak") return r;
-      if (r && r.mode && r.mode.indexOf("retrieve") >= 0 && r.text) return r;
-    } catch (e) {}
-    return null;
-  }
-  function composeFromSources(q, coreText) {
-    coreText = String(coreText || "").trim();
-    if (!coreText) return null;
-    var body = coreText.replace(/^\[.*?\]\s*/gm, "").replace(/\n{3,}/g, "\n\n").trim();
-    if (body.length < 20) return null;
-    if (body.length > 1100) {
-      body = body.slice(0, 1100);
-      var cut = body.lastIndexOf(".");
-      if (cut > 400) body = body.slice(0, cut + 1); else body += "…";
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = { raw: text };
     }
-    if (/^[А-ЯA-Z]/.test(body) && body.length > 80)
-      body = body + "\n\nЕсли нужно — уточни, копнём глубже.";
-    return body;
-  }
-  function needsInternet(q) {
-    if (global.AKSI_CORE && typeof global.AKSI_CORE.needsNet === "function") {
-      try { if (global.AKSI_CORE.needsNet(q)) return true; } catch (e) {}
+    if (!res.ok) {
+      var err = new Error(
+        (data && data.error && data.error.message) || data.message || res.status + " " + url
+      );
+      err.status = res.status;
+      err.data = data;
+      throw err;
     }
-    var low = String(q || "").toLowerCase();
-    if (/^(что такое|кто такой|кто такая|найди|поиск|wiki|расскажи про|расскажи о)\b/.test(low)) return true;
-    if (/\b(202[4-9]|когда|где находится|сколько|определение)\b/.test(low) && low.length > 12) return true;
-    if (low.length > 15 && low.length < 120 && /\?$/.test(String(q).trim())) return true;
-    return false;
+    return data;
   }
-  function chatAI(q) {
-    q = String(q || "").trim();
-    if (!q) return;
-    if (busy) busy = false;
-    if (global.AKSI_SELF && typeof global.AKSI_SELF.handle === "function") {
+
+  async function completeOpenAI(p, messages, opts) {
+    opts = opts || {};
+    var headers = { "Content-Type": "application/json" };
+    var key = getSecret(p.id);
+    if (key) headers.Authorization = "Bearer " + key;
+    var body = {
+      model: opts.model || p.model,
+      messages: messages,
+      temperature: opts.temperature != null ? opts.temperature : cfg().temperature,
+      max_tokens: opts.maxTokens || cfg().maxTokens,
+      stream: false,
+    };
+    var data = await fetchJSON(p.baseURL.replace(/\/$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(body),
+      signal: opts.signal,
+    });
+    var choice = data.choices && data.choices[0];
+    var msg = choice && choice.message;
+    return {
+      text: (msg && msg.content) || "",
+      providerId: p.id,
+      model: body.model,
+      usage: data.usage || null,
+      done: true,
+    };
+  }
+
+  async function completeAnthropic(p, messages, opts) {
+    opts = opts || {};
+    var key = getSecret(p.id);
+    if (!key) throw new Error("нет API key Anthropic");
+    var system = "";
+    var msgs = [];
+    messages.forEach(function (m) {
+      if (m.role === "system") system += (system ? "\n" : "") + m.content;
+      else msgs.push({ role: m.role === "assistant" ? "assistant" : "user", content: m.content });
+    });
+    var data = await fetchJSON("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+      },
+      body: JSON.stringify({
+        model: opts.model || p.model,
+        max_tokens: opts.maxTokens || cfg().maxTokens || 1024,
+        system: system || undefined,
+        messages: msgs,
+      }),
+      signal: opts.signal,
+    });
+    var text = "";
+    (data.content || []).forEach(function (b) {
+      if (b.type === "text") text += b.text;
+    });
+    return { text: text, providerId: p.id, model: data.model || p.model, done: true, usage: data.usage };
+  }
+
+  async function completeGemini(p, messages, opts) {
+    opts = opts || {};
+    var key = getSecret(p.id);
+    if (!key) throw new Error("нет API key Gemini");
+    var contents = [];
+    var system = "";
+    messages.forEach(function (m) {
+      if (m.role === "system") system += m.content + "\n";
+      else
+        contents.push({
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }],
+        });
+    });
+    var url =
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+      encodeURIComponent(opts.model || p.model) +
+      ":generateContent?key=" +
+      encodeURIComponent(key);
+    var body = { contents: contents };
+    if (system) body.systemInstruction = { parts: [{ text: system }] };
+    var data = await fetchJSON(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: opts.signal,
+    });
+    var text = "";
+    var cand = data.candidates && data.candidates[0];
+    if (cand && cand.content && cand.content.parts) {
+      cand.content.parts.forEach(function (pt) {
+        if (pt.text) text += pt.text;
+      });
+    }
+    return { text: text, providerId: p.id, model: p.model, done: true };
+  }
+
+  async function completeProvider(p, messages, opts) {
+    if (p.id === "anthropic") return completeAnthropic(p, messages, opts);
+    if (p.id === "gemini") return completeGemini(p, messages, opts);
+    return completeOpenAI(p, messages, opts);
+  }
+
+  async function isAvailable(p) {
+    if (p.needsKey && !getSecret(p.id)) return false;
+    if (p.kind === "local") {
       try {
-        var selfAns = global.AKSI_SELF.handle(q);
-        if (selfAns) {
-          bubble("me", q); chatHistory.push({ role: "user", content: q });
-          if ($("inp")) $("inp").value = "";
-          bubble("ai", selfAns, "Self");
-          chatHistory.push({ role: "assistant", content: selfAns });
-          return;
-        }
-      } catch (e) {}
-    }
-    if (/^(запомни|выучи)\s*[:\s]/i.test(q) || /забудь всё|что ты помнишь|что ты знаешь/i.test(q)) {
-      if (/^(запомни|выучи)\s*[:\s]/i.test(q) && global.AKSI_NEURO && global.AKSI_NEURO.learn) {
-        try { global.AKSI_NEURO.learn(q.replace(/^(запомни|выучи)\s*[:\s]*/i, ""), 3); } catch (e) {}
+        var url = p.baseURL.replace(/\/$/, "") + "/models";
+        var res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+        return res.ok || res.status === 401;
+      } catch (e) {
+        return false;
       }
-      if (typeof global.AKSI_CHAT_LOCAL === "function") return global.AKSI_CHAT_LOCAL(q);
-      bubble("me", q); if ($("inp")) $("inp").value = "";
-      var memAns = localAnswer(q);
-      if (!memAns && /запомни|выучи/i.test(q)) memAns = "Запомнила. Спроси «что ты помнишь».";
-      bubble("ai", memAns || "Ок.", "память"); return;
     }
-    busy = true; bubble("me", q); chatHistory.push({ role: "user", content: q });
-    if ($("inp")) $("inp").value = ""; bubble("ai", "Сейчас…");
-    var finished = false;
-    function finish(text, meta) {
-      if (finished) return; finished = true; removeThinking();
-      text = String(text || "").trim();
-      if (!text) text = "Не собрала уверенный ответ. Переформулируй или «что такое …».\nOllama на localhost — для полного диалога (О себе).";
-      bubble("ai", text, meta || "АКСИ");
-      chatHistory.push({ role: "assistant", content: text });
-      if (chatHistory.length > 40) chatHistory = chatHistory.slice(-40);
-      busy = false;
-    }
-    var watchdog = setTimeout(function () {
-      if (!finished) finish(localAnswer(q) || "Сеть не успела. Спроси ещё раз.", "таймаут");
-    }, 10000);
-    function done(text, meta) { clearTimeout(watchdog); finish(text, meta); }
-    var local = localAnswer(q);
-    var wantNet = needsInternet(q);
-    if (local && !wantNet) { done(local, "АКСИ"); return; }
-    if (!wantNet) {
-      var nr = tryNeuro(q);
-      if (nr && nr.text && nr.text.length > 12) { done(nr.text, "Neuro"); return; }
-    }
-    function afterCore(coreText) {
-      var composed = composeFromSources(q, coreText);
-      var promptForLlm = coreText
-        ? ("Вопрос: " + q + "\n\nДанные поиска:\n" + String(coreText).slice(0, 1800) + "\n\nОтветь по-русски живо и по делу, своими словами.")
-        : q;
-      callLLM(promptForLlm).then(function (llm) {
-        if (llm && llm.text) { done(llm.text, coreText ? "АКСИ · поиск+LLM" : "АКСИ · LLM"); return; }
-        if (composed) { done(composed, "АКСИ · поиск"); return; }
-        if (coreText) { done(String(coreText).slice(0, 1200), "поиск"); return; }
-        if (local) { done(local, "АКСИ"); return; }
-        var nr2 = tryNeuro(q);
-        if (nr2 && nr2.text) { done(nr2.text, "Neuro"); return; }
-        done("По этому вопросу нет готового ответа, поиск пуст.\n• перефразируй\n• «что такое …»\n• «запомни: …»\n• Ollama → полный LLM", "АКСИ");
-      });
-    }
-    if ((wantNet || !local) && global.AKSI_CORE && typeof global.AKSI_CORE.query === "function") {
-      Promise.race([
-        global.AKSI_CORE.query(q),
-        new Promise(function (r) { setTimeout(function () { r({ ok: false }); }, 7000); })
-      ]).then(function (res) { afterCore(res && res.ok && res.text ? res.text : null); })
-        .catch(function () { afterCore(null); });
-      return;
-    }
-    if (local) { done(local, "АКСИ"); return; }
-    afterCore(null);
+    return true;
   }
-  global.AKSI_CHAT = chatAI;
-  document.addEventListener("click", function (e) {
-    var el = e.target.closest ? e.target.closest("#send, #btnLlmSave, #btnLlmTest") : e.target;
-    if (!el) return;
-    if (el.id === "send") { e.stopPropagation(); e.preventDefault(); chatAI(($("inp") || {}).value || ""); return; }
-    if (el.id === "btnLlmSave") {
-      var cfg = { on: $("llmOn") ? !!$("llmOn").checked : true, base: (($("llmBase") || {}).value || "").trim().replace(/\/$/, "") || LLM_DEFAULTS.base,
-        key: (($("llmKey") || {}).value || "").trim() || "ollama", model: (($("llmModel") || {}).value || "").trim() || "llama3.2", maxTokens: 800 };
-      saveLlmCfg(cfg); if ($("llmStatus")) $("llmStatus").textContent = "сохранено…";
-      probeLLM(function (ok) {
-        if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM online — ответы как большая модель" : "LLM офлайн · АКСИ отвечает сама";
-      }); return;
-    }
-    if (el.id === "btnLlmTest") {
-      callLLM("Ответь одной фразой: ты АКСИ.").then(function (r) {
-        if ($("llmStatus")) $("llmStatus").textContent = r ? "✓ LLM отвечает" : "Ollama не найдена — работаю без неё";
-        if (r) bubble("ai", r.text, "тест LLM");
+
+  async function complete(userText, opts) {
+    opts = opts || {};
+    var c = cfg();
+    if (c.enabled === false && !opts.force) throw new Error("LLM выключен в настройках");
+    var system = opts.system || c.system || DEFAULT_SYSTEM;
+    var messages = [{ role: "system", content: system }];
+    if (c.history !== false && !opts.noHistory) {
+      hist().forEach(function (m) {
+        messages.push(m);
       });
     }
-  }, true);
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && e.target && e.target.id === "inp") { e.preventDefault(); e.stopPropagation(); chatAI(e.target.value); }
-  }, true);
-  document.addEventListener("click", function (e) {
-    var el = e.target.closest && e.target.closest("[data-ask]");
-    if (!el) return; e.stopPropagation(); e.preventDefault(); chatAI(el.getAttribute("data-ask"));
-  }, true);
-  function initUi() {
-    var cfg = loadLlmCfg();
-    if ($("llmOn")) $("llmOn").checked = !!cfg.on;
-    if ($("llmBase")) $("llmBase").value = cfg.base;
-    if ($("llmModel")) $("llmModel").value = cfg.model;
-    probeLLM(function (ok) {
-      if ($("llmStatus")) $("llmStatus").textContent = ok ? "✓ LLM online" : "Без Ollama: поиск + Self + RWKV · ollama run llama3.2 для полного диалога";
-      if ($("stBadge")) $("stBadge").textContent = ok ? "LLM" : "АКСИ";
+    messages.push({ role: "user", content: String(userText) });
+
+    var order = opts.order || c.order || DEFAULT_ORDER;
+    var prefer = opts.provider;
+    if (prefer)
+      order = [prefer].concat(
+        order.filter(function (x) {
+          return x !== prefer;
+        })
+      );
+
+    var errors = [];
+    for (var i = 0; i < order.length; i++) {
+      var p = findProv(order[i]);
+      if (!p) continue;
+      try {
+        if (!(await isAvailable(p))) {
+          errors.push(p.id + ": offline");
+          continue;
+        }
+        var result = await completeProvider(p, messages, {
+          model: opts.model,
+          temperature: opts.temperature,
+          maxTokens: opts.maxTokens,
+          signal: opts.signal,
+        });
+        if (result && result.text) {
+          if (c.history !== false && !opts.noHistory) {
+            pushHist("user", userText);
+            pushHist("assistant", result.text);
+          }
+          result.providerLabel = p.label;
+          return result;
+        }
+        errors.push(p.id + ": empty");
+      } catch (e) {
+        errors.push(p.id + ": " + (e.message || e));
+      }
+    }
+    var err = new Error("LLM: " + (errors.join(" · ") || "нет провайдеров"));
+    err.errors = errors;
+    throw err;
+  }
+
+  async function health() {
+    var list = catalog();
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      var ok = false;
+      var detail = "";
+      try {
+        ok = await isAvailable(p);
+        detail = ok ? "ready" : p.needsKey && !getSecret(p.id) ? "no key" : "unreachable";
+      } catch (e) {
+        detail = String(e.message || e);
+      }
+      out.push({
+        id: p.id,
+        label: p.label,
+        kind: p.kind,
+        ok: ok,
+        detail: detail,
+        hasKey: !!getSecret(p.id),
+      });
+    }
+    return out;
+  }
+
+  function mount(sel) {
+    var root = typeof sel === "string" ? document.querySelector(sel) : sel;
+    if (!root) return;
+    var c = cfg();
+
+    root.innerHTML =
+      '<div class="card">' +
+      "<h2>LLM Router · v" +
+      VER +
+      "</h2>" +
+      '<p class="muted">Universal adapter · local-first · ключи только в браузере (BYOK).</p>' +
+      '<label class="muted" style="display:flex;gap:8px;align-items:center;margin:12px 0">' +
+      '<input type="checkbox" id="llmROn"' +
+      (c.enabled !== false ? " checked" : "") +
+      "> Включить router</label>' +
+      '<p class="muted" style="margin-bottom:6px">Провайдер (приоритет сверху)</p>' +
+      '<select id="llmPrefer" style="margin-bottom:8px"></select>' +
+      '<p class="muted" style="margin-bottom:6px">API key (для облака)</p>' +
+      '<input id="llmKey" type="password" placeholder="sk-… / xai-… / AIza…" autocomplete="off" style="margin-bottom:8px">' +
+      '<div class="row">' +
+      '<button type="button" class="btn p" id="llmSaveKey">Сохранить key</button>' +
+      '<button type="button" class="btn" id="llmClearKey">Стереть key</button>' +
+      '<button type="button" class="btn" id="llmHealth">Health</button>' +
+      "</div>" +
+      '<p class="muted" style="margin:12px 0 6px">Ollama base · model</p>' +
+      '<input id="llmBase" value="" style="margin-bottom:8px">' +
+      '<input id="llmModel" value="" style="margin-bottom:8px">' +
+      '<p class="muted" style="margin:12px 0 6px">Custom OpenAI-compatible base · model</p>' +
+      '<input id="llmCustomBase" placeholder="http://127.0.0.1:8080/v1" style="margin-bottom:8px">' +
+      '<input id="llmCustomModel" placeholder="model-id" style="margin-bottom:8px">' +
+      '<p class="muted" style="margin:12px 0 6px">System prompt</p>' +
+      '<textarea id="llmSystem" style="min-height:72px"></textarea>' +
+      '<div class="row">' +
+      '<button type="button" class="btn p" id="llmSaveCfg">Сохранить</button>' +
+      '<button type="button" class="btn" id="llmTest">Тест chat</button>' +
+      '<button type="button" class="btn" id="llmClearHist">Очистить history</button>' +
+      "</div>" +
+      '<pre id="llmOut" class="out" style="margin-top:12px;max-height:220px">—</pre>' +
+      "</div>";
+
+    var prefer = document.getElementById("llmPrefer");
+    catalog().forEach(function (p) {
+      var o = document.createElement("option");
+      o.value = p.id;
+      o.textContent = p.label + (p.kind === "local" ? " · local" : " · cloud");
+      prefer.appendChild(o);
     });
+    prefer.value = (c.order && c.order[0]) || "ollama";
+
+    var legacy = loadJSON("aksi_llm_cfg_v1", {});
+    document.getElementById("llmBase").value = legacy.base || "http://127.0.0.1:11434";
+    document.getElementById("llmModel").value = legacy.model || "llama3.2";
+    document.getElementById("llmCustomBase").value = c.customBase || "";
+    document.getElementById("llmCustomModel").value = c.customModel || "";
+    document.getElementById("llmSystem").value = c.system || DEFAULT_SYSTEM;
+
+    function show(x) {
+      var el = document.getElementById("llmOut");
+      if (el) el.textContent = typeof x === "string" ? x : JSON.stringify(x, null, 2);
+    }
+
+    document.getElementById("llmSaveKey").onclick = function () {
+      var id = prefer.value;
+      var key = document.getElementById("llmKey").value;
+      setSecret(id, key);
+      document.getElementById("llmKey").value = "";
+      show("Key для «" + id + "» сохранён локально. Не уходит на сервер АКСИ.");
+    };
+    document.getElementById("llmClearKey").onclick = function () {
+      setSecret(prefer.value, null);
+      show("Key «" + prefer.value + "» удалён");
+    };
+    document.getElementById("llmHealth").onclick = function () {
+      show("probe…");
+      health().then(show).catch(function (e) {
+        show(String(e.message || e));
+      });
+    };
+    document.getElementById("llmSaveCfg").onclick = function () {
+      var base = document.getElementById("llmBase").value.trim();
+      var model = document.getElementById("llmModel").value.trim();
+      saveJSON("aksi_llm_cfg_v1", { on: true, base: base, model: model });
+      var order = [prefer.value].concat(
+        DEFAULT_ORDER.filter(function (x) {
+          return x !== prefer.value;
+        })
+      );
+      saveCfg({
+        enabled: document.getElementById("llmROn").checked,
+        order: order,
+        system: document.getElementById("llmSystem").value,
+        customBase: document.getElementById("llmCustomBase").value.trim(),
+        customModel: document.getElementById("llmCustomModel").value.trim(),
+      });
+      show("Конфиг сохранён · prefer=" + prefer.value);
+    };
+    document.getElementById("llmTest").onclick = function () {
+      show("test…");
+      complete("Ответь одним словом: ок", { provider: prefer.value, noHistory: true })
+        .then(function (r) {
+          show({ ok: true, provider: r.providerId, text: r.text });
+        })
+        .catch(function (e) {
+          show({ ok: false, error: e.message, errors: e.errors });
+        });
+    };
+    document.getElementById("llmClearHist").onclick = function () {
+      clearHist();
+      show("history cleared");
+    };
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initUi); else setTimeout(initUi, 80);
-  global.AKSI_LLM = { call: callLLM, probe: probeLLM, chat: chatAI, version: "2.0.0-brain" };
-})(window);
+
+  global.AKSI_LLM = {
+    version: VER,
+    complete: complete,
+    health: health,
+    catalog: catalog,
+    getSecret: getSecret,
+    setSecret: setSecret,
+    listSecrets: listSecrets,
+    cfg: cfg,
+    saveCfg: saveCfg,
+    clearHist: clearHist,
+    hist: hist,
+    mount: mount,
+    DEFAULT_SYSTEM: DEFAULT_SYSTEM,
+  };
+})(typeof window !== "undefined" ? window : this);
