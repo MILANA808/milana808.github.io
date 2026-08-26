@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ · Диагностика</title>
+<style>
+body{font:14px/1.5 system-ui;background:#06050b;color:#f7f5ff;max-width:640px;margin:0 auto;padding:20px}
+h1{font-size:18px} .ok{color:#34d399} .bad{color:#f87171} .warn{color:#fbbf24}
+pre{background:#13111c;padding:12px;border-radius:12px;overflow:auto;font-size:12px;white-space:pre-wrap}
+button{margin:4px 4px 4px 0;padding:10px 14px;border-radius:10px;border:0;background:#7c3aed;color:#fff;font-weight:600}
+a{color:#a78bfa}
+</style>
+</head>
+<body>
+<h1>АКСИ · диагностика</h1>
+<p><a href="/">← сайт</a></p>
+<pre id="out">Запуск…</pre>
+<button id="run">Повторить</button>
+<button id="bus">Тест вкладок</button>
+<script>
+function line(s, cls) {
+  var el = document.getElementById("out");
+  el.textContent += (cls ? "[" + cls + "] " : "") + s + "\n";
+}
+async function run() {
+  var out = document.getElementById("out");
+  out.textContent = "";
+  line("UA: " + navigator.userAgent.slice(0, 80));
+  line("origin: " + location.origin);
+  line("secure: " + window.isSecureContext);
+  line("BroadcastChannel: " + (typeof BroadcastChannel !== "undefined" ? "OK" : "NO"));
+  line("crypto.subtle: " + (!!(window.crypto && crypto.subtle) ? "OK" : "NO"));
+  line("localStorage: " + (function(){ try { localStorage.setItem("_t","1"); localStorage.removeItem("_t"); return "OK"; } catch(e){ return "NO"; } })());
+  var scripts = ["aksi-core.js","aksi-one.js","aksi-p2p.js","aksi-mesh.js","aksi-llm.js","aksi-link.js"];
+  for (var i = 0; i < scripts.length; i++) {
+    try {
+      var r = await fetch("/" + scripts[i] + "?_=" + Date.now());
+      line(scripts[i] + ": HTTP " + r.status + " · " + (await r.text()).length + "b");
+    } catch (e) {
+      line(scripts[i] + ": " + e);
+    }
+  }
+  try {
+    await new Promise(function (res, rej) {
+      var s = document.createElement("script");
+      s.src = "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+    line("PeerJS CDN: OK");
+    if (window.Peer) {
+      await new Promise(function (res) {
+        var p = new Peer({ host: "0.peerjs.com", port: 443, path: "/", secure: true, debug: 0 });
+        var t = setTimeout(function () { line("PeerJS signaling: TIMEOUT"); try{p.destroy()}catch(e){}; res(); }, 12000);
+        p.on("open", function (id) {
+          clearTimeout(t);
+          line("PeerJS signaling: OK id=" + id);
+          p.destroy();
+          res();
+        });
+        p.on("error", function (e) {
+          clearTimeout(t);
+          line("PeerJS error: " + (e.type || e));
+          res();
+        });
+      });
+    }
+  } catch (e) {
+    line("PeerJS CDN fail: " + e);
+  }
+  try {
+    var o = await fetch("http://127.0.0.1:11434/api/tags", { signal: AbortSignal.timeout(2000) });
+    line("Ollama localhost: HTTP " + o.status);
+  } catch (e) {
+    line("Ollama: недоступен или CORS · " + (e.message || e));
+  }
+  line("\n--- Итог ---");
+  line("• Вкладки одного браузера: BroadcastChannel");
+  line("• Разные устройства: PeerJS+NAT; без TURN часто peer-unavailable");
+  line("• OpenAI из браузера: обычно CORS block");
+  line("• Ollama: OLLAMA_ORIGINS=https://milana808.github.io");
+}
+document.getElementById("run").onclick = run;
+document.getElementById("bus").onclick = function () {
+  if (typeof BroadcastChannel === "undefined") return alert("NO BC");
+  var ch = new BroadcastChannel("aksi-diag-bus");
+  ch.onmessage = function (e) { line("BUS recv: " + JSON.stringify(e.data)); };
+  ch.postMessage({ t: Date.now(), hello: true });
+  line("BUS sent — вторая вкладка /diag.html → Тест вкладок");
+};
+run();
+</script>
+</body>
+</html>
