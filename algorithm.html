@@ -3,39 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0a0a0c">
-<meta name="description" content="ADIA — AKSI Decision Integrity Algorithm. Стандарт измерения и фиксации решений агента.">
-<title>ADIA v1.1 — Decision Integrity Algorithm · AKSI</title>
+<meta name="theme-color" content="#05050a">
+<meta name="description" content="ADIA — Decision Integrity Algorithm. Ядро AKSI. Стандарт проверяемых решений агента.">
+<title>ADIA — Decision Integrity Algorithm · AKSI</title>
 <style>
-:root{--bg:#0a0a0c;--card:#141418;--line:#2a2a32;--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif}
+:root{
+  --bg:#05050a;--card:#0e0e14;--line:#1e1e28;--t:#f0f0f5;--m:#8b8b9a;
+  --a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--t);font:16px/1.65 var(--font);-webkit-font-smoothing:antialiased}
-.wrap{max-width:740px;margin:0 auto;padding:32px 20px 100px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px;flex-wrap:wrap;gap:12px}
-.brand{display:flex;gap:10px;align-items:center;color:var(--t);text-decoration:none;font-weight:650}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff}
-nav a{color:var(--m);text-decoration:none;font-size:14px;margin-left:14px}
+.wrap{max-width:720px;margin:0 auto;padding:28px 18px 90px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;flex-wrap:wrap;gap:12px}
+.brand{display:flex;gap:10px;align-items:center;color:var(--t);text-decoration:none;font-weight:700;font-size:15px}
+.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 12px/1 var(--font);color:#fff}
+nav a{color:var(--m);text-decoration:none;font-size:13px;margin-left:16px}
 nav a:hover{color:var(--t)}
-h1{font-size:clamp(28px,5.5vw,38px);letter-spacing:-.03em;margin-bottom:10px;line-height:1.15}
-.badge{display:inline-block;font-size:12px;font-weight:600;color:var(--a);background:rgba(167,139,250,.12);padding:4px 10px;border-radius:99px;margin-bottom:14px}
-.lead{color:var(--m);font-size:17px;margin-bottom:28px;max-width:540px}
-.btn{display:inline-block;padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;text-decoration:none;font-weight:600;font-size:14px;margin-right:10px;margin-bottom:10px;border:none;cursor:pointer}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--a);background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);padding:5px 11px;border-radius:99px;margin-bottom:16px;letter-spacing:.03em}
+h1{font-size:clamp(30px,6vw,42px);letter-spacing:-.04em;margin-bottom:12px;line-height:1.1;font-weight:750}
+.lead{color:var(--m);font-size:17px;margin-bottom:28px;max-width:520px;line-height:1.55}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}
+.btn{display:inline-flex;align-items:center;padding:12px 18px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;text-decoration:none;font-weight:600;font-size:14px;border:none;cursor:pointer;transition:transform .1s}
 .btn.g{background:transparent;border:1px solid var(--line);color:var(--t)}
-.btn:active{transform:scale(.98)}
-h2{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--a);margin:40px 0 14px;font-weight:600}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:12px;color:var(--m);font-size:15px}
+.btn:active{transform:scale(.97)}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--a);margin:42px 0 14px;font-weight:650}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:11px;color:var(--m);font-size:15px;line-height:1.55}
 .card strong{color:var(--t)}
-.formula{font-family:ui-monospace,monospace;font-size:13px;background:#0e0e12;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;color:#d4d4d8;margin:12px 0;line-height:1.5}
+.formula{font-family:ui-monospace,SFMono-Regular,monospace;font-size:12.5px;background:#08080e;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;color:#c4c4d0;margin:12px 0;line-height:1.55}
 .grid{display:grid;gap:10px}
-@media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
-textarea{width:100%;min-height:90px;background:#0e0e12;border:1px solid var(--line);border-radius:10px;color:var(--t);padding:12px;font:14px/1.5 var(--font);resize:vertical}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:14px}
-.metric{background:#0e0e12;border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
-.metric b{display:block;font-size:22px;color:var(--a);font-variant-numeric:tabular-nums}
-.metric span{font-size:11px;color:var(--m);text-transform:uppercase;letter-spacing:.04em}
-#passport{font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;background:#0e0e12;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px;color:#d4d4d8;max-height:320px;overflow:auto}
-.ok{color:var(--ok)}
-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);color:var(--m);font-size:14px}
+@media(min-width:540px){.grid{grid-template-columns:1fr 1fr}}
+textarea{width:100%;min-height:88px;background:#08080e;border:1px solid var(--line);border-radius:10px;color:var(--t);padding:13px;font:14px/1.5 var(--font);resize:vertical}
+textarea:focus{outline:none;border-color:rgba(167,139,250,.4)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+@media(max-width:480px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:#08080e;border:1px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center}
+.metric b{display:block;font-size:20px;color:var(--a);font-variant-numeric:tabular-nums;font-weight:700}
+.metric span{font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;display:block}
+#passport{font-family:ui-monospace,SFMono-Regular,monospace;font-size:11.5px;white-space:pre-wrap;background:#08080e;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px;color:#c4c4d0;max-height:300px;overflow:auto}
+.ok{color:var(--ok);font-weight:600}
+.price{display:flex;flex-direction:column;gap:8px}
+.price-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.price-row span:last-child{color:var(--t);font-weight:600;white-space:nowrap}
+footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);color:var(--m);font-size:13px}
 footer a{color:var(--a);text-decoration:none}
 </style>
 </head>
@@ -50,26 +59,32 @@ footer a{color:var(--a);text-decoration:none}
     </nav>
   </header>
 
-  <div class="badge">CORE IP · v1.1</div>
+  <div class="badge">CORE IP · v1.2</div>
   <h1>ADIA</h1>
-  <p class="lead">Decision Integrity Algorithm — стандарт измерения и фиксации решений агента. Не качество ответа. Целостность решения.</p>
+  <p class="lead">Decision Integrity Algorithm.<br>Не оценка «качества ответа». Стандарт <strong style="color:var(--t)">целостности решения</strong> суверенного агента.</p>
 
-  <a class="btn" href="/aksi.html">Открыть агента</a>
-  <a class="btn g" href="mailto:aksilove@internet.ru?subject=AKSI%20ADIA%20Studio">Лицензия Studio</a>
-
-  <h2>Зачем это нужно</h2>
-  <div class="card">
-    Модели меняются каждый год. Нужен <strong>неизменный стандарт</strong>, который отвечает на три вопроса:<br><br>
-    1. Насколько ответ информативен?<br>
-    2. Опирается ли он на память владельца?<br>
-    3. Можно ли проверить цепочку решения?
+  <div class="cta">
+    <a class="btn" href="/aksi.html">Открыть агента</a>
+    <a class="btn g" href="mailto:aksilove@internet.ru?subject=AKSI%20ADIA%20Studio">Лицензия</a>
   </div>
 
-  <h2>Формула EQS</h2>
+  <h2>Суть</h2>
   <div class="card">
-    <strong>Agent Quality Score</strong>
+    Модели меняются каждый год. Нужен неизменный слой, который отвечает на три вопроса:<br><br>
+    <strong>1.</strong> Насколько решение информативно?<br>
+    <strong>2.</strong> Опирается ли оно на память владельца?<br>
+    <strong>3.</strong> Можно ли проверить цепочку?<br><br>
+    ADIA — этот слой. Он принадлежит владельцу агента, а не модели.
+  </div>
+
+  <h2>Формула</h2>
+  <div class="card">
+    <strong>EQS — Agent Quality Score</strong>
     <div class="formula">EQS = 100 × clip( 0.30·(H/5) + 0.35·R + 0.25·C + 0.10·A )</div>
-    H — энтропия Шеннона · R — reliability (опора на owned facts) · C — coherence · A — maturity / age factor (от 14.02.1995)
+    H — энтропия Шеннона<br>
+    R — reliability (опора на owned facts)<br>
+    C — coherence<br>
+    A — age / maturity factor (от 14.02.1995)
   </div>
 
   <div class="grid">
@@ -79,12 +94,12 @@ footer a{color:var(--a);text-decoration:none}
     <div class="card"><strong>Chain</strong><br>Hash-linked журнал решений</div>
   </div>
 
-  <h2>Живой расчёт + Decision Passport</h2>
+  <h2>Живой расчёт</h2>
   <div class="card">
-    <p style="margin-bottom:12px">Вставь любой текст решения агента:</p>
+    <p style="margin-bottom:12px;color:var(--m)">Вставь текст решения агента:</p>
     <textarea id="input">Агент вспомнил три факта владельца, проверил согласованность с предыдущими решениями и зафиксировал вывод в цепочку целостности.</textarea>
-    <div style="margin-top:14px">
-      <button class="btn" id="calc">Рассчитать ADIA</button>
+    <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px">
+      <button class="btn" id="calc">Рассчитать</button>
       <button class="btn g" id="passportBtn">Создать Passport</button>
     </div>
     <div class="metrics" id="metrics" style="display:none">
@@ -96,12 +111,12 @@ footer a{color:var(--a);text-decoration:none}
     <div id="passport" style="display:none"></div>
   </div>
 
-  <h2>Коммерция</h2>
-  <div class="card">
-    <strong>Studio</strong> — $497 · ADIA ref + protocol + 1 product<br>
-    <strong>Business</strong> — $4 900 · white-label<br>
-    <strong>Enterprise</strong> — from $25 000 · policy + integration + audit export<br><br>
-    Письмо: <strong>aksilove@internet.ru</strong>
+  <h2>Лицензии</h2>
+  <div class="card price">
+    <div class="price-row"><span>Studio · ref + protocol + 1 product</span><span>$497</span></div>
+    <div class="price-row"><span>Business · white-label</span><span>$4 900</span></div>
+    <div class="price-row"><span>Enterprise · policy + audit</span><span>from $25k</span></div>
+    <p style="margin-top:14px;font-size:14px">aksilove@internet.ru</p>
   </div>
 
   <footer>
@@ -124,17 +139,17 @@ footer a{color:var(--a);text-decoration:none}
       return null;
     }
     const t = input.value.trim() || " ";
-    const eqs = ADIA.eqs(t);
+    const eqsVal = ADIA.eqs(t);
     const q = ADIA.qcli(t);
     const he = ADIA.heff(t);
     const h = ADIA.shannonH(t);
 
-    document.getElementById("m-eqs").textContent = eqs;
+    document.getElementById("m-eqs").textContent = eqsVal;
     document.getElementById("m-qcli").textContent = q.toFixed(3);
     document.getElementById("m-heff").textContent = he.toFixed(3);
-    document.getElementById("m-h").textContent = h.toFixed(3);
+    document.getElementById("m-h").textContent = h.toFixed(2);
     metrics.style.display = "grid";
-    return {eqs, q, he, h, t};
+    return {eqs: eqsVal, q, he, h, t};
   }
 
   document.getElementById("calc").onclick = run;
@@ -152,7 +167,7 @@ footer a{color:var(--a);text-decoration:none}
       const v = ADIA.verifyChain(chain);
       const did = await ADIA.localDid("AKSI_DIMAX_v3_2026", res.t.slice(0, 64));
       passport = {
-        adia_version: ADIA.VERSION || "1.0",
+        adia_version: ADIA.VERSION || "1.1",
         did: did,
         timestamp: new Date().toISOString(),
         eqs: res.eqs,
@@ -162,12 +177,12 @@ footer a{color:var(--a);text-decoration:none}
         chain_events: chain.length,
         chain_status: v.msg,
         chain_head: chain.length ? chain[chain.length-1].hash : null,
-        note: "AKSI Decision Passport · generated locally"
+        note: "AKSI Decision Passport"
       };
     }
 
     passportEl.style.display = "block";
-    passportEl.innerHTML = "<span class='ok'>✓ Decision Passport created</span>\n\n" + JSON.stringify(passport, null, 2);
+    passportEl.innerHTML = "<span class='ok'>✓ Decision Passport</span>\n\n" + JSON.stringify(passport, null, 2);
   };
 })();
 </script>
