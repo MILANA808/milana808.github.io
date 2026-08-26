@@ -1,11 +1,11 @@
 /**
- * AKSI ONE — единый runtime v1.1
- * План: chat · memory · proof · EQS · quantum · protocol · edge · core · ollama
+ * AKSI ONE — единый runtime v1.2
+ * Exclusive chat handler (stopPropagation) — no app/llm race
  * Contact: aksilove@internet.ru · @AKSILOVE
  */
 (function (global) {
   "use strict";
-  var VER = "1.1.0";
+  var VER = "1.2.0";
   var MEM_KEY = "aksi_whole_mem_v3";
   var LEDGER_KEY = "aksi_proof_ledger_v1";
   var LLM_KEY = "aksi_llm_cfg_v1";
@@ -15,7 +15,7 @@
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s)
-      .replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
   function loadMem() {
@@ -98,17 +98,18 @@
     var low = String(q || "").toLowerCase().trim();
     if (!low) return null;
     if (/^(привет|здравств|добрый|hello|hi)\b/.test(low))
-      return "Привет. Я АКСИ ONE — единый runtime. Спроси по делу или открой MATRIX.";
+      return "Привет. Я АКСИ ONE. Чат работает. Спроси по делу или открой Нейро / WebLLM.";
     if (/кто ты|что ты такое|who are you/.test(low))
-      return "Я АКСИ — суверенный напарник. Core + память + proof на твоём устройстве.\nКонтакт: aksilove@internet.ru";
+      return "Я АКСИ — суверенный напарник. Core + память + proof на устройстве.\nКонтакт: aksilove@internet.ru";
     if (/что умеешь|что можешь|помощь|help|команды/.test(low))
-      return "• чат и поиск (Core)\n• запомни: факт\n• EQS / цепочка / протокол / Edge\n• DKV · Зрение · Нейро · Self\n• MATRIX · Ollama";
+      return "• чат (всегда ответ)\n• запомни: факт\n• Нейро RWKV · WebLLM Ollama\n• EQS / цепочка / протокол / Edge\n• MATRIX";
     if (/время|который час|дата|сегодня/.test(low)) return "Сейчас: " + mskNow() + ".";
     if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · @AKSILOVE";
+    if (/нейро|rwkv/.test(low)) return "Вкладка «Нейро» — RWKV на CPU. Обучи ядро → Спросить.";
+    if (/ollama|llm|webllm/.test(low))
+      return "Вкладка WebLLM: ollama run llama3.2 → Сохранить → Тест.";
     if (/формул|aksi\s*=/.test(low))
       return "AKSI = (A × I × S) × (1 + 0.4√n)\nEQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age";
-    if (/ollama|llm/.test(low))
-      return "Локально: ollama run llama3.2 → вкладка «О себе» → Сохранить.";
     if (/matrix/.test(low))
       return "MATRIX: https://milana808.github.io/aksi-matrix/";
     if (/что такое ии\b|искусственный интеллект/.test(low) && low.length < 48)
@@ -238,12 +239,12 @@
       if (coreRes && coreRes.text) { setBadge("Core"); return coreRes; }
       setBadge("llm…");
       return tryOllama(q).then(function (ollama) {
-        setBadge("ONE");
+        setBadge("ONE " + VER);
         if (ollama) return { text: ollama, meta: "ollama" };
         if (loc) return { text: loc, meta: "local" };
         if (fromMem) return { text: fromMem, meta: "memory" };
         return {
-          text: "Не собрала уверенный ответ.\n\n• «что такое …»\n• запомни: факт\n• ollama run llama3.2\n• /aksi-matrix/",
+          text: "Пока нет уверенного ответа.\n\n• «привет» / «кто ты»\n• запомни: факт\n• вкладка Нейро\n• ollama run llama3.2\n• /aksi-matrix/",
           meta: "fallback"
         };
       });
@@ -289,16 +290,31 @@
   function wire() {
     var send = $("send");
     var inp = $("inp");
-    if (send) send.onclick = function () { ask(inp && inp.value); };
+    if (send) {
+      send.onclick = null;
+      send.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        ask(inp && inp.value);
+      }, true);
+    }
     if (inp) {
       inp.addEventListener("keydown", function (e) {
-        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(inp.value); }
-      });
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          ask(inp.value);
+        }
+      }, true);
     }
     document.addEventListener("click", function (e) {
       var chip = e.target.closest && e.target.closest("[data-ask]");
-      if (chip) { e.preventDefault(); ask(chip.getAttribute("data-ask")); }
-    });
+      if (chip) {
+        e.preventDefault();
+        e.stopPropagation();
+        ask(chip.getAttribute("data-ask"));
+      }
+    }, true);
     var teach = $("btnTeach");
     if (teach) teach.onclick = function () {
       var t = ($("teachBox") && $("teachBox").value || "").trim();
@@ -346,17 +362,16 @@
       var cfg = {
         on: $("llmOn") ? $("llmOn").checked : true,
         base: ($("llmBase") && $("llmBase").value) || "http://127.0.0.1:11434",
-        model: ($("llmModel") && $("llmModel").value) || "llama3.2",
-        key: ($("llmKey") && $("llmKey").value) || "ollama"
+        model: ($("llmModel") && $("llmModel").value) || "llama3.2"
       };
       localStorage.setItem(LLM_KEY, JSON.stringify(cfg));
-      if ($("llmStatus")) $("llmStatus").textContent = "Сохранено";
+      if ($("llmStatus")) $("llmStatus").textContent = "Сохранено · offline-first UI";
     };
     var btnLlmTest = $("btnLlmTest");
     if (btnLlmTest) btnLlmTest.onclick = function () {
       if ($("llmStatus")) $("llmStatus").textContent = "Тест…";
       tryOllama("скажи ок").then(function (t) {
-        if ($("llmStatus")) $("llmStatus").textContent = t ? "OK: " + t.slice(0, 80) : "Нет ответа (запусти ollama)";
+        if ($("llmStatus")) $("llmStatus").textContent = t ? "OK: " + t.slice(0, 80) : "Нет ответа (запусти: ollama run llama3.2)";
       });
     };
     var btnFullExp = $("btnFullExp");
@@ -420,9 +435,7 @@
       version: VER, ask: ask, think: think, remember: remember,
       verifyLedger: verifyLedger, eqsOf: eqsOf
     };
-    if (!global.AKSI_ANSWER) {
-      global.AKSI_ANSWER = function (q) { return think(q).then(function (r) { return r && r.text; }); };
-    }
+    global.AKSI_ANSWER = function (q) { return think(q).then(function (r) { return r && r.text; }); };
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
