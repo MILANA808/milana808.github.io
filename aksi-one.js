@@ -1,11 +1,10 @@
 /**
- * AKSI ONE — единый runtime v1.2
- * Exclusive chat handler (stopPropagation) — no app/llm race
- * Contact: aksilove@internet.ru · @AKSILOVE
+ * AKSI ONE — единый runtime v1.3 · Universal LLM Router
+ * Exclusive chat handler · Contact: aksilove@internet.ru
  */
 (function (global) {
   "use strict";
-  var VER = "1.2.0";
+  var VER = "1.3.0-llm";
   var MEM_KEY = "aksi_whole_mem_v3";
   var LEDGER_KEY = "aksi_proof_ledger_v1";
   var LLM_KEY = "aksi_llm_cfg_v1";
@@ -15,7 +14,7 @@
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s)
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      .replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
   }
 
   function loadMem() {
@@ -98,22 +97,20 @@
     var low = String(q || "").toLowerCase().trim();
     if (!low) return null;
     if (/^(привет|здравств|добрый|hello|hi)\b/.test(low))
-      return "Привет. Я АКСИ ONE. Чат работает. Спроси по делу или открой Нейро / WebLLM.";
+      return "Привет. Я АКСИ ONE. LLM Router: Ollama / Grok / GPT / Claude. Local-first.";
     if (/кто ты|что ты такое|who are you/.test(low))
-      return "Я АКСИ — суверенный напарник. Core + память + proof на устройстве.\nКонтакт: aksilove@internet.ru";
+      return "Я АКСИ — суверенный напарник. Core + память + proof + multi-LLM.\nКонтакт: aksilove@internet.ru";
     if (/что умеешь|что можешь|помощь|help|команды/.test(low))
-      return "• чат (всегда ответ)\n• запомни: факт\n• Нейро RWKV · WebLLM Ollama\n• EQS / цепочка / протокол / Edge\n• MATRIX";
+      return "• чат (local → Core → LLM Router)\n• запомни: факт\n• LLM: Ollama/xAI/OpenAI/Claude/Gemini\n• Нейро · P2P · Mesh · DKV\n• MATRIX";
     if (/время|который час|дата|сегодня/.test(low)) return "Сейчас: " + mskNow() + ".";
     if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · @AKSILOVE";
-    if (/нейро|rwkv/.test(low)) return "Вкладка «Нейро» — RWKV на CPU. Обучи ядро → Спросить.";
-    if (/ollama|llm|webllm/.test(low))
-      return "Вкладка WebLLM: ollama run llama3.2 → Сохранить → Тест.";
+    if (/нейро|rwkv/.test(low)) return "Вкладка «Нейро» — RWKV на CPU.";
+    if (/ollama|llm|webllm|grok|claude|openai/.test(low))
+      return "Вкладка LLM Router: выбери провайдера, сохрани key (BYOK), Health, Тест.";
     if (/формул|aksi\s*=/.test(low))
       return "AKSI = (A × I × S) × (1 + 0.4√n)\nEQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age";
     if (/matrix/.test(low))
       return "MATRIX: https://milana808.github.io/aksi-matrix/";
-    if (/что такое ии\b|искусственный интеллект/.test(low) && low.length < 48)
-      return "ИИ — системы, которые делают то, что раньше требовало человеческого ума. Я — локальный агент: данные у тебя.";
     return null;
   }
 
@@ -166,6 +163,18 @@
       return { on: true, base: "http://127.0.0.1:11434", model: "llama3.2" };
     }
   }
+
+  function tryLLM(q) {
+    if (global.AKSI_LLM && typeof global.AKSI_LLM.complete === "function") {
+      return global.AKSI_LLM.complete(q).then(function (r) {
+        return r && r.text ? r : null;
+      }).catch(function () { return null; });
+    }
+    return tryOllama(q).then(function (t) {
+      return t ? { text: t, providerId: "ollama" } : null;
+    });
+  }
+
   function tryOllama(q) {
     var cfg = llmCfg();
     if (!cfg.on) return Promise.resolve(null);
@@ -238,13 +247,13 @@
     return tryCore(q).then(function (coreRes) {
       if (coreRes && coreRes.text) { setBadge("Core"); return coreRes; }
       setBadge("llm…");
-      return tryOllama(q).then(function (ollama) {
+      return tryLLM(q).then(function (llm) {
         setBadge("ONE " + VER);
-        if (ollama) return { text: ollama, meta: "ollama" };
+        if (llm && llm.text) return { text: llm.text, meta: llm.providerId || "llm" };
         if (loc) return { text: loc, meta: "local" };
         if (fromMem) return { text: fromMem, meta: "memory" };
         return {
-          text: "Пока нет уверенного ответа.\n\n• «привет» / «кто ты»\n• запомни: факт\n• вкладка Нейро\n• ollama run llama3.2\n• /aksi-matrix/",
+          text: "Пока нет уверенного ответа.\n\n• «привет» / «кто ты»\n• запомни: факт\n• вкладка LLM Router (Ollama / API key)\n• /aksi-matrix/",
           meta: "fallback"
         };
       });
@@ -269,7 +278,6 @@
       appendLedger("chat", "Q:" + q.slice(0, 80));
       var m = eqsOf(text);
       if ($("stEqs")) $("stEqs").textContent = String(m.EQS);
-      if ($("stQ")) $("stQ").textContent = String(Math.round(m.QCLI * 100) / 100);
     }).catch(function (e) {
       busy = false;
       bubble("ai", "Сбой: " + (e && e.message || e), "error");
@@ -349,37 +357,18 @@
     var btnBell = $("btnBell");
     if (btnBell) btnBell.onclick = function () {
       var out = $("qOut");
-      if (out) out.textContent = "Bell |Φ+⟩ sim\n00: " + (0.5 + Math.random() * 0.02).toFixed(3) +
-        "\n11: " + (0.5 - Math.random() * 0.02).toFixed(3) + "\n(локальный RNG)";
+      if (out) out.textContent = "Bell |Φ+⟩ sim\n00: " + (0.5 + Math.random() * 0.02).toFixed(3);
     };
     var btnSuper = $("btnSuper");
     if (btnSuper) btnSuper.onclick = function () {
       var out = $("qOut");
-      if (out) out.textContent = "|+⟩ = (|0⟩+|1⟩)/√2\np0≈" + (0.5 + (Math.random() - 0.5) * 0.1).toFixed(3);
-    };
-    var btnLlmSave = $("btnLlmSave");
-    if (btnLlmSave) btnLlmSave.onclick = function () {
-      var cfg = {
-        on: $("llmOn") ? $("llmOn").checked : true,
-        base: ($("llmBase") && $("llmBase").value) || "http://127.0.0.1:11434",
-        model: ($("llmModel") && $("llmModel").value) || "llama3.2"
-      };
-      localStorage.setItem(LLM_KEY, JSON.stringify(cfg));
-      if ($("llmStatus")) $("llmStatus").textContent = "Сохранено · offline-first UI";
-    };
-    var btnLlmTest = $("btnLlmTest");
-    if (btnLlmTest) btnLlmTest.onclick = function () {
-      if ($("llmStatus")) $("llmStatus").textContent = "Тест…";
-      tryOllama("скажи ок").then(function (t) {
-        if ($("llmStatus")) $("llmStatus").textContent = t ? "OK: " + t.slice(0, 80) : "Нет ответа (запусти: ollama run llama3.2)";
-      });
+      if (out) out.textContent = "|+⟩ = (|0⟩+|1⟩)/√2";
     };
     var btnFullExp = $("btnFullExp");
     if (btnFullExp) btnFullExp.onclick = function () {
       var blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), mem: loadMem(), ledger: loadLedger() }, null, 2)], { type: "application/json" });
       var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "aksi-backup.json"; a.click();
     };
-
     function didStr() {
       try {
         var d = localStorage.getItem("aksi_did_v1");
@@ -395,7 +384,6 @@
     if (btnHs) btnHs.onclick = function () {
       var env = { type: "handshake", protocol: "AKSI-Agent-v1", did: didStr(), ts: Date.now() };
       appendLedger("handshake", JSON.stringify(env));
-      if ($("prMsg")) $("prMsg").textContent = String(loadLedger().filter(function (x) { return x.kind === "handshake" || x.kind === "envelope"; }).length);
       if ($("prOut")) $("prOut").textContent = JSON.stringify(env, null, 2);
     };
     var btnEnv = $("btnEnvelope");
@@ -412,18 +400,11 @@
       think(q).then(function (res) {
         var ms = Date.now() - t0;
         if ($("eMs")) $("eMs").textContent = String(ms);
-        if ($("eHits")) $("eHits").textContent = String((Number($("eHits").textContent) || 0) + 1);
         if ($("eOut")) $("eOut").textContent = (res && res.text) || "—";
         if ($("eMode")) $("eMode").textContent = (res && res.meta) || "cpu";
       });
     };
-    var btnEdgeClear = $("btnEdgeClear");
-    if (btnEdgeClear) btnEdgeClear.onclick = function () {
-      if ($("eOut")) $("eOut").textContent = "—";
-      if ($("eMs")) $("eMs").textContent = "—";
-    };
     if (global.AKSI_DKV && !global.DKV) global.DKV = global.AKSI_DKV;
-
     renderMemList();
     appendLedger("session", "AKSI ONE " + VER);
     setBadge("ONE " + VER);
