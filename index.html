@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ — Neuro · WebLLM · чат. Local-first. aksilove@internet.ru">
+<meta name="description" content="АКСИ — Neuro · WebLLM · P2P. Local-first. aksilove@internet.ru">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>АКСИ — Neuro · WebLLM</title>
+<title>АКСИ — Neuro · WebLLM · P2P</title>
 <style>
 :root{
   --bg:#06050b;--s1:#13111c;--s2:#1b1726;
@@ -118,7 +118,7 @@ pre.out,pre#nOut{
   <div class="logo">A</div>
   <div>
     <h1>АКСИ <span class="pill">● online</span></h1>
-    <div class="sub">Нейро · WebLLM · чат на устройстве</div>
+    <div class="sub">Нейро · WebLLM · P2P · чат</div>
   </div>
   <div class="stats">
     <div id="stClock">MSK —</div>
@@ -130,6 +130,7 @@ pre.out,pre#nOut{
   <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Всегда отвечает · Core + LLM</span></button>
   <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV на CPU · учится</span></button>
   <button type="button" class="f" data-tab="llm"><strong>🌐 WebLLM</strong><span>Ollama offline-first</span></button>
+  <button type="button" class="f" data-tab="p2p"><strong>🔗 P2P</strong><span>Зал · WebRTC encrypted</span></button>
   <a class="f" href="/aksi-matrix/"><strong>✦ MATRIX</strong><span>Полная поверхность</span></a>
 </div>
 
@@ -137,6 +138,7 @@ pre.out,pre#nOut{
   <button type="button" class="on" data-tab="chat">Чат</button>
   <button type="button" data-tab="neuro">Нейро</button>
   <button type="button" data-tab="llm">WebLLM</button>
+  <button type="button" data-tab="p2p">P2P</button>
   <button type="button" data-tab="teach">Учить</button>
   <button type="button" data-tab="mem">Память</button>
   <button type="button" data-tab="metrics">Метрики</button>
@@ -158,26 +160,21 @@ pre.out,pre#nOut{
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
       <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
       <button type="button" class="chip" data-ask="время">время</button>
+      <button type="button" class="chip hot" data-tab="p2p">→ P2P</button>
       <button type="button" class="chip hot" data-tab="neuro">→ Нейро</button>
-      <button type="button" class="chip hot" data-tab="llm">→ WebLLM</button>
       <a class="chip hot" href="/aksi-matrix/">MATRIX</a>
     </div>
-    <p class="hint">Один мозг · без дублей · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+    <p class="hint">ONE · P2P · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
   </section>
 
   <section class="panel" id="tab-neuro">
-    <div id="neuro-root">
-      <div class="card">
-        <h2>Нейро · RWKV</h2>
-        <p class="muted">Загрузка модуля… Если пусто после 2 сек — Ctrl+F5.</p>
-      </div>
-    </div>
+    <div id="neuro-root"><div class="card"><h2>Нейро · RWKV</h2><p class="muted">Загрузка…</p></div></div>
   </section>
 
   <section class="panel" id="tab-llm">
     <div class="card">
-      <h2>WebLLM · Ollama (offline-first)</h2>
-      <p class="muted">Модель на <b>твоём</b> ПК. UI без сети; ответы LLM — когда Ollama запущена на localhost.</p>
+      <h2>WebLLM · Ollama</h2>
+      <p class="muted">UI offline; LLM — когда Ollama на localhost.</p>
       <label class="muted" style="display:flex;gap:8px;margin:12px 0;align-items:center">
         <input type="checkbox" id="llmOn" checked> Включить LLM
       </label>
@@ -185,22 +182,20 @@ pre.out,pre#nOut{
       <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
       <div class="row">
         <button type="button" class="btn p" id="btnLlmSave">Сохранить</button>
-        <button type="button" class="btn" id="btnLlmTest">Тест связи</button>
+        <button type="button" class="btn" id="btnLlmTest">Тест</button>
       </div>
-      <p class="muted" id="llmStatus" style="margin-top:12px">Статус: не проверен</p>
-      <p class="muted" style="margin-top:12px">
-        1) <a href="https://ollama.com" style="color:var(--a)" target="_blank" rel="noopener">Ollama</a><br>
-        2) <code>ollama run llama3.2</code><br>
-        3) Сохранить → Тест → чат
-      </p>
+      <p class="muted" id="llmStatus" style="margin-top:12px">—</p>
     </div>
+  </section>
+
+  <section class="panel" id="tab-p2p">
+    <div id="p2p-root"><div class="card"><h2>P2P</h2><p class="muted">Загрузка модуля…</p></div></div>
   </section>
 
   <section class="panel" id="tab-teach">
     <div class="card">
       <h2>Научи меня</h2>
-      <p class="muted">Или в чате: <code>запомни: факт</code></p>
-      <textarea id="teachBox" style="margin-top:10px" placeholder="мой проект называется АКСИ"></textarea>
+      <textarea id="teachBox" style="margin-top:10px" placeholder="факт"></textarea>
       <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div>
     </div>
   </section>
@@ -289,14 +284,13 @@ pre.out,pre#nOut{
   <section class="panel" id="tab-about">
     <div class="card">
       <h2>АКСИ</h2>
-      <p class="muted">Local-first. Чат → Core → Ollama. Нейро RWKV на CPU.</p>
-      <p class="muted" style="margin-top:10px">Контакт: <b>aksilove@internet.ru</b><br>
-      MATRIX: <a href="/aksi-matrix/" style="color:var(--a)">/aksi-matrix/</a></p>
+      <p class="muted">Local-first · P2P WebRTC · Core · Ollama</p>
+      <p class="muted" style="margin-top:10px">aksilove@internet.ru · <a href="/aksi-matrix/" style="color:var(--a)">MATRIX</a></p>
     </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
     <div class="card">
       <h2>Бэкап</h2>
-      <div class="row"><button type="button" class="btn p" id="btnFullExp">Скачать память + ledger</button></div>
+      <div class="row"><button type="button" class="btn p" id="btnFullExp">Скачать</button></div>
     </div>
   </section>
 </main>
@@ -311,6 +305,7 @@ pre.out,pre#nOut{
 <script src="aksi-dkv.js?v=16"></script>
 <script src="aksi-vision.js?v=4"></script>
 <script src="aksi-self.js?v=2"></script>
+<script src="aksi-p2p.js?v=1"></script>
 <script src="aksi-one.js?v=4"></script>
 <script>
 (function () {
@@ -323,10 +318,11 @@ pre.out,pre#nOut{
     document.querySelectorAll("main .panel").forEach(function (p) {
       p.classList.toggle("on", p.id === "tab-" + t);
     });
-    if (t === "neuro") mountNeuro();
+    if (t === "neuro") mountMod("neuro", "#neuro-root");
     if (t === "dkv") mountMod("dkv", "#dkv-root");
     if (t === "vision") mountMod("vision", "#vision-root");
     if (t === "self") mountMod("self", "#self-root");
+    if (t === "p2p") mountMod("p2p", "#p2p-root");
   }
   var mounted = {};
   function eng(n) {
@@ -334,6 +330,7 @@ pre.out,pre#nOut{
     if (n === "vision") return window.AKSI_VISION;
     if (n === "neuro") return window.AKSI_NEURO;
     if (n === "self") return window.AKSI_SELF;
+    if (n === "p2p") return window.AKSI_P2P;
     return null;
   }
   function mountMod(name, sel) {
@@ -352,13 +349,12 @@ pre.out,pre#nOut{
       if (root) root.innerHTML = '<div class="card"><h2>' + name + '</h2><p class="muted">Ошибка: ' + (e && e.message || e) + '</p></div>';
     }
   }
-  function mountNeuro() { mountMod("neuro", "#neuro-root"); }
   function bootUi() {
     var th = document.getElementById("thread");
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">Привет. Чат починен: один мозг (ONE).\n\n• Подсказка или вопрос\n• <b>Нейро</b> — RWKV\n• <b>WebLLM</b> — Ollama localhost<div class="meta">ONE · fixed</div></div>';
+      d.innerHTML = '<div class="bub">Привет. Чат + <b>P2P</b> (PeerJS).\n\nВкладка P2P → Создать Зал / Присоединиться.\nСвязь: DTLS · индикатор ping сверху.<div class="meta">ONE · P2P</div></div>';
       th.appendChild(d);
     }
     var el = document.getElementById("stClock");
@@ -374,8 +370,7 @@ pre.out,pre#nOut{
       var t = x.getAttribute("data-tab");
       if (t) goTab(t);
     }, true);
-    setTimeout(mountNeuro, 400);
-    setTimeout(function () { if (!mounted.neuro && window.AKSI_NEURO) mountNeuro(); }, 1200);
+    setTimeout(function () { mountMod("neuro", "#neuro-root"); }, 400);
     setTimeout(function () {
       var b = document.getElementById("stBadge");
       if (b && window.AKSI_ONE && window.AKSI_ONE.version) b.textContent = "ONE " + window.AKSI_ONE.version;
