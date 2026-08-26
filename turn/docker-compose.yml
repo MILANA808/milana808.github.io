@@ -1,0 +1,23 @@
+# AKSI TURN (coturn)
+# Usage:
+#   1) cp .env.example .env  && edit PUBLIC_IP + TURN_SECRET
+#   2) sed -i "s/YOUR_PUBLIC_IP/${PUBLIC_IP}/g" turnserver.conf
+#   3) docker compose up -d
+#
+# Open firewall: UDP/TCP 3478, TCP 5349, UDP 49152-49200
+
+services:
+  coturn:
+    image: coturn/coturn:4.6.2
+    container_name: aksi-turn
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    volumes:
+      - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
+      - ./certs:/etc/coturn/certs:ro
+      - turn-logs:/var/log/turnserver
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+
+volumes:
+  turn-logs:
