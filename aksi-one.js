@@ -1,12 +1,11 @@
 /**
- * AKSI ONE — единый runtime
- * Собрано из: Core, llm pipeline, app memory/ledger, self-local, matrix chat
- * Чинит: «ищет ответ но ответа нет», stub-модули, разрозненные entry points
+ * AKSI ONE — единый runtime v1.1
+ * План: chat · memory · proof · EQS · quantum · protocol · edge · core · ollama
  * Contact: aksilove@internet.ru · @AKSILOVE
  */
 (function (global) {
   "use strict";
-  var VER = "1.0.0";
+  var VER = "1.1.0";
   var MEM_KEY = "aksi_whole_mem_v3";
   var LEDGER_KEY = "aksi_proof_ledger_v1";
   var LLM_KEY = "aksi_llm_cfg_v1";
@@ -83,8 +82,7 @@
     words.forEach(function (w) { uniq[w.toLowerCase()] = 1; });
     var rel = words.length ? Object.keys(uniq).length / words.length : 0;
     var coh = Math.min(1, words.length / 40);
-    var age = 0.55;
-    var eqs = 0.30 * Math.min(1, h / 5) + 0.35 * rel + 0.25 * coh + 0.10 * age;
+    var eqs = 0.30 * Math.min(1, h / 5) + 0.35 * rel + 0.25 * coh + 0.10 * 0.55;
     return { H: h, QCLI: Math.min(1, h / 5), H_eff: Math.round(h * rel * 10000) / 10000, EQS: Math.round(eqs * 1000) / 1000 };
   }
 
@@ -104,7 +102,7 @@
     if (/кто ты|что ты такое|who are you/.test(low))
       return "Я АКСИ — суверенный напарник. Core + память + proof на твоём устройстве.\nКонтакт: aksilove@internet.ru";
     if (/что умеешь|что можешь|помощь|help|команды/.test(low))
-      return "• отвечать и искать (Core)\n• запомни: факт\n• метрики EQS / цепочка\n• MATRIX · Ollama (локально)\n• вкладки: Self, Neuro, DKV, Vision";
+      return "• чат и поиск (Core)\n• запомни: факт\n• EQS / цепочка / протокол / Edge\n• DKV · Зрение · Нейро · Self\n• MATRIX · Ollama";
     if (/время|который час|дата|сегодня/.test(low)) return "Сейчас: " + mskNow() + ".";
     if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · @AKSILOVE";
     if (/формул|aksi\s*=/.test(low))
@@ -177,8 +175,7 @@
       headers: { "Content-Type": "application/json" },
       signal: ctrl && ctrl.signal,
       body: JSON.stringify({
-        model: cfg.model,
-        stream: false,
+        model: cfg.model, stream: false,
         prompt: "Ты АКСИ, суверенный напарник. Ответь по-русски кратко и по делу.\nВопрос: " + q,
         options: { temperature: 0.7 }
       })
@@ -188,10 +185,7 @@
       return r.json();
     }).then(function (j) {
       return j && j.response ? String(j.response).trim() : null;
-    }).catch(function () {
-      clearTimeout(t);
-      return null;
-    });
+    }).catch(function () { clearTimeout(t); return null; });
   }
 
   function tryCore(q) {
@@ -209,7 +203,6 @@
   function think(q) {
     q = String(q || "").trim();
     if (!q) return Promise.resolve({ text: "Пустой запрос.", meta: "one" });
-
     var memCmd = q.match(/^(запомни|выучи)\s*[:\s]+(.+)/i);
     if (memCmd) {
       remember(memCmd[2].trim(), "user");
@@ -229,7 +222,6 @@
       renderMemList();
       return Promise.resolve({ text: "Память очищена.", meta: "memory" });
     }
-
     var loc = localAnswer(q);
     var needNet = false;
     var c = global.AKSI_CORE || global.AksiCore;
@@ -239,24 +231,19 @@
       needNet = /\?$/.test(q) || /^(что такое|кто такой|найди|поиск|расскажи)/i.test(q) || q.split(/\s+/).length >= 5;
     }
     if (loc && !needNet) return Promise.resolve({ text: loc, meta: "local" });
-
     var fromMem = matchMem(q);
     if (fromMem && !needNet) return Promise.resolve({ text: fromMem, meta: "memory" });
-
     setBadge("search…");
     return tryCore(q).then(function (coreRes) {
-      if (coreRes && coreRes.text) {
-        setBadge("Core");
-        return coreRes;
-      }
+      if (coreRes && coreRes.text) { setBadge("Core"); return coreRes; }
       setBadge("llm…");
       return tryOllama(q).then(function (ollama) {
-        setBadge("Core");
+        setBadge("ONE");
         if (ollama) return { text: ollama, meta: "ollama" };
         if (loc) return { text: loc, meta: "local" };
         if (fromMem) return { text: fromMem, meta: "memory" };
         return {
-          text: "Не собрала уверенный ответ.\n\n• перефразируй или «что такое …»\n• запомни: факт\n• ollama run llama3.2\n• /aksi-matrix/",
+          text: "Не собрала уверенный ответ.\n\n• «что такое …»\n• запомни: факт\n• ollama run llama3.2\n• /aksi-matrix/",
           meta: "fallback"
         };
       });
@@ -310,10 +297,7 @@
     }
     document.addEventListener("click", function (e) {
       var chip = e.target.closest && e.target.closest("[data-ask]");
-      if (chip) {
-        e.preventDefault();
-        ask(chip.getAttribute("data-ask"));
-      }
+      if (chip) { e.preventDefault(); ask(chip.getAttribute("data-ask")); }
     });
     var teach = $("btnTeach");
     if (teach) teach.onclick = function () {
@@ -337,9 +321,7 @@
     if (btnProof) btnProof.onclick = function () {
       var v = verifyLedger();
       var out = $("pOut");
-      if (out) out.textContent = v.ok
-        ? "Цепочка цела · " + v.length + " записей"
-        : "Разрыв · at " + v.at + " · length " + v.length;
+      if (out) out.textContent = v.ok ? "Цепочка цела · " + v.length + " записей" : "Разрыв · at " + v.at;
     };
     var btnProofClear = $("btnProofClear");
     if (btnProofClear) btnProofClear.onclick = function () {
@@ -347,15 +329,12 @@
       if ($("pOut")) $("pOut").textContent = "Очищено";
     };
     var btnWipe = $("btnWipe");
-    if (btnWipe) btnWipe.onclick = function () {
-      saveMem([]);
-      renderMemList();
-    };
+    if (btnWipe) btnWipe.onclick = function () { saveMem([]); renderMemList(); };
     var btnBell = $("btnBell");
     if (btnBell) btnBell.onclick = function () {
       var out = $("qOut");
       if (out) out.textContent = "Bell |Φ+⟩ sim\n00: " + (0.5 + Math.random() * 0.02).toFixed(3) +
-        "\n11: " + (0.5 - Math.random() * 0.02).toFixed(3) + "\n(локальный RNG, не физика)";
+        "\n11: " + (0.5 - Math.random() * 0.02).toFixed(3) + "\n(локальный RNG)";
     };
     var btnSuper = $("btnSuper");
     if (btnSuper) btnSuper.onclick = function () {
@@ -382,16 +361,54 @@
     };
     var btnFullExp = $("btnFullExp");
     if (btnFullExp) btnFullExp.onclick = function () {
-      var blob = new Blob([JSON.stringify({
-        exportedAt: new Date().toISOString(),
-        mem: loadMem(),
-        ledger: loadLedger()
-      }, null, 2)], { type: "application/json" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "aksi-backup.json";
-      a.click();
+      var blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), mem: loadMem(), ledger: loadLedger() }, null, 2)], { type: "application/json" });
+      var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "aksi-backup.json"; a.click();
     };
+
+    function didStr() {
+      try {
+        var d = localStorage.getItem("aksi_did_v1");
+        if (d) return d;
+        var id = "did:aksi:" + simpleHash(String(Date.now()) + Math.random()).slice(0, 12);
+        localStorage.setItem("aksi_did_v1", id);
+        return id;
+      } catch (e) { return "did:aksi:local"; }
+    }
+    if ($("didVal")) $("didVal").textContent = didStr();
+    if ($("prDid")) $("prDid").textContent = didStr().replace("did:aksi:", "").slice(0, 10) + "…";
+    var btnHs = $("btnHandshake");
+    if (btnHs) btnHs.onclick = function () {
+      var env = { type: "handshake", protocol: "AKSI-Agent-v1", did: didStr(), ts: Date.now() };
+      appendLedger("handshake", JSON.stringify(env));
+      if ($("prMsg")) $("prMsg").textContent = String(loadLedger().filter(function (x) { return x.kind === "handshake" || x.kind === "envelope"; }).length);
+      if ($("prOut")) $("prOut").textContent = JSON.stringify(env, null, 2);
+    };
+    var btnEnv = $("btnEnvelope");
+    if (btnEnv) btnEnv.onclick = function () {
+      var payload = { type: "envelope", did: didStr(), body: "ping", ts: Date.now() };
+      payload.fingerprint = simpleHash(JSON.stringify(payload));
+      appendLedger("envelope", payload.fingerprint);
+      if ($("prOut")) $("prOut").textContent = JSON.stringify(payload, null, 2);
+    };
+    var btnEdge = $("btnEdge");
+    if (btnEdge) btnEdge.onclick = function () {
+      var q = ($("eQuery") && $("eQuery").value) || "что умеешь";
+      var t0 = Date.now();
+      think(q).then(function (res) {
+        var ms = Date.now() - t0;
+        if ($("eMs")) $("eMs").textContent = String(ms);
+        if ($("eHits")) $("eHits").textContent = String((Number($("eHits").textContent) || 0) + 1);
+        if ($("eOut")) $("eOut").textContent = (res && res.text) || "—";
+        if ($("eMode")) $("eMode").textContent = (res && res.meta) || "cpu";
+      });
+    };
+    var btnEdgeClear = $("btnEdgeClear");
+    if (btnEdgeClear) btnEdgeClear.onclick = function () {
+      if ($("eOut")) $("eOut").textContent = "—";
+      if ($("eMs")) $("eMs").textContent = "—";
+    };
+    if (global.AKSI_DKV && !global.DKV) global.DKV = global.AKSI_DKV;
+
     renderMemList();
     appendLedger("session", "AKSI ONE " + VER);
     setBadge("ONE " + VER);
@@ -400,12 +417,8 @@
   function boot() {
     wire();
     global.AKSI_ONE = {
-      version: VER,
-      ask: ask,
-      think: think,
-      remember: remember,
-      verifyLedger: verifyLedger,
-      eqsOf: eqsOf
+      version: VER, ask: ask, think: think, remember: remember,
+      verifyLedger: verifyLedger, eqsOf: eqsOf
     };
     if (!global.AKSI_ANSWER) {
       global.AKSI_ANSWER = function (q) { return think(q).then(function (r) { return r && r.text; }); };
