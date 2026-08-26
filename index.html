@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ — Neuro · WebLLM · P2P. Local-first. aksilove@internet.ru">
+<meta name="description" content="АКСИ — Mesh · Neuro · WebLLM · P2P. Proprietary. aksilove@internet.ru">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>АКСИ — Neuro · WebLLM · P2P</title>
+<title>АКСИ — Mesh · Neuro · P2P</title>
 <style>
 :root{
   --bg:#06050b;--s1:#13111c;--s2:#1b1726;
@@ -118,7 +118,7 @@ pre.out,pre#nOut{
   <div class="logo">A</div>
   <div>
     <h1>АКСИ <span class="pill">● online</span></h1>
-    <div class="sub">Нейро · WebLLM · P2P · чат</div>
+    <div class="sub">Mesh · Нейро · WebLLM · P2P</div>
   </div>
   <div class="stats">
     <div id="stClock">MSK —</div>
@@ -128,14 +128,16 @@ pre.out,pre#nOut{
 
 <div class="feat" id="featGrid">
   <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Всегда отвечает · Core + LLM</span></button>
-  <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV на CPU · учится</span></button>
+  <button type="button" class="f" data-tab="mesh"><strong>⬡ Mesh</strong><span>С нуля · вкладки+P2P</span></button>
+  <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV на CPU</span></button>
   <button type="button" class="f" data-tab="llm"><strong>🌐 WebLLM</strong><span>Ollama offline-first</span></button>
-  <button type="button" class="f" data-tab="p2p"><strong>🔗 P2P</strong><span>Зал · WebRTC stable</span></button>
+  <a class="f" href="/mesh.html"><strong>⬡ Mesh page</strong><span>Отдельная страница</span></a>
   <a class="f" href="/aksi-matrix/"><strong>✦ MATRIX</strong><span>Полная поверхность</span></a>
 </div>
 
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
+  <button type="button" data-tab="mesh">Mesh</button>
   <button type="button" data-tab="neuro">Нейро</button>
   <button type="button" data-tab="llm">WebLLM</button>
   <button type="button" data-tab="p2p">P2P</button>
@@ -159,12 +161,15 @@ pre.out,pre#nOut{
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
       <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
-      <button type="button" class="chip" data-ask="время">время</button>
-      <button type="button" class="chip hot" data-tab="p2p">→ P2P</button>
+      <button type="button" class="chip hot" data-tab="mesh">→ Mesh</button>
       <button type="button" class="chip hot" data-tab="neuro">→ Нейро</button>
-      <a class="chip hot" href="/aksi-matrix/">MATRIX</a>
+      <a class="chip hot" href="/mesh.html">Mesh page</a>
     </div>
-    <p class="hint">ONE · P2P 4.1 · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+    <p class="hint">ONE · Mesh · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+  </section>
+
+  <section class="panel" id="tab-mesh">
+    <div id="mesh-root"><div class="card"><h2>Mesh</h2><p class="muted">Загрузка…</p></div></div>
   </section>
 
   <section class="panel" id="tab-neuro">
@@ -189,7 +194,7 @@ pre.out,pre#nOut{
   </section>
 
   <section class="panel" id="tab-p2p">
-    <div id="p2p-root"><div class="card"><h2>P2P</h2><p class="muted">Загрузка модуля…</p></div></div>
+    <div id="p2p-root"><div class="card"><h2>P2P</h2><p class="muted">Загрузка…</p></div></div>
   </section>
 
   <section class="panel" id="tab-teach">
@@ -277,15 +282,17 @@ pre.out,pre#nOut{
     </div>
   </section>
 
-  <section class="panel" id="tab-dkv"><div id="dkv-root"><div class="card"><h2>DKV</h2><p class="muted">Открой вкладку после загрузки.</p></div></div></section>
-  <section class="panel" id="tab-vision"><div id="vision-root"><div class="card"><h2>Зрение</h2><p class="muted">Открой вкладку после загрузки.</p></div></div></section>
-  <section class="panel" id="tab-self"><div id="self-root"><div class="card"><h2>Self</h2><p class="muted">Открой вкладку после загрузки.</p></div></div></section>
+  <section class="panel" id="tab-dkv"><div id="dkv-root"><div class="card"><h2>DKV</h2><p class="muted">Открой вкладку.</p></div></div></section>
+  <section class="panel" id="tab-vision"><div id="vision-root"><div class="card"><h2>Зрение</h2><p class="muted">Открой вкладку.</p></div></div></section>
+  <section class="panel" id="tab-self"><div id="self-root"><div class="card"><h2>Self</h2><p class="muted">Открой вкладку.</p></div></div></section>
 
   <section class="panel" id="tab-about">
     <div class="card">
-      <h2>АКСИ</h2>
-      <p class="muted">Local-first · P2P WebRTC · Core · Ollama</p>
-      <p class="muted" style="margin-top:10px">aksilove@internet.ru · <a href="/aksi-matrix/" style="color:var(--a)">MATRIX</a></p>
+      <h2>АКСИ · proprietary</h2>
+      <p class="muted">Mesh с нуля · local-first · P2P</p>
+      <p class="muted" style="margin-top:10px">aksilove@internet.ru ·
+        <a href="/mesh.html" style="color:var(--a)">Mesh</a> ·
+        <a href="/aksi-matrix/" style="color:var(--a)">MATRIX</a></p>
     </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
     <div class="card">
@@ -305,6 +312,7 @@ pre.out,pre#nOut{
 <script src="aksi-dkv.js?v=16"></script>
 <script src="aksi-vision.js?v=4"></script>
 <script src="aksi-self.js?v=2"></script>
+<script src="aksi-mesh.js?v=1"></script>
 <script src="aksi-p2p.js?v=3"></script>
 <script src="aksi-one.js?v=4"></script>
 <script>
@@ -322,6 +330,7 @@ pre.out,pre#nOut{
     if (t === "dkv") mountMod("dkv", "#dkv-root");
     if (t === "vision") mountMod("vision", "#vision-root");
     if (t === "self") mountMod("self", "#self-root");
+    if (t === "mesh") mountMod("mesh", "#mesh-root");
     if (t === "p2p") mountMod("p2p", "#p2p-root");
   }
   var mounted = {};
@@ -330,6 +339,7 @@ pre.out,pre#nOut{
     if (n === "vision") return window.AKSI_VISION;
     if (n === "neuro") return window.AKSI_NEURO;
     if (n === "self") return window.AKSI_SELF;
+    if (n === "mesh") return window.AKSI_MESH;
     if (n === "p2p") return window.AKSI_P2P;
     return null;
   }
@@ -354,7 +364,7 @@ pre.out,pre#nOut{
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">Привет. P2P <b>4.1 stable</b>: STUN+TURN, soft reconnect.\n\nВкладка P2P → Создать Зал / Присоединиться.<div class="meta">ONE · P2P</div></div>';
+      d.innerHTML = '<div class="bub">Привет. Система <b>Mesh</b> с нуля готова.\n\nВкладка Mesh → Создать зал → вторая вкладка или другое устройство.<div class="meta">ONE · Mesh</div></div>';
       th.appendChild(d);
     }
     var el = document.getElementById("stClock");
