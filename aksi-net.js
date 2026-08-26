@@ -175,3 +175,17 @@
     version: "1.1.0"
   };
 })(typeof window !== "undefined" ? window : this);
+
+/* Transparent answer-quality layer: loaded after the stable network core. */
+(function () {
+  "use strict";
+  function load() {
+    if (document.querySelector('script[data-aksi-quality]')) return;
+    var s = document.createElement("script");
+    s.src = "aksi-answer-quality.js?v=1";
+    s.async = true;
+    s.setAttribute("data-aksi-quality", "1");
+    (document.head || document.documentElement).appendChild(s);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", load); else load();
+})();
