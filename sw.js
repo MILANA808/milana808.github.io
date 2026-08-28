@@ -1,18 +1,26 @@
-const CACHE = 'aksi-shell-v3';
-const CORE = ['/', '/index.html', '/app.css', '/app.js', '/aksi-runtime.js', '/manifest.webmanifest'];
-self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE).catch(() => {})).then(() => self.skipWaiting())));
-self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-  if (event.request.method !== 'GET' || url.origin !== location.origin) return;
-  // Prefer network for versioned assets so ?v= bumps always win
-  if (url.search.includes('v=') || /\.(js|css)$/.test(url.pathname)) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-    return;
-  }
-  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-    const copy = response.clone(); caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(() => {}); return response;
-  }).catch(() => caches.match('/index.html'))));
+var CACHE = "aksi-shell-v29";
+var PRE = ["/", "/index.html", "/manifest.json", "/aksi-core.js?v=51", "/aksi-brain.js?v=4", "/aksi-web.js?v=2", "/aksi-i18n.js?v=1", "/aksi-mind.js?v=5", "/aksi-one.js?v=15", "/aksi-one-fix.js?v=1", "/aksi-ux.js?v=2", "/aksi-product-ui.js?v=1"];
+self.addEventListener("install", function (e) {
+  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(PRE).catch(function () {}); }).then(function () { return self.skipWaiting(); }));
+});
+self.addEventListener("activate", function (e) {
+  e.waitUntil(caches.keys().then(function (keys) {
+    return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+  }).then(function () { return self.clients.claim(); }));
+});
+self.addEventListener("fetch", function (e) {
+  var req = e.request;
+  if (req.method !== "GET") return;
+  var url = new URL(req.url);
+  if (url.origin !== self.location.origin) return;
+  e.respondWith(caches.match(req).then(function (hit) {
+    var net = fetch(req).then(function (res) {
+      if (res && res.ok && url.pathname.match(/\.(js|css|html|json|svg|png|woff2?)$/)) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, copy); });
+      }
+      return res;
+    }).catch(function () { return hit || caches.match("/index.html"); });
+    return hit || net;
+  }));
 });
