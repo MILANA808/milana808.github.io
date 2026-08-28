@@ -1,10 +1,12 @@
 /**
- * AKSI ONE v1.5.1-stable — LIVE-aware · single Trust pass
- * aksilove@internet.ru
+ * AKSI ONE v1.6.0 — stable chat runtime
+ * Routes think() → LIVE when present (fixes race where LIVE hook was lost).
+ * Single Trust pass if LIVE already verified.
+ * © AKSI · aksilove@internet.ru
  */
 (function (global) {
   "use strict";
-  var VER = "1.5.1-stable";
+  var VER = "1.6.0";
   var MEM_KEY = "aksi_whole_mem_v3";
   var LEDGER_KEY = "aksi_proof_ledger_v1";
   var LLM_KEY = "aksi_llm_cfg_v1";
@@ -12,14 +14,14 @@
   var history = [];
   function $(id) { return document.getElementById(id); }
   function esc(s) {
-    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return String(s == null ? "" : s).replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
   }
   function loadMem() {
     try { var a = JSON.parse(localStorage.getItem(MEM_KEY) || "[]"); return Array.isArray(a) ? a : []; }
     catch (e) { return []; }
   }
   function saveMem(arr) {
-    localStorage.setItem(MEM_KEY, JSON.stringify((arr || []).slice(-120)));
+    try { localStorage.setItem(MEM_KEY, JSON.stringify((arr || []).slice(-120))); } catch (e) {}
     var n = $("memN"); if (n) n.textContent = String((arr || []).length);
   }
   function remember(text, src) {
@@ -42,7 +44,7 @@
     var body = { i: chain.length, ts: Date.now(), kind: kind, payload: String(payload).slice(0, 400), prev: prev };
     body.hash = simpleHash(JSON.stringify(body));
     chain.push(body);
-    localStorage.setItem(LEDGER_KEY, JSON.stringify(chain.slice(-200)));
+    try { localStorage.setItem(LEDGER_KEY, JSON.stringify(chain.slice(-200))); } catch (e) {}
     return body;
   }
   function verifyLedger() {
@@ -58,22 +60,46 @@
     text = String(text || ""); if (!text.length) return 0;
     var freq = {}, n = text.length, h = 0, c, p, i;
     for (i = 0; i < n; i++) { c = text.charAt(i); freq[c] = (freq[c] || 0) + 1; }
-    for (c in freq) { p = freq[c] / n; h -= p * Math.log(p) / Math.LN2; }
-    return Math.round(h * 10000) / 10000;
+    for (c in freq) { p = freq[c] / n; h -= p * Math.log2(p); }
+    return Math.round(h * 1000) / 1000;
   }
   function eqsOf(text) {
-    var h = shannonH(text);
-    var words = String(text).trim().split(/\s+/).filter(Boolean);
-    var uniq = {}; words.forEach(function (w) { uniq[w.toLowerCase()] = 1; });
-    var rel = words.length ? Object.keys(uniq).length / words.length : 0;
-    var coh = Math.min(1, words.length / 40);
-    var eqs = 0.30 * Math.min(1, h / 5) + 0.35 * rel + 0.25 * coh + 0.10 * 0.55;
-    return { H: h, QCLI: Math.min(1, h / 5), H_eff: Math.round(h * rel * 10000) / 10000, EQS: Math.round(eqs * 1000) / 1000 };
+    var H = shannonH(text);
+    var EQS = Math.min(99, Math.round(40 + H * 8 + Math.min(20, String(text).length / 40)));
+    return { H: H, EQS: EQS };
+  }
+  function setBadge(t) { var el = $("stBadge"); if (el) el.textContent = t; }
+  function bubble(role, text, meta) {
+    var th = $("thread"); if (!th) return;
+    var d = document.createElement("div");
+    d.className = "msg " + (role === "me" ? "me" : "ai");
+    var m = meta != null && String(meta).length ? '<div class="meta">' + esc(meta) + "</div>" : "";
+    d.innerHTML = '<div class="bub">' + esc(text) + m + "</div>";
+    th.appendChild(d);
+    try { th.lastElementChild.scrollIntoView({ behavior: "smooth", block: "end" }); } catch (e) {}
+  }
+  function llmCfg() {
+    try {
+      var j = JSON.parse(localStorage.getItem(LLM_KEY) || "null");
+      if (!j) return { on: true, base: "http://127.0.0.1:11434", model: "llama3.2" };
+      return { on: j.on !== false, base: String(j.base || "http://127.0.0.1:11434").replace(/\/$/, ""), model: j.model || "llama3.2" };
+    } catch (e) { return { on: true, base: "http://127.0.0.1:11434", model: "llama3.2" }; }
   }
   function localAnswer(q) {
     var low = String(q || "").toLowerCase().trim();
-    if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · @AKSILOVE";
+    if (/^(привет|здравств|добрый|hello|hi)\b/.test(low))
+      return "Привет. Я АКСИ — local-first runtime (Quantum · Trust · Overlay · DKV). Спросите «кто ты» или откройте вкладку Whole.";
+    if (/кто ты|что ты такое|what are you/.test(low))
+      return "АКСИ — суверенный Decision Integrity Runtime в браузере: офлайн Brain, proof-ledger, Quantum Engine, Trust Compiler, Overlay AOP/1. Контакт: aksilove@internet.ru";
+    if (/что умеешь|помощь|help|функци/.test(low))
+      return "Чат · Net (Overlay) · Quantum · DKV · Trust · Brain · P2P · Lang · Память (запомни: …) · Цепочка. Всё local-first.";
+    if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · X @AKSILOVE";
     if (/matrix/.test(low)) return "MATRIX: https://milana808.github.io/aksi-matrix/";
+    if (/время|который час|time/.test(low)) {
+      try {
+        return new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", dateStyle: "medium", timeStyle: "medium" }).format(new Date()) + " (MSK)";
+      } catch (e) { return new Date().toISOString(); }
+    }
     return null;
   }
   function matchMem(q) {
@@ -84,26 +110,9 @@
       hit = 0;
       words.forEach(function (w) { if (String(m[i].t || "").toLowerCase().indexOf(w) !== -1) hit++; });
       var s = hit / words.length;
-      if (s > score) { score = s; best = m[i]; }
+      if (s > score && s >= 0.4) { score = s; best = m[i].t; }
     }
-    if (best && score >= 0.35) return "Из памяти:\n" + best.t;
-    return null;
-  }
-  function bubble(role, text, meta) {
-    var th = $("thread"); if (!th) return;
-    var d = document.createElement("div");
-    d.className = "msg " + (role === "user" || role === "me" ? "me" : "ai");
-    var b = document.createElement("div"); b.className = "bub"; b.textContent = text;
-    if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; b.appendChild(m); }
-    d.appendChild(b); th.appendChild(d); th.scrollTop = th.scrollHeight;
-  }
-  function setBadge(t) { var el = $("stBadge"); if (el) el.textContent = t; }
-  function llmCfg() {
-    try {
-      var j = JSON.parse(localStorage.getItem(LLM_KEY) || "null");
-      if (!j) return { on: true, base: "http://127.0.0.1:11434", model: "llama3.2" };
-      return { on: j.on !== false, base: String(j.base || "http://127.0.0.1:11434").replace(/\/$/, ""), model: j.model || "llama3.2" };
-    } catch (e) { return { on: true, base: "http://127.0.0.1:11434", model: "llama3.2" }; }
+    return best;
   }
   function tryBrain(q) {
     if (global.AKSI_BRAIN && typeof global.AKSI_BRAIN.complete === "function") {
@@ -115,7 +124,7 @@
     var cfg = llmCfg();
     if (!cfg.on) return Promise.resolve(null);
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var t = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (e) {} }, 12000);
+    var t = setTimeout(function () { try { if (ctrl) ctrl.abort(); } catch (e) {} }, 10000);
     return fetch(cfg.base + "/api/generate", {
       method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl && ctrl.signal,
       body: JSON.stringify({ model: cfg.model, stream: false, prompt: "Ты АКСИ. Кратко по-русски.\nВопрос: " + q, options: { temperature: 0.7 } })
@@ -138,10 +147,11 @@
     return Promise.race([c.query(q), new Promise(function (r) { setTimeout(function () { r(null); }, 9000); })])
       .then(function (res) {
         if (res && res.ok && res.text) return { text: res.text, meta: res.local ? "core · local" : "core · net" };
+        if (res && res.text) return { text: String(res.text), meta: "core" };
         return null;
       }).catch(function () { return null; });
   }
-  function think(q) {
+  function thinkLocal(q) {
     q = String(q || "").trim();
     if (!q) return Promise.resolve({ text: "Пустой запрос.", meta: "one" });
     if (global.AKSI_TRUST && global.AKSI_TRUST.state && global.AKSI_TRUST.state().safeMode) {
@@ -169,7 +179,7 @@
     if (fromMem) return Promise.resolve({ text: fromMem, meta: "memory" });
     setBadge("brain…");
     return tryBrain(q).then(function (br) {
-      if (br && br.text && br.meta !== "brain·fallback") {
+      if (br && br.text && String(br.meta || "").indexOf("fallback") === -1) {
         setBadge("ONE " + VER);
         return { text: br.text, meta: br.meta || "brain" };
       }
@@ -181,10 +191,23 @@
           setBadge("ONE " + VER);
           if (llm && llm.text) return { text: llm.text, meta: llm.providerId || "llm" };
           if (br && br.text) return { text: br.text, meta: br.meta || "brain" };
-          return { text: "Нет уверенного факта.\n· запомни: …\n· Brain / Trust", meta: "fallback" };
+          return { text: "Пока нет сильного факта в офлайн-базе.\n· «запомни: …»\n· вкладки Brain / Trust / Whole", meta: "fallback" };
         });
       });
     });
+  }
+  function think(q) {
+    q = String(q || "").trim();
+    if (!q) return Promise.resolve({ text: "Пустой запрос.", meta: "one" });
+    if (global.AKSI_LIVE && typeof global.AKSI_LIVE.think === "function" && !think._viaLive) {
+      try {
+        return global.AKSI_LIVE.think(q).then(function (r) {
+          if (r && r.text) return r;
+          return thinkLocal(q);
+        }).catch(function () { return thinkLocal(q); });
+      } catch (e) { return thinkLocal(q); }
+    }
+    return thinkLocal(q);
   }
   function ask(q) {
     if (busy) return;
@@ -192,6 +215,7 @@
     busy = true; bubble("me", q);
     var inp = $("inp"); if (inp) inp.value = "";
     history.push({ role: "user", content: q });
+    setBadge("…");
     think(q).then(function (res) {
       busy = false;
       var text = (res && res.text) || "…";
@@ -199,51 +223,53 @@
       function finish(extra) {
         var mtag = meta;
         if (extra && mtag.indexOf(extra) === -1) mtag = mtag + (mtag ? " · " : "") + extra;
+        if (res && res.quantum && res.quantum.qcli != null) mtag += " · Q" + res.quantum.qcli;
         bubble("ai", text, mtag);
         history.push({ role: "assistant", content: text });
         appendLedger("chat", "Q:" + q.slice(0, 80));
         var m = eqsOf(text);
         if ($("stEqs")) $("stEqs").textContent = String(m.EQS);
+        setBadge("ONE " + VER);
       }
       if (res && res.trust && res.trust.trust) {
         if (res.trust.safeMode) {
           text = "Safe-mode АКСИ: trust compiler.\n" + (res.trust.reason || "anomaly");
-          finish("trust·safe");
-          return;
+          finish("trust·safe"); return;
         }
-        finish(null);
+        finish("trust:" + res.trust.trust + (res.trust.score != null ? " " + res.trust.score : ""));
         return;
       }
-      if (meta.indexOf("trust:") !== -1) { finish(null); return; }
+      if (String(meta).indexOf("trust:") !== -1) { finish(null); return; }
       if (global.AKSI_TRUST && typeof global.AKSI_TRUST.verifyResponse === "function") {
         var scoreText = text.split("\n——\n")[0];
         global.AKSI_TRUST.verifyResponse(q, scoreText, { source: "one" }).then(function (tr) {
           if (tr.safeMode) {
             text = "Safe-mode АКСИ: trust compiler.\n" + (tr.reason || "anomaly");
-            finish("trust·safe");
-            return;
+            finish("trust·safe"); return;
           }
           finish("trust:" + tr.trust + (tr.score != null ? " " + tr.score : ""));
         }).catch(function () { finish(null); });
       } else finish(null);
     }).catch(function (e) {
-      busy = false; bubble("ai", "Сбой: " + (e && e.message || e), "error");
+      busy = false; bubble("ai", "Сбой: " + (e && e.message || e), "error"); setBadge("error");
     });
   }
   function renderMemList() {
     var box = $("memList"); if (!box) return;
     var m = loadMem();
     if ($("memN")) $("memN").textContent = String(m.length);
-    if (!m.length) { box.innerHTML = "<p class=\"muted\">Пусто</p>"; return; }
+    if (!m.length) { box.innerHTML = '<p class="muted">Пусто</p>'; return; }
     box.innerHTML = m.slice(-20).map(function (x) {
-      return "<div class=\"card\" style=\"padding:10px;margin:6px 0\">" + esc(x.t) + "</div>";
+      return '<div class="card" style="padding:10px;margin:6px 0">' + esc(x.t) + "</div>";
     }).join("");
   }
   function wire() {
     var send = $("send"); var inp = $("inp");
     if (send) {
       send.onclick = null;
-      send.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); ask(inp && inp.value); }, true);
+      send.addEventListener("click", function (e) {
+        e.preventDefault(); e.stopPropagation(); ask(inp && inp.value);
+      }, true);
     }
     if (inp) {
       inp.addEventListener("keydown", function (e) {
@@ -278,9 +304,9 @@
   function boot() {
     wire();
     global.AKSI_ONE = {
-      version: VER, ask: ask, think: think, remember: remember,
+      version: VER, ask: ask, think: think, thinkLocal: thinkLocal, remember: remember,
       verifyLedger: verifyLedger, eqsOf: eqsOf,
-      trust: function () { return global.AKSI_TRUST; }
+      trust: function () { return global.AKSI_TRUST; },
     };
     global.AKSI_ANSWER = function (q) { return think(q).then(function (r) { return r && r.text; }); };
   }
