@@ -1,16 +1,15 @@
 /**
- * AKSI ONE v1.5 — Offline Brain · Trust Compiler on answers
+ * AKSI ONE v1.5.1-stable — LIVE-aware · single Trust pass
  * aksilove@internet.ru
  */
 (function (global) {
   "use strict";
-  var VER = "1.5.0-trust";
+  var VER = "1.5.1-stable";
   var MEM_KEY = "aksi_whole_mem_v3";
   var LEDGER_KEY = "aksi_proof_ledger_v1";
   var LLM_KEY = "aksi_llm_cfg_v1";
   var busy = false;
   var history = [];
-
   function $(id) { return document.getElementById(id); }
   function esc(s) {
     return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -168,7 +167,6 @@
     var fromMem = matchMem(q);
     if (loc) return Promise.resolve({ text: loc, meta: "local" });
     if (fromMem) return Promise.resolve({ text: fromMem, meta: "memory" });
-
     setBadge("brain…");
     return tryBrain(q).then(function (br) {
       if (br && br.text && br.meta !== "brain·fallback") {
@@ -199,15 +197,27 @@
       var text = (res && res.text) || "…";
       var meta = (res && res.meta) || "one";
       function finish(extra) {
-        var mtag = meta + (extra ? " · " + extra : "");
+        var mtag = meta;
+        if (extra && mtag.indexOf(extra) === -1) mtag = mtag + (mtag ? " · " : "") + extra;
         bubble("ai", text, mtag);
         history.push({ role: "assistant", content: text });
         appendLedger("chat", "Q:" + q.slice(0, 80));
         var m = eqsOf(text);
         if ($("stEqs")) $("stEqs").textContent = String(m.EQS);
       }
+      if (res && res.trust && res.trust.trust) {
+        if (res.trust.safeMode) {
+          text = "Safe-mode АКСИ: trust compiler.\n" + (res.trust.reason || "anomaly");
+          finish("trust·safe");
+          return;
+        }
+        finish(null);
+        return;
+      }
+      if (meta.indexOf("trust:") !== -1) { finish(null); return; }
       if (global.AKSI_TRUST && typeof global.AKSI_TRUST.verifyResponse === "function") {
-        global.AKSI_TRUST.verifyResponse(q, text, { source: "one" }).then(function (tr) {
+        var scoreText = text.split("\n——\n")[0];
+        global.AKSI_TRUST.verifyResponse(q, scoreText, { source: "one" }).then(function (tr) {
           if (tr.safeMode) {
             text = "Safe-mode АКСИ: trust compiler.\n" + (tr.reason || "anomaly");
             finish("trust·safe");
