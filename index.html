@@ -4,40 +4,45 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0b0a12">
-<meta name="description" content="АКСИ — помощник: чат, поиск в сети, фото, память.">
+<meta name="description" content="AKSI offline-first assistant. RU/EN. Internet only with consent.">
 <title>АКСИ — помощник</title>
 <style>
 :root{--bg:#0b0a12;--card:#16141f;--card2:#1e1b2a;--line:rgba(167,139,250,.2);--t:#f5f3ff;--m:#b4adc8;--dim:#7d7696;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:640px;--r:16px}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
 body{color:var(--t);font:16px/1.5 var(--font);background:var(--bg);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;background-image:radial-gradient(ellipse 100% 50% at 50% -10%,rgba(124,58,237,.28),transparent 55%)}
-header{display:flex;align-items:center;gap:12px;padding:14px var(--pad);border-bottom:1px solid rgba(255,255,255,.06);background:rgba(11,10,18,.9);backdrop-filter:blur(12px);position:sticky;top:0;z-index:40}
-.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#6d28d9,#a78bfa 60%,#ddd6fe);display:grid;place-items:center;font-weight:800;color:#fff;font-size:16px}
-header h1{font-size:18px;font-weight:700}header .sub{font-size:12.5px;color:var(--m);margin-top:2px}
-.badge{margin-left:auto;font-size:11px;color:var(--ok);background:rgba(52,211,153,.1);padding:4px 10px;border-radius:999px}
-.welcome{margin:14px var(--pad) 0;padding:16px;border-radius:var(--r);background:var(--card);border:1px solid rgba(255,255,255,.06)}
-.welcome h2{font-size:15px;margin-bottom:8px}.welcome p{font-size:14px;color:var(--m);margin-bottom:6px}
-.welcome .steps{margin:10px 0 0;padding-left:18px;color:var(--m);font-size:14px}.welcome .steps li{margin:5px 0}
+header{display:flex;align-items:center;gap:10px;padding:12px var(--pad);border-bottom:1px solid rgba(255,255,255,.06);background:rgba(11,10,18,.92);backdrop-filter:blur(12px);position:sticky;top:0;z-index:40;flex-wrap:wrap}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#6d28d9,#a78bfa 60%,#ddd6fe);display:grid;place-items:center;font-weight:800;color:#fff;font-size:15px;flex-shrink:0}
+header h1{font-size:17px;font-weight:700}header .sub{font-size:12px;color:var(--m);margin-top:1px}
+.badge{font-size:11px;color:var(--ok);background:rgba(52,211,153,.1);padding:4px 10px;border-radius:999px}
+.lang{display:flex;gap:4px;margin-left:auto}
+.lang button{padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--m);font:600 12px/1 var(--font);cursor:pointer}
+.lang button.on{background:var(--card2);color:var(--t);border-color:var(--line)}
+.netbox{display:flex;align-items:center;gap:8px;width:100%;padding:8px 0 0;font-size:13px;color:var(--m)}
+.netbox input{width:18px;height:18px;accent-color:var(--a2)}
+.welcome{margin:12px var(--pad) 0;padding:14px;border-radius:var(--r);background:var(--card);border:1px solid rgba(255,255,255,.06)}
+.welcome h2{font-size:15px;margin-bottom:6px}.welcome p{font-size:14px;color:var(--m)}
+.welcome .steps{margin:8px 0 0;padding-left:18px;color:var(--m);font-size:13px}.welcome .steps li{margin:4px 0}
 .welcome .hide{float:right;background:0;border:0;color:var(--dim);font-size:12px;cursor:pointer}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px var(--pad) 0}
-.actions button{padding:14px 12px;border-radius:var(--r);border:1px solid rgba(255,255,255,.07);background:var(--card);color:var(--t);font:inherit;text-align:left;cursor:pointer}
-.actions button strong{display:block;font-size:14px;margin-bottom:4px}.actions button span{font-size:12px;color:var(--dim)}
-nav{display:flex;gap:4px;padding:10px var(--pad);overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:72px;z-index:30;background:rgba(11,10,18,.95)}
-nav button{flex-shrink:0;padding:9px 14px;border:0;border-radius:12px;background:transparent;color:var(--m);font:600 13px/1 var(--font);cursor:pointer}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px var(--pad) 0}
+.actions button{padding:12px;border-radius:var(--r);border:1px solid rgba(255,255,255,.07);background:var(--card);color:var(--t);font:inherit;text-align:left;cursor:pointer}
+.actions button strong{display:block;font-size:13px;margin-bottom:3px}.actions button span{font-size:11px;color:var(--dim)}
+nav{display:flex;gap:4px;padding:8px var(--pad);overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:30;background:rgba(11,10,18,.95)}
+nav button{flex-shrink:0;padding:8px 12px;border:0;border-radius:10px;background:transparent;color:var(--m);font:600 13px/1 var(--font);cursor:pointer}
 nav button.on{background:var(--card2);color:var(--t)}
 main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(110px + var(--safe))}
 .panel{display:none}.panel.on{display:block}
-#thread{display:flex;flex-direction:column;gap:12px;min-height:120px}
+#thread{display:flex;flex-direction:column;gap:12px;min-height:100px}
 .msg{display:flex}.msg.me{justify-content:flex-end}
 .bub{max-width:min(92%,420px);padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:15px}
 .msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff;border-bottom-right-radius:6px}
 .msg.ai .bub{background:var(--card2);border:1px solid rgba(255,255,255,.06);border-bottom-left-radius:6px}
 .meta{font-size:11px;color:var(--dim);margin-top:6px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.chip{padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);color:var(--t);font-size:13px;cursor:pointer;font:inherit}
-.card{background:var(--card2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{padding:9px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);color:var(--t);font-size:13px;cursor:pointer;font:inherit}
+.card{background:var(--card2);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;margin-bottom:10px}
 .card h2{font-size:15px;margin:0 0 8px}.muted{color:var(--m);font-size:14px;line-height:1.55}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{min-height:44px;padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--t);font:600 14px/1 var(--font);cursor:pointer}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--t);font:600 14px/1 var(--font);cursor:pointer}
 .btn.primary{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
 input,textarea,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:var(--card);color:var(--t);font:inherit;margin-top:8px}
 pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:260px;color:var(--m)}
@@ -45,120 +50,132 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 .bar input[type=text]{flex:1;min-height:48px;margin:0;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--card2)}
 .icon-btn{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--card2);color:var(--t);font-size:20px;cursor:pointer;flex-shrink:0}
 .send-btn{width:48px;height:48px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font-size:18px;cursor:pointer;flex-shrink:0}
-.hint{text-align:center;font-size:12px;color:var(--dim);margin-top:12px}
+.hint{text-align:center;font-size:12px;color:var(--dim);margin-top:10px}
+a{color:var(--a)}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ</h1><div class="sub">Помощник · чат · сеть · фото</div></div>
-  <div class="badge" id="stBadge">загрузка…</div>
+  <div>
+    <h1 data-i18n="brand">АКСИ</h1>
+    <div class="sub" data-i18n="sub">Локальный помощник · офлайн по умолчанию</div>
+  </div>
+  <div class="lang">
+    <button type="button" id="langRu" class="on">RU</button>
+    <button type="button" id="langEn">EN</button>
+  </div>
+  <div class="badge" id="stBadge" data-i18n="offline_badge">офлайн</div>
+  <label class="netbox">
+    <input type="checkbox" id="netToggle">
+    <span data-i18n="internet">Интернет</span>
+    <span style="font-size:12px;color:var(--dim)" data-i18n="internet_hint">Выкл = только офлайн</span>
+  </label>
 </header>
 <div class="welcome" id="welcome">
-  <button type="button" class="hide" id="hideWelcome">скрыть</button>
-  <h2>Добро пожаловать</h2>
-  <p>АКСИ отвечает на вопросы, ищет в открытых источниках, помнит заметки и читает текст с фото. Данные по умолчанию остаются у вас.</p>
+  <button type="button" class="hide" id="hideWelcome" data-i18n="hide">скрыть</button>
+  <h2 data-i18n="welcome_h">Добро пожаловать</h2>
+  <p data-i18n="welcome_p">АКСИ отвечает локально. Интернет — только если включите галочку.</p>
   <ol class="steps">
-    <li>Спросите что угодно или «найди …» / «что такое …»</li>
-    <li>📷 — разобрать фото</li>
-    <li>Настройки — Ollama для более длинных ответов</li>
+    <li data-i18n="step1">Напишите вопрос внизу</li>
+    <li data-i18n="step2">📷 — разобрать фото</li>
+    <li data-i18n="step3">Галочка «Интернет» — поиск в сети по желанию</li>
   </ol>
 </div>
 <div class="actions">
-  <button type="button" data-tab="chat"><strong>💬 Спросить</strong><span>Чат и поиск</span></button>
-  <button type="button" data-tab="photo"><strong>📷 Фото</strong><span>Текст с картинки</span></button>
-  <button type="button" data-tab="settings"><strong>⚙️ Настройки</strong><span>Модель</span></button>
-  <button type="button" data-tab="help"><strong>❓ Помощь</strong><span>Как пользоваться</span></button>
+  <button type="button" data-tab="chat"><strong data-i18n="ask">Спросить</strong><span data-i18n="ask_d">Текстовый диалог</span></button>
+  <button type="button" data-tab="photo"><strong data-i18n="photo">Фото</strong><span data-i18n="photo_d">Прочитать картинку</span></button>
+  <button type="button" data-tab="settings"><strong data-i18n="settings">Настройки</strong><span data-i18n="settings_d">Модель и ключи</span></button>
+  <button type="button" data-tab="help"><strong data-i18n="help">Помощь</strong><span data-i18n="help_d">Как всё работает</span></button>
 </div>
 <nav>
-  <button type="button" class="on" data-tab="chat">Чат</button>
-  <button type="button" data-tab="photo">Фото</button>
-  <button type="button" data-tab="mem">Память</button>
-  <button type="button" data-tab="settings">Настройки</button>
-  <button type="button" data-tab="help">Помощь</button>
-  <button type="button" data-tab="lab">Ещё</button>
+  <button type="button" class="on" data-tab="chat" data-i18n="chat">Чат</button>
+  <button type="button" data-tab="photo" data-i18n="photo">Фото</button>
+  <button type="button" data-tab="mem" data-i18n="mem">Память</button>
+  <button type="button" data-tab="settings" data-i18n="settings">Настройки</button>
+  <button type="button" data-tab="help" data-i18n="help">Помощь</button>
+  <button type="button" data-tab="lab" data-i18n="more">Ещё</button>
 </nav>
 <main>
   <section class="panel on" id="tab-chat">
     <div id="thread"></div>
     <div class="chips">
-      <button type="button" class="chip" data-ask="Привет! Кто ты?">Кто ты?</button>
-      <button type="button" class="chip" data-ask="Что ты умеешь?">Что умеешь?</button>
-      <button type="button" class="chip" data-ask="что такое искусственный интеллект">Что такое ИИ?</button>
-      <button type="button" class="chip" data-ask="запомни: мне нравится работать с АКСИ">Запомни</button>
+      <button type="button" class="chip" data-ask="Кто ты? / Who are you?" data-i18n="who">Кто ты?</button>
+      <button type="button" class="chip" data-ask="Что ты умеешь? / What can you do?" data-i18n="can">Что умеешь?</button>
+      <button type="button" class="chip" data-ask="запомни: мне нравится АКСИ" data-i18n="remember">Запомни</button>
     </div>
-    <p class="hint">«найди …» — поиск в сети · Ollama — в Настройках</p>
+    <p class="hint" data-i18n="hint_chat">Офлайн по умолчанию. Поиск в сети — галочка «Интернет».</p>
   </section>
   <section class="panel" id="tab-photo">
     <div class="card">
-      <h2>Разобрать фото</h2>
-      <p class="muted">PNG/JPG — OCR текста. С llava — описание сцены.</p>
+      <h2 data-i18n="photo">Фото</h2>
+      <p class="muted" data-i18n="photo_help">Выберите снимок. OCR текста.</p>
       <input type="file" id="phFile" accept="image/*" capture="environment">
-      <div class="row"><button type="button" class="btn primary" id="phGo">Обработать</button></div>
-      <pre class="out" id="phOut">Результат появится здесь</pre>
+      <div class="row"><button type="button" class="btn primary" id="phGo" data-i18n="process">Обработать</button></div>
+      <pre class="out" id="phOut">—</pre>
     </div>
   </section>
   <section class="panel" id="tab-mem">
     <div class="card">
-      <h2>Память · <span id="memN">0</span></h2>
-      <p class="muted">Только в этом браузере.</p>
+      <h2><span data-i18n="mem">Память</span> · <span id="memN">0</span></h2>
+      <p class="muted" data-i18n="help_mem">Только в этом браузере.</p>
       <div id="memList"></div>
-      <div class="row"><button type="button" class="btn" id="btnWipe">Очистить память</button></div>
+      <div class="row"><button type="button" class="btn" id="btnWipe" data-i18n="wipe">Очистить память</button></div>
     </div>
   </section>
   <section class="panel" id="tab-settings">
     <div class="card">
-      <h2>Умная модель (LLM)</h2>
-      <p class="muted">Ollama на вашем ПК усиливает ответы. Без неё работают локальные знания и поиск в сети.</p>
-      <p class="muted" style="margin-top:8px"><b>1.</b> <a href="https://ollama.com" target="_blank" rel="noopener" style="color:var(--a)">Ollama</a><br>
-      <b>2.</b> <code>ollama pull llama3.2</code><br>
-      <b>3.</b> Для фото: <code>ollama pull llava</code></p>
+      <h2 data-i18n="settings">Настройки</h2>
+      <p class="muted" data-i18n="settings_help">Ollama усиливает ответы.</p>
       <div id="llm-root"></div>
     </div>
   </section>
   <section class="panel" id="tab-help">
     <div class="card">
-      <h2>Что умеет АКСИ</h2>
-      <p class="muted"><b>Чат</b> — вопросы и поиск («найди …», «что такое …»).</p>
-      <p class="muted"><b>Фото</b> — текст с картинки.</p>
-      <p class="muted"><b>Память</b> — «запомни: …».</p>
-      <p class="muted"><b>Настройки</b> — Ollama / API-ключ локально.</p>
+      <h2 data-i18n="help">Помощь</h2>
+      <p class="muted" data-i18n="help_chat">Чат — вопросы. «запомни: …» сохраняет факт.</p>
+      <p class="muted" data-i18n="help_photo">Фото — текст с картинки.</p>
+      <p class="muted" data-i18n="help_net">Интернет выключен по умолчанию.</p>
+      <p class="muted" data-i18n="help_priv">Ключи и память локальны.</p>
     </div>
-    <div class="card"><h2>Приватность</h2><p class="muted">Поиск идёт в открытые API (Wikipedia и др.) только по вашему запросу. Ключи и память — у вас.</p></div>
-    <div class="card"><h2>Контакт</h2><p class="muted">aksilove@internet.ru</p>
-      <p class="muted"><a href="/product/" style="color:var(--a)">Product · PQ Seal →</a></p>
-      <p class="muted" id="didLine">DID: —</p></div>
+    <div class="card">
+      <h2 data-i18n="precedent">Прецедент</h2>
+      <p class="muted" data-i18n="precedent_p">Доказуемая политика offline-first.</p>
+      <p class="muted"><a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a></p>
+    </div>
+    <div class="card">
+      <h2 data-i18n="contact">Контакт</h2>
+      <p class="muted">aksilove@internet.ru</p>
+      <p class="muted" id="didLine">DID: —</p>
+    </div>
   </section>
   <section class="panel" id="tab-lab">
     <div class="card">
-      <h2>Дополнительно</h2>
+      <h2 data-i18n="more">Ещё</h2>
       <div class="row">
-        <button type="button" class="btn" data-tab="web">Поиск</button>
-        <button type="button" class="btn" data-tab="mind">Мозг</button>
+        <button type="button" class="btn" data-tab="web">Web</button>
+        <button type="button" class="btn" data-tab="lang">AKSI.L</button>
+        <button type="button" class="btn" data-tab="mind">Mind</button>
         <button type="button" class="btn" data-tab="quantum">Quantum</button>
         <button type="button" class="btn" data-tab="trust">Trust</button>
-        <button type="button" class="btn" data-tab="dkv">Документы</button>
-        <button type="button" class="btn" data-tab="vision">Камера</button>
-        <button type="button" class="btn" data-tab="net">Сеть</button>
-        <button type="button" class="btn" data-tab="seal">PQ Seal</button>
+        <button type="button" class="btn" data-tab="dkv">DKV</button>
+        <button type="button" class="btn" data-tab="seal">Seal</button>
       </div>
     </div>
   </section>
   <section class="panel" id="tab-web"><div id="web-root"></div></section>
+  <section class="panel" id="tab-lang"><div id="lang-root"></div></section>
   <section class="panel" id="tab-mind"><div id="mind-root"></div></section>
   <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
   <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
   <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-  <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
-  <section class="panel" id="tab-net"><div id="net-root"></div></section>
-  <section class="panel" id="tab-brain"><div id="brain-root"></div></section>
   <section class="panel" id="tab-seal"><div id="seal-root"></div></section>
 </main>
 <div class="bar">
-  <button type="button" class="icon-btn" id="photoBtn" title="Фото">📷</button>
+  <button type="button" class="icon-btn" id="photoBtn" title="Photo">📷</button>
   <input type="file" id="photoFile" accept="image/*" capture="environment" hidden>
-  <input id="inp" type="text" placeholder="Вопрос или «найди …»" enterkeyhint="send" autocomplete="off" maxlength="2000">
-  <button type="button" class="send-btn" id="send" aria-label="Отправить">↑</button>
+  <input id="inp" type="text" data-i18n="placeholder" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off" maxlength="2000">
+  <button type="button" class="send-btn" id="send" aria-label="Send">↑</button>
 </div>
 <script src="aksi-core.js?v=51"></script>
 <script src="aksi-quantum.js?v=3"></script>
@@ -169,8 +186,10 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 <script src="aksi-llm.js?v=2"></script>
 <script src="aksi-vision.js?v=2"></script>
 <script src="aksi-photo.js?v=1"></script>
-<script src="aksi-web.js?v=1"></script>
-<script src="aksi-mind.js?v=4"></script>
+<script src="aksi-web.js?v=2"></script>
+<script src="aksi-i18n.js?v=1"></script>
+<script src="aksi-lang.js?v=2"></script>
+<script src="aksi-mind.js?v=5"></script>
 <script src="aksi-one.js?v=15"></script>
 <script src="aksi-ux.js?v=2"></script>
 <script src="aksi-one-fix.js?v=1"></script>
@@ -180,13 +199,11 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 (function () {
   var TABS = {
     web: ["AKSI_WEB", "#web-root"],
+    lang: ["AKSI_LANG", "#lang-root"],
     mind: ["AKSI_MIND", "#mind-root"],
     quantum: ["AKSI_QUANTUM", "#quantum-root"],
     trust: ["AKSI_TRUST", "#trust-root"],
     dkv: ["AKSI_DKV", "#dkv-root"],
-    vision: ["AKSI_VISION", "#vision-root"],
-    net: ["AKSI_OVERLAY", "#net-root"],
-    brain: ["AKSI_BRAIN", "#brain-root"],
     seal: ["AKSI_SEAL", "#seal-root"],
   };
   var mounted = {};
@@ -207,31 +224,34 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     if (!m || typeof m.mount !== "function") {
       if (root && !root.dataset.fb) {
         root.dataset.fb = "1";
-        root.innerHTML = '<p class="muted">Ctrl+F5, если пусто.</p>';
+        root.innerHTML = '<p class="muted">Ctrl+F5</p>';
       }
       return;
     }
     try { m.mount(sel); mounted[name] = true; }
     catch (e) { if (root) root.innerHTML = '<p class="muted">' + (e && e.message) + "</p>"; }
   }
-  function bindPhotoTab() {
-    var go = document.getElementById("phGo");
-    var file = document.getElementById("phFile");
-    var out = document.getElementById("phOut");
-    if (!go || !file) return;
-    go.onclick = function () {
-      var f = file.files && file.files[0];
-      if (!f) { out.textContent = "Выберите файл."; return; }
-      out.textContent = "Обрабатываю…";
-      if (!window.AKSI_PHOTO || !AKSI_PHOTO.analyze) {
-        out.textContent = "Модуль фото не загружен. Ctrl+F5."; return;
-      }
-      AKSI_PHOTO.analyze(f, { onProgress: function (p) { out.textContent = p; } })
-        .then(function (r) { out.textContent = r.text + "\n\n— " + (r.meta || ""); })
-        .catch(function (e) { out.textContent = "Не получилось: " + (e.message || e); });
-    };
+  function syncNet() {
+    var on = !!(window.AKSI_WEB && AKSI_WEB.isEnabled && AKSI_WEB.isEnabled());
+    var cb = document.getElementById("netToggle");
+    if (cb) cb.checked = on;
+    var b = document.getElementById("stBadge");
+    if (b && window.AKSI_I18N) b.textContent = on ? AKSI_I18N.t("online_badge") : AKSI_I18N.t("offline_badge");
+    else if (b) b.textContent = on ? "net on" : "offline";
   }
   function boot() {
+    if (window.AKSI_I18N) {
+      AKSI_I18N.apply();
+      var lr = document.getElementById("langRu");
+      var le = document.getElementById("langEn");
+      if (lr) lr.onclick = function () { AKSI_I18N.setLang("ru"); AKSI_I18N.apply(); syncNet(); };
+      if (le) le.onclick = function () { AKSI_I18N.setLang("en"); AKSI_I18N.apply(); syncNet(); };
+    }
+    var cb = document.getElementById("netToggle");
+    if (cb && window.AKSI_WEB && AKSI_WEB.setEnabled) {
+      cb.checked = AKSI_WEB.isEnabled();
+      cb.onchange = function () { AKSI_WEB.setEnabled(cb.checked); syncNet(); };
+    }
     try {
       if (localStorage.getItem("aksi_welcome_hidden") === "1") {
         var w = document.getElementById("welcome");
@@ -248,24 +268,37 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">Здравствуйте. Задайте вопрос или напишите «найди …» — поищу в открытых источниках.<div class="meta">чат · сеть · фото</div></div>';
+      var msg = (window.AKSI_I18N && AKSI_I18N.t("greet_bubble")) || "Offline by default.";
+      d.innerHTML = '<div class="bub">' + msg + '<div class="meta">offline-first</div></div>';
       th.appendChild(d);
     }
     document.addEventListener("click", function (e) {
       var x = e.target.closest && e.target.closest("[data-tab]");
       if (x) { var t = x.getAttribute("data-tab"); if (t) goTab(t); }
     }, true);
-    bindPhotoTab();
+    var go = document.getElementById("phGo");
+    var file = document.getElementById("phFile");
+    var out = document.getElementById("phOut");
+    if (go && file) {
+      go.onclick = function () {
+        var f = file.files && file.files[0];
+        if (!f) { out.textContent = "—"; return; }
+        out.textContent = "…";
+        if (!window.AKSI_PHOTO || !AKSI_PHOTO.analyze) { out.textContent = "Ctrl+F5"; return; }
+        AKSI_PHOTO.analyze(f, { onProgress: function (p) { out.textContent = p; } })
+          .then(function (r) { out.textContent = r.text + "\n\n— " + (r.meta || ""); })
+          .catch(function (e) { out.textContent = String(e.message || e); });
+      };
+    }
     setTimeout(function () {
-      var b = document.getElementById("stBadge");
-      if (b) b.textContent = "готова";
+      syncNet();
       try {
         var did = localStorage.getItem("aksi_did_v1");
         var dl = document.getElementById("didLine");
         if (dl && did) dl.textContent = "DID: " + did;
       } catch (e) {}
       if (window.AKSI_PHOTO && AKSI_PHOTO.wireChat) AKSI_PHOTO.wireChat();
-    }, 500);
+    }, 400);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
