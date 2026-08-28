@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#0b0a12">
-<meta name="description" content="АКСИ — ваш локальный помощник: чат, фото, память.">
+<meta name="description" content="АКСИ — помощник: чат, поиск в сети, фото, память.">
 <title>АКСИ — помощник</title>
 <style>
 :root{--bg:#0b0a12;--card:#16141f;--card2:#1e1b2a;--line:rgba(167,139,250,.2);--t:#f5f3ff;--m:#b4adc8;--dim:#7d7696;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:640px;--r:16px}
@@ -51,24 +51,24 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ</h1><div class="sub">Ваш локальный помощник</div></div>
+  <div><h1>АКСИ</h1><div class="sub">Помощник · чат · сеть · фото</div></div>
   <div class="badge" id="stBadge">загрузка…</div>
 </header>
 <div class="welcome" id="welcome">
   <button type="button" class="hide" id="hideWelcome">скрыть</button>
   <h2>Добро пожаловать</h2>
-  <p>АКСИ отвечает на вопросы, помнит заметки и может прочитать текст с фото. Данные остаются в этом браузере.</p>
+  <p>АКСИ отвечает на вопросы, ищет в открытых источниках, помнит заметки и читает текст с фото. Данные по умолчанию остаются у вас.</p>
   <ol class="steps">
-    <li>Напишите вопрос внизу и нажмите ↑</li>
-    <li>Или нажмите 📷 — чтобы разобрать фото</li>
-    <li>В «Настройки» можно подключить умную модель (Ollama)</li>
+    <li>Спросите что угодно или «найди …» / «что такое …»</li>
+    <li>📷 — разобрать фото</li>
+    <li>Настройки — Ollama для более длинных ответов</li>
   </ol>
 </div>
 <div class="actions">
-  <button type="button" data-tab="chat"><strong>💬 Спросить</strong><span>Текстовый диалог</span></button>
-  <button type="button" data-tab="photo"><strong>📷 Фото</strong><span>Прочитать картинку</span></button>
-  <button type="button" data-tab="settings"><strong>⚙️ Настройки</strong><span>Модель и ключи</span></button>
-  <button type="button" data-tab="help"><strong>❓ Помощь</strong><span>Как всё работает</span></button>
+  <button type="button" data-tab="chat"><strong>💬 Спросить</strong><span>Чат и поиск</span></button>
+  <button type="button" data-tab="photo"><strong>📷 Фото</strong><span>Текст с картинки</span></button>
+  <button type="button" data-tab="settings"><strong>⚙️ Настройки</strong><span>Модель</span></button>
+  <button type="button" data-tab="help"><strong>❓ Помощь</strong><span>Как пользоваться</span></button>
 </div>
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
@@ -84,15 +84,15 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     <div class="chips">
       <button type="button" class="chip" data-ask="Привет! Кто ты?">Кто ты?</button>
       <button type="button" class="chip" data-ask="Что ты умеешь?">Что умеешь?</button>
+      <button type="button" class="chip" data-ask="что такое искусственный интеллект">Что такое ИИ?</button>
       <button type="button" class="chip" data-ask="запомни: мне нравится работать с АКСИ">Запомни</button>
-      <button type="button" class="chip" data-ask="статус">Статус</button>
     </div>
-    <p class="hint">Ответы локально. Для «умных» ответов — Ollama в Настройках.</p>
+    <p class="hint">«найди …» — поиск в сети · Ollama — в Настройках</p>
   </section>
   <section class="panel" id="tab-photo">
     <div class="card">
       <h2>Разобрать фото</h2>
-      <p class="muted">Выберите снимок (PNG, JPG). АКСИ прочитает текст. С моделью llava — опишет картинку.</p>
+      <p class="muted">PNG/JPG — OCR текста. С llava — описание сцены.</p>
       <input type="file" id="phFile" accept="image/*" capture="environment">
       <div class="row"><button type="button" class="btn primary" id="phGo">Обработать</button></div>
       <pre class="out" id="phOut">Результат появится здесь</pre>
@@ -101,7 +101,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
   <section class="panel" id="tab-mem">
     <div class="card">
       <h2>Память · <span id="memN">0</span></h2>
-      <p class="muted">Заметки хранятся только в этом браузере.</p>
+      <p class="muted">Только в этом браузере.</p>
       <div id="memList"></div>
       <div class="row"><button type="button" class="btn" id="btnWipe">Очистить память</button></div>
     </div>
@@ -109,7 +109,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
   <section class="panel" id="tab-settings">
     <div class="card">
       <h2>Умная модель (LLM)</h2>
-      <p class="muted">Без модели — встроенные ответы. С Ollama — почти как ИИ на вашем ПК.</p>
+      <p class="muted">Ollama на вашем ПК усиливает ответы. Без неё работают локальные знания и поиск в сети.</p>
       <p class="muted" style="margin-top:8px"><b>1.</b> <a href="https://ollama.com" target="_blank" rel="noopener" style="color:var(--a)">Ollama</a><br>
       <b>2.</b> <code>ollama pull llama3.2</code><br>
       <b>3.</b> Для фото: <code>ollama pull llava</code></p>
@@ -119,21 +119,21 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
   <section class="panel" id="tab-help">
     <div class="card">
       <h2>Что умеет АКСИ</h2>
-      <p class="muted"><b>Чат</b> — вопросы. «запомни: …» сохраняет факт.</p>
-      <p class="muted"><b>Фото</b> — текст с картинки. С llava — описание сцены.</p>
-      <p class="muted"><b>Память</b> — ваши заметки в браузере.</p>
-      <p class="muted"><b>Настройки</b> — Ollama или API-ключ.</p>
+      <p class="muted"><b>Чат</b> — вопросы и поиск («найди …», «что такое …»).</p>
+      <p class="muted"><b>Фото</b> — текст с картинки.</p>
+      <p class="muted"><b>Память</b> — «запомни: …».</p>
+      <p class="muted"><b>Настройки</b> — Ollama / API-ключ локально.</p>
     </div>
-    <div class="card"><h2>Приватность</h2><p class="muted">По умолчанию offline. Сообщения не уходят на наши серверы.</p></div>
+    <div class="card"><h2>Приватность</h2><p class="muted">Поиск идёт в открытые API (Wikipedia и др.) только по вашему запросу. Ключи и память — у вас.</p></div>
     <div class="card"><h2>Контакт</h2><p class="muted">aksilove@internet.ru</p>
-      <p class="muted"><a href="/product/" style="color:var(--a)">World Product · PQ Seal →</a></p>
+      <p class="muted"><a href="/product/" style="color:var(--a)">Product · PQ Seal →</a></p>
       <p class="muted" id="didLine">DID: —</p></div>
   </section>
   <section class="panel" id="tab-lab">
     <div class="card">
       <h2>Дополнительно</h2>
-      <p class="muted">Для проверки. Обычному пользователю не обязательно.</p>
       <div class="row">
+        <button type="button" class="btn" data-tab="web">Поиск</button>
         <button type="button" class="btn" data-tab="mind">Мозг</button>
         <button type="button" class="btn" data-tab="quantum">Quantum</button>
         <button type="button" class="btn" data-tab="trust">Trust</button>
@@ -144,6 +144,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
       </div>
     </div>
   </section>
+  <section class="panel" id="tab-web"><div id="web-root"></div></section>
   <section class="panel" id="tab-mind"><div id="mind-root"></div></section>
   <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
   <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
@@ -156,7 +157,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 <div class="bar">
   <button type="button" class="icon-btn" id="photoBtn" title="Фото">📷</button>
   <input type="file" id="photoFile" accept="image/*" capture="environment" hidden>
-  <input id="inp" type="text" placeholder="Напишите вопрос…" enterkeyhint="send" autocomplete="off" maxlength="2000">
+  <input id="inp" type="text" placeholder="Вопрос или «найди …»" enterkeyhint="send" autocomplete="off" maxlength="2000">
   <button type="button" class="send-btn" id="send" aria-label="Отправить">↑</button>
 </div>
 <script src="aksi-core.js?v=51"></script>
@@ -164,11 +165,12 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 <script src="aksi-overlay.js?v=1"></script>
 <script src="aksi-dkv.js?v=1"></script>
 <script src="aksi-trust.js?v=2"></script>
-<script src="aksi-brain.js?v=3"></script>
+<script src="aksi-brain.js?v=4"></script>
 <script src="aksi-llm.js?v=2"></script>
 <script src="aksi-vision.js?v=2"></script>
 <script src="aksi-photo.js?v=1"></script>
-<script src="aksi-mind.js?v=3"></script>
+<script src="aksi-web.js?v=1"></script>
+<script src="aksi-mind.js?v=4"></script>
 <script src="aksi-one.js?v=15"></script>
 <script src="aksi-ux.js?v=2"></script>
 <script src="aksi-one-fix.js?v=1"></script>
@@ -177,6 +179,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 <script>
 (function () {
   var TABS = {
+    web: ["AKSI_WEB", "#web-root"],
     mind: ["AKSI_MIND", "#mind-root"],
     quantum: ["AKSI_QUANTUM", "#quantum-root"],
     trust: ["AKSI_TRUST", "#trust-root"],
@@ -204,7 +207,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     if (!m || typeof m.mount !== "function") {
       if (root && !root.dataset.fb) {
         root.dataset.fb = "1";
-        root.innerHTML = '<p class="muted">Обновите страницу (Ctrl+F5), если пусто.</p>';
+        root.innerHTML = '<p class="muted">Ctrl+F5, если пусто.</p>';
       }
       return;
     }
@@ -218,7 +221,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     if (!go || !file) return;
     go.onclick = function () {
       var f = file.files && file.files[0];
-      if (!f) { out.textContent = "Сначала выберите файл."; return; }
+      if (!f) { out.textContent = "Выберите файл."; return; }
       out.textContent = "Обрабатываю…";
       if (!window.AKSI_PHOTO || !AKSI_PHOTO.analyze) {
         out.textContent = "Модуль фото не загружен. Ctrl+F5."; return;
@@ -245,7 +248,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">Здравствуйте. Я АКСИ — помощник в вашем браузере.\n\nСпросите что угодно или нажмите 📷 для фото.<div class="meta">данные остаются у вас</div></div>';
+      d.innerHTML = '<div class="bub">Здравствуйте. Задайте вопрос или напишите «найди …» — поищу в открытых источниках.<div class="meta">чат · сеть · фото</div></div>';
       th.appendChild(d);
     }
     document.addEventListener("click", function (e) {
