@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ Offline Brain · PQ · Relay. aksilove@internet.ru">
-<title>АКСИ — Offline Brain</title>
+<meta name="description" content="АКСИ Trust Compiler · Offline Brain · PQ. aksilove@internet.ru">
+<title>АКСИ — Trust · Offline Brain</title>
 <style>
 :root{--bg:#06050b;--s1:#13111c;--s2:#1b1726;--line:rgba(167,139,250,.18);--line2:rgba(255,255,255,.07);--t:#f7f5ff;--m:#a8a0bd;--dim:#7a738f;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px}
 *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
@@ -37,8 +37,7 @@ main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--s
 .btn{min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:600 13px/1 var(--font);cursor:pointer}
 .btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
 input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:inherit}
-textarea{min-height:88px}
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv .cell{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px}.kv b{display:block;font-size:16px;color:var(--ok)}.kv span{font-size:11px;color:var(--dim)}
+textarea{min-height:72px}
 pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px;color:var(--m)}
 .bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:12px var(--pad) calc(12px + var(--safe));display:flex;gap:8px;z-index:60;background:linear-gradient(transparent,var(--bg) 28%)}
 .bar input{flex:1;min-height:50px;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--s2);color:var(--t)}
@@ -49,19 +48,20 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ <span class="pill">offline</span></h1><div class="sub">Offline Brain · PQ · Relay</div></div>
+  <div><h1>АКСИ <span class="pill">trust</span></h1><div class="sub">Trust Compiler · Offline Brain · PQ</div></div>
   <div class="stats"><div id="stClock">MSK —</div><div>EQS <b id="stEqs">—</b> · <span id="stBadge">boot</span></div></div>
 </header>
 <div class="feat">
+  <button type="button" class="f" data-tab="trust"><strong>🛡 Trust</strong><span>Compiler · chain · safe-mode</span></button>
   <button type="button" class="f" data-tab="brain"><strong>🧠 Offline Brain</strong><span>Без сети и GPU</span></button>
-  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Brain → Core → LLM</span></button>
+  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Brain → Trust badge</span></button>
   <button type="button" class="f" data-tab="pq"><strong>🔐 AKSI-PQ</strong><span>Post-Quantum E2E</span></button>
-  <button type="button" class="f" data-tab="relay"><strong>📡 Relay</strong><span>Ваш сервер</span></button>
-  <button type="button" class="f" data-tab="llm"><strong>🌐 LLM</strong><span>Ollama / API</span></button>
-  <button type="button" class="f" data-tab="neuro"><strong>🧬 Нейро</strong><span>RWKV CPU</span></button>
+  <a class="f" href="/trust.html"><strong>🛡 Pilot</strong><span>trust.html</span></a>
+  <a class="f" href="/docs/TRUST-COMPILER.md"><strong>📄 Docs</strong><span>Architecture MVP</span></a>
 </div>
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
+  <button type="button" data-tab="trust">Trust</button>
   <button type="button" data-tab="brain">Brain</button>
   <button type="button" data-tab="pq">PQ</button>
   <button type="button" data-tab="relay">Relay</button>
@@ -72,17 +72,17 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
+  <section class="panel" id="tab-trust"><div id="trust-root"><div class="card"><h2>Trust</h2><p class="muted">Загрузка…</p></div></div></section>
   <section class="panel" id="tab-brain"><div id="brain-root"><div class="card"><h2>Brain</h2><p class="muted">Загрузка…</p></div></div></section>
   <section class="panel on" id="tab-chat">
     <div id="thread"></div>
     <div class="chips">
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-ask="что такое ии">что такое ИИ</button>
-      <button type="button" class="chip" data-ask="17*24">17×24</button>
-      <button type="button" class="chip hot" data-tab="brain">→ Brain</button>
+      <button type="button" class="chip" data-ask="что такое ии">ИИ</button>
+      <button type="button" class="chip hot" data-tab="trust">→ Trust</button>
     </div>
-    <p class="hint">Offline-first · <b>Ctrl+F5</b> · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></p>
+    <p class="hint">Trust badge на каждом ответе · <b>Ctrl+F5</b> · <a href="/trust.html">pilot</a></p>
   </section>
   <section class="panel" id="tab-pq"><div id="pq-root"><div class="card"><h2>PQ</h2><p class="muted">…</p></div></div></section>
   <section class="panel" id="tab-relay"><div id="relay-root"><div class="card"><h2>Relay</h2><p class="muted">…</p></div></div></section>
@@ -99,13 +99,13 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
       <pre class="out" id="pOut">—</pre></div>
   </section>
   <section class="panel" id="tab-about">
-    <div class="card"><h2>АКСИ</h2><p class="muted">Offline Brain · PQ · Relay · proprietary</p>
+    <div class="card"><h2>АКСИ</h2><p class="muted">Trust Compiler · Offline Brain · proprietary</p>
       <p class="muted">aksilove@internet.ru</p></div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
   </section>
 </main>
 <div class="bar">
-  <input id="inp" type="text" placeholder="Спроси offline…" enterkeyhint="send" autocomplete="off">
+  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
   <button type="button" class="send" id="send">↑</button>
 </div>
 <script src="aksi-core.js?v=51"></script>
@@ -113,14 +113,16 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <script src="aksi-pq.js?v=1"></script>
 <script src="aksi-relay.js?v=1"></script>
 <script src="aksi-llm.js?v=1"></script>
+<script src="aksi-trust.js?v=1"></script>
 <script src="aksi-brain.js?v=1"></script>
-<script src="aksi-one.js?v=7"></script>
+<script src="aksi-one.js?v=8"></script>
 <script>
 (function(){
   function goTab(t){
     if(!t)return;
     document.querySelectorAll("nav [data-tab]").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===t);});
     document.querySelectorAll("main .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});
+    if(t==="trust")mountMod("trust","#trust-root");
     if(t==="brain")mountMod("brain","#brain-root");
     if(t==="pq")mountMod("pq","#pq-root");
     if(t==="relay")mountMod("relay","#relay-root");
@@ -129,6 +131,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   }
   var mounted={};
   function eng(n){
+    if(n==="trust")return window.AKSI_TRUST;
     if(n==="brain")return window.AKSI_BRAIN;
     if(n==="pq")return window.AKSI_PQ;
     if(n==="relay")return window.AKSI_RELAY;
@@ -149,7 +152,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
     var th=document.getElementById("thread");
     if(th&&!th.children.length){
       var d=document.createElement("div");d.className="msg ai";
-      d.innerHTML='<div class="bub">Offline Brain активен: без сети и GPU.\nСпросите «что такое ИИ», «17*24» или «запомни: …».<div class="meta">brain · ONE 1.4</div></div>';
+      d.innerHTML='<div class="bub">Trust Compiler активен: каждый ответ получает <b>trust:high|medium|low</b> и запись в hash-chain.<div class="meta">ONE 1.5 · trust</div></div>';
       th.appendChild(d);
     }
     var el=document.getElementById("stClock");
