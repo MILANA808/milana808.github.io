@@ -1,318 +1,201 @@
 /**
- * AKSI Brain v7 — answers real questions (Wikipedia + local KB)
+ * AKSI BRAIN — Offline Language Engine v1
+ * Без интернета · без GPU · CPU/JS only
+ * © AKSI · aksilove@internet.ru · Proprietary
  */
 (function (global) {
   "use strict";
-  var SEED = "AKSI_DIMAX_v3_2026";
-  var DID = "did:aksi:ed25519:sovereign-2026";
-  var VERSION = "7.0";
+  var VER = "1.0.0-offline";
+  var HIST_KEY = "aksi:brain:hist:v1";
+  var KB_EXTRA = "aksi:brain:kb:v1";
 
-  function enc(s) {
-    return new TextEncoder().encode(String(s));
-  }
-
-  function shaHex(t) {
-    if (!global.crypto || !crypto.subtle) {
-      var h = 0x811c9dc5,
-        i;
-      for (i = 0; i < t.length; i++) {
-        h ^= t.charCodeAt(i);
-        h = Math.imul(h, 0x01000193);
-      }
-      return Promise.resolve((h >>> 0).toString(16).padStart(8, "0"));
-    }
-    return crypto.subtle.digest("SHA-256", enc(t)).then(function (b) {
-      return Array.prototype.map
-        .call(new Uint8Array(b), function (x) {
-          return x.toString(16).padStart(2, "0");
-        })
-        .join("");
-    });
-  }
-
-  function aksiSig(message) {
-    return shaHex(String(message) + SEED + Date.now()).then(function (h) {
-      return h.slice(0, 16).toUpperCase();
-    });
-  }
-
-  function fetchJSON(url, timeoutMs) {
-    timeoutMs = timeoutMs || 6000;
-    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var t = setTimeout(function () {
-      if (ctrl) try { ctrl.abort(); } catch (e) {}
-    }, timeoutMs);
-    return fetch(url, ctrl ? { signal: ctrl.signal } : {})
-      .then(function (r) {
-        clearTimeout(t);
-        if (!r.ok) throw new Error("http " + r.status);
-        return r.json();
-      })
-      .catch(function (e) {
-        clearTimeout(t);
-        throw e;
-      });
-  }
-
-  var LOCAL = [
-    {
-      re: /небо.*голуб|почему.*небо|sky.*blue|почему небо/i,
-      a:
-        "Небо кажется голубым из‑за рассеяния Рэлея: солнечный свет сталкивается с молекулами воздуха, и синяя часть спектра рассеивается сильнее красной. Поэтому днём мы видим голубой «купол», а на закате — красные и оранжевые тона (луч проходит длиннее и синий уже рассеян).",
-    },
-    {
-      re: /что такое (ии|ai|искусственн\w+ интеллект)/i,
-      a:
-        "Искусственный интеллект — системы, которые решают задачи, обычно требующие человеческого мышления: распознавание, язык, планирование. Современные чат-модели обучаются на больших текстах и предсказывают следующий токен; это мощный, но не «живой» разум.",
-    },
-    {
-      re: /кто (ты|вы)|что ты такое|что такое акси/i,
-      a:
-        "Я АКСИ — суверенный ИИ-агент. Работаю в браузере: отвечаю на вопросы, ищу факты в Wikipedia, помню диалог на вашем устройстве. Суверенный агент АКСИ.",
-    },
-    {
-      re: /привет|здравствуй|добрый (день|вечер|утро)|hello|hi\b/i,
-      a: "Здравствуйте. Я АКСИ. Спрашивайте — факты, объяснения, курсы, погоду.",
-    },
-    {
-      re: /как дела/i,
-      a: "В рабочем режиме. Чем помочь?",
-    },
-    {
-      re: /спасибо|благодар/i,
-      a: "Пожалуйста.",
-    },
+  var KB = [
+    { t: "акси aksi кто ты", a: "Я АКСИ — суверенный local-first цифровой напарник. Работаю в браузере: память, proof-ledger, PQ-крипто, метрики EQS. Данные остаются у вас. Контакт: aksilove@internet.ru." },
+    { t: "миссия aksi суверенность", a: "Миссия АКСИ: цифровой суверенитет — идентичность, память и рассуждение без обязательной облачной привязки. Целостность (proof) важнее «магии» чужого API." },
+    { t: "eqs метрики формула", a: "EQS = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age. AKSI = (A×I×S)×(1+0.4√n). H — энтропия Шеннона; rel — разнообразие лексики; coh — связность." },
+    { t: "proof ledger цепочка", a: "Proof ledger — append-only цепочка хешей. Подмена записи ломает prev_hash. Аудит целостности, не токен-блокчейн." },
+    { t: "постквантовое pq шифрование", a: "AKSI-PQ: гибрид ECDH P-256 + опционально ML-KEM-768, AES-256-GCM, Resonance Seal. Релей видит ciphertext." },
+    { t: "что такое ии искусственный интеллект", a: "ИИ — системы, которые делают задачи, ранее требовавшие ума: язык, зрение, планирование. Чаще статистические модели на данных, а не «сознание»." },
+    { t: "машинное обучение нейросеть", a: "ML — подгонка параметров под данные. Нейросеть — граф слоёв; обучение градиентами. Малые модели работают на CPU без GPU." },
+    { t: "квантовая физика кубит", a: "Кубит: суперпозиция |0⟩ и |1⟩. Запутанность связывает системы. Квантовые компьютеры пока узкоспециализированы." },
+    { t: "теория относительности эйнштейн", a: "СТО: скорость света постоянна в инерциальных системах. ОТО: гравитация как кривизна пространства-времени. GPS учитывает поправки." },
+    { t: "эволюция дарвин", a: "Естественный отбор: изменчивость + отбор. ДНК — носитель наследственности у земной жизни." },
+    { t: "днк ген хромосома", a: "ДНК — двойная спираль (A,T,G,C). Ген кодирует продукт. Хромосомы — упакованная ДНК." },
+    { t: "вселенная космос", a: "Вселенная расширяется; реликтовое излучение — отпечаток ранней эпохи. Тёмная материя/энергия — рабочие гипотезы." },
+    { t: "климат парниковый", a: "Парниковые газы удерживают тепло. Рост CO₂ связан с потеплением. Климат — долгосрочная статистика погоды." },
+    { t: "алгоритм сложность", a: "Алгоритм — конечная процедура. O-нотация: рост времени с размером входа. Бинарный поиск O(log n)." },
+    { t: "криптография хеш sha256", a: "SHA-256 — криптографический отпечаток. Малое изменение входа → другой хеш. Подпись связывает сообщение с ключом." },
+    { t: "http https интернет", a: "HTTP — протокол запросов. HTTPS = HTTP + TLS. DNS имя→IP. Браузер — клиент." },
+    { t: "javascript браузер", a: "JS в браузере: DOM, Web Crypto, IndexedDB. WebGPU/WASM ускоряют, но не обязательны для логики агента." },
+    { t: "как учиться", a: "Активное воспроизведение, интервалы, сон, связь с известным. Объяснение своими словами сильнее перечитывания." },
+    { t: "критическое мышление", a: "Источник, опровержения, факт vs вывод. Уверенный тон ≠ истина." },
+    { t: "этика ии", a: "Прозрачность, ответственность, приватность, смещения. Local-first и свои ключи — практика автономии." },
+    { t: "здоровье сон", a: "Сон 7–9 ч, вода, движение. Диагнозы — у врача." },
+    { t: "пароль безопасность", a: "Менеджер паролей, уникальные пароли, 2FA, не светить API-ключи." },
+    { t: "вторая мировая", a: "1939–1945. Разгром нацистской Германии и милитаристской Японии, ООН." },
+    { t: "пушкин", a: "Пушкин — норма современного русского литературного языка: лирика, Онегин, проза." },
+    { t: "api rest", a: "API — контракт запрос→ответ. REST часто JSON. Ключи храните локально (BYOK)." },
+    { t: "git commit", a: "commit — снимок; branch — линия; merge — сборка. Понятные сообщения коммитов." },
+    { t: "docker", a: "Контейнер = приложение + зависимости. Удобно для AKSI Relay-сервера." },
+    { t: "расскажи шутку", a: "Инженер АКСИ задокументировал «стакан наполовину…» в proof-ledger и пошёл дальше." },
+    { t: "спасибо", a: "Пожалуйста. Команда «запомни: …» пишет в память и offline-базу." },
   ];
 
-  function localKnowledge(text) {
-    for (var i = 0; i < LOCAL.length; i++) {
-      if (LOCAL[i].re.test(text || "")) return LOCAL[i].a;
-    }
-    return null;
+  function norm(s) {
+    return String(s || "").toLowerCase().replace(/ё/g, "е").replace(/[^a-zа-я0-9\s+\-*/=?.]/g, " ").replace(/\s+/g, " ").trim();
+  }
+  function tokens(s) {
+    return norm(s).split(" ").filter(function (w) { return w.length > 1; });
+  }
+  function loadJSON(k, fb) {
+    try { var v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? fb : v; } catch (e) { return fb; }
+  }
+  function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function extraKB() { var a = loadJSON(KB_EXTRA, []); return Array.isArray(a) ? a : []; }
+  function allKB() { return KB.concat(extraKB()); }
+
+  function score(queryTok, entry) {
+    var et = tokens(entry.t + " " + entry.a);
+    if (!queryTok.length || !et.length) return 0;
+    var set = {}; et.forEach(function (w) { set[w] = 1; });
+    var hit = 0, i;
+    for (i = 0; i < queryTok.length; i++) if (set[queryTok[i]]) hit++;
+    var title = tokens(entry.t), th = 0;
+    for (i = 0; i < queryTok.length; i++) if (title.indexOf(queryTok[i]) >= 0) th++;
+    return hit / queryTok.length + 0.35 * (th / Math.max(1, queryTok.length));
+  }
+  function retrieve(q, topN) {
+    var qt = tokens(q);
+    return allKB().map(function (e) { return { e: e, s: score(qt, e) }; })
+      .filter(function (x) { return x.s > 0.12; })
+      .sort(function (a, b) { return b.s - a.s; }).slice(0, topN || 3);
   }
 
-  function getCrypto() {
-    return fetchJSON(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,toncoin,solana&vs_currencies=usd,rub",
-      5000
-    ).then(function (d) {
-      var lines = [];
-      if (d.bitcoin) lines.push("BTC: $" + d.bitcoin.usd + " / ₽" + d.bitcoin.rub);
-      if (d.ethereum) lines.push("ETH: $" + d.ethereum.usd + " / ₽" + d.ethereum.rub);
-      if (d.toncoin) lines.push("TON: $" + d.toncoin.usd + " / ₽" + d.toncoin.rub);
-      if (d.solana) lines.push("SOL: $" + d.solana.usd + " / ₽" + d.solana.rub);
-      return lines.length ? lines.join("\n") : null;
-    });
-  }
-
-  function getWeather(city) {
-    city = city || "Moscow";
-    return fetch("https://wttr.in/" + encodeURIComponent(city) + "?format=j1", {
-      headers: { Accept: "application/json" },
-    })
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (d) {
-        var c = d.current_condition && d.current_condition[0];
-        var area = d.nearest_area && d.nearest_area[0];
-        if (!c) return null;
-        var name =
-          (area && area.areaName && area.areaName[0] && area.areaName[0].value) || city;
-        var desc =
-          c.lang_ru && c.lang_ru[0] ? c.lang_ru[0].value : c.weatherDesc[0].value;
-        return name + ": " + c.temp_C + "°C · " + desc + " · влажность " + c.humidity + "%";
-      })
-      .catch(function () {
-        return null;
-      });
-  }
-
-  function getWikiSummary(title, lang) {
-    lang = lang || "ru";
-    return fetchJSON(
-      "https://" +
-        lang +
-        ".wikipedia.org/api/rest_v1/page/summary/" +
-        encodeURIComponent(title),
-      5500
-    )
-      .then(function (d) {
-        if (!d || !d.extract) return null;
-        if (d.type === "disambiguation") return null;
-        return {
-          title: d.title,
-          text: String(d.extract).slice(0, 1100),
-          url:
-            (d.content_urls && d.content_urls.desktop && d.content_urls.desktop.page) ||
-            "",
-        };
-      })
-      .catch(function () {
-        return null;
-      });
-  }
-
-  function toSearchQuery(text) {
-    var q = String(text || "")
-      .replace(/[?!…]+/g, " ")
-      .replace(/^(а |ну |скажи |пожалуйста |мне |то |же )/gi, "")
-      .replace(
-        /^(что такое|что значит|кто такой|кто такая|кто такие|расскажи (про|о)|объясни|почему|зачем|как работает|как устроен|what is|who is|why is|why are|how does)\s+/i,
-        ""
-      )
-      .replace(/\s+/g, " ")
-      .trim();
-    if (/небо/i.test(text) && /голуб|син/i.test(text)) return "Рассеяние Рэлея";
-    if (/биткоин|bitcoin/i.test(text)) return "Биткойн";
-    if (q.length < 2) return String(text || "").slice(0, 80);
-    return q.slice(0, 120);
-  }
-
-  function searchWiki(query) {
-    var q = toSearchQuery(query);
-    if (!q || q.length < 2) return Promise.resolve(null);
-    var searchUrl =
-      "https://ru.wikipedia.org/w/api.php?action=opensearch&search=" +
-      encodeURIComponent(q) +
-      "&limit=5&namespace=0&format=json&origin=*";
-    return fetchJSON(searchUrl, 5500)
-      .then(function (data) {
-        var titles = data && data[1];
-        if (!titles || !titles.length) {
-          return getWikiSummary(q, "ru").then(function (r) {
-            return r || getWikiSummary(q, "en");
-          });
-        }
-        function tryAt(i) {
-          if (i >= titles.length) return getWikiSummary(q, "en");
-          return getWikiSummary(titles[i], "ru").then(function (r) {
-            if (r && r.text) return r;
-            return tryAt(i + 1);
-          });
-        }
-        return tryAt(0);
-      })
-      .catch(function () {
-        return getWikiSummary(q, "en");
-      });
-  }
-
-  function detectLive(text) {
-    var t = (text || "").toLowerCase();
-    if (/биткоин|bitcoin|эфир|ethereum|курс|крипт|\bbtc\b|\beth\b|solana|тонкоин|\bton\b/i.test(t))
-      return { type: "crypto" };
-    if (/погода|weather/i.test(t)) {
-      var city = "Moscow";
-      if (/питер|санкт|spb/i.test(t)) city = "Saint Petersburg";
-      if (/казан/i.test(t)) city = "Kazan";
-      if (/москв/i.test(t)) city = "Moscow";
-      return { type: "weather", city: city };
-    }
-    return null;
-  }
-
-  function fullReply(text, messageCount, opts) {
-    messageCount = messageCount || 0;
-    opts = opts || {};
-    text = String(text || "").trim();
-
-    function finish(ans, source) {
-      return aksiSig(ans).then(function (sig) {
-        return {
-          text: ans,
-          html: String(ans).replace(/\n/g, "<br>"),
-          signature: sig,
-          source: source || "aksi",
-          metrics: { version: VERSION },
-        };
-      });
-    }
-
-    if (!text) return finish("Напишите вопрос.", "empty");
-
-    var loc = localKnowledge(text);
-    if (loc) return finish(loc, "local");
-
-    var live = detectLive(text);
-    if (live && live.type === "crypto") {
-      return getCrypto()
-        .then(function (ans) {
-          return finish(ans || "Курсы временно недоступны.", "coingecko");
-        })
-        .catch(function () {
-          return finish("Курсы временно недоступны.", "fail");
-        });
-    }
-    if (live && live.type === "weather") {
-      return getWeather(live.city).then(function (ans) {
-        return finish(ans || "Погода недоступна.", "wttr");
-      });
-    }
-
-    return searchWiki(text).then(function (wiki) {
-      if (wiki && wiki.text) {
-        var ans = wiki.title + ".\n\n" + wiki.text;
-        if (wiki.url) ans += "\n\nИсточник: Wikipedia";
-        return finish(ans, "wikipedia");
-      }
-      return finish(
-        "Не нашла точной статьи по запросу «" +
-          text.slice(0, 80) +
-          "». Переформулируйте короче (например: «рассеяние Рэлея», «Биткойн», «фотосинтез») — или спросите иначе.",
-        "miss"
-      );
-    });
-  }
-
-  function backendReply(text, history, memory) {
-    var API = "";
+  function tryMath(q) {
+    var m = String(q).replace(/,/g, ".").match(/(?:посчитай|вычисли|сколько будет)?\s*([0-9\s+\-*/().^%]+)\s*\??$/i);
+    var expr = m ? m[1] : (/^[0-9+\-*/().^%\s]+$/.test(q.trim()) ? q.trim() : null);
+    if (!expr) return null;
+    expr = expr.replace(/\^/g, "**").replace(/\s+/g, "");
+    if (!/^[0-9+\-*/().%*]+$/.test(expr.replace(/\*\*/g, ""))) return null;
     try {
-      API = localStorage.getItem("AKSI_API") || "";
+      var r = Function('"use strict"; return (' + expr + ")")();
+      if (typeof r === "number" && isFinite(r)) return "Результат: " + r;
     } catch (e) {}
-    if (!API) return Promise.resolve(null);
-    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-    var timer = setTimeout(function () {
-      if (ctrl) try { ctrl.abort(); } catch (e) {}
-    }, 25000);
-    return fetch(API.replace(/\/$/, "") + "/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        content: text,
-        mode: "aksi",
-        history: (history || []).slice(-16),
-        memory: memory || "",
-      }),
-      signal: ctrl ? ctrl.signal : undefined,
-    })
-      .then(function (r) {
-        clearTimeout(timer);
-        if (!r.ok) throw new Error("api");
-        return r.json();
-      })
-      .then(function (j) {
-        if (j && j.answer)
-          return {
-            text: j.answer,
-            html: String(j.answer).replace(/\n/g, "<br>"),
-            signature: j.signature || "",
-            source: "backend-llm",
-          };
-        return null;
-      })
-      .catch(function () {
-        clearTimeout(timer);
-        return null;
-      });
+    return null;
   }
 
-  global.AKSIBrain = {
-    VERSION: VERSION,
-    DID: DID,
-    fullReply: fullReply,
-    backendReply: backendReply,
-    searchWiki: searchWiki,
-    sig: aksiSig,
+  function mskNow() {
+    try {
+      return new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date()) + " (MSK)";
+    } catch (e) { return new Date().toLocaleString("ru-RU"); }
+  }
+
+  function synthesize(q, hits) {
+    if (!hits.length) return null;
+    var best = hits[0];
+    if (best.s < 0.18) return null;
+    var parts = [best.e.a];
+    if (hits[1] && hits[1].s > 0.28 && hits[1].e.a !== best.e.a) parts.push("Также: " + hits[1].e.a);
+    if (best.s < 0.35) parts.push("Если имелось в виду другое — уточните.");
+    return parts.join("\n\n");
+  }
+
+  function personaFallback(q) {
+    var low = norm(q);
+    if (/^(привет|здравств|добрый|hello|hi)\b/.test(low))
+      return "Привет. Я АКСИ Brain — offline без интернета и GPU. Спросите о науке, АКСИ, безопасности или «запомни: факт».";
+    if (/кто ты|что ты/.test(low))
+      return "Локальный мозг АКСИ: retrieval + синтез. Не облачный GPT; работает без сети. Большая модель — Ollama на вашем ПК.";
+    if (/что умеешь|помощь|help/.test(low))
+      return "Offline: база знаний, арифметика, память, RWKV, PQ/ledger. Опционально сеть: LLM Router, Relay.";
+    if (/время|дата|час/.test(low)) return "Сейчас: " + mskNow() + ".";
+    if (/интернет|offline|оффлайн|без сети/.test(low))
+      return "Это offline-мозг. Сеть не нужна. Облако — только если вы сами включите LLM Router.";
+    if (/gpu|видеокарт/.test(low))
+      return "Без GPU: CPU и JavaScript. WebLLM/Ollama — отдельный контур по желанию.";
+    return null;
+  }
+
+  function tryNeuro(q) {
+    try {
+      if (!global.AKSI_NEURO || typeof global.AKSI_NEURO.generate !== "function") return null;
+      var g = global.AKSI_NEURO.generate(q, 48, 0.85);
+      if (g && String(g).trim().length > 8) return String(g).trim();
+    } catch (e) {}
+    return null;
+  }
+
+  function pushHist(role, content) {
+    var h = loadJSON(HIST_KEY, []);
+    h.push({ role: role, content: String(content).slice(0, 2000), ts: Date.now() });
+    if (h.length > 40) h = h.slice(-40);
+    saveJSON(HIST_KEY, h);
+  }
+
+  function complete(q, opts) {
+    opts = opts || {};
+    q = String(q || "").trim();
+    if (!q) return { text: "Пустой запрос.", meta: "brain", offline: true };
+    var math = tryMath(q);
+    if (math) return { text: math, meta: "brain·math", offline: true };
+    var persona = personaFallback(q);
+    if (persona && /^(привет|кто ты|что умеешь|время|gpu|offline)/i.test(norm(q).slice(0, 24)))
+      return { text: persona, meta: "brain·persona", offline: true };
+    var hits = retrieve(q, 4);
+    var syn = synthesize(q, hits);
+    if (syn) {
+      pushHist("user", q); pushHist("assistant", syn);
+      return { text: syn, meta: "brain·kb", offline: true, score: hits[0].s };
+    }
+    if (!opts.noNeuro) {
+      var ng = tryNeuro(q);
+      if (ng) {
+        pushHist("user", q); pushHist("assistant", ng);
+        return { text: ng, meta: "brain·rwkv", offline: true };
+      }
+    }
+    if (persona) return { text: persona, meta: "brain·persona", offline: true };
+    var text = "Я offline-мозг АКСИ: по запросу «" + q.slice(0, 80) + "» нет уверенного факта в локальной базе.\n\n• переформулировать\n• «запомни: …»\n• вкладка Нейро — RWKV\n• Ollama на ПК";
+    pushHist("user", q); pushHist("assistant", text);
+    return { text: text, meta: "brain·fallback", offline: true };
+  }
+
+  function teach(text) {
+    text = String(text || "").trim();
+    if (!text) return false;
+    var a = extraKB();
+    a.push({ t: tokens(text).slice(0, 12).join(" "), a: text });
+    if (a.length > 200) a = a.slice(-200);
+    saveJSON(KB_EXTRA, a);
+    return true;
+  }
+
+  function stats() {
+    return { version: VER, kb: KB.length, extra: extraKB().length, offline: true, gpu: false, internet: false };
+  }
+
+  function mount(sel) {
+    var root = typeof sel === "string" ? document.querySelector(sel) : sel;
+    if (!root) return;
+    root.innerHTML = '<div class="card"><h2>Offline Brain · v' + VER + '</h2>' +
+      '<p class="muted">Без интернета и GPU. База + синтез. «В базу» — выучить факт.</p>' +
+      '<pre id="brSt" class="out">' + JSON.stringify(stats(), null, 2) + '</pre>' +
+      '<textarea id="brIn" placeholder="Вопрос offline…" style="margin-top:10px"></textarea>' +
+      '<div class="row"><button type="button" class="btn p" id="brAsk">Спросить</button>' +
+      '<button type="button" class="btn" id="brTeach">В базу</button></div>' +
+      '<pre id="brOut" class="out" style="margin-top:10px;max-height:240px">—</pre></div>';
+    document.getElementById("brAsk").onclick = function () {
+      var r = complete(document.getElementById("brIn").value);
+      document.getElementById("brOut").textContent = r.text + "\n\n[" + r.meta + "]";
+    };
+    document.getElementById("brTeach").onclick = function () {
+      teach(document.getElementById("brIn").value);
+      document.getElementById("brSt").textContent = JSON.stringify(stats(), null, 2);
+      document.getElementById("brOut").textContent = "Добавлено в offline-базу.";
+    };
+  }
+
+  global.AKSI_BRAIN = {
+    version: VER, complete: complete, retrieve: retrieve, teach: teach, stats: stats, mount: mount, KB_SIZE: KB.length,
   };
-})(typeof window !== "undefined" ? window : globalThis);
+})(typeof window !== "undefined" ? window : this);
