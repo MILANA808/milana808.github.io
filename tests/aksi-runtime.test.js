@@ -67,6 +67,12 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
   assert.strictEqual(result.ok, false);
   assert.strictEqual(result.reason, 'previous-hash-mismatch');
 
+  const forgedSignature = JSON.parse(JSON.stringify([e1, e2]));
+  forgedSignature[0].signature.signature = 'AA==' + forgedSignature[0].signature.signature;
+  result = await integrity.verifyLedger(forgedSignature);
+  assert.strictEqual(result.ok, false);
+  assert.strictEqual(result.reason, 'signature-mismatch');
+
   console.log('AKSI runtime contract + cryptographic integrity tests: OK');
 })().catch((error) => {
   console.error(error);
