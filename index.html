@@ -122,22 +122,17 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
       <p class="muted"><b>Чат</b> — вопросы. «запомни: …» сохраняет факт.</p>
       <p class="muted"><b>Фото</b> — текст с картинки. С llava — описание сцены.</p>
       <p class="muted"><b>Память</b> — ваши заметки в браузере.</p>
-      <p class="muted"><b>Настройки</b> — Ollama или API-ключ (ключ не уходит на серверы АКСИ).</p>
+      <p class="muted"><b>Настройки</b> — Ollama или API-ключ.</p>
     </div>
-    <div class="card">
-      <h2>Приватность</h2>
-      <p class="muted">По умолчанию offline. Сообщения не отправляются на наши серверы.</p>
-    </div>
-    <div class="card">
-      <h2>Контакт</h2>
-      <p class="muted">aksilove@internet.ru</p>
-      <p class="muted" id="didLine">DID: —</p>
-    </div>
+    <div class="card"><h2>Приватность</h2><p class="muted">По умолчанию offline. Сообщения не уходят на наши серверы.</p></div>
+    <div class="card"><h2>Контакт</h2><p class="muted">aksilove@internet.ru</p>
+      <p class="muted"><a href="/product/" style="color:var(--a)">World Product · PQ Seal →</a></p>
+      <p class="muted" id="didLine">DID: —</p></div>
   </section>
   <section class="panel" id="tab-lab">
     <div class="card">
       <h2>Дополнительно</h2>
-      <p class="muted">Для проверки и разработки. Обычному пользователю не обязательно.</p>
+      <p class="muted">Для проверки. Обычному пользователю не обязательно.</p>
       <div class="row">
         <button type="button" class="btn" data-tab="mind">Мозг</button>
         <button type="button" class="btn" data-tab="quantum">Quantum</button>
@@ -145,6 +140,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
         <button type="button" class="btn" data-tab="dkv">Документы</button>
         <button type="button" class="btn" data-tab="vision">Камера</button>
         <button type="button" class="btn" data-tab="net">Сеть</button>
+        <button type="button" class="btn" data-tab="seal">PQ Seal</button>
       </div>
     </div>
   </section>
@@ -155,6 +151,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
   <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
   <section class="panel" id="tab-net"><div id="net-root"></div></section>
   <section class="panel" id="tab-brain"><div id="brain-root"></div></section>
+  <section class="panel" id="tab-seal"><div id="seal-root"></div></section>
 </main>
 <div class="bar">
   <button type="button" class="icon-btn" id="photoBtn" title="Фото">📷</button>
@@ -171,10 +168,12 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
 <script src="aksi-llm.js?v=2"></script>
 <script src="aksi-vision.js?v=2"></script>
 <script src="aksi-photo.js?v=1"></script>
-<script src="aksi-mind.js?v=2"></script>
-<script src="aksi-one.js?v=14"></script>
-<script src="aksi-ux.js?v=1"></script>
-<script src="aksi-whole.js?v=2"></script>
+<script src="aksi-mind.js?v=3"></script>
+<script src="aksi-one.js?v=15"></script>
+<script src="aksi-ux.js?v=2"></script>
+<script src="aksi-one-fix.js?v=1"></script>
+<script src="aksi-seal.js?v=1"></script>
+<script src="aksi-whole.js?v=3"></script>
 <script>
 (function () {
   var TABS = {
@@ -185,6 +184,7 @@ pre.out{background:var(--card);border-radius:12px;padding:12px;font-size:12px;ov
     vision: ["AKSI_VISION", "#vision-root"],
     net: ["AKSI_OVERLAY", "#net-root"],
     brain: ["AKSI_BRAIN", "#brain-root"],
+    seal: ["AKSI_SEAL", "#seal-root"],
   };
   var mounted = {};
   function goTab(t) {
