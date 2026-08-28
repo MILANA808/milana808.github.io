@@ -1,0 +1,31 @@
+{
+  "type": "AKSI-LEGAL-TECHNICAL-PRECEDENT",
+  "id": "aksi-offline-first-consent-2026-08",
+  "version": "1.0",
+  "title": {
+    "en": "Offline-first personal AI runtime with explicit network consent",
+    "ru": "Офлайн-первый персональный ИИ-рантайм с явным согласием на сеть"
+  },
+  "claim": {
+    "en": "AKSI processes user dialogue, memory, and identity locally in the browser by default. Any outbound network request for knowledge search requires an explicit user-enabled control (checkbox Internet). Private keys and memory are not transmitted to AKSI operator servers as part of default operation.",
+    "ru": "АКСИ по умолчанию обрабатывает диалог, память и идентичность локально в браузере. Любой исходящий сетевой запрос для поиска знаний требует явного включения пользователем (галочка «Интернет»). Приватные ключи и память не передаются на серверы оператора АКСИ в режиме по умолчанию."
+  },
+  "technical_controls": [
+    "localStorage flag aksi:web:enabled defaults absent/false",
+    "AKSI_WEB.search refuses network unless isEnabled() or force",
+    "AKSI_MIND skips fromWeb when needsWeb is false",
+    "API keys stored only in browser storage chosen by user",
+    "Proof ledger and PQ seal can attest session policy"
+  ],
+  "how_to_verify": {
+    "en": "1) Open https://milana808.github.io/ . 2) Confirm Internet checkbox is off. 3) Ask a factual question — answer must not call Wikipedia. 4) Enable checkbox, ask again — network calls to wikipedia.org / api.duckduckgo.com may appear. 5) Optional: AKSI_SEAL.sign() and download attestation JSON. 6) Check content_sha256 of this file.",
+    "ru": "1) Откройте https://milana808.github.io/ . 2) Галочка «Интернет» выключена. 3) Фактический вопрос — Wikipedia не вызывается. 4) Включите галочку — допустимы запросы к wikipedia.org / api.duckduckgo.com. 5) Опционально: AKSI_SEAL.sign(). 6) Сверьте content_sha256 этого файла."
+  },
+  "contact": "aksilove@internet.ru",
+  "license": "Proprietary",
+  "runtime": "https://milana808.github.io/",
+  "precedent_url": "https://milana808.github.io/PRECEDENT.json",
+  "sealed_with": "AKSI-SEAL hybrid ECDSA-P256 + AKSI-PQ-COMMIT-v1 (generate in browser)",
+  "content_sha256": "4f7a9fdbbae2ef446f42d370617d756ef6becbbe4c6da264bc9b2f2a08f55ace",
+  "canonicalization": "json-sort-keys-utf8-no-space"
+}

@@ -1,0 +1,66 @@
+// AKSI.L — application source of truth
+// Runtime host: browser (aksi-lang.js interpreter)
+// © AKSI · aksilove@internet.ru · Proprietary
+
+agent aksi {
+  name: "AKSI"
+  contact: "aksilove@internet.ru"
+  offline_default: true
+  internet: opt_in
+  languages: ["ru", "en"]
+}
+
+module web {
+  enabled: false
+  flag: "aksi:web:enabled"
+  sources: ["wikipedia", "duckduckgo"]
+  require_checkbox: true
+}
+
+module mind {
+  pipeline: ["brain", "web?", "core", "llm", "guide"]
+  quantum: true
+  trust: true
+}
+
+module memory {
+  store: "localStorage"
+  command: "remember"
+}
+
+module photo {
+  ocr: true
+  vision_llm: "optional"
+}
+
+module seal {
+  classical: "ECDSA-P256-SHA256"
+  pq: "AKSI-PQ-COMMIT-v1"
+}
+
+module i18n {
+  default: "ru"
+  supported: ["ru", "en"]
+  storage: "aksi:lang"
+}
+
+policy privacy {
+  assert offline_first
+  assert no_default_telemetry
+  assert keys_stay_local
+  assert network_requires_consent
+}
+
+precedent offline_consent {
+  id: "aksi-offline-first-consent-2026-08"
+  file: "PRECEDENT.json"
+  verify: "checkbox + DevTools network + content_sha256"
+}
+
+agent Sovereign {
+  on query(q) {
+    let qx = quantum.shot(q)
+    let ans = brain.think(q)
+    return ans
+  }
+}
