@@ -1,7 +1,7 @@
-/** AKSI Quantum Engine v2.0.0-engine · 1..8 qubits · state-vector · © AKSI proprietary */
+/** AKSI Quantum Engine v2.0.1-engine · 1..8 qubits · state-vector · © AKSI proprietary */
 (function (G) {
   "use strict";
-  var VER = "2.0.0-engine";
+  var VER = "2.0.1-engine";
   var RESONANCE_SEED = "Alfiya_AKSI_DIMAX_v3_2026";
   var MAX_QUBITS = 8;
   var SQRT2_INV = 1 / Math.SQRT2;
@@ -183,7 +183,7 @@
     return { x: +rx.toFixed(6), y: +ry.toFixed(6), z: +rz.toFixed(6), r: +Math.sqrt(rx*rx+ry*ry+rz*rz).toFixed(6) };
   };
   Circuit.prototype.circuitString = function () {
-    var lines = [], i, self = this;
+    var lines = [], i;
     for (i = 0; i < this.n; i++) lines.push("q" + i + ": ");
     this.ops.forEach(function (op) {
       if (op.qubits.length === 1) lines[op.qubits[0]] += "[" + op.gate + "]─";
@@ -240,14 +240,19 @@
     if (seed & 2) c.rz(0, th0);
     if (seed & 4) c.ry(1, th1);
     if (seed & 8) c.h(0);
-    var m = c.measure(rng), p = m.probs, ent = shannonEntropy(p), pur = purityFromProbs(p);
+    var p = c.probs();
+    var bloch0 = c.bloch(0);
+    var circ = c.circuitString();
+    var nops = c.ops.length;
+    var ent = shannonEntropy(p), pur = purityFromProbs(p);
+    var m = c.measure(rng);
     var qcli = Math.min(1, ent / 2);
     var resonance = +((0.4 * qcli + 0.35 * (1 - Math.abs(pur - 0.5)) + 0.25 * (m.outcome / 3)).toFixed(3));
     return {
       version: VER, bits: m.bits, outcome: m.outcome,
       probs: p.map(function (x) { return +x.toFixed(3); }),
       entropy: +ent.toFixed(3), purity: +pur.toFixed(3), QCLI: +qcli.toFixed(3), resonance: resonance,
-      circuit: c.circuitString(), ops: c.ops.length, bloch0: c.bloch(0),
+      circuit: circ, ops: nops, bloch0: bloch0,
       label: "AKSI-QEngine·2q", seed: RESONANCE_SEED, engine: VER,
     };
   }
