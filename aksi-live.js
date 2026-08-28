@@ -1,11 +1,10 @@
 /**
- * AKSI LIVE RUNTIME v1 — Quantum → Brain/Core/LLM → Trust
- * window.AKSI = unified facade
+ * AKSI LIVE RUNTIME v1.0.1 — Quantum → Brain/Core/LLM → Trust
  * © AKSI · aksilove@internet.ru · Proprietary
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0-live";
+  var VER = "1.0.1-live";
   function modules() {
     return {
       quantum: !!G.AKSI_QUANTUM, brain: !!G.AKSI_BRAIN, trust: !!G.AKSI_TRUST, one: !!G.AKSI_ONE,
@@ -86,9 +85,9 @@
       }
       var done = function (tr) {
         var meta = (res.meta || "live") + " · q:" + (qx.bits || "?");
-        if (tr) meta += " · trust:" + tr.trust;
-        var text = res.text;
-        if (text.length < 1200) text = text + formatQuantumFooter(qx);
+        if (tr && tr.trust) meta += " · trust:" + tr.trust;
+        var text = String(res.text || "");
+        if (text.indexOf("⟨QSim⟩") === -1 && text.length < 1200) text = text + formatQuantumFooter(qx);
         return { text: text, meta: meta, quantum: qx, trust: tr || null, offline: !!res.offline };
       };
       if (G.AKSI_TRUST && G.AKSI_TRUST.verifyResponse) {
@@ -138,7 +137,9 @@
   function hookOne() {
     if (!G.AKSI_ONE) return;
     G.AKSI_ONE.think = function (q) {
-      return think(q).then(function (r) { return { text: r.text, meta: r.meta }; });
+      return think(q).then(function (r) {
+        return { text: r.text, meta: r.meta, trust: r.trust, quantum: r.quantum };
+      });
     };
     G.AKSI_ONE.live = true;
     G.AKSI_ONE.version = (G.AKSI_ONE.version || "") + "+live";
