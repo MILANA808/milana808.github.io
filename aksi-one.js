@@ -1,12 +1,11 @@
 /**
- * AKSI ONE v1.6.0 — stable chat runtime
- * Routes think() → LIVE when present (fixes race where LIVE hook was lost).
- * Single Trust pass if LIVE already verified.
+ * AKSI ONE v1.7.0 — max chat runtime
+ * Routes think() → LIVE when present. /demo · whoami · QCLI+R meta.
  * © AKSI · aksilove@internet.ru
  */
 (function (global) {
   "use strict";
-  var VER = "1.6.0";
+  var VER = "1.7.0";
   var MEM_KEY = "aksi_whole_mem_v3";
   var LEDGER_KEY = "aksi_proof_ledger_v1";
   var LLM_KEY = "aksi_llm_cfg_v1";
@@ -88,11 +87,11 @@
   function localAnswer(q) {
     var low = String(q || "").toLowerCase().trim();
     if (/^(привет|здравств|добрый|hello|hi)\b/.test(low))
-      return "Привет. Я АКСИ — local-first runtime (Quantum · Trust · Overlay · DKV). Спросите «кто ты» или откройте вкладку Whole.";
+      return "Привет. Я АКСИ — local-first runtime (Quantum · Trust · Overlay · DKV). Спросите «кто ты» или /demo.";
     if (/кто ты|что ты такое|what are you/.test(low))
-      return "АКСИ — суверенный Decision Integrity Runtime в браузере: офлайн Brain, proof-ledger, Quantum Engine, Trust Compiler, Overlay AOP/1. Контакт: aksilove@internet.ru";
+      return "АКСИ — суверенный Decision Integrity Runtime: offline Brain, proof-ledger, Quantum, Trust, Overlay AOP/1. Контакт: aksilove@internet.ru";
     if (/что умеешь|помощь|help|функци/.test(low))
-      return "Чат · Net (Overlay) · Quantum · DKV · Trust · Brain · P2P · Lang · Память (запомни: …) · Цепочка. Всё local-first.";
+      return "Чат · Net · Quantum · DKV · Trust · Brain · P2P · Lang · Память · Цепочка. Команда /demo.";
     if (/контакт|почта|email/.test(low)) return "aksilove@internet.ru · X @AKSILOVE";
     if (/matrix/.test(low)) return "MATRIX: https://milana808.github.io/aksi-matrix/";
     if (/время|который час|time/.test(low)) {
@@ -156,6 +155,17 @@
     if (!q) return Promise.resolve({ text: "Пустой запрос.", meta: "one" });
     if (global.AKSI_TRUST && global.AKSI_TRUST.state && global.AKSI_TRUST.state().safeMode) {
       return Promise.resolve({ text: "Safe-mode: Trust Compiler. Сброс во вкладке Trust.", meta: "trust·safe" });
+    }
+    if (/^\/demo\b/i.test(q) || /^demo$/i.test(q)) {
+      return Promise.resolve({
+        text: "AKSI demo:\n· whoami — DID\n· /demo — этот список\n· вкладки: Quantum · Net · Trust · DKV · Whole\n· запомни: факт\n· 2+2 — math Brain",
+        meta: "demo",
+      });
+    }
+    if (/^whoami$/i.test(q)) {
+      var did = "—";
+      try { did = localStorage.getItem("aksi_did_v1") || "did:aksi:local"; } catch (e) {}
+      return Promise.resolve({ text: "DID: " + did + "\nПриватный ключ не покидает браузер (local-first).", meta: "identity" });
     }
     var memCmd = q.match(/^(запомни|выучи)\s*[:\s]+(.+)/i);
     if (memCmd) {
@@ -223,7 +233,10 @@
       function finish(extra) {
         var mtag = meta;
         if (extra && mtag.indexOf(extra) === -1) mtag = mtag + (mtag ? " · " : "") + extra;
-        if (res && res.quantum && res.quantum.qcli != null) mtag += " · Q" + res.quantum.qcli;
+        var qx = res && res.quantum;
+        var qv = qx && (qx.QCLI != null ? qx.QCLI : qx.qcli);
+        if (qv != null) mtag += " · Q" + qv;
+        if (qx && qx.resonance != null) mtag += " · R" + qx.resonance;
         bubble("ai", text, mtag);
         history.push({ role: "assistant", content: text });
         appendLedger("chat", "Q:" + q.slice(0, 80));
