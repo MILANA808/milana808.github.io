@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ Quantum Engine v2 · LIVE · Trust. aksilove@internet.ru">
-<title>АКСИ — Quantum Engine v2</title>
+<meta name="description" content="АКСИ — Quantum Engine · LIVE · Trust · Offline Brain">
+<title>АКСИ</title>
 <style>
 :root{--bg:#06050b;--s1:#13111c;--s2:#1b1726;--line:rgba(167,139,250,.18);--line2:rgba(255,255,255,.07);--t:#f7f5ff;--m:#a8a0bd;--dim:#7a738f;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px}
 *{box-sizing:border-box;margin:0;padding:0}html{height:100%}
@@ -17,7 +17,7 @@ header h1{font-size:17px;font-weight:750}.sub{font-size:12px;color:var(--m)}.pil
 .feat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px var(--pad) 0}
 .feat .f{padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--s1);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;text-decoration:none;display:block}
 .feat .f strong{display:block;font-size:13px;margin-bottom:3px}.feat .f span{font-size:11.5px;color:var(--dim)}
-nav{display:flex;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.92);overflow-x:auto}
+nav{display:flex;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.92);overflow-x:auto;-webkit-overflow-scrolling:touch}
 nav button{flex-shrink:0;padding:8px 12px;border:0;border-radius:10px;background:0;color:var(--m);font:600 12px/1 var(--font);cursor:pointer}
 nav button.on{background:var(--s2);color:var(--t)}
 main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--safe))}
@@ -47,16 +47,16 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ <span class="pill">Q v2</span></h1><div class="sub">Quantum Engine · LIVE · Trust</div></div>
+  <div><h1>АКСИ <span class="pill">stable</span></h1><div class="sub">Quantum · LIVE · Trust · Brain</div></div>
   <div class="stats"><div id="stClock">MSK —</div><div>EQS <b id="stEqs">—</b> · <span id="stBadge">boot</span></div></div>
 </header>
 <div class="feat">
-  <button type="button" class="f" data-tab="quantum"><strong>⚛ Quantum</strong><span>Engine v2 · CHSH · Bloch</span></button>
-  <a class="f" href="/quantum.html"><strong>🔬 Lab</strong><span>quantum.html pilot</span></a>
-  <button type="button" class="f" data-tab="live"><strong>⚡ LIVE</strong><span>QSim → Trust</span></button>
-  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>Quantum path</span></button>
+  <button type="button" class="f" data-tab="quantum"><strong>⚛ Quantum</strong><span>Engine v2</span></button>
+  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>LIVE path</span></button>
   <button type="button" class="f" data-tab="trust"><strong>🛡 Trust</strong><span>Compiler</span></button>
-  <a class="f" href="/product/"><strong>🏢 B2B</strong><span>Decision Integrity</span></a>
+  <button type="button" class="f" data-tab="brain"><strong>🧠 Brain</strong><span>Offline</span></button>
+  <button type="button" class="f" data-tab="live"><strong>⚡ LIVE</strong><span>Status</span></button>
+  <a class="f" href="/product/"><strong>🏢 B2B</strong><span>Product</span></a>
 </div>
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
@@ -65,93 +65,124 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   <button type="button" data-tab="lang">Lang</button>
   <button type="button" data-tab="trust">Trust</button>
   <button type="button" data-tab="brain">Brain</button>
+  <button type="button" data-tab="mem">Память</button>
   <button type="button" data-tab="proof">Цепочка</button>
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
-  <section class="panel" id="tab-quantum"><div id="quantum-root"><div class="card"><h2>Quantum</h2><p class="muted">…</p></div></div></section>
-  <section class="panel" id="tab-live"><div id="live-root"><div class="card"><h2>LIVE</h2><p class="muted">…</p></div></div></section>
-  <section class="panel" id="tab-lang"><div id="lang-root"><div class="card"><h2>Lang</h2><p class="muted">…</p></div></div></section>
-  <section class="panel" id="tab-trust"><div id="trust-root"><div class="card"><h2>Trust</h2><p class="muted">…</p></div></div></section>
-  <section class="panel" id="tab-brain"><div id="brain-root"><div class="card"><h2>Brain</h2><p class="muted">…</p></div></div></section>
+  <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
+  <section class="panel" id="tab-live"><div id="live-root"></div></section>
+  <section class="panel" id="tab-lang"><div id="lang-root"></div></section>
+  <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
+  <section class="panel" id="tab-brain"><div id="brain-root"></div></section>
   <section class="panel on" id="tab-chat">
     <div id="thread"></div>
     <div class="chips">
       <button type="button" class="chip" data-ask="привет">привет</button>
-      <button type="button" class="chip" data-tab="quantum">→ Quantum</button>
+      <button type="button" class="chip" data-ask="кто ты">кто ты</button>
+      <button type="button" class="chip" data-ask="что такое ии">ИИ</button>
     </div>
-    <p class="hint">Engine v2 · <a href="/quantum.html">lab</a> · <a href="/docs/QUANTUM-ENGINE.md">docs</a> · <b>Ctrl+F5</b></p>
+    <p class="hint">Ctrl+F5 · <a href="/quantum.html">quantum lab</a></p>
+  </section>
+  <section class="panel" id="tab-mem">
+    <div class="card"><h2>Память · <span id="memN">0</span></h2>
+      <div id="memList"></div>
+      <div class="row"><button type="button" class="btn" id="btnWipe">Забыть всё</button></div>
+    </div>
   </section>
   <section class="panel" id="tab-proof">
     <div class="card"><h2>Цепочка</h2>
-      <div class="row"><button type="button" class="btn p" id="btnProof">Проверить</button>
-        <button type="button" class="btn" id="btnProofClear">Очистить</button></div>
-      <pre class="out" id="pOut">—</pre></div>
+      <div class="row">
+        <button type="button" class="btn p" id="btnProof">Проверить</button>
+        <button type="button" class="btn" id="btnProofClear">Очистить</button>
+      </div>
+      <pre class="out" id="pOut">—</pre>
+    </div>
   </section>
   <section class="panel" id="tab-about">
-    <div class="card"><h2>АКСИ</h2><p class="muted">Quantum Engine v2 · proprietary</p>
-      <p class="muted">aksilove@internet.ru</p></div>
+    <div class="card"><h2>АКСИ</h2>
+      <p class="muted">Local-first · Quantum · Trust · Proof Ledger</p>
+      <p class="muted">aksilove@internet.ru</p>
+    </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
   </section>
 </main>
 <div class="bar">
-  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
-  <button type="button" class="send" id="send">↑</button>
+  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off" maxlength="2000">
+  <button type="button" class="send" id="send" aria-label="Отправить">↑</button>
 </div>
 <script src="aksi-core.js?v=51"></script>
-<script src="aksi-quantum.js?v=2"></script>
-<script src="aksi-live.js?v=1"></script>
+<script src="aksi-quantum.js?v=3"></script>
+<script src="aksi-live.js?v=2"></script>
 <script src="aksi-lang.js?v=1"></script>
-<script src="aksi-trust.js?v=1"></script>
+<script src="aksi-trust.js?v=2"></script>
 <script src="aksi-brain.js?v=1"></script>
-<script src="aksi-one.js?v=9"></script>
+<script src="aksi-one.js?v=10"></script>
 <script>
-(function(){
-  function goTab(t){
-    if(!t)return;
-    document.querySelectorAll("nav [data-tab]").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-tab")===t);});
-    document.querySelectorAll("main .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});
-    if(t==="quantum")mountMod("quantum","#quantum-root");
-    if(t==="live")mountMod("live","#live-root");
-    if(t==="lang")mountMod("lang","#lang-root");
-    if(t==="trust")mountMod("trust","#trust-root");
-    if(t==="brain")mountMod("brain","#brain-root");
+(function () {
+  function goTab(t) {
+    if (!t) return;
+    document.querySelectorAll("nav [data-tab]").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-tab") === t);
+    });
+    document.querySelectorAll("main .panel").forEach(function (p) {
+      p.classList.toggle("on", p.id === "tab-" + t);
+    });
+    if (t === "quantum") mountMod("quantum", "#quantum-root");
+    if (t === "live") mountMod("live", "#live-root");
+    if (t === "lang") mountMod("lang", "#lang-root");
+    if (t === "trust") mountMod("trust", "#trust-root");
+    if (t === "brain") mountMod("brain", "#brain-root");
   }
-  var mounted={};
-  function eng(n){
-    if(n==="quantum")return window.AKSI_QUANTUM;
-    if(n==="live")return window.AKSI_LIVE;
-    if(n==="lang")return window.AKSI_LANG;
-    if(n==="trust")return window.AKSI_TRUST;
-    if(n==="brain")return window.AKSI_BRAIN;
+  var mounted = {};
+  function eng(n) {
+    if (n === "quantum") return window.AKSI_QUANTUM;
+    if (n === "live") return window.AKSI_LIVE;
+    if (n === "lang") return window.AKSI_LANG;
+    if (n === "trust") return window.AKSI_TRUST;
+    if (n === "brain") return window.AKSI_BRAIN;
     return null;
   }
-  function mountMod(name,sel){
-    if(mounted[name])return;
-    var m=eng(name),root=document.querySelector(sel);
-    if(!m||typeof m.mount!=="function"){
-      if(root&&!root.dataset.fb){root.dataset.fb="1";root.innerHTML='<div class="card"><h2>'+name+'</h2><p class="muted">Ctrl+F5</p></div>';}
+  function mountMod(name, sel) {
+    if (mounted[name]) return;
+    var m = eng(name), root = document.querySelector(sel);
+    if (!m || typeof m.mount !== "function") {
+      if (root && !root.dataset.fb) {
+        root.dataset.fb = "1";
+        root.innerHTML = '<div class="card"><h2>' + name + '</h2><p class="muted">Ctrl+F5</p></div>';
+      }
       return;
     }
-    try{m.mount(sel);mounted[name]=true;}catch(e){if(root)root.innerHTML='<div class="card"><p class="muted">'+e.message+'</p></div>';}
+    try { m.mount(sel); mounted[name] = true; }
+    catch (e) { if (root) root.innerHTML = '<div class="card"><p class="muted">' + (e && e.message) + "</p></div>"; }
   }
-  function boot(){
-    var th=document.getElementById("thread");
-    if(th&&!th.children.length){
-      var d=document.createElement("div");d.className="msg ai";
-      d.innerHTML='<div class="bub">Quantum Engine <b>v2</b>: Bell · GHZ · CHSH · Bloch · Circuit API<div class="meta">AKSI-QEngine</div></div>';
+  function boot() {
+    var th = document.getElementById("thread");
+    if (th && !th.children.length) {
+      var d = document.createElement("div");
+      d.className = "msg ai";
+      d.innerHTML = '<div class="bub">АКСИ online. Quantum → Brain → Trust.<div class="meta">stable</div></div>';
       th.appendChild(d);
     }
-    var el=document.getElementById("stClock");
-    function tick(){try{el.textContent=new Intl.DateTimeFormat("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit"}).format(new Date())+" MSK";}catch(e){}}
-    if(el){tick();setInterval(tick,30000);}
-    document.addEventListener("click",function(e){
-      var x=e.target.closest&&e.target.closest("[data-tab]");
-      if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}
-    },true);
-    setTimeout(function(){var b=document.getElementById("stBadge");if(b&&window.AKSI_ONE)b.textContent="ONE "+window.AKSI_ONE.version;},400);
+    var el = document.getElementById("stClock");
+    function tick() {
+      try {
+        el.textContent = new Intl.DateTimeFormat("ru-RU", { timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit" }).format(new Date()) + " MSK";
+      } catch (e) {}
+    }
+    if (el) { tick(); setInterval(tick, 30000); }
+    document.addEventListener("click", function (e) {
+      var x = e.target.closest && e.target.closest("[data-tab]");
+      if (x) { var t = x.getAttribute("data-tab"); if (t) goTab(t); }
+    }, true);
+    setTimeout(function () {
+      var b = document.getElementById("stBadge");
+      if (b && window.AKSI_ONE) b.textContent = "ONE " + window.AKSI_ONE.version;
+      else if (b) b.textContent = "ready";
+    }, 300);
   }
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
 </script>
 </body>
