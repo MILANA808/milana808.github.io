@@ -1,20 +1,26 @@
 /**
- * AKSI LIVE v1.1.0 — Quantum → Brain/ONE → Trust
+ * AKSI LIVE v1.2.0 — Quantum → Brain/ONE → Trust
  * Does NOT patch ONE.think (race-safe). ONE.think calls LIVE when present.
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.1.0";
+  var VER = "1.2.0";
   function modules() {
     return {
       quantum: !!G.AKSI_QUANTUM, brain: !!G.AKSI_BRAIN, trust: !!G.AKSI_TRUST,
       one: !!G.AKSI_ONE, core: !!(G.AKSI_CORE || G.AksiCore), overlay: !!G.AKSI_OVERLAY,
     };
   }
+  function normQ(qx) {
+    if (!qx) return null;
+    if (qx.qcli == null && qx.QCLI != null) qx.qcli = qx.QCLI;
+    if (qx.QCLI == null && qx.qcli != null) qx.QCLI = qx.qcli;
+    return qx;
+  }
   function quantumContext(q) {
     if (!G.AKSI_QUANTUM || typeof G.AKSI_QUANTUM.shot !== "function") return null;
-    try { return G.AKSI_QUANTUM.shot(String(q || "ping").slice(0, 200)); }
+    try { return normQ(G.AKSI_QUANTUM.shot(String(q || "ping").slice(0, 200))); }
     catch (e) { return { error: String(e.message || e) }; }
   }
   function tryBrain(q) {
@@ -59,7 +65,9 @@
     }).then(function (res) {
       var text = res.text;
       var meta = res.meta || "live";
-      if (qx && qx.qcli != null) meta += " · Q" + qx.qcli;
+      var qv = qx && (qx.QCLI != null ? qx.QCLI : qx.qcli);
+      if (qv != null) meta += " · Q" + qv;
+      if (qx && qx.resonance != null) meta += " · R" + qx.resonance;
       if (!G.AKSI_TRUST || typeof G.AKSI_TRUST.verifyResponse !== "function") {
         return { text: text, meta: meta, quantum: qx, trust: null, offline: !!res.offline };
       }
@@ -75,7 +83,7 @@
   function status() {
     return {
       version: VER, modules: modules(),
-      quantumSample: G.AKSI_QUANTUM ? G.AKSI_QUANTUM.shot("status") : null,
+      quantumSample: G.AKSI_QUANTUM ? normQ(G.AKSI_QUANTUM.shot("status")) : null,
       product: "AKSI LIVE pipeline", contact: "aksilove@internet.ru",
     };
   }
