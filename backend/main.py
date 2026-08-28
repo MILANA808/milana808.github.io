@@ -1,17 +1,12 @@
 """
-АКСИ Backend v1.2 — локальный мост к LLM (Ollama / xAI / OpenAI).
+АКСИ Backend v1.3 — local-first LLM bridge.
 
-Запуск:
-  pip install fastapi uvicorn httpx pydantic
-  ollama pull qwen2.5:3b && ollama serve
-  python main.py
+Network policy: local Ollama is the default. Remote providers are NEVER
+selected implicitly: set AKSI_ALLOW_REMOTE=1 and choose AKSI_LLM_PROVIDER.
 
-Эндпоинты:
-  GET  /health
-  GET  /api/identity
-  POST /v1/chat/completions
-  POST /api/chat
-  GET  /docs
+The backend response signature is a SHA-256 integrity fingerprint, not an
+Ed25519 digital signature. Cryptographic identity/signatures are owned by the
+browser AKSI Runtime, where the private key can remain non-exportable.
 """
 from __future__ import annotations
 
@@ -25,14 +20,15 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-VERSION = "1.2.0"
-DID = "did:aksi:ed25519:sovereign-2026"
+VERSION = "1.3.0"
+DID = "did:aksi:backend:local"
 SEED = os.getenv("RESONANCE_SEED", "AKSI_DIMAX_v3_2026")
 CONTACT = "aksilove@internet.ru"
 
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5:3b")
-PROVIDER = os.getenv("AKSI_LLM_PROVIDER", "auto")
+PROVIDER = os.getenv("AKSI_LLM_PROVIDER", "ollama").lower()
+ALLOW_REMOTE = os.getenv("AKSI_ALLOW_REMOTE", "0").lower() in {"1", "true", "yes", "on"}
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_BASE = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
@@ -46,25 +42,31 @@ SYSTEM = (
 )
 
 KB = [
-    (
-        ("кто ты", "что ты", "твоя идентичность"),
-        "Я АКСИ — суверенный помощник. DID: did:aksi:ed25519:sovereign-2026. "
-        "Работаю локально: данные по умолчанию остаются у вас. Контакт: aksilove@internet.ru",
-    ),
-    (
-        ("что умеешь", "возможности", "функции"),
-        "Отвечаю offline, помню факты, считаю, объясняю квантовые состояния, "
-        "подписываю ответы. С Ollama — полноценный LLM. Backend: /v1/chat/completions.",
-    ),
-    (
-        ("помощь", "help", "команды"),
-        "Команды: «запомни: …», «очисти память», формулы, «запутанность». "
-        "Включите LLM в настройках чата: http://127.0.0.1:8000",
-    ),
+    (("кто ты", "что ты", "твоя идентичность"),
+     "Я АКСИ — локальный помощник. Данные по умолчанию остаются локально. "
+     "Криптографические подписи ответов выполняет AKSI Runtime в браузере."),
+    (("что умеешь", "возможности", "функции"),
+     "Отвечаю offline, могу работать с Ollama, памятью и проверяемыми доказательствами. "
+     "Backend предоставляет /v1/chat/completions и /api/chat."),
+    (("помощь", "help", "команды"),
+     "Команды: «запомни: …», «очисти память», формулы, «запутанность». "
+     "Локальный backend по умолчанию использует Ollama."),
 ]
 
-app = FastAPI(title="АКСИ Backend", description="Sovereign local LLM bridge", version=VERSION)
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app = FastAPI(title="АКСИ Backend", description="Sovereign local-first LLM bridge", version=VERSION)
+
+# Explicit allowlist. Override only for a deliberate deployment.
+allowed_origins = [x.strip() for x in os.getenv(
+    "AKSI_ALLOWED_ORIGINS",
+    "https://milana808.github.io,http://localhost:8000,http://127.0.0.1:8000"
+).split(",") if x.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+)
 
 
 class ChatMessage(BaseModel):
@@ -75,7 +77,7 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     model: str = "local"
     messages: List[ChatMessage] = Field(default_factory=list)
-    temperature: float = 0.5
+    temperature: float = Field(default=0.5, ge=0.0, le=2.0)
     stream: bool = False
 
 
@@ -86,8 +88,9 @@ class SimpleChat(BaseModel):
     history: List[Dict[str, Any]] = Field(default_factory=list)
 
 
-def _sign(text: str) -> str:
-    return hashlib.sha256(f"{SEED}|{text}".encode("utf-8")).hexdigest()[:32]
+def _integrity_fingerprint(text: str) -> str:
+    """Return an integrity fingerprint; deliberately NOT a digital signature."""
+    return hashlib.sha256(f"{SEED}|{text}".encode("utf-8")).hexdigest()
 
 
 def _kb_answer(q: str) -> Optional[str]:
@@ -111,20 +114,23 @@ async def _gen_ollama(messages: List[Dict[str, str]], temperature: float) -> str
     async with httpx.AsyncClient(timeout=120.0) as client:
         r = await client.post(
             f"{OLLAMA_URL}/api/chat",
-            json={"model": OLLAMA_MODEL, "messages": messages, "stream": False, "options": {"temperature": temperature}},
+            json={"model": OLLAMA_MODEL, "messages": messages, "stream": False,
+                  "options": {"temperature": temperature}},
         )
         if r.status_code != 200:
             prompt_parts = [f"{m.get('role','user')}: {m.get('content','')}" for m in messages] + ["assistant:"]
             r2 = await client.post(
                 f"{OLLAMA_URL}/api/generate",
-                json={"model": OLLAMA_MODEL, "prompt": "\n".join(prompt_parts), "stream": False, "options": {"temperature": temperature}},
+                json={"model": OLLAMA_MODEL, "prompt": "\n".join(prompt_parts),
+                      "stream": False, "options": {"temperature": temperature}},
             )
             r2.raise_for_status()
             return (r2.json() or {}).get("response") or ""
         return (r.json().get("message") or {}).get("content") or ""
 
 
-async def _gen_openai_compat(base: str, key: str, model: str, messages: List[Dict[str, str]], temperature: float) -> str:
+async def _gen_openai_compat(base: str, key: str, model: str,
+                             messages: List[Dict[str, str]], temperature: float) -> str:
     async with httpx.AsyncClient(timeout=120.0) as client:
         r = await client.post(
             f"{base}/chat/completions",
@@ -138,14 +144,7 @@ async def _gen_openai_compat(base: str, key: str, model: str, messages: List[Dic
 async def generate(messages: List[Dict[str, str]], temperature: float = 0.5):
     prov = PROVIDER
     if prov == "auto":
-        if await _ollama_up():
-            prov = "ollama"
-        elif XAI_API_KEY:
-            prov = "xai"
-        elif OPENAI_API_KEY:
-            prov = "openai"
-        else:
-            prov = "offline"
+        prov = "ollama"
 
     if prov == "ollama":
         try:
@@ -157,6 +156,13 @@ async def generate(messages: List[Dict[str, str]], temperature: float = 0.5):
                 return kb, "kb-fallback"
             raise HTTPException(502, f"Ollama error: {e}") from e
 
+    if not ALLOW_REMOTE:
+        last_user = next((m["content"] for m in reversed(messages) if m.get("role") == "user"), "")
+        kb = _kb_answer(last_user)
+        if kb:
+            return kb, "offline-kb"
+        raise HTTPException(403, "Remote LLM disabled. Set AKSI_ALLOW_REMOTE=1 explicitly.")
+
     if prov == "xai":
         if not XAI_API_KEY:
             raise HTTPException(503, "XAI_API_KEY not set")
@@ -167,14 +173,7 @@ async def generate(messages: List[Dict[str, str]], temperature: float = 0.5):
             raise HTTPException(503, "OPENAI_API_KEY not set")
         return await _gen_openai_compat(OPENAI_BASE, OPENAI_API_KEY, OPENAI_MODEL, messages, temperature), "openai"
 
-    last_user = next((m["content"] for m in reversed(messages) if m.get("role") == "user"), "")
-    kb = _kb_answer(last_user)
-    if kb:
-        return kb, "offline-kb"
-    return (
-        f"Локальная LLM недоступна. Установите Ollama, выполните `ollama pull {OLLAMA_MODEL}` и `ollama serve`.",
-        "offline",
-    )
+    raise HTTPException(400, f"Unsupported provider: {prov}")
 
 
 @app.get("/")
@@ -184,6 +183,7 @@ async def root():
         "version": VERSION,
         "did": DID,
         "contact": CONTACT,
+        "network_policy": "local-first; remote requires AKSI_ALLOW_REMOTE=1",
         "endpoints": ["/health", "/api/identity", "/v1/chat/completions", "/api/chat", "/docs"],
         "frontend": "https://milana808.github.io/chat/",
     }
@@ -199,16 +199,17 @@ async def health():
         "provider": PROVIDER,
         "model": OLLAMA_MODEL,
         "ollama": ollama,
-        "ollama_url": OLLAMA_URL,
-        "xai": bool(XAI_API_KEY),
-        "openai": bool(OPENAI_API_KEY),
+        "remote_allowed": ALLOW_REMOTE,
+        "xai": bool(XAI_API_KEY) and ALLOW_REMOTE,
+        "openai": bool(OPENAI_API_KEY) and ALLOW_REMOTE,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 
 
 @app.get("/api/identity")
 async def identity():
-    return {"did": DID, "name": "AKSI", "contact": CONTACT, "version": VERSION}
+    return {"did": DID, "name": "AKSI", "contact": CONTACT, "version": VERSION,
+            "signature_note": "Backend fingerprint only; browser Runtime owns Ed25519 signatures."}
 
 
 @app.post("/v1/chat/completions")
@@ -224,7 +225,7 @@ async def openai_chat(req: ChatRequest):
         "created": int(time.time()),
         "model": req.model or OLLAMA_MODEL,
         "choices": [{"index": 0, "message": {"role": "assistant", "content": text}, "finish_reason": "stop"}],
-        "aksi": {"provider": provider, "did": DID, "signature": _sign(text), "version": VERSION},
+        "aksi": {"provider": provider, "did": DID, "integrity_fingerprint": _integrity_fingerprint(text), "version": VERSION},
     }
 
 
@@ -241,7 +242,8 @@ async def simple_chat(body: SimpleChat):
             msgs.append({"role": "assistant" if role in ("assistant", "a") else "user", "content": content[:2000]})
     msgs.append({"role": "user", "content": message})
     text, provider = await generate(msgs, 0.5)
-    return {"answer": text, "provider": provider, "did": DID, "signature": _sign(text), "version": VERSION}
+    return {"answer": text, "provider": provider, "did": DID,
+            "integrity_fingerprint": _integrity_fingerprint(text), "version": VERSION}
 
 
 if __name__ == "__main__":
