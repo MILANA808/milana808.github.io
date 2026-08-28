@@ -1,10 +1,10 @@
 /**
- * AKSI WHOLE v1 — health registry + unified ask()
+ * AKSI WHOLE v1.1 — health registry + unified ask()
  * © AKSI · aksilove@internet.ru · Proprietary
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0-whole";
+  var VER = "1.1.0-whole";
   var REGISTRY = [
     { id: "core", global: "AKSI_CORE", also: "AksiCore", role: "wiki/search" },
     { id: "quantum", global: "AKSI_QUANTUM", role: "state-vector QEngine" },
@@ -12,7 +12,11 @@
     { id: "live", global: "AKSI_LIVE", role: "Q→Brain→Trust pipeline" },
     { id: "lang", global: "AKSI_LANG", role: "domain language" },
     { id: "trust", global: "AKSI_TRUST", role: "verify_response + chain" },
+    { id: "mind", global: "AKSI_MIND", role: "unified mind" },
     { id: "brain", global: "AKSI_BRAIN", role: "offline intelligence" },
+    { id: "photo", global: "AKSI_PHOTO", role: "OCR + vision" },
+    { id: "seal", global: "AKSI_SEAL", role: "PQ hybrid seal" },
+    { id: "vision", global: "AKSI_VISION", role: "camera OCR" },
     { id: "one", global: "AKSI_ONE", role: "UI chat runtime" },
     { id: "dkv", global: "AKSI_DKV", role: "document claim verifier" },
     { id: "p2p", global: "AKSI_P2P", role: "PeerJS rooms" },
@@ -28,7 +32,7 @@
       var ok = present(r.global) || (r.also && present(r.also));
       mods[r.id] = { ok: ok, global: r.global, role: r.role };
     });
-    var path = "Quantum → Brain/Core/LLM → Trust → UI";
+    var path = "MIND → Quantum → Brain/Core/LLM → Trust → UI";
     if (mods.overlay && mods.overlay.ok) path = "Overlay∥ " + path;
     return {
       version: VER, product: "AKSI Decision Integrity Runtime", path: path,
@@ -38,6 +42,7 @@
   function ask(q) {
     q = String(q || "").trim();
     if (!q) return Promise.resolve({ text: "Пустой запрос.", meta: "whole" });
+    if (G.AKSI_MIND && typeof G.AKSI_MIND.think === "function") return G.AKSI_MIND.think(q);
     if (G.AKSI_LIVE && typeof G.AKSI_LIVE.think === "function") return G.AKSI_LIVE.think(q);
     if (G.AKSI_ONE && typeof G.AKSI_ONE.think === "function") return G.AKSI_ONE.think(q);
     if (G.AKSI_BRAIN && typeof G.AKSI_BRAIN.complete === "function") {
@@ -61,7 +66,7 @@
     root.innerHTML = '<div class="card"><h2>AKSI WHOLE · v' + VER + '</h2>' +
       '<p class="muted">' + h.path + '</p>' +
       '<pre class="out" style="white-space:pre-wrap">' + lines + '</pre>' +
-      '<p class="muted" style="margin-top:8px">ask() → LIVE / ONE / Brain</p></div>';
+      '<p class="muted" style="margin-top:8px">ask() → MIND / LIVE / ONE / Brain</p></div>';
   }
   G.AKSI_WHOLE = { version: VER, health: health, ask: ask, mount: mount, registry: REGISTRY };
   G.AKSI = G.AKSI || {};
