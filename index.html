@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ — Quantum Engine · LIVE · Trust · Offline Brain">
+<meta name="description" content="АКСИ Overlay · Quantum · LIVE · Trust">
 <title>АКСИ</title>
 <style>
 :root{--bg:#06050b;--s1:#13111c;--s2:#1b1726;--line:rgba(167,139,250,.18);--line2:rgba(255,255,255,.07);--t:#f7f5ff;--m:#a8a0bd;--dim:#7a738f;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px}
@@ -17,7 +17,7 @@ header h1{font-size:17px;font-weight:750}.sub{font-size:12px;color:var(--m)}.pil
 .feat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px var(--pad) 0}
 .feat .f{padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--s1);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;text-decoration:none;display:block}
 .feat .f strong{display:block;font-size:13px;margin-bottom:3px}.feat .f span{font-size:11.5px;color:var(--dim)}
-nav{display:flex;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.92);overflow-x:auto;-webkit-overflow-scrolling:touch}
+nav{display:flex;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.92);overflow-x:auto}
 nav button{flex-shrink:0;padding:8px 12px;border:0;border-radius:10px;background:0;color:var(--m);font:600 12px/1 var(--font);cursor:pointer}
 nav button.on{background:var(--s2);color:var(--t)}
 main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--safe))}
@@ -36,7 +36,6 @@ main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--s
 .btn{min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:600 13px/1 var(--font);cursor:pointer}
 .btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
 input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--s1);color:var(--t);font:inherit}
-textarea{min-height:72px}
 pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px;color:var(--m)}
 .bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:12px var(--pad) calc(12px + var(--safe));display:flex;gap:8px;z-index:60;background:linear-gradient(transparent,var(--bg) 28%)}
 .bar input{flex:1;min-height:50px;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--s2);color:var(--t)}
@@ -47,19 +46,20 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ <span class="pill">stable</span></h1><div class="sub">Quantum · LIVE · Trust · Brain</div></div>
+  <div><h1>АКСИ <span class="pill">aon</span></h1><div class="sub">Overlay · Quantum · LIVE · Trust</div></div>
   <div class="stats"><div id="stClock">MSK —</div><div>EQS <b id="stEqs">—</b> · <span id="stBadge">boot</span></div></div>
 </header>
 <div class="feat">
+  <button type="button" class="f" data-tab="net"><strong>🌐 Net</strong><span>Overlay AOP/1</span></button>
   <button type="button" class="f" data-tab="quantum"><strong>⚛ Quantum</strong><span>Engine v2</span></button>
   <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>LIVE path</span></button>
   <button type="button" class="f" data-tab="trust"><strong>🛡 Trust</strong><span>Compiler</span></button>
   <button type="button" class="f" data-tab="brain"><strong>🧠 Brain</strong><span>Offline</span></button>
-  <button type="button" class="f" data-tab="live"><strong>⚡ LIVE</strong><span>Status</span></button>
   <a class="f" href="/product/"><strong>🏢 B2B</strong><span>Product</span></a>
 </div>
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
+  <button type="button" data-tab="net">Net</button>
   <button type="button" data-tab="quantum">Quantum</button>
   <button type="button" data-tab="live">LIVE</button>
   <button type="button" data-tab="lang">Lang</button>
@@ -70,6 +70,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   <button type="button" data-tab="about">О себе</button>
 </nav>
 <main>
+  <section class="panel" id="tab-net"><div id="net-root"></div></section>
   <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
   <section class="panel" id="tab-live"><div id="live-root"></div></section>
   <section class="panel" id="tab-lang"><div id="lang-root"></div></section>
@@ -80,9 +81,9 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
     <div class="chips">
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-ask="что такое ии">ИИ</button>
+      <button type="button" class="chip" data-tab="net">→ Net</button>
     </div>
-    <p class="hint">Ctrl+F5 · <a href="/quantum.html">quantum lab</a></p>
+    <p class="hint">Ctrl+F5 · <a href="/net.html">overlay lab</a> · <a href="/quantum.html">quantum</a></p>
   </section>
   <section class="panel" id="tab-mem">
     <div class="card"><h2>Память · <span id="memN">0</span></h2>
@@ -101,7 +102,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   </section>
   <section class="panel" id="tab-about">
     <div class="card"><h2>АКСИ</h2>
-      <p class="muted">Local-first · Quantum · Trust · Proof Ledger</p>
+      <p class="muted">Overlay AOP/1 · Quantum · Trust · Proof</p>
       <p class="muted">aksilove@internet.ru</p>
     </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
@@ -113,6 +114,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 </div>
 <script src="aksi-core.js?v=51"></script>
 <script src="aksi-quantum.js?v=3"></script>
+<script src="aksi-overlay.js?v=1"></script>
 <script src="aksi-live.js?v=2"></script>
 <script src="aksi-lang.js?v=1"></script>
 <script src="aksi-trust.js?v=2"></script>
@@ -128,6 +130,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
     document.querySelectorAll("main .panel").forEach(function (p) {
       p.classList.toggle("on", p.id === "tab-" + t);
     });
+    if (t === "net") mountMod("net", "#net-root");
     if (t === "quantum") mountMod("quantum", "#quantum-root");
     if (t === "live") mountMod("live", "#live-root");
     if (t === "lang") mountMod("lang", "#lang-root");
@@ -136,6 +139,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   }
   var mounted = {};
   function eng(n) {
+    if (n === "net") return window.AKSI_OVERLAY;
     if (n === "quantum") return window.AKSI_QUANTUM;
     if (n === "live") return window.AKSI_LIVE;
     if (n === "lang") return window.AKSI_LANG;
@@ -161,7 +165,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">АКСИ online. Quantum → Brain → Trust.<div class="meta">stable</div></div>';
+      d.innerHTML = '<div class="bub">АКСИ: Overlay AOP/1 · Quantum · Trust<div class="meta">aon</div></div>';
       th.appendChild(d);
     }
     var el = document.getElementById("stClock");
