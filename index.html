@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
 <meta name="theme-color" content="#06050b">
-<meta name="description" content="АКСИ Overlay · Quantum · LIVE · Trust">
+<meta name="description" content="АКСИ — Overlay · Quantum · Trust · DKV · Offline Brain">
 <title>АКСИ</title>
 <style>
 :root{--bg:#06050b;--s1:#13111c;--s2:#1b1726;--line:rgba(167,139,250,.18);--line2:rgba(255,255,255,.07);--t:#f7f5ff;--m:#a8a0bd;--dim:#7a738f;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe:env(safe-area-inset-bottom,0px);--pad:16px;--max:720px}
@@ -17,7 +17,7 @@ header h1{font-size:17px;font-weight:750}.sub{font-size:12px;color:var(--m)}.pil
 .feat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px var(--pad) 0}
 .feat .f{padding:12px;border-radius:14px;border:1px solid var(--line2);background:var(--s1);cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;text-decoration:none;display:block}
 .feat .f strong{display:block;font-size:13px;margin-bottom:3px}.feat .f span{font-size:11.5px;color:var(--dim)}
-nav{display:flex;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.92);overflow-x:auto}
+nav{display:flex;gap:4px;padding:10px var(--pad);border-bottom:1px solid var(--line2);position:sticky;top:70px;z-index:40;background:rgba(6,5,11,.92);overflow-x:auto;-webkit-overflow-scrolling:touch}
 nav button{flex-shrink:0;padding:8px 12px;border:0;border-radius:10px;background:0;color:var(--m);font:600 12px/1 var(--font);cursor:pointer}
 nav button.on{background:var(--s2);color:var(--t)}
 main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(120px + var(--safe))}
@@ -46,25 +46,28 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <body>
 <header>
   <div class="logo">A</div>
-  <div><h1>АКСИ <span class="pill">aon</span></h1><div class="sub">Overlay · Quantum · LIVE · Trust</div></div>
+  <div><h1>АКСИ <span class="pill">whole</span></h1><div class="sub">Overlay · Quantum · Trust · DKV</div></div>
   <div class="stats"><div id="stClock">MSK —</div><div>EQS <b id="stEqs">—</b> · <span id="stBadge">boot</span></div></div>
 </header>
 <div class="feat">
-  <button type="button" class="f" data-tab="net"><strong>🌐 Net</strong><span>Overlay AOP/1</span></button>
+  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>LIVE pipeline</span></button>
+  <button type="button" class="f" data-tab="net"><strong>🌐 Net</strong><span>AOP/1 Overlay</span></button>
   <button type="button" class="f" data-tab="quantum"><strong>⚛ Quantum</strong><span>Engine v2</span></button>
-  <button type="button" class="f" data-tab="chat"><strong>💬 Чат</strong><span>LIVE path</span></button>
+  <button type="button" class="f" data-tab="dkv"><strong>📜 DKV</strong><span>Верификатор</span></button>
   <button type="button" class="f" data-tab="trust"><strong>🛡 Trust</strong><span>Compiler</span></button>
-  <button type="button" class="f" data-tab="brain"><strong>🧠 Brain</strong><span>Offline</span></button>
-  <a class="f" href="/product/"><strong>🏢 B2B</strong><span>Product</span></a>
+  <button type="button" class="f" data-tab="whole"><strong>▦ Whole</strong><span>Карта модулей</span></button>
 </div>
 <nav>
   <button type="button" class="on" data-tab="chat">Чат</button>
   <button type="button" data-tab="net">Net</button>
   <button type="button" data-tab="quantum">Quantum</button>
+  <button type="button" data-tab="dkv">DKV</button>
   <button type="button" data-tab="live">LIVE</button>
   <button type="button" data-tab="lang">Lang</button>
   <button type="button" data-tab="trust">Trust</button>
   <button type="button" data-tab="brain">Brain</button>
+  <button type="button" data-tab="p2p">P2P</button>
+  <button type="button" data-tab="whole">Whole</button>
   <button type="button" data-tab="mem">Память</button>
   <button type="button" data-tab="proof">Цепочка</button>
   <button type="button" data-tab="about">О себе</button>
@@ -72,18 +75,21 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <main>
   <section class="panel" id="tab-net"><div id="net-root"></div></section>
   <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
+  <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
   <section class="panel" id="tab-live"><div id="live-root"></div></section>
   <section class="panel" id="tab-lang"><div id="lang-root"></div></section>
   <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
   <section class="panel" id="tab-brain"><div id="brain-root"></div></section>
+  <section class="panel" id="tab-p2p"><div id="p2p-root"></div></section>
+  <section class="panel" id="tab-whole"><div id="whole-root"></div></section>
   <section class="panel on" id="tab-chat">
     <div id="thread"></div>
     <div class="chips">
       <button type="button" class="chip" data-ask="привет">привет</button>
       <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-tab="net">→ Net</button>
+      <button type="button" class="chip" data-ask="что такое ии">ИИ</button>
     </div>
-    <p class="hint">Ctrl+F5 · <a href="/net.html">overlay lab</a> · <a href="/quantum.html">quantum</a></p>
+    <p class="hint">Ctrl+F5 · <a href="/docs/ARCHITECTURE.md">Architecture</a> · <a href="/product/">B2B</a></p>
   </section>
   <section class="panel" id="tab-mem">
     <div class="card"><h2>Память · <span id="memN">0</span></h2>
@@ -102,8 +108,8 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
   </section>
   <section class="panel" id="tab-about">
     <div class="card"><h2>АКСИ</h2>
-      <p class="muted">Overlay AOP/1 · Quantum · Trust · Proof</p>
-      <p class="muted">aksilove@internet.ru</p>
+      <p class="muted">Local-first Decision Integrity Runtime</p>
+      <p class="muted">aksilove@internet.ru · Proprietary</p>
     </div>
     <div class="card"><h2>DID</h2><p class="muted"><b id="didVal">—</b></p></div>
   </section>
@@ -115,13 +121,28 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
 <script src="aksi-core.js?v=51"></script>
 <script src="aksi-quantum.js?v=3"></script>
 <script src="aksi-overlay.js?v=1"></script>
+<script src="aksi-dkv.js?v=1"></script>
+<script src="aksi-p2p.js?v=5"></script>
 <script src="aksi-live.js?v=2"></script>
 <script src="aksi-lang.js?v=1"></script>
 <script src="aksi-trust.js?v=2"></script>
 <script src="aksi-brain.js?v=1"></script>
 <script src="aksi-one.js?v=10"></script>
+<script src="aksi-whole.js?v=1"></script>
 <script>
 (function () {
+  var TABS = {
+    net: ["AKSI_OVERLAY", "#net-root"],
+    quantum: ["AKSI_QUANTUM", "#quantum-root"],
+    dkv: ["AKSI_DKV", "#dkv-root"],
+    live: ["AKSI_LIVE", "#live-root"],
+    lang: ["AKSI_LANG", "#lang-root"],
+    trust: ["AKSI_TRUST", "#trust-root"],
+    brain: ["AKSI_BRAIN", "#brain-root"],
+    p2p: ["AKSI_P2P", "#p2p-root"],
+    whole: ["AKSI_WHOLE", "#whole-root"],
+  };
+  var mounted = {};
   function goTab(t) {
     if (!t) return;
     document.querySelectorAll("nav [data-tab]").forEach(function (b) {
@@ -130,26 +151,11 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
     document.querySelectorAll("main .panel").forEach(function (p) {
       p.classList.toggle("on", p.id === "tab-" + t);
     });
-    if (t === "net") mountMod("net", "#net-root");
-    if (t === "quantum") mountMod("quantum", "#quantum-root");
-    if (t === "live") mountMod("live", "#live-root");
-    if (t === "lang") mountMod("lang", "#lang-root");
-    if (t === "trust") mountMod("trust", "#trust-root");
-    if (t === "brain") mountMod("brain", "#brain-root");
+    if (TABS[t]) mountMod(t, TABS[t][0], TABS[t][1]);
   }
-  var mounted = {};
-  function eng(n) {
-    if (n === "net") return window.AKSI_OVERLAY;
-    if (n === "quantum") return window.AKSI_QUANTUM;
-    if (n === "live") return window.AKSI_LIVE;
-    if (n === "lang") return window.AKSI_LANG;
-    if (n === "trust") return window.AKSI_TRUST;
-    if (n === "brain") return window.AKSI_BRAIN;
-    return null;
-  }
-  function mountMod(name, sel) {
+  function mountMod(name, gname, sel) {
     if (mounted[name]) return;
-    var m = eng(name), root = document.querySelector(sel);
+    var m = window[gname], root = document.querySelector(sel);
     if (!m || typeof m.mount !== "function") {
       if (root && !root.dataset.fb) {
         root.dataset.fb = "1";
@@ -165,7 +171,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
     if (th && !th.children.length) {
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">АКСИ: Overlay AOP/1 · Quantum · Trust<div class="meta">aon</div></div>';
+      d.innerHTML = '<div class="bub">АКСИ WHOLE: Quantum → Brain → Trust · Overlay · DKV<div class="meta">local-first</div></div>';
       th.appendChild(d);
     }
     var el = document.getElementById("stClock");
@@ -183,7 +189,7 @@ pre.out{background:var(--s1);border:1px solid var(--line2);border-radius:12px;pa
       var b = document.getElementById("stBadge");
       if (b && window.AKSI_ONE) b.textContent = "ONE " + window.AKSI_ONE.version;
       else if (b) b.textContent = "ready";
-    }, 300);
+    }, 400);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
