@@ -1,12 +1,20 @@
 /**
- * AKSI Web — internet intelligence
- * Wikipedia RU/EN · OpenSearch · DuckDuckGo · always meaningful
+ * AKSI Web — opt-in internet only
+ * Default OFF · localStorage aksi:web:enabled
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0-web";
+  var VER = "1.1.0-web";
   var CACHE = "aksi:web:cache:v1";
+  var FLAG = "aksi:web:enabled";
+  function isEnabled() {
+    try { return localStorage.getItem(FLAG) === "1"; } catch (e) { return false; }
+  }
+  function setEnabled(on) {
+    try { localStorage.setItem(FLAG, on ? "1" : "0"); } catch (e) {}
+    return isEnabled();
+  }
   function utf8len(s) { return String(s || "").length; }
   function cacheGet(k) {
     try {
@@ -87,13 +95,9 @@
       if (j.AbstractText)
         out.push({ source: "duckduckgo", title: j.Heading || q, text: String(j.AbstractText).slice(0, 1000), url: j.AbstractURL || "" });
       if (j.Answer)
-        out.push({ source: "ddg-answer", title: "Краткий ответ", text: String(j.Answer).slice(0, 600), url: "" });
+        out.push({ source: "ddg-answer", title: "Answer", text: String(j.Answer).slice(0, 600), url: "" });
       if (j.Definition)
-        out.push({ source: "ddg-def", title: "Определение", text: String(j.Definition).slice(0, 600), url: j.DefinitionURL || "" });
-      (j.RelatedTopics || []).slice(0, 4).forEach(function (t) {
-        if (t && t.Text)
-          out.push({ source: "ddg-related", title: (t.FirstURL || "").split("/").pop() || "related", text: String(t.Text).slice(0, 400), url: t.FirstURL || "" });
-      });
+        out.push({ source: "ddg-def", title: "Definition", text: String(j.Definition).slice(0, 600), url: j.DefinitionURL || "" });
       return out;
     }).catch(function () { return []; });
   }
@@ -102,9 +106,8 @@
     if (!hits.length) {
       return {
         ok: false,
-        text: "По запросу «" + q + "» в открытых источниках сейчас нет ясного материала. Уточните формулировку — отвечу из локальных знаний, если смогу.",
+        text: "No clear open-source hit for «" + q + "». / Нет ясного материала. Try another wording.",
         sources: [],
-        offline_hint: true,
       };
     }
     hits.sort(function (a, b) { return utf8len(b.text) - utf8len(a.text); });
@@ -115,33 +118,35 @@
       body = cut > 350 ? body.slice(0, cut + 1) : body.slice(0, 1000) + "…";
     }
     var lines = [];
-    if (main.title && main.title !== "Краткий ответ" && main.title !== "Определение") {
+    if (main.title && main.title !== "Answer" && main.title !== "Definition") {
       lines.push("«" + main.title + "»", "");
     }
     lines.push(body);
-    var extra = hits.slice(1, 3).filter(function (h) {
-      return h.text && h.text !== main.text && h.text.length > 40;
-    });
-    if (extra.length) {
-      lines.push("");
-      extra.forEach(function (h) {
-        lines.push("• " + String(h.text).slice(0, 220) + (h.text.length > 220 ? "…" : ""));
-      });
-    }
     var sources = [];
     hits.forEach(function (h) {
       if (h.url && sources.indexOf(h.url) === -1) sources.push(h.url);
     });
     if (sources.length) {
-      lines.push("", "Источники:");
+      lines.push("", "Sources / Источники:");
       sources.slice(0, 4).forEach(function (u, i) { lines.push(i + 1 + ". " + u); });
     }
-    return { ok: true, text: lines.join("\n"), sources: sources, hits: hits.slice(0, 8), meta: "web·" + (main.source || "net") };
+    return { ok: true, text: lines.join("\n"), sources: sources, meta: "web·" + (main.source || "net") };
   }
   function search(q, opts) {
     opts = opts || {};
+    if (!isEnabled() && !opts.force) {
+      return Promise.resolve({
+        ok: false,
+        blocked: true,
+        offline: true,
+        text:
+          "Internet is OFF (offline-first). Enable the checkbox «Internet / Интернет» to search the web.\n" +
+          "Интернет выключен. Включите галочку «Internet / Интернет», чтобы искать в сети.",
+        sources: [],
+      });
+    }
     q = clean(q);
-    if (!q) return Promise.resolve({ ok: false, text: "Напишите, что искать в сети.", sources: [] });
+    if (!q) return Promise.resolve({ ok: false, text: "Empty query. / Пустой запрос.", sources: [] });
     var ck = q.toLowerCase();
     if (!opts.noCache) {
       var cached = cacheGet(ck);
@@ -161,40 +166,27 @@
         if (Array.isArray(p)) hits = hits.concat(p);
         else hits.push(p);
       });
-      var topTitle = null;
-      for (var i = 0; i < hits.length; i++) {
-        if (hits[i].source && hits[i].source.indexOf("wiki-search") === 0 && hits[i].title) {
-          topTitle = hits[i].title;
-          break;
-        }
-      }
-      var enrich = Promise.resolve(null);
-      if (topTitle && topTitle.toLowerCase() !== term.toLowerCase()) {
-        enrich = wikiSummary("ru", topTitle).then(function (s) { return s || wikiSummary("en", topTitle); });
-      }
-      return enrich.then(function (more) {
-        if (more) hits.unshift(more);
-        var result = compose(q, hits);
-        if (result.ok) cacheSet(ck, result);
-        return result;
-      });
+      var result = compose(q, hits);
+      if (result.ok) cacheSet(ck, result);
+      return result;
     }).catch(function () {
       return {
         ok: false,
-        text: "Сейчас нет доступа к сети или источники не ответили. Могу ответить из локальных знаний — переформулируйте вопрос или подключите Ollama в Настройках.",
-        sources: [],
         offline: true,
+        text: "Network unreachable. / Сеть недоступна. Local knowledge still works.",
+        sources: [],
       };
     });
   }
   function needsWeb(q) {
+    if (!isEnabled()) return false;
     var low = String(q || "").toLowerCase().trim();
     if (!low || low.length < 2) return false;
     if (/^(запомни|выучи)\s*[:\s]/i.test(low)) return false;
-    if (/^(привет|hello|hi|whoami|\/demo|статус)\b/.test(low)) return false;
-    if (/^(найди|поиск|в интернете|что такое|кто такой|кто такая|расскажи о|новости)/i.test(low)) return true;
+    if (/^(привет|hello|hi|whoami|\/demo|статус|status)\b/.test(low)) return false;
+    if (/^(найди|поиск|search|в интернете|что такое|what is|who is|кто такой)/i.test(low)) return true;
     if (/\?$/.test(low)) return true;
-    if (/^(кто|что|как|почему|где|когда|сколько|какой|какая)\s/i.test(low)) return true;
+    if (/^(кто|что|как|почему|где|когда|сколько|what|who|how|why|where)\s/i.test(low)) return true;
     if (low.split(/\s+/).length >= 4) return true;
     return false;
   }
@@ -202,18 +194,25 @@
     var root = typeof sel === "string" ? document.querySelector(sel) : sel;
     if (!root) return;
     root.innerHTML =
-      '<div class="card"><h2>Сеть · поиск</h2>' +
-      '<p class="muted">Wikipedia + DuckDuckGo</p>' +
-      '<input id="webIn" placeholder="Что найти в интернете?">' +
-      '<div class="row"><button type="button" class="btn primary" id="webGo">Найти</button></div>' +
+      '<div class="card"><h2>Web search / Поиск</h2>' +
+      '<p class="muted">Requires Internet checkbox ON. / Нужна галочка «Интернет».</p>' +
+      '<input id="webIn" placeholder="Query / Запрос">' +
+      '<div class="row"><button type="button" class="btn primary" id="webGo">Search / Найти</button></div>' +
       '<pre class="out" id="webOut">—</pre></div>';
     document.getElementById("webGo").onclick = function () {
-      var q = document.getElementById("webIn").value;
-      document.getElementById("webOut").textContent = "Ищу…";
-      search(q).then(function (r) {
-        document.getElementById("webOut").textContent = r.text + (r.meta ? "\n\n[" + r.meta + "]" : "");
+      document.getElementById("webOut").textContent = "…";
+      search(document.getElementById("webIn").value).then(function (r) {
+        document.getElementById("webOut").textContent = r.text;
       });
     };
   }
-  G.AKSI_WEB = { version: VER, search: search, needsWeb: needsWeb, clean: clean, mount: mount };
+  G.AKSI_WEB = {
+    version: VER,
+    search: search,
+    needsWeb: needsWeb,
+    isEnabled: isEnabled,
+    setEnabled: setEnabled,
+    clean: clean,
+    mount: mount,
+  };
 })(typeof window !== "undefined" ? window : this);
