@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07060d">
-<meta name="description" content="AKSI — offline AI. Neuro + WebLLM + proof.">
+<meta name="description" content="AKSI — ADIA 2.0 offline AI. Neuro + WebLLM + algorithm.">
 <link rel="manifest" href="/manifest.json">
-<title>AKSI — offline AI system</title>
+<title>AKSI — ADIA offline AI</title>
 <style>
 :root{--bg:#07060d;--elev:#12101a;--card:#181624;--line:rgba(167,139,250,.22);--t:#f4f1ff;--m:#a8a0c0;--dim:#6f6788;--a:#b39aff;--a2:#7c3aed;--ok:#34d399;--warn:#fbbf24;--font:system-ui,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--bn:58px}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
 body{color:var(--t);font:16px/1.45 var(--font);background:var(--bg);display:flex;flex-direction:column;max-width:720px;margin:0 auto;background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(124,58,237,.32),transparent 55%)}
-button,input,textarea{font:inherit;color:inherit;border:0;background:0}button{cursor:pointer}a{color:var(--a)}
+button,input,textarea,select{font:inherit;color:inherit;border:0;background:0}button{cursor:pointer}a{color:var(--a)}
 .top{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(7,6,13,.92);backdrop-filter:blur(16px);z-index:40}
 .logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#6d28d9,#c4b5fd);display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px}
 .titles{flex:1}h1{font-size:15px}.sub{font-size:11px;color:var(--m)}
@@ -43,42 +43,42 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
 <body>
 <header class="top">
   <div class="logo">A</div>
-  <div class="titles"><h1>AKSI</h1><div class="sub">offline AI · Neuro + WebLLM</div></div>
+  <div class="titles"><h1>AKSI</h1><div class="sub">ADIA 2.0 · offline AI</div></div>
   <label class="pill" id="netPill"><input type="checkbox" id="netToggle"> Сеть</label>
 </header>
 <div class="stage" id="stage">
 <section class="panel on" id="tab-home">
   <div class="hero">
-    <div class="sub" style="color:var(--a);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px">Offline-first product</div>
-    <h2>Многослойный локальный ИИ</h2>
-    <p>Неуро (CPU всегда) + WebLLM (WebGPU) + память + proof. Наследие MATRIX.</p>
+    <div class="sub" style="color:var(--a);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px">Resonance Decision Engine</div>
+    <h2>Алгоритм ADIA 2.0 + локальный ИИ</h2>
+    <p>Каждый ответ: EQS · резонанс · seal. Neuro + WebLLM. Offline-first.</p>
     <button type="button" class="btn primary" id="btnProofDemo">⚡ Докажи offline</button>
     <button type="button" class="btn" data-tab="chat">Чат</button>
-    <button type="button" class="btn" id="btnExportProof">Export proof</button>
+    <button type="button" class="btn" data-tab="adia">ADIA</button>
     <div style="margin-top:10px"><span class="badge" id="stNeuro">Neuro…</span> <span class="badge" id="stNet">сеть выкл</span> <span class="badge" id="stMem">mem 0</span></div>
-    <div class="kv" id="sysKv">
+    <div class="kv">
       <div class="cell"><b id="kvNeuro">—</b><span>локальный ИИ</span></div>
-      <div class="cell"><b id="kvMind">—</b><span>маршрутизатор</span></div>
-      <div class="cell"><b id="kvProof">—</b><span>proof ledger</span></div>
+      <div class="cell"><b id="kvMind">—</b><span>Mind + ADIA</span></div>
+      <div class="cell"><b id="kvProof">—</b><span>proof</span></div>
       <div class="cell"><b id="kvMode">offline</b><span>режим</span></div>
     </div>
-    <p class="muted" id="pathText">Intent → Brain → WebLLM? → Neuro → Web? → Core/LLM → Trust</p>
+    <p class="muted">Intent → Brain → WebLLM? → Neuro → <b>ADIA</b> → Web? → Trust</p>
     <div id="proofDemoOut"></div>
   </div>
   <div class="card"><h3>Teach</h3>
     <input type="text" id="teachIn" placeholder="факт…">
     <button type="button" class="btn primary" id="btnTeach" style="margin-top:8px;width:100%">Запомнить</button>
   </div>
-  <div class="card"><p class="muted"><a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a> · aksilove@internet.ru</p></div>
+  <div class="card"><p class="muted"><a href="/ALGORITHM.md" target="_blank" rel="noopener">ALGORITHM.md</a> · <a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT</a> · aksilove@internet.ru</p></div>
 </section>
 <section class="panel" id="tab-chat">
   <div id="thread"></div>
   <div style="margin-top:12px">
     <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
     <button type="button" class="chip" data-ask="Работает ли без интернета?">Без сети?</button>
-    <button type="button" class="chip" data-ask="запомни: мне нравится АКСИ">Запомни</button>
+    <button type="button" class="chip" data-ask="статус">Статус</button>
   </div>
-  <p class="muted" style="text-align:center;margin-top:10px;font-size:12px">Neuro · WebLLM · memory · web opt-in</p>
+  <p class="muted" style="text-align:center;margin-top:10px;font-size:12px">ADIA EQS · Neuro · WebLLM · seal</p>
 </section>
 <section class="panel" id="tab-mem">
   <div class="card"><h3>Память · <span id="memN">0</span></h3>
@@ -93,19 +93,21 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
 </section>
 <section class="panel" id="tab-lab">
   <div class="card"><h3>Лаборатория</h3>
-  <p class="muted" style="margin-bottom:10px">Neuro (CPU) + WebLLM (WebGPU) + Ollama + Trust</p>
+  <p class="muted" style="margin-bottom:10px">ADIA 2.0 + Neuro + WebLLM + Quantum + Trust</p>
   <div class="lab-grid">
+    <button type="button" class="btn primary" data-tab="adia">ADIA · алгоритм</button>
     <button type="button" class="btn primary" data-tab="neuro">Neuro CPU</button>
     <button type="button" class="btn primary" data-tab="webllm">WebLLM GPU</button>
     <button type="button" class="btn" data-tab="settings">Ollama</button>
     <button type="button" class="btn" data-tab="mind">Mind</button>
-    <button type="button" class="btn" data-tab="web">Web</button>
     <button type="button" class="btn" data-tab="quantum">Quantum</button>
     <button type="button" class="btn" data-tab="trust">Trust</button>
     <button type="button" class="btn" data-tab="dkv">DKV</button>
+    <button type="button" class="btn" data-tab="web">Web</button>
     <button type="button" class="btn" data-tab="help">Помощь</button>
   </div></div>
 </section>
+<section class="panel" id="tab-adia"><div id="adia-root"></div></section>
 <section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
 <section class="panel" id="tab-webllm"><div id="webllm-root"></div></section>
 <section class="panel" id="tab-settings"><div class="card"><div id="llm-root"></div></div></section>
@@ -114,7 +116,7 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
 <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
 <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
 <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-<section class="panel" id="tab-help"><div class="card"><p class="muted">Чат: Brain → WebLLM? → Neuro → сеть/Ollama.<br>запомни: факт · Lab → WebLLM загрузить модель один раз.<br>aksilove@internet.ru</p></div></section>
+<section class="panel" id="tab-help"><div class="card"><p class="muted">Каждый ответ проходит через <b>ADIA 2.0</b> (EQS + seal).<br>Lab → ADIA — оценить текст и проверить ledger.<br>aksilove@internet.ru</p></div></section>
 </div>
 <div class="composer">
   <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000">
@@ -137,18 +139,19 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
 <script src="aksi-web.js?v=3"></script>
 <script src="aksi-neuro.js?v=4"></script>
 <script src="aksi-webllm.js?v=1"></script>
-<script src="aksi-mind.js?v=9"></script>
+<script src="aksi-algorithm.js?v=1"></script>
+<script src="aksi-mind.js?v=10"></script>
 <script src="aksi-one.js?v=16"></script>
 <script src="aksi-product-ui.js?v=3"></script>
 <script>
 (function(){
-var TABS={neuro:["AKSI_NEURO","#neuro-root"],webllm:["AKSI_WEBLLM","#webllm-root"],web:["AKSI_WEB","#web-root"],mind:["AKSI_MIND","#mind-root"],quantum:["AKSI_QUANTUM","#quantum-root"],trust:["AKSI_TRUST","#trust-root"],dkv:["AKSI_DKV","#dkv-root"]};
+var TABS={adia:["AKSI_ALGORITHM","#adia-root"],neuro:["AKSI_NEURO","#neuro-root"],webllm:["AKSI_WEBLLM","#webllm-root"],web:["AKSI_WEB","#web-root"],mind:["AKSI_MIND","#mind-root"],quantum:["AKSI_QUANTUM","#quantum-root"],trust:["AKSI_TRUST","#trust-root"],dkv:["AKSI_DKV","#dkv-root"]};
 var MAIN={home:1,chat:1,photo:1,mem:1,lab:1},mounted={};
 function goTab(t){if(!t)return;document.querySelectorAll(".bnav [data-tab]").forEach(function(b){b.classList.toggle("on",MAIN[t]?b.getAttribute("data-tab")===t:b.getAttribute("data-tab")==="lab");});document.querySelectorAll(".stage .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});var s=document.getElementById("stage");if(s)s.scrollTop=0;if(t==="settings")mountMod("llm","AKSI_LLM","#llm-root");if(TABS[t])mountMod(t,TABS[t][0],TABS[t][1]);}
 function mountMod(name,gname,sel){if(mounted[name])return;var m=window[gname],root=document.querySelector(sel);if(!m||typeof m.mount!=="function"){if(root)root.innerHTML='<div class="card"><p class="muted">Ctrl+F5</p></div>';return;}try{m.mount(sel);mounted[name]=true;}catch(e){if(root)root.innerHTML='<div class="card"><p class="muted">'+(e&&e.message)+'</p></div>';}}
 function syncNet(){var on=!!(window.AKSI_WEB&&AKSI_WEB.isEnabled&&AKSI_WEB.isEnabled());var cb=document.getElementById("netToggle");if(cb)cb.checked=on;var pill=document.getElementById("netPill");if(pill)pill.classList.toggle("on",on);var st=document.getElementById("stNet");if(st){st.textContent=on?"сеть ON":"сеть выкл";st.className="badge "+(on?"warn":"ok");}var kv=document.getElementById("kvMode");if(kv)kv.textContent=on?"network":"offline";}window.__aksiSyncNet=syncNet;
-function refreshStatus(){var neuroOk=!!(window.AKSI_NEURO&&(AKSI_NEURO.ready?AKSI_NEURO.ready():true));var wllmOk=!!(window.AKSI_WEBLLM&&AKSI_WEBLLM.ready&&AKSI_WEBLLM.ready());var el=document.getElementById("stNeuro");if(el){el.textContent=wllmOk?"WebLLM+Neuro":neuroOk?"Neuro ready":"Neuro…";el.className="badge "+(neuroOk||wllmOk?"ok":"warn");}var kvN=document.getElementById("kvNeuro");if(kvN)kvN.textContent=wllmOk?"WebLLM on":(neuroOk?"RWKV":"—");var kvM=document.getElementById("kvMind");if(kvM)kvM.textContent=window.AKSI_MIND?(AKSI_MIND.version||"on"):"—";try{var a=JSON.parse(localStorage.getItem("aksi_whole_mem_v3")||"[]");var n=Array.isArray(a)?a.length:0;var sm=document.getElementById("stMem");if(sm)sm.textContent="mem "+n;var mn=document.getElementById("memN");if(mn)mn.textContent=String(n);}catch(e){}try{var led=JSON.parse(localStorage.getItem("aksi_proof_ledger_v1")||"[]");var kvP=document.getElementById("kvProof");if(kvP)kvP.textContent=Array.isArray(led)?String(led.length):"0";}catch(e){}}
-function boot(){var cb=document.getElementById("netToggle");if(cb&&window.AKSI_WEB&&AKSI_WEB.setEnabled){cb.checked=AKSI_WEB.isEnabled();cb.onchange=function(){AKSI_WEB.setEnabled(cb.checked);syncNet();}}syncNet();refreshStatus();setInterval(refreshStatus,4000);var th=document.getElementById("thread");if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Здравствуйте. Я АКСИ — offline ИИ. Neuro всегда, WebLLM — по загрузке в Lab.<div class="meta">local · neuro</div></div>';th.appendChild(d);}document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}},true);var go=document.getElementById("phGo"),file=document.getElementById("phFile"),out=document.getElementById("phOut");if(go&&file){go.onclick=function(){var f=file.files&&file.files[0];if(!f){out.textContent="—";return;}out.textContent="…";if(!window.AKSI_PHOTO||!AKSI_PHOTO.analyze){out.textContent="Ctrl+F5";return;}AKSI_PHOTO.analyze(f,{onProgress:function(p){out.textContent=p;}}).then(function(r){out.textContent=r.text+"\n\n— "+(r.meta||"");}).catch(function(e){out.textContent=String(e.message||e);});};}if(window.AKSI_PRODUCT_UI&&AKSI_PRODUCT_UI.wire)setTimeout(function(){AKSI_PRODUCT_UI.wire();},300);try{if(localStorage.getItem("aksi_seen_hero")==="1")goTab("chat");else{goTab("home");localStorage.setItem("aksi_seen_hero","1");}}catch(e){goTab("home");}}
+function refreshStatus(){var neuroOk=!!(window.AKSI_NEURO&&(AKSI_NEURO.ready?AKSI_NEURO.ready():true));var wllmOk=!!(window.AKSI_WEBLLM&&AKSI_WEBLLM.ready&&AKSI_WEBLLM.ready());var el=document.getElementById("stNeuro");if(el){el.textContent=wllmOk?"WebLLM+Neuro":neuroOk?"Neuro ready":"Neuro…";el.className="badge "+(neuroOk||wllmOk?"ok":"warn");}var kvN=document.getElementById("kvNeuro");if(kvN)kvN.textContent=wllmOk?"WebLLM":neuroOk?"RWKV":"—";var kvM=document.getElementById("kvMind");if(kvM)kvM.textContent=window.AKSI_ALGORITHM?"ADIA+Mind":(window.AKSI_MIND?"Mind":"—");try{var a=JSON.parse(localStorage.getItem("aksi_whole_mem_v3")||"[]");var n=Array.isArray(a)?a.length:0;var sm=document.getElementById("stMem");if(sm)sm.textContent="mem "+n;var mn=document.getElementById("memN");if(mn)mn.textContent=String(n);}catch(e){}try{var led=JSON.parse(localStorage.getItem("aksi_adia_ledger_v2")||localStorage.getItem("aksi_proof_ledger_v1")||"[]");var kvP=document.getElementById("kvProof");if(kvP)kvP.textContent=Array.isArray(led)?String(led.length):"0";}catch(e){}}
+function boot(){var cb=document.getElementById("netToggle");if(cb&&window.AKSI_WEB&&AKSI_WEB.setEnabled){cb.checked=AKSI_WEB.isEnabled();cb.onchange=function(){AKSI_WEB.setEnabled(cb.checked);syncNet();}}syncNet();refreshStatus();setInterval(refreshStatus,4000);var th=document.getElementById("thread");if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Здравствуйте. Я АКСИ. Каждый ответ оценивает <b>ADIA 2.0</b> (EQS + seal).<div class="meta">adia · offline</div></div>';th.appendChild(d);}document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}},true);var go=document.getElementById("phGo"),file=document.getElementById("phFile"),out=document.getElementById("phOut");if(go&&file){go.onclick=function(){var f=file.files&&file.files[0];if(!f){out.textContent="—";return;}out.textContent="…";if(!window.AKSI_PHOTO||!AKSI_PHOTO.analyze){out.textContent="Ctrl+F5";return;}AKSI_PHOTO.analyze(f,{onProgress:function(p){out.textContent=p;}}).then(function(r){out.textContent=r.text+"\n\n— "+(r.meta||"");}).catch(function(e){out.textContent=String(e.message||e);});};}if(window.AKSI_PRODUCT_UI&&AKSI_PRODUCT_UI.wire)setTimeout(function(){AKSI_PRODUCT_UI.wire();},300);try{if(localStorage.getItem("aksi_seen_hero")==="1")goTab("chat");else{goTab("home");localStorage.setItem("aksi_seen_hero","1");}}catch(e){goTab("home");}}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
