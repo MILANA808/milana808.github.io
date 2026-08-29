@@ -3,188 +3,49 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#05050a">
-<meta name="description" content="ADIA — Decision Integrity Algorithm. Ядро AKSI. Стандарт проверяемых решений агента.">
-<title>ADIA — Decision Integrity Algorithm · AKSI</title>
+<meta name="description" content="ADIA 2.0 — Resonance Decision Engine. AKSI algorithm IP.">
+<title>ADIA 2.0 · AKSI Algorithm</title>
 <style>
-:root{
-  --bg:#05050a;--card:#0e0e14;--line:#1e1e28;--t:#f0f0f5;--m:#8b8b9a;
-  --a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--t);font:16px/1.65 var(--font);-webkit-font-smoothing:antialiased}
-.wrap{max-width:720px;margin:0 auto;padding:28px 18px 90px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px;flex-wrap:wrap;gap:12px}
-.brand{display:flex;gap:10px;align-items:center;color:var(--t);text-decoration:none;font-weight:700;font-size:15px}
-.logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 12px/1 var(--font);color:#fff}
-nav a{color:var(--m);text-decoration:none;font-size:13px;margin-left:16px}
-nav a:hover{color:var(--t)}
-.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--a);background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);padding:5px 11px;border-radius:99px;margin-bottom:16px;letter-spacing:.03em}
-h1{font-size:clamp(30px,6vw,42px);letter-spacing:-.04em;margin-bottom:12px;line-height:1.1;font-weight:750}
-.lead{color:var(--m);font-size:17px;margin-bottom:28px;max-width:520px;line-height:1.55}
-.cta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}
-.btn{display:inline-flex;align-items:center;padding:12px 18px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;text-decoration:none;font-weight:600;font-size:14px;border:none;cursor:pointer;transition:transform .1s}
-.btn.g{background:transparent;border:1px solid var(--line);color:var(--t)}
-.btn:active{transform:scale(.97)}
-h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--a);margin:42px 0 14px;font-weight:650}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:11px;color:var(--m);font-size:15px;line-height:1.55}
-.card strong{color:var(--t)}
-.formula{font-family:ui-monospace,SFMono-Regular,monospace;font-size:12.5px;background:#08080e;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;color:#c4c4d0;margin:12px 0;line-height:1.55}
-.grid{display:grid;gap:10px}
-@media(min-width:540px){.grid{grid-template-columns:1fr 1fr}}
-textarea{width:100%;min-height:88px;background:#08080e;border:1px solid var(--line);border-radius:10px;color:var(--t);padding:13px;font:14px/1.5 var(--font);resize:vertical}
-textarea:focus{outline:none;border-color:rgba(167,139,250,.4)}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
-@media(max-width:480px){.metrics{grid-template-columns:repeat(2,1fr)}}
-.metric{background:#08080e;border:1px solid var(--line);border-radius:10px;padding:12px 8px;text-align:center}
-.metric b{display:block;font-size:20px;color:var(--a);font-variant-numeric:tabular-nums;font-weight:700}
-.metric span{font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;display:block}
-#passport{font-family:ui-monospace,SFMono-Regular,monospace;font-size:11.5px;white-space:pre-wrap;background:#08080e;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px;color:#c4c4d0;max-height:300px;overflow:auto}
-.ok{color:var(--ok);font-weight:600}
-.price{display:flex;flex-direction:column;gap:8px}
-.price-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
-.price-row span:last-child{color:var(--t);font-weight:600;white-space:nowrap}
-footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);color:var(--m);font-size:13px}
-footer a{color:var(--a);text-decoration:none}
+:root{--bg:#07060d;--card:#181624;--t:#f4f1ff;--m:#a8a0c0;--a:#b39aff;--a2:#7c3aed;--ok:#34d399;--line:rgba(167,139,250,.25)}
+*{box-sizing:border-box;margin:0;padding:0}body{font:16px/1.5 system-ui;background:var(--bg);color:var(--t);max-width:720px;margin:0 auto;padding:24px 16px 48px}
+a{color:var(--a)}h1{font-size:28px;margin:12px 0 8px}h2{font-size:18px;margin:28px 0 10px;color:var(--a)}
+p,li{color:var(--m);margin:8px 0}.tag{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--ok);margin-bottom:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0}
+pre{background:#0c0a14;border-radius:12px;padding:14px;overflow:auto;font-size:12px;color:#c4b5fd;line-height:1.45}
+.btn{display:inline-block;margin-top:12px;padding:12px 16px;border-radius:12px;background:linear-gradient(135deg,var(--a2),#9f7aea);color:#fff;text-decoration:none;font-weight:600;font-size:14px}
+code{font-size:13px;color:#ddd6fe}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <a class="brand" href="/"><div class="logo">A</div>AKSI</a>
-    <nav>
-      <a href="/aksi.html">Агент</a>
-      <a href="/platform.html">Платформа</a>
-      <a href="/algorithm.html">ADIA</a>
-    </nav>
-  </header>
-
-  <div class="badge">CORE IP · v1.2</div>
-  <h1>ADIA</h1>
-  <p class="lead">Decision Integrity Algorithm.<br>Не оценка «качества ответа». Стандарт <strong style="color:var(--t)">целостности решения</strong> суверенного агента.</p>
-
-  <div class="cta">
-    <a class="btn" href="/aksi.html">Открыть агента</a>
-    <a class="btn g" href="mailto:aksilove@internet.ru?subject=AKSI%20ADIA%20Studio">Лицензия</a>
-  </div>
-
-  <h2>Суть</h2>
-  <div class="card">
-    Модели меняются каждый год. Нужен неизменный слой, который отвечает на три вопроса:<br><br>
-    <strong>1.</strong> Насколько решение информативно?<br>
-    <strong>2.</strong> Опирается ли оно на память владельца?<br>
-    <strong>3.</strong> Можно ли проверить цепочку?<br><br>
-    ADIA — этот слой. Он принадлежит владельцу агента, а не модели.
-  </div>
-
-  <h2>Формула</h2>
-  <div class="card">
-    <strong>EQS — Agent Quality Score</strong>
-    <div class="formula">EQS = 100 × clip( 0.30·(H/5) + 0.35·R + 0.25·C + 0.10·A )</div>
-    H — энтропия Шеннона<br>
-    R — reliability (опора на owned facts)<br>
-    C — coherence<br>
-    A — age / maturity factor (от 14.02.1995)
-  </div>
-
-  <div class="grid">
-    <div class="card"><strong>QCLI</strong><br>Нормированная лексическая информативность</div>
-    <div class="card"><strong>H_eff</strong><br>Энтропия × разнообразие словаря</div>
-    <div class="card"><strong>Retrieve</strong><br>Ранжирование фактов владельца</div>
-    <div class="card"><strong>Chain</strong><br>Hash-linked журнал решений</div>
-  </div>
-
-  <h2>Живой расчёт</h2>
-  <div class="card">
-    <p style="margin-bottom:12px;color:var(--m)">Вставь текст решения агента:</p>
-    <textarea id="input">Агент вспомнил три факта владельца, проверил согласованность с предыдущими решениями и зафиксировал вывод в цепочку целостности.</textarea>
-    <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px">
-      <button class="btn" id="calc">Рассчитать</button>
-      <button class="btn g" id="passportBtn">Создать Passport</button>
-    </div>
-    <div class="metrics" id="metrics" style="display:none">
-      <div class="metric"><b id="m-eqs">—</b><span>EQS</span></div>
-      <div class="metric"><b id="m-qcli">—</b><span>QCLI</span></div>
-      <div class="metric"><b id="m-heff">—</b><span>H_eff</span></div>
-      <div class="metric"><b id="m-h">—</b><span>H</span></div>
-    </div>
-    <div id="passport" style="display:none"></div>
-  </div>
-
-  <h2>Лицензии</h2>
-  <div class="card price">
-    <div class="price-row"><span>Studio · ref + protocol + 1 product</span><span>$497</span></div>
-    <div class="price-row"><span>Business · white-label</span><span>$4 900</span></div>
-    <div class="price-row"><span>Enterprise · policy + audit</span><span>from $25k</span></div>
-    <p style="margin-top:14px;font-size:14px">aksilove@internet.ru</p>
-  </div>
-
-  <footer>
-    <p>AKSI Sovereign Agent Layer · ADIA — core intellectual property</p>
-    <p style="margin-top:8px"><a href="/platform.html">Манифест</a> · <a href="/aksi.html">Агент</a> · <a href="/">Вход</a></p>
-  </footer>
+<div class="tag">Core IP · offline-first</div>
+<h1>ADIA 2.0</h1>
+<p><b style="color:var(--t)">Resonance Decision Engine</b> — именованный алгоритм целостности решений АКСИ.</p>
+<p>Не облачный чат. Прибор: измерить → ранжировать → печать → накопить.</p>
+<div class="card">
+<h2>Цикл</h2>
+<pre>query
+  → engines (Brain / WebLLM / Neuro / Web / Ollama)
+  → candidates
+  → rank by EQS + source trust + quantum meta
+  → policy gate
+  → seal (ledger)
+  → metrics (EQS · QCLI · H · AKSI · resonance)</pre>
 </div>
-
-<script src="/adia-ref.js"></script>
-<script>
-(function(){
-  const input = document.getElementById("input");
-  const metrics = document.getElementById("metrics");
-  const passportEl = document.getElementById("passport");
-
-  function run() {
-    if (typeof ADIA === "undefined") {
-      passportEl.style.display = "block";
-      passportEl.textContent = "ADIA reference не загружен";
-      return null;
-    }
-    const t = input.value.trim() || " ";
-    const eqsVal = ADIA.eqs(t);
-    const q = ADIA.qcli(t);
-    const he = ADIA.heff(t);
-    const h = ADIA.shannonH(t);
-
-    document.getElementById("m-eqs").textContent = eqsVal;
-    document.getElementById("m-qcli").textContent = q.toFixed(3);
-    document.getElementById("m-heff").textContent = he.toFixed(3);
-    document.getElementById("m-h").textContent = h.toFixed(2);
-    metrics.style.display = "grid";
-    return {eqs: eqsVal, q, he, h, t};
-  }
-
-  document.getElementById("calc").onclick = run;
-
-  document.getElementById("passportBtn").onclick = async function() {
-    const res = run();
-    if (!res || typeof ADIA === "undefined") return;
-
-    let passport;
-    if (typeof ADIA.createPassport === "function") {
-      passport = await ADIA.createPassport(res.t);
-    } else {
-      const chain = ADIA.createChain();
-      await ADIA.appendEvent(chain, "decision", { text: res.t.slice(0, 180), ok: true }, res.eqs);
-      const v = ADIA.verifyChain(chain);
-      const did = await ADIA.localDid("AKSI_DIMAX_v3_2026", res.t.slice(0, 64));
-      passport = {
-        adia_version: ADIA.VERSION || "1.1",
-        did: did,
-        timestamp: new Date().toISOString(),
-        eqs: res.eqs,
-        qcli: +res.q.toFixed(4),
-        h_eff: +res.he.toFixed(4),
-        shannon_h: +res.h.toFixed(4),
-        chain_events: chain.length,
-        chain_status: v.msg,
-        chain_head: chain.length ? chain[chain.length-1].hash : null,
-        note: "AKSI Decision Passport"
-      };
-    }
-
-    passportEl.style.display = "block";
-    passportEl.innerHTML = "<span class='ok'>✓ Decision Passport</span>\n\n" + JSON.stringify(passport, null, 2);
-  };
-})();
-</script>
+<div class="card">
+<h2>EQS 2.0</h2>
+<pre>EQS = 100 · clip(
+  0.22·min(1,H/5) + 0.20·R + 0.18·C
+  + 0.10·A + 0.18·S_src + 0.12·M
+)</pre>
+<p>S_src выше для offline (memory, brain, neuro, webllm), ниже для cloud.</p>
+</div>
+<div class="card">
+<h2>Runtime</h2>
+<p><code>aksi-algorithm.js</code> · <code>AKSI_ALGORITHM.evaluate(…)</code></p>
+<p>В чате каждый ответ проходит ADIA. Lab → ADIA — ручная оценка и verify ledger.</p>
+<a class="btn" href="/">Открыть продукт АКСИ</a>
+<a class="btn" href="/ALGORITHM.md" style="background:rgba(255,255,255,.08);margin-left:8px">ALGORITHM.md</a>
+</div>
+<p style="margin-top:28px;font-size:13px">aksilove@internet.ru · <a href="https://milana808.github.io">milana808.github.io</a></p>
 </body>
 </html>
