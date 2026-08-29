@@ -1,131 +1,168 @@
 # АКСИ (AKSI)
 
-**Local-first offline AI companion** with explicit network consent and verifiable policy.
+**Полноценная offline AI-система** с локальным ИИ в браузере.
+
+Local-first · explicit network consent · verifiable policy · single product interface.
 
 **Live:** https://milana808.github.io  
 **Contact:** aksilove@internet.ru · X [@AKSILOVE](https://x.com/AKSILOVE)
 
 ---
 
-## What you get
+## Что это
 
-A working **product in the browser** (no install required):
+Готовый продукт в браузере (без установки):
 
-| Surface | What it does |
-|---------|----------------|
-| **Chat** | Unified answers: Brain → **Neuro (offline LLM)** → optional Web → Core → Ollama |
-| **Memory** | Facts stay in this browser (`запомни: …`) |
-| **Photo** | Local OCR / vision path |
-| **Home** | Offline proof demo, teach, export proof, PRECEDENT |
-| **Lab** | Neuro UI, Mind, Quantum, Trust, DKV, Seal, Web, Ollama |
+| Поверхность | Назначение |
+|-------------|------------|
+| **Chat** | Единый ответ: Brain → **Neuro (offline LLM)** → Web (opt-in) → Core → Ollama |
+| **Memory** | Факты в этом браузере (`запомни: …`) |
+| **Photo** | Локальный OCR / vision path |
+| **Home** | Offline proof demo, teach, export proof, статус системы |
+| **Lab** | Neuro UI, Mind, Quantum, Trust, DKV, Web, Ollama |
 
-**Default: offline.** Internet only after the **Сеть / Network** checkbox.
+**По умолчанию — offline.** Интернет только после галочки **Сеть**.
 
----
-
-## Principles
-
-1. **Local first** — dialogue and memory work without a server.
-2. **Consent for network** — search/API only when the user enables it.
-3. **Provable policy** — [`PRECEDENT.json`](./PRECEDENT.json) + proof/export session trail.
-4. **No private keys on remote servers** — identity stays in the browser.
-5. **Honest scope** — not AGI; not a cloud frontier model replacement. A **sovereign companion layer**.
+Наследие **АКСИ MATRIX** (суверенная когнитивная оболочка, proof ledger, identity) сведено в один понятный mobile-first интерфейс.
 
 ---
 
-## Architecture (runtime)
+## Принципы
+
+1. **Local first** — диалог, память и локальный ИИ работают без сервера.
+2. **Consent for network** — поиск/API только после явного включения пользователем.
+3. **Provable policy** — [`PRECEDENT.json`](./PRECEDENT.json) + proof/export сессии.
+4. **Ключи на устройстве** — identity и память не уходят на серверы оператора по умолчанию.
+5. **Честный scope** — не AGI и не замена frontier-моделей. **Суверенный companion layer**.
+
+---
+
+## Архитектура
 
 ```text
-UI (index.html)
-  ├─ Chat / Memory / Photo / Home / Lab
+UI (index.html) — единый продукт
+  ├─ Home / Chat / Memory / Photo / Lab
   └─ Orchestration
        AKSI_MIND.think()
-         → Quantum shot (optional meta)
-         → Brain (local KB)
-         → Neuro  (offline LLM / retrieve + learn)   ← local AI
-         → Web    (only if consent ON)
-         → Core   (wiki/ddg when allowed)
+         → Quantum shot (meta)
+         → Brain (локальная KB)
+         → Neuro  (offline LLM · retrieve + learn)   ← локальный ИИ
+         → Web    (только если consent ON)
+         → Core   (wiki/ddg при разрешении)
          → LLM    (Ollama / OpenAI-compatible BYOK)
-         → Trust  (verify / ledger hooks)
+         → Trust  (verify / ledger)
 ```
 
-Key scripts:
+### Ключевые файлы
 
-| File | Role |
+| Файл | Роль |
 |------|------|
-| `aksi-core.js` | Stable core search / local helpers |
-| `aksi-neuro.js` | **Offline local AI** (CPU, pure JS) |
-| `aksi-mind.js` | Unified router |
+| `index.html` | Продуктовый shell (Home / Chat / Memory / Photo / Lab) |
+| `aksi-neuro.js` | **Offline local AI** (RWKV-style, pure JS, CPU) |
+| `aksi-mind.js` | Единый маршрутизатор |
 | `aksi-one.js` | Chat runtime / wire |
-| `aksi-web.js` | Opt-in internet |
-| `aksi-brain.js` | Local knowledge complete |
-| `aksi-llm.js` | Optional Ollama / cloud providers |
-| `aksi-product-ui.js` | Proof demo, compare, teach, export |
-| `PRECEDENT.json` | Machine-readable offline-first policy |
+| `aksi-brain.js` | Локальная knowledge base |
+| `aksi-web.js` | Opt-in интернет |
+| `aksi-llm.js` | Ollama / cloud providers (BYOK) |
+| `aksi-product-ui.js` | Proof demo, teach, export |
+| `aksi-quantum.js` | Quantum simulator |
+| `aksi-trust.js` | Trust / ledger hooks |
+| `aksi-dkv.js` | Document claim graph |
+| `aksi-photo.js` | Photo / OCR path |
+| `aksi-core.js` | Стабильный core |
+| `PRECEDENT.json` | Машиночитаемая offline-first политика |
 
-Legacy lab surfaces (`/aksi-matrix/`, system/omega pages) remain reachable; **the product entry is `/`**.
+Legacy surfaces (`/aksi-matrix/`, system/omega) остаются доступны. **Точка входа продукта — `/`.**
+
+---
+
+## Локальный ИИ (Neuro)
+
+- Полностью в браузере (CPU, без GPU, без сети).
+- Архитектура: RWKV-style (рекуррентное состояние O(1), без KV-cache).
+- Ответы из встроенного ядра + фактов, которым вы научили.
+- Обучение: `запомни: …` в чате или Lab → Neuro → Выучить.
+- Не заменяет большие cloud-модели — это **всегда доступный offline brain**.
+
+### Быстрая проверка offline
+
+1. Галочка **Сеть** выключена.
+2. В чате: `Кто ты?`, `Работает ли без интернета?`
+3. Home → **Докажи offline**.
+4. Откройте [`PRECEDENT.json`](https://milana808.github.io/PRECEDENT.json).
 
 ---
 
 ## Quick start
 
-1. Open **https://milana808.github.io** and hard-refresh (**Ctrl+F5** / pull-to-refresh).
-2. Ask in Chat: `Кто ты?`, `Работает ли без интернета?`
-3. Teach: `запомни: мой факт`
-4. Optional network: enable **Сеть**, then search-style questions.
-5. Optional stronger model:
+1. Откройте **https://milana808.github.io** и hard-refresh (**Ctrl+F5**).
+2. Чат: `Кто ты?`, `запомни: мой факт`.
+3. Опционально сеть: включите **Сеть**, затем поисковые вопросы.
+4. Более сильная модель (опционально):
 
 ```bash
 ollama run llama3.2
 ```
 
-Then **Lab → Settings (Ollama)**.
+Затем Lab → Ollama.
 
 ---
 
-## Offline local AI (Neuro)
+## Маршрут ответа (Mind)
 
-- Runs **entirely in the browser** (no GPU required).
-- Answers from built-in knowledge + facts you teach.
-- Learns with `запомни:` / Neuro → Выучить.
-- Does **not** replace large cloud models; it is the **always-on offline brain**.
+```
+Intent
+  → Quantum (meta)
+  → Brain (локальные знания)
+  → Neuro (offline LLM)          ← основной локальный путь
+  → Web (только с consent)
+  → Core / LLM (Ollama)
+  → Trust (подпись / ledger)
+```
+
+Команды в чате:
+- `кто ты` / `whoami`
+- `запомни: …` / `выучи: …`
+- `статус`
+- `что ты помнишь`
+- `/demo`
 
 ---
 
-## Verify offline policy
+## Проверка политики
 
-1. Leave **Сеть** off.
+1. Оставьте **Сеть** выключенной.
 2. Home → **Докажи offline**.
-3. Open [`PRECEDENT.json`](https://milana808.github.io/PRECEDENT.json).
-4. Export proof session from Home when available.
+3. Сверьте [`PRECEDENT.json`](./PRECEDENT.json).
+4. Export proof session с Home (когда доступен).
+
+Технические контроли:
+- `localStorage` flag сети по умолчанию выключен
+- `AKSI_WEB.search` не ходит в сеть без `isEnabled()`
+- `AKSI_MIND` пропускает Web, если consent off
+- ключи и память — только в браузере пользователя
 
 ---
 
-## Privacy
+## Стек
 
-- No analytics trackers in the product shell.
-- Network calls only after consent (or optional local Ollama on your machine).
-- Public contact only: **aksilove@internet.ru**.
-
----
-
-## License
-
-Proprietary — see `LICENSE` / `PROPRIETARY.md`.  
-Unauthorized commercial redistribution of the runtime is not allowed without a license from the author.
+- Pure JS (no framework on product path)
+- IndexedDB / localStorage persistence
+- RWKV-style offline model (Neuro)
+- Ed25519 / seal hooks (где доступны)
+- Optional Ollama (local) and BYOK cloud
+- GitHub Pages static deploy
 
 ---
 
-## Repo map
+## Лицензия и контакт
 
-| Path | Notes |
-|------|--------|
-| `index.html` | Product UI (mobile-first) |
-| `aksi-*.js` | Modules |
-| `PRECEDENT.json` | Policy attestation |
-| `/aksi-matrix/` | MATRIX surface (legacy/lab) |
-| `Milana-backend` (separate repo) | Optional API / agent server |
+Proprietary. См. `LICENSE`, `PROPRIETARY.md`.
+
+**Контакт:** aksilove@internet.ru  
+**X:** [@AKSILOVE](https://x.com/AKSILOVE)  
+**Репозиторий:** [MILANA808/milana808.github.io](https://github.com/MILANA808/milana808.github.io)
 
 ---
 
-*AKSI · offline by default · proof over slogans*
+*AKSI — sovereign digital companion. Offline by default.*

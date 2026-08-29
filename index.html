@@ -4,105 +4,234 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07060d">
-<meta name="description" content="AKSI — local-first offline AI. Consent-bound network. Provable policy.">
+<meta name="description" content="AKSI — полноценная offline AI-система. Локальный ИИ в браузере, память, proof, согласие на сеть.">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
-<title>AKSI — offline AI</title>
+<title>AKSI — offline AI system</title>
 <style>
-:root{--bg:#07060d;--elev:#12101a;--card:#181624;--line:rgba(167,139,250,.2);--t:#f4f1ff;--m:#a8a0c0;--dim:#6f6788;--a:#b39aff;--a2:#7c3aed;--ok:#34d399;--font:system-ui,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--bn:58px}
+:root{
+  --bg:#07060d;--elev:#12101a;--card:#181624;--line:rgba(167,139,250,.22);
+  --t:#f4f1ff;--m:#a8a0c0;--dim:#6f6788;--a:#b39aff;--a2:#7c3aed;
+  --ok:#34d399;--warn:#fbbf24;--err:#f87171;
+  --font:system-ui,-apple-system,sans-serif;
+  --safe-b:env(safe-area-inset-bottom,0px);--bn:58px;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;height:100dvh;overflow:hidden}
-body{color:var(--t);font:16px/1.45 var(--font);background:var(--bg);display:flex;flex-direction:column;max-width:720px;margin:0 auto;background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(124,58,237,.35),transparent 55%)}
-button,input{font:inherit;color:inherit;border:0;background:0}button{cursor:pointer}
-a{color:var(--a)}
-.top{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(7,6,13,.9);backdrop-filter:blur(16px);z-index:40}
-.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#6d28d9,#c4b5fd);display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px}
-.titles{flex:1}h1{font-size:15px}.sub{font-size:11px;color:var(--m)}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.08);color:var(--m)}
+body{
+  color:var(--t);font:16px/1.45 var(--font);background:var(--bg);
+  display:flex;flex-direction:column;max-width:720px;margin:0 auto;
+  background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(124,58,237,.32),transparent 55%);
+}
+button,input,textarea{font:inherit;color:inherit;border:0;background:0}
+button{cursor:pointer}a{color:var(--a)}
+.top{
+  height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  background:rgba(7,6,13,.92);backdrop-filter:blur(16px);z-index:40;flex-shrink:0;
+}
+.logo{
+  width:34px;height:34px;border-radius:11px;
+  background:linear-gradient(145deg,#6d28d9,#c4b5fd);
+  display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px;
+}
+.titles{flex:1;min-width:0}h1{font-size:15px;font-weight:700}.sub{font-size:11px;color:var(--m)}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
+  font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.08);color:var(--m);
+}
 .pill.on{color:var(--ok);border-color:rgba(52,211,153,.4)}
+.pill input{width:14px;height:14px;accent-color:var(--a2)}
 .stage{flex:1;min-height:0;overflow:auto;padding:14px;padding-bottom:calc(120px + var(--safe-b))}
 .panel{display:none}.panel.on{display:block}
-.hero{padding:18px 16px;border-radius:20px;background:linear-gradient(160deg,rgba(124,58,237,.18),rgba(24,22,36,.9));border:1px solid var(--line);margin-bottom:14px}
-.hero h2{font-size:22px;line-height:1.25;margin:8px 0}
+.hero{
+  padding:18px 16px;border-radius:20px;
+  background:linear-gradient(160deg,rgba(124,58,237,.18),rgba(24,22,36,.9));
+  border:1px solid var(--line);margin-bottom:14px;
+}
+.hero .tag{color:var(--a);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.hero h2{font-size:21px;line-height:1.25;margin:8px 0}
 .hero p{font-size:14px;color:var(--m);margin-bottom:12px}
-.btn{min-height:44px;padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t);margin:4px 4px 0 0}
+.btn{
+  min-height:44px;padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t);
+  margin:4px 4px 0 0;display:inline-flex;align-items:center;justify-content:center;
+}
 .btn.primary{background:linear-gradient(135deg,var(--a2),#9f7aea);border:0;color:#fff}
-.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;margin-bottom:10px}
-.muted{color:var(--m);font-size:13px}
-#thread{display:flex;flex-direction:column;gap:10px}
+.btn:active{transform:scale(.98)}
+.card{
+  background:var(--card);border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;padding:14px;margin-bottom:10px;
+}
+.card h3{font-size:14px;margin-bottom:8px;font-weight:700}
+.muted{color:var(--m);font-size:13px;line-height:1.45}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.kv .cell{background:rgba(0,0,0,.25);border-radius:12px;padding:10px 12px}
+.kv b{display:block;font-size:15px;color:var(--ok)}.kv span{font-size:10px;color:var(--dim)}
+#thread{display:flex;flex-direction:column;gap:10px;min-height:120px}
 .msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:88%;padding:11px 13px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:15px}
-.msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff}
-.msg.ai .bub{background:var(--elev);border:1px solid rgba(255,255,255,.06)}
-.meta{font-size:11px;color:var(--dim);margin-top:5px}
-.chip{padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);font-size:13px;margin:4px}
-.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:720px;margin:0 auto;z-index:55;padding:8px 14px;display:flex;gap:8px;background:linear-gradient(to top,var(--bg) 65%,transparent)}
-.composer input{flex:1;min-height:48px;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--elev);font-size:16px;color:var(--t)}
-.composer .send{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font-size:18px}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;max-width:720px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);display:flex;background:rgba(12,10,18,.96);border-top:1px solid rgba(255,255,255,.07)}
-.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);font-size:10px;font-weight:600}
+.bub{
+  max-width:88%;padding:11px 13px;border-radius:16px;
+  white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.45;
+}
+.msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff;border-bottom-right-radius:5px}
+.msg.ai .bub{background:var(--elev);border:1px solid rgba(255,255,255,.06);border-bottom-left-radius:5px}
+.meta{font-size:11px;color:var(--dim);margin-top:5px;font-family:ui-monospace,monospace}
+.chip{
+  padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);
+  background:var(--card);font-size:13px;margin:4px;display:inline-block;
+}
+.composer{
+  position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));
+  max-width:720px;margin:0 auto;z-index:55;padding:8px 14px;
+  display:flex;gap:8px;background:linear-gradient(to top,var(--bg) 65%,transparent);
+}
+.composer input{
+  flex:1;min-height:48px;padding:12px 16px;border-radius:16px;
+  border:1px solid var(--line);background:var(--elev);font-size:16px;color:var(--t);
+}
+.composer .send{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font-size:18px;flex-shrink:0;
+}
+.bnav{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;max-width:720px;margin:0 auto;
+  height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);
+  display:flex;background:rgba(12,10,18,.96);border-top:1px solid rgba(255,255,255,.07);
+}
+.bnav button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;color:var(--dim);font-size:10px;font-weight:600;
+}
 .bnav button.on{color:var(--a)}
-pre.out{background:var(--elev);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:200px;color:var(--m)}
+pre.out{
+  background:var(--elev);border-radius:12px;padding:12px;font-size:12px;
+  overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:220px;color:var(--m);
+}
 .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-input[type=text],input[type=file]{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:var(--elev);color:var(--t);font-size:16px;margin-top:8px}
+input[type=text],input[type=file],textarea{
+  width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
+  background:var(--elev);color:var(--t);font-size:16px;margin-top:8px;
+}
+textarea{min-height:80px;resize:vertical}
+.status-bar{
+  display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px;
+}
+.badge{
+  font-size:11px;padding:4px 9px;border-radius:999px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--m);
+}
+.badge.ok{color:var(--ok);border-color:rgba(52,211,153,.3)}
+.badge.warn{color:var(--warn);border-color:rgba(251,191,36,.3)}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="logo">A</div>
-  <div class="titles"><h1>AKSI</h1><div class="sub">offline AI · consent network</div></div>
+  <div class="titles">
+    <h1>AKSI</h1>
+    <div class="sub">offline AI · local first</div>
+  </div>
   <label class="pill" id="netPill"><input type="checkbox" id="netToggle"> Сеть</label>
 </header>
+
 <div class="stage" id="stage">
+
+<!-- HOME -->
 <section class="panel on" id="tab-home">
   <div class="hero">
-    <div class="sub" style="color:var(--a);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px">Offline-first product</div>
-    <h2>Локальный ИИ с доказуемой политикой</h2>
-    <p>Чат, память, Neuro offline, фото. Интернет — только после галочки. PRECEDENT + proof.</p>
+    <div class="tag">Offline-first product</div>
+    <h2>Полноценная offline AI-система</h2>
+    <p>Локальный ИИ (Neuro RWKV) · память · proof ledger · согласие на сеть. Наследие АКСИ MATRIX в одном понятном интерфейсе.</p>
     <button type="button" class="btn primary" id="btnProofDemo">⚡ Докажи offline</button>
-    <button type="button" class="btn" data-tab="chat">Чат</button>
+    <button type="button" class="btn" data-tab="chat">Открыть чат</button>
     <button type="button" class="btn" id="btnExportProof">Export proof</button>
-    <div class="sub" style="margin-top:10px" id="statusText">offline · сеть выкл</div>
+    <div class="status-bar" id="statusBar">
+      <span class="badge" id="stNeuro">Neuro…</span>
+      <span class="badge" id="stNet">сеть выкл</span>
+      <span class="badge" id="stMem">mem 0</span>
+    </div>
     <div id="proofDemoOut"></div>
   </div>
-  <div class="card"><h3 style="font-size:14px;margin-bottom:8px">Teach</h3>
-    <input type="text" id="teachIn" placeholder="факт…">
-    <button type="button" class="btn primary" id="btnTeach" style="margin-top:8px">Запомнить</button>
+
+  <div class="card">
+    <h3>Статус системы</h3>
+    <div class="kv" id="sysKv">
+      <div class="cell"><b id="kvNeuro">—</b><span>локальный ИИ</span></div>
+      <div class="cell"><b id="kvMind">—</b><span>маршрутизатор</span></div>
+      <div class="cell"><b id="kvProof">—</b><span>proof ledger</span></div>
+      <div class="cell"><b id="kvMode">offline</b><span>режим</span></div>
+    </div>
+    <p class="muted" id="pathText">Intent → Brain → Neuro(offline) → Web? → Core/LLM → Trust</p>
   </div>
-  <div class="card"><p class="muted"><a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a> · aksilove@internet.ru · <a href="https://github.com/MILANA808/milana808.github.io">GitHub</a></p></div>
+
+  <div class="card">
+    <h3>Научить</h3>
+    <input type="text" id="teachIn" placeholder="факт… например: мой город — Казань">
+    <button type="button" class="btn primary" id="btnTeach" style="margin-top:8px;width:100%">Запомнить в Neuro + память</button>
+  </div>
+
+  <div class="card">
+    <p class="muted">
+      <a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a> ·
+      aksilove@internet.ru ·
+      <a href="https://github.com/MILANA808/milana808.github.io" target="_blank" rel="noopener">GitHub</a>
+    </p>
+  </div>
 </section>
+
+<!-- CHAT -->
 <section class="panel" id="tab-chat">
   <div id="thread"></div>
   <div style="margin-top:12px">
     <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
     <button type="button" class="chip" data-ask="Работает ли без интернета?">Без сети?</button>
     <button type="button" class="chip" data-ask="запомни: мне нравится АКСИ">Запомни</button>
+    <button type="button" class="chip" data-ask="статус">Статус</button>
   </div>
-  <p class="muted" style="text-align:center;margin-top:10px;font-size:12px">Neuro offline · memory · web opt-in · Ollama</p>
+  <p class="muted" style="text-align:center;margin-top:10px;font-size:12px">
+    Neuro offline · memory · web opt-in · Ollama
+  </p>
 </section>
+
+<!-- MEMORY -->
 <section class="panel" id="tab-mem">
-  <div class="card"><h3 style="font-size:14px">Память · <span id="memN">0</span></h3>
-  <div id="memList"></div>
-  <button type="button" class="btn" id="btnWipe" style="margin-top:8px;width:100%">Очистить</button></div>
+  <div class="card">
+    <h3>Память · <span id="memN">0</span></h3>
+    <div id="memList"></div>
+    <button type="button" class="btn" id="btnWipe" style="margin-top:8px;width:100%">Очистить память</button>
+  </div>
 </section>
+
+<!-- PHOTO -->
 <section class="panel" id="tab-photo">
-  <div class="card"><h3 style="font-size:14px">Фото · OCR</h3>
-  <input type="file" id="phFile" accept="image/*" capture="environment">
-  <button type="button" class="btn primary" id="phGo" style="margin-top:8px;width:100%">Обработать</button>
-  <pre class="out" id="phOut">—</pre></div>
+  <div class="card">
+    <h3>Фото · OCR</h3>
+    <p class="muted">Текст с изображения обрабатывается локально (где возможно).</p>
+    <input type="file" id="phFile" accept="image/*" capture="environment">
+    <button type="button" class="btn primary" id="phGo" style="margin-top:8px;width:100%">Обработать</button>
+    <pre class="out" id="phOut">—</pre>
+  </div>
 </section>
+
+<!-- LAB -->
 <section class="panel" id="tab-lab">
-  <div class="card"><h3 style="font-size:14px;margin-bottom:8px">Лаборатория</h3>
-  <div class="lab-grid">
-    <button type="button" class="btn" data-tab="neuro">Neuro · offline LLM</button>
-    <button type="button" class="btn" data-tab="settings">Ollama</button>
-    <button type="button" class="btn" data-tab="mind">Mind</button>
-    <button type="button" class="btn" data-tab="web">Web</button>
-    <button type="button" class="btn" data-tab="quantum">Quantum</button>
-    <button type="button" class="btn" data-tab="trust">Trust</button>
-    <button type="button" class="btn" data-tab="dkv">DKV</button>
-    <button type="button" class="btn" data-tab="help">Помощь</button>
-  </div></div>
+  <div class="card">
+    <h3>Лаборатория</h3>
+    <p class="muted" style="margin-bottom:10px">Модули АКСИ MATRIX в одном месте. Neuro — основной локальный ИИ.</p>
+    <div class="lab-grid">
+      <button type="button" class="btn primary" data-tab="neuro">Neuro · offline LLM</button>
+      <button type="button" class="btn" data-tab="settings">Ollama</button>
+      <button type="button" class="btn" data-tab="mind">Mind</button>
+      <button type="button" class="btn" data-tab="web">Web</button>
+      <button type="button" class="btn" data-tab="quantum">Quantum</button>
+      <button type="button" class="btn" data-tab="trust">Trust</button>
+      <button type="button" class="btn" data-tab="dkv">DKV</button>
+      <button type="button" class="btn" data-tab="help">Помощь</button>
+    </div>
+  </div>
 </section>
+
 <section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
 <section class="panel" id="tab-settings"><div class="card"><div id="llm-root"></div></div></section>
 <section class="panel" id="tab-mind"><div id="mind-root"></div></section>
@@ -110,12 +239,26 @@ input[type=text],input[type=file]{width:100%;padding:12px;border-radius:12px;bor
 <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
 <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
 <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-<section class="panel" id="tab-help"><div class="card"><p class="muted">Чат · запомни: · Neuro · Сеть только с галочки · <a href="/PRECEDENT.json">PRECEDENT</a></p><p class="muted">aksilove@internet.ru</p></div></section>
+<section class="panel" id="tab-help">
+  <div class="card">
+    <h3>Как пользоваться</h3>
+    <p class="muted">
+      1. Чат — основной диалог. Отвечает локальный Neuro (RWKV), затем Brain, при необходимости Ollama/сеть.<br>
+      2. «запомни: факт» — учит Neuro и сохраняет в память браузера.<br>
+      3. Галочка «Сеть» — явное согласие на интернет-поиск.<br>
+      4. Home → «Докажи offline» — проверка политики + PRECEDENT.<br>
+      5. Lab → Neuro — обучение и прямой доступ к offline LLM.
+    </p>
+    <p class="muted" style="margin-top:10px">Контакт: aksilove@internet.ru · X @AKSILOVE</p>
+  </div>
+</section>
 </div>
+
 <div class="composer">
-  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000">
-  <button type="button" class="send" id="send">↑</button>
+  <input id="inp" type="text" placeholder="Сообщение… (или «запомни: …»)" enterkeyhint="send" autocomplete="off" maxlength="2000">
+  <button type="button" class="send" id="send" aria-label="Отправить">↑</button>
 </div>
+
 <nav class="bnav">
   <button type="button" data-tab="home">✦ Home</button>
   <button type="button" class="on" data-tab="chat">💬 Чат</button>
@@ -123,38 +266,204 @@ input[type=text],input[type=file]{width:100%;padding:12px;border-radius:12px;bor
   <button type="button" data-tab="photo">📷 Фото</button>
   <button type="button" data-tab="lab">⬡ Lab</button>
 </nav>
-<script src="aksi-core.js?v=51"></script>
-<script src="aksi-quantum.js?v=3"></script>
-<script src="aksi-dkv.js?v=1"></script>
-<script src="aksi-trust.js?v=2"></script>
-<script src="aksi-brain.js?v=4"></script>
-<script src="aksi-llm.js?v=2"></script>
-<script src="aksi-photo.js?v=1"></script>
-<script src="aksi-web.js?v=2"></script>
-<script src="aksi-neuro.js?v=3"></script>
-<script src="aksi-mind.js?v=7"></script>
-<script src="aksi-one.js?v=15"></script>
-<script src="aksi-product-ui.js?v=2"></script>
+
+<script src="aksi-core.js?v=52"></script>
+<script src="aksi-quantum.js?v=4"></script>
+<script src="aksi-dkv.js?v=2"></script>
+<script src="aksi-trust.js?v=3"></script>
+<script src="aksi-brain.js?v=5"></script>
+<script src="aksi-llm.js?v=3"></script>
+<script src="aksi-photo.js?v=2"></script>
+<script src="aksi-web.js?v=3"></script>
+<script src="aksi-neuro.js?v=4"></script>
+<script src="aksi-mind.js?v=8"></script>
+<script src="aksi-one.js?v=16"></script>
+<script src="aksi-product-ui.js?v=3"></script>
 <script>
-(function(){
-var TABS={neuro:["AKSI_NEURO","#neuro-root"],web:["AKSI_WEB","#web-root"],mind:["AKSI_MIND","#mind-root"],quantum:["AKSI_QUANTUM","#quantum-root"],trust:["AKSI_TRUST","#trust-root"],dkv:["AKSI_DKV","#dkv-root"]};
-var MAIN={home:1,chat:1,photo:1,mem:1,lab:1},mounted={};
-function goTab(t){if(!t)return;document.querySelectorAll(".bnav [data-tab]").forEach(function(b){b.classList.toggle("on",MAIN[t]?b.getAttribute("data-tab")===t:b.getAttribute("data-tab")==="lab");});document.querySelectorAll(".stage .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});var s=document.getElementById("stage");if(s)s.scrollTop=0;if(t==="settings")mountMod("llm","AKSI_LLM","#llm-root");if(TABS[t])mountMod(t,TABS[t][0],TABS[t][1]);}
-function mountMod(name,gname,sel){if(mounted[name])return;var m=window[gname],root=document.querySelector(sel);if(!m||typeof m.mount!=="function"){if(root)root.innerHTML='<div class="card"><p class="muted">Ctrl+F5</p></div>';return;}try{m.mount(sel);mounted[name]=true;}catch(e){if(root)root.innerHTML='<div class="card"><p class="muted">'+(e&&e.message)+'</p></div>';}}
-function syncNet(){var on=!!(window.AKSI_WEB&&AKSI_WEB.isEnabled&&AKSI_WEB.isEnabled());var cb=document.getElementById("netToggle");if(cb)cb.checked=on;var pill=document.getElementById("netPill");if(pill)pill.classList.toggle("on",on);var st=document.getElementById("statusText");if(st)st.textContent=on?"network ON":"offline · сеть выкл";}window.__aksiSyncNet=syncNet;
-function boot(){
-  var cb=document.getElementById("netToggle");
-  if(cb&&window.AKSI_WEB&&AKSI_WEB.setEnabled){cb.checked=AKSI_WEB.isEnabled();cb.onchange=function(){AKSI_WEB.setEnabled(cb.checked);syncNet();}}
-  syncNet();
-  var th=document.getElementById("thread");
-  if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Здравствуйте. Я АКСИ — локальный offline ИИ. Сеть только с галочки.<div class="meta">local · neuro</div></div>';th.appendChild(d);}
-  document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}},true);
-  var go=document.getElementById("phGo"),file=document.getElementById("phFile"),out=document.getElementById("phOut");
-  if(go&&file){go.onclick=function(){var f=file.files&&file.files[0];if(!f){out.textContent="—";return;}out.textContent="…";if(!window.AKSI_PHOTO||!AKSI_PHOTO.analyze){out.textContent="Ctrl+F5";return;}AKSI_PHOTO.analyze(f,{onProgress:function(p){out.textContent=p;}}).then(function(r){out.textContent=r.text+"\n\n— "+(r.meta||"");}).catch(function(e){out.textContent=String(e.message||e);});};}
-  if(window.AKSI_PRODUCT_UI&&AKSI_PRODUCT_UI.wire)setTimeout(function(){AKSI_PRODUCT_UI.wire();},300);
-  try{if(localStorage.getItem("aksi_seen_hero")==="1")goTab("chat");else{goTab("home");localStorage.setItem("aksi_seen_hero","1");}}catch(e){goTab("home");}
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+(function () {
+  "use strict";
+  var TABS = {
+    neuro: ["AKSI_NEURO", "#neuro-root"],
+    web: ["AKSI_WEB", "#web-root"],
+    mind: ["AKSI_MIND", "#mind-root"],
+    quantum: ["AKSI_QUANTUM", "#quantum-root"],
+    trust: ["AKSI_TRUST", "#trust-root"],
+    dkv: ["AKSI_DKV", "#dkv-root"]
+  };
+  var MAIN = { home: 1, chat: 1, photo: 1, mem: 1, lab: 1 };
+  var mounted = {};
+
+  function goTab(t) {
+    if (!t) return;
+    document.querySelectorAll(".bnav [data-tab]").forEach(function (b) {
+      b.classList.toggle("on", MAIN[t] ? b.getAttribute("data-tab") === t : b.getAttribute("data-tab") === "lab");
+    });
+    document.querySelectorAll(".stage .panel").forEach(function (p) {
+      p.classList.toggle("on", p.id === "tab-" + t);
+    });
+    var s = document.getElementById("stage");
+    if (s) s.scrollTop = 0;
+    if (t === "settings") mountMod("llm", "AKSI_LLM", "#llm-root");
+    if (TABS[t]) mountMod(t, TABS[t][0], TABS[t][1]);
+    if (t === "mem" && window.AKSI_ONE) {
+      try { if (typeof AKSI_ONE.thinkLocal === "function") { /* refresh via render */ } } catch (e) {}
+    }
+  }
+
+  function mountMod(name, gname, sel) {
+    if (mounted[name]) return;
+    var m = window[gname], root = document.querySelector(sel);
+    if (!m || typeof m.mount !== "function") {
+      if (root) root.innerHTML = '<div class="card"><p class="muted">Ctrl+F5 — перезагрузите скрипты</p></div>';
+      return;
+    }
+    try {
+      m.mount(sel);
+      mounted[name] = true;
+    } catch (e) {
+      if (root) root.innerHTML = '<div class="card"><p class="muted">' + (e && e.message) + "</p></div>";
+    }
+  }
+
+  function syncNet() {
+    var on = !!(window.AKSI_WEB && AKSI_WEB.isEnabled && AKSI_WEB.isEnabled());
+    var cb = document.getElementById("netToggle");
+    if (cb) cb.checked = on;
+    var pill = document.getElementById("netPill");
+    if (pill) pill.classList.toggle("on", on);
+    var stNet = document.getElementById("stNet");
+    if (stNet) {
+      stNet.textContent = on ? "сеть ON" : "сеть выкл";
+      stNet.className = "badge " + (on ? "warn" : "ok");
+    }
+    var kvMode = document.getElementById("kvMode");
+    if (kvMode) kvMode.textContent = on ? "network" : "offline";
+  }
+  window.__aksiSyncNet = syncNet;
+
+  function refreshStatus() {
+    var neuroOk = !!(window.AKSI_NEURO && (AKSI_NEURO.ready ? AKSI_NEURO.ready() : true));
+    var st = null;
+    try { if (window.AKSI_NEURO && AKSI_NEURO.status) st = AKSI_NEURO.status(); } catch (e) {}
+    var el = document.getElementById("stNeuro");
+    if (el) {
+      el.textContent = neuroOk ? "Neuro ready" : "Neuro…";
+      el.className = "badge " + (neuroOk ? "ok" : "warn");
+    }
+    var kvN = document.getElementById("kvNeuro");
+    if (kvN) kvN.textContent = st ? ("RWKV · " + (st.steps || 0)) : (neuroOk ? "on" : "—");
+    var kvM = document.getElementById("kvMind");
+    if (kvM) kvM.textContent = window.AKSI_MIND ? (AKSI_MIND.version || "on") : "—";
+    var memN = 0;
+    try {
+      var raw = localStorage.getItem("aksi_whole_mem_v3");
+      var a = raw ? JSON.parse(raw) : [];
+      memN = Array.isArray(a) ? a.length : 0;
+    } catch (e) {}
+    var stMem = document.getElementById("stMem");
+    if (stMem) stMem.textContent = "mem " + memN;
+    var memNEl = document.getElementById("memN");
+    if (memNEl) memNEl.textContent = String(memN);
+    var proofLen = 0;
+    try {
+      var led = JSON.parse(localStorage.getItem("aksi_proof_ledger_v1") || "[]");
+      proofLen = Array.isArray(led) ? led.length : 0;
+    } catch (e) {}
+    var kvP = document.getElementById("kvProof");
+    if (kvP) kvP.textContent = proofLen ? String(proofLen) : "0";
+  }
+
+  function boot() {
+    var cb = document.getElementById("netToggle");
+    if (cb && window.AKSI_WEB && AKSI_WEB.setEnabled) {
+      cb.checked = AKSI_WEB.isEnabled();
+      cb.onchange = function () {
+        AKSI_WEB.setEnabled(cb.checked);
+        syncNet();
+      };
+    }
+    syncNet();
+    refreshStatus();
+    setInterval(refreshStatus, 4000);
+
+    var th = document.getElementById("thread");
+    if (th && !th.children.length) {
+      var d = document.createElement("div");
+      d.className = "msg ai";
+      d.innerHTML =
+        '<div class="bub">Здравствуйте. Я АКСИ — полноценная offline AI-система. ' +
+        "Локальный ИИ (Neuro) отвечает без интернета. Сеть — только после галочки." +
+        '<div class="meta">local · neuro · mind</div></div>';
+      th.appendChild(d);
+    }
+
+    document.addEventListener(
+      "click",
+      function (e) {
+        var x = e.target.closest && e.target.closest("[data-tab]");
+        if (x) {
+          var t = x.getAttribute("data-tab");
+          if (t) goTab(t);
+        }
+      },
+      true
+    );
+
+    var go = document.getElementById("phGo"),
+      file = document.getElementById("phFile"),
+      out = document.getElementById("phOut");
+    if (go && file) {
+      go.onclick = function () {
+        var f = file.files && file.files[0];
+        if (!f) {
+          out.textContent = "—";
+          return;
+        }
+        out.textContent = "…";
+        if (!window.AKSI_PHOTO || !AKSI_PHOTO.analyze) {
+          out.textContent = "Ctrl+F5";
+          return;
+        }
+        AKSI_PHOTO.analyze(f, {
+          onProgress: function (p) {
+            out.textContent = p;
+          }
+        })
+          .then(function (r) {
+            out.textContent = r.text + "\n\n— " + (r.meta || "");
+          })
+          .catch(function (e) {
+            out.textContent = String(e.message || e);
+          });
+      };
+    }
+
+    if (window.AKSI_PRODUCT_UI && AKSI_PRODUCT_UI.wire) {
+      setTimeout(function () {
+        AKSI_PRODUCT_UI.wire();
+      }, 200);
+    }
+
+    // bootstrap Neuro early
+    if (window.AKSI_NEURO && typeof AKSI_NEURO.bootstrap === "function") {
+      AKSI_NEURO.bootstrap().then(function () {
+        refreshStatus();
+      });
+    }
+
+    try {
+      if (localStorage.getItem("aksi_seen_hero") === "1") goTab("chat");
+      else {
+        goTab("home");
+        localStorage.setItem("aksi_seen_hero", "1");
+      }
+    } catch (e) {
+      goTab("home");
+    }
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
 </script>
 </body>
