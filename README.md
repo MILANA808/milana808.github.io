@@ -1,61 +1,131 @@
-# АКСИ
+# АКСИ (AKSI)
 
-**Суверенный цифровой напарник · Core v5.1 · MATRIX**
+**Local-first offline AI companion** with explicit network consent and verifiable policy.
 
-Сайт: **https://milana808.github.io**  
-MATRIX: **https://milana808.github.io/aksi-matrix/**  
-Контакт: **aksilove@internet.ru** · X **@AKSILOVE**
+**Live:** https://milana808.github.io  
+**Contact:** aksilove@internet.ru · X [@AKSILOVE](https://x.com/AKSILOVE)
 
 ---
 
-## Что это
+## What you get
 
-АКСИ — local-first система: диалог, память, поиск и proof-ledger работают **в браузере на твоём устройстве**.  
-Облачный LLM не обязателен. При желании подключается **Ollama** на `localhost`.
+A working **product in the browser** (no install required):
 
-| Слой | Назначение |
-|------|------------|
-| **Core v5.1** (`aksi-core.js`) | Поиск Wiki/DDG, локальные ответы, кэш |
-| **MATRIX** (`/aksi-matrix/`) | Отдельная поверхность чата на Core |
-| **Self / Neuro / DKV / Vision** | Экспериментальные модули во вкладках |
-| **LLM adapter** | Ollama → ответы уровня большой модели |
+| Surface | What it does |
+|---------|----------------|
+| **Chat** | Unified answers: Brain → **Neuro (offline LLM)** → optional Web → Core → Ollama |
+| **Memory** | Facts stay in this browser (`запомни: …`) |
+| **Photo** | Local OCR / vision path |
+| **Home** | Offline proof demo, teach, export proof, PRECEDENT |
+| **Lab** | Neuro UI, Mind, Quantum, Trust, DKV, Seal, Web, Ollama |
 
-## Принцип
+**Default: offline.** Internet only after the **Сеть / Network** checkbox.
 
-1. Сначала локально.  
-2. Сеть — явно и с пометкой источника.  
-3. Proof-ledger фиксирует целостность истории, **не** «истинность мира».  
-4. Приватный ключ identity не уходит на сервер.
+---
 
-## Быстрый старт
+## Principles
 
-Открой https://milana808.github.io и сделай **Ctrl+F5** (сброс кэша).
+1. **Local first** — dialogue and memory work without a server.
+2. **Consent for network** — search/API only when the user enables it.
+3. **Provable policy** — [`PRECEDENT.json`](./PRECEDENT.json) + proof/export session trail.
+4. **No private keys on remote servers** — identity stays in the browser.
+5. **Honest scope** — not AGI; not a cloud frontier model replacement. A **sovereign companion layer**.
 
-Опционально:
+---
+
+## Architecture (runtime)
+
+```text
+UI (index.html)
+  ├─ Chat / Memory / Photo / Home / Lab
+  └─ Orchestration
+       AKSI_MIND.think()
+         → Quantum shot (optional meta)
+         → Brain (local KB)
+         → Neuro  (offline LLM / retrieve + learn)   ← local AI
+         → Web    (only if consent ON)
+         → Core   (wiki/ddg when allowed)
+         → LLM    (Ollama / OpenAI-compatible BYOK)
+         → Trust  (verify / ledger hooks)
+```
+
+Key scripts:
+
+| File | Role |
+|------|------|
+| `aksi-core.js` | Stable core search / local helpers |
+| `aksi-neuro.js` | **Offline local AI** (CPU, pure JS) |
+| `aksi-mind.js` | Unified router |
+| `aksi-one.js` | Chat runtime / wire |
+| `aksi-web.js` | Opt-in internet |
+| `aksi-brain.js` | Local knowledge complete |
+| `aksi-llm.js` | Optional Ollama / cloud providers |
+| `aksi-product-ui.js` | Proof demo, compare, teach, export |
+| `PRECEDENT.json` | Machine-readable offline-first policy |
+
+Legacy lab surfaces (`/aksi-matrix/`, system/omega pages) remain reachable; **the product entry is `/`**.
+
+---
+
+## Quick start
+
+1. Open **https://milana808.github.io** and hard-refresh (**Ctrl+F5** / pull-to-refresh).
+2. Ask in Chat: `Кто ты?`, `Работает ли без интернета?`
+3. Teach: `запомни: мой факт`
+4. Optional network: enable **Сеть**, then search-style questions.
+5. Optional stronger model:
 
 ```bash
 ollama run llama3.2
 ```
 
-Затем вкладка **О себе** → Сохранить → Тест.
-
-## Формула
-
-```text
-AKSI = (A × I × S) × (1 + 0.4√n)
-EQS  = 0.30·H + 0.35·rel + 0.25·coh + 0.10·age
-```
-
-## Что АКСИ не заявляет
-
-Нет претензий на AGI, сознание или quantum supremacy.  
-Квантовый контур — программный инструмент/симулятор.
-
-## Репозиторий
-
-Стабильное ядро: `aksi-core.js`.  
-Главная: `index.html` (баннер v5.1, чип MATRIX, чат).
+Then **Lab → Settings (Ollama)**.
 
 ---
 
-*АКСИ × Grok · private by default*
+## Offline local AI (Neuro)
+
+- Runs **entirely in the browser** (no GPU required).
+- Answers from built-in knowledge + facts you teach.
+- Learns with `запомни:` / Neuro → Выучить.
+- Does **not** replace large cloud models; it is the **always-on offline brain**.
+
+---
+
+## Verify offline policy
+
+1. Leave **Сеть** off.
+2. Home → **Докажи offline**.
+3. Open [`PRECEDENT.json`](https://milana808.github.io/PRECEDENT.json).
+4. Export proof session from Home when available.
+
+---
+
+## Privacy
+
+- No analytics trackers in the product shell.
+- Network calls only after consent (or optional local Ollama on your machine).
+- Public contact only: **aksilove@internet.ru**.
+
+---
+
+## License
+
+Proprietary — see `LICENSE` / `PROPRIETARY.md`.  
+Unauthorized commercial redistribution of the runtime is not allowed without a license from the author.
+
+---
+
+## Repo map
+
+| Path | Notes |
+|------|--------|
+| `index.html` | Product UI (mobile-first) |
+| `aksi-*.js` | Modules |
+| `PRECEDENT.json` | Policy attestation |
+| `/aksi-matrix/` | MATRIX surface (legacy/lab) |
+| `Milana-backend` (separate repo) | Optional API / agent server |
+
+---
+
+*AKSI · offline by default · proof over slogans*
