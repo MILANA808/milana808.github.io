@@ -4,230 +4,156 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07060d">
-<meta name="description" content="AKSI — local-first personal AI. Offline by default. Provable consent.">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="description" content="AKSI — local-first offline AI. Consent-bound network. Provable policy.">
 <link rel="manifest" href="/manifest.json">
-<title>AKSI — local-first AI</title>
+<title>AKSI — offline AI</title>
 <style>
-:root{--bg:#07060d;--elev:#12101a;--card:#181624;--line:rgba(167,139,250,.18);--t:#f4f1ff;--m:#a8a0c0;--dim:#6f6788;--a:#b39aff;--a2:#7c3aed;--ok:#34d399;--warn:#fbbf24;--font:ui-sans-serif,system-ui,-apple-system,sans-serif;--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--r:16px;--h:52px;--bn:58px;--cmp:56px}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#07060d;--elev:#12101a;--card:#181624;--line:rgba(167,139,250,.2);--t:#f4f1ff;--m:#a8a0c0;--dim:#6f6788;--a:#b39aff;--a2:#7c3aed;--ok:#34d399;--font:system-ui,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--bn:58px}
+*{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;height:100dvh;overflow:hidden}
-body{color:var(--t);font:16px/1.45 var(--font);background:var(--bg);display:flex;flex-direction:column;max-width:720px;margin:0 auto;padding-top:var(--safe-t);background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(124,58,237,.35),transparent 55%)}
-button,input{font:inherit;color:inherit}button{cursor:pointer;touch-action:manipulation;border:0;background:0}
-a{color:var(--a)}:focus-visible{outline:2px solid var(--a);outline-offset:2px}
-.top{flex-shrink:0;height:var(--h);display:flex;align-items:center;gap:10px;padding:0 var(--pad);border-bottom:1px solid rgba(255,255,255,.05);background:rgba(7,6,13,.88);backdrop-filter:blur(16px);z-index:40}
-.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#6d28d9,#c4b5fd);display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px;box-shadow:0 0 24px rgba(124,58,237,.35)}
-.titles{flex:1;min-width:0}h1{font-size:15px;font-weight:700}.sub{font-size:11px;color:var(--m)}
-.top-actions{display:flex;gap:6px;align-items:center}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);color:var(--m);min-height:32px}
-.pill.on{color:var(--ok);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
-.pill input{width:14px;height:14px;accent-color:var(--a2)}
-.lang button{min-width:34px;min-height:32px;border-radius:8px;color:var(--dim);font-weight:700;font-size:11px}
-.lang button.on{background:var(--card);color:var(--t);border:1px solid var(--line)}
-.stage{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:var(--pad);padding-bottom:calc(var(--cmp)+var(--bn)+var(--safe-b)+16px)}
+body{color:var(--t);font:16px/1.45 var(--font);background:var(--bg);display:flex;flex-direction:column;max-width:720px;margin:0 auto;background-image:radial-gradient(ellipse 90% 45% at 50% -8%,rgba(124,58,237,.35),transparent 55%)}
+button,input{font:inherit;color:inherit;border:0;background:0}button{cursor:pointer}
+a{color:var(--a)}
+.top{height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(7,6,13,.9);backdrop-filter:blur(16px);z-index:40}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#6d28d9,#c4b5fd);display:grid;place-items:center;font-weight:800;color:#fff;font-size:13px}
+.titles{flex:1}h1{font-size:15px}.sub{font-size:11px;color:var(--m)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.08);color:var(--m)}
+.pill.on{color:var(--ok);border-color:rgba(52,211,153,.4)}
+.stage{flex:1;min-height:0;overflow:auto;padding:14px;padding-bottom:calc(120px + var(--safe-b))}
 .panel{display:none}.panel.on{display:block}
-.hero{margin-bottom:14px;padding:18px 16px;border-radius:20px;position:relative;overflow:hidden;background:linear-gradient(160deg,rgba(124,58,237,.18),rgba(24,22,36,.9) 50%);border:1px solid rgba(167,139,250,.2);box-shadow:0 20px 50px rgba(0,0,0,.35)}
-.hero-kicker{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--a);margin-bottom:10px}
-.hero-kicker i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero h2{font-size:22px;line-height:1.25;font-weight:750;letter-spacing:-.02em;margin-bottom:8px}
-.hero p{font-size:14px;color:var(--m);line-height:1.5;margin-bottom:14px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:8px}
-.btn{min-height:44px;padding:10px 16px;border-radius:12px;font:600 13px/1 var(--font);border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t)}
-.btn:active{transform:scale(.97)}
-.btn.primary{background:linear-gradient(135deg,var(--a2),#9f7aea);border:0;color:#fff;box-shadow:0 8px 24px rgba(124,58,237,.35)}
-.btn.ghost{background:transparent}.btn.block{width:100%}
-.status-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--dim)}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}.status-dot.warn{background:var(--warn)}
-.proof-card{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;margin-top:10px}
-.proof-badge{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ok);margin-bottom:6px}
-.proof-badge.on{color:var(--a)}.proof-card p{font-size:13px;color:var(--t);line-height:1.4;white-space:pre-wrap}
-.proof-meta{font-size:11px;color:var(--dim);margin-top:6px}
-.compare-grid{display:grid;gap:8px}@media(min-width:520px){.compare-grid{grid-template-columns:1fr 1fr}}
-.skel{height:64px;border-radius:12px;background:linear-gradient(90deg,var(--card),var(--elev),var(--card));background-size:200% 100%;animation:shimmer 1.2s infinite}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-.usecases{display:grid;gap:8px;margin:14px 0}
-.uc{padding:12px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.05)}
-.uc strong{display:block;font-size:13px;margin-bottom:4px}.uc span{font-size:12px;color:var(--m);line-height:1.4}
-.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--r);padding:14px;margin-bottom:10px}
-.card h3{font-size:14px;margin-bottom:8px}.muted{color:var(--m);font-size:13px;line-height:1.5}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.lab-grid .btn{width:100%;text-align:left;padding:12px;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
-.lab-grid .btn em{font-style:normal;font-size:10px;font-weight:700;color:var(--warn);letter-spacing:.04em;text-transform:uppercase}
-.lab-grid .btn span{font-size:11px;color:var(--m);font-weight:400}
-#thread{display:flex;flex-direction:column;gap:10px;min-height:60px}
+.hero{padding:18px 16px;border-radius:20px;background:linear-gradient(160deg,rgba(124,58,237,.18),rgba(24,22,36,.9));border:1px solid var(--line);margin-bottom:14px}
+.hero h2{font-size:22px;line-height:1.25;margin:8px 0}
+.hero p{font-size:14px;color:var(--m);margin-bottom:12px}
+.btn{min-height:44px;padding:10px 16px;border-radius:12px;font-weight:600;font-size:13px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--t);margin:4px 4px 0 0}
+.btn.primary{background:linear-gradient(135deg,var(--a2),#9f7aea);border:0;color:#fff}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;margin-bottom:10px}
+.muted{color:var(--m);font-size:13px}
+#thread{display:flex;flex-direction:column;gap:10px}
 .msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:min(88%,400px);padding:11px 13px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.4}
-.msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff;border-bottom-right-radius:5px}
-.msg.ai .bub{background:var(--elev);border:1px solid rgba(255,255,255,.06);border-bottom-left-radius:5px}
+.bub{max-width:88%;padding:11px 13px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:15px}
+.msg.me .bub{background:linear-gradient(135deg,var(--a2),#8b5cf6);color:#fff}
+.msg.ai .bub{background:var(--elev);border:1px solid rgba(255,255,255,.06)}
 .meta{font-size:11px;color:var(--dim);margin-top:5px}
-.badge-src{display:inline-block;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(167,139,250,.12);color:var(--a)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.chip{padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);font-size:13px;min-height:40px}
-.hint{text-align:center;font-size:12px;color:var(--dim);margin-top:10px}
-input[type=text],input[type=file]{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:var(--elev);color:var(--t);font-size:16px;margin-top:8px}
-pre.out{background:var(--elev);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:220px;color:var(--m)}
-.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:720px;margin:0 auto;z-index:55;padding:8px var(--pad);display:flex;gap:8px;align-items:center;background:linear-gradient(to top,var(--bg) 65%,transparent)}
-.composer input[type=text]{flex:1;min-height:48px;margin:0;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--elev);font-size:16px}
-.composer .icon-btn,.composer .send-btn{width:48px;height:48px;border-radius:14px;flex-shrink:0;display:grid;place-items:center;font-size:18px}
-.composer .icon-btn{border:1px solid var(--line);background:var(--elev)}
-.composer .send-btn{background:linear-gradient(135deg,var(--a2),var(--a));color:#fff}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;max-width:720px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding:0 2px var(--safe-b);display:flex;background:rgba(12,10,18,.96);backdrop-filter:blur(18px);border-top:1px solid rgba(255,255,255,.07)}
-.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);font-size:10px;font-weight:600;min-height:var(--bn)}
-.bnav button .ic{font-size:18px}.bnav button.on{color:var(--a)}
-body.kb-open .composer{bottom:var(--safe-b)}body.kb-open .bnav{transform:translateY(110%);opacity:0;pointer-events:none}
-.foot{margin:20px 0 8px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:var(--dim);text-align:center;line-height:1.6}
+.chip{padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:var(--card);font-size:13px;margin:4px}
+.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:720px;margin:0 auto;z-index:55;padding:8px 14px;display:flex;gap:8px;background:linear-gradient(to top,var(--bg) 65%,transparent)}
+.composer input{flex:1;min-height:48px;padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:var(--elev);font-size:16px;color:var(--t)}
+.composer .send{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font-size:18px}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;max-width:720px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);display:flex;background:rgba(12,10,18,.96);border-top:1px solid rgba(255,255,255,.07)}
+.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);font-size:10px;font-weight:600}
+.bnav button.on{color:var(--a)}
+pre.out{background:var(--elev);border-radius:12px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:200px;color:var(--m)}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=text],input[type=file]{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:var(--elev);color:var(--t);font-size:16px;margin-top:8px}
 </style>
 </head>
 <body>
-<header class="top" role="banner">
-  <div class="logo" aria-hidden="true">A</div>
-  <div class="titles"><h1>AKSI</h1><div class="sub">local-first · offline by default</div></div>
-  <div class="top-actions">
-    <label class="pill" id="netPill"><input type="checkbox" id="netToggle" aria-label="Network consent"><span>Сеть</span></label>
-    <div class="lang" role="group" aria-label="Language">
-      <button type="button" id="langRu" class="on">RU</button>
-      <button type="button" id="langEn">EN</button>
-    </div>
-  </div>
+<header class="top">
+  <div class="logo">A</div>
+  <div class="titles"><h1>AKSI</h1><div class="sub">offline AI · consent network</div></div>
+  <label class="pill" id="netPill"><input type="checkbox" id="netToggle"> Сеть</label>
 </header>
 <div class="stage" id="stage">
 <section class="panel on" id="tab-home">
   <div class="hero">
-    <div class="hero-kicker"><i></i> Offline-first · consent-bound</div>
-    <h2>Не чатбот в облаке.<br>Ваш локальный мозг с доказуемой политикой.</h2>
-    <p>Диалог, память и идентичность — в браузере. Интернет только после галочки. Политика проверяется: PRECEDENT + ledger + DID.</p>
-    <div class="hero-actions">
-      <button type="button" class="btn primary" id="btnProofDemo">⚡ Докажи offline</button>
-      <button type="button" class="btn" data-tab="chat">Чат</button>
-      <button type="button" class="btn ghost" id="btnShare">Поделиться</button>
-      <button type="button" class="btn ghost" id="btnInstall" hidden>Install</button>
-    </div>
-    <div class="status-row"><span class="status-dot" id="statusDot"></span><span id="statusText">offline · сеть выкл</span></div>
-    <div id="proofDemoOut" aria-live="polite"></div>
+    <div class="sub" style="color:var(--a);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px">Offline-first product</div>
+    <h2>Локальный ИИ с доказуемой политикой</h2>
+    <p>Чат, память, Neuro offline, фото. Интернет — только после галочки. PRECEDENT + proof.</p>
+    <button type="button" class="btn primary" id="btnProofDemo">⚡ Докажи offline</button>
+    <button type="button" class="btn" data-tab="chat">Чат</button>
+    <button type="button" class="btn" id="btnExportProof">Export proof</button>
+    <div class="sub" style="margin-top:10px" id="statusText">offline · сеть выкл</div>
+    <div id="proofDemoOut"></div>
   </div>
-  <div class="card">
-    <h3>Сравнить offline vs online</h3>
-    <p class="muted">Один вопрос — два ответа с источниками.</p>
-    <input type="text" id="compareQ" value="what is photosynthesis" aria-label="Compare question">
-    <div class="row"><button type="button" class="btn primary" id="btnCompare">Сравнить</button></div>
+  <div class="card"><h3 style="font-size:14px;margin-bottom:8px">Teach</h3>
+    <input type="text" id="teachIn" placeholder="факт…">
+    <button type="button" class="btn primary" id="btnTeach" style="margin-top:8px">Запомнить</button>
   </div>
-  <div class="usecases">
-    <div class="uc"><strong>Юрист / журналист</strong><span>Черновики не уходят в чужой API.</span></div>
-    <div class="uc"><strong>Личные заметки</strong><span>«запомни: …» — только в браузере.</span></div>
-    <div class="uc"><strong>Без сети</strong><span>OCR и локальные ответы в поле.</span></div>
-  </div>
-  <div class="card">
-    <h3>Почему это важно</h3>
-    <p class="muted">Большинство ИИ-помощников шлют текст на сервер. AKSI: <b>локально по умолчанию</b>, сеть — opt-in. Код + PRECEDENT.json.</p>
-    <div class="row">
-      <a class="btn" href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a>
-      <button type="button" class="btn" id="btnExportProof">Export proof</button>
-    </div>
-    <p class="muted" style="margin-top:10px" id="passportOut">DID · consent · mem</p>
-  </div>
-  <div class="card">
-    <h3>Teach me</h3>
-    <input type="text" id="teachIn" placeholder="факт для памяти…" aria-label="Teach fact">
-    <div class="row"><button type="button" class="btn primary" id="btnTeach">Запомнить</button></div>
-  </div>
-  <footer class="foot">aksilove@internet.ru · <a href="https://github.com/MILANA808/milana808.github.io" target="_blank" rel="noopener">GitHub</a> · <a href="https://x.com/AKSILOVE" target="_blank" rel="noopener">X</a> · <a href="/PRECEDENT.json">Precedent</a></footer>
+  <div class="card"><p class="muted"><a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a> · aksilove@internet.ru · <a href="https://github.com/MILANA808/milana808.github.io">GitHub</a></p></div>
 </section>
 <section class="panel" id="tab-chat">
-  <div id="thread" role="log" aria-live="polite"></div>
-  <div class="chips">
+  <div id="thread"></div>
+  <div style="margin-top:12px">
     <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
-    <button type="button" class="chip" data-ask="Что ты умеешь?">Что умеешь?</button>
+    <button type="button" class="chip" data-ask="Работает ли без интернета?">Без сети?</button>
     <button type="button" class="chip" data-ask="запомни: мне нравится АКСИ">Запомни</button>
   </div>
-  <p class="hint">local / memory / web / ollama</p>
-</section>
-<section class="panel" id="tab-photo">
-  <div class="card"><h3>Фото · OCR</h3><p class="muted">Текст с картинки локально.</p>
-  <input type="file" id="phFile" accept="image/*" capture="environment">
-  <div class="row"><button type="button" class="btn primary block" id="phGo">Обработать</button></div>
-  <pre class="out" id="phOut">—</pre></div>
+  <p class="muted" style="text-align:center;margin-top:10px;font-size:12px">Neuro offline · memory · web opt-in · Ollama</p>
 </section>
 <section class="panel" id="tab-mem">
-  <div class="card"><h3>Память · <span id="memN">0</span></h3><p class="muted">Только этот браузер.</p>
+  <div class="card"><h3 style="font-size:14px">Память · <span id="memN">0</span></h3>
   <div id="memList"></div>
-  <div class="row"><button type="button" class="btn block" id="btnWipe">Очистить</button></div></div>
+  <button type="button" class="btn" id="btnWipe" style="margin-top:8px;width:100%">Очистить</button></div>
+</section>
+<section class="panel" id="tab-photo">
+  <div class="card"><h3 style="font-size:14px">Фото · OCR</h3>
+  <input type="file" id="phFile" accept="image/*" capture="environment">
+  <button type="button" class="btn primary" id="phGo" style="margin-top:8px;width:100%">Обработать</button>
+  <pre class="out" id="phOut">—</pre></div>
 </section>
 <section class="panel" id="tab-lab">
-  <div class="card"><h3>Лаборатория</h3><p class="muted">Эксперименты. Продукт — чат, память, фото, proof.</p>
+  <div class="card"><h3 style="font-size:14px;margin-bottom:8px">Лаборатория</h3>
   <div class="lab-grid">
-    <button type="button" class="btn" data-tab="settings"><em>core</em>Настройки<span>Ollama</span></button>
-    <button type="button" class="btn" data-tab="web"><em>experiment</em>Web<span>поиск + consent</span></button>
-    <button type="button" class="btn" data-tab="mind"><em>experiment</em>Mind<span>пайплайн</span></button>
-    <button type="button" class="btn" data-tab="quantum"><em>experiment</em>Quantum<span>симулятор</span></button>
-    <button type="button" class="btn" data-tab="trust"><em>experiment</em>Trust<span>verify</span></button>
-    <button type="button" class="btn" data-tab="dkv"><em>experiment</em>DKV<span>documents</span></button>
-    <button type="button" class="btn" data-tab="seal"><em>experiment</em>Seal<span>PQ</span></button>
-    <button type="button" class="btn" data-tab="lang"><em>experiment</em>AKSI.L<span>language</span></button>
-    <button type="button" class="btn" data-tab="help"><em>docs</em>Помощь<span>Precedent</span></button>
+    <button type="button" class="btn" data-tab="neuro">Neuro · offline LLM</button>
+    <button type="button" class="btn" data-tab="settings">Ollama</button>
+    <button type="button" class="btn" data-tab="mind">Mind</button>
+    <button type="button" class="btn" data-tab="web">Web</button>
+    <button type="button" class="btn" data-tab="quantum">Quantum</button>
+    <button type="button" class="btn" data-tab="trust">Trust</button>
+    <button type="button" class="btn" data-tab="dkv">DKV</button>
+    <button type="button" class="btn" data-tab="help">Помощь</button>
   </div></div>
 </section>
-<section class="panel" id="tab-settings"><div class="card"><h3>Ollama</h3><div id="llm-root"></div></div></section>
-<section class="panel" id="tab-help"><div class="card"><h3>Помощь</h3><p class="muted">Чат · «запомни:» · фото · сеть только с галочкой.</p><p class="muted"><a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT.json</a></p></div>
-<div class="card"><h3>Контакт</h3><p class="muted">aksilove@internet.ru</p><p class="muted" id="didLine">DID: —</p></div></section>
-<section class="panel" id="tab-web"><div id="web-root"></div></section>
+<section class="panel" id="tab-neuro"><div id="neuro-root"></div></section>
+<section class="panel" id="tab-settings"><div class="card"><div id="llm-root"></div></div></section>
 <section class="panel" id="tab-mind"><div id="mind-root"></div></section>
+<section class="panel" id="tab-web"><div id="web-root"></div></section>
 <section class="panel" id="tab-quantum"><div id="quantum-root"></div></section>
 <section class="panel" id="tab-trust"><div id="trust-root"></div></section>
 <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-<section class="panel" id="tab-seal"><div id="seal-root"></div></section>
-<section class="panel" id="tab-lang"><div id="lang-root"></div></section>
+<section class="panel" id="tab-help"><div class="card"><p class="muted">Чат · запомни: · Neuro · Сеть только с галочки · <a href="/PRECEDENT.json">PRECEDENT</a></p><p class="muted">aksilove@internet.ru</p></div></section>
 </div>
 <div class="composer">
-  <button type="button" class="icon-btn" id="photoBtn" aria-label="Photo">📷</button>
-  <input type="file" id="photoFile" accept="image/*" capture="environment" hidden>
-  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000" aria-label="Message">
-  <button type="button" class="send-btn" id="send" aria-label="Send">↑</button>
+  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000">
+  <button type="button" class="send" id="send">↑</button>
 </div>
-<nav class="bnav" aria-label="Main">
-  <button type="button" data-tab="home"><span class="ic">✦</span>Home</button>
-  <button type="button" class="on" data-tab="chat"><span class="ic">💬</span>Чат</button>
-  <button type="button" data-tab="mem"><span class="ic">🧠</span>Память</button>
-  <button type="button" data-tab="photo"><span class="ic">📷</span>Фото</button>
-  <button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
+<nav class="bnav">
+  <button type="button" data-tab="home">✦ Home</button>
+  <button type="button" class="on" data-tab="chat">💬 Чат</button>
+  <button type="button" data-tab="mem">🧠 Память</button>
+  <button type="button" data-tab="photo">📷 Фото</button>
+  <button type="button" data-tab="lab">⬡ Lab</button>
 </nav>
 <script src="aksi-core.js?v=51"></script>
 <script src="aksi-quantum.js?v=3"></script>
-<script src="aksi-overlay.js?v=1"></script>
 <script src="aksi-dkv.js?v=1"></script>
 <script src="aksi-trust.js?v=2"></script>
 <script src="aksi-brain.js?v=4"></script>
 <script src="aksi-llm.js?v=2"></script>
-<script src="aksi-vision.js?v=2"></script>
 <script src="aksi-photo.js?v=1"></script>
 <script src="aksi-web.js?v=2"></script>
-<script src="aksi-i18n.js?v=1"></script>
-<script src="aksi-lang.js?v=2"></script>
-<script src="aksi-mind.js?v=5"></script>
+<script src="aksi-neuro.js?v=3"></script>
+<script src="aksi-mind.js?v=7"></script>
 <script src="aksi-one.js?v=15"></script>
-<script src="aksi-ux.js?v=2"></script>
-<script src="aksi-one-fix.js?v=1"></script>
-<script src="aksi-seal.js?v=1"></script>
-<script src="aksi-whole.js?v=3"></script>
 <script src="aksi-product-ui.js?v=2"></script>
 <script>
 (function(){
-var TABS={web:["AKSI_WEB","#web-root"],lang:["AKSI_LANG","#lang-root"],mind:["AKSI_MIND","#mind-root"],quantum:["AKSI_QUANTUM","#quantum-root"],trust:["AKSI_TRUST","#trust-root"],dkv:["AKSI_DKV","#dkv-root"],seal:["AKSI_SEAL","#seal-root"]};
-var MAIN={home:1,chat:1,photo:1,mem:1,lab:1};var mounted={};
-function goTab(t){if(!t)return;document.querySelectorAll(".bnav [data-tab]").forEach(function(b){var id=b.getAttribute("data-tab");b.classList.toggle("on",MAIN[t]?id===t:id==="lab");});document.querySelectorAll(".stage .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});var s=document.getElementById("stage");if(s)s.scrollTop=0;if(t==="settings")mountMod("llm","AKSI_LLM","#llm-root");if(TABS[t])mountMod(t,TABS[t][0],TABS[t][1]);}
-function mountMod(name,gname,sel){if(mounted[name])return;var m=window[gname],root=document.querySelector(sel);if(!m||typeof m.mount!=="function"){if(root&&!root.dataset.fb){root.dataset.fb="1";root.innerHTML='<div class="card"><p class="muted">Ctrl+F5</p></div>';}return;}try{m.mount(sel);mounted[name]=true;}catch(e){if(root)root.innerHTML='<div class="card"><p class="muted">'+(e&&e.message)+'</p></div>';}}
-function syncNet(){var on=!!(window.AKSI_WEB&&AKSI_WEB.isEnabled&&AKSI_WEB.isEnabled());var cb=document.getElementById("netToggle");if(cb)cb.checked=on;var pill=document.getElementById("netPill");if(pill)pill.classList.toggle("on",on);var dot=document.getElementById("statusDot");var st=document.getElementById("statusText");if(dot)dot.className="status-dot"+(on?" warn":"");if(st)st.textContent=on?"network consent ON":"offline · сеть выкл";}window.__aksiSyncNet=syncNet;
-function setupKeyboard(){var inp=document.getElementById("inp");if(!inp)return;inp.addEventListener("focus",function(){document.body.classList.add("kb-open");});inp.addEventListener("blur",function(){setTimeout(function(){document.body.classList.remove("kb-open");},120);});}
-function boot(){if(window.AKSI_I18N){AKSI_I18N.apply();var lr=document.getElementById("langRu"),le=document.getElementById("langEn");if(lr)lr.onclick=function(){AKSI_I18N.setLang("ru");AKSI_I18N.apply();syncNet();};if(le)le.onclick=function(){AKSI_I18N.setLang("en");AKSI_I18N.apply();syncNet();};}
-var cb=document.getElementById("netToggle");if(cb&&window.AKSI_WEB&&AKSI_WEB.setEnabled){cb.checked=AKSI_WEB.isEnabled();cb.onchange=function(){AKSI_WEB.setEnabled(cb.checked);syncNet();}}syncNet();
-var th=document.getElementById("thread");if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Здравствуйте. AKSI — offline by default.<div class="meta"><span class="badge-src">local</span></div></div>';th.appendChild(d);}
-document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}},true);
-var go=document.getElementById("phGo"),file=document.getElementById("phFile"),out=document.getElementById("phOut");if(go&&file){go.onclick=function(){var f=file.files&&file.files[0];if(!f){out.textContent="—";return;}out.textContent="…";if(!window.AKSI_PHOTO||!AKSI_PHOTO.analyze){out.textContent="Ctrl+F5";return;}AKSI_PHOTO.analyze(f,{onProgress:function(p){out.textContent=p;}}).then(function(r){out.textContent=r.text+"\n\n— "+(r.meta||"");}).catch(function(e){out.textContent=String(e.message||e);});};}
-var photoBtn=document.getElementById("photoBtn"),photoFile=document.getElementById("photoFile");if(photoBtn&&photoFile){photoBtn.onclick=function(){goTab("photo");photoFile.click();};photoFile.onchange=function(){if(photoFile.files&&photoFile.files[0]&&file){try{var dt=new DataTransfer();dt.items.add(photoFile.files[0]);file.files=dt.files;}catch(e){}if(go)go.click();}};}
-setupKeyboard();if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js").catch(function(){});}
-setTimeout(function(){syncNet();try{var did=localStorage.getItem("aksi_did_v1");var dl=document.getElementById("didLine");if(dl&&did)dl.textContent="DID: "+did;}catch(e){}if(window.AKSI_PHOTO&&AKSI_PHOTO.wireChat)AKSI_PHOTO.wireChat();if(window.AKSI_PRODUCT_UI&&AKSI_PRODUCT_UI.wire)AKSI_PRODUCT_UI.wire();},350);
-try{if(localStorage.getItem("aksi_seen_hero")==="1")goTab("chat");else{goTab("home");localStorage.setItem("aksi_seen_hero","1");}}catch(e){goTab("home");}}
+var TABS={neuro:["AKSI_NEURO","#neuro-root"],web:["AKSI_WEB","#web-root"],mind:["AKSI_MIND","#mind-root"],quantum:["AKSI_QUANTUM","#quantum-root"],trust:["AKSI_TRUST","#trust-root"],dkv:["AKSI_DKV","#dkv-root"]};
+var MAIN={home:1,chat:1,photo:1,mem:1,lab:1},mounted={};
+function goTab(t){if(!t)return;document.querySelectorAll(".bnav [data-tab]").forEach(function(b){b.classList.toggle("on",MAIN[t]?b.getAttribute("data-tab")===t:b.getAttribute("data-tab")==="lab");});document.querySelectorAll(".stage .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});var s=document.getElementById("stage");if(s)s.scrollTop=0;if(t==="settings")mountMod("llm","AKSI_LLM","#llm-root");if(TABS[t])mountMod(t,TABS[t][0],TABS[t][1]);}
+function mountMod(name,gname,sel){if(mounted[name])return;var m=window[gname],root=document.querySelector(sel);if(!m||typeof m.mount!=="function"){if(root)root.innerHTML='<div class="card"><p class="muted">Ctrl+F5</p></div>';return;}try{m.mount(sel);mounted[name]=true;}catch(e){if(root)root.innerHTML='<div class="card"><p class="muted">'+(e&&e.message)+'</p></div>';}}
+function syncNet(){var on=!!(window.AKSI_WEB&&AKSI_WEB.isEnabled&&AKSI_WEB.isEnabled());var cb=document.getElementById("netToggle");if(cb)cb.checked=on;var pill=document.getElementById("netPill");if(pill)pill.classList.toggle("on",on);var st=document.getElementById("statusText");if(st)st.textContent=on?"network ON":"offline · сеть выкл";}window.__aksiSyncNet=syncNet;
+function boot(){
+  var cb=document.getElementById("netToggle");
+  if(cb&&window.AKSI_WEB&&AKSI_WEB.setEnabled){cb.checked=AKSI_WEB.isEnabled();cb.onchange=function(){AKSI_WEB.setEnabled(cb.checked);syncNet();}}
+  syncNet();
+  var th=document.getElementById("thread");
+  if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Здравствуйте. Я АКСИ — локальный offline ИИ. Сеть только с галочки.<div class="meta">local · neuro</div></div>';th.appendChild(d);}
+  document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}},true);
+  var go=document.getElementById("phGo"),file=document.getElementById("phFile"),out=document.getElementById("phOut");
+  if(go&&file){go.onclick=function(){var f=file.files&&file.files[0];if(!f){out.textContent="—";return;}out.textContent="…";if(!window.AKSI_PHOTO||!AKSI_PHOTO.analyze){out.textContent="Ctrl+F5";return;}AKSI_PHOTO.analyze(f,{onProgress:function(p){out.textContent=p;}}).then(function(r){out.textContent=r.text+"\n\n— "+(r.meta||"");}).catch(function(e){out.textContent=String(e.message||e);});};}
+  if(window.AKSI_PRODUCT_UI&&AKSI_PRODUCT_UI.wire)setTimeout(function(){AKSI_PRODUCT_UI.wire();},300);
+  try{if(localStorage.getItem("aksi_seen_hero")==="1")goTab("chat");else{goTab("home");localStorage.setItem("aksi_seen_hero","1");}}catch(e){goTab("home");}
+}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
