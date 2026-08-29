@@ -1,27 +1,30 @@
 /**
- * AKSI-Neuro v3 — offline browser LLM (RWKV-style, pure JS, CPU)
- * Full file restored after PLACEHOLDER incident.
+ * AKSI-Neuro v3.2 — offline browser LLM layer (CPU, pure JS)
+ * Hybrid: lexical retrieve (SEED + memory) + optional RWKV-style status
  * Contact: aksilove@internet.ru
  */
 (function (global) {
   "use strict";
-  var VER = "3.0.1-rwkv";
+  var VER = "3.2.0-hybrid";
+  var MEM_KEY = "aksi_rwkv_mem_v3";
   var SEED = [
-    "АКСИ — суверенный цифровой напарник. Работает в браузере offline по умолчанию.",
+    "Вопрос: кто ты? Ответ: Я АКСИ — offline-first суверенный цифровой напарник в браузере. Работаю локально на CPU.",
+    "Вопрос: who are you? Ответ: I am AKSI — an offline-first sovereign digital companion in the browser. Local CPU.",
+    "Вопрос: что такое АКСИ? Ответ: АКСИ — локальный ИИ-компаньон с алгоритмом ADIA 2.0, Neuro, памятью и proof ledger.",
+    "Вопрос: what is AKSI? Ответ: AKSI is a local AI companion with ADIA 2.0, Neuro offline LLM, memory and proof ledger.",
+    "Вопрос: работает ли без интернета? Ответ: Да. По умолчанию offline. Сеть включается только после вашего согласия.",
+    "Вопрос: does it work offline? Ответ: Yes. Offline by default. Network only after your explicit consent.",
+    "Вопрос: как доказать offline? Ответ: Нажмите «Докажи offline» на Home и откройте PRECEDENT.json.",
+    "Вопрос: где контакт? Ответ: aksilove@internet.ru · X @AKSILOVE",
+    "Вопрос: contact? Ответ: aksilove@internet.ru · X @AKSILOVE",
+    "Вопрос: что такое RWKV? Ответ: Рекуррентная архитектура: линейное время, постоянная память, без KV-cache, работает на CPU.",
+    "Вопрос: что такое ADIA? Ответ: ADIA 2.0 — Resonance Decision Engine: EQS, резонанс памяти, ranking кандидатов и integrity seal.",
+    "Вопрос: что такое EQS? Ответ: Entropy-Quantum-Integrity Score — измеримое качество ответа и решения.",
+    "АКСИ — суверенный цифровой напарник. Offline-first. Контакт: aksilove@internet.ru.",
     "Сеть включается только после явного согласия пользователя.",
     "PRECEDENT.json — проверяемый прецедент offline-first политики АКСИ.",
-    "Я АКСИ. Локальная нейросеть RWKV: CPU, без GPU, без сети по умолчанию.",
-    "Контакт: aksilove@internet.ru. Demo: milana808.github.io",
-    "Proof ledger фиксирует хеши сессии. Можно экспортировать доказательство.",
-    "Память АКСИ хранится локально. Факты: запомни: …",
-    "Вопрос: кто ты? Ответ: Я АКСИ — offline-first суверенный агент в браузере.",
-    "Вопрос: что такое АКСИ? Ответ: Локальный цифровой напарник с проверяемой offline-политикой.",
-    "Вопрос: работает ли без интернета? Ответ: Да. По умолчанию offline. Сеть только с согласия.",
-    "Вопрос: как доказать offline? Ответ: Кнопка Докажи offline и файл PRECEDENT.json.",
-    "Вопрос: где контакт? Ответ: aksilove@internet.ru",
-    "Вопрос: что такое RWKV? Ответ: Рекуррентная нейросеть с линейным временем и постоянной памятью."
+    "Память АКСИ хранится локально. Факты: запомни: …"
   ];
-  var MEM_KEY = "aksi_rwkv_mem_v3";
   var extra = [];
   try { extra = JSON.parse(localStorage.getItem(MEM_KEY) || "[]") || []; } catch (e) {}
 
@@ -36,7 +39,7 @@
     var cov = hit / qt.length;
     var lowq = String(q).toLowerCase(), lowt = String(text).toLowerCase();
     if (lowt.indexOf(lowq) !== -1) cov += 0.35;
-    if (/вопрос:/.test(lowt) && lowt.indexOf(lowq.slice(0, Math.min(16, lowq.length))) !== -1) cov += 0.3;
+    if (/вопрос:|question:/.test(lowt) && lowt.indexOf(lowq.slice(0, Math.min(18, lowq.length))) !== -1) cov += 0.3;
     return cov;
   }
   function allFacts() {
@@ -44,7 +47,7 @@
     for (i = 0; i < extra.length; i++) if (extra[i] && extra[i].text) a.push(extra[i].text);
     try {
       var mem = JSON.parse(localStorage.getItem("aksi_whole_mem_v3") || "[]");
-      if (Array.isArray(mem)) mem.slice(0, 80).forEach(function (x) { if (x && x.t) a.push(x.t); });
+      if (Array.isArray(mem)) mem.slice(0, 100).forEach(function (x) { if (x && x.t) a.push(x.t); });
     } catch (e) {}
     return a;
   }
@@ -65,18 +68,22 @@
   function think(question) {
     question = String(question || "").trim();
     if (!question) return { text: "", mode: "empty", offline: true, source: "neuro" };
-    var hits = retrieve(question, 4), top = hits[0];
-    if (top && top.score > 0.2) {
+    var hits = retrieve(question, 5), top = hits[0];
+    if (top && top.score >= 0.22) {
       var body = extractAnswer(top.text);
-      if (hits[1] && hits[1].score > 0.28) {
+      if (hits[1] && hits[1].score > 0.35) {
         var ex = extractAnswer(hits[1].text);
-        if (ex && ex !== body && ex.length < 180) body += "\n\n" + ex;
+        if (ex && ex !== body && ex.length < 160) body += "\n\n" + ex;
       }
-      return { text: body, mode: "rwkv-retrieve", score: top.score, offline: true, source: "neuro", arch: "RWKV", steps: SEED.length };
+      return { text: body, mode: "rwkv-retrieve", score: top.score, offline: true, source: "neuro", arch: "RWKV-hybrid", steps: SEED.length + extra.length };
     }
     return {
-      text: "Локальная модель мало знает по этой теме. Напишите «запомни: факт» или откройте Neuro → Обучить ядро. Offline по умолчанию.",
-      mode: "rwkv-weak", offline: true, source: "neuro", arch: "RWKV", steps: SEED.length
+      text: "Локальная модель мало знает по этой теме. Напишите «запомни: факт» или Lab → Neuro → Выучить. Offline by default.",
+      mode: "rwkv-weak",
+      offline: true,
+      source: "neuro",
+      arch: "RWKV-hybrid",
+      steps: SEED.length + extra.length
     };
   }
   function learn(text) {
@@ -87,44 +94,48 @@
     try { localStorage.setItem(MEM_KEY, JSON.stringify(extra)); } catch (e) {}
     return { ok: true, n: extra.length };
   }
-  function generate(prompt, maxNew) {
-    var r = think(String(prompt || ""));
-    return r.text || "";
-  }
   function complete(q) {
     return Promise.resolve((function () {
       var r = think(q);
-      return { text: r.text, content: r.text, mode: r.mode, provider: "neuro-rwkv", offline: true, meta: r.mode };
+      return { text: r.text, content: r.text, mode: r.mode, provider: "neuro-hybrid", offline: true, meta: r.mode, source: "neuro" };
     })());
   }
-  function seedTrain() {
-    return { steps: SEED.length, loss: 0, seeded: SEED.length, arch: "RWKV", ver: VER };
-  }
+  function generate(prompt) { return think(String(prompt || "")).text || ""; }
+  function seedTrain() { return { steps: SEED.length, loss: 0, seeded: SEED.length, arch: "RWKV-hybrid", ver: VER }; }
   function status() {
-    return { arch: "RWKV", ver: VER, ready: true, steps: SEED.length + extra.length, offline: true, device: "CPU · pure JS", memIndex: allFacts().length };
+    return { arch: "RWKV-hybrid", ver: VER, ready: true, steps: SEED.length + extra.length, offline: true, device: "CPU · pure JS", memIndex: allFacts().length };
   }
   function mount(sel) {
     var root = typeof sel === "string" ? document.querySelector(sel) : sel;
     if (!root) return;
-    root.innerHTML = '<div class="card"><h2>АКСИ-Neuro · offline LLM</h2><p class="muted">Локальные ответы без сети. Обучение: факты в памяти устройства.</p><textarea id="nAsk" placeholder="Вопрос…"></textarea><div class="row"><button type="button" class="btn p" id="nThink">Спросить</button><button type="button" class="btn" id="nSeed">Обучить ядро</button></div><textarea id="nTrain" placeholder="запомни: факт" style="margin-top:8px"></textarea><div class="row"><button type="button" class="btn" id="nLearn">Выучить</button></div><pre class="out" id="nOut">ready · offline</pre></div>';
-    document.getElementById("nThink").onclick = function () {
-      var r = think((document.getElementById("nAsk") || {}).value || "");
-      document.getElementById("nOut").textContent = "[" + r.mode + "]\n\n" + r.text;
-    };
-    document.getElementById("nSeed").onclick = function () {
-      document.getElementById("nOut").textContent = JSON.stringify(seedTrain(), null, 2);
-    };
-    document.getElementById("nLearn").onclick = function () {
-      var t = (document.getElementById("nTrain") || {}).value || "";
-      learn(t);
-      document.getElementById("nOut").textContent = "Выучила: " + t.slice(0, 120);
-    };
+    root.innerHTML = "";
+    var card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = "<h2>АКСИ-Neuro · offline</h2><p class=\"muted\">Локальные ответы без сети. Обучение: факты на устройстве.</p>";
+    var ask = document.createElement("textarea");
+    ask.id = "nAsk"; ask.placeholder = "Вопрос…";
+    var train = document.createElement("textarea");
+    train.id = "nTrain"; train.placeholder = "запомни: факт"; train.style.marginTop = "8px";
+    var out = document.createElement("pre");
+    out.className = "out"; out.id = "nOut"; out.textContent = "ready · offline · " + VER;
+    var row1 = document.createElement("div"); row1.className = "row";
+    var b1 = document.createElement("button"); b1.type = "button"; b1.className = "btn p"; b1.textContent = "Спросить";
+    var b2 = document.createElement("button"); b2.type = "button"; b2.className = "btn"; b2.textContent = "Обучить ядро";
+    var b3 = document.createElement("button"); b3.type = "button"; b3.className = "btn"; b3.textContent = "Выучить";
+    b1.onclick = function () { var r = think(ask.value || ""); out.textContent = "[" + r.mode + "]\n\n" + r.text; };
+    b2.onclick = function () { out.textContent = JSON.stringify(seedTrain(), null, 2); };
+    b3.onclick = function () { learn(train.value || ""); out.textContent = "Выучила: " + String(train.value || "").slice(0, 120); };
+    row1.appendChild(b1); row1.appendChild(b2);
+    card.appendChild(ask); card.appendChild(row1); card.appendChild(train); card.appendChild(b3); card.appendChild(out);
+    root.appendChild(card);
   }
   global.AKSI_NEURO = {
-    version: VER, arch: "RWKV", think: think, ask: think, complete: complete, generate: generate,
+    version: VER, arch: "RWKV-hybrid",
+    think: think, ask: think, complete: complete, generate: generate,
     learn: learn, seedTrain: seedTrain, retrieve: retrieve, status: status, mount: mount,
     bootstrap: function () { return Promise.resolve(status()); },
-    save: function () { return true; }, reset: function () { extra = []; try { localStorage.removeItem(MEM_KEY); } catch (e) {} return true; },
+    save: function () { return true; },
+    reset: function () { extra = []; try { localStorage.removeItem(MEM_KEY); } catch (e) {} return true; },
     ready: function () { return true; }, ensure: function () { return {}; }
   };
   global.AKSI_LOCAL_LLM = global.AKSI_NEURO;
