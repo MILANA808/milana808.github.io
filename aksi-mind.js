@@ -1,11 +1,11 @@
 /**
- * AKSI MIND v1.4 — unified offline-first mind
- * Intent → Quantum → Brain → WebLLM? → Neuro → Web? → Core/LLM → Trust
+ * AKSI MIND v1.5 — offline-first + ADIA 2.0 on every answer
+ * Intent → Brain → WebLLM? → Neuro → ADIA(EQS·seal) → Web? → LLM → Trust
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.4.0-mind";
+  var VER = "1.5.0-mind+adia";
   function has(name, method) {
     var m = G[name]; if (!m) return false;
     if (!method) return true;
@@ -26,8 +26,7 @@
       var r = G.AKSI_BRAIN.complete(q);
       if (r && r.text && String(r.meta || "").indexOf("fallback") === -1)
         return Promise.resolve({ text: r.text, meta: r.meta || "brain", source: "brain", offline: true, score: r.score });
-      if (r && r.text)
-        return Promise.resolve({ text: r.text, meta: r.meta || "brain", source: "brain", offline: true, weak: true });
+      if (r && r.text) return Promise.resolve({ text: r.text, meta: r.meta || "brain", source: "brain", offline: true, weak: true });
     } catch (e) {}
     return Promise.resolve(null);
   }
@@ -36,8 +35,7 @@
     if (!c || typeof c.query !== "function") return Promise.resolve(null);
     return Promise.race([c.query(q), new Promise(function (r) { setTimeout(function () { r(null); }, 10000); })])
       .then(function (res) {
-        if (res && (res.ok || res.text) && res.text)
-          return { text: String(res.text), meta: res.local ? "core·local" : "core·net", source: "core" };
+        if (res && (res.ok || res.text) && res.text) return { text: String(res.text), meta: res.local ? "core·local" : "core·net", source: "core" };
         return null;
       }).catch(function () { return null; });
   }
@@ -52,17 +50,12 @@
     ]);
   }
   function meaningfulFallback(q) {
-    return {
-      text: "Пока нет точного ответа на «" + String(q).slice(0, 80) + "».\n\nЯ offline-first. Попробуйте: «кто ты?», «запомни: …», Lab → WebLLM / Ollama.",
-      meta: "mind·guide", source: "mind", offline: true
-    };
+    return { text: "Пока нет точного ответа на «" + String(q).slice(0, 80) + "».\n\nOffline-first. «кто ты?», «запомни: …», Lab → ADIA / WebLLM / Ollama.", meta: "mind·guide", source: "mind", offline: true };
   }
   function fromLLM(q) {
     if (has("AKSI_LLM", "complete")) {
       return Promise.race([
-        G.AKSI_LLM.complete(q).then(function (r) {
-          return r && r.text ? { text: r.text, meta: r.providerId || r.providerLabel || "llm", source: "llm" } : null;
-        }).catch(function () { return null; }),
+        G.AKSI_LLM.complete(q).then(function (r) { return r && r.text ? { text: r.text, meta: r.providerId || "llm", source: "llm" } : null; }).catch(function () { return null; }),
         new Promise(function (r) { setTimeout(function () { r(null); }, 45000); })
       ]);
     }
@@ -75,10 +68,6 @@
         var r = G.AKSI_NEURO.think(q);
         if (r && r.text && String(r.text).trim().length > 4)
           return { text: String(r.text).trim(), meta: (r.mode || "neuro") + (r.steps != null ? " · " + r.steps : ""), source: "neuro", offline: true, mode: r.mode, score: r.score };
-      }
-      if (typeof G.AKSI_NEURO.generate === "function") {
-        var g = G.AKSI_NEURO.generate(q, 48, 0.55);
-        if (g && String(g).trim().length > 12) return { text: String(g).trim(), meta: "neuro", source: "neuro", offline: true };
       }
     } catch (e) {}
     return null;
@@ -98,30 +87,20 @@
     if (/^\/demo\b|^demo$/i.test(low)) return "demo";
     if (/^whoami$/i.test(low)) return "identity";
     if (/^(запомни|выучи)\s*[:\s]/i.test(low)) return "remember";
-    if (/что ты помнишь|что ты знаешь|забудь всё/i.test(low)) return "memory";
-    if (/^[0-9\s+\-*/×÷.,()]+\??$/.test(low) || /посчитай|сколько будет/i.test(low)) return "math";
-    if (/^(привет|здравств|hello|hi)\b/.test(low)) return "greet";
-    if (/кто ты|что ты такое/i.test(low)) return "persona";
     if (/статус|health|модул/i.test(low)) return "status";
-    if (/документ|проверить текст|dkv/i.test(low)) return "dkv";
-    if (/комната|overlay|p2p|сеть/i.test(low)) return "net";
+    if (/кто ты|что ты такое/i.test(low)) return "persona";
     return "general";
-  }
-  function demoText() { return "AKSI · whoami · /demo · запомни: факт · статус · Lab→WebLLM"; }
-  function identityText() {
-    var did = "did:aksi:local"; try { did = localStorage.getItem("aksi_did_v1") || did; } catch (e) {}
-    return "DID: " + did + "\nКлючи local-first · aksilove@internet.ru";
   }
   function statusSnapshot() {
     var mods = {
-      quantum: has("AKSI_QUANTUM"), brain: has("AKSI_BRAIN"),
-      core: !!(G.AKSI_CORE || G.AksiCore), trust: has("AKSI_TRUST"),
-      neuro: has("AKSI_NEURO"), webllm: has("AKSI_WEBLLM") && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready(),
-      web: has("AKSI_WEB"), llm: has("AKSI_LLM"), mind: true
+      quantum: has("AKSI_QUANTUM"), brain: has("AKSI_BRAIN"), neuro: has("AKSI_NEURO"),
+      webllm: has("AKSI_WEBLLM") && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready(),
+      web: has("AKSI_WEB"), llm: has("AKSI_LLM"), trust: has("AKSI_TRUST"),
+      adia: has("AKSI_ALGORITHM"), mind: true
     };
-    var on = Object.keys(mods).filter(function (k) { return mods[k]; });
-    return { version: VER, product: "AKSI Unified Mind", modules: mods, online: on,
-      path: "Intent → Brain → WebLLM? → Neuro → Web? → Core/LLM → Trust", contact: "aksilove@internet.ru" };
+    return { version: VER, product: "AKSI Unified Mind", modules: mods, online: Object.keys(mods).filter(function (k) { return mods[k]; }),
+      path: "Intent → Brain → WebLLM? → Neuro → ADIA(EQS·seal) → Web? → LLM → Trust", contact: "aksilove@internet.ru",
+      adia: has("AKSI_ALGORITHM") ? (G.AKSI_ALGORITHM.version || true) : false };
   }
   function rememberCmd(q) {
     var m = String(q).match(/^(запомни|выучи)\s*[:\s]+(.+)/i);
@@ -136,10 +115,20 @@
     var text = payload.text, meta = payload.meta || "mind", sources = payload.sources || [payload.source || "mind"];
     var qv = qx && (qx.QCLI != null ? qx.QCLI : qx.qcli);
     if (qv != null) meta += " · Q" + qv;
-    if (qx && qx.resonance != null) meta += " · R" + qx.resonance;
+    var adiaMetrics = null, adiaSeal = null;
+    if (has("AKSI_ALGORITHM", "evaluate")) {
+      try {
+        var ev = G.AKSI_ALGORITHM.evaluate(q, { text: text, source: payload.source || sources[0] || "mind", offline: !!payload.offline, meta: payload.meta }, { quantum: qx, seal: true });
+        if (ev && ev.metrics) {
+          adiaMetrics = ev.metrics; adiaSeal = ev.seal;
+          if (ev.metrics.EQS != null) meta += " · EQS" + ev.metrics.EQS;
+          if (ev.metrics.resonance != null) meta += " · R" + ev.metrics.resonance;
+        }
+      } catch (e) {}
+    }
     function pack(tr) {
       if (tr && tr.trust) meta += " · trust:" + tr.trust;
-      return { text: text, meta: meta, quantum: qx, trust: tr || null, sources: sources, offline: !!payload.offline, mind: VER };
+      return { text: text, meta: meta, quantum: qx, trust: tr || null, sources: sources, offline: !!payload.offline, mind: VER, adia: adiaMetrics, seal: adiaSeal };
     }
     if (!has("AKSI_TRUST", "verifyResponse")) return Promise.resolve(pack(null));
     return G.AKSI_TRUST.verifyResponse(q, String(text).split("\n\u2014\u2014\n")[0], { source: "mind" }).then(pack).catch(function () { return pack(null); });
@@ -148,8 +137,11 @@
     q = String(q || "").trim();
     if (!q) return Promise.resolve({ text: "Напишите вопрос.", meta: "mind", mind: VER });
     var qx = quantumShot(q), it = intent(q);
-    if (it === "demo") return trustWrap(q, { text: demoText(), meta: "mind·demo", source: "mind", offline: true }, qx);
-    if (it === "identity") return trustWrap(q, { text: identityText(), meta: "mind·id", source: "mind", offline: true }, qx);
+    if (it === "demo") return trustWrap(q, { text: "AKSI · whoami · запомни: · статус · Lab→ADIA/WebLLM", meta: "mind·demo", source: "mind", offline: true }, qx);
+    if (it === "identity") {
+      var did = "did:aksi:local"; try { did = localStorage.getItem("aksi_did_v1") || did; } catch (e) {}
+      return trustWrap(q, { text: "DID: " + did + "\nlocal-first · aksilove@internet.ru", meta: "mind·id", source: "mind", offline: true }, qx);
+    }
     if (it === "status") {
       var snap = statusSnapshot();
       return trustWrap(q, { text: "Активно: " + snap.online.join(", ") + "\n" + snap.path, meta: "mind·status", source: "mind", offline: true }, qx);
@@ -163,8 +155,7 @@
         if (neuro && neuro.text && String(neuro.text).length > 8)
           return trustWrap(q, { text: neuro.text, meta: neuro.meta || "neuro", source: "neuro", offline: true, sources: ["neuro"] }, qx);
         var wantWeb = has("AKSI_WEB") && G.AKSI_WEB.isEnabled && G.AKSI_WEB.isEnabled();
-        var webP = wantWeb ? fromWeb(q) : Promise.resolve(null);
-        return webP.then(function (web) {
+        return (wantWeb ? fromWeb(q) : Promise.resolve(null)).then(function (web) {
           if (web && web.ok && web.text) return trustWrap(q, { text: web.text, meta: web.meta, source: "web", sources: ["web"] }, qx);
           return fromCore(q).then(function (core) {
             if (core && core.text) return trustWrap(q, { text: core.text, meta: core.meta, source: core.source, sources: ["core"] }, qx);
@@ -182,26 +173,12 @@
   function mount(sel) {
     var root = typeof sel === "string" ? document.querySelector(sel) : sel; if (!root) return;
     var snap = statusSnapshot();
-    root.innerHTML = '<div class="card"><h2>AKSI MIND · v' + VER + '</h2><p class="muted">' + snap.path + '</p>' +
-      '<pre id="mindSt" class="out">' + JSON.stringify(snap, null, 2) + '</pre>' +
-      '<textarea id="mindIn" placeholder="Вопрос…" style="margin-top:10px"></textarea>' +
-      '<div class="row"><button type="button" class="btn primary" id="mindAsk">Think</button></div>' +
-      '<pre id="mindOut" class="out" style="margin-top:10px">—</pre></div>';
-    document.getElementById("mindAsk").onclick = function () {
-      document.getElementById("mindOut").textContent = "thinking…";
-      think(document.getElementById("mindIn").value).then(function (r) {
-        document.getElementById("mindOut").textContent = r.text + "\n\n[" + r.meta + "]";
-      });
-    };
+    root.innerHTML = '<div class="card"><h2>AKSI MIND · v' + VER + '</h2><p class="muted">' + snap.path + '</p><pre class="out">' + JSON.stringify(snap, null, 2) + '</pre></div>';
   }
   function hookOne() {
-    if (!G.AKSI_ONE || typeof G.AKSI_ONE.think !== "function") return;
-    if (G.AKSI_ONE._mindHooked) return;
+    if (!G.AKSI_ONE || typeof G.AKSI_ONE.think !== "function" || G.AKSI_ONE._mindHooked) return;
     var prev = G.AKSI_ONE.think;
-    G.AKSI_ONE.think = function (q) {
-      if (G.AKSI_ONE.think._viaMind) return prev(q);
-      return think(q);
-    };
+    G.AKSI_ONE.think = function (q) { if (G.AKSI_ONE.think._viaMind) return prev(q); return think(q); };
     G.AKSI_ONE._mindHooked = true;
   }
   G.AKSI_MIND = { version: VER, think: think, ask: think, status: statusSnapshot, intent: intent, mount: mount };
