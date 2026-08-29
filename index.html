@@ -4,9 +4,32 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07060d">
-<meta name="description" content="AKSI — ADIA 2.0 offline AI. Neuro + WebLLM + algorithm.">
+<meta name="description" content="АКСИ (AKSI) — offline-first AI companion. Local LLM in browser (RWKV Neuro + WebLLM), ADIA 2.0 decision integrity, memory, proof ledger. Privacy-first. Contact aksilove@internet.ru">
+<meta name="keywords" content="AKSI, АКСИ, offline AI, local LLM, RWKV, WebLLM, ADIA, EQS, sovereign AI, privacy assistant, milana808, browser AI, offline-first">
+<meta name="author" content="AKSI · aksilove@internet.ru">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="googlebot" content="index,follow">
+<link rel="canonical" href="https://milana808.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://milana808.github.io/">
+<meta property="og:title" content="AKSI — offline-first AI · ADIA 2.0">
+<meta property="og:description" content="Local-first browser AI: Neuro RWKV + WebLLM + ADIA decision engine. Offline by default.">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:site_name" content="AKSI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AKSI — offline-first AI">
+<meta name="twitter:description" content="Sovereign local AI in the browser. ADIA 2.0 · Neuro · WebLLM. aksilove@internet.ru">
+<meta name="twitter:creator" content="@AKSILOVE">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="/manifest.json">
-<title>AKSI — ADIA offline AI</title>
+<link rel="alternate" hreflang="ru" href="https://milana808.github.io/">
+<link rel="alternate" hreflang="en" href="https://milana808.github.io/">
+<link rel="alternate" hreflang="x-default" href="https://milana808.github.io/">
+<title>АКСИ (AKSI) — offline AI · ADIA 2.0 · local LLM</title>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"AKSI","alternateName":["АКСИ","AKSI offline AI"],"applicationCategory":"BrowserApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Offline-first sovereign AI companion in the browser with ADIA 2.0 decision integrity, RWKV Neuro and optional WebLLM.","url":"https://milana808.github.io/","author":{"@type":"Person","name":"AKSI","email":"aksilove@internet.ru","sameAs":["https://x.com/AKSILOVE","https://github.com/MILANA808"]},"softwareVersion":"3.0"}
+</script>
 <style>
 :root{--bg:#07060d;--elev:#12101a;--card:#181624;--line:rgba(167,139,250,.22);--t:#f4f1ff;--m:#a8a0c0;--dim:#6f6788;--a:#b39aff;--a2:#7c3aed;--ok:#34d399;--warn:#fbbf24;--font:system-ui,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--bn:58px}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
@@ -69,7 +92,7 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
     <input type="text" id="teachIn" placeholder="факт…">
     <button type="button" class="btn primary" id="btnTeach" style="margin-top:8px;width:100%">Запомнить</button>
   </div>
-  <div class="card"><p class="muted"><a href="/ALGORITHM.md" target="_blank" rel="noopener">ALGORITHM.md</a> · <a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT</a> · aksilove@internet.ru</p></div>
+  <div class="card"><p class="muted"><a href="/ALGORITHM.md" target="_blank" rel="noopener">ALGORITHM.md</a> · <a href="/PRECEDENT.json" target="_blank" rel="noopener">PRECEDENT</a> · <a href="/README.md" target="_blank" rel="noopener">README</a> · aksilove@internet.ru</p></div>
 </section>
 <section class="panel" id="tab-chat">
   <div id="thread"></div>
@@ -137,7 +160,7 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
 <script src="aksi-llm.js?v=3"></script>
 <script src="aksi-photo.js?v=2"></script>
 <script src="aksi-web.js?v=3"></script>
-<script src="aksi-neuro.js?v=6"></script>
+<script src="aksi-neuro.js?v=7"></script>
 <script src="aksi-webllm.js?v=2"></script>
 <script src="aksi-algorithm.js?v=3"></script>
 <script src="aksi-mind.js?v=12"></script>
@@ -148,7 +171,7 @@ input[type=text],input[type=file],textarea,select{width:100%;padding:12px;border
 var TABS={adia:["AKSI_ALGORITHM","#adia-root"],neuro:["AKSI_NEURO","#neuro-root"],webllm:["AKSI_WEBLLM","#webllm-root"],web:["AKSI_WEB","#web-root"],mind:["AKSI_MIND","#mind-root"],quantum:["AKSI_QUANTUM","#quantum-root"],trust:["AKSI_TRUST","#trust-root"],dkv:["AKSI_DKV","#dkv-root"]};
 var MAIN={home:1,chat:1,photo:1,mem:1,lab:1},mounted={};
 function goTab(t){if(!t)return;document.querySelectorAll(".bnav [data-tab]").forEach(function(b){b.classList.toggle("on",MAIN[t]?b.getAttribute("data-tab")===t:b.getAttribute("data-tab")==="lab");});document.querySelectorAll(".stage .panel").forEach(function(p){p.classList.toggle("on",p.id==="tab-"+t);});var s=document.getElementById("stage");if(s)s.scrollTop=0;if(t==="settings")mountMod("llm","AKSI_LLM","#llm-root");if(TABS[t])mountMod(t,TABS[t][0],TABS[t][1]);}
-function mountMod(name,gname,sel){if(mounted[name])return;var m=window[gname],root=document.querySelector(sel);if(!m||typeof m.mount!=="function"){if(root)root.innerHTML='<div class="card"><p class="muted">Ctrl+F5</p></div>';return;}try{m.mount(sel);mounted[name]=true;}catch(e){if(root)root.innerHTML='<div class="card"><p class="muted">'+(e&&e.message)+'</p></div>';}}
+function mountMod(name,gname,sel){if(mounted[name])return;var m=window[gname],root=document.querySelector(sel);if(!m||typeof m.mount!=="function"){if(root)root.innerHTML='<div class="card"><p class="muted">Ctrl+F5</p></div>';return;}try{m.mount(sel);mounted[name]=true;}catch(e){if(root){var _m=document.createElement("div");_m.className="card";var _p=document.createElement("p");_p.className="muted";_p.textContent=(e&&e.message)||"error";_m.appendChild(_p);root.innerHTML="";root.appendChild(_m);}}}
 function syncNet(){var on=!!(window.AKSI_WEB&&AKSI_WEB.isEnabled&&AKSI_WEB.isEnabled());var cb=document.getElementById("netToggle");if(cb)cb.checked=on;var pill=document.getElementById("netPill");if(pill)pill.classList.toggle("on",on);var st=document.getElementById("stNet");if(st){st.textContent=on?"сеть ON":"сеть выкл";st.className="badge "+(on?"warn":"ok");}var kv=document.getElementById("kvMode");if(kv)kv.textContent=on?"network":"offline";}window.__aksiSyncNet=syncNet;
 function refreshStatus(){var neuroOk=!!(window.AKSI_NEURO&&(AKSI_NEURO.ready?AKSI_NEURO.ready():true));var wllmOk=!!(window.AKSI_WEBLLM&&AKSI_WEBLLM.ready&&AKSI_WEBLLM.ready());var el=document.getElementById("stNeuro");if(el){el.textContent=wllmOk?"WebLLM+Neuro":neuroOk?"Neuro ready":"Neuro…";el.className="badge "+(neuroOk||wllmOk?"ok":"warn");}var kvN=document.getElementById("kvNeuro");if(kvN)kvN.textContent=wllmOk?"WebLLM":neuroOk?"RWKV":"—";var kvM=document.getElementById("kvMind");if(kvM)kvM.textContent=window.AKSI_ALGORITHM?"ADIA+Mind":(window.AKSI_MIND?"Mind":"—");try{var a=JSON.parse(localStorage.getItem("aksi_whole_mem_v3")||"[]");var n=Array.isArray(a)?a.length:0;var sm=document.getElementById("stMem");if(sm)sm.textContent="mem "+n;var mn=document.getElementById("memN");if(mn)mn.textContent=String(n);}catch(e){}try{var led=JSON.parse(localStorage.getItem("aksi_adia_ledger_v2")||localStorage.getItem("aksi_proof_ledger_v1")||"[]");var kvP=document.getElementById("kvProof");if(kvP)kvP.textContent=Array.isArray(led)?String(led.length):"0";}catch(e){}}
 function boot(){var cb=document.getElementById("netToggle");if(cb&&window.AKSI_WEB&&AKSI_WEB.setEnabled){cb.checked=AKSI_WEB.isEnabled();cb.onchange=function(){AKSI_WEB.setEnabled(cb.checked);syncNet();}}syncNet();refreshStatus();setInterval(refreshStatus,4000);var th=document.getElementById("thread");if(th&&!th.children.length){var d=document.createElement("div");d.className="msg ai";d.innerHTML='<div class="bub">Здравствуйте. Я АКСИ. Каждый ответ оценивает <b>ADIA 2.0</b> (EQS + seal).<div class="meta">adia · offline</div></div>';th.appendChild(d);}document.addEventListener("click",function(e){var x=e.target.closest&&e.target.closest("[data-tab]");if(x){var t=x.getAttribute("data-tab");if(t)goTab(t);}},true);var go=document.getElementById("phGo"),file=document.getElementById("phFile"),out=document.getElementById("phOut");if(go&&file){go.onclick=function(){var f=file.files&&file.files[0];if(!f){out.textContent="—";return;}out.textContent="…";if(!window.AKSI_PHOTO||!AKSI_PHOTO.analyze){out.textContent="Ctrl+F5";return;}AKSI_PHOTO.analyze(f,{onProgress:function(p){out.textContent=p;}}).then(function(r){out.textContent=r.text+"\n\n— "+(r.meta||"");}).catch(function(e){out.textContent=String(e.message||e);});};}if(window.AKSI_PRODUCT_UI&&AKSI_PRODUCT_UI.wire)setTimeout(function(){AKSI_PRODUCT_UI.wire();},300);try{if(localStorage.getItem("aksi_seen_hero")==="1")goTab("chat");else{goTab("home");localStorage.setItem("aksi_seen_hero","1");}}catch(e){goTab("home");}}
