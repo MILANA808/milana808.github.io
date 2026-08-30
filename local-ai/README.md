@@ -1,51 +1,76 @@
 # АКСИ Local AI
 
-## Что это
+## Цель
 
-АКСИ теперь имеет отдельный browser-local inference layer. Он использует WebGPU и WebLLM, когда они доступны, и не требует backend для генерации после того, как модель и runtime уже находятся в локальном кэше.
+Полноценный local-first слой АКСИ: генерация на устройстве, локальная память, retrieval, наблюдаемая телеметрия выполнения и криптографическая проверка через AKSI Runtime.
 
-WebLLM предоставляет локальный inference в браузере через WebGPU; первая загрузка модели требует загрузки весов и последующие запуски могут использовать кэш. Transformers.js также поддерживает WebGPU и локальные модели/кэш. Источник: официальная документация проектов.
+## Engines
 
-## Честное ограничение
+### 1. WebLLM / WebGPU
 
-GitHub Pages не может магически содержать десятки гигабайт весов модели внутри обычного репозитория. Поэтому «полностью офлайн» означает:
+Основной browser-native engine. Модель загружается явно, после загрузки inference выполняется на GPU устройства, без отправки текста в облачный LLM. WebGPU даёт браузеру GPU compute; WebLLM использует этот путь для локальной генерации.
 
-1. один раз установить/загрузить выбранную модель на устройство;
-2. дождаться окончания кэширования;
-3. после этого отключить сеть;
-4. АКСИ продолжит работать локально, если браузер сохранил runtime/model cache.
+### 2. llama.cpp localhost
 
-Для действительно air-gapped установки нужно заранее положить model artifacts и WebLLM/Transformers runtime в локальный пакет приложения.
+Для компьютеров предусмотрен совместимый endpoint `http://127.0.0.1:8080/v1/chat/completions`. Это позволяет использовать большие GGUF-модели, CPU/GPU hybrid inference и native hardware acceleration через llama.cpp. Сервер llama.cpp предоставляет OpenAI-compatible API.
 
-## Архитектура
+### 3. Offline kernel
+
+Если полноценная модель не установлена, АКСИ не обращается к облаку. Она сообщает, что модель отсутствует, и использует только минимальный локальный fallback.
+
+## Память
+
+`IndexedDB` используется как локальное хранилище памяти. Перед генерацией выполняется локальный lexical retrieval; найденные записи добавляются в контекст модели. Сетевой RAG намеренно не используется в этом local-only workspace.
+
+## Execution trace
+
+АКСИ показывает не скрытую chain-of-thought, а проверяемые события runtime:
 
 ```text
-UI
- │
- ├── safe execution trace (без скрытой цепочки рассуждений)
- │
- ▼
-AKSI Local Engine
- │
- ├── WebGPU capability check
- ├── local model selection
- ├── cached model
- ├── local generation
- └── telemetry
- │
- ▼
-AKSI Runtime
- │
- ├── evidence
- ├── SHA-256 integrity
- ├── Ed25519 identity/signature
- └── ledger
+input.received
+      ↓
+memory.retrieve
+      ↓
+context.built
+      ↓
+model.load / model.ready
+      ↓
+inference.start
+      ↓
+inference.complete
+      ↓
+verification.complete
 ```
 
-## Безопасность
+Это принципиальное отличие: пользователь видит, **какие операции реально были выполнены**, но внутренняя скрытая цепочка рассуждений модели не выдается за достоверный журнал.
 
-АКСИ не показывает внутреннюю скрытую цепочку рассуждений модели. В интерфейсе отображаются только проверяемые этапы выполнения: вход, контекст, выбор локального движка, генерация, длительность, токены и состояние проверки.
+## Offline semantics
 
-## Backend
+GitHub Pages не может вместить произвольную многогигабайтную модель в обычные файлы сайта. Поэтому browser-offline режим имеет две стадии:
 
-Backend остаётся вторичным. По умолчанию он local-first и удалённые провайдеры требуют явного разрешения.
+1. первый запуск — установка runtime/весов;
+2. последующие запуски — inference из локального cache.
+
+Для air-gapped продукта нужна отдельная desktop/mobile сборка с заранее поставленными model artifacts. Веб-версия остаётся удобным zero-install вариантом.
+
+## Security boundary
+
+- удалённый LLM не является fallback по умолчанию;
+- backend remote providers требуют `AKSI_ALLOW_REMOTE=1`;
+- browser identity/signature принадлежат AKSI Runtime;
+- SHA-256 ledger и Ed25519 verification отделены от LLM generation;
+- execution trace не является доказательством истинности ответа сам по себе.
+
+## Следующий production-уровень
+
+- native llama.cpp packaging;
+- GGUF model manager;
+- model integrity manifests;
+- signed model metadata;
+- stronger local embeddings + vector index;
+- local reranker;
+- tool sandbox;
+- multimodal local models;
+- streaming tokens + token-rate telemetry;
+- benchmark suite по устройствам;
+- reproducible offline installation bundle.
