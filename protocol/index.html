@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+<meta name="description" content="AKSI Protocol — Живой Разум: offline HRR, рой, гиперграф-память, ADIA, WebRTC, тьютор, OCR. aksilove@internet.ru">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://milana808.github.io/protocol/">
+<title>AKSI Protocol — Живой Разум</title>
+<style>
+:root{
+  --bg:#0b0d12;--panel:#12151c;--panel2:#181c26;--line:#2a3140;
+  --ink:#e8edf7;--muted:#8b95a8;--a:#7c9cff;--a2:#a78bfa;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;
+  --r:16px;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font)}
+body{display:flex;flex-direction:column;max-width:960px;margin:0 auto;min-height:100dvh}
+a{color:var(--a);text-decoration:none}
+button,input,textarea,select{font:inherit;color:inherit;background:transparent;border:0;outline:0}
+button{cursor:pointer}
+.top{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);background:rgba(18,21,28,.9);backdrop-filter:blur(12px);position:sticky;top:0;z-index:20}
+.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg,var(--a),var(--a2));display:grid;place-items:center;font-weight:900;color:#0b0d12}
+.titles{flex:1}.titles h1{font-size:16px;font-weight:800}.titles p{font-size:11px;color:var(--muted)}
+.pill{font-size:11px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.on{color:var(--ok);border-color:rgba(52,211,153,.35);background:rgba(52,211,153,.08)}
+.layout{display:grid;grid-template-columns:220px 1fr;flex:1;min-height:0}
+@media(max-width:820px){.layout{grid-template-columns:1fr}}
+.side{border-right:1px solid var(--line);padding:12px;overflow:auto;background:var(--panel)}
+@media(max-width:820px){.side{display:none}.side.open{display:block;position:fixed;inset:0;z-index:30}}
+.navbtn{width:100%;text-align:left;padding:10px 12px;border-radius:12px;color:var(--muted);margin-bottom:4px;font-weight:600;font-size:13px}
+.navbtn.on,.navbtn:hover{background:var(--panel2);color:var(--ink)}
+.main{display:flex;flex-direction:column;min-height:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.chip{padding:7px 12px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--muted)}
+.chip.on{color:var(--a);border-color:rgba(124,156,255,.4);background:rgba(124,156,255,.1)}
+.stage{flex:1;overflow:auto;padding:14px;padding-bottom:calc(88px + var(--safe-b))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.metric{background:var(--panel2);border-radius:12px;padding:12px;border:1px solid var(--line)}
+.metric b{display:block;font-size:18px;font-weight:800}.metric span{font-size:11px;color:var(--muted)}
+#thread{display:flex;flex-direction:column;gap:10px;min-height:180px}
+.msg{display:flex}.msg.me{justify-content:flex-end}
+.bub{max-width:92%;padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.45}
+.msg.me .bub{background:linear-gradient(135deg,#3b4f8a,#5b4a9a);border-bottom-right-radius:5px}
+.msg.ai .bub{background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:5px}
+.meta{font-size:11px;color:var(--muted);margin-top:6px}
+.composer{position:sticky;bottom:0;display:flex;gap:8px;padding:10px 14px calc(10px + var(--safe-b));background:linear-gradient(to top,var(--bg) 70%,transparent);border-top:1px solid transparent}
+.composer input{flex:1;min-height:48px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--panel)}
+.composer button{min-width:48px;border-radius:14px;background:var(--a);color:#0b0d12;font-weight:800}
+.field,textarea.field{width:100%;min-height:44px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);margin:6px 0}
+textarea.field{min-height:90px;resize:vertical}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);font-weight:700;font-size:13px}
+.btn.p{background:var(--a);border-color:var(--a);color:#0b0d12}
+.btn.block{width:100%}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.trace{max-height:220px;overflow:auto;font:12px/1.45 var(--mono);background:#0a0c10;border-radius:12px;padding:10px;border:1px solid var(--line)}
+.trace div{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);color:var(--muted)}
+.trace b{color:var(--a2)}
+.bar{height:8px;border-radius:999px;background:#1a2030;overflow:hidden;margin-top:6px}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--a),var(--ok));width:0%;transition:width .35s ease}
+.canvas-wrap{position:relative;height:160px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#090b10}
+canvas{width:100%;height:100%;display:block}
+.muted{color:var(--muted);font-size:13px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.menu{display:none}
+@media(max-width:820px){.menu{display:inline-flex}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="menu btn" id="menuBtn" type="button" aria-label="menu">☰</button>
+  <div class="logo">A</div>
+  <div class="titles">
+    <h1>AKSI Protocol</h1>
+    <p>Живой Разум · offline · без сервера</p>
+  </div>
+  <span class="pill on" id="netPill">local</span>
+</header>
+<div class="layout">
+  <aside class="side" id="side">
+    <button class="navbtn on" data-view="chat">💬 Разум</button>
+    <button class="navbtn" data-view="hrr">🧬 HRR Голограмма</button>
+    <button class="navbtn" data-view="swarm">🧠 Рой</button>
+    <button class="navbtn" data-view="memory">🕸️ Память</button>
+    <button class="navbtn" data-view="adia">⚖️ ADIA</button>
+    <button class="navbtn" data-view="mesh">🌐 Сеть</button>
+    <button class="navbtn" data-view="tutor">👨‍🏫 Тьютор</button>
+    <button class="navbtn" data-view="vision">👁️ Зрение</button>
+    <button class="navbtn" data-view="privacy">🔒 Суверенитет</button>
+    <button class="navbtn" data-view="evolve">🤖 Эволюция</button>
+    <div style="margin-top:16px;padding:10px;border-top:1px solid var(--line)">
+      <p class="muted">Контакт: <b>aksilove@internet.ru</b></p>
+      <p class="muted" style="margin-top:6px"><a href="/">← главная АКСИ</a></p>
+    </div>
+  </aside>
+  <section class="main">
+    <div class="toolbar" id="toolbar">
+      <button type="button" class="chip on" data-mode="normal">Обычный</button>
+      <button type="button" class="chip" data-mode="swarm">Рой</button>
+      <button type="button" class="chip" data-mode="tutor">Тьютор</button>
+      <button type="button" class="chip" data-mode="strict">Только знание</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="view" id="view-chat">
+        <div class="card">
+          <h2>Протокол Живого Разума</h2>
+          <p class="muted">10 столпов в браузере: HRR-резонанс, рой агентов, гиперграф-память, ADIA-критик, WebRTC-обмен слепками, сократический тьютор, OCR, шифрование, offline, эволюция. Честно: это инженерный runtime, не всезнание человечества.</p>
+          <div class="grid2" style="margin-top:12px">
+            <div class="metric"><b id="mRes">—</b><span>резонанс HRR</span></div>
+            <div class="metric"><b id="mAdia">—</b><span>ADIA score</span></div>
+            <div class="metric"><b id="mMem">0</b><span>узлы памяти</span></div>
+            <div class="metric"><b id="mAgents">3</b><span>агенты роя</span></div>
+          </div>
+        </div>
+        <div id="thread"></div>
+      </div>
+      <div class="view" id="view-hrr" hidden>
+        <div class="card">
+          <h2>Голографический резонансный вывод</h2>
+          <p class="muted">Знания в комплексном поле N=64. Нет резонанса — «не знаю».</p>
+          <div class="canvas-wrap"><canvas id="hrrCanvas" width="640" height="160"></canvas></div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn p" id="hrrSeed" type="button">Засеять поле</button>
+            <button class="btn" id="hrrProbe" type="button">Пробный резонанс</button>
+          </div>
+          <pre class="trace" id="hrrLog" style="margin-top:10px"></pre>
+        </div>
+      </div>
+      <div class="view" id="view-swarm" hidden>
+        <div class="card">
+          <h2>Мульти-мозг · рой</h2>
+          <p class="muted">Composer + Neuro + Core → ADIA ranking.</p>
+          <div id="swarmBox" class="trace"></div>
+        </div>
+      </div>
+      <div class="view" id="view-memory" hidden>
+        <div class="card">
+          <h2>Гиперграф памяти</h2>
+          <textarea class="field" id="memFact" placeholder="факт или A -> B"></textarea>
+          <div class="row">
+            <button class="btn p" id="memAdd" type="button">Добавить</button>
+            <button class="btn" id="memSearch" type="button">Поиск</button>
+            <button class="btn" id="memExport" type="button">Слепок</button>
+            <button class="btn" id="memClear" type="button">Очистить</button>
+          </div>
+          <div id="memList" class="trace" style="margin-top:10px"></div>
+        </div>
+      </div>
+      <div class="view" id="view-adia" hidden>
+        <div class="card">
+          <h2>Критик ADIA</h2>
+          <div id="adiaBars"></div>
+          <pre class="trace" id="adiaOut" style="margin-top:10px">ожидание…</pre>
+        </div>
+      </div>
+      <div class="view" id="view-mesh" hidden>
+        <div class="card">
+          <h2>WebRTC · пульс сети</h2>
+          <div class="row">
+            <button class="btn p" id="rtcOffer" type="button">Offer</button>
+            <button class="btn" id="rtcAnswer" type="button">Answer</button>
+            <button class="btn" id="rtcAccept" type="button">Accept</button>
+            <button class="btn" id="rtcSend" type="button">Слепок</button>
+          </div>
+          <textarea class="field" id="rtcBox" placeholder="SDP JSON"></textarea>
+          <pre class="trace" id="rtcLog"></pre>
+        </div>
+      </div>
+      <div class="view" id="view-tutor" hidden>
+        <div class="card">
+          <h2>Сократический тьютор</h2>
+          <div class="metric"><b id="tutorLevel">1</b><span>уровень</span></div>
+          <p class="muted" style="margin-top:10px">Включи режим «Тьютор» сверху.</p>
+        </div>
+      </div>
+      <div class="view" id="view-vision" hidden>
+        <div class="card">
+          <h2>OCR</h2>
+          <input type="file" id="ocrFile" accept="image/*" class="field">
+          <button class="btn p" id="ocrRun" type="button">Распознать</button>
+          <pre class="trace" id="ocrOut">файл не выбран</pre>
+        </div>
+      </div>
+      <div class="view" id="view-privacy" hidden>
+        <div class="card">
+          <h2>Суверенитет</h2>
+          <p class="muted">Zero server · offline-first · IndexedDB · opt-in WebRTC.<br>Контакт: aksilove@internet.ru</p>
+          <div class="row" style="margin-top:12px">
+            <button class="btn" id="swReg" type="button">SW</button>
+            <button class="btn" id="wipeAll" type="button">Стереть данные</button>
+          </div>
+        </div>
+      </div>
+      <div class="view" id="view-evolve" hidden>
+        <div class="card">
+          <h2>Эволюция</h2>
+          <button class="btn p" id="evolveRun" type="button">Анализ сессии</button>
+          <pre class="trace" id="evolveOut" style="margin-top:10px"></pre>
+        </div>
+      </div>
+    </div>
+    <div class="composer">
+      <input id="inp" type="text" placeholder="Вопрос к протоколу…" maxlength="4000" enterkeyhint="send">
+      <button type="button" id="send" aria-label="send">↑</button>
+    </div>
+  </section>
+</div>
+<script src="/aksi-algorithm.js?v=31"></script>
+<script src="/aksi-compose.js?v=31"></script>
+<script src="/aksi-neuro.js?v=31"></script>
+<script src="/aksi-pq.js?v=31"></script>
+<script src="/protocol/runtime.js?v=1"></script>
+</body>
+</html>
