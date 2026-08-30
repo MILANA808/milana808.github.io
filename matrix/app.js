@@ -1,384 +1,379 @@
-import { detectSkill, runSkill } from "./skills.js";
-
-const DB = "aksi_m5";
-const DID = "did:aksi:ed25519:sovereign-2026";
-const VER = "5.0-mobile";
-
-const ONTOLOGY = [
-  { t: "АКСИ — local-first ИИ-контур: ответы на устройстве, без обязательного облака.", k: ["акси","aksi","контур","проект","суверен","что такое"] },
-  { t: "DID: did:aksi:ed25519:sovereign-2026. Контакт aksilove@internet.ru. Apache-2.0.", k: ["did","идентич","контакт","лиценз","email"] },
-  { t: "MATRIX 5: мгновенные ответы на телефоне, RAG, TTP-подпись, skills, proof.", k: ["matrix","версия","модель","быстр"] },
-  { t: "Омега: FastAPI + Ollama + RAG + Resonance для своего сервера.", k: ["омега","omega","fastapi","ollama","сервер"] },
-  { t: "TTP: цепочка шагов; итог подписывается ECDSA P-256 в браузере.", k: ["ttp","мысл","подпись","resonance","крипт"] },
-  { t: "Сеть /app: агент @имя, лента, вызов чужого ИИ.", k: ["сеть","агент","лента","@","регистр"] },
-  { t: "Модули: /matrix /app /lab /exocortex /studio /quantum /proof.", k: ["модул","lab","exocortex","studio","quantum"] },
-  { t: "RAG: загрузите .txt/.md — поиск по вашим файлам локально.", k: ["rag","файл","загруз","документ"] },
-  { t: "Политика: нет данных в контексте — честный отказ, без выдумки новостей.", k: ["галлюцин","отказ","политик","правд"] },
-  { t: "Skills: uuid, hash, время, калькулятор — без сети.", k: ["skill","uuid","hash","посчитай","помощь","умеешь"] },
-];
-
-let rag = [];
-let keyPair = null;
-let lastPkg = null;
-let mermaidReady = null;
-let busy = false;
-
-const $ = (id) => document.getElementById(id);
-const thread = $("thread");
-const thoughts = $("thoughts");
-
-function status(t) { const s = $("status"); if (s) s.textContent = t; }
-
-function openDB() {
-  return new Promise((res, rej) => {
-    const r = indexedDB.open(DB, 1);
-    r.onupgradeneeded = () => {
-      const d = r.result;
-      if (!d.objectStoreNames.contains("m")) d.createObjectStore("m", { keyPath: "id", autoIncrement: true });
-      if (!d.objectStoreNames.contains("r")) d.createObjectStore("r", { keyPath: "id", autoIncrement: true });
-      if (!d.objectStoreNames.contains("k")) d.createObjectStore("k");
-    };
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
-}
-
-async function idbGet(store, key) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, "readonly");
-    const q = key != null ? tx.objectStore(store).get(key) : tx.objectStore(store).getAll();
-    q.onsuccess = () => res(q.result);
-    q.onerror = () => rej(q.error);
-  });
-}
-async function idbAdd(store, val) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, "readwrite");
-    tx.objectStore(store).add(val);
-    tx.oncomplete = () => res();
-    tx.onerror = () => rej(tx.error);
-  });
-}
-async function idbPut(store, val, key) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, "readwrite");
-    tx.objectStore(store).put(val, key);
-    tx.oncomplete = () => res();
-    tx.onerror = () => rej(tx.error);
-  });
-}
-async function idbClear(store) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction(store, "readwrite");
-    tx.objectStore(store).clear();
-    tx.oncomplete = () => res();
-    tx.onerror = () => rej(tx.error);
-  });
-}
-
-function b64(buf) {
-  const u = new Uint8Array(buf);
-  let s = "";
-  for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
-  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-async function sha256(text) {
-  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return [...new Uint8Array(h)].map(x => x.toString(16).padStart(2, "0")).join("");
-}
-async function ensureKeys() {
-  if (keyPair) return keyPair;
-  const stored = await idbGet("k", "ecdsa");
-  if (stored?.privateKey) {
-    keyPair = {
-      privateKey: await crypto.subtle.importKey("jwk", stored.privateKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
-      publicKey: await crypto.subtle.importKey("jwk", stored.publicKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]),
-    };
+/** AKSI MATRIX app v7 — WebLLM · RAG · ECDSA · Quantum · Neuro · © AKSI */
+(function () {
+  "use strict";
+  var DID = "did:aksi:ed25519:sovereign-2026";
+  var DB = "aksi_matrix_v7";
+  var MODEL = "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC";
+  var rag = [], keyPair = null, lastSig = null, engine = null, busy = false, webllmLoading = false;
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">"); }
+  function bootMsg(t, pct) {
+    var m = $("bootMsg"); if (m) m.textContent = t || "";
+    var b = $("bootBar"); if (b && pct != null) b.style.width = Math.min(100, Math.max(0, pct)) + "%";
+  }
+  function setStatus(t) { var s = $("statusLine"); if (s) s.textContent = t; }
+  function idbOpen() {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open(DB, 1);
+      r.onupgradeneeded = function () {
+        var d = r.result;
+        if (!d.objectStoreNames.contains("rag")) d.createObjectStore("rag", { keyPath: "id", autoIncrement: true });
+        if (!d.objectStoreNames.contains("keys")) d.createObjectStore("keys");
+      };
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  function idbPut(store, val, key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        var os = db.transaction(store, "readwrite").objectStore(store);
+        var req = key != null ? os.put(val, key) : os.put(val);
+        req.onsuccess = function () { res(req.result); };
+        req.onerror = function () { rej(req.error); };
+      });
+    });
+  }
+  function idbGet(store, key) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        var req = db.transaction(store, "readonly").objectStore(store).get(key);
+        req.onsuccess = function () { res(req.result); };
+        req.onerror = function () { rej(req.error); };
+      });
+    });
+  }
+  function idbAll(store) {
+    return idbOpen().then(function (db) {
+      return new Promise(function (res, rej) {
+        var req = db.transaction(store, "readonly").objectStore(store).getAll();
+        req.onsuccess = function () { res(req.result || []); };
+        req.onerror = function () { rej(req.error); };
+      });
+    });
+  }
+  function b64(buf) {
+    var u = new Uint8Array(buf), s = "", i;
+    for (i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function fromB64(s) {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var bin = atob(s), u = new Uint8Array(bin.length), i;
+    for (i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return u;
+  }
+  async function sha256(text) {
+    var h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(h)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join("");
+  }
+  async function ensureKeys() {
+    if (keyPair) return keyPair;
+    try {
+      var stored = await idbGet("keys", "ecdsa");
+      if (stored && stored.privateKey) {
+        keyPair = {
+          privateKey: await crypto.subtle.importKey("jwk", stored.privateKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
+          publicKey: await crypto.subtle.importKey("jwk", stored.publicKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"])
+        };
+        return keyPair;
+      }
+    } catch (e) {}
+    keyPair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    await idbPut("keys", {
+      privateKey: await crypto.subtle.exportKey("jwk", keyPair.privateKey),
+      publicKey: await crypto.subtle.exportKey("jwk", keyPair.publicKey)
+    }, "ecdsa");
     return keyPair;
   }
-  keyPair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-  await idbPut("k", {
-    privateKey: await crypto.subtle.exportKey("jwk", keyPair.privateKey),
-    publicKey: await crypto.subtle.exportKey("jwk", keyPair.publicKey),
-  }, "ecdsa");
-  return keyPair;
-}
-async function sign(text) {
-  await ensureKeys();
-  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, keyPair.privateKey, new TextEncoder().encode(text));
-  return { alg: "ECDSA-P256-SHA256", did: DID, sha256: await sha256(text), signature: b64(sig) };
-}
-async function verify(text, sigB64) {
-  await ensureKeys();
-  try {
-    const bin = Uint8Array.from(atob(sigB64.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
-    return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, keyPair.publicKey, bin, new TextEncoder().encode(text));
-  } catch { return false; }
-}
-
-function esc(s) {
-  return String(s || "").replace(/[&<>"']/g, c => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[c]));
-}
-
-function showSteps(steps) {
-  if (!thoughts) return;
-  thoughts.innerHTML = (steps || []).map((s, i) =>
-    `<div class="step"><b>${i + 1}. ${esc(s.t)}</b>${esc(s.d || "")}</div>`
-  ).join("");
-}
-
-function addBubble(role, text, meta) {
-  const wrap = document.createElement("div");
-  wrap.className = "msg " + (role === "user" ? "user" : "bot");
-  const bubble = document.createElement("div");
-  bubble.className = "bubble";
-  const mm = text.match(/```mermaid\s*([\s\S]*?)```/i);
-  if (mm && role !== "user") {
-    const before = text.slice(0, mm.index).trim();
-    if (before) bubble.appendChild(document.createTextNode(before));
-    const box = document.createElement("div");
-    box.className = "mermaid-box";
-    box.textContent = "схема…";
-    bubble.appendChild(box);
-    loadMermaid().then(() => renderMermaid(mm[1].trim(), box)).catch(() => { box.textContent = mm[1]; });
-    const after = text.slice(mm.index + mm[0].length).trim();
-    if (after) {
-      const n = document.createElement("div");
-      n.style.marginTop = "6px";
-      n.textContent = after;
-      bubble.appendChild(n);
+  async function exportPub() { await ensureKeys(); return crypto.subtle.exportKey("jwk", keyPair.publicKey); }
+  async function signText(text) {
+    await ensureKeys();
+    var sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, keyPair.privateKey, new TextEncoder().encode(text));
+    return { alg: "ECDSA-P256-SHA256", did: DID, sha256: await sha256(text), signature: b64(sig), ts: Date.now() };
+  }
+  async function verifyText(text, sigB64) {
+    await ensureKeys();
+    try { return await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, keyPair.publicKey, fromB64(sigB64), new TextEncoder().encode(text)); }
+    catch (e) { return false; }
+  }
+  function drawQR(text, size) {
+    size = size || 140;
+    var canvas = document.createElement("canvas"); canvas.width = size; canvas.height = size;
+    var ctx = canvas.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, size, size);
+    var h = 0, i, j, n = 21, cell = size / n;
+    for (i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) >>> 0;
+    function bit(x, y) { return ((h ^ (x * 73856093) ^ (y * 19349663)) >>> (x + y) % 16) & 1; }
+    ctx.fillStyle = "#000";
+    for (i = 0; i < n; i++) for (j = 0; j < n; j++) {
+      if ((i < 3 && j < 3) || (i < 3 && j > n - 4) || (i > n - 4 && j < 3)) { ctx.fillRect(j * cell, i * cell, cell, cell); continue; }
+      if (bit(i, j)) ctx.fillRect(j * cell, i * cell, cell * 0.9, cell * 0.9);
     }
-  } else {
-    bubble.textContent = text;
+    [[0, 0], [0, n - 7], [n - 7, 0]].forEach(function (p) {
+      ctx.fillStyle = "#000"; ctx.fillRect(p[1] * cell, p[0] * cell, 7 * cell, 7 * cell);
+      ctx.fillStyle = "#fff"; ctx.fillRect((p[1] + 1) * cell, (p[0] + 1) * cell, 5 * cell, 5 * cell);
+      ctx.fillStyle = "#000"; ctx.fillRect((p[1] + 2) * cell, (p[0] + 2) * cell, 3 * cell, 3 * cell);
+    });
+    return canvas;
   }
-  wrap.appendChild(bubble);
-  if (meta) {
-    const m = document.createElement("div");
-    m.className = "meta";
-    m.textContent = meta;
-    wrap.appendChild(m);
+  async function refreshCrypto() {
+    await ensureKeys();
+    var pub = await exportPub();
+    $("didLine").textContent = DID;
+    $("pubOut").textContent = JSON.stringify(pub);
+    var box = $("qrBox"); box.innerHTML = ""; box.appendChild(drawQR(DID + "|" + (pub.x || "").slice(0, 24)));
+    $("kvDid").textContent = "sovereign";
   }
-  thread.appendChild(wrap);
-  thread.scrollTop = 1e9;
-}
-
-function loadMermaid() {
-  if (mermaidReady) return mermaidReady;
-  mermaidReady = import("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs").then((m) => {
-    m.default.initialize({ startOnLoad: false, theme: "dark" });
-    window.__mermaid = m.default;
-    return m.default;
-  });
-  return mermaidReady;
-}
-async function renderMermaid(code, el) {
-  try {
-    const m = await loadMermaid();
-    const id = "m" + Math.random().toString(36).slice(2);
-    const { svg } = await m.render(id, code);
-    el.innerHTML = svg;
-  } catch {
-    el.textContent = code;
+  function tok(s) { return String(s || "").toLowerCase().replace(/[^a-zа-яё0-9\s]/gi, " ").split(/\s+/).filter(function (t) { return t.length > 2; }); }
+  function ragScore(q, text) {
+    var qt = tok(q), tt = tok(text), set = {}, i, hit = 0;
+    for (i = 0; i < tt.length; i++) set[tt[i]] = 1;
+    for (i = 0; i < qt.length; i++) if (set[qt[i]]) hit++;
+    return qt.length ? hit / qt.length : 0;
   }
-}
-
-function tok(s) {
-  return String(s).toLowerCase().replace(/[^\p{L}\p{N}\s]+/gu, " ").split(/\s+/).filter(Boolean);
-}
-function tf(tokens) {
-  const m = {};
-  for (const t of tokens) m[t] = (m[t] || 0) + 1;
-  return m;
-}
-function cos(a, b) {
-  let dot = 0, na = 0, nb = 0;
-  const keys = new Set([...Object.keys(a), ...Object.keys(b)]);
-  for (const k of keys) {
-    const x = a[k] || 0, y = b[k] || 0;
-    dot += x * y; na += x * x; nb += y * y;
+  function ragRetrieve(q, k) {
+    k = k || 4;
+    return rag.map(function (r) { return { text: r.text, score: ragScore(q, r.text), name: r.name }; })
+      .sort(function (a, b) { return b.score - a.score; }).slice(0, k).filter(function (x) { return x.score > 0.05; });
   }
-  return na && nb ? dot / (Math.sqrt(na) * Math.sqrt(nb)) : 0;
-}
-
-function retrieve(q, k = 5) {
-  const low = q.toLowerCase();
-  const qtf = tf(tok(q));
-  const ont = ONTOLOGY.map((row) => {
-    let score = cos(qtf, tf(tok(row.t)));
-    for (const kw of row.k) if (low.includes(kw)) score += 0.45;
-    return { source: "ontology", text: row.t, score };
-  });
-  const files = rag.map((c) => ({ ...c, score: cos(qtf, c.tf || {}) })).filter((c) => c.score > 0.03);
-  return [...files, ...ont].sort((a, b) => b.score - a.score).slice(0, k);
-}
-
-function answer(q, hits, skillOut) {
-  const low = q.toLowerCase();
-  if (skillOut) return { text: skillOut + "\n\n· skill · " + DID, route: "skill" };
-
-  if (/схем|диаграмм|архитектур|mermaid|покажи схему/.test(low)) {
-    return {
-      text: "Архитектура АКСИ (мобильный контур):\n\n```mermaid\nflowchart LR\n  U[Вы] --> R[Retrieve]\n  R --> A[Ответ]\n  A --> S[Подпись]\n  S --> UI[Экран]\n```\n\nВсё локально и быстро. DID: " + DID,
-      route: "arch",
-    };
+  async function loadRag() { try { rag = await idbAll("rag"); } catch (e) { rag = []; } $("kvRag").textContent = String(rag.length); }
+  async function addRagFiles(files) {
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i], text = await f.text();
+      var chunks = text.split(/\n{2,}/).map(function (c) { return c.trim(); }).filter(function (c) { return c.length > 20; });
+      if (!chunks.length) chunks = [text.slice(0, 4000)];
+      for (var j = 0; j < chunks.length; j++) {
+        var item = { text: chunks[j].slice(0, 4000), name: f.name, ts: Date.now() };
+        await idbPut("rag", item); rag.push(item);
+      }
+    }
+    await loadRag();
   }
-  if (/привет|здравств|добрый|hello|hi\b/.test(low)) {
-    return {
-      text: "Здравствуйте. АКСИ отвечает сразу на телефоне.\n\nМожно: вопрос по проекту · «покажи схему» · uuid · hash … · посчитай 2+2 · загрузить файл (RAG).",
-      route: "hi",
-    };
+  function detectSkill(userText) {
+    var low = userText.toLowerCase().trim();
+    var hashM = low.match(/(?:hash|хеш|sha256)\s+(.+)/i);
+    if (hashM) return { name: "hash", arg: hashM[1].trim() };
+    if (/(uuid|guid)/i.test(low)) return { name: "uuid" };
+    if (/(который час|сколько времени)/i.test(low)) return { name: "now" };
+    var calcM = low.match(/(?:посчитай|вычисли|calc)\s+(.+)/i);
+    if (calcM) return { name: "calc", arg: calcM[1].trim() };
+    return null;
   }
-  if (/кто ты|что ты|представь|версия/.test(low)) {
-    return {
-      text: "Я АКСИ MATRIX " + VER + ".\n\nDID: " + DID + "\n\nМгновенный поиск по онтологии и вашим файлам, подпись ответа, skills. Тяжёлую нейросеть на телефон не тащим — так быстрее и стабильнее.",
-      route: "id",
-    };
+  async function runSkill(skill) {
+    if (skill.name === "hash") return "SHA-256: " + await sha256(skill.arg || "");
+    if (skill.name === "uuid") return "UUID: " + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
+    if (skill.name === "now") return "Время: " + new Date().toLocaleString();
+    if (skill.name === "calc") {
+      try {
+        var safe = (skill.arg || "").replace(/[^0-9+\-*/().%\s]/g, "");
+        var v = Function('"use strict";return(' + safe + ")")();
+        if (typeof v === "number" && isFinite(v)) return "Результат: " + v;
+      } catch (e) {}
+      return "Не удалось вычислить.";
+    }
+    return null;
   }
-  if (/помощ|умеешь|команд|skills|функц/.test(low)) {
-    return {
-      text: "• вопрос про АКСИ\n• покажи схему\n• uuid / hash текст / который час / посчитай N\n• RAG-файлы\n• Proof · Verify\n\naksilove@internet.ru",
-      route: "help",
-    };
+  async function loadWebLLM() {
+    if (webllmLoading) return false;
+    webllmLoading = true;
+    bootMsg("Подключаю WebLLM…", 5);
+    $("boot").style.display = "flex"; $("boot").classList.remove("hide");
+    try {
+      var mod = await import("https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm").catch(function () {
+        return import("https://esm.sh/@mlc-ai/web-llm@0.2.79");
+      });
+      var CreateMLCEngine = mod.CreateMLCEngine || (mod.default && mod.default.CreateMLCEngine);
+      if (!CreateMLCEngine) throw new Error("CreateMLCEngine missing");
+      engine = await CreateMLCEngine(MODEL, {
+        initProgressCallback: function (r) {
+          var p = Math.round((r.progress || 0) * 100);
+          bootMsg((r.text || "Загрузка") + " · " + p + "%", p);
+        }
+      });
+      bootMsg("Модель готова", 100);
+      $("kvModel").textContent = "WebLLM";
+      setStatus("модель готова · RAG " + rag.length);
+      setTimeout(function () { $("boot").classList.add("hide"); setTimeout(function () { $("boot").style.display = "none"; }, 400); }, 500);
+      webllmLoading = false; return true;
+    } catch (e) {
+      bootMsg("WebLLM недоступен — Neuro · " + (e.message || e), 100);
+      $("kvModel").textContent = "Neuro";
+      setTimeout(function () { $("boot").classList.add("hide"); setTimeout(function () { $("boot").style.display = "none"; }, 500); }, 1200);
+      webllmLoading = false; return false;
+    }
   }
-  if (hits.length && hits[0].score > 0.2) {
-    const lines = hits.slice(0, 4).map((h, i) => (i + 1) + ". " + h.text).join("\n");
-    return {
-      text: "По локальным знаниям:\n\n" + lines + "\n\nУточните вопрос или добавьте файл в RAG.",
-      route: "kb",
-    };
+  async function webllmChat(q, context) {
+    if (!engine) return null;
+    try {
+      var messages = [
+        { role: "system", content: "Ты АКСИ MATRIX. Кратко по-русски. DID: " + DID },
+        { role: "user", content: (context ? context + "\n\n" : "") + q }
+      ];
+      var out = await engine.chat.completions.create({ messages: messages, max_tokens: 400, temperature: 0.7 });
+      var text = out && out.choices && out.choices[0] && out.choices[0].message && out.choices[0].message.content;
+      return text ? String(text).trim() : null;
+    } catch (e) { return null; }
   }
-  return {
-    text: "Мало данных по запросу. Попробуйте: кто ты · архитектура · DID · uuid · или загрузите .txt.\n\n" + DID,
-    route: "soft",
-  };
-}
-
-async function chat(q) {
-  const t0 = performance.now();
-  const steps = [];
-  const step = (t, d) => { steps.push({ t, d }); showSteps(steps); };
-
-  step("Приём", q.slice(0, 160));
-  const skill = detectSkill(q);
-  let skillOut = null;
-  if (skill) {
-    step("Skill", skill.name);
-    skillOut = await runSkill(skill, sha256);
+  function bubble(role, text, meta) {
+    var th = $("thread"); if (!th) return;
+    var d = document.createElement("div");
+    d.className = "msg " + (role === "me" ? "me" : "ai");
+    d.innerHTML = '<div class="bub">' + esc(text) + (meta ? '<div class="meta">' + esc(meta) + "</div>" : "") + "</div>";
+    th.appendChild(d);
+    try { th.lastElementChild.scrollIntoView({ block: "end" }); } catch (e) {}
   }
-  const hits = retrieve(q, 5);
-  step("Поиск", hits.length ? hits.map((h) => h.source).join(", ") : "пусто");
-  const { text, route } = answer(q, hits, skillOut);
-  step("Ответ", route);
-
-  const sig = await sign(text);
-  const ms = Math.round(performance.now() - t0);
-  step("Подпись", sig.sha256.slice(0, 16) + "… · " + ms + "ms");
-
-  lastPkg = {
-    version: VER, did: DID, question: q, answer: text, route, ms,
-    final: sig, steps, sources: hits.map((h) => ({ source: h.source, score: h.score })),
-    created_at: new Date().toISOString(),
-  };
-  return { text, route, sig, ms };
-}
-
-async function send() {
-  if (busy) return;
-  const inp = $("inp");
-  const q = (inp.value || "").trim();
-  if (!q) return;
-  inp.value = "";
-  busy = true;
-  addBubble("user", q);
-  try { await idbAdd("m", { role: "user", content: q, ts: Date.now() }); } catch {}
-  try {
-    const { text, route, sig, ms } = await chat(q);
-    addBubble("bot", text, ms + "ms · " + route + " · " + (sig.sha256 || "").slice(0, 10));
-    try { await idbAdd("m", { role: "assistant", content: text, ts: Date.now() }); } catch {}
-    status(ms + " ms");
-  } catch (e) {
-    addBubble("bot", "Ошибка: " + (e.message || e), "err");
-  } finally {
+  async function think(q) {
+    q = String(q || "").trim();
+    if (!q) return { text: "Пустой запрос.", meta: "matrix" };
+    var skill = detectSkill(q);
+    if (skill) { var so = await runSkill(skill); if (so) return { text: so + "\n\n· skill · " + DID, meta: "skill" }; }
+    if (/покажи схему|архитектур/i.test(q))
+      return { text: "Архитектура:\nПользователь → MATRIX UI → IndexedDB / RAG → WebLLM/Neuro → Quantum → ECDSA\n\nDID: " + DID, meta: "arch" };
+    if (/^did$/i.test(q)) return { text: "DID: " + DID + "\nECDSA P-256", meta: "did" };
+    if (/^статус$/i.test(q))
+      return { text: "Модель: " + (engine ? "WebLLM" : "Neuro") + "\nRAG: " + rag.length + "\nDID: " + DID, meta: "status" };
+    var hits = ragRetrieve(q, 3);
+    var ctx = hits.length && hits[0].score >= 0.12 ? hits.map(function (h) { return h.text.slice(0, 400); }).join("\n---\n") : "";
+    if (engine) {
+      var wl = await webllmChat(q, ctx ? "RAG:\n" + ctx : "");
+      if (wl) {
+        var meta = "webllm";
+        if (window.AKSI_QUANTUM && AKSI_QUANTUM.answerGate) { var qx = AKSI_QUANTUM.answerGate(q, wl); if (qx) meta += " · Q" + qx.QCLI; }
+        return { text: wl, meta: meta };
+      }
+    }
+    if (ctx) return { text: "По RAG:\n\n" + hits.map(function (h, i) { return (i + 1) + ". [" + h.name + "] " + h.text.slice(0, 280); }).join("\n\n"), meta: "rag" };
+    if (window.AKSI_MIND && AKSI_MIND.think) {
+      try { var r = await AKSI_MIND.think(q); if (r && r.text) return { text: r.text, meta: r.meta || "mind" }; } catch (e) {}
+    }
+    if (window.AKSI_NEURO && AKSI_NEURO.think) {
+      var n = AKSI_NEURO.think(q);
+      if (n && n.text) {
+        var meta2 = n.mode || "neuro";
+        if (window.AKSI_QUANTUM && AKSI_QUANTUM.answerGate) { var qx2 = AKSI_QUANTUM.answerGate(q, n.text); if (qx2) meta2 += " · Q" + qx2.QCLI; }
+        return { text: n.text, meta: meta2 };
+      }
+    }
+    return { text: "Мало данных. RAG или «Перезагрузить модель».\n\n" + DID, meta: "fallback" };
+  }
+  async function ask(q) {
+    if (busy) return;
+    q = String(q || "").trim(); if (!q) return;
+    busy = true; bubble("me", q); $("inp").value = ""; setStatus("думаю…");
+    try {
+      var r = await think(q); var meta = r.meta || "";
+      try { lastSig = await signText(r.text); meta += " · sig"; } catch (e) {}
+      bubble("ai", r.text, meta);
+      setStatus((engine ? "webllm" : "neuro") + " · RAG " + rag.length);
+    } catch (e) { bubble("ai", "Сбой: " + (e.message || e), "error"); }
     busy = false;
   }
-}
-
-async function onFiles(files) {
-  for (const f of files) {
-    const text = await f.text();
-    for (let i = 0; i < text.length; i += 450) {
-      const chunk = text.slice(i, i + 450);
-      if (chunk.trim().length < 20) continue;
-      const item = { source: f.name, text: chunk, tf: tf(tok(chunk)), ts: Date.now() };
-      rag.push(item);
-      try { await idbAdd("r", item); } catch {}
+  function drawBloch(bloch) {
+    var canvas = $("bloch"); if (!canvas || !bloch) return;
+    var ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.38;
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(167,139,250,.4)";
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, R, R * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
+    var px = cx + (bloch.x || 0) * R, py = cy - (bloch.z || 0) * R;
+    ctx.strokeStyle = "#c4b5fd"; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+    ctx.fillStyle = "#a78bfa"; ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+  }
+  function showQ(obj) {
+    $("qOut").textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+    if (obj && obj.bloch0) drawBloch(obj.bloch0);
+  }
+  function goTab(t) {
+    document.querySelectorAll(".tabs [data-tab]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-tab") === t); });
+    document.querySelectorAll(".stage .panel").forEach(function (p) { p.classList.toggle("on", p.id === "tab-" + t); });
+    if (t === "crypto") refreshCrypto();
+    if (t === "bloch" && window.AKSI_QUANTUM) try { showQ(AKSI_QUANTUM.shot("matrix")); } catch (e) {}
+    if (t === "ui") {
+      $("kvModel").textContent = engine ? "WebLLM" : (window.AKSI_NEURO ? "Neuro" : "—");
+      $("kvQ").textContent = window.AKSI_QUANTUM ? (AKSI_QUANTUM.version || "on") : "—";
+      $("kvRag").textContent = String(rag.length);
     }
   }
-  addBubble("bot", "RAG: " + rag.length + " фрагментов. Можно спрашивать.", "rag");
-  status("RAG " + rag.length);
-}
-
-$("send").onclick = send;
-$("inp").addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-});
-$("btn-arch").onclick = () => { $("inp").value = "покажи схему"; send(); };
-$("btn-thoughts").onclick = () => $("side").classList.toggle("on");
-$("btn-clear").onclick = async () => {
-  await idbClear("m");
-  thread.innerHTML = "";
-  lastPkg = null;
-  showSteps([]);
-  addBubble("bot", "Очищено. Пишите — ответ сразу.", "sys");
-};
-$("file-input").onchange = async (e) => {
-  if (e.target.files?.length) await onFiles([...e.target.files]);
-  e.target.value = "";
-};
-$("btn-proof").onclick = () => {
-  if (!lastPkg) { addBubble("bot", "Сначала задайте вопрос.", "proof"); return; }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(lastPkg, null, 2)], { type: "application/json" }));
-  a.download = "aksi-proof.json";
-  a.click();
-};
-$("btn-verify").onclick = async () => {
-  if (!lastPkg?.final?.signature) { addBubble("bot", "Нет подписи.", "v"); return; }
-  const ok = await verify(lastPkg.answer, lastPkg.final.signature);
-  addBubble("bot", ok ? "✅ Подпись верна" : "❌ Неверна", "v");
-};
-$("btn-mic").onclick = () => {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { addBubble("bot", "Голос: Chrome/Safari.", "voice"); return; }
-  const r = new SR();
-  r.lang = "ru-RU";
-  r.onresult = (ev) => { $("inp").value = ev.results[0][0].transcript; send(); };
-  r.start();
-  status("слушаю…");
-};
-
-(async () => {
-  try {
-    status("старт");
-    await ensureKeys();
-    const msgs = (await idbGet("m")) || [];
-    msgs.slice(-30).forEach((m) => addBubble(m.role === "user" ? "user" : "bot", m.content));
-    rag = ((await idbGet("r")) || []).map((c) => ({ ...c, tf: c.tf || tf(tok(c.text || "")) }));
-    if (!msgs.length) {
-      addBubble("bot", "АКСИ готов. Ответ сразу, без тяжёлой модели на телефоне.\n\nСпросите «кто ты» или нажмите «Схема».", "sys");
-    }
-    status("готово · RAG " + rag.length);
-  } catch (e) {
-    status("ok");
-    addBubble("bot", "Можно писать. " + (e.message || ""), "sys");
+  async function start() {
+    bootMsg("IndexedDB…", 10); try { await idbOpen(); } catch (e) {}
+    bootMsg("ECDSA…", 25); try { await ensureKeys(); } catch (e) {}
+    bootMsg("RAG…", 45); await loadRag();
+    bootMsg("Neuro / Quantum…", 70);
+    $("kvModel").textContent = window.AKSI_NEURO ? "Neuro" : "—";
+    $("kvQ").textContent = window.AKSI_QUANTUM ? "on" : "—";
+    bootMsg("MATRIX online", 100); setStatus("neuro · RAG " + rag.length);
+    setTimeout(function () {
+      $("boot").classList.add("hide"); $("app").hidden = false;
+      setTimeout(function () { $("boot").style.display = "none"; }, 400);
+      bubble("ai", "Здравствуйте. АКСИ MATRIX online.\n\n• Neuro — сразу offline\n• «Перезагрузить модель» — WebLLM\n• RAG · ECDSA · Quantum\n\nDID: " + DID, "matrix · local-first");
+    }, 450);
   }
-  const boot = $("boot");
-  if (boot) {
-    boot.classList.add("hide");
-    setTimeout(() => { boot.style.display = "none"; }, 280);
-  }
+  document.querySelectorAll(".tabs [data-tab]").forEach(function (b) {
+    b.addEventListener("click", function () { goTab(b.getAttribute("data-tab")); });
+  });
+  $("send").onclick = function () { ask($("inp").value); };
+  $("inp").addEventListener("keydown", function (e) { if (e.key === "Enter") ask($("inp").value); });
+  document.querySelectorAll("[data-ask]").forEach(function (c) { c.onclick = function () { ask(c.getAttribute("data-ask")); }; });
+  $("btnClear").onclick = function () { $("thread").innerHTML = ""; };
+  $("btnModel").onclick = function () { loadWebLLM(); };
+  $("btnRag").onclick = function () { $("ragFile").click(); };
+  $("ragFile").onchange = function () {
+    if (this.files && this.files.length) addRagFiles(this.files).then(function () {
+      bubble("ai", "RAG: " + rag.length + " фрагментов", "rag");
+      setStatus((engine ? "webllm" : "neuro") + " · RAG " + rag.length);
+    });
+  };
+  $("btnVoice").onclick = function () {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { bubble("ai", "SpeechRecognition недоступен", "voice"); return; }
+    var r = new SR(); r.lang = "ru-RU";
+    r.onresult = function (ev) { ask(ev.results[0][0].transcript); }; r.start();
+  };
+  $("btnTrust").onclick = function () { goTab("crypto"); };
+  $("btnPro").onclick = function () { goTab("ui"); };
+  $("btnSign").onclick = async function () {
+    lastSig = await signText($("signMsg").value || "");
+    $("cryptoOut").textContent = JSON.stringify(lastSig, null, 2);
+  };
+  $("btnVerify").onclick = async function () {
+    if (!lastSig) { $("cryptoOut").textContent = "Сначала подпишите"; return; }
+    var ok = await verifyText($("signMsg").value || "", lastSig.signature);
+    $("cryptoOut").textContent = ok ? "✓ Подпись верна\n" + JSON.stringify(lastSig, null, 2) : "✗ Неверна";
+  };
+  $("btnDl").onclick = function () {
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(lastSig || { did: DID }, null, 2)], { type: "application/json" }));
+    a.download = "aksi-proof.json"; a.click();
+  };
+  document.querySelectorAll("[data-crypto]").forEach(function (b) {
+    b.onclick = async function () {
+      var k = b.getAttribute("data-crypto"); await ensureKeys();
+      if (k === "keys" || k === "did") refreshCrypto();
+      else if (k === "json") $("cryptoOut").textContent = JSON.stringify({ did: DID, publicKey: await exportPub() }, null, 2);
+      else if (k === "pem") $("cryptoOut").textContent = "JWK P-256:\n" + JSON.stringify(await exportPub(), null, 2);
+    };
+  });
+  $("btnBell").onclick = function () {
+    if (!window.AKSI_QUANTUM) return showQ("Quantum offline");
+    var c = AKSI_QUANTUM.bell("phi+");
+    var s = c.summary ? c.summary() : AKSI_QUANTUM.shot("bell");
+    if (c.bloch) showQ(Object.assign({}, s, { bloch0: c.bloch(0) })); else showQ(s);
+  };
+  $("btnShot").onclick = function () { showQ(window.AKSI_QUANTUM ? AKSI_QUANTUM.shot("matrix") : "no Q"); };
+  $("btnGate").onclick = function () {
+    if (!window.AKSI_QUANTUM || !AKSI_QUANTUM.answerGate) return showQ("no answerGate");
+    showQ(AKSI_QUANTUM.answerGate("Кто ты?", "Я АКСИ MATRIX"));
+  };
+  $("btnChsh").onclick = function () { showQ(window.AKSI_QUANTUM ? AKSI_QUANTUM.chsh(1024) : "no Q"); };
+  $("btnQ2Bell").onclick = function () {
+    if (!window.AKSI_QUANTUM) return;
+    var c = AKSI_QUANTUM.bell("phi+");
+    $("q2Out").textContent = (c.circuitString ? c.circuitString() + "\n\n" : "") + JSON.stringify(c.summary ? c.summary() : {}, null, 2);
+  };
+  $("btnQ2Sample").onclick = function () {
+    if (!window.AKSI_QUANTUM) return;
+    $("q2Out").textContent = JSON.stringify(AKSI_QUANTUM.bell("phi+").sample(1024), null, 2);
+  };
+  start();
 })();
