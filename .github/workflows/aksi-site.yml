@@ -11,32 +11,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
       - name: Required runtime files
         run: |
           set -euo pipefail
           for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js aksi-algorithm.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
+
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          find . -type f -name '*.js' -not -path './.git/*' -not -name '*.min.js' -print0 | while IFS= read -r -d '' f; do node --check "$f" || exit 1; done
+          find . -type f -name '*.js' -not -path './.git/*' -not -name '*.min.js' -print0 \
+            | while IFS= read -r -d '' f; do
+                node --check "$f" || { echo "SYNTAX FAIL $f"; exit 1; }
+              done
+
       - name: Answer quality tests
         run: node tests/aksi-answer-quality.test.js
+
       - name: Runtime contract tests
         run: node tests/aksi-runtime.test.js
+
       - name: Metrics contract
         run: |
           node --check aksi-algorithm.js
           node - <<'NODE'
-          global.window=global; require('./aksi-algorithm.js');
-          const A=global.AKSI_ALGORITHM;
-          if(!A || A.version!=='6.0.0') throw new Error('metrics engine unavailable');
-          const r=A.evaluate('hello','AKSI local verification',{offline:true,seal:false});
-          for(const k of ['H','QCLI','H_eff','EQS','AKSI','resonance','DIMAX','DIMAX_U5','quantum']) if(!(k in r.metrics)) throw new Error('missing metric '+k);
-          if(r.metrics.quantum.qubits!==3) throw new Error('3-qubit simulator contract failed');
+          global.window = global;
+          require('./aksi-algorithm.js');
+          const A = global.AKSI_ALGORITHM;
+          if (!A || A.version !== '6.0.0') throw new Error('metrics engine unavailable');
+          const r = A.evaluate('hello', 'AKSI local verification', { offline: true, seal: false });
+          for (const k of ['H', 'QCLI', 'H_eff', 'EQS', 'AKSI', 'resonance', 'DIMAX', 'DIMAX_U5', 'quantum']) {
+            if (!(k in r.metrics)) throw new Error('missing metric ' + k);
+          }
+          if (r.metrics.quantum.qubits !== 3) throw new Error('3-qubit simulator contract failed');
           console.log('metrics contract OK');
           NODE
+
       - name: Local AI contract
         run: |
           set -euo pipefail
@@ -45,50 +57,75 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          manifest=json.loads(Path('local-ai/manifest.json').read_text(encoding='utf-8'))
+          manifest = json.loads(Path('local-ai/manifest.json').read_text(encoding='utf-8'))
           assert manifest.get('start_url') == '/local-ai/'
-          html=Path('local-ai/index.html').read_text(encoding='utf-8').lower()
-          for needle in ('aksi_local_engine','aksi-webllm.js','engine.js','execution trace','remote: off'):
+          html = Path('local-ai/index.html').read_text(encoding='utf-8').lower()
+          for needle in ('aksi_local_engine', 'aksi-webllm.js', 'engine.js', 'execution trace'):
               assert needle in html, needle
-          engine=Path('local-ai/engine.js').read_text(encoding='utf-8')
-          for needle in ('memory.retrieve','inference.start','inference.complete','offline-kernel','allowLocalServer'):
+          # network-off policy (RU or EN)
+          assert ('remote: off' in html) or ('сеть: off' in html) or ('сеть off' in html) or ('remote off' in html), 'network-off policy missing'
+          engine = Path('local-ai/engine.js').read_text(encoding='utf-8')
+          for needle in ('memory.retrieve', 'inference.start', 'inference.complete', 'offline-kernel', 'allowLocalServer'):
               assert needle in engine, needle
           print('local AI contract OK')
           PY
+
       - name: Public surface privacy and secret scan
         run: |
           set -euo pipefail
+          # Public contact aksilove@internet.ru is ALLOWED (product policy).
+          # Block real secrets and private FIO only.
           files="index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js aksi-algorithm.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js"
-          if grep -nE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}|aksilove@|Alfiya|Баширова|Альфия' $files; then
-            echo 'Possible secret or personal identifier in public runtime surface'; exit 1
+          if grep -nE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' $files; then
+            echo 'Possible secret in public runtime surface'
+            exit 1
           fi
-          echo 'Public surface privacy/secret scan OK'
+          if grep -nE 'Баширова|Альфия Ринатовна|Alfiya Bashirova|14\.02\.1995|birth.?year.?1995' $files; then
+            echo 'Private identity data in public runtime surface'
+            exit 1
+          fi
+          echo 'Public surface privacy/secret scan OK (contact email allowed)'
+
       - name: Referenced scripts exist
         run: |
           python3 - <<'PY'
           import re
           from pathlib import Path
-          missing=[]
-          for hp in [Path('index.html'),Path('local-ai/index.html')]:
-            html=hp.read_text(encoding='utf-8',errors='replace')
-            for src in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',html,re.I):
-              if src.startswith(('http://','https://','//')): continue
-              p=(hp.parent/src.split('?',1)[0].split('#',1)[0]).resolve()
-              if not p.is_file(): missing.append(str(p))
-          if missing: print(*missing,sep='\n'); raise SystemExit(1)
+          root = Path('.').resolve()
+          missing = []
+          for hp in [Path('index.html'), Path('local-ai/index.html')]:
+              html = hp.read_text(encoding='utf-8', errors='replace')
+              for src in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, re.I):
+                  if src.startswith(('http://', 'https://', '//')):
+                      continue
+                  clean = src.split('?', 1)[0].split('#', 1)[0]
+                  if clean.startswith('/'):
+                      p = (root / clean.lstrip('/')).resolve()
+                  else:
+                      p = (hp.parent / clean).resolve()
+                  if not p.is_file():
+                      missing.append(f'{hp}: {src} -> {p}')
+          if missing:
+              print(*missing, sep='\n')
+              raise SystemExit(1)
           print('Referenced local scripts OK')
           PY
+
       - name: Core HTML sanity
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          for name in ['index.html','404.html','aksi.html','local-ai/index.html']:
-            s=Path(name).read_text(encoding='utf-8',errors='replace').lower()
-            if '<html' not in s or '</html>' not in s: raise SystemExit('BAD '+name)
+          for name in ['index.html', '404.html', 'aksi.html', 'local-ai/index.html']:
+              s = Path(name).read_text(encoding='utf-8', errors='replace').lower()
+              if '<html' not in s or '</html>' not in s:
+                  raise SystemExit('BAD ' + name)
           print('HTML OK')
           PY
+
       - name: Runtime size sanity
         run: |
           set -euo pipefail
           test "$(wc -c < aksi.html)" -gt 5000
           test "$(wc -c < aksi-app.js)" -gt 10000
+          test "$(wc -c < index.html)" -gt 5000
+          echo 'size OK'
