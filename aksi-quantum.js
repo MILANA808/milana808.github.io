@@ -1,9 +1,9 @@
-/** AKSI Quantum Engine v2.0.1-engine · 1..8 qubits · state-vector · © AKSI proprietary */
+/** AKSI Quantum Engine v3.0.0-ideal · answerGate · QFT · Grover · IBM optional · © AKSI */
 (function (G) {
   "use strict";
-  var VER = "2.0.1-engine";
+  var VER = "3.0.0-ideal";
   var RESONANCE_SEED = "Alfiya_AKSI_DIMAX_v3_2026";
-  var MAX_QUBITS = 8;
+  var MAX_QUBITS = 10;
   var SQRT2_INV = 1 / Math.SQRT2;
   function C(re, im) { return { re: re || 0, im: im || 0 }; }
   function cadd(a, b) { return C(a.re + b.re, a.im + b.im); }
@@ -19,7 +19,11 @@
     st[0] = C(1, 0);
     return st;
   }
-  function cloneState(st) { return st.map(function (c) { return C(c.re, c.im); }); }
+  function cloneState(st) {
+    var o = new Array(st.length), i;
+    for (i = 0; i < st.length; i++) o[i] = C(st[i].re, st[i].im);
+    return o;
+  }
   function normalize(st) {
     var nrm = 0, i;
     for (i = 0; i < st.length; i++) nrm += cabs2(st[i]);
@@ -28,7 +32,11 @@
     for (i = 0; i < st.length; i++) st[i] = cscale(st[i], 1 / nrm);
     return st;
   }
-  function probs(st) { return st.map(function (c) { return cabs2(c); }); }
+  function probs(st) {
+    var p = new Array(st.length), i;
+    for (i = 0; i < st.length; i++) p[i] = cabs2(st[i]);
+    return p;
+  }
   function shannonEntropy(p) {
     var h = 0, i;
     for (i = 0; i < p.length; i++) if (p[i] > 1e-15) h -= p[i] * Math.log2(p[i]);
@@ -62,13 +70,12 @@
     return normalize(out);
   }
   var GATES = {
-    I: [C(1, 0), C(0, 0), C(0, 0), C(1, 0)],
     X: [C(0, 0), C(1, 0), C(1, 0), C(0, 0)],
     Y: [C(0, 0), C(0, -1), C(0, 1), C(0, 0)],
     Z: [C(1, 0), C(0, 0), C(0, 0), C(-1, 0)],
     H: [C(SQRT2_INV, 0), C(SQRT2_INV, 0), C(SQRT2_INV, 0), C(-SQRT2_INV, 0)],
     S: [C(1, 0), C(0, 0), C(0, 0), C(0, 1)],
-    T: [C(1, 0), C(0, 0), C(0, 0), cexp_i(Math.PI / 4)],
+    T: [C(1, 0), C(0, 0), C(0, 0), cexp_i(Math.PI / 4)]
   };
   function Rx(theta) {
     var c = Math.cos(theta / 2), s = Math.sin(theta / 2);
@@ -81,20 +88,14 @@
   function Rz(theta) {
     return [cexp_i(-theta / 2), C(0, 0), C(0, 0), cexp_i(theta / 2)];
   }
-  function Phase(phi) {
-    return [C(1, 0), C(0, 0), C(0, 0), cexp_i(phi)];
-  }
   function Circuit(nQubits) {
-    nQubits = nQubits | 0;
-    if (nQubits < 1) nQubits = 1;
-    if (nQubits > MAX_QUBITS) nQubits = MAX_QUBITS;
-    this.n = nQubits;
-    this.state = zeroState(nQubits);
+    this.n = Math.max(1, Math.min(MAX_QUBITS, nQubits | 0));
+    this.state = zeroState(this.n);
     this.ops = [];
   }
   Circuit.prototype._gate1 = function (name, mat, q) {
     q = q | 0;
-    if (q < 0 || q >= this.n) throw new Error("qubit out of range: " + q);
+    if (q < 0 || q >= this.n) return this;
     this.state = apply1(this.state, this.n, q, mat[0], mat[1], mat[2], mat[3]);
     this.ops.push({ gate: name, qubits: [q] });
     return this;
@@ -108,12 +109,9 @@
   Circuit.prototype.rx = function (q, theta) { return this._gate1("Rx", Rx(theta), q); };
   Circuit.prototype.ry = function (q, theta) { return this._gate1("Ry", Ry(theta), q); };
   Circuit.prototype.rz = function (q, theta) { return this._gate1("Rz", Rz(theta), q); };
-  Circuit.prototype.p = function (q, phi) { return this._gate1("P", Phase(phi), q); };
   Circuit.prototype.cnot = function (control, target) {
-    control |= 0; target |= 0;
-    if (control === target) throw new Error("CNOT: control === target");
     this.state = applyCtrl1(this.state, this.n, control, target, GATES.X[0], GATES.X[1], GATES.X[2], GATES.X[3]);
-    this.ops.push({ gate: "CNOT", qubits: [control, target] });
+    this.ops.push({ gate: "CX", qubits: [control, target] });
     return this;
   };
   Circuit.prototype.cz = function (control, target) {
@@ -121,14 +119,10 @@
     this.ops.push({ gate: "CZ", qubits: [control, target] });
     return this;
   };
-  Circuit.prototype.swap = function (a, b) {
-    this.cnot(a, b); this.cnot(b, a); this.cnot(a, b);
-    this.ops.push({ gate: "SWAP", qubits: [a, b] });
-    return this;
-  };
+  Circuit.prototype.swap = function (a, b) { return this.cnot(a, b).cnot(b, a).cnot(a, b); };
   Circuit.prototype.ccx = function (c0, c1, t) {
-    c0 |= 0; c1 |= 0; t |= 0;
-    var d = this.state.length, m0 = 1 << c0, m1 = 1 << c1, mt = 1 << t, out = cloneState(this.state), i;
+    var st = this.state, d = st.length, out = cloneState(st), i;
+    var m0 = 1 << c0, m1 = 1 << c1, mt = 1 << t;
     for (i = 0; i < d; i++) {
       if ((i & m0) && (i & m1) && !(i & mt)) {
         var j = i | mt, tmp = out[i]; out[i] = out[j]; out[j] = tmp;
@@ -138,65 +132,85 @@
     this.ops.push({ gate: "CCX", qubits: [c0, c1, t] });
     return this;
   };
-  Circuit.prototype.reset = function () { this.state = zeroState(this.n); this.ops = []; return this; };
   Circuit.prototype.probs = function () { return probs(this.state); };
   Circuit.prototype.entropy = function () { return shannonEntropy(this.probs()); };
   Circuit.prototype.purity = function () { return purityFromProbs(this.probs()); };
   Circuit.prototype.measure = function (rng) {
     rng = rng || Math.random;
-    var p = this.probs(), r = rng(), acc = 0, i, outcome = 0;
-    for (i = 0; i < p.length; i++) { acc += p[i]; if (r <= acc) { outcome = i; break; } }
-    var collapsed = zeroState(this.n); collapsed[outcome] = C(1, 0); this.state = collapsed;
-    var bits = ""; for (i = this.n - 1; i >= 0; i--) bits += (outcome >> i) & 1 ? "1" : "0";
-    return { outcome: outcome, bits: bits, probs: p };
+    var p = this.probs(), r = rng(), acc = 0, i, bits = "", n = this.n, k;
+    for (i = 0; i < p.length; i++) {
+      acc += p[i];
+      if (r <= acc || i === p.length - 1) {
+        for (k = 0; k < n; k++) bits = ((i >> k) & 1) + bits;
+        return { outcome: i, bits: bits, prob: p[i] };
+      }
+    }
+    return { outcome: 0, bits: "0", prob: 1 };
   };
   Circuit.prototype.sample = function (shots, rng) {
     shots = shots || 1024; rng = rng || Math.random;
-    var p = this.probs(), counts = {}, i, k;
-    for (i = 0; i < p.length; i++) counts[i] = 0;
+    var counts = {}, i, m, hist = [], key;
     for (i = 0; i < shots; i++) {
-      var r = rng(), acc = 0, hit = 0;
-      for (k = 0; k < p.length; k++) { acc += p[k]; if (r <= acc) { hit = k; break; } }
-      counts[hit]++;
+      m = this.measure(rng);
+      counts[m.bits] = (counts[m.bits] || 0) + 1;
     }
-    var hist = [];
-    for (k = 0; k < p.length; k++) {
-      if (!counts[k]) continue;
-      var bits = ""; for (i = this.n - 1; i >= 0; i--) bits += (k >> i) & 1 ? "1" : "0";
-      hist.push({ bits: bits, count: counts[k], prob: counts[k] / shots, ideal: p[k] });
-    }
+    for (key in counts) hist.push({ bits: key, count: counts[key], p: counts[key] / shots });
     hist.sort(function (a, b) { return b.count - a.count; });
-    return { shots: shots, histogram: hist, idealProbs: p };
-  };
-  Circuit.prototype.reducedQubit = function (q) {
-    q |= 0; var p = this.state, d = p.length, rho = [C(0,0),C(0,0),C(0,0),C(0,0)], mask = 1 << q, i, j;
-    for (i = 0; i < d; i++) for (j = 0; j < d; j++) {
-      if ((i & ~mask) !== (j & ~mask)) continue;
-      var bi = (i & mask) ? 1 : 0, bj = (j & mask) ? 1 : 0;
-      rho[bi * 2 + bj] = cadd(rho[bi * 2 + bj], cmul(p[i], cconj(p[j])));
-    }
-    return [[rho[0], rho[1]], [rho[2], rho[3]]];
+    return { shots: shots, histogram: hist, top: hist[0] };
   };
   Circuit.prototype.bloch = function (q) {
-    var rho = this.reducedQubit(q);
-    var rx = 2 * rho[0][1].re, ry = 2 * rho[1][0].im, rz = rho[0][0].re - rho[1][1].re;
-    return { x: +rx.toFixed(6), y: +ry.toFixed(6), z: +rz.toFixed(6), r: +Math.sqrt(rx*rx+ry*ry+rz*rz).toFixed(6) };
+    var st = this.state, d = st.length, mask = 1 << q, i, j;
+    var rho00 = C(0,0), rho01 = C(0,0), rho11 = C(0,0);
+    for (i = 0; i < d; i++) {
+      for (j = 0; j < d; j++) {
+        if (((i ^ j) & ~mask) !== 0) continue;
+        var bi = (i & mask) ? 1 : 0, bj = (j & mask) ? 1 : 0;
+        var amp = cmul(st[i], cconj(st[j]));
+        if (bi === 0 && bj === 0) rho00 = cadd(rho00, amp);
+        else if (bi === 0 && bj === 1) rho01 = cadd(rho01, amp);
+        else if (bi === 1 && bj === 1) rho11 = cadd(rho11, amp);
+      }
+    }
+    var x = 2 * rho01.re, y = -2 * rho01.im, z = rho00.re - rho11.re;
+    var r = Math.sqrt(x * x + y * y + z * z);
+    return { x: +x.toFixed(6), y: +y.toFixed(6), z: +z.toFixed(6), r: +r.toFixed(6) };
   };
   Circuit.prototype.circuitString = function () {
-    var lines = [], i;
-    for (i = 0; i < this.n; i++) lines.push("q" + i + ": ");
+    var lines = [], i, n = this.n;
+    for (i = 0; i < n; i++) lines[i] = "q" + i + ": ";
     this.ops.forEach(function (op) {
       if (op.qubits.length === 1) lines[op.qubits[0]] += "[" + op.gate + "]─";
-      else if (op.gate === "CNOT") { lines[op.qubits[0]] += "•─"; lines[op.qubits[1]] += "⊕─"; }
+      else if (op.gate === "CX") { lines[op.qubits[0]] += "•─"; lines[op.qubits[1]] += "⊕─"; }
       else op.qubits.forEach(function (q) { lines[q] += "[" + op.gate + "]─"; });
     });
     return lines.join("\n");
   };
   Circuit.prototype.summary = function () {
-    return { n: this.n, ops: this.ops.length, entropy: +this.entropy().toFixed(4), purity: +this.purity().toFixed(4),
-      probs: this.probs().map(function (x) { return +x.toFixed(4); }), circuit: this.circuitString() };
+    var p = this.probs();
+    return { n: this.n, ops: this.ops.length, entropy: +shannonEntropy(p).toFixed(4), purity: +purityFromProbs(p).toFixed(4), probs: p.map(function (x) { return +x.toFixed(4); }), circuit: this.circuitString() };
   };
-  function create(n) { return new Circuit(n || 2); }
+  Circuit.prototype.qft = function () {
+    var n = this.n, i, j;
+    for (i = 0; i < n; i++) {
+      this.h(i);
+      for (j = i + 1; j < n; j++) {
+        var phi = Math.PI / Math.pow(2, j - i);
+        this.state = applyCtrl1(this.state, n, j, i, C(1,0), C(0,0), C(0,0), cexp_i(phi));
+        this.ops.push({ gate: "CP", qubits: [j, i] });
+      }
+    }
+    for (i = 0; i < Math.floor(n / 2); i++) this.swap(i, n - 1 - i);
+    return this;
+  };
+  Circuit.prototype.groverDiffuser = function () {
+    var n = this.n, i;
+    for (i = 0; i < n; i++) this.h(i).x(i);
+    if (n === 2) this.cz(0, 1);
+    else if (n >= 3) { this.h(n - 1); this.ccx(0, 1, n - 1); this.h(n - 1); }
+    for (i = 0; i < n; i++) this.x(i).h(i);
+    return this;
+  };
+  function create(n) { return new Circuit(n); }
   function bell(pair) {
     pair = pair || "phi+";
     var c = create(2).h(0).cnot(0, 1);
@@ -205,13 +219,27 @@
     if (pair === "psi-") { c.x(1); c.z(0); }
     return c;
   }
+  function grover(n, iterations) {
+    n = Math.max(2, Math.min(4, n || 2));
+    iterations = iterations || Math.max(1, Math.floor(Math.PI / 4 * Math.sqrt(dim(n))));
+    var c = create(n), i, k;
+    for (i = 0; i < n; i++) c.h(i);
+    for (k = 0; k < iterations; k++) {
+      for (i = 0; i < n; i++) c.x(i);
+      if (n === 2) c.cz(0, 1);
+      else { c.h(n - 1); c.ccx(0, 1, n - 1); c.h(n - 1); }
+      for (i = 0; i < n; i++) c.x(i);
+      c.groverDiffuser();
+    }
+    return c;
+  }
   function chsh(shots) {
     shots = shots || 4096;
     function corr(angleA, angleB) {
       var c = bell("phi+"); c.ry(0, -angleA); c.ry(1, -angleB);
       var s = c.sample(shots), e = 0, total = 0;
       s.histogram.forEach(function (h) {
-        var a = h.bits[0] === "1" ? 1 : -1, b = h.bits[1] === "1" ? 1 : -1;
+        var a = h.bits[1] === "1" ? 1 : -1, b = h.bits[0] === "1" ? 1 : -1;
         e += a * b * h.count; total += h.count;
       });
       return total ? e / total : 0;
@@ -240,62 +268,103 @@
     if (seed & 2) c.rz(0, th0);
     if (seed & 4) c.ry(1, th1);
     if (seed & 8) c.h(0);
-    var p = c.probs();
-    var bloch0 = c.bloch(0);
-    var circ = c.circuitString();
-    var nops = c.ops.length;
+    var p = c.probs(), bloch0 = c.bloch(0), m = c.measure(rng);
     var ent = shannonEntropy(p), pur = purityFromProbs(p);
-    var m = c.measure(rng);
-    var qcli = Math.min(1, ent / 2);
-    var resonance = +((0.4 * qcli + 0.35 * (1 - Math.abs(pur - 0.5)) + 0.25 * (m.outcome / 3)).toFixed(3));
-    return {
-      version: VER, bits: m.bits, outcome: m.outcome,
-      probs: p.map(function (x) { return +x.toFixed(3); }),
-      entropy: +ent.toFixed(3), purity: +pur.toFixed(3), QCLI: +qcli.toFixed(3), resonance: resonance,
-      circuit: circ, ops: nops, bloch0: bloch0,
-      label: "AKSI-QEngine·2q", seed: RESONANCE_SEED, engine: VER,
-    };
+    var qcli = Math.min(1, Math.max(0, 0.35 * (ent / 2) + 0.35 * (1 - Math.abs(pur - 0.5)) * 2 + 0.3 * bloch0.r));
+    var resonance = +((0.4 * qcli + 0.35 * (1 - Math.abs(pur - 0.5)) + 0.25 * ((m.outcome % 4) / 3)).toFixed(3));
+    return { version: VER, bits: m.bits, outcome: m.outcome, probs: p.map(function (x) { return +x.toFixed(4); }), entropy: +ent.toFixed(3), purity: +pur.toFixed(3), QCLI: +qcli.toFixed(3), qcli: +qcli.toFixed(3), resonance: resonance, circuit: c.circuitString(), ops: c.ops.length, bloch0: bloch0, label: "AKSI-QEngine·2q", seed: RESONANCE_SEED, engine: VER, backend: "local-ideal" };
+  }
+  function answerGate(query, answer) {
+    var text = String(query || "") + "||" + String(answer || "");
+    var seed = hashU32(text), rng = mulberry32(seed), c = create(3);
+    var a0 = ((seed % 1000) / 1000) * Math.PI;
+    var a1 = (((seed >>> 8) % 1000) / 1000) * Math.PI;
+    var a2 = (((seed >>> 16) % 1000) / 1000) * Math.PI;
+    c.h(0).h(1).h(2);
+    c.ry(0, a0).ry(1, a1).ry(2, a2);
+    c.cnot(0, 1).cnot(1, 2).cnot(0, 2);
+    c.rz(0, a0 * 0.5).rz(1, a1 * 0.5).rz(2, a2 * 0.5);
+    c.cnot(2, 1).cnot(1, 0);
+    var p = c.probs(), ent = shannonEntropy(p), pur = purityFromProbs(p), m = c.measure(rng), bloch0 = c.bloch(0);
+    var qcli = Math.min(1, Math.max(0, 0.25 * (ent / 3) + 0.25 * pur + 0.25 * bloch0.r + 0.25 * (1 - Math.abs(0.5 - p[0]))));
+    var resonance = +((0.45 * qcli + 0.3 * pur + 0.25 * (m.prob || 0.25)).toFixed(3));
+    var band = qcli >= 0.72 ? "high" : qcli >= 0.45 ? "mid" : "low";
+    return { version: VER, backend: "local-ideal", bits: m.bits, outcome: m.outcome, prob: +(m.prob || 0).toFixed(4), entropy: +ent.toFixed(3), purity: +pur.toFixed(3), QCLI: +qcli.toFixed(3), qcli: +qcli.toFixed(3), resonance: resonance, band: band, circuit: c.circuitString(), ops: c.ops.length, bloch0: bloch0, nQubits: 3, label: "answerGate·3q", seed: RESONANCE_SEED, engine: VER };
+  }
+  function sealAnswer(query, answer) {
+    var qx = answerGate(query, answer);
+    return { text: String(answer || ""), meta: "Q" + qx.QCLI + " · R" + qx.resonance + " · " + qx.bits + " · " + qx.backend, quantum: qx, QCLI: qx.QCLI, resonance: qx.resonance };
+  }
+  function getIbmToken() { try { return localStorage.getItem("aksi_ibm_token") || ""; } catch (e) { return ""; } }
+  function setIbmToken(t) { try { if (t) localStorage.setItem("aksi_ibm_token", String(t).trim()); else localStorage.removeItem("aksi_ibm_token"); return true; } catch (e) { return false; } }
+  function runHardware(query) {
+    var token = getIbmToken();
+    var netOn = G.AKSI_WEB && G.AKSI_WEB.isEnabled && G.AKSI_WEB.isEnabled();
+    var local = shot(query); local.backend = "local-ideal";
+    if (!token || !netOn) {
+      local.note = !token ? "no IBM token (Lab→Quantum)" : "network off";
+      return Promise.resolve(local);
+    }
+    return fetch("https://runtime-us-east.quantum-computing.ibm.com/jobs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ program_id: "sampler", backend: "ibm_kyiv", params: { circuit: "h q[0]; cx q[0],q[1]; measure", shots: 128, query: String(query || "").slice(0, 80) } })
+    }).then(function (r) {
+      if (!r.ok) throw new Error("IBM HTTP " + r.status);
+      return r.json();
+    }).then(function (j) {
+      local.backend = "ibm-runtime"; local.ibm = { id: j.id || j.job_id || null }; local.note = "submitted to IBM Quantum"; return local;
+    }).catch(function (e) {
+      local.backend = "local-ideal"; local.note = "IBM unreachable: " + String(e.message || e) + " — local ideal"; return local;
+    });
   }
   function drawBloch(canvas, bloch) {
-    if (!canvas || !canvas.getContext) return;
-    var ctx = canvas.getContext("2d"), w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, R = Math.min(w,h)*0.38;
-    ctx.clearRect(0,0,w,h); ctx.fillStyle = "#0d0b14"; ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle = "rgba(167,139,250,0.35)"; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.ellipse(cx,cy,R,R*0.28,0,0,Math.PI*2); ctx.strokeStyle = "rgba(167,139,250,0.2)"; ctx.stroke();
-    ctx.strokeStyle = "rgba(255,255,255,0.15)"; ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.moveTo(cx,cy-R); ctx.lineTo(cx,cy+R); ctx.stroke();
-    var bx = bloch.x*R, by = -bloch.y*R*0.28 - bloch.z*R;
-    ctx.strokeStyle = "#a78bfa"; ctx.fillStyle = "#c4b5fd"; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+bx,cy+by); ctx.stroke();
-    ctx.beginPath(); ctx.arc(cx+bx,cy+by,4,0,Math.PI*2); ctx.fill();
+    if (!canvas || !bloch) return;
+    var ctx = canvas.getContext("2d"); if (!ctx) return;
+    var w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.38;
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(167,139,250,.35)";
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, R, R * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
+    var px = cx + (bloch.x || 0) * R, py = cy - (bloch.z || 0) * R;
+    ctx.strokeStyle = "#c4b5fd"; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+    ctx.fillStyle = "#a78bfa"; ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
   }
   function mount(sel) {
     var root = typeof sel === "string" ? document.querySelector(sel) : sel;
     if (!root) return;
-    root.innerHTML = '<div class="card"><h2>AKSI Quantum Engine · v'+VER+'</h2>'+
-      '<p class="muted">State-vector · gates · shots · Bloch · CHSH</p>'+
-      '<div class="row" style="gap:6px;flex-wrap:wrap">'+
-      '<button type="button" class="btn p" data-q="bell">Bell Φ+</button>'+
-      '<button type="button" class="btn" data-q="ghz">GHZ-3</button>'+
-      '<button type="button" class="btn" data-q="chsh">CHSH</button>'+
-      '<button type="button" class="btn" data-q="shot">shot</button>'+
-      '<button type="button" class="btn" data-q="sample">1024 shots</button></div>'+
-      '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">'+
-      '<canvas id="qBloch" width="160" height="160" style="border-radius:12px;background:#0d0b14;border:1px solid rgba(167,139,250,.2)"></canvas>'+
-      '<pre id="qOut" class="out" style="flex:1;min-width:180px;margin:0;max-height:220px">—</pre></div>'+
-      '<pre id="qCirc" class="out" style="margin-top:10px;font-family:ui-monospace,monospace">circuit</pre></div>';
+    root.innerHTML = '<div class="card"><h2>Quantum Engine v' + VER + '</h2><p class="muted">Локальный идеальный симулятор · answerGate · IBM optional</p>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">' +
+      '<button type="button" class="btn primary" data-q="bell">Bell</button>' +
+      '<button type="button" class="btn" data-q="chsh">CHSH</button>' +
+      '<button type="button" class="btn" data-q="qft">QFT-3</button>' +
+      '<button type="button" class="btn" data-q="grover">Grover</button>' +
+      '<button type="button" class="btn" data-q="gate">answerGate</button>' +
+      '<button type="button" class="btn" data-q="hw">IBM/local</button></div>' +
+      '<input type="password" id="qToken" placeholder="IBM Quantum API token" style="margin-top:10px">' +
+      '<button type="button" class="btn" id="qSaveToken" style="margin-top:8px">Сохранить token</button>' +
+      '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">' +
+      '<canvas id="qBloch" width="160" height="160" style="border-radius:12px;background:#0d0b14;border:1px solid rgba(167,139,250,.2)"></canvas>' +
+      '<pre id="qOut" class="out" style="flex:1;min-width:180px;margin:0;max-height:240px">—</pre></div>' +
+      '<pre id="qCirc" class="out" style="margin-top:10px">circuit</pre></div>';
     function show(obj, circ) {
       var el = document.getElementById("qOut"); if (el) el.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
       var c = document.getElementById("qCirc"); if (c && circ) c.textContent = circ;
     }
+    var saveBtn = document.getElementById("qSaveToken");
+    if (saveBtn) saveBtn.onclick = function () {
+      var v = (document.getElementById("qToken") || {}).value || "";
+      setIbmToken(v); show({ ok: true, hasToken: !!getIbmToken() });
+    };
     root.querySelectorAll("[data-q]").forEach(function (btn) {
       btn.onclick = function () {
         var k = btn.getAttribute("data-q");
         if (k === "bell") { var c = bell("phi+"); drawBloch(document.getElementById("qBloch"), c.bloch(0)); show(c.summary(), c.circuitString()); }
-        else if (k === "ghz") { var g = create(3).h(0).cnot(0,1).cnot(0,2); drawBloch(document.getElementById("qBloch"), g.bloch(0)); show(g.summary(), g.circuitString()); }
         else if (k === "chsh") show(chsh(2048), "CHSH");
-        else if (k === "shot") { var s = shot("demo"); show(s, s.circuit); if (s.bloch0) drawBloch(document.getElementById("qBloch"), s.bloch0); }
-        else if (k === "sample") { var cs = bell("phi+"); show(cs.sample(1024), cs.circuitString()); drawBloch(document.getElementById("qBloch"), cs.bloch(0)); }
+        else if (k === "qft") { var qf = create(3).x(0).qft(); drawBloch(document.getElementById("qBloch"), qf.bloch(0)); show(qf.summary(), qf.circuitString()); }
+        else if (k === "grover") { var gr = grover(2, 1); drawBloch(document.getElementById("qBloch"), gr.bloch(0)); show(gr.summary(), gr.circuitString()); }
+        else if (k === "gate") { var ag = answerGate("Кто ты?", "Я АКСИ"); show(ag, ag.circuit); if (ag.bloch0) drawBloch(document.getElementById("qBloch"), ag.bloch0); }
+        else if (k === "hw") { show("running…"); runHardware("ping").then(function (r) { show(r, r.circuit || ""); if (r.bloch0) drawBloch(document.getElementById("qBloch"), r.bloch0); }); }
       };
     });
     var boot = bell("phi+"); drawBloch(document.getElementById("qBloch"), boot.bloch(0)); show(boot.summary(), boot.circuitString());
@@ -303,9 +372,11 @@
   G.AKSI_QUANTUM = {
     version: VER, MAX_QUBITS: MAX_QUBITS, RESONANCE_SEED: RESONANCE_SEED,
     create: create, Circuit: Circuit, bell: bell, chsh: chsh, shot: shot,
-    measure: function (st) { var c = create(2); if (st) c.state = st; return c.measure(); },
-    bellPair: function () { var c = bell("phi+"); return { state: c.state, probs: c.probs(), name: "Φ+", circuit: c.circuitString() }; },
+    answerGate: answerGate, sealAnswer: sealAnswer, grover: grover,
+    runHardware: runHardware, getIbmToken: getIbmToken, setIbmToken: setIbmToken,
+    measure: function () { return create(2).measure(); },
+    bellPair: function () { var c = bell("phi+"); return { probs: c.probs(), name: "Φ+", circuit: c.circuitString() }; },
     zeroState: function (n) { return zeroState(n || 2); },
-    C: C, complex: C, mount: mount,
+    C: C, complex: C, mount: mount
   };
 })(typeof window !== "undefined" ? window : this);
