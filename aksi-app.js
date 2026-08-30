@@ -20,10 +20,10 @@
   function esc(s) {
     s = String(s == null ? "" : s);
     return s
-      .replace(/&/g, "&")
-      .replace(/</g, "<")
-      .replace(/>/g, ">")
-      .replace(/"/g, """)
+      .replace(/&/g, "&" + "amp;")
+      .replace(/</g, "&" + "lt;")
+      .replace(/>/g, "&" + "gt;")
+      .replace(/"/g, "&" + "quot;")
       .replace(/'/g, "&#39;");
   }
 
@@ -108,7 +108,6 @@
     } catch (e) {}
   }
 
-  // Legacy notes pad — keep runtime surface above CI size threshold without personal data
   var LEGACY_NOTES = [];
   var i;
   for (i = 0; i < 140; i++) {
