@@ -71,7 +71,8 @@
       algo: !!(window.AKSI_ALGORITHM && AKSI_ALGORITHM.evaluate),
       pq: !!(window.AKSI_PQ && AKSI_PQ.status),
       engine: !!(window.AKSI_LOCAL_ENGINE && AKSI_LOCAL_ENGINE.ask),
-      quantum: !!(window.AKSI_QUANTUM)
+      quantum: !!(window.AKSI_QUANTUM),
+      selfArch: !!(window.AKSI_SELF_ARCH && AKSI_SELF_ARCH.answer)
     };
   }
 
@@ -91,7 +92,7 @@
         ["ADIA", m.algo],
         ["PQ", m.pq],
         ["Engine", m.engine],
-        ["Quantum", m.quantum]
+        ["Self-Arch", m.selfArch]
       ].forEach(function (row) {
         var el = document.createElement("div");
         el.className = "stat";
@@ -123,6 +124,27 @@
       }
     }
 
+    if (window.AKSI_SELF_ARCH && typeof AKSI_SELF_ARCH.answer === "function") {
+      try {
+        var sa = AKSI_SELF_ARCH.answer(q);
+        if (sa && sa.text) {
+          return { text: sa.text, meta: sa.meta || "self-arch" };
+        }
+      } catch (e) {}
+    }
+
+    if (window.AKSIKnowledge && typeof AKSIKnowledge.search === "function") {
+      try {
+        var lowQ = q.toLowerCase();
+        if (/архитектур|pipeline|пайплайн|модул|протокол|живой разум|adia|eqs|как устроен|стек|границ|крипто|pq |did|trust/.test(lowQ)) {
+          var k = AKSIKnowledge.search(q);
+          if (k && k.body) {
+            return { text: k.title + "\n\n" + k.body, meta: "knowledge · product" };
+          }
+        }
+      } catch (e) {}
+    }
+
     if (window.AKSI_COMPOSE && typeof AKSI_COMPOSE.think === "function") {
       try {
         var c = AKSI_COMPOSE.think(q);
@@ -148,39 +170,42 @@
     }
 
     var low = q.toLowerCase();
-    if (/кто ты|who are you/i.test(low)) {
+    if (/кто ты|who are you|что ты такое/i.test(low)) {
+      if (window.AKSI_SELF_ARCH && AKSI_SELF_ARCH.overview) {
+        return { text: AKSI_SELF_ARCH.overview(), meta: "self-arch · overview" };
+      }
       return {
-        text: "Я АКСИ — локальный offline runtime. Composer + Neuro на устройстве, ADIA-метрики, hybrid crypto (ECDSA + optional ML-KEM). Без обязательного облака. Контакт: aksilove@internet.ru",
+        text: "Я АКСИ — локальный offline runtime. Composer + Neuro, ADIA, hybrid crypto. Контакт: aksilove@internet.ru",
         meta: "core"
       };
     }
     if (/без (сети|интернета)|offline|оффлайн/i.test(low)) {
       return {
-        text: "Да. Offline по умолчанию: Composer, Neuro, локальная память. Сеть не нужна для базовых ответов и обучения «запомни:».",
+        text: "Да. Offline по умолчанию: Composer, Neuro, локальная память. Сеть не нужна для базовых ответов и «запомни:».",
         meta: "core"
       };
     }
     if (/статус|status/i.test(low)) {
       var m = moduleMap();
       return {
-        text: "Статус модулей:\n• Composer: " + (m.compose ? "on" : "off") +
+        text: "Статус:\n• Composer: " + (m.compose ? "on" : "off") +
           "\n• Neuro: " + (m.neuro ? "on" : "off") +
           "\n• ADIA: " + (m.algo ? "on" : "off") +
           "\n• PQ: " + (m.pq ? "on" : "off") +
-          "\n• Engine: " + (m.engine ? "on" : "off") +
+          "\n• Self-Arch: " + (m.selfArch ? "on" : "off") +
           "\n• Память: " + loadMem().length,
         meta: "status"
       };
     }
     if (/adia|eqs|метрик/i.test(low)) {
       return {
-        text: "ADIA / Metrics Engine: EQS, QCLI, H_eff, Resonance, DIMAX — инженерные сигналы продукта. Integrity ledger = FNV-hash; криптоподпись = ECDSA / hybrid PQ.",
+        text: "ADIA / Metrics Engine: EQS, QCLI, H_eff — инженерные сигналы. Integrity = FNV-hash; подпись = ECDSA / hybrid PQ.",
         meta: "adia"
       };
     }
     if (/что умеешь|возможности|features/i.test(low)) {
       return {
-        text: "Умею: локальный чат (Composer/Neuro), обучение «запомни:», видимый pipeline Local AI, ADIA-метрики, hybrid PQ seal/open, память на устройстве, ссылки на MATRIX / Quantum / Proof.",
+        text: "Локальный чат, «запомни:», pipeline Local AI, ADIA, hybrid PQ, память, MATRIX / Protocol. Спроси «как устроена АКСИ».",
         meta: "core"
       };
     }
@@ -202,7 +227,7 @@
     }
 
     return {
-      text: "Принято. Локальное ядро ответило кратко. Открой Local AI для полного pipeline или добавь знание: «запомни: факт».",
+      text: "Принято. Добавь знание «запомни: факт» или спроси про архитектуру: pipeline, ADIA, protocol.",
       meta: "fallback"
     };
   }
@@ -240,10 +265,9 @@
     if (m.compose) parts.push("Composer");
     if (m.neuro) parts.push("Neuro");
     if (m.engine) parts.push("Engine");
-    if (m.quantum) parts.push("Quantum");
     if (m.algo) parts.push("ADIA");
+    if (m.selfArch) parts.push("Self-Arch");
     el.textContent = (parts.length ? parts.join(" · ") : "базовое ядро") + " · сеть OFF";
-    var kn = $("kvNeuro"); if (kn) kn.textContent = parts[0] || "core";
   }
 
   function setPipe(active) {
@@ -290,10 +314,8 @@
     $("localAns").textContent = "Обработка…";
     $("localMeta").textContent = "";
     localTrace("input.received", { chars: q.length });
-
     try {
       localTrace("memory.retrieve", { items: loadMem().length });
-
       if (window.AKSI_LOCAL_ENGINE && typeof AKSI_LOCAL_ENGINE.ask === "function") {
         var unsub = AKSI_LOCAL_ENGINE.subscribe(function (e) {
           localTrace(e.type || "engine", e.data || {});
@@ -306,7 +328,6 @@
         if (r.metrics && (r.metrics.EQS != null || r.metrics.eqs != null)) {
           parts.push("EQS " + (r.metrics.EQS != null ? r.metrics.EQS : r.metrics.eqs));
         }
-        if (r.offline) parts.push("offline");
         $("localMeta").textContent = parts.join(" · ");
         localTrace("verification.complete", { source: r.source || "engine" });
       } else {
@@ -328,10 +349,10 @@
   function refreshPq() {
     var el = $("pqStatus"); if (!el) return;
     if (!window.AKSI_PQ || typeof AKSI_PQ.status !== "function") {
-      el.textContent = "AKSI_PQ не загружен. Обнови страницу (сброс кэша) или открой /aksi-pq.js";
+      el.textContent = "AKSI_PQ не загружен. Ctrl+F5 или /aksi-pq.js";
       return;
     }
-    el.textContent = "загрузка идентичности…";
+    el.textContent = "загрузка…";
     AKSI_PQ.status().then(function (s) {
       el.textContent = JSON.stringify(s, null, 2);
     }).catch(function (e) {
@@ -445,8 +466,8 @@
     if ($("thread") && !$("thread").children.length) {
       addMsg(
         "ai",
-        "Здравствуйте. АКСИ — локальный offline runtime.\nВкладки: Home · Чат · Local · Trust · Память · Lab.\nМожно сразу: «запомни: факт» или спросить «статус».\nКонтакт: aksilove@internet.ru",
-        "compose · offline"
+        "Здравствуйте. АКСИ — рабочий offline-прототип.\nВкладки: Home · Чат · Local · Trust · Память · Lab.\nСпросите: «как устроена АКСИ», «pipeline», «ADIA», «протокол».\nОбучение: «запомни: факт». Контакт: aksilove@internet.ru",
+        "self-arch · boot"
       );
     }
 
