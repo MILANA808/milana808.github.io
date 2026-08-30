@@ -13,12 +13,12 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Required runtime files
         run: |
           set -euo pipefail
-          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js local-ai/index.html local-ai/engine.js local-ai/sw.js aksi-webllm.js; do
+          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
           echo "core files OK"
@@ -48,8 +48,8 @@ jobs:
           from pathlib import Path
           manifest=json.loads(Path('local-ai/manifest.json').read_text(encoding='utf-8'))
           assert manifest.get('start_url') == '/local-ai/'
-          html=Path('local-ai/index.html').read_text(encoding='utf-8')
-          for needle in ('AKSI_LOCAL_ENGINE','aksi-webllm.js','engine.js','execution trace','remote: OFF'):
+          html=Path('local-ai/index.html').read_text(encoding='utf-8').lower()
+          for needle in ('aksi_local_engine','aksi-webllm.js','engine.js','execution trace','remote: off'):
               assert needle in html, needle
           engine=Path('local-ai/engine.js').read_text(encoding='utf-8')
           for needle in ('memory.retrieve','inference.start','inference.complete','offline-kernel','allowLocalServer'):
