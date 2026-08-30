@@ -1,129 +1,546 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ — offline-first AI runtime: Local Engine, MATRIX, ADIA, hybrid post-quantum crypto (P-256 + ML-KEM), DID. Контакт aksilove@internet.ru">
+<meta name="color-scheme" content="light">
+<meta name="description" content="АКСИ — offline-first AI: Local Engine, MATRIX, ADIA, hybrid PQ crypto. Контакт aksilove@internet.ru">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://milana808.github.io/">
-<title>АКСИ — Local Intelligence Platform</title>
+<link rel="manifest" href="/manifest.json">
+<title>АКСИ — Local Intelligence</title>
 <style>
-:root{--bg:#efe5d2;--s:#fbf7ef;--s2:#e7dbc6;--ink:#28231d;--muted:#756b5d;--line:#d5c7b0;--a:#705038;--a2:#a27b57;--ok:#356b4a;--r:20px;--sh:0 18px 50px rgba(67,48,31,.11)}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 8% 0,#fffaf0,transparent 34%),var(--bg);color:var(--ink);font:15px/1.55 system-ui,sans-serif}
-a{color:inherit;text-decoration:none}.shell{max-width:1320px;margin:auto;padding:18px}
-.nav{position:sticky;top:10px;z-index:30;display:flex;align-items:center;gap:13px;padding:11px 14px;background:rgba(251,247,239,.9);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(18px);box-shadow:var(--sh)}
-.mark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--a);color:#fff;font-weight:900}
-.brand{flex:1}.brand b{font-size:18px}.brand span{display:block;color:var(--muted);font-size:11px}
-.pill{padding:7px 10px;border:1px solid var(--line);border-radius:999px;font-size:11px;font-weight:800;background:var(--s2)}
-.ok{color:var(--ok);background:#e6efe7}
-.hero{margin-top:24px;display:grid;grid-template-columns:1.45fr .75fr;gap:16px}
-.panel,.card{background:rgba(251,247,239,.94);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
-.hero-main{padding:38px}.eyebrow{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--a);font-weight:900}
-.hero h1{font-size:clamp(36px,5.5vw,64px);line-height:1.02;letter-spacing:-.055em;margin:12px 0}
-.hero p{max-width:780px;color:var(--muted);font-size:17px}
-.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:23px}
-.btn{min-height:46px;padding:0 17px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:13px;background:var(--s);font-weight:850}
-.primary{background:var(--a);border-color:var(--a);color:#fff}
-.side{padding:22px}.side h2{margin:0 0 15px;font-size:17px}
-.metric{margin:14px 0}.metric label{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
-.bar{height:8px;margin-top:6px;background:#ddd0bb;border-radius:99px;overflow:hidden}.bar i{display:block;height:100%;background:var(--a2);border-radius:inherit}
-.section{margin-top:28px}.head{margin-bottom:12px}.head h2{margin:0;font-size:25px}.head p{margin:0;color:var(--muted);font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.card{padding:18px;min-height:130px}.card:hover{transform:translateY(-2px)}.icon{font-size:22px;color:var(--a)}.card h3{margin:9px 0 5px;font-size:16px}.card p{margin:0;color:var(--muted);font-size:13px}
-.link{display:inline-block;margin-top:13px;color:var(--a);font-weight:850;font-size:12px}
-.infra{display:grid;grid-template-columns:1fr 1fr;gap:12px}.list{display:grid;gap:8px}
-.item{display:flex;gap:9px;align-items:center;padding:11px 12px;border:1px solid var(--line);background:var(--s);border-radius:13px}
-.item span{margin-left:auto;color:var(--muted);font:11px ui-monospace,monospace}
-.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
-.mini{padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--s)}.mini b{display:block;font-size:20px}.mini span{color:var(--muted);font-size:11px}
-.trace{background:#29241f;color:#eee5d7;border-radius:16px;padding:15px;min-height:160px;font:12px/1.6 ui-monospace,monospace;overflow:auto}
-.trace div{padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08)}.trace b{color:#d9b18b}
-.footer{margin:30px 0 10px;padding:20px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
-@media(max-width:900px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.infra{grid-template-columns:1fr}.metrics-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:560px){.shell{padding:10px}.pill{display:none}.grid{grid-template-columns:1fr}}
+:root{
+  --bg:#efe5d2;--s:#fbf7ef;--s2:#e7dbc6;--ink:#28231d;--muted:#756b5d;--line:#d5c7b0;
+  --a:#705038;--a2:#a27b57;--ok:#356b4a;--warn:#8b651f;--r:16px;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+  --bn:58px;--tap:48px;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;height:100dvh;overflow:hidden}
+body{
+  color:var(--ink);font:15px/1.45 var(--font);background:var(--bg);
+  display:flex;flex-direction:column;max-width:720px;margin:0 auto;
+  background-image:radial-gradient(ellipse 100% 40% at 50% -8%,#fffaf0,transparent 55%);
+  padding-top:var(--safe-t);
+}
+button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;outline:0}
+button{cursor:pointer}
+a{color:var(--a)}
+.top{
+  min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 14px;
+  border-bottom:1px solid var(--line);background:rgba(251,247,239,.92);
+  backdrop-filter:blur(14px);z-index:40;flex-shrink:0;
+}
+.logo{
+  width:36px;height:36px;border-radius:12px;flex-shrink:0;
+  background:var(--a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:14px;
+}
+.titles{flex:1;min-width:0}
+h1{font-size:16px;font-weight:800}
+.sub{font-size:11px;color:var(--muted);margin-top:1px}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;
+  font-size:11px;font-weight:700;border:1px solid var(--line);color:var(--muted);background:var(--s2);
+}
+.pill.on{color:var(--ok);border-color:#b9d4c0;background:#e6efe7}
+.stage{
+  flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;
+  padding:12px 14px calc(80px + var(--safe-b));
+}
+.panel{display:none}.panel.on{display:block;animation:fade .15s ease}
+@keyframes fade{from{opacity:.5}to{opacity:1}}
+.hero{
+  padding:18px 16px;border-radius:18px;margin-bottom:12px;
+  background:linear-gradient(160deg,rgba(162,123,87,.18),var(--s));
+  border:1px solid var(--line);
+}
+.hero .tag{color:var(--a);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.hero h2{font-size:22px;line-height:1.2;margin:8px 0 6px;font-weight:800}
+.hero p{font-size:14px;color:var(--muted);margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.btn{
+  min-height:var(--tap);padding:11px 15px;border-radius:14px;font-weight:700;font-size:13px;
+  border:1px solid var(--line);background:var(--s);color:var(--ink);
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn:active{transform:scale(.97)}
+.btn.p{background:var(--a);border-color:var(--a);color:#fff}
+.btn.block{width:100%}
+.card{
+  background:var(--s);border:1px solid var(--line);border-radius:16px;
+  padding:14px;margin-bottom:10px;
+}
+.card h3{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.kv .cell{background:var(--s2);border-radius:12px;padding:12px}
+.kv b{display:block;font-size:16px;color:var(--ok);font-weight:800}
+.kv span{font-size:10px;color:var(--muted);text-transform:uppercase}
+#thread{display:flex;flex-direction:column;gap:10px;padding-bottom:8px}
+.msg{display:flex}.msg.me{justify-content:flex-end}
+.bub{
+  max-width:88%;padding:12px 14px;border-radius:16px;
+  white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.45;
+}
+.msg.me .bub{background:var(--a);color:#fff;border-bottom-right-radius:6px}
+.msg.ai .bub{background:var(--s);border:1px solid var(--line);border-bottom-left-radius:6px}
+.meta{font-size:11px;color:var(--muted);margin-top:5px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{
+  min-height:40px;padding:8px 14px;border-radius:999px;
+  border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600;
+}
+.composer{
+  position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));
+  max-width:720px;margin:0 auto;z-index:55;
+  padding:8px 12px 8px;
+  display:flex;gap:8px;align-items:flex-end;
+  background:linear-gradient(to top,var(--bg) 70%,transparent);
+}
+.composer input{
+  flex:1;min-height:var(--tap);padding:12px 16px;border-radius:16px;
+  border:1px solid var(--line);background:var(--s);font-size:16px;color:var(--ink);
+}
+.composer input::placeholder{color:var(--muted)}
+.composer .send{
+  width:var(--tap);height:var(--tap);border-radius:16px;flex-shrink:0;
+  background:var(--a);color:#fff;font-size:18px;font-weight:800;
+}
+.bnav{
+  position:fixed;left:0;right:0;bottom:0;z-index:60;
+  max-width:720px;margin:0 auto;
+  height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);
+  display:flex;background:rgba(251,247,239,.97);
+  border-top:1px solid var(--line);backdrop-filter:blur(12px);
+}
+.bnav button{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;color:var(--muted);font-size:10px;font-weight:700;min-height:var(--bn);
+  padding:6px 2px 4px;
+}
+.bnav button .ic{font-size:18px;line-height:1}
+.bnav button.on{color:var(--a)}
+pre.out{
+  background:var(--s2);border-radius:12px;padding:12px;font-size:12px;
+  overflow:auto;white-space:pre-wrap;margin-top:8px;max-height:220px;color:var(--muted);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+.trace{height:280px;overflow:auto;background:#29241f;color:#eee5d7;border-radius:12px;padding:8px;margin-top:8px}
+.event{padding:7px;border-bottom:1px solid rgba(255,255,255,.08);font:12px ui-monospace,monospace}
+.event b{color:#d9b18b}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pipeline{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.step{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-size:11px;font-weight:700;color:var(--muted)}
+.step.on{background:var(--a);color:#fff;border-color:var(--a)}
+.step.done{background:#e6efe7;color:var(--ok);border-color:#b9d4c0}
+textarea.field,input.field{
+  width:100%;min-height:var(--tap);padding:12px 14px;border-radius:14px;
+  border:1px solid var(--line);background:var(--s);font-size:15px;margin:6px 0;
+}
+textarea.field{min-height:72px;resize:vertical}
+@media(max-width:380px){.hero h2{font-size:19px}.lab-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="shell">
-<header class="nav"><div class="mark">A</div><div class="brand"><b>АКСИ</b><span>Local Intelligence Platform</span></div>
-<span class="pill ok">● Local runtime</span><span class="pill">Privacy-first</span></header>
-<main>
-<section class="hero">
-<div class="panel hero-main">
-<div class="eyebrow">LOCAL-FIRST AI PLATFORM</div>
-<h1>Интеллект.<br>Локально.<br>Прозрачно.</h1>
-<p>Единый offline runtime: ядро → память → inference → квантовая печать → метрики → проверка. Hybrid crypto (P-256 + ML-KEM). Облако выключено по умолчанию.</p>
-<div class="actions">
-<a class="btn primary" href="/local-ai/">Запустить Local AI</a>
-<a class="btn" href="/matrix/">MATRIX · квант · Trust</a>
-<a class="btn" href="/chat/">Chat</a>
+<header class="top">
+  <div class="logo">A</div>
+  <div class="titles"><h1>АКСИ</h1><div class="sub">offline · local · без VPN</div></div>
+  <span class="pill on" id="modePill">local</span>
+</header>
+
+<div class="stage" id="stage">
+  <section class="panel on" id="tab-home">
+    <div class="hero">
+      <div class="tag">Local Intelligence Platform</div>
+      <h2>Единый offline AI-runtime</h2>
+      <p>Ядро → память → inference → квант → метрики → Trust. Всё на одной странице. Контакт: aksilove@internet.ru</p>
+      <div class="row">
+        <button type="button" class="btn p" data-tab="chat">Чат</button>
+        <button type="button" class="btn" data-tab="local">Local AI</button>
+        <button type="button" class="btn" data-tab="trust">Trust · PQ</button>
+      </div>
+      <div class="kv">
+        <div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div>
+        <div class="cell"><b id="kvMem">0</b><span>память</span></div>
+        <div class="cell"><b id="kvEqs">—</b><span>EQS</span></div>
+        <div class="cell"><b id="kvMode">offline</b><span>режим</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Контуры</h3>
+      <div class="lab-grid">
+        <button type="button" class="btn" data-tab="chat">💬 Чат</button>
+        <button type="button" class="btn" data-tab="local">◉ Local AI</button>
+        <button type="button" class="btn" data-tab="trust">🔐 Trust PQ</button>
+        <button type="button" class="btn" data-tab="mem">🧠 Память</button>
+        <button type="button" class="btn" data-tab="lab">⬡ Lab</button>
+        <a class="btn" href="/matrix/" style="text-decoration:none;display:flex;align-items:center;justify-content:center">✦ MATRIX</a>
+      </div>
+    </div>
+    <div class="card">
+      <p class="muted">Метрики — инженерные сигналы, не AGI. Integrity = FNV-hash. Криптоподпись = ECDSA + optional ML-KEM.<br>
+      <b>aksilove@internet.ru</b> · @AKSILOVE</p>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-chat">
+    <div id="thread"></div>
+    <div class="chips">
+      <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
+      <button type="button" class="chip" data-ask="Работает ли без интернета?">Без сети?</button>
+      <button type="button" class="chip" data-ask="статус">Статус</button>
+      <button type="button" class="chip" data-ask="что такое ADIA">ADIA</button>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-local">
+    <div class="pipeline" id="pipe">
+      <span class="step" data-s="input">1. Ввод</span>
+      <span class="step" data-s="memory">2. Память</span>
+      <span class="step" data-s="kernel">3. Ядро</span>
+      <span class="step" data-s="quantum">4. Квант</span>
+      <span class="step" data-s="metrics">5. Метрики</span>
+      <span class="step" data-s="verify">6. Проверка</span>
+    </div>
+    <div class="card">
+      <h3>Локальный inference</h3>
+      <p class="muted" id="localCaps">Composer / Neuro / WebLLM · сеть OFF</p>
+      <textarea class="field" id="localQ" placeholder="Запрос… или «запомни: факт»"></textarea>
+      <div class="row">
+        <button type="button" class="btn p" id="localAsk">Обработать</button>
+        <button type="button" class="btn" id="localRemember">В память</button>
+      </div>
+      <div class="bub" id="localAns" style="margin-top:10px;background:var(--s2);border:1px solid var(--line)">Ответ появится здесь.</div>
+      <div class="meta" id="localMeta"></div>
+    </div>
+    <div class="card">
+      <h3>Execution trace</h3>
+      <div class="trace" id="localTrace"><div class="event"><b>BOOT</b> · Local surface ready</div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-trust">
+    <div class="card">
+      <h3>Hybrid Crypto · AKSI-PQ</h3>
+      <p class="muted">Web Crypto ECDH/ECDSA P-256 + AES-256-GCM. Post-quantum: ML-KEM-768 hybrid (если lib загружена). DID локальный.</p>
+      <pre class="out" id="pqStatus">…</pre>
+      <div class="row" style="margin-top:10px">
+        <button type="button" class="btn p" id="pqBoot">Идентичность</button>
+        <button type="button" class="btn" id="pqExport">Экспорт pub</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Seal / Open</h3>
+      <textarea class="field" id="pqPeer" placeholder="public pack получателя (JSON)"></textarea>
+      <textarea class="field" id="pqMsg" placeholder="Текст для шифрования…"></textarea>
+      <div class="row">
+        <button type="button" class="btn p" id="pqSeal">Seal</button>
+        <button type="button" class="btn" id="pqOpen">Open</button>
+      </div>
+      <textarea class="field" id="pqEnv" placeholder="envelope JSON" style="min-height:100px"></textarea>
+    </div>
+    <div class="card">
+      <h3>Честность</h3>
+      <p class="muted">Integrity ledger = FNV-hash (телеметрия). Настоящая подпись = ECDSA. PQ = hybrid ML-KEM, не «квантовый компьютер».</p>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-mem">
+    <div class="card">
+      <h3>Память · <span id="memN">0</span></h3>
+      <input class="field" id="teachIn" placeholder="факт… (или в чате: запомни: …)" autocomplete="off">
+      <button type="button" class="btn p block" id="btnTeach" style="margin-top:8px">Запомнить</button>
+      <div id="memList" style="margin-top:12px"></div>
+      <button type="button" class="btn block" id="btnWipe" style="margin-top:10px">Очистить память</button>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-lab">
+    <div class="card">
+      <h3>Лаборатория</h3>
+      <div class="lab-grid">
+        <a class="btn" href="/matrix/" style="text-decoration:none;text-align:center">MATRIX</a>
+        <a class="btn" href="/quantum/" style="text-decoration:none;text-align:center">Quantum</a>
+        <a class="btn" href="/proof/" style="text-decoration:none;text-align:center">Proof</a>
+        <a class="btn" href="/algorithm.html" style="text-decoration:none;text-align:center">ADIA</a>
+        <a class="btn" href="/local-ai/" style="text-decoration:none;text-align:center">Local AI full</a>
+        <a class="btn" href="/offer/" style="text-decoration:none;text-align:center">Protocol</a>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Метрики (demo)</h3>
+      <pre class="out" id="labMetrics">—</pre>
+      <button type="button" class="btn p" id="btnMetrics">Обновить EQS</button>
+    </div>
+    <div class="card">
+      <p class="muted">Контакт: <b>aksilove@internet.ru</b> · @AKSILOVE<br>Без цен на публичных страницах.</p>
+    </div>
+  </section>
 </div>
+
+<div class="composer" id="composer">
+  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000">
+  <button type="button" class="send" id="send" aria-label="Отправить">↑</button>
 </div>
-<aside class="panel side"><h2>Runtime status</h2>
-<div class="metric"><label><span>Local-first</span><b>ON</b></label><div class="bar"><i style="width:100%"></i></div></div>
-<div class="metric"><label><span>Remote fallback</span><b>OFF</b></label><div class="bar"><i style="width:0%"></i></div></div>
-<div class="metric"><label><span>Proof ledger</span><b id="ledger">…</b></label><div class="bar"><i id="lb" style="width:40%"></i></div></div>
-<div class="metric"><label><span>Metrics engine</span><b id="metricsState">…</b></label><div class="bar"><i id="mb" style="width:40%"></i></div></div>
-</aside>
-</section>
-<section class="section"><div class="head"><h2>Как обрабатывается запрос</h2><p>Прозрачный pipeline — не «чёрный ящик».</p></div>
-<div class="infra">
-<div class="card"><h3>Cognitive pipeline</h3><div class="list">
-<div class="item"><b>1. Input → Context</b><span>local</span></div>
-<div class="item"><b>2. Memory → Retrieval</b><span>IndexedDB</span></div>
-<div class="item"><b>3. Kernel / LLM</b><span>Compose·Neuro·WebGPU</span></div>
-<div class="item"><b>4. Quantum seal</b><span>answerGate</span></div>
-</div></div>
-<div class="card"><h3>Trust pipeline</h3><div class="list">
-<div class="item"><b>Metrics</b><span>EQS · QCLI</span></div>
-<div class="item"><b>Integrity</b><span>FNV-hash</span></div>
-<div class="item"><b>Identity</b><span>ECDSA/Ed25519</span></div>
-<div class="item"><b>PQ hybrid</b><span>ML-KEM-768</span></div>
-</div></div>
-</div></section>
-<section class="section"><div class="head"><h2>Метрики</h2><p>Инженерные сигналы (EQS · QCLI · H_eff · Resonance · DIMAX). Не доказательство истины, сознания или AGI. Integrity = FNV-hash; криптоподпись — ECDSA + optional ML-KEM.</p></div>
-<div class="metrics-grid">
-<div class="mini"><b id="eqs">—</b><span>EQS</span></div>
-<div class="mini"><b id="dimax">—</b><span>DIMAX</span></div>
-<div class="mini"><b id="dimax5">—</b><span>DIMAX-U v5</span></div>
-<div class="mini"><b id="res">—</b><span>Resonance</span></div>
-<div class="mini"><b>QCLI</b><span>квант</span></div>
-<div class="mini"><b>H_eff</b><span>энтропия</span></div>
-<div class="mini"><b>AKSI</b><span>A×I×S</span></div>
-<div class="mini"><b>PQ</b><span>hybrid</span></div>
-</div></section>
-<section class="section" id="modules"><div class="head"><h2>Платформа — всё на одном сайте</h2><p>Рабочие контуры, которые ты строила.</p></div>
-<div class="grid">
-<a class="card" href="/local-ai/"><div class="icon">◉</div><h3>Local AI</h3><p>Offline pipeline с видимым trace.</p><span class="link">Открыть →</span></a>
-<a class="card" href="/matrix/"><div class="icon">✦</div><h3>MATRIX</h3><p>Чат + квант + DID + RAG + Trust.</p><span class="link">Открыть →</span></a>
-<a class="card" href="/chat/"><div class="icon">◌</div><h3>Chat</h3><p>Диалог и контекст.</p><span class="link">Открыть →</span></a>
-<a class="card" href="/quantum/"><div class="icon">⚛</div><h3>Quantum</h3><p>Симулятор.</p><span class="link">Открыть →</span></a>
-<a class="card" href="/proof/"><div class="icon">✓</div><h3>Proof</h3><p>Доказательства.</p><span class="link">Открыть →</span></a>
-<a class="card" href="/matrix/"><div class="icon">🔐</div><h3>Trust · PQ</h3><p>ECDSA P-256 + ML-KEM hybrid · DID.</p><span class="link">MATRIX →</span></a>
-<a class="card" href="/offer/"><div class="icon">◇</div><h3>Protocol</h3><p>Decision Integrity · контакт.</p><span class="link">Открыть →</span></a>
-<a class="card" href="/algorithm.html"><div class="icon">ƒ</div><h3>ADIA</h3><p>Метрики.</p><span class="link">Открыть →</span></a>
-</div></section>
-<section class="section"><div class="head"><h2>Execution trace</h2><p>Boot платформы.</p></div>
-<div class="trace" id="trace"><div><b>BOOT</b> · platform initialized</div><div><b>POLICY</b> · local-first · remote OFF</div><div><b>CRYPTO</b> · Web Crypto ECDSA · optional ML-KEM</div><div><b>METRICS</b> · loading…</div></div>
-</section>
-</main>
-<footer class="footer">АКСИ · Local Intelligence · <b>aksilove@internet.ru</b> · @AKSILOVE · <a href="https://github.com/MILANA808/milana808.github.io">GitHub</a></footer>
-</div>
+
+<nav class="bnav" aria-label="Навигация">
+  <button type="button" class="on" data-tab="home"><span class="ic">✦</span>Home</button>
+  <button type="button" data-tab="chat"><span class="ic">💬</span>Чат</button>
+  <button type="button" data-tab="local"><span class="ic">◉</span>Local</button>
+  <button type="button" data-tab="trust"><span class="ic">🔐</span>Trust</button>
+  <button type="button" data-tab="mem"><span class="ic">🧠</span>Память</button>
+  <button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
+</nav>
+
 <script src="/aksi-algorithm.js"></script>
-<script src="/aksi-runtime.js"></script>
+<script src="/aksi-compose.js"></script>
+<script src="/aksi-neuro.js"></script>
+<script src="/aksi-quantum.js"></script>
+<script src="/aksi-pq.js"></script>
+<script src="/local-ai/engine.js"></script>
 <script>
-(function(){var t=document.getElementById('trace');function add(a,b){var d=document.createElement('div'),x=document.createElement('b');x.textContent=a;d.append(x,document.createTextNode(' · '+b));t.appendChild(d)}
-try{if(window.AKSI_ALGORITHM){var s=window.AKSI_ALGORITHM.status?window.AKSI_ALGORITHM.status():{};
-document.getElementById('metricsState').textContent='READY';document.getElementById('mb').style.width='100%';
-document.getElementById('ledger').textContent=s.ledgerOk?'OK':'—';document.getElementById('lb').style.width=s.ledgerOk?'100%':'50%';
-var demo=window.AKSI_ALGORITHM.evaluate('platform status','AKSI ready',{offline:true,source:'local',seal:false});var m=demo.metrics||demo;
-if(document.getElementById('eqs'))document.getElementById('eqs').textContent=m.EQS!=null?m.EQS:(m.eqs!=null?m.eqs:'—');
-if(document.getElementById('dimax'))document.getElementById('dimax').textContent=m.DIMAX!=null?m.DIMAX:'—';
-if(document.getElementById('dimax5'))document.getElementById('dimax5').textContent=m.DIMAX_U5!=null?m.DIMAX_U5:'—';
-if(document.getElementById('res'))document.getElementById('res').textContent=m.resonance!=null?m.resonance:'—';
-add('METRICS','EQS '+(m.EQS||m.eqs||'—')+' · READY')}else add('METRICS','engine not loaded');
-if(window.AKSI_RUNTIME)add('RUNTIME',(window.AKSI_RUNTIME.version||'')+' · integrity')}catch(e){add('ERROR',e.message)}})();
+(function(){
+"use strict";
+var MEM_KEY="aksi_whole_mem_v3";
+var MAIN={home:1,chat:1,local:1,trust:1,mem:1,lab:1};
+
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/[&<>\"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]})}
+
+function goTab(t){
+  if(!t||!MAIN[t])return;
+  document.querySelectorAll(".bnav [data-tab]").forEach(function(b){
+    b.classList.toggle("on",b.getAttribute("data-tab")===t);
+  });
+  document.querySelectorAll(".stage .panel").forEach(function(p){
+    p.classList.toggle("on",p.id==="tab-"+t);
+  });
+  var c=$("composer");
+  if(c)c.style.display=(t==="chat")?"flex":"none";
+  var s=$("stage");if(s)s.scrollTop=0;
+  if(t==="trust")refreshPq();
+  if(t==="mem")renderMem();
+  if(t==="local")refreshLocalCaps();
+}
+
+function loadMem(){
+  try{var a=JSON.parse(localStorage.getItem(MEM_KEY)||"[]");return Array.isArray(a)?a:[]}catch(e){return[]}
+}
+function saveMem(a){try{localStorage.setItem(MEM_KEY,JSON.stringify(a.slice(-200)))}catch(e){}}
+function renderMem(){
+  var a=loadMem();
+  var n=$("memN");if(n)n.textContent=String(a.length);
+  var kv=$("kvMem");if(kv)kv.textContent=String(a.length);
+  var list=$("memList");if(!list)return;
+  list.innerHTML="";
+  a.slice().reverse().slice(0,40).forEach(function(item){
+    var d=document.createElement("div");
+    d.className="muted";
+    d.style.cssText="padding:8px 0;border-bottom:1px solid var(--line)";
+    d.textContent=typeof item==="string"?item:(item.text||JSON.stringify(item));
+    list.appendChild(d);
+  });
+}
+
+function addMsg(role,text,meta){
+  var th=$("thread");if(!th)return;
+  var d=document.createElement("div");
+  d.className="msg "+(role==="me"?"me":"ai");
+  d.innerHTML='<div class="bub">'+esc(text)+(meta?'<div class="meta">'+esc(meta)+'</div>':'')+'</div>';
+  th.appendChild(d);
+  th.scrollTop=th.scrollHeight;
+}
+
+function offlineAnswer(q){
+  q=String(q||"").trim();
+  var low=q.toLowerCase();
+  if(/^запомни[:：\s]/i.test(q)){
+    var fact=q.replace(/^запомни[:：\s]*/i,"").trim();
+    if(fact){var a=loadMem();a.push({text:fact,ts:Date.now()});saveMem(a);renderMem();return{text:"Запомнила: "+fact,meta:"memory"}}
+  }
+  if(window.AKSI_COMPOSE&&typeof AKSI_COMPOSE.think==="function"){
+    try{var c=AKSI_COMPOSE.think(q);if(c&&c.text)return{text:c.text,meta:"compose"}}catch(e){}
+  }
+  if(window.AKSI_NEURO&&typeof AKSI_NEURO.think==="function"){
+    try{var n=AKSI_NEURO.think(q);if(n&&n.text)return{text:n.text,meta:"neuro"}}catch(e){}
+  }
+  if(/кто ты|who are you/i.test(low))
+    return{text:"Я АКСИ — локальный offline AI-runtime. Neuro/Composer на устройстве, ADIA-метрики, hybrid crypto (ECDSA + optional ML-KEM). Контакт: aksilove@internet.ru",meta:"core"};
+  if(/без (сети|интернета)|offline/i.test(low))
+    return{text:"Да. Offline по умолчанию: Composer + Neuro + память IndexedDB/localStorage. Сеть не нужна для базовых ответов.",meta:"core"};
+  if(/статус|status/i.test(low)){
+    var st={compose:!!(window.AKSI_COMPOSE),neuro:!!(window.AKSI_NEURO),pq:!!(window.AKSI_PQ),algo:!!(window.AKSI_ALGORITHM),mem:loadMem().length};
+    return{text:"Статус: compose="+st.compose+" neuro="+st.neuro+" pq="+st.pq+" algorithm="+st.algo+" mem="+st.mem,meta:"status"};
+  }
+  if(/adia|eqs|метрик/i.test(low))
+    return{text:"ADIA / Metrics Engine: EQS, QCLI, H_eff, Resonance, DIMAX — инженерные сигналы. Не доказательство AGI. Integrity ledger = FNV-hash; подпись = ECDSA.",meta:"adia"};
+  return{text:"Принято. Локальное ядро без загруженной LLM отвечает кратко. Открой вкладку Local AI или MATRIX для полного pipeline. Можно «запомни: факт».",meta:"fallback"};
+}
+
+function askChat(q){
+  if(!q)return;
+  addMsg("me",q);
+  var r=offlineAnswer(q);
+  var meta=r.meta||"local";
+  try{
+    if(window.AKSI_ALGORITHM&&AKSI_ALGORITHM.evaluate){
+      var m=AKSI_ALGORITHM.evaluate(q,r.text,{offline:true,source:meta,seal:false});
+      var met=m.metrics||m;
+      if(met.EQS!=null||met.eqs!=null)meta+=" · EQS "+(met.EQS!=null?met.EQS:met.eqs);
+      var ke=$("kvEqs");if(ke&&(met.EQS!=null||met.eqs!=null))ke.textContent=String(met.EQS!=null?met.EQS:met.eqs);
+    }
+  }catch(e){}
+  addMsg("ai",r.text,meta);
+}
+
+function refreshLocalCaps(){
+  var el=$("localCaps");
+  if(!el)return;
+  var parts=[];
+  if(window.AKSI_COMPOSE)parts.push("Composer");
+  if(window.AKSI_NEURO)parts.push("Neuro");
+  if(window.AKSI_LOCAL_ENGINE)parts.push("Engine v3");
+  if(window.AKSI_QUANTUM)parts.push("Quantum");
+  el.textContent=(parts.join(" · ")||"базовое ядро")+" · сеть OFF";
+  var kn=$("kvNeuro");if(kn)kn.textContent=parts[0]||"core";
+}
+
+function setPipe(active){
+  var map={"input.received":"input","memory.retrieve":"memory","context.built":"memory","kernel.compose":"kernel","kernel.neuro":"kernel","kernel.offline":"kernel","inference.start":"kernel","inference.complete":"kernel","quantum.seal":"quantum","metrics.eval":"metrics","verification.complete":"verify"};
+  var order=["input","memory","kernel","quantum","metrics","verify"];
+  var cur=map[active];var idx=order.indexOf(cur);
+  document.querySelectorAll("#pipe .step").forEach(function(el){
+    var s=el.getAttribute("data-s");var i=order.indexOf(s);
+    el.classList.remove("on","done");
+    if(i<idx)el.classList.add("done");
+    if(i===idx)el.classList.add("on");
+  });
+}
+
+function localTrace(type,data){
+  setPipe(type);
+  var t=$("localTrace");if(!t)return;
+  var d=document.createElement("div");
+  d.className="event";
+  d.innerHTML="<b>"+esc(type)+"</b> · "+esc(typeof data==="string"?data:JSON.stringify(data||{}).slice(0,120));
+  t.prepend(d);
+}
+
+async function runLocal(){
+  var q=($("localQ")&&$("localQ").value||"").trim();
+  if(!q)return;
+  $("localAns").textContent="Обработка…";
+  $("localMeta").textContent="";
+  localTrace("input.received",{chars:q.length});
+  try{
+    if(window.AKSI_LOCAL_ENGINE&&AKSI_LOCAL_ENGINE.ask){
+      var unsub=AKSI_LOCAL_ENGINE.subscribe(function(e){localTrace(e.type,e.data)});
+      var r=await AKSI_LOCAL_ENGINE.ask(q,{useMemory:true});
+      unsub();
+      $("localAns").textContent=r.text||"—";
+      var parts=["источник: "+(r.source||"—")];
+      if(r.latencyMs!=null)parts.push(r.latencyMs+" мс");
+      if(r.metrics&&(r.metrics.EQS!=null||r.metrics.eqs!=null))parts.push("EQS "+(r.metrics.EQS!=null?r.metrics.EQS:r.metrics.eqs));
+      if(r.offline)parts.push("offline");
+      $("localMeta").textContent=parts.join(" · ");
+    }else{
+      localTrace("kernel.offline",{});
+      var r2=offlineAnswer(q);
+      localTrace("verification.complete",{source:r2.meta});
+      $("localAns").textContent=r2.text;
+      $("localMeta").textContent=r2.meta+" · offline";
+    }
+  }catch(e){
+    $("localAns").textContent="Ошибка: "+(e.message||e);
+  }
+}
+
+function refreshPq(){
+  var el=$("pqStatus");if(!el)return;
+  if(!window.AKSI_PQ){el.textContent="AKSI_PQ не загружен. Ctrl+F5 или /aksi-pq.js";return}
+  AKSI_PQ.status().then(function(s){
+    el.textContent=JSON.stringify(s,null,2);
+  }).catch(function(e){el.textContent=String(e.message||e)});
+}
+
+function boot(){
+  document.addEventListener("click",function(e){
+    var t=e.target.closest&&e.target.closest("[data-tab]");
+    if(t){var id=t.getAttribute("data-tab");if(id)goTab(id)}
+    var ask=e.target.closest&&e.target.closest("[data-ask]");
+    if(ask){goTab("chat");askChat(ask.getAttribute("data-ask"))}
+  },true);
+
+  $("send")&&($("send").onclick=function(){
+    var v=$("inp").value.trim();if(!v)return;$("inp").value="";askChat(v);
+  });
+  $("inp")&&$("inp").addEventListener("keydown",function(e){
+    if(e.key==="Enter"){e.preventDefault();$("send").click()}
+  });
+
+  $("localAsk")&&($("localAsk").onclick=runLocal);
+  $("localRemember")&&($("localRemember").onclick=function(){
+    var q=($("localQ")&&$("localQ").value||"").trim();
+    if(!q)return;
+    var a=loadMem();a.push({text:q,ts:Date.now()});saveMem(a);renderMem();
+    $("localQ").value="";localTrace("memory.write",{chars:q.length});
+  });
+
+  $("btnTeach")&&($("btnTeach").onclick=function(){
+    var v=($("teachIn")&&$("teachIn").value||"").trim();
+    if(!v)return;
+    var a=loadMem();a.push({text:v,ts:Date.now()});saveMem(a);renderMem();$("teachIn").value="";
+  });
+  $("btnWipe")&&($("btnWipe").onclick=function(){
+    if(confirm("Очистить локальную память?")){saveMem([]);renderMem()}
+  });
+
+  $("pqBoot")&&($("pqBoot").onclick=refreshPq);
+  $("pqExport")&&($("pqExport").onclick=function(){
+    if(!window.AKSI_PQ)return;
+    AKSI_PQ.ensureIdentity().then(function(){
+      var p=AKSI_PQ.publicPack();
+      $("pqEnv").value=JSON.stringify(p,null,2);
+      refreshPq();
+    });
+  });
+  $("pqSeal")&&($("pqSeal").onclick=function(){
+    if(!window.AKSI_PQ)return;
+    var peer;try{peer=JSON.parse($("pqPeer").value||"{}")}catch(e){return alert("peer JSON invalid")}
+    AKSI_PQ.seal($("pqMsg").value||"",peer,{eqs:0.55}).then(function(env){
+      $("pqEnv").value=JSON.stringify(env,null,2);
+      refreshPq();
+    }).catch(function(e){alert(e.message||e)});
+  });
+  $("pqOpen")&&($("pqOpen").onclick=function(){
+    if(!window.AKSI_PQ)return;
+    var env;try{env=JSON.parse($("pqEnv").value||"{}")}catch(e){return alert("envelope invalid")}
+    AKSI_PQ.open(env).then(function(r){
+      $("pqMsg").value=r.text;
+      refreshPq();
+    }).catch(function(e){alert(e.message||e)});
+  });
+
+  $("btnMetrics")&&($("btnMetrics").onclick=function(){
+    if(!window.AKSI_ALGORITHM){$("labMetrics").textContent="algorithm not loaded";return}
+    var r=AKSI_ALGORITHM.evaluate("lab","АКСИ demo metrics",{offline:true,source:"lab",seal:false});
+    $("labMetrics").textContent=JSON.stringify(r.metrics||r,null,2);
+    var m=r.metrics||r;
+    if($("kvEqs")&&(m.EQS!=null||m.eqs!=null))$("kvEqs").textContent=String(m.EQS!=null?m.EQS:m.eqs);
+  });
+
+  if($("thread")&&!$("thread").children.length){
+    addMsg("ai","Здравствуйте. Я АКСИ. Offline-first, бежевый интерфейс, вкладки Home · Чат · Local · Trust · Память · Lab.\nКонтакт: aksilove@internet.ru","adia · offline");
+  }
+  renderMem();
+  refreshLocalCaps();
+  goTab("home");
+  var c=$("composer");if(c)c.style.display="none";
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+})();
 </script>
 </body>
 </html>
