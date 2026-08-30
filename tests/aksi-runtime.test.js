@@ -21,7 +21,7 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
 
 (async () => {
   assert.ok(context.AKSI_RUNTIME);
-  assert.strictEqual(context.AKSI_RUNTIME.version, '1.1.0');
+  assert.strictEqual(context.AKSI_RUNTIME.version, '1.2.0');
 
   const degraded = await context.AKSI_RUNTIME.selfTest();
   assert.strictEqual(degraded.ok, false);
@@ -41,12 +41,14 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
   assert.deepStrictEqual(answer.citations, ['x', 'y']);
 
   const integrity = context.AKSI_RUNTIME.integrity;
-  const value = { b: 2, a: 'АКСИ' };
+  const value = { b: 2, a: 'АКСИ', ignored: undefined };
   const reordered = { a: 'АКСИ', b: 2 };
+  assert.strictEqual(integrity.canonical(value), integrity.canonical(reordered));
   assert.strictEqual(await integrity.sha256(integrity.canonical(value)), await integrity.sha256(integrity.canonical(reordered)));
 
   const proof = await integrity.sign(value);
   assert.strictEqual(proof.algorithm, 'Ed25519');
+  assert.ok(proof.did.startsWith('did:aksi:ed25519:'));
   assert.strictEqual(await integrity.verify(value, proof), true);
   assert.strictEqual(await integrity.verify({ a: 'АКСИ', b: 3 }, proof), false);
 
@@ -68,10 +70,10 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
   assert.strictEqual(result.reason, 'previous-hash-mismatch');
 
   const forgedSignature = JSON.parse(JSON.stringify([e1, e2]));
-  forgedSignature[0].signature.signature = 'AA==' + forgedSignature[0].signature.signature;
+  forgedSignature[0].proof.signature = 'AA==' + forgedSignature[0].proof.signature;
   result = await integrity.verifyLedger(forgedSignature);
   assert.strictEqual(result.ok, false);
-  assert.strictEqual(result.reason, 'signature-mismatch');
+  assert.strictEqual(result.reason, 'signature-invalid');
 
   console.log('AKSI runtime contract + cryptographic integrity tests: OK');
 })().catch((error) => {
