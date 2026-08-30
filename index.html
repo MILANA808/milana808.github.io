@@ -8,7 +8,7 @@
 <meta name="description" content="АКСИ — offline-first AI: Local Engine, MATRIX, ADIA, hybrid PQ crypto. Контакт aksilove@internet.ru">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://milana808.github.io/">
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="/manifest.json?v=30">
 <title>АКСИ — Local Intelligence</title>
 <style>
 :root{
@@ -146,7 +146,7 @@ textarea.field{min-height:72px;resize:vertical}
 <body>
 <header class="top">
   <div class="logo">A</div>
-  <div class="titles"><h1>АКСИ</h1><div class="sub">offline · local · без VPN</div></div>
+  <div class="titles"><h1>АКСИ</h1><div class="sub">offline · beige SPA v30 · без VPN</div></div>
   <span class="pill on" id="modePill">local</span>
 </header>
 
@@ -294,12 +294,12 @@ textarea.field{min-height:72px;resize:vertical}
   <button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
 </nav>
 
-<script src="/aksi-algorithm.js"></script>
-<script src="/aksi-compose.js"></script>
-<script src="/aksi-neuro.js"></script>
-<script src="/aksi-quantum.js"></script>
-<script src="/aksi-pq.js"></script>
-<script src="/local-ai/engine.js"></script>
+<script src="/aksi-algorithm.js?v=30"></script>
+<script src="/aksi-compose.js?v=30"></script>
+<script src="/aksi-neuro.js?v=30"></script>
+<script src="/aksi-quantum.js?v=30"></script>
+<script src="/aksi-pq.js?v=30"></script>
+<script src="/local-ai/engine.js?v=30"></script>
 <script>
 (function(){
 "use strict";
@@ -307,7 +307,7 @@ var MEM_KEY="aksi_whole_mem_v3";
 var MAIN={home:1,chat:1,local:1,trust:1,mem:1,lab:1};
 
 function $(id){return document.getElementById(id)}
-function esc(s){return String(s).replace(/[&<>\"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]})}
+function esc(s){return String(s).replace(/[&<>\"']/g,function(c){return({"&":"&","<":"<",">":">","\"":""","'":"&#39;"})[c]})}
 
 function goTab(t){
   if(!t||!MAIN[t])return;
@@ -532,7 +532,7 @@ function boot(){
   });
 
   if($("thread")&&!$("thread").children.length){
-    addMsg("ai","Здравствуйте. Я АКСИ. Offline-first, бежевый интерфейс, вкладки Home · Чат · Local · Trust · Память · Lab.\nКонтакт: aksilove@internet.ru","adia · offline");
+    addMsg("ai","Здравствуйте. АКСИ v30 — бежевый offline SPA.\nВкладки: Home · Чат · Local · Trust · Память · Lab.\nКонтакт: aksilove@internet.ru","adia · offline");
   }
   renderMem();
   refreshLocalCaps();
@@ -540,6 +540,23 @@ function boot(){
   var c=$("composer");if(c)c.style.display="none";
 }
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+})();
+</script>
+<script>
+(function(){
+  if(!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("/sw.js?v=30").then(function(reg){
+      try{ reg.update(); }catch(e){}
+      if(window.caches){
+        caches.keys().then(function(keys){
+          keys.forEach(function(k){
+            if(k.indexOf("aksi-shell-v30")===-1) caches.delete(k);
+          });
+        });
+      }
+    }).catch(function(){});
+  });
 })();
 </script>
 </body>
