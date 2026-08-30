@@ -1,15 +1,14 @@
-# АКСИ (AKSI) — offline-first AI companion
+# АКСИ (AKSI) — offline-first AI · MVP
 
-**EN** · Local-first browser AI with a measurable decision layer (**ADIA 2.0**).  
-**RU** · Локальный ИИ в браузере с измеримым слоем решений (**ADIA 2.0**).
+**EN** · Local-first browser AI with measurable decision integrity (**ADIA**).  
+**RU** · Локальный ИИ в браузере с измеримой целостностью решений (**ADIA**).
 
 | | |
 |--|--|
 | **Live** | https://milana808.github.io |
-| **Contact** | aksilove@internet.ru · X [@AKSILOVE](https://x.com/AKSILOVE) |
-| **License** | [Proprietary](./LICENSE) — not open source |
-| **Algorithm** | [ALGORITHM.md](./ALGORITHM.md) · ADIA 2.0 |
-| **Structure** | [STRUCTURE.md](./STRUCTURE.md) |
+| **Contact** | **aksilove@internet.ru** · X [@AKSILOVE](https://x.com/AKSILOVE) |
+| **License** | [Proprietary](./LICENSE) |
+| **Algorithm** | [ALGORITHM.md](./ALGORITHM.md) |
 
 ---
 
@@ -19,58 +18,51 @@
 
 AKSI is a **sovereign offline-first AI companion** in the browser — not a thin ChatGPT wrapper.
 
-- **ADIA 2.0** — Resonance Decision Engine (EQS, memory resonance, candidate rank, integrity seal)
-- **Neuro** — pure-JS RWKV-style offline LLM (CPU, zero download)
-- **WebLLM** — optional MLC WebGPU model (user loads once, then offline)
-- **Mind** — router: Brain → WebLLM? → Neuro → **ADIA** → Web? → Ollama
-- **Memory / Teach** — local facts (`remember: …` / `запомни: …`)
-- **Proof / PRECEDENT** — offline policy attestation
-- **Photo OCR** — Tesseract.js
-- **Trust · Quantum · DKV** — lab modules
+**MVP modules**
 
-**Network is off by default.** Internet only after the **Сеть / Network** consent toggle.
+| Module | Role |
+|--------|------|
+| **SecureMem** | IndexedDB + optional AES-GCM |
+| **ADIA assess** | 5-axis score; DistilBERT if online, else heuristics |
+| **Swarm** | 1–3 agents, ADIA rank |
+| **HRR** | Holographic resonance + hologram view |
+| **Neuro / Composer** | Pure-JS offline (zero download) |
+| **WebLLM** | Optional WebGPU (user opt-in) |
+| **PQ Trust** | ECDSA P-256 + optional ML-KEM |
+| **Multi-chat** | Rename / archive / delete |
+| **Stats** | Local ADIA timeline |
+| **Protocol** | `/protocol/` Living Mind lab |
 
-### Product UI
-
-| Tab | Role |
-|-----|------|
-| **Home** | Offline proof, status, teach, PRECEDENT |
-| **Chat** | Single dialogue via Mind + ADIA seal |
-| **Memory** | Local facts |
-| **Photo** | OCR |
-| **Lab** | ADIA · Neuro · WebLLM · Ollama · Mind · Quantum · Trust · DKV |
-
-### Architecture
-
-```text
-Intent → Quantum meta → Brain
-  → WebLLM (if loaded)
-  → Neuro RWKV (always offline)
-  → ADIA 2.0 (EQS · rank · seal)
-  → Web (only with consent)
-  → Ollama / Core
-```
+Network is **off by default**.
 
 ### Quick start
 
-1. Open https://milana808.github.io
-2. Hard refresh (Ctrl+F5)
-3. Chat: “Who are you?”, “Does it work offline?”
-4. Home → **Докажи offline**
-5. Lab → ADIA / Neuro / WebLLM
+1. https://milana808.github.io  
+2. **Ctrl+F5**  
+3. Chat: “status”, “запомни: demo”  
+4. **Stats** tab → swarm 1–3, hologram, chats  
+5. Optional: allow DistilBERT once online  
 
-### Principles
+### Demo scenarios (conferences)
 
-1. Offline-first
-2. Explicit network consent
-3. Measurable answers (EQS, ledger)
-4. One product surface (`/`) — no parallel SPA forks
-5. No prices on public pages
-6. Proprietary license (evaluation ≠ production rights)
+1. Offline — DevTools Offline → chat works  
+2. Teach — `запомни:` then related question  
+3. Swarm — agents 1–3  
+4. ADIA — Lab assess JSON  
+5. HRR — Stats → hologram / Protocol  
+6. P2P — SDP copy between tabs  
+7. Encrypt memory — password on unlock  
 
-### Search / discovery keywords
+### Honest limits
 
-AKSI, АКСИ, offline AI, local LLM browser, RWKV browser, WebLLM, ADIA, EQS, decision integrity, sovereign AI, privacy-first assistant, milana808, aksilove
+Three full LLMs (Llama / Phi / WebLLM) in parallel need multi-GB RAM/VRAM — not the default MVP path. Swarm uses pure-JS engines; heavy models are progressive. DistilBERT loads from CDN when online; offline → heuristic classifier with UI notice.
+
+### How to contribute
+
+1. Report issues with browser + online/offline steps.  
+2. No PRs with secrets, FIO, or public prices.  
+3. Prefer pure JS modules (no build step for GH Pages).  
+4. Partnership / education / pilot: **aksilove@internet.ru**  
 
 ---
 
@@ -78,69 +70,26 @@ AKSI, АКСИ, offline AI, local LLM browser, RWKV browser, WebLLM, ADIA, EQS, 
 
 ### Что это
 
-АКСИ — **суверенный offline-first цифровой напарник** в браузере, а не обёртка над чужим чатом.
-
-- **ADIA 2.0** — Resonance Decision Engine (EQS, резонанс памяти, rank, seal)
-- **Neuro** — чистый JS RWKV offline (CPU, без загрузки модели)
-- **WebLLM** — опциональная MLC WebGPU-модель (скачать один раз)
-- **Mind** — маршрутизатор: Brain → WebLLM? → Neuro → **ADIA** → Web? → Ollama
-- **Память** — локальные факты (`запомни: …`)
-- **Proof / PRECEDENT** — проверяемая offline-политика
-- **Фото OCR** — Tesseract.js
-- **Trust · Quantum · DKV** — лабораторные модули
-
-**Сеть выключена по умолчанию.** Интернет — только после галочки **Сеть**.
-
-### Интерфейс
-
-| Вкладка | Назначение |
-|---------|------------|
-| **Home** | Proof offline, статус, teach, PRECEDENT |
-| **Чат** | Единый диалог через Mind + ADIA |
-| **Память** | Локальные факты |
-| **Фото** | OCR |
-| **Lab** | ADIA · Neuro · WebLLM · Ollama · Mind · Quantum · Trust · DKV |
+**АКСИ** — суверенный offline-first компаньон + слой **ADIA**. Данные и inference по умолчанию на устройстве.
 
 ### Быстрый старт
 
-1. https://milana808.github.io
-2. Ctrl+F5
-3. Чат: «Кто ты?», «Работает ли без интернета?»
-4. Home → **Докажи offline**
-5. Lab → ADIA / Neuro / WebLLM
+1. https://milana808.github.io · **Ctrl+F5**  
+2. «статус», «запомни: факт»  
+3. Вкладка **Stats** — рой, голограмма, диалоги  
 
-### Принципы
+### Сценарии демо
 
-1. Offline-first
-2. Явное согласие на сеть
-3. Измеримость (EQS, ledger)
-4. Один продукт (`/`)
-5. Без цен на публичных страницах
-6. Проприетарная лицензия
+Офлайн · Память · Рой 1–3 · ADIA · HRR · SDP P2P · AES-память
 
-### Ключевые слова для поиска
+### Ограничения
 
-АКСИ, AKSI, локальный ИИ, offline ИИ, RWKV браузер, WebLLM, ADIA, EQS, суверенный агент, приватный ассистент, milana808, aksilove@internet.ru
+Полные Llama/Phi×3 в браузере — гигабайты. MVP-рой = pure-JS + опциональные модели.
+
+### Вклад
+
+Баги, модули на чистом JS, пилоты: **aksilove@internet.ru**
 
 ---
 
-## Key files / Ключевые файлы
-
-| File | Role |
-|------|------|
-| `index.html` | Product shell |
-| `aksi-algorithm.js` | ADIA 2.0 |
-| `aksi-mind.js` | Router |
-| `aksi-neuro.js` | Offline RWKV |
-| `aksi-webllm.js` | Optional WebGPU |
-| `PRECEDENT.json` | Policy claim |
-| `ALGORITHM.md` | ADIA specification |
-| `LICENSE` | Proprietary terms |
-| `robots.txt` / `sitemap.xml` | Indexing |
-
-## License / Лицензия
-
-**Proprietary.** See [LICENSE](./LICENSE) and [PROPRIETARY.md](./PROPRIETARY.md).  
-Same policy family as **Milana-backend**: all rights reserved; commercial use requires written permission.
-
-© AKSI · aksilove@internet.ru
+© AKSI · aksilove@internet.ru · MVP shell v34 · SW aksi-shell-v33
