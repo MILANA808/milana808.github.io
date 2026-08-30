@@ -1,12 +1,14 @@
-/** AKSI MATRIX app v10-compose — Resonance Composer first · mobile-safe · © AKSI */
+/** AKSI MATRIX v13 — локальный ИИ + квантовый симулятор · © AKSI */
 (function () {
   "use strict";
   var DID = "did:aksi:ed25519:sovereign-2026";
   var DB = "aksi_matrix_v7";
   var MODEL = "TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC";
-  var rag = [], keyPair = null, lastSig = null, engine = null, busy = false, webllmLoading = false;
+  var rag = [], keyPair = null, lastSig = null, engine = null, busy = false, webllmLoading = false, lastQx = null;
   function $(id) { return document.getElementById(id); }
-  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">"); }
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
   function bootMsg(t, pct) {
     var m = $("bootMsg"); if (m) m.textContent = t || "";
     var b = $("bootBar"); if (b && pct != null) b.style.width = Math.min(100, Math.max(0, pct)) + "%";
@@ -94,7 +96,9 @@
     try { rag = await idbAll("rag"); } catch (e) { rag = []; }
     if ($("kvRag")) $("kvRag").textContent = String(rag.length);
   }
-  function tok(s) { return String(s || "").toLowerCase().replace(/[^a-zа-яё0-9\s]/gi, " ").split(/\s+/).filter(function (t) { return t.length > 2; }); }
+  function tok(s) {
+    return String(s || "").toLowerCase().replace(/[^a-zа-яё0-9\s]/gi, " ").split(/\s+/).filter(function (t) { return t.length > 2; });
+  }
   function ragRetrieve(q, k) {
     k = k || 3;
     return rag.map(function (r) {
@@ -117,7 +121,7 @@
   async function runSkill(skill) {
     if (skill.name === "hash") return "SHA-256: " + await sha256(skill.arg || "");
     if (skill.name === "uuid") return "UUID: " + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36));
-    if (skill.name === "now") return "Время: " + new Date().toLocaleString();
+    if (skill.name === "now") return "Время: " + new Date().toLocaleString("ru-RU");
     if (skill.name === "calc") {
       try {
         var safe = (skill.arg || "").replace(/[^0-9+\-*/().%\s]/g, "");
@@ -133,14 +137,13 @@
     var hasGPU = false;
     try { hasGPU = !!(navigator.gpu && typeof navigator.gpu.requestAdapter === "function"); } catch (e) {}
     if (!hasGPU) {
-      setStatus("Composer · WebGPU нет");
-      if ($("kvModel")) $("kvModel").textContent = "Composer";
-      try { bubble("ai", "WebLLM недоступен (нет WebGPU).\nРаботаю через Resonance Composer offline.", "compose"); } catch (e) {}
-      hideBoot();
-      return false;
+      setStatus("ядро · без WebGPU");
+      if ($("kvModel")) $("kvModel").textContent = "Ядро";
+      try { bubble("ai", "Нейросеть недоступна (нет WebGPU).\nРаботает локальное ядро + квантовый симулятор.", "ядро"); } catch (e) {}
+      hideBoot(); return false;
     }
     webllmLoading = true;
-    bootMsg("Подключаю WebLLM…", 5);
+    bootMsg("Подключаю нейросеть…", 5);
     var boot = $("boot");
     if (boot) { boot.style.display = "flex"; boot.classList.remove("hide"); }
     try {
@@ -155,23 +158,21 @@
           bootMsg((r.text || "Загрузка") + " · " + p + "%", Math.min(99, p));
         }
       });
-      if ($("kvModel")) $("kvModel").textContent = "WebLLM";
+      if ($("kvModel")) $("kvModel").textContent = "нейросеть";
       hideBoot();
-      bubble("ai", "WebLLM загружен — нейросетевая генерация активна.", "webllm");
-      webllmLoading = false;
-      return true;
+      bubble("ai", "Нейросеть загружена. Каждый ответ проходит квантовый симулятор.", "нейросеть");
+      webllmLoading = false; return true;
     } catch (e) {
-      bootMsg("WebLLM недоступен — Composer", 100);
-      setTimeout(function () { hideBoot(); bubble("ai", "WebLLM недоступен. Composer offline.", "compose"); }, 500);
-      webllmLoading = false;
-      return false;
+      bootMsg("Нейросеть недоступна — ядро", 100);
+      setTimeout(function () { hideBoot(); bubble("ai", "Нейросеть недоступна. Работает локальное ядро + квант.", "ядро"); }, 500);
+      webllmLoading = false; return false;
     }
   }
   async function webllmChat(q, context) {
     if (!engine) return null;
     try {
       var messages = [
-        { role: "system", content: "Ты АКСИ MATRIX. Кратко по-русски. DID: " + DID },
+        { role: "system", content: "Ты АКСИ — локальный ИИ. Отвечай только по-русски, кратко и по делу. DID: " + DID },
         { role: "user", content: (context ? context + "\n\n" : "") + q }
       ];
       var out = await engine.chat.completions.create({ messages: messages, max_tokens: 400, temperature: 0.7 });
@@ -187,35 +188,68 @@
     th.appendChild(d);
     try { th.lastElementChild.scrollIntoView({ block: "end" }); } catch (e) {}
   }
+  function quantumSeal(q, text) {
+    if (!window.AKSI_QUANTUM || !AKSI_QUANTUM.answerGate) return { meta: "", qx: null };
+    try {
+      var qx = AKSI_QUANTUM.answerGate(q, text);
+      lastQx = qx;
+      var band = qx.band === "high" ? "высокая" : qx.band === "mid" ? "средняя" : "низкая";
+      var meta = "Q" + qx.QCLI + " · R" + qx.resonance + " · " + (qx.bits || "") + " · " + band;
+      try { if (qx.bloch0 && $("bloch")) drawBlochCanvas($("bloch"), qx.bloch0); } catch (e) {}
+      return { meta: meta, qx: qx };
+    } catch (e) { return { meta: "", qx: null }; }
+  }
+  function drawBlochCanvas(canvas, bloch) {
+    if (!canvas || !bloch) return;
+    var ctx = canvas.getContext("2d"); if (!ctx) return;
+    var w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.38;
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = "rgba(167,139,250,0.45)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx, cy, r, r * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy); ctx.stroke();
+    var x = bloch.x || 0, z = bloch.z || 0;
+    var px = cx + x * r, py = cy - z * r;
+    ctx.strokeStyle = "#22d3ee"; ctx.fillStyle = "#a78bfa"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(px, py); ctx.stroke();
+    ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#9b93b0"; ctx.font = "11px system-ui";
+    ctx.fillText("|0⟩", cx - 8, cy - r - 6);
+    ctx.fillText("|1⟩", cx - 8, cy + r + 14);
+  }
   async function think(q) {
     q = String(q || "").trim();
     if (!q) return { text: "Пустой запрос.", meta: "matrix" };
     var skill = detectSkill(q);
-    if (skill) { var so = await runSkill(skill); if (so) return { text: so, meta: "skill" }; }
+    if (skill) { var so = await runSkill(skill); if (so) return { text: so, meta: "навык" }; }
     if (/^статус$/i.test(q)) {
-      return { text: "Модель: " + (engine ? "WebLLM" : (window.AKSI_COMPOSE ? "Composer" : "Neuro")) + "\nRAG: " + rag.length + "\nDID: " + DID, meta: "status" };
+      var gs = (window.AKSI_COMPOSE && AKSI_COMPOSE.status) ? AKSI_COMPOSE.status() : {};
+      var qv = window.AKSI_QUANTUM ? (AKSI_QUANTUM.version || "on") : "—";
+      return { text: "Модель: " + (engine ? "нейросеть" : (window.AKSI_COMPOSE ? "ядро v2" : "Neuro")) +
+        "\nКвант: " + qv + "\nРост ядра: " + (gs.growth != null ? gs.growth : "—") +
+        "\nГенераций: " + (gs.generations != null ? gs.generations : "—") +
+        "\nФайлы: " + rag.length + "\nDID: " + DID, meta: "статус" };
     }
     if (/^did$/i.test(q)) return { text: "DID: " + DID, meta: "did" };
     var hits = ragRetrieve(q, 3);
     var ctx = hits.length && hits[0].score >= 0.12 ? hits.map(function (h) { return h.text.slice(0, 400); }).join("\n---\n") : "";
     if (engine) {
-      var wl = await webllmChat(q, ctx ? "RAG:\n" + ctx : "");
-      if (wl) return { text: wl, meta: "webllm" };
+      var wl = await webllmChat(q, ctx ? "Контекст файлов:\n" + ctx : "");
+      if (wl) { var qs = quantumSeal(q, wl); return { text: wl, meta: "нейросеть · " + (qs.meta || "квант") }; }
     }
     if (ctx && hits[0].score >= 0.25) {
-      return { text: "По RAG:\n\n" + hits.map(function (h, i) { return (i + 1) + ". [" + h.name + "] " + h.text.slice(0, 280); }).join("\n\n"), meta: "rag" };
+      var ragText = "По вашим файлам:\n\n" + hits.map(function (h, i) { return (i + 1) + ". [" + h.name + "] " + h.text.slice(0, 280); }).join("\n\n");
+      var qsR = quantumSeal(q, ragText);
+      return { text: ragText, meta: "файлы · " + (qsR.meta || "") };
     }
     if (window.AKSI_COMPOSE && AKSI_COMPOSE.think) {
       try {
         var comp = AKSI_COMPOSE.think(q);
         if (comp && comp.text) {
-          var metaC = (comp.mode || "compose") + " · " + Math.round((comp.confidence || 0) * 100) + "%";
-          try {
-            if (window.AKSI_QUANTUM && AKSI_QUANTUM.answerGate) {
-              var qx = AKSI_QUANTUM.answerGate(q, comp.text);
-              if (qx && qx.QCLI != null) metaC += " · Q" + qx.QCLI;
-            }
-          } catch (e) {}
+          var metaC = (comp.mode || "ядро") + " · " + Math.round((comp.confidence || 0) * 100) + "%";
+          var qsC = quantumSeal(q, comp.text);
+          if (qsC.meta) metaC += " · " + qsC.meta;
           try {
             if (window.AKSI_ALGORITHM && AKSI_ALGORITHM.evaluate) {
               var ev = AKSI_ALGORITHM.evaluate(q, comp.text, { seal: true });
@@ -229,9 +263,12 @@
     }
     if (window.AKSI_NEURO && AKSI_NEURO.think) {
       var n = AKSI_NEURO.think(q);
-      if (n && n.text) return { text: n.text, meta: n.mode || "neuro" };
+      if (n && n.text) {
+        var qsN = quantumSeal(q, n.text);
+        return { text: n.text, meta: (n.mode || "neuro") + (qsN.meta ? " · " + qsN.meta : "") };
+      }
     }
-    return { text: "Мало локальных данных. «запомни: факт» или RAG.\n\n" + DID, meta: "fallback" };
+    return { text: "Мало локальных данных. Напишите «запомни: факт» или загрузите файл.\n\nDID: " + DID, meta: "запасной" };
   }
   async function ask(q) {
     if (busy) return;
@@ -239,54 +276,129 @@
     busy = true; bubble("me", q); if ($("inp")) $("inp").value = ""; setStatus("думаю…");
     try {
       var r = await think(q); var meta = r.meta || "";
-      try { lastSig = await signText(r.text); meta += " · sig"; } catch (e) {}
+      try { lastSig = await signText(r.text); meta += " · подпись"; } catch (e) {}
       bubble("ai", r.text, meta);
-      setStatus((engine ? "webllm" : "compose") + " · RAG " + rag.length);
-    } catch (e) { bubble("ai", "Сбой: " + (e.message || e), "error"); }
+      setStatus((engine ? "нейросеть" : "ядро") + " · квант · файлы " + rag.length);
+    } catch (e) { bubble("ai", "Сбой: " + (e.message || e), "ошибка"); }
     busy = false;
+  }
+  function showQ(obj, title) {
+    var out = $("qOut"); if (!out) return;
+    var lines = [];
+    if (title) lines.push("—— " + title + " ——");
+    if (typeof obj === "string") lines.push(obj);
+    else if (obj) {
+      try {
+        if (obj.QCLI != null) lines.push("QCLI: " + obj.QCLI);
+        if (obj.resonance != null) lines.push("Резонанс: " + obj.resonance);
+        if (obj.entropy != null) lines.push("Энтропия: " + obj.entropy);
+        if (obj.purity != null) lines.push("Чистота: " + obj.purity);
+        if (obj.bits != null) lines.push("Измерение: " + obj.bits);
+        if (obj.S != null) lines.push("CHSH S: " + obj.S + (obj.S > 2 ? " (нарушение неравенства Белла)" : ""));
+        if (obj.circuit) lines.push("Схема: " + obj.circuit);
+        if (obj.backend) lines.push("Бэкенд: " + obj.backend);
+        if (obj.band) lines.push("Полоса: " + obj.band);
+        if (lines.length < 3) lines.push(JSON.stringify(obj, null, 2));
+      } catch (e) { lines.push(String(obj)); }
+    }
+    out.textContent = lines.join("\n");
+  }
+  function runQuantumDemo(kind) {
+    if (!window.AKSI_QUANTUM) { showQ("Квантовый модуль не загружен", "ошибка"); return; }
+    var Q = AKSI_QUANTUM;
+    try {
+      if (kind === "bell") {
+        var c = Q.bell("phi+");
+        var sum = typeof c.summary === "function" ? c.summary() : c;
+        showQ(sum, "Состояние Белла Φ+");
+        if (c.bloch && $("bloch")) drawBlochCanvas($("bloch"), c.bloch(0));
+        else if (sum && sum.bloch0 && $("bloch")) drawBlochCanvas($("bloch"), sum.bloch0);
+      } else if (kind === "shot") {
+        var s = Q.shot("matrix·aksi");
+        showQ(s, "Измерение (shot)");
+        if (s.bloch0 && $("bloch")) drawBlochCanvas($("bloch"), s.bloch0);
+      } else if (kind === "chsh") {
+        showQ(Q.chsh(2048), "Тест CHSH (Белл)");
+      } else if (kind === "gate") {
+        var ag = Q.answerGate("Кто ты?", "Я АКСИ — локальный ИИ с квантовым симулятором");
+        showQ(ag, "answerGate · печать ответа");
+        if (ag.bloch0 && $("bloch")) drawBlochCanvas($("bloch"), ag.bloch0);
+      } else if (kind === "last" && lastQx) {
+        showQ(lastQx, "Последняя квантовая печать");
+        if (lastQx.bloch0 && $("bloch")) drawBlochCanvas($("bloch"), lastQx.bloch0);
+      }
+    } catch (e) { showQ(String(e.message || e), "ошибка"); }
   }
   function goTab(t) {
     document.querySelectorAll(".tabs [data-tab]").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-tab") === t); });
     document.querySelectorAll(".stage .panel").forEach(function (p) { p.classList.toggle("on", p.id === "tab-" + t); });
     if (t === "ui") {
-      if ($("kvModel")) $("kvModel").textContent = engine ? "WebLLM" : (window.AKSI_COMPOSE ? "Composer" : "Neuro");
+      if ($("kvModel")) $("kvModel").textContent = engine ? "нейросеть" : (window.AKSI_COMPOSE ? "Ядро" : "Neuro");
       if ($("kvQ")) $("kvQ").textContent = window.AKSI_QUANTUM ? "on" : "—";
       if ($("kvRag")) $("kvRag").textContent = String(rag.length);
     }
+    if (t === "bloch") runQuantumDemo(lastQx ? "last" : "bell");
+  }
+  async function onRagFiles(files) {
+    if (!files || !files.length) return;
+    var i, f, text;
+    for (i = 0; i < files.length; i++) {
+      f = files[i];
+      try { text = await f.text(); await idbPut("rag", { name: f.name, text: text.slice(0, 120000), ts: Date.now() }); } catch (e) {}
+    }
+    await loadRag();
+    bubble("ai", "Загружено файлов в RAG: " + files.length + ". Всего: " + rag.length, "файлы");
   }
   async function start() {
     try {
       bootMsg("IndexedDB…", 15); try { await idbOpen(); } catch (e) {}
-      bootMsg("Ключи…", 35); try { await ensureKeys(); } catch (e) {}
-      bootMsg("RAG…", 55); try { await loadRag(); } catch (e) { rag = []; }
-      bootMsg("Composer…", 80);
-      if ($("kvModel")) $("kvModel").textContent = window.AKSI_COMPOSE ? "Composer" : (window.AKSI_NEURO ? "Neuro" : "—");
+      bootMsg("Ключи DID…", 30); try { await ensureKeys(); } catch (e) {}
+      bootMsg("Файлы…", 45); try { await loadRag(); } catch (e) { rag = []; }
+      bootMsg("Ядро…", 65);
+      if ($("kvModel")) $("kvModel").textContent = window.AKSI_COMPOSE ? "Ядро" : (window.AKSI_NEURO ? "Neuro" : "—");
+      bootMsg("Квантовый симулятор…", 85);
       if ($("kvQ")) $("kvQ").textContent = window.AKSI_QUANTUM ? "on" : "—";
-      bootMsg("MATRIX online", 100);
-      setStatus("compose · RAG " + rag.length);
+      bootMsg("MATRIX готов", 100);
+      setStatus("ядро · квант · файлы " + rag.length);
     } catch (e) { bootMsg("MATRIX", 100); }
     setTimeout(function () {
       hideBoot();
-      bubble("ai", "Здравствуйте. АКСИ MATRIX.\n\n• Resonance Composer — собирает ответ из локальных доказательств\n• WebLLM — на ПК с WebGPU\n• ADIA · Quantum · DID\n\nDID: " + DID, "composer · local-first");
+      bubble("ai",
+        "Здравствуйте. Я АКСИ — локальный ИИ на этом устройстве.\n\n" +
+        "• Ядро генерирует ответ без облака\n" +
+        "• Каждый ответ проходит квантовый симулятор (answerGate)\n" +
+        "• Вкладка Bloch — Белл, CHSH, измерение\n" +
+        "• «запомни:» обучает ядро · WebGPU — нейросеть\n\n" +
+        "DID: " + DID,
+        "ядро · квант · без сети");
     }, 280);
-    setTimeout(hideBoot, 2000);
+    setTimeout(hideBoot, 2200);
   }
   document.querySelectorAll(".tabs [data-tab]").forEach(function (b) {
     b.addEventListener("click", function () { goTab(b.getAttribute("data-tab")); });
   });
-  if ($("send")) $("send").onclick = function () { ask($("inp").value); };
+  if ($("send")) $("send").onclick = function () { ask($("inp") && $("inp").value); };
   if ($("inp")) $("inp").addEventListener("keydown", function (e) { if (e.key === "Enter") ask($("inp").value); });
   document.querySelectorAll("[data-ask]").forEach(function (c) { c.onclick = function () { ask(c.getAttribute("data-ask")); }; });
   if ($("btnClear")) $("btnClear").onclick = function () { if ($("thread")) $("thread").innerHTML = ""; };
   if ($("btnModel")) $("btnModel").onclick = function () { loadWebLLM(); };
   if ($("btnRag")) $("btnRag").onclick = function () { if ($("ragFile")) $("ragFile").click(); };
+  if ($("ragFile")) $("ragFile").addEventListener("change", function () { onRagFiles($("ragFile").files); $("ragFile").value = ""; });
   if ($("btnVoice")) $("btnVoice").onclick = function () {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+    if (!SR) { bubble("ai", "Голос недоступен", "голос"); return; }
     var r = new SR(); r.lang = "ru-RU";
     r.onresult = function (ev) { ask(ev.results[0][0].transcript); }; r.start();
   };
   if ($("btnTrust")) $("btnTrust").onclick = function () { goTab("crypto"); };
   if ($("btnPro")) $("btnPro").onclick = function () { goTab("ui"); };
+  if ($("btnBell")) $("btnBell").onclick = function () { runQuantumDemo("bell"); };
+  if ($("btnShot")) $("btnShot").onclick = function () { runQuantumDemo("shot"); };
+  if ($("btnChsh")) $("btnChsh").onclick = function () { runQuantumDemo("chsh"); };
+  if ($("btnGate")) $("btnGate").onclick = function () { runQuantumDemo("gate"); };
+  if ($("btnQ2Bell")) $("btnQ2Bell").onclick = function () { runQuantumDemo("bell"); };
+  if ($("btnQ2Sample")) $("btnQ2Sample").onclick = function () {
+    if (window.AKSI_QUANTUM) showQ(AKSI_QUANTUM.chsh(1024), "1024 shots · CHSH");
+  };
   start();
 })();
