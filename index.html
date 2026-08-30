@@ -8,7 +8,7 @@
 <meta name="description" content="АКСИ — offline-first локальный ИИ: Neuro, Composer, ADIA, hybrid PQ. Контакт aksilove@internet.ru">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://milana808.github.io/">
-<link rel="manifest" href="/manifest.json?v=32">
+<link rel="manifest" href="/manifest.json?v=33">
 <title>АКСИ — Local Intelligence</title>
 <style>
 :root{
@@ -72,9 +72,7 @@ h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
   min-height:var(--tap);padding:12px 16px;border-radius:15px;font-weight:700;font-size:13px;
   border:1px solid var(--line);background:var(--s);color:var(--ink);
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
-  transition:transform .12s ease,background .12s ease;
 }
-.btn:active{transform:scale(.97)}
 .btn.p{background:var(--a);border-color:var(--a);color:#fff}
 .btn.block{width:100%}
 .card{
@@ -92,7 +90,6 @@ h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
 .bub{
   max-width:90%;padding:12px 15px;border-radius:18px;
   white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.45;
-  box-shadow:0 2px 8px rgba(40,30,20,.04);
 }
 .msg.me .bub{background:var(--a);color:#fff;border-bottom-right-radius:6px}
 .msg.ai .bub{background:var(--s);border:1px solid var(--line);border-bottom-left-radius:6px}
@@ -113,13 +110,10 @@ h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
 .composer input{
   flex:1;min-height:var(--tap);padding:13px 16px;border-radius:16px;
   border:1px solid var(--line);background:var(--s);font-size:16px;color:var(--ink);
-  box-shadow:var(--shadow);
 }
-.composer input::placeholder{color:var(--muted)}
 .composer .send{
   width:var(--tap);height:var(--tap);border-radius:16px;flex-shrink:0;
   background:var(--a);color:#fff;font-size:18px;font-weight:800;
-  box-shadow:0 6px 14px rgba(107,79,53,.28);
 }
 .bnav{
   position:fixed;left:0;right:0;bottom:0;z-index:60;
@@ -131,7 +125,6 @@ h1{font-size:17px;font-weight:800;letter-spacing:-.02em}
 .bnav button{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:3px;color:var(--muted);font-size:10px;font-weight:700;min-height:var(--bn);
-  padding:6px 2px 4px;
 }
 .bnav button .ic{font-size:18px;line-height:1}
 .bnav button.on{color:var(--a)}
@@ -170,10 +163,6 @@ textarea.field{min-height:78px;resize:vertical}
 }
 .stat b{display:block;font-size:14px;font-weight:800}
 .stat span{font-size:10px;color:var(--muted);text-transform:uppercase}
-@media(max-width:380px){
-  .hero h2{font-size:20px}
-  .lab-grid{grid-template-columns:1fr}
-}
 </style>
 </head>
 <body>
@@ -181,16 +170,16 @@ textarea.field{min-height:78px;resize:vertical}
   <div class="logo">A</div>
   <div class="titles">
     <h1>АКСИ</h1>
-    <div class="sub">локальный offline runtime · без облака</div>
+    <div class="sub">offline runtime · SecureMem · Swarm · HRR</div>
   </div>
   <span class="pill on" id="modePill"><span class="dot"></span> offline</span>
 </header>
 <div class="stage" id="stage">
   <section class="panel on" id="tab-home">
     <div class="hero">
-      <div class="tag">Local Intelligence</div>
+      <div class="tag">Local Intelligence v33</div>
       <h2>Рабочий offline-прототип</h2>
-      <p>Спроси в чате «как устроена АКСИ» — ответит сама. Pipeline, ADIA, Trust, Protocol. Данные локально. Контакт: <b>aksilove@internet.ru</b></p>
+      <p>IndexedDB+AES · ADIA 5 осей · Swarm 3 профиля · HRR. Спроси «статус». Контакт: <b>aksilove@internet.ru</b></p>
       <div class="row">
         <button type="button" class="btn p" data-tab="chat">Открыть чат</button>
         <button type="button" class="btn" data-tab="local">Local AI</button>
@@ -199,7 +188,7 @@ textarea.field{min-height:78px;resize:vertical}
       <div class="kv">
         <div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div>
         <div class="cell"><b id="kvMem">0</b><span>память</span></div>
-        <div class="cell"><b id="kvEqs">—</b><span>EQS</span></div>
+        <div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div>
         <div class="cell"><b id="kvMods">0</b><span>модули</span></div>
       </div>
     </div>
@@ -217,7 +206,7 @@ textarea.field{min-height:78px;resize:vertical}
     <div class="card">
       <h3>Статус модулей</h3>
       <div class="stat-row" id="modStats"></div>
-      <p class="muted" style="margin-top:12px">Метрики — инженерные сигналы продукта. Integrity ledger = FNV-hash. Подпись = ECDSA / hybrid PQ.</p>
+      <p class="muted" style="margin-top:12px">SecureMem = IndexedDB+AES-GCM. ADIA assess ≥70% или реген. Swarm = 3 профиля.</p>
     </div>
   </section>
   <section class="panel" id="tab-chat">
@@ -242,7 +231,7 @@ textarea.field{min-height:78px;resize:vertical}
     </div>
     <div class="card">
       <h3>Локальный inference</h3>
-      <p class="muted" id="localCaps">загрузка модулей…</p>
+      <p class="muted" id="localCaps">загрузка…</p>
       <textarea class="field" id="localQ" placeholder="Запрос… или «запомни: факт»"></textarea>
       <div class="row">
         <button type="button" class="btn p" id="localAsk">Обработать</button>
@@ -250,16 +239,17 @@ textarea.field{min-height:78px;resize:vertical}
       </div>
       <div class="ans-box" id="localAns">Ответ появится здесь.</div>
       <div class="meta" id="localMeta"></div>
+      <div class="muted" id="modelProgress" style="margin-top:8px;font-size:12px"></div>
     </div>
     <div class="card">
       <h3>Execution trace</h3>
-      <div class="trace" id="localTrace"><div class="event"><b>BOOT</b> · local surface ready</div></div>
+      <div class="trace" id="localTrace"><div class="event"><b>BOOT</b> · v33</div></div>
     </div>
   </section>
   <section class="panel" id="tab-trust">
     <div class="card">
       <h3>Hybrid Crypto · AKSI-PQ</h3>
-      <p class="muted">Web Crypto ECDH/ECDSA P-256 + AES-256-GCM. Post-quantum: ML-KEM-768 hybrid (если доступен). DID локальный.</p>
+      <p class="muted">ECDSA P-256 + AES-GCM. Optional ML-KEM-768.</p>
       <pre class="out" id="pqStatus">ожидание…</pre>
       <div class="row" style="margin-top:10px">
         <button type="button" class="btn p" id="pqBoot">Идентичность</button>
@@ -268,23 +258,19 @@ textarea.field{min-height:78px;resize:vertical}
     </div>
     <div class="card">
       <h3>Seal / Open</h3>
-      <textarea class="field" id="pqPeer" placeholder="public pack получателя (JSON)"></textarea>
-      <textarea class="field" id="pqMsg" placeholder="Текст для шифрования…"></textarea>
+      <textarea class="field" id="pqPeer" placeholder="public pack JSON"></textarea>
+      <textarea class="field" id="pqMsg" placeholder="Текст…"></textarea>
       <div class="row">
         <button type="button" class="btn p" id="pqSeal">Seal</button>
         <button type="button" class="btn" id="pqOpen">Open</button>
       </div>
       <textarea class="field" id="pqEnv" placeholder="envelope JSON" style="min-height:110px"></textarea>
     </div>
-    <div class="card">
-      <h3>Честность стека</h3>
-      <p class="muted">Integrity ledger = FNV-hash (локальная телеметрия). Настоящая подпись = ECDSA. PQ = hybrid ML-KEM, не «квантовый компьютер».</p>
-    </div>
   </section>
   <section class="panel" id="tab-mem">
     <div class="card">
       <h3>Память · <span id="memN">0</span></h3>
-      <input class="field" id="teachIn" placeholder="факт… (или в чате: запомни: …)" autocomplete="off">
+      <input class="field" id="teachIn" placeholder="факт…" autocomplete="off">
       <button type="button" class="btn p block" id="btnTeach" style="margin-top:8px">Запомнить</button>
       <div id="memList" style="margin-top:14px"></div>
       <button type="button" class="btn block" id="btnWipe" style="margin-top:12px">Очистить память</button>
@@ -299,19 +285,20 @@ textarea.field{min-height:78px;resize:vertical}
         <a class="btn" href="/proof/">Proof</a>
         <a class="btn" href="/algorithm.html">ADIA</a>
         <a class="btn" href="/local-ai/">Local AI full</a>
-        <a class="btn" href="/protocol/">Protocol · Живой Разум</a>
+        <a class="btn" href="/protocol/">Protocol</a>
       </div>
     </div>
     <div class="card">
       <h3>Метрики ADIA</h3>
       <pre class="out" id="labMetrics">—</pre>
-      <button type="button" class="btn p" id="btnMetrics">Обновить EQS</button>
+      <button type="button" class="btn p" id="btnMetrics">Обновить assess</button>
     </div>
     <div class="card">
-      <p class="muted">Контакт: <b>aksilove@internet.ru</b> · @AKSILOVE<br>Публично — без цен и без персональных данных.</p>
+      <p class="muted">Контакт: <b>aksilove@internet.ru</b></p>
     </div>
   </section>
 </div>
+<div id="typingInd" class="muted" style="display:none;text-align:center;padding:4px;font-size:12px;position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:54">печатает…</div>
 <div class="composer" id="composer">
   <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000">
   <button type="button" class="send" id="send" aria-label="Отправить">↑</button>
@@ -324,22 +311,26 @@ textarea.field{min-height:78px;resize:vertical}
   <button type="button" data-tab="mem"><span class="ic">🧠</span>Память</button>
   <button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
 </nav>
-<script src="/aksi-algorithm.js?v=32"></script>
-<script src="/aksi-compose.js?v=32"></script>
-<script src="/aksi-neuro.js?v=32"></script>
-<script src="/aksi-quantum.js?v=32"></script>
-<script src="/aksi-pq.js?v=32"></script>
-<script src="/local-ai/engine.js?v=32"></script>
-<script src="/aksi-knowledge.js?v=32"></script>
-<script src="/aksi-self-arch.js?v=1"></script>
-<script src="/app-runtime.js?v=32"></script>
+<script src="/aksi-algorithm.js?v=33"></script>
+<script src="/aksi-compose.js?v=33"></script>
+<script src="/aksi-neuro.js?v=33"></script>
+<script src="/aksi-quantum.js?v=33"></script>
+<script src="/aksi-pq.js?v=33"></script>
+<script src="/local-ai/engine.js?v=33"></script>
+<script src="/aksi-knowledge.js?v=33"></script>
+<script src="/aksi-self-arch.js?v=2"></script>
+<script src="/aksi-secure-mem.js?v=1"></script>
+<script src="/aksi-adia-assess.js?v=1"></script>
+<script src="/aksi-swarm.js?v=1"></script>
+<script src="/aksi-hrr.js?v=1"></script>
+<script src="/app-runtime.js?v=33"></script>
 <script>
 (function(){
 if(!('serviceWorker' in navigator))return;
 window.addEventListener('load',function(){
-navigator.serviceWorker.register('/sw.js?v=31').then(function(reg){
+navigator.serviceWorker.register('/sw.js?v=32').then(function(reg){
 try{reg.update()}catch(e){}
-if(window.caches){caches.keys().then(function(keys){keys.forEach(function(k){if(k.indexOf('aksi-shell-v31')===-1)caches.delete(k)})})}
+if(window.caches){caches.keys().then(function(keys){keys.forEach(function(k){if(k.indexOf('aksi-shell-v32')===-1)caches.delete(k)})})}
 }).catch(function(){})});
 })();
 </script>
