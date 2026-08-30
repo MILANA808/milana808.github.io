@@ -1,5 +1,5 @@
-/* AKSI shell SW v30 — beige product SPA, network-first HTML */
-var CACHE = "aksi-shell-v30-beige";
+/* AKSI shell SW v31 — beige product SPA, network-first HTML */
+var CACHE = "aksi-shell-v31-beige";
 var PRE = [
   "/",
   "/index.html",
@@ -42,7 +42,6 @@ self.addEventListener("fetch", function (e) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  // HTML always network-first so beige SPA updates immediately
   var isHtml = url.pathname === "/" || url.pathname.endsWith(".html") || url.pathname.endsWith("/");
   if (isHtml) {
     e.respondWith(
