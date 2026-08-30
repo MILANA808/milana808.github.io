@@ -1,118 +1,104 @@
 /**
- * AKSI MIND v1.5 — offline-first + ADIA 2.0 on every answer
- * Intent → Brain → WebLLM? → Neuro → ADIA(EQS·seal) → Web? → LLM → Trust
+ * AKSI MIND v1.6 — offline-first + ADIA 2.0 + quantum answerGate
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.5.0-mind+adia";
-  function has(name, method) {
-    var m = G[name]; if (!m) return false;
-    if (!method) return true;
-    return typeof m[method] === "function";
+  var VER = "1.6.0-mind+quantum";
+  function has(name, fn) {
+    var o = G[name];
+    if (!o) return false;
+    if (!fn) return true;
+    return typeof o[fn] === "function";
   }
   function quantumShot(q) {
-    if (!has("AKSI_QUANTUM", "shot")) return null;
+    if (!has("AKSI_QUANTUM")) return null;
     try {
-      var qx = G.AKSI_QUANTUM.shot(String(q || "ping").slice(0, 200));
+      var qx = null;
+      if (typeof G.AKSI_QUANTUM.shot === "function") qx = G.AKSI_QUANTUM.shot(String(q || "ping").slice(0, 200));
       if (qx && qx.qcli == null && qx.QCLI != null) qx.qcli = qx.QCLI;
       if (qx && qx.QCLI == null && qx.qcli != null) qx.QCLI = qx.qcli;
       return qx;
-    } catch (e) { return { error: String(e.message || e) }; }
+    } catch (e) { return null; }
+  }
+  function quantumAnswerGate(q, text) {
+    if (!has("AKSI_QUANTUM")) return null;
+    try {
+      if (typeof G.AKSI_QUANTUM.answerGate === "function") {
+        var qx = G.AKSI_QUANTUM.answerGate(String(q || "").slice(0, 300), String(text || "").slice(0, 800));
+        if (qx && qx.qcli == null && qx.QCLI != null) qx.qcli = qx.QCLI;
+        if (qx && qx.QCLI == null && qx.qcli != null) qx.QCLI = qx.qcli;
+        return qx;
+      }
+      return quantumShot(q);
+    } catch (e) { return quantumShot(q); }
   }
   function fromBrain(q) {
-    if (!has("AKSI_BRAIN", "complete")) return Promise.resolve(null);
+    if (!has("AKSI_BRAIN", "complete")) return null;
     try {
       var r = G.AKSI_BRAIN.complete(q);
-      if (r && r.text && String(r.meta || "").indexOf("fallback") === -1)
-        return Promise.resolve({ text: r.text, meta: r.meta || "brain", source: "brain", offline: true, score: r.score });
-      if (r && r.text) return Promise.resolve({ text: r.text, meta: r.meta || "brain", source: "brain", offline: true, weak: true });
+      if (r && r.text) return { text: r.text, meta: r.meta || "brain", source: "brain", weak: !!r.weak };
     } catch (e) {}
-    return Promise.resolve(null);
-  }
-  function fromCore(q) {
-    var c = G.AKSI_CORE || G.AksiCore;
-    if (!c || typeof c.query !== "function") return Promise.resolve(null);
-    return Promise.race([c.query(q), new Promise(function (r) { setTimeout(function () { r(null); }, 10000); })])
-      .then(function (res) {
-        if (res && (res.ok || res.text) && res.text) return { text: String(res.text), meta: res.local ? "core·local" : "core·net", source: "core" };
-        return null;
-      }).catch(function () { return null; });
-  }
-  function fromWeb(q) {
-    if (!has("AKSI_WEB", "search")) return fromCore(q);
-    return Promise.race([
-      G.AKSI_WEB.search(q).then(function (r) {
-        if (r && r.text) return { text: r.text, meta: r.meta || (r.ok ? "web" : "web·empty"), source: "web", offline: !!r.offline, ok: !!r.ok };
-        return null;
-      }).catch(function () { return null; }),
-      new Promise(function (r) { setTimeout(function () { r(null); }, 12000); })
-    ]);
-  }
-  function meaningfulFallback(q) {
-    return { text: "Пока нет точного ответа на «" + String(q).slice(0, 80) + "».\n\nOffline-first. «кто ты?», «запомни: …», Lab → ADIA / WebLLM / Ollama.", meta: "mind·guide", source: "mind", offline: true };
-  }
-  function fromLLM(q) {
-    if (has("AKSI_LLM", "complete")) {
-      return Promise.race([
-        G.AKSI_LLM.complete(q).then(function (r) { return r && r.text ? { text: r.text, meta: r.providerId || "llm", source: "llm" } : null; }).catch(function () { return null; }),
-        new Promise(function (r) { setTimeout(function () { r(null); }, 45000); })
-      ]);
-    }
-    return Promise.resolve(null);
+    return null;
   }
   function fromNeuro(q) {
     if (!has("AKSI_NEURO")) return null;
     try {
       if (typeof G.AKSI_NEURO.think === "function") {
         var r = G.AKSI_NEURO.think(q);
-        if (r && r.text && String(r.text).trim().length > 4)
-          return { text: String(r.text).trim(), meta: (r.mode || "neuro") + (r.steps != null ? " · " + r.steps : ""), source: "neuro", offline: true, mode: r.mode, score: r.score };
+        if (r && r.text) return { text: r.text, meta: r.mode || r.meta || "neuro", source: "neuro", offline: true };
       }
     } catch (e) {}
     return null;
   }
   function fromWebLLM(q) {
-    if (!has("AKSI_WEBLLM") || !G.AKSI_WEBLLM.ready || !G.AKSI_WEBLLM.ready()) return Promise.resolve(null);
-    try {
-      return G.AKSI_WEBLLM.complete(q).then(function (r) {
-        if (r && r.text && String(r.text).trim().length > 4)
-          return { text: String(r.text).trim(), meta: r.meta || "webllm", source: "webllm", offline: true, model: r.model };
-        return null;
+    if (!has("AKSI_WEBLLM", "complete")) return Promise.resolve(null);
+    if (!G.AKSI_WEBLLM.ready || !G.AKSI_WEBLLM.ready()) return Promise.resolve(null);
+    return G.AKSI_WEBLLM.complete(q).then(function (r) {
+      return r && r.text ? { text: r.text, meta: r.meta || "webllm", source: "webllm" } : null;
+    }).catch(function () { return null; });
+  }
+  function fromWeb(q) {
+    if (!has("AKSI_WEB") || !G.AKSI_WEB.isEnabled || !G.AKSI_WEB.isEnabled()) return Promise.resolve(null);
+    if (typeof G.AKSI_WEB.search === "function") {
+      return G.AKSI_WEB.search(q).then(function (r) {
+        return r && r.text ? { text: r.text, meta: r.meta || "web", source: "web", ok: true } : null;
       }).catch(function () { return null; });
-    } catch (e) { return Promise.resolve(null); }
+    }
+    return Promise.resolve(null);
   }
   function intent(q) {
-    var low = String(q || "").toLowerCase().trim();
-    if (/^\/demo\b|^demo$/i.test(low)) return "demo";
-    if (/^whoami$/i.test(low)) return "identity";
-    if (/^(запомни|выучи)\s*[:\s]/i.test(low)) return "remember";
-    if (/статус|health|модул/i.test(low)) return "status";
-    if (/кто ты|что ты такое/i.test(low)) return "persona";
-    return "general";
-  }
-  function statusSnapshot() {
-    var mods = {
-      quantum: has("AKSI_QUANTUM"), brain: has("AKSI_BRAIN"), neuro: has("AKSI_NEURO"),
-      webllm: has("AKSI_WEBLLM") && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready(),
-      web: has("AKSI_WEB"), llm: has("AKSI_LLM"), trust: has("AKSI_TRUST"),
-      adia: has("AKSI_ALGORITHM"), mind: true
-    };
-    return { version: VER, product: "AKSI Unified Mind", modules: mods, online: Object.keys(mods).filter(function (k) { return mods[k]; }),
-      path: "Intent → Brain → WebLLM? → Neuro → ADIA(EQS·seal) → Web? → LLM → Trust", contact: "aksilove@internet.ru",
-      adia: has("AKSI_ALGORITHM") ? (G.AKSI_ALGORITHM.version || true) : false };
+    var s = String(q || "").toLowerCase().trim();
+    if (/^\/demo|^demo$/.test(s)) return "demo";
+    if (/^whoami|кто ты\s*\?*$/.test(s) && /whoami/.test(s)) return "identity";
+    if (/^статус$|^status$/.test(s)) return "status";
+    if (/^(запомни|выучи|remember)\b/.test(s)) return "remember";
+    return "chat";
   }
   function rememberCmd(q) {
-    var m = String(q).match(/^(запомни|выучи)\s*[:\s]+(.+)/i);
+    var m = String(q).match(/^(запомни|выучи|remember)\s*[:\s]+(.+)/i);
     if (!m) return null;
     var fact = m[2].trim();
+    if (has("AKSI_NEURO", "learn")) try { G.AKSI_NEURO.learn(fact); } catch (e) {}
     if (has("AKSI_ONE", "remember")) try { G.AKSI_ONE.remember(fact, "user"); } catch (e) {}
     if (has("AKSI_BRAIN", "teach")) try { G.AKSI_BRAIN.teach(fact); } catch (e) {}
-    if (has("AKSI_NEURO", "learn")) try { G.AKSI_NEURO.learn(fact); } catch (e) {}
-    return { text: "Запомнила:\n«" + fact + "»", meta: "mind·memory", source: "memory", offline: true };
+    return { text: "Запомнила:\n«" + fact + "»", meta: "memory", source: "memory", offline: true };
+  }
+  function snapshot() {
+    var online = [];
+    if (has("AKSI_NEURO")) online.push("neuro");
+    if (has("AKSI_ALGORITHM")) online.push("adia");
+    if (has("AKSI_QUANTUM")) online.push("quantum");
+    if (has("AKSI_WEBLLM") && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready()) online.push("webllm");
+    return { online: online, path: "Brain→WebLLM?→Neuro→ADIA→Q-gate→Web?" };
+  }
+  function meaningfulFallback(q) {
+    return { text: "Пока нет точного факта. Напишите «запомни: …» или Lab → Neuro. Offline.", meta: "fallback", source: "mind", offline: true };
   }
   function trustWrap(q, payload, qx) {
     var text = payload.text, meta = payload.meta || "mind", sources = payload.sources || [payload.source || "mind"];
+    var qxGate = quantumAnswerGate(q, text);
+    if (qxGate) qx = qxGate;
     var qv = qx && (qx.QCLI != null ? qx.QCLI : qx.qcli);
     if (qv != null) meta += " · Q" + qv;
     var adiaMetrics = null, adiaSeal = null;
@@ -126,65 +112,48 @@
         }
       } catch (e) {}
     }
-    function pack(tr) {
-      if (tr && tr.trust) meta += " · trust:" + tr.trust;
-      return { text: text, meta: meta, quantum: qx, trust: tr || null, sources: sources, offline: !!payload.offline, mind: VER, adia: adiaMetrics, seal: adiaSeal };
-    }
-    if (!has("AKSI_TRUST", "verifyResponse")) return Promise.resolve(pack(null));
-    return G.AKSI_TRUST.verifyResponse(q, String(text).split("\n\u2014\u2014\n")[0], { source: "mind" }).then(pack).catch(function () { return pack(null); });
+    return Promise.resolve({
+      text: text, meta: meta, quantum: qx, trust: null, sources: sources,
+      offline: !!payload.offline, mind: VER, adia: adiaMetrics, seal: adiaSeal
+    });
   }
   function think(q) {
     q = String(q || "").trim();
-    if (!q) return Promise.resolve({ text: "Напишите вопрос.", meta: "mind", mind: VER });
+    if (!q) return Promise.resolve({ text: "Пустой запрос.", meta: "mind", offline: true });
     var qx = quantumShot(q), it = intent(q);
-    if (it === "demo") return trustWrap(q, { text: "AKSI · whoami · запомни: · статус · Lab→ADIA/WebLLM", meta: "mind·demo", source: "mind", offline: true }, qx);
+    if (it === "demo") return trustWrap(q, { text: "AKSI · whoami · запомни: · статус · Lab→ADIA/Quantum/WebLLM", meta: "mind·demo", source: "mind", offline: true }, qx);
     if (it === "identity") {
-      var did = "did:aksi:local"; try { did = localStorage.getItem("aksi_did_v1") || did; } catch (e) {}
+      var did = "did:aksi:local";
+      try { did = localStorage.getItem("aksi_did_v1") || did; } catch (e) {}
       return trustWrap(q, { text: "DID: " + did + "\nlocal-first · aksilove@internet.ru", meta: "mind·id", source: "mind", offline: true }, qx);
     }
     if (it === "status") {
-      var snap = statusSnapshot();
+      var snap = snapshot();
       return trustWrap(q, { text: "Активно: " + snap.online.join(", ") + "\n" + snap.path, meta: "mind·status", source: "mind", offline: true }, qx);
     }
-    if (it === "remember") { var rm = rememberCmd(q); if (rm) return trustWrap(q, rm, qx); }
-    return fromBrain(q).then(function (br) {
-      if (br && !br.weak) return trustWrap(q, { text: br.text, meta: br.meta, source: br.source, offline: true, sources: ["brain"] }, qx);
-      return fromWebLLM(q).then(function (wllm) {
-        if (wllm && wllm.text) return trustWrap(q, { text: wllm.text, meta: wllm.meta, source: "webllm", offline: true, sources: ["webllm"] }, qx);
-        var neuro = fromNeuro(q);
-        if (neuro && neuro.text && String(neuro.text).length > 8)
-          return trustWrap(q, { text: neuro.text, meta: neuro.meta || "neuro", source: "neuro", offline: true, sources: ["neuro"] }, qx);
-        var wantWeb = has("AKSI_WEB") && G.AKSI_WEB.isEnabled && G.AKSI_WEB.isEnabled();
-        return (wantWeb ? fromWeb(q) : Promise.resolve(null)).then(function (web) {
-          if (web && web.ok && web.text) return trustWrap(q, { text: web.text, meta: web.meta, source: "web", sources: ["web"] }, qx);
-          return fromCore(q).then(function (core) {
-            if (core && core.text) return trustWrap(q, { text: core.text, meta: core.meta, source: core.source, sources: ["core"] }, qx);
-            return fromLLM(q).then(function (llm) {
-              if (llm && llm.text) return trustWrap(q, { text: llm.text, meta: llm.meta, source: llm.source, sources: ["llm"] }, qx);
-              if (neuro && neuro.text) return trustWrap(q, { text: neuro.text, meta: neuro.meta, source: "neuro", offline: true, sources: ["neuro"] }, qx);
-              if (br && br.text) return trustWrap(q, { text: br.text, meta: br.meta, source: "brain", offline: true, sources: ["brain"] }, qx);
-              return trustWrap(q, meaningfulFallback(q), qx);
-            });
-          });
-        });
+    if (it === "remember") {
+      var rm = rememberCmd(q);
+      if (rm) return trustWrap(q, rm, qx);
+    }
+    var br = fromBrain(q);
+    if (br && !br.weak) return trustWrap(q, { text: br.text, meta: br.meta, source: br.source, offline: true, sources: ["brain"] }, qx);
+    return fromWebLLM(q).then(function (wllm) {
+      if (wllm && wllm.text) return trustWrap(q, { text: wllm.text, meta: wllm.meta, source: "webllm", offline: true, sources: ["webllm"] }, qx);
+      var neuro = fromNeuro(q);
+      if (neuro && neuro.text) return trustWrap(q, { text: neuro.text, meta: neuro.meta || "neuro", source: "neuro", offline: true, sources: ["neuro"] }, qx);
+      return fromWeb(q).then(function (web) {
+        if (web && web.ok && web.text) return trustWrap(q, { text: web.text, meta: web.meta, source: "web", sources: ["web"] }, qx);
+        if (neuro && neuro.text) return trustWrap(q, { text: neuro.text, meta: neuro.meta, source: "neuro", offline: true, sources: ["neuro"] }, qx);
+        if (br && br.text) return trustWrap(q, { text: br.text, meta: br.meta, source: "brain", offline: true, sources: ["brain"] }, qx);
+        return trustWrap(q, meaningfulFallback(q), qx);
       });
     });
   }
   function mount(sel) {
-    var root = typeof sel === "string" ? document.querySelector(sel) : sel; if (!root) return;
-    var snap = statusSnapshot();
-    root.innerHTML = '<div class="card"><h2>AKSI MIND · v' + VER + '</h2><p class="muted">' + snap.path + '</p><pre class="out">' + JSON.stringify(snap, null, 2) + '</pre></div>';
+    var root = typeof sel === "string" ? document.querySelector(sel) : sel;
+    if (!root) return;
+    var snap = snapshot();
+    root.innerHTML = '<div class="card"><h2>MIND · v' + VER + '</h2><p class="muted">' + snap.path + '</p><pre class="out">' + JSON.stringify(snap, null, 2) + '</pre></div>';
   }
-  function hookOne() {
-    if (!G.AKSI_ONE || typeof G.AKSI_ONE.think !== "function" || G.AKSI_ONE._mindHooked) return;
-    var prev = G.AKSI_ONE.think;
-    G.AKSI_ONE.think = function (q) { if (G.AKSI_ONE.think._viaMind) return prev(q); return think(q); };
-    G.AKSI_ONE._mindHooked = true;
-  }
-  G.AKSI_MIND = { version: VER, think: think, ask: think, status: statusSnapshot, intent: intent, mount: mount };
-  G.AKSI = G.AKSI || {}; G.AKSI.mind = VER; G.AKSI.think = think;
-  if (typeof document !== "undefined") {
-    function tryHook(n) { n = n || 0; hookOne(); if (!G.AKSI_ONE || !G.AKSI_ONE._mindHooked) { if (n < 25) setTimeout(function () { tryHook(n + 1); }, 100); } }
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { tryHook(0); }); else tryHook(0);
-  }
+  G.AKSI_MIND = { version: VER, think: think, ask: think, mount: mount, snapshot: snapshot };
 })(typeof window !== "undefined" ? window : this);
