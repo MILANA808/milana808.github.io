@@ -18,7 +18,7 @@ jobs:
       - name: Required runtime files
         run: |
           set -euo pipefail
-          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js; do
+          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js local-ai/index.html local-ai/engine.js local-ai/sw.js aksi-webllm.js; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
           echo "core files OK"
@@ -38,31 +38,51 @@ jobs:
       - name: Runtime contract tests
         run: node tests/aksi-runtime.test.js
 
+      - name: Local AI contract
+        run: |
+          set -euo pipefail
+          node --check local-ai/engine.js
+          node --check aksi-webllm.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('local-ai/manifest.json').read_text(encoding='utf-8'))
+          assert manifest.get('start_url') == '/local-ai/'
+          html=Path('local-ai/index.html').read_text(encoding='utf-8')
+          for needle in ('AKSI_LOCAL_ENGINE','aksi-webllm.js','engine.js','execution trace','remote: OFF'):
+              assert needle in html, needle
+          engine=Path('local-ai/engine.js').read_text(encoding='utf-8')
+          for needle in ('memory.retrieve','inference.start','inference.complete','offline-kernel','allowLocalServer'):
+              assert needle in engine, needle
+          print('local AI contract OK')
+          PY
+
       - name: Referenced scripts exist
         run: |
           python3 - <<'PY'
           import re
           from pathlib import Path
-          html = Path("index.html").read_text(encoding="utf-8", errors="replace")
-          scripts = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, re.I)
           missing = []
-          for src in scripts:
-              if src.startswith(("http://", "https://", "//")):
-                  continue
-              path = Path(src.split("?", 1)[0].split("#", 1)[0])
-              if not path.is_file():
-                  missing.append(str(path))
+          for html_path in [Path("index.html"), Path("local-ai/index.html")]:
+              html = html_path.read_text(encoding="utf-8", errors="replace")
+              scripts = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, re.I)
+              for src in scripts:
+                  if src.startswith(("http://", "https://", "//")):
+                      continue
+                  path = (html_path.parent / src.split("?", 1)[0].split("#", 1)[0]).resolve()
+                  if not path.is_file():
+                      missing.append(str(path))
           if missing:
               print("Missing scripts:", *missing, sep="\n- ")
               raise SystemExit(1)
-          print(f"Referenced local scripts OK: {len(scripts)}")
+          print("Referenced local scripts OK")
           PY
 
       - name: Core HTML sanity
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          required = ["index.html", "404.html", "aksi.html"]
+          required = ["index.html", "404.html", "aksi.html", "local-ai/index.html"]
           bad = []
           for name in required:
               s = Path(name).read_text(encoding="utf-8", errors="replace").lower()
