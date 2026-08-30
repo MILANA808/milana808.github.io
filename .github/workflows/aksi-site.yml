@@ -1,43 +1,42 @@
 name: AKSI verification
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-
       - name: Required runtime files
         run: |
           set -euo pipefail
-          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js; do
+          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js aksi-algorithm.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
-          echo "core files OK"
-
       - name: JavaScript syntax
         run: |
           set -euo pipefail
-          find . -type f -name '*.js' -not -path './.git/*' -not -name '*.min.js' -print0 |
-            while IFS= read -r -d '' f; do
-              node --check "$f" || exit 1
-            done
-          echo "all JavaScript files parse successfully"
-
+          find . -type f -name '*.js' -not -path './.git/*' -not -name '*.min.js' -print0 | while IFS= read -r -d '' f; do node --check "$f" || exit 1; done
       - name: Answer quality tests
         run: node tests/aksi-answer-quality.test.js
-
       - name: Runtime contract tests
         run: node tests/aksi-runtime.test.js
-
+      - name: Metrics contract
+        run: |
+          node --check aksi-algorithm.js
+          node - <<'NODE'
+          global.window=global; require('./aksi-algorithm.js');
+          const A=global.AKSI_ALGORITHM;
+          if(!A || A.version!=='6.0.0') throw new Error('metrics engine unavailable');
+          const r=A.evaluate('hello','AKSI local verification',{offline:true,seal:false});
+          for(const k of ['H','QCLI','H_eff','EQS','AKSI','resonance','DIMAX','DIMAX_U5','quantum']) if(!(k in r.metrics)) throw new Error('missing metric '+k);
+          if(r.metrics.quantum.qubits!==3) throw new Error('3-qubit simulator contract failed');
+          console.log('metrics contract OK');
+          NODE
       - name: Local AI contract
         run: |
           set -euo pipefail
@@ -56,58 +55,40 @@ jobs:
               assert needle in engine, needle
           print('local AI contract OK')
           PY
-
+      - name: Privacy and secret scan
+        run: |
+          set -euo pipefail
+          if grep -RInE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}' --exclude-dir=.git --exclude='*.map' .; then exit 1; fi
+          if grep -RInE 'aksilove@|Alfiya|Баширова|[А-Яа-я]+_[А-Яа-я]+_AKSI_' --exclude-dir=.git --exclude='*.map' .; then
+            echo 'Possible personal identifier found in public product source'; exit 1
+          fi
+          echo 'Privacy/secret scan OK'
       - name: Referenced scripts exist
         run: |
           python3 - <<'PY'
           import re
           from pathlib import Path
-          missing = []
-          for html_path in [Path("index.html"), Path("local-ai/index.html")]:
-              html = html_path.read_text(encoding="utf-8", errors="replace")
-              scripts = re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, re.I)
-              for src in scripts:
-                  if src.startswith(("http://", "https://", "//")):
-                      continue
-                  path = (html_path.parent / src.split("?", 1)[0].split("#", 1)[0]).resolve()
-                  if not path.is_file():
-                      missing.append(str(path))
-          if missing:
-              print("Missing scripts:", *missing, sep="\n- ")
-              raise SystemExit(1)
-          print("Referenced local scripts OK")
+          missing=[]
+          for hp in [Path('index.html'),Path('local-ai/index.html')]:
+            html=hp.read_text(encoding='utf-8',errors='replace')
+            for src in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',html,re.I):
+              if src.startswith(('http://','https://','//')): continue
+              p=(hp.parent/src.split('?',1)[0].split('#',1)[0]).resolve()
+              if not p.is_file(): missing.append(str(p))
+          if missing: print(*missing,sep='\n'); raise SystemExit(1)
+          print('Referenced local scripts OK')
           PY
-
       - name: Core HTML sanity
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          required = ["index.html", "404.html", "aksi.html", "local-ai/index.html"]
-          bad = []
-          for name in required:
-              s = Path(name).read_text(encoding="utf-8", errors="replace").lower()
-              if "<html" not in s or "</html>" not in s:
-                  bad.append(name)
-          if bad:
-              print("BAD:", bad)
-              raise SystemExit(1)
-          print("HTML OK")
+          for name in ['index.html','404.html','aksi.html','local-ai/index.html']:
+            s=Path(name).read_text(encoding='utf-8',errors='replace').lower()
+            if '<html' not in s or '</html>' not in s: raise SystemExit('BAD '+name)
+          print('HTML OK')
           PY
-
       - name: Runtime size sanity
         run: |
           set -euo pipefail
-          hz=$(wc -c < aksi.html)
-          jz=$(wc -c < aksi-app.js)
-          echo "aksi.html=$hz aksi-app.js=$jz"
-          test "$hz" -gt 5000
-          test "$jz" -gt 10000
-
-      - name: No obvious secret literals
-        run: |
-          set -euo pipefail
-          if grep -RInE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{20,}' --exclude-dir=.git --exclude='*.map' .; then
-            echo "Possible secret literal found"
-            exit 1
-          fi
-          echo "No obvious secret literals found"
+          test "$(wc -c < aksi.html)" -gt 5000
+          test "$(wc -c < aksi-app.js)" -gt 10000
