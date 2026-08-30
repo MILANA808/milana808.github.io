@@ -1,2 +1,108 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#efe5d2"><meta name="color-scheme" content="light"><meta name="description" content="AKSI Local AI — private on-device inference, memory and observable execution."><link rel="manifest" href="manifest.json"><title>AKSI · Local AI</title><style>:root{--bg:#efe5d2;--s:#fbf7ef;--s2:#e7dbc6;--ink:#28231d;--muted:#756b5d;--line:#d5c7b0;--a:#705038;--a2:#a27b57;--ok:#356b4a;--warn:#8b651f;--r:18px;--sh:0 14px 40px rgba(67,48,31,.1)}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#fffaf0,transparent 38%),var(--bg);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:1050px;margin:auto;padding:18px}.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.logo{width:46px;height:46px;border-radius:14px;background:var(--a);color:#fff;display:grid;place-items:center;font-weight:900}.sub{color:var(--muted);font-size:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{background:rgba(251,247,239,.95);border:1px solid var(--line);border-radius:var(--r);padding:17px;box-shadow:var(--sh)}.wide{grid-column:1/-1}.badges,.row,.metrics{display:flex;flex-wrap:wrap;gap:7px}.badge,.metric{padding:7px 9px;border-radius:10px;background:var(--s2);border:1px solid var(--line);font-size:12px}.ok{color:var(--ok)}.warn{color:var(--warn)}select,textarea,button{font:inherit}select,textarea{width:100%;color:var(--ink);background:var(--s);border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:9px}textarea{min-height:125px;resize:vertical}button{border:1px solid var(--a);border-radius:12px;padding:11px 14px;background:var(--a);color:#fff;font-weight:800;cursor:pointer;margin-top:9px}button.secondary{background:var(--s);color:var(--ink);border-color:var(--line)}.row button{flex:1;min-width:145px}.answer{white-space:pre-wrap;line-height:1.55;background:#29241f;color:#f5eee3;border-radius:12px;padding:13px;margin-top:9px;min-height:105px}.trace{height:380px;overflow:auto;background:#29241f;color:#eee5d7;border-radius:12px;padding:8px;margin-top:9px}.event{padding:8px;border-bottom:1px solid rgba(255,255,255,.1);font:12px ui-monospace,SFMono-Regular,Menlo,monospace}.event b{color:#d9b18b}.event small{color:#b9aa96}.note{color:var(--muted);font-size:12px;line-height:1.5}@media(max-width:760px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}main{padding:10px}}
-</style></head><body><main><header class="top"><div class="logo">A</div><div><h1 style="margin:0;font-size:20px">AKSI · Local AI</h1><div class="sub">on-device inference · memory · retrieval · verification trace</div></div></header><div class="grid"><section class="card"><h2 style="font-size:16px">Локальный inference</h2><div class="badges"><span id="gpu" class="badge">WebGPU…</span><span id="db" class="badge">IndexedDB…</span><span id="policy" class="badge ok">remote: OFF</span></div><select id="model"></select><div class="row"><button id="load">Загрузить модель</button><button id="unload" class="secondary">Выгрузить</button></div><p id="loadState" class="note">Веса модели загружаются на устройство; после кэширования повторный запуск может работать без сети.</p></section><section class="card"><h2 style="font-size:16px">Состояние</h2><div class="metrics"><span class="metric">mode: <b id="mode">offline-kernel</b></span><span class="metric">model: <b id="ready">нет</b></span><span class="metric">memory: <b id="mem">0</b></span></div><p class="note">Для мощных локальных моделей предусмотрен localhost-адаптер llama.cpp. Этот экран не отправляет запросы в облако.</p></section><section class="card wide"><h2 style="font-size:16px">Запрос</h2><textarea id="q" placeholder="Напиши запрос…"></textarea><div class="row"><button id="ask">Обработать локально</button><button id="remember" class="secondary">Сохранить в память</button></div><div class="answer" id="answer">Ответ появится здесь.</div></section><section class="card wide"><h2 style="font-size:16px">Execution trace</h2><p class="note">Здесь отображаются реальные этапы выполнения: ввод, retrieval, контекст, inference, завершение и verification. Это не скрытая chain-of-thought модели.</p><div id="trace" class="trace"><div class="event"><b>BOOT</b> · Runtime ready</div></div></section></div><script src="../aksi-webllm.js"></script><script src="engine.js"></script><script>const E=window.AKSI_LOCAL_ENGINE,$=id=>document.getElementById(id);E.models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;$("model").appendChild(o)});function esc(s){return String(s).replace(/[&<>"\\]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\\':'&#92;'}[c]))}async function render(){const c=E.capabilities();$("gpu").textContent='WebGPU: '+(c.webgpu?'YES':'NO');$("gpu").className='badge '+(c.webgpu?'ok':'warn');$("db").textContent='IndexedDB: '+(c.indexedDB?'YES':'NO');$("db").className='badge '+(c.indexedDB?'ok':'warn');$("mode").textContent=c.mode;$("ready").textContent=c.ready?'READY':'NO';$("mem").textContent=(await E.memoryAll()).length}E.subscribe(e=>{const d=document.createElement('div');d.className='event';d.innerHTML='<b>'+esc(e.type)+'</b> <small>'+new Date(e.ts).toLocaleTimeString()+'</small><br>'+esc(JSON.stringify(e.data||{}));$("trace").prepend(d);render()});$("load").onclick=async()=>{try{$("loadState").textContent='Загрузка модели…';await E.load($("model").value,s=>$("loadState").textContent=(s.message||'')+' · '+Math.round((s.progress||0)*100)+'%');$("loadState").textContent='Модель готова. Генерация локально.'}catch(e){$("loadState").textContent='Ошибка: '+e.message}render()};$("unload").onclick=async()=>{await E.unload();$("loadState").textContent='Модель выгружена';render()};$("ask").onclick=async()=>{const q=$("q").value.trim();if(!q)return;$("answer").textContent='Обработка…';try{const r=await E.ask(q,{useMemory:true});$("answer").textContent=r.text||'Нет ответа'}catch(e){$("answer").textContent='Ошибка: '+e.message}render()};$("remember").onclick=async()=>{const q=$("q").value.trim();if(q){await E.memoryPut(q,{source:'user'});$("q").value='';render()}};render();</script></main></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#efe5d2">
+<meta name="description" content="АКСИ Local AI — offline ИИ с видимым pipeline.">
+<link rel="manifest" href="manifest.json">
+<title>АКСИ · Local AI</title>
+<style>
+:root{--bg:#efe5d2;--s:#fbf7ef;--s2:#e7dbc6;--ink:#28231d;--muted:#756b5d;--line:#d5c7b0;--a:#705038;--ok:#356b4a;--warn:#8b651f;--r:18px;--sh:0 14px 40px rgba(67,48,31,.1)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#fffaf0,transparent 38%),var(--bg);color:var(--ink);font:15px/1.55 system-ui,sans-serif}
+main{max-width:1100px;margin:auto;padding:18px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.logo{width:46px;height:46px;border-radius:14px;background:var(--a);color:#fff;display:grid;place-items:center;font-weight:900}
+.sub{color:var(--muted);font-size:12px}.navlinks{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.navlinks a{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--s);font-size:12px;font-weight:700;color:inherit;text-decoration:none}
+.pipeline{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.step{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-size:11px;font-weight:700;color:var(--muted)}
+.step.on{background:var(--a);color:#fff;border-color:var(--a)}.step.done{background:#e6efe7;color:var(--ok)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:rgba(251,247,239,.95);border:1px solid var(--line);border-radius:var(--r);padding:17px;box-shadow:var(--sh)}
+.wide{grid-column:1/-1}.badges,.row,.metrics{display:flex;flex-wrap:wrap;gap:7px}
+.badge,.metric{padding:7px 9px;border-radius:10px;background:var(--s2);border:1px solid var(--line);font-size:12px}
+.ok{color:var(--ok)}.warn{color:var(--warn)}
+select,textarea,button{font:inherit}select,textarea{width:100%;color:var(--ink);background:var(--s);border:1px solid var(--line);border-radius:12px;padding:11px;margin-top:9px}
+textarea{min-height:110px;resize:vertical}
+button{border:1px solid var(--a);border-radius:12px;padding:11px 14px;background:var(--a);color:#fff;font-weight:800;cursor:pointer;margin-top:9px}
+button.secondary{background:var(--s);color:var(--ink);border-color:var(--line)}.row button{flex:1;min-width:130px}
+.answer{white-space:pre-wrap;background:#29241f;color:#f5eee3;border-radius:12px;padding:13px;margin-top:9px;min-height:90px}
+.meta{font-size:11px;color:#b9aa96;margin-top:8px}
+.trace{height:360px;overflow:auto;background:#29241f;color:#eee5d7;border-radius:12px;padding:8px;margin-top:9px}
+.event{padding:8px;border-bottom:1px solid rgba(255,255,255,.1);font:12px ui-monospace,monospace}.event b{color:#d9b18b}.event small{color:#b9aa96}
+.note{color:var(--muted);font-size:12px;line-height:1.5}h2{font-size:16px;margin:0 0 4px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.navlinks{margin-left:0}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <div class="logo">A</div>
+  <div><h1 style="margin:0;font-size:20px">АКСИ · Local AI</h1>
+  <div class="sub">offline ядро · видимый pipeline · память · квант · без облака по умолчанию</div></div>
+  <div class="navlinks"><a href="/">← Платформа</a><a href="/matrix/">MATRIX</a><a href="/chat/">Chat</a></div>
+</header>
+<div class="pipeline" id="pipe">
+  <span class="step" data-s="input">1. Ввод</span>
+  <span class="step" data-s="memory">2. Память</span>
+  <span class="step" data-s="kernel">3. Ядро</span>
+  <span class="step" data-s="quantum">4. Квант</span>
+  <span class="step" data-s="metrics">5. Метрики</span>
+  <span class="step" data-s="verify">6. Проверка</span>
+</div>
+<div class="grid">
+<section class="card"><h2>Локальный inference</h2>
+<div class="badges"><span id="gpu" class="badge">WebGPU…</span><span id="db" class="badge">IndexedDB…</span><span id="kernel" class="badge">ядро…</span><span id="policy" class="badge ok">сеть: OFF</span></div>
+<select id="model"></select>
+<div class="row"><button id="load">Загрузить LLM</button><button id="unload" class="secondary">Выгрузить</button></div>
+<p id="loadState" class="note">Без LLM работает Composer/Neuro. LLM (WebGPU) — нейросеть на устройстве. Облако не используется.</p>
+</section>
+<section class="card"><h2>Состояние runtime</h2>
+<div class="metrics"><span class="metric">режим: <b id="mode">—</b></span><span class="metric">LLM: <b id="ready">нет</b></span><span class="metric">память: <b id="mem">0</b></span><span class="metric">квант: <b id="qst">—</b></span></div>
+<p class="note">Метрики (EQS, QCLI) — инженерные сигналы, не AGI.</p>
+</section>
+<section class="card wide"><h2>Запрос</h2>
+<textarea id="q" placeholder="Спросите…"></textarea>
+<div class="row"><button id="ask">Обработать локально</button><button id="remember" class="secondary">В память</button></div>
+<div class="answer" id="answer">Ответ появится здесь.</div>
+<div class="meta" id="ansMeta"></div>
+</section>
+<section class="card wide"><h2>Execution trace — как думает система</h2>
+<p class="note">Реальные этапы: ввод → retrieval → ядро → quantum seal → metrics → verification.</p>
+<div id="trace" class="trace"><div class="event"><b>BOOT</b> · Runtime ready · Local Engine v3</div></div>
+</section>
+</div>
+</main>
+<script src="/aksi-knowledge.js"></script>
+<script src="/aksi-neuro.js"></script>
+<script src="/aksi-compose.js"></script>
+<script src="/aksi-quantum.js"></script>
+<script src="/aksi-algorithm.js"></script>
+<script src="/aksi-webllm.js"></script>
+<script src="engine.js?v=3"></script>
+<script>
+(function(){
+var E=window.AKSI_LOCAL_ENGINE;function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/[&<>"\\]/g,function(c){return{"&":"&","<":"<",">":">",'"':'"',"\\":"&#92;"}[c]})}
+E.models.forEach(function(m){var o=document.createElement("option");o.value=m.id;o.textContent=m.label;$("model").appendChild(o)});
+function setPipe(active){
+var map={"input.received":"input","memory.retrieve":"memory","context.built":"memory","kernel.compose":"kernel","kernel.neuro":"kernel","kernel.offline":"kernel","inference.start":"kernel","inference.fallback":"kernel","inference.complete":"kernel","quantum.seal":"quantum","metrics.eval":"metrics","verification.complete":"verify"};
+var order=["input","memory","kernel","quantum","metrics","verify"],cur=map[active],idx=order.indexOf(cur);
+document.querySelectorAll("#pipe .step").forEach(function(el){var s=el.getAttribute("data-s"),i=order.indexOf(s);el.classList.remove("on","done");if(i<idx)el.classList.add("done");if(i===idx)el.classList.add("on")})}
+async function render(){var c=E.capabilities();
+$("gpu").textContent="WebGPU: "+(c.webgpu?"ДА":"НЕТ");$("gpu").className="badge "+(c.webgpu?"ok":"warn");
+$("db").textContent="IndexedDB: "+(c.indexedDB?"ДА":"НЕТ");$("db").className="badge "+(c.indexedDB?"ok":"warn");
+$("kernel").textContent="ядро: "+(c.compose?"Composer":c.neuro?"Neuro":"—");$("kernel").className="badge "+(c.compose||c.neuro?"ok":"warn");
+$("mode").textContent=c.mode;$("ready").textContent=c.ready?"READY":"нет";$("qst").textContent=c.quantum?"on":"—";
+$("mem").textContent=(await E.memoryAll()).length}
+E.subscribe(function(e){setPipe(e.type);var d=document.createElement("div");d.className="event";d.innerHTML="<b>"+esc(e.type)+"</b> <small>"+new Date(e.ts).toLocaleTimeString()+"</small><br>"+esc(JSON.stringify(e.data||{}));$("trace").prepend(d);render()});
+$("load").onclick=async function(){try{$("loadState").textContent="Загрузка…";await E.load($("model").value,function(s){$("loadState").textContent=(s.message||"")+" · "+Math.round((s.progress||0)*100)+"%"});$("loadState").textContent="Модель готова."}catch(e){$("loadState").textContent="Ошибка: "+e.message+" — Composer активен"}render()};
+$("unload").onclick=async function(){await E.unload();$("loadState").textContent="Выгружено · Composer/Neuro";render()};
+$("ask").onclick=async function(){var q=$("q").value.trim();if(!q)return;$("answer").textContent="Обработка…";$("ansMeta").textContent="";try{var r=await E.ask(q,{useMemory:true});$("answer").textContent=r.text||"Нет ответа";var parts=["источник: "+(r.source||"—")];if(r.latencyMs!=null)parts.push(r.latencyMs+" мс");if(r.quantum&&r.quantum.QCLI!=null)parts.push("QCLI "+r.quantum.QCLI);if(r.offline)parts.push("offline");$("ansMeta").textContent=parts.join(" · ")}catch(e){$("answer").textContent="Ошибка: "+e.message}render()};
+$("remember").onclick=async function(){var q=$("q").value.trim();if(q){await E.memoryPut(q,{source:"user"});$("q").value="";render()}};
+render();
+})();
+</script>
+</body>
+</html>
