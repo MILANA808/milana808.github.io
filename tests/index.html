@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Tests</title>
+<style>
+body{font:14px system-ui;background:#f3ebdc;color:#2a241c;max-width:720px;margin:0 auto;padding:16px}
+button{padding:10px 14px;border-radius:12px;border:1px solid #ddd0bb;background:#fbf7ef;font-weight:700;cursor:pointer}
+pre{background:#fbf7ef;border:1px solid #ddd0bb;border-radius:12px;padding:12px;white-space:pre-wrap}
+.ok{color:#2f6b48}.fail{color:#8b2e2e}
+</style>
+</head>
+<body>
+<h1>AKSI MVP Tests</h1>
+<button id="run">Run</button>
+<pre id="out">—</pre>
+<script src="/aksi-security.js"></script>
+<script src="/aksi-algorithm.js"></script>
+<script src="/aksi-secure-mem.js"></script>
+<script src="/aksi-swarm.js"></script>
+<script>
+var log=[];
+function ok(n,p,d){log.push((p?"OK ":"FAIL ")+n+(d?" — "+d:""));}
+async function run(){
+ log=[]; var o=document.getElementById("out"); o.textContent="…";
+ try{
+  ok("esc", window.AKSI_SECURITY.esc("<x>")==="&lt;x&gt;");
+  ok("file block", !AKSI_SECURITY.validateFile({name:"a.exe",type:"application/octet-stream",size:1}).ok);
+ }catch(e){ok("security",false,e.message);}
+ try{
+  await AKSI_SECURE_MEM.unlock("");
+  await AKSI_SECURE_MEM.saveMemory([{text:"t",ts:Date.now()}]);
+  var m=await AKSI_SECURE_MEM.loadMemory();
+  ok("secure mem", Array.isArray(m));
+  ok("lock API", typeof AKSI_SECURE_MEM.isLocked==="function");
+ }catch(e){ok("secure mem",false,e.message);}
+ try{
+  AKSI_SWARM.setAgentCount(2);
+  ok("swarm n", AKSI_SWARM.getAgentCount()===2);
+ }catch(e){ok("swarm",false,e.message);}
+ var fails=log.filter(function(l){return l.indexOf("FAIL")===0;}).length;
+ log.push(fails?"RESULT fail "+fails:"RESULT all passed");
+ o.textContent=log.join("\n"); o.className=fails?"fail":"ok";
+}
+document.getElementById("run").onclick=run;
+</script>
+</body>
+</html>
