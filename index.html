@@ -4,13 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ MVP — offline AI: Swarm, SecureMem, ADIA, HRR. aksilove@internet.ru">
-<meta name="robots" content="index,follow">
+<meta name="description" content="АКСИ v35 — Pulse, Skills, Swarm, SecureMem, ADIA, HRR. aksilove@internet.ru">
 <link rel="canonical" href="https://milana808.github.io/">
-<link rel="manifest" href="/manifest.json?v=34">
-<title>АКСИ — Local Intelligence MVP</title>
+<link rel="manifest" href="/manifest.json?v=35">
+<title>АКСИ — Local Intelligence v35</title>
 <style>
-:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--warn:#9a6b1f;--bn:60px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px);--font:ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
+:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:60px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px);--font:ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}body{color:var(--ink);font:15px/1.5 var(--font);background:linear-gradient(180deg,#f7f0e4,#efe5d2);display:flex;flex-direction:column;max-width:740px;margin:0 auto}
 button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer}a{color:var(--a);text-decoration:none}
 .top{min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(251,247,239,.88);backdrop-filter:blur(16px);z-index:40}
@@ -52,15 +51,15 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
 <div id="updateBanner" style="display:none;background:#6b4f35;color:#fff;padding:8px 12px;text-align:center;font-size:13px;font-weight:700">Новая версия АКСИ <button type="button" id="btnUpdate" style="margin-left:8px;padding:4px 10px;border-radius:8px;border:0;font-weight:700;cursor:pointer">Обновить</button></div>
 <header class="top">
   <div class="logo">A</div>
-  <div class="titles"><h1>АКСИ</h1><div class="sub">MVP · SecureMem · Swarm · HRR · ADIA</div></div>
+  <div class="titles"><h1>АКСИ</h1><div class="sub">v35 · Pulse · Skills · Swarm · ADIA</div></div>
   <span class="pill on" id="modePill"><span class="dot"></span> offline</span>
 </header>
 <div class="stage" id="stage">
   <section class="panel on" id="tab-home">
     <div class="hero">
-      <div class="tag">MVP v34</div>
-      <h2>Готово к демо</h2>
-      <p>DistilBERT / эвристика · рой 1–3 · мульти-чат · голограмма HRR · Stats. Контакт: <b>aksilove@internet.ru</b></p>
+      <div class="tag">MVP v35</div>
+      <h2>Pulse + Skills</h2>
+      <p>Sovereign Brief · навыки offline · рой 1–3 · SecureMem · HRR. Контакт: <b>aksilove@internet.ru</b></p>
       <div class="row">
         <button type="button" class="btn p" data-tab="chat">Чат</button>
         <button type="button" class="btn" data-tab="stats">Stats</button>
@@ -82,13 +81,15 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
       <a class="btn" href="/protocol/">Protocol</a>
     </div></div>
     <div class="card"><h3>Статус модулей</h3><div class="stat-row" id="modStats"></div>
-      <p class="muted" style="margin-top:12px">Classifier: DistilBERT online / эвристика offline. Рой pure-JS.</p></div>
+      <p class="muted" style="margin-top:12px">Спроси «brief» или «навык: имя | …». Контакт: aksilove@internet.ru</p></div>
   </section>
   <section class="panel" id="tab-chat">
     <div id="thread"></div>
     <div class="chips">
       <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
       <button type="button" class="chip" data-ask="статус">Статус</button>
+      <button type="button" class="chip" data-ask="brief">Brief</button>
+      <button type="button" class="chip" data-ask="список навыков">Навыки</button>
       <button type="button" class="chip" data-ask="как устроена АКСИ">Архитектура</button>
       <button type="button" class="chip" data-ask="что такое ADIA">ADIA</button>
     </div>
@@ -104,7 +105,7 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
       <div class="ans-box" id="localAns">—</div><div class="meta" id="localMeta"></div>
       <div class="muted" id="modelProgress" style="margin-top:8px;font-size:12px"></div>
     </div>
-    <div class="card"><h3>Trace</h3><div class="trace" id="localTrace"><div class="event"><b>BOOT</b> · MVP</div></div></div>
+    <div class="card"><h3>Trace</h3><div class="trace" id="localTrace"><div class="event"><b>BOOT</b> · v35</div></div></div>
   </section>
   <section class="panel" id="tab-trust">
     <div class="card"><h3>Hybrid PQ</h3>
@@ -136,10 +137,13 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
     <div class="card"><p class="muted">aksilove@internet.ru</p></div>
   </section>
   <section class="panel" id="tab-stats">
+    <div class="card"><h3>Pulse · Integrity</h3><div id="pulseBox" class="muted">…</div>
+      <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="btnBrief">Sovereign Brief</button></div>
+      <pre class="out" id="briefOut" style="margin-top:8px">—</pre></div>
     <div class="card"><h3>Статистика</h3><div id="statsBox" class="muted">…</div>
       <button type="button" class="btn p" id="btnStatsRefresh" style="margin-top:10px">Обновить</button></div>
     <div class="card"><h3>Рой агентов</h3>
-      <p class="muted">1–3 pure-JS агента (offline). Тяжёлые LLM — опционально.</p>
+      <p class="muted">1–3 pure-JS агента (offline).</p>
       <div class="row"><button type="button" class="btn" data-swarm="1">1</button><button type="button" class="btn" data-swarm="2">2</button><button type="button" class="btn p" data-swarm="3">3</button></div>
       <p class="muted" id="swarmLabel" style="margin-top:8px">агентов: 3</p></div>
     <div class="card"><h3>HRR голограмма</h3>
@@ -149,7 +153,6 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
       <div class="row"><button type="button" class="btn p" id="chatNew">Новый</button><button type="button" class="btn" id="chatRename">Имя</button><button type="button" class="btn" id="chatArchive">Архив</button><button type="button" class="btn" id="chatDelete">Удалить</button></div>
       <div id="chatList" class="muted" style="margin-top:10px"></div></div>
     <div class="card"><h3>P2P · SDP</h3>
-      <p class="muted">Обмен SDP без сервера (две вкладки).</p>
       <textarea class="field" id="sdpBox" placeholder="SDP JSON" style="min-height:72px"></textarea>
       <div class="row"><button type="button" class="btn p" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><a class="btn" href="/protocol/">Protocol</a></div>
       <pre class="out" id="sdpLog">—</pre></div>
@@ -169,14 +172,14 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
   <button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
   <button type="button" data-tab="stats"><span class="ic">📊</span>Stats</button>
 </nav>
-<script src="/aksi-algorithm.js?v=34"></script>
-<script src="/aksi-compose.js?v=34"></script>
-<script src="/aksi-neuro.js?v=34"></script>
-<script src="/aksi-quantum.js?v=34"></script>
-<script src="/aksi-pq.js?v=34"></script>
-<script src="/local-ai/engine.js?v=34"></script>
-<script src="/aksi-knowledge.js?v=34"></script>
-<script src="/aksi-self-arch.js?v=2"></script>
+<script src="/aksi-algorithm.js?v=35"></script>
+<script src="/aksi-compose.js?v=35"></script>
+<script src="/aksi-neuro.js?v=35"></script>
+<script src="/aksi-quantum.js?v=35"></script>
+<script src="/aksi-pq.js?v=35"></script>
+<script src="/local-ai/engine.js?v=35"></script>
+<script src="/aksi-knowledge.js?v=35"></script>
+<script src="/aksi-self-arch.js?v=3"></script>
 <script src="/aksi-secure-mem.js?v=1"></script>
 <script src="/aksi-sentiment.js?v=1"></script>
 <script src="/aksi-adia-assess.js?v=2"></script>
@@ -185,17 +188,19 @@ textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;bo
 <script src="/aksi-hrr-webgl.js?v=1"></script>
 <script src="/aksi-chats.js?v=1"></script>
 <script src="/aksi-stats.js?v=1"></script>
-<script src="/app-runtime.js?v=34"></script>
-<script src="/aksi-mvp-boot.js?v=1"></script>
+<script src="/aksi-pulse.js?v=1"></script>
+<script src="/aksi-skills.js?v=1"></script>
+<script src="/app-runtime.js?v=35"></script>
+<script src="/aksi-mvp-boot.js?v=2"></script>
 <script>
 (function(){
 if(!('serviceWorker' in navigator))return;
 window.addEventListener('load',function(){
-navigator.serviceWorker.register('/sw.js?v=33').then(function(reg){
+navigator.serviceWorker.register('/sw.js?v=34').then(function(reg){
 try{reg.update()}catch(e){}
 if(reg.waiting){var b=document.getElementById('updateBanner');if(b)b.style.display='block'}
 reg.addEventListener('updatefound',function(){var n=reg.installing;if(!n)return;n.addEventListener('statechange',function(){if(n.state==='installed'&&navigator.serviceWorker.controller){var b=document.getElementById('updateBanner');if(b)b.style.display='block'}})});
-if(window.caches){caches.keys().then(function(keys){keys.forEach(function(k){if(k.indexOf('aksi-shell-v33')===-1)caches.delete(k)})})}
+if(window.caches){caches.keys().then(function(keys){keys.forEach(function(k){if(k.indexOf('aksi-shell-v34')===-1)caches.delete(k)})})}
 }).catch(function(){});
 var bu=document.getElementById('btnUpdate');
 if(bu)bu.onclick=function(){navigator.serviceWorker.getRegistration().then(function(r){if(r&&r.waiting)r.waiting.postMessage({type:'SKIP_WAITING'});window.location.reload()})};
