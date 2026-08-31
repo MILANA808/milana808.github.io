@@ -1,40 +1,75 @@
-/* AKSI SW v48 */
-var CACHE = "aksi-shell-v48";
-var VERSION = "48";
-var PRE = ["/", "/index.html", "/manifest.json", "/sw.js", "/aksi-security.js", "/app-runtime.js", "/aksi-nav-fix.js"];
+/* AKSI SW v55 — network-first HTML, cache-first assets, update ping */
+var CACHE = "aksi-shell-v55";
+var VERSION = "55";
+var PRE = [
+  "/", "/index.html",
+  "/aksi-product-ready.js",
+  "/aksi-client-boot.js",
+  "/aksi-mind-l2.js",
+  "/aksi-neuro.js",
+  "/aksi-rag.js",
+  "/aksi-p2p-sdp.js",
+  "/aksi-hrr.js",
+  "/aksi-hrr-webgl.js",
+  "/aksi-chats.js",
+  "/sw.js"
+];
+
 self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) {
-    return Promise.all(PRE.map(function (u) { return c.add(u).catch(function () {}); }));
-  }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(
+    caches.open(CACHE).then(function (c) {
+      return Promise.all(PRE.map(function (u) {
+        return c.add(u).catch(function () {});
+      }));
+    }).then(function () { return self.skipWaiting(); })
+  );
 });
+
 self.addEventListener("activate", function (e) {
-  e.waitUntil(caches.keys().then(function (keys) {
-    return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
-  }).then(function () { return self.clients.claim(); }));
+  e.waitUntil(
+    caches.keys().then(function (keys) {
+      return Promise.all(keys.map(function (k) {
+        if (k !== CACHE) return caches.delete(k);
+      }));
+    }).then(function () { return self.clients.claim(); })
+  );
 });
+
 self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
-  var url;
-  try { url = new URL(req.url); } catch (err) { return; }
+  var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === "/" || /\.html$/i.test(url.pathname)) {
-    e.respondWith(fetch(req).then(function (res) {
-      if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
-      return res;
-    }).catch(function () { return caches.match(req).then(function (h) { return h || caches.match("/index.html"); }); }));
+
+  var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
+
+  if (isHTML) {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, copy); });
+        return res;
+      }).catch(function () {
+        return caches.match(req).then(function (r) { return r || caches.match("/index.html"); });
+      })
+    );
     return;
   }
-  if (/\.(js|json|css)(\?|$)/i.test(url.pathname) || /aksi-/.test(url.pathname)) {
-    e.respondWith(caches.match(req).then(function (hit) {
+
+  e.respondWith(
+    caches.match(req).then(function (cached) {
       var net = fetch(req).then(function (res) {
-        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(req, copy); }); }
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(req, copy); });
+        }
         return res;
-      }).catch(function () { return hit || new Response("offline", { status: 503 }); });
-      return hit || net;
-    }));
-  }
+      }).catch(function () { return cached; });
+      return cached || net;
+    })
+  );
 });
+
 self.addEventListener("message", function (e) {
   if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
 });
