@@ -1,7 +1,7 @@
-/* AKSI Service Worker v35 — nav fix cache bust */
-var CACHE = "aksi-shell-v35";
-var VERSION = "35";
-var PRE = ["/","/index.html","/manifest.json","/aksi-algorithm.js","/aksi-compose.js","/aksi-neuro.js","/aksi-quantum.js","/aksi-pq.js","/aksi-knowledge.js","/aksi-self-arch.js","/aksi-secure-mem.js","/aksi-adia-assess.js","/aksi-swarm.js","/aksi-hrr.js","/aksi-hrr-webgl.js","/aksi-sentiment.js","/aksi-chats.js","/aksi-stats.js","/aksi-pulse.js","/aksi-skills.js","/aksi-mvp-boot.js","/app-runtime.js","/local-ai/engine.js","/sw.js"];
+/* AKSI Service Worker v36 */
+var CACHE = "aksi-shell-v36";
+var VERSION = "36";
+var PRE = ["/","/index.html","/manifest.json","/aksi-algorithm.js","/aksi-compose.js","/aksi-neuro.js","/aksi-quantum.js","/aksi-pq.js","/aksi-knowledge.js","/aksi-self-arch.js","/aksi-secure-mem.js","/aksi-adia-assess.js","/aksi-swarm.js","/aksi-hrr.js","/aksi-hrr-webgl.js","/aksi-sentiment.js","/aksi-chats.js","/aksi-stats.js","/aksi-pulse.js","/aksi-skills.js","/aksi-nav-fix.js","/aksi-mvp-boot.js","/app-runtime.js","/local-ai/engine.js","/sw.js"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(CACHE).then(function(c){return Promise.all(PRE.map(function(u){return c.add(u).catch(function(){})}))}).then(function(){return self.skipWaiting()}))});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE}).map(function(k){return caches.delete(k)}))}).then(function(){return self.clients.claim()}))});
 function isCDN(url){return /cdn\.jsdelivr\.net|unpkg\.com|cdnjs\.cloudflare\.com|esm\.sh|huggingface\.co/i.test(url)}
