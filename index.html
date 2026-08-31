@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<title>АКСИ v50</title>
+<title>АКСИ v51 · Mind L2</title>
 <style>
 :root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:58px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
@@ -39,39 +39,38 @@ button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;ou
 </style>
 </head>
 <body>
-<header class="top"><div class="logo">A</div><div class="titles"><h1>АКСИ</h1><div class="sub">v50 · Local Client · RAG · WebLLM</div></div><span class="pill" id="modePill">offline</span></header>
+<header class="top"><div class="logo">A</div><div class="titles"><h1>АКСИ</h1><div class="sub">v51 · Mind L2 · Local Client</div></div><span class="pill" id="modePill">offline</span></header>
 <div class="stage" id="stage">
-<section class="panel on" id="tab-home"><div class="card"><h3>Главная</h3><p class="muted">Local-first: WebLLM, векторная память, AES-экспорт. Ctrl+F5 после обновления.</p><div class="row"><button type="button" class="btn p" data-tab="local">Local LLM</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="chat">Чат</button></div><div class="kv"><div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div><div class="cell"><b id="kvMem">0</b><span>память</span></div><div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div><div class="cell"><b id="kvMods">0</b><span>модули</span></div></div></div><div class="card"><h3>Меню</h3><div class="lab-grid"><button type="button" class="btn" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="trust">Trust</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="lab">Lab</button><button type="button" class="btn" data-tab="stats">Stats</button></div><p class="muted" style="margin-top:10px">aksilove@internet.ru</p></div></section>
-<section class="panel" id="tab-chat"><div id="thread"></div><div class="chips"><button type="button" class="chip" data-q="Кто ты?">Кто ты?</button><button type="button" class="chip" data-q="статус">Статус</button></div></section>
+<section class="panel on" id="tab-home"><div class="card"><h3>Mind L2</h3><p class="muted">Новый уровень offline-разума: intent → self-model → RAG → ответ. Без сервера.</p><div class="row"><button type="button" class="btn p" data-tab="chat">Чат L2</button><button type="button" class="btn" data-tab="local">Local LLM</button><button type="button" class="btn" data-tab="mem">Mem</button></div><div class="kv"><div class="cell"><b id="kvNeuro">L2</b><span>mind</span></div><div class="cell"><b id="kvMem">0</b><span>память</span></div><div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div><div class="cell"><b id="kvMods">0</b><span>модули</span></div></div></div><div class="card"><h3>Меню</h3><div class="lab-grid"><button type="button" class="btn" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="trust">Trust</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="lab">Lab</button><button type="button" class="btn" data-tab="stats">Stats</button></div><p class="muted" style="margin-top:10px">aksilove@internet.ru</p></div></section>
+<section class="panel" id="tab-chat"><div id="thread"></div><div class="chips"><button type="button" class="chip" data-q="Кто ты?">Кто ты?</button><button type="button" class="chip" data-q="архитектура">Архитектура</button><button type="button" class="chip" data-q="статус">Статус</button><button type="button" class="chip" data-q="что умеешь">Возможности</button></div></section>
 <section class="panel" id="tab-local"><div class="card"><h3>Local LLM + RAG</h3><p class="muted" id="localCaps">Проверка WebGPU…</p>
 <div class="kv"><div class="cell"><b id="wlGpu">…</b><span>WebGPU</span></div><div class="cell"><b id="wlState">idle</b><span>модель</span></div></div>
 <select id="wlModel" class="box">
-<option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B (~0.4GB)</option>
-<option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B (~1GB)</option>
+<option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B</option>
+<option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B</option>
 <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
 </select>
 <div class="row"><button type="button" class="btn p" id="wlLoad">Загрузить LLM</button><button type="button" class="btn" id="wlUnload">Выгрузить</button></div>
-<pre id="wlOut" class="muted" style="margin-top:8px;white-space:pre-wrap">Сначала загрузите модель (Chrome/Edge + WebGPU).</pre>
+<pre id="wlOut" class="muted" style="margin-top:8px;white-space:pre-wrap">LLM opt-in · иначе Mind L2 offline</pre>
 <input class="box" id="localQ" placeholder="Вопрос…">
 <div class="row"><button type="button" class="btn p" id="localAsk">Спросить</button></div>
 <div id="localAns">—</div><div id="localMeta" class="muted"></div><div id="localTrace"></div>
 </div></section>
 <section class="panel" id="tab-trust"><div class="card"><h3>Trust · AES vault</h3><pre id="pqStatus" class="muted">—</pre>
 <div class="row"><button type="button" class="btn p" id="pqBoot">Status</button><button type="button" class="btn" id="pqExport">Export .aksi</button></div>
-<textarea class="box" id="pqPeer" placeholder="peer"></textarea>
-<textarea class="box" id="pqMsg" placeholder="message"></textarea>
+<textarea class="box" id="pqPeer"></textarea><textarea class="box" id="pqMsg"></textarea>
 <div class="row"><button type="button" class="btn p" id="pqSeal">Seal RAG</button><button type="button" class="btn" id="pqOpen">Open</button></div>
-<textarea class="box" id="pqEnv" placeholder="envelope JSON"></textarea>
+<textarea class="box" id="pqEnv"></textarea>
 </div></section>
 <section class="panel" id="tab-mem"><div class="card"><h3>Mem RAG · <span id="memN">0</span></h3>
-<input class="box" id="teachIn" placeholder="факт для векторной памяти">
+<input class="box" id="teachIn" placeholder="факт">
 <div class="row"><button type="button" class="btn p" id="btnTeach">Учить</button><button type="button" class="btn" id="btnWipe">Wipe</button></div>
 <div id="memList" class="muted"></div><div id="chatList" class="muted"></div>
 </div></section>
 <section class="panel" id="tab-lab"><div class="card"><h3>Lab</h3><pre id="labMetrics" class="muted">—</pre><button type="button" class="btn p" id="btnMetrics">ADIA</button>
 <canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:240px;margin-top:8px;background:#1a1814;border-radius:12px"></canvas>
 <div id="modStats" class="muted"></div></div></section>
-<section class="panel" id="tab-stats"><div class="card"><h3>Stats · perf</h3><div id="statsBox" class="muted">—</div><div id="pulseBox" class="muted">—</div>
+<section class="panel" id="tab-stats"><div class="card"><h3>Stats</h3><div id="statsBox" class="muted">—</div><div id="pulseBox" class="muted">—</div>
 <textarea class="box" id="sdpBox"></textarea>
 <div class="row"><button type="button" class="btn" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><button type="button" class="btn" id="sdpEmbed">Embed</button></div>
 <pre id="sdpLog" class="muted">—</pre><span id="swarmLabel">3</span>
@@ -96,32 +95,31 @@ document.querySelectorAll('.bnav [data-tab]').forEach(function(b){b.classList.to
 var c=document.getElementById('composer');
 if(c){if(t==='chat'){c.classList.add('on');c.style.display='flex';c.style.pointerEvents='auto';}else{c.classList.remove('on');c.style.display='none';c.style.pointerEvents='none';}}
 try{sessionStorage.setItem('aksi_tab',t);}catch(e){}
-if(typeof window.goTab==='function'&&!window.goTab.__simple){try{window.goTab(t);}catch(e){}}
 }
 window.AKSI_SHOW_TAB=showTab;window.AKSI_NAV_GO=showTab;
-function bind(){document.querySelectorAll('[data-tab]').forEach(function(btn){if(btn.__b)return;btn.__b=1;btn.style.pointerEvents='auto';var fn=function(e){var id=btn.getAttribute('data-tab');if(!id)return;try{e.preventDefault();e.stopPropagation();}catch(err){}showTab(id);};btn.addEventListener('click',fn,true);btn.addEventListener('touchend',function(e){fn(e);},{capture:true,passive:false});});}
+function bind(){document.querySelectorAll('[data-tab]').forEach(function(btn){if(btn.__b)return;btn.__b=1;var fn=function(e){var id=btn.getAttribute('data-tab');if(!id)return;try{e.preventDefault();e.stopPropagation();}catch(err){}showTab(id);};btn.addEventListener('click',fn,true);btn.addEventListener('touchend',function(e){fn(e);},{capture:true,passive:false});});}
 function boot(){bind();var t='home';try{t=sessionStorage.getItem('aksi_tab')||'home';}catch(e){}showTab(t);[50,300,1000].forEach(function(ms){setTimeout(bind,ms);});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
-<script src="/aksi-security.js?v=50"></script>
-<script src="/aksi-algorithm.js?v=50"></script>
-<script src="/aksi-neuro.js?v=50"></script>
-<script src="/aksi-knowledge.js?v=50"></script>
-<script src="/aksi-compose.js?v=50"></script>
-<script src="/aksi-core-ai.js?v=50"></script>
-<script src="/aksi-secure-mem.js?v=50"></script>
-<script src="/aksi-swarm.js?v=50"></script>
-<script src="/aksi-stats.js?v=50"></script>
-<script src="/aksi-organism.js?v=50"></script>
-<script src="/app-runtime.js?v=50"></script>
-<script src="/aksi-rag.js?v=50"></script>
-<script src="/aksi-trust-vault.js?v=50"></script>
-<script src="/aksi-perf.js?v=50"></script>
-<script src="/aksi-webllm.js?v=50"></script>
-<script src="/aksi-webllm-stream.js?v=50"></script>
-<script src="/aksi-client-boot.js?v=50"></script>
-<script src="/aksi-nav-fix.js?v=50"></script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js?v=50').catch(function(){});});}</script>
+<script src="/aksi-security.js?v=51"></script>
+<script src="/aksi-algorithm.js?v=51"></script>
+<script src="/aksi-neuro.js?v=51"></script>
+<script src="/aksi-knowledge.js?v=51"></script>
+<script src="/aksi-mind-l2.js?v=51"></script>
+<script src="/aksi-core-ai.js?v=51"></script>
+<script src="/aksi-secure-mem.js?v=51"></script>
+<script src="/aksi-swarm.js?v=51"></script>
+<script src="/aksi-stats.js?v=51"></script>
+<script src="/aksi-organism.js?v=51"></script>
+<script src="/app-runtime.js?v=51"></script>
+<script src="/aksi-rag.js?v=51"></script>
+<script src="/aksi-trust-vault.js?v=51"></script>
+<script src="/aksi-perf.js?v=51"></script>
+<script src="/aksi-webllm.js?v=51"></script>
+<script src="/aksi-webllm-stream.js?v=51"></script>
+<script src="/aksi-client-boot.js?v=51"></script>
+<script src="/aksi-nav-fix.js?v=51"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js?v=51').catch(function(){});});}</script>
 </body>
 </html>
