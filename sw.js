@@ -1,7 +1,7 @@
-/* AKSI SW v47 */
-var CACHE = "aksi-shell-v47";
-var VERSION = "47";
-var PRE = ["/", "/index.html", "/manifest.json", "/sw.js", "/app-runtime.js", "/aksi-nav-fix.js", "/aksi-organism.js", "/aksi-core-ai.js", "/aksi-web.js", "/aksi-webllm.js", "/aksi-llm-boot.js", "/aksi-algorithm.js", "/aksi-neuro.js", "/aksi-knowledge.js"];
+/* AKSI SW v48 */
+var CACHE = "aksi-shell-v48";
+var VERSION = "48";
+var PRE = ["/", "/index.html", "/manifest.json", "/sw.js", "/aksi-security.js", "/app-runtime.js", "/aksi-nav-fix.js"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) {
     return Promise.all(PRE.map(function (u) { return c.add(u).catch(function () {}); }));
