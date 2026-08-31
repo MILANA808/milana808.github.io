@@ -2,213 +2,103 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ v36 — offline AI. aksilove@internet.ru">
-<link rel="canonical" href="https://milana808.github.io/">
-<link rel="manifest" href="/manifest.json?v=36">
-<title>АКСИ — Local Intelligence</title>
+<title>АКСИ v47</title>
 <style>
-:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:60px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px);--font:ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}body{color:var(--ink);font:15px/1.5 var(--font);background:linear-gradient(180deg,#f7f0e4,#efe5d2);display:flex;flex-direction:column;max-width:740px;margin:0 auto}
-button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer}a{color:var(--a);text-decoration:none}
-.top{min-height:56px;display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(251,247,239,.88);backdrop-filter:blur(16px);z-index:40}
-.logo{width:38px;height:38px;border-radius:13px;background:linear-gradient(145deg,var(--a),#8a6544);color:#fff;display:grid;place-items:center;font-weight:900}
-.titles{flex:1}h1{font-size:17px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
-.pill{padding:7px 12px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid var(--line);color:var(--muted);background:var(--s2)}.pill.on{color:var(--ok);border-color:#b7d4c2;background:#e8f2ea}.dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
-.stage{flex:1;min-height:0;overflow:auto;padding:14px 14px calc(100px + var(--safe-b));-webkit-overflow-scrolling:touch}
-.panel{display:none}.panel.on{display:block}
-.hero{padding:20px 18px;border-radius:22px;margin-bottom:12px;background:linear-gradient(155deg,rgba(160,122,85,.16),var(--s));border:1px solid var(--line)}
-.hero .tag{color:var(--a);font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:11px}
-.hero h2{font-size:22px;margin:10px 0 8px;font-weight:800}.hero p{font-size:14px;color:var(--muted);margin-bottom:14px}
-.row{display:flex;flex-wrap:wrap;gap:8px}
-.btn{min-height:var(--tap);padding:12px 16px;border-radius:15px;font-weight:700;font-size:13px;border:1px solid var(--line);background:var(--s);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto}
-.btn.p{background:var(--a);border-color:var(--a);color:#fff}.btn.block{width:100%}
-.card{background:var(--s);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
-.card h3{font-size:12px;font-weight:800;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-.muted{color:var(--muted);font-size:13px;line-height:1.55}
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}.kv .cell{background:var(--s2);border-radius:14px;padding:12px 14px}.kv b{display:block;font-size:17px;color:var(--ok);font-weight:800}.kv span{font-size:10px;color:var(--muted);text-transform:uppercase}
-#thread{display:flex;flex-direction:column;gap:10px;min-height:120px}.msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:90%;padding:12px 15px;border-radius:18px;white-space:pre-wrap;word-break:break-word;font-size:15px}
-.msg.me .bub{background:var(--a);color:#fff;border-bottom-right-radius:6px}.msg.ai .bub{background:var(--s);border:1px solid var(--line);border-bottom-left-radius:6px}
-.meta{font-size:11px;color:var(--muted);margin-top:6px}.msg.me .meta{color:rgba(255,255,255,.72)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chip{min-height:40px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600;cursor:pointer;pointer-events:auto}
-.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:740px;margin:0 auto;z-index:55;padding:8px 12px 10px;display:none;gap:8px;align-items:flex-end;background:linear-gradient(to top,var(--bg) 65%,transparent);pointer-events:none}
-.composer.on{display:flex;pointer-events:auto}.composer input{flex:1;min-height:var(--tap);padding:13px 16px;border-radius:16px;border:1px solid var(--line);background:var(--s);font-size:16px}
-.composer .send{width:var(--tap);height:var(--tap);border-radius:16px;flex-shrink:0;background:var(--a);color:#fff;font-size:18px;font-weight:800;pointer-events:auto}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:80;max-width:740px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);display:flex;background:rgba(251,247,239,.98);border-top:1px solid var(--line);backdrop-filter:blur(14px);pointer-events:auto}
-.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:9px;font-weight:700;min-height:var(--bn);pointer-events:auto!important;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;z-index:81;position:relative;background:transparent}
-.bnav button .ic{font-size:16px;pointer-events:none}.bnav button.on{color:var(--a)}
-.pipeline{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.step{padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-size:11px;font-weight:700;color:var(--muted)}.step.on{background:var(--a);color:#fff}.step.done{background:#e6efe7;color:var(--ok)}
-.trace{height:200px;overflow:auto;background:#2a241c;color:#f0e7d8;border-radius:14px;padding:10px;margin-top:8px;font:12px/1.45 var(--mono)}.event{padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.07)}.event b{color:#d9b18b}
+:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:58px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
+body{color:var(--ink);font:14px/1.45 system-ui,sans-serif;background:linear-gradient(180deg,#f7f0e4,#efe5d2);display:flex;flex-direction:column;max-width:740px;margin:0 auto}
+button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.top{min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:rgba(251,247,239,.95);z-index:40}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--a),#8a6544);color:#fff;display:grid;place-items:center;font-weight:900}
+.titles{flex:1}h1{font-size:16px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
+.pill{padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid #b7d4c2;background:#e8f2ea;color:var(--ok)}
+.stage{flex:1;min-height:0;overflow:auto;padding:12px 12px calc(var(--bn)+72px+var(--safe-b));-webkit-overflow-scrolling:touch}
+.panel{display:none!important}.panel.on{display:block!important}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h3{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.muted{color:var(--muted);font-size:13px;line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.btn{min-height:42px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:13px}
+.btn.p{background:var(--a);color:#fff;border-color:var(--a)}
 .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-pre.out{background:var(--s2);border-radius:14px;padding:12px;font-size:12px;overflow:auto;white-space:pre-wrap;margin-top:8px;max-height:180px;color:var(--muted);font-family:var(--mono)}
-textarea.field,input.field{width:100%;min-height:var(--tap);padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:#fffdf8;font-size:15px;margin:6px 0}textarea.field{min-height:78px;resize:vertical}
-.ans-box{margin-top:12px;padding:14px;border-radius:16px;background:var(--s2);border:1px solid var(--line);white-space:pre-wrap;min-height:64px}
-.stat-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.stat{flex:1;min-width:80px;background:var(--s2);border-radius:12px;padding:10px 12px;border:1px solid var(--line)}.stat b{display:block;font-size:14px;font-weight:800}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.cell{background:var(--s2);border-radius:12px;padding:10px;text-align:center}.cell b{display:block;font-size:16px;font-weight:800}.cell span{font-size:10px;color:var(--muted)}
+#thread{display:flex;flex-direction:column;gap:10px;min-height:40vh}
+.msg{display:flex}.msg.me{justify-content:flex-end}
+.bub{max-width:92%;padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word}
+.msg.me .bub{background:var(--a);color:#fff}.msg.ai .bub{background:var(--s);border:1px solid var(--line)}
+.meta{font-size:11px;color:var(--muted);margin-top:5px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{min-height:36px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600}
+.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:740px;margin:0 auto;z-index:55;padding:8px 12px;display:none;gap:8px;align-items:flex-end;background:linear-gradient(to top,var(--bg) 70%,transparent);pointer-events:none}
+.composer.on{display:flex!important;pointer-events:auto}
+.composer input{flex:1;min-height:var(--tap);padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s);font-size:16px}
+.composer .send{width:var(--tap);height:var(--tap);border-radius:14px;background:var(--a);color:#fff;font-size:18px;font-weight:800}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:100;max-width:740px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);display:flex;background:rgba(251,247,239,.98);border-top:1px solid var(--line);pointer-events:auto!important}
+.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;font-weight:700;min-height:var(--bn);pointer-events:auto!important;z-index:101;background:transparent}
+.bnav button.on{color:var(--a);background:var(--s2)}.bnav .ic{font-size:15px;pointer-events:none}
+.box{width:100%;min-height:42px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;margin:6px 0}
+textarea.box{min-height:70px}
 </style>
 </head>
 <body>
-<div id="updateBanner" style="display:none;background:#6b4f35;color:#fff;padding:8px 12px;text-align:center;font-size:13px;font-weight:700">Новая версия АКСИ <button type="button" id="btnUpdate" style="margin-left:8px;padding:4px 10px;border-radius:8px;border:0;font-weight:700;cursor:pointer">Обновить</button></div>
-<header class="top">
-  <div class="logo">A</div>
-  <div class="titles"><h1>АКСИ</h1><div class="sub">v36 · Pulse · Skills · Swarm · ADIA</div></div>
-  <span class="pill on" id="modePill"><span class="dot"></span> offline</span>
-</header>
+<header class="top"><div class="logo">A</div><div class="titles"><h1>АКСИ</h1><div class="sub">v47 · вкладки исправлены</div></div><span class="pill" id="modePill">offline</span></header>
 <div class="stage" id="stage">
-  <section class="panel on" id="tab-home">
-    <div class="hero">
-      <div class="tag">MVP v36</div>
-      <h2>Pulse + Skills</h2>
-      <p>Нижние вкладки · Brief · рой · SecureMem. Контакт: <b>aksilove@internet.ru</b></p>
-      <div class="row">
-        <button type="button" class="btn p" data-tab="chat">Чат</button>
-        <button type="button" class="btn" data-tab="stats">Stats</button>
-        <button type="button" class="btn" data-tab="trust">Trust</button>
-      </div>
-      <div class="kv">
-        <div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div>
-        <div class="cell"><b id="kvMem">0</b><span>память</span></div>
-        <div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div>
-        <div class="cell"><b id="kvMods">0</b><span>модули</span></div>
-      </div>
-    </div>
-    <div class="card"><h3>Контуры</h3><div class="lab-grid">
-      <button type="button" class="btn" data-tab="chat">💬 Чат</button>
-      <button type="button" class="btn" data-tab="local">◉ Local</button>
-      <button type="button" class="btn" data-tab="trust">🔐 Trust</button>
-      <button type="button" class="btn" data-tab="mem">🧠 Память</button>
-      <button type="button" class="btn" data-tab="stats">📊 Stats</button>
-      <a class="btn" href="/protocol/">Protocol</a>
-    </div></div>
-    <div class="card"><h3>Статус модулей</h3><div class="stat-row" id="modStats"></div>
-      <p class="muted" style="margin-top:12px">Контакт: aksilove@internet.ru</p></div>
-  </section>
-  <section class="panel" id="tab-chat">
-    <div id="thread"></div>
-    <div class="chips">
-      <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
-      <button type="button" class="chip" data-ask="статус">Статус</button>
-      <button type="button" class="chip" data-ask="brief">Brief</button>
-      <button type="button" class="chip" data-ask="список навыков">Навыки</button>
-      <button type="button" class="chip" data-ask="как устроена АКСИ">Архитектура</button>
-      <button type="button" class="chip" data-ask="что такое ADIA">ADIA</button>
-    </div>
-  </section>
-  <section class="panel" id="tab-local">
-    <div class="pipeline" id="pipe">
-      <span class="step" data-s="input">1. Ввод</span><span class="step" data-s="memory">2. Память</span><span class="step" data-s="kernel">3. Ядро</span><span class="step" data-s="quantum">4. Квант</span><span class="step" data-s="metrics">5. Метрики</span><span class="step" data-s="verify">6. Проверка</span>
-    </div>
-    <div class="card"><h3>Local inference</h3>
-      <p class="muted" id="localCaps">…</p>
-      <textarea class="field" id="localQ" placeholder="Запрос…"></textarea>
-      <div class="row"><button type="button" class="btn p" id="localAsk">Обработать</button><button type="button" class="btn" id="localRemember">В память</button></div>
-      <div class="ans-box" id="localAns">—</div><div class="meta" id="localMeta"></div>
-      <div class="muted" id="modelProgress" style="margin-top:8px;font-size:12px"></div>
-    </div>
-    <div class="card"><h3>Trace</h3><div class="trace" id="localTrace"><div class="event"><b>BOOT</b> · v36</div></div></div>
-  </section>
-  <section class="panel" id="tab-trust">
-    <div class="card"><h3>Hybrid PQ</h3>
-      <pre class="out" id="pqStatus">…</pre>
-      <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="pqBoot">Идентичность</button><button type="button" class="btn" id="pqExport">Export</button></div>
-    </div>
-    <div class="card"><h3>Seal / Open</h3>
-      <textarea class="field" id="pqPeer" placeholder="peer JSON"></textarea>
-      <textarea class="field" id="pqMsg" placeholder="текст"></textarea>
-      <div class="row"><button type="button" class="btn p" id="pqSeal">Seal</button><button type="button" class="btn" id="pqOpen">Open</button></div>
-      <textarea class="field" id="pqEnv" placeholder="envelope" style="min-height:100px"></textarea>
-    </div>
-  </section>
-  <section class="panel" id="tab-mem">
-    <div class="card"><h3>Память · <span id="memN">0</span></h3>
-      <input class="field" id="teachIn" placeholder="факт…">
-      <button type="button" class="btn p block" id="btnTeach" style="margin-top:8px">Запомнить</button>
-      <div id="memList" style="margin-top:14px"></div>
-      <button type="button" class="btn block" id="btnWipe" style="margin-top:12px">Очистить</button>
-    </div>
-  </section>
-  <section class="panel" id="tab-lab">
-    <div class="card"><h3>Lab</h3><div class="lab-grid">
-      <a class="btn" href="/matrix/">MATRIX</a><a class="btn" href="/protocol/">Protocol</a>
-      <a class="btn" href="/algorithm.html">ADIA</a><a class="btn" href="/local-ai/">Local AI</a>
-    </div></div>
-    <div class="card"><h3>ADIA assess</h3><pre class="out" id="labMetrics">—</pre>
-      <button type="button" class="btn p" id="btnMetrics">Обновить</button></div>
-    <div class="card"><p class="muted">aksilove@internet.ru</p></div>
-  </section>
-  <section class="panel" id="tab-stats">
-    <div class="card"><h3>Pulse · Integrity</h3><div id="pulseBox" class="muted">…</div>
-      <div class="row" style="margin-top:10px"><button type="button" class="btn p" id="btnBrief">Sovereign Brief</button></div>
-      <pre class="out" id="briefOut" style="margin-top:8px">—</pre></div>
-    <div class="card"><h3>Статистика</h3><div id="statsBox" class="muted">…</div>
-      <button type="button" class="btn p" id="btnStatsRefresh" style="margin-top:10px">Обновить</button></div>
-    <div class="card"><h3>Рой агентов</h3>
-      <p class="muted">1–3 pure-JS агента (offline).</p>
-      <div class="row"><button type="button" class="btn" data-swarm="1">1</button><button type="button" class="btn" data-swarm="2">2</button><button type="button" class="btn p" data-swarm="3">3</button></div>
-      <p class="muted" id="swarmLabel" style="margin-top:8px">агентов: 3</p></div>
-    <div class="card"><h3>HRR голограмма</h3>
-      <canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:320px;border-radius:12px;border:1px solid var(--line);background:#0a0c10"></canvas>
-      <div class="row" style="margin-top:8px"><button type="button" class="btn p" id="hrrRender">Обновить</button><button type="button" class="btn" id="hrrSeedBtn">Seed</button></div></div>
-    <div class="card"><h3>Диалоги</h3>
-      <div class="row"><button type="button" class="btn p" id="chatNew">Новый</button><button type="button" class="btn" id="chatRename">Имя</button><button type="button" class="btn" id="chatArchive">Архив</button><button type="button" class="btn" id="chatDelete">Удалить</button></div>
-      <div id="chatList" class="muted" style="margin-top:10px"></div></div>
-    <div class="card"><h3>P2P · SDP</h3>
-      <textarea class="field" id="sdpBox" placeholder="SDP JSON" style="min-height:72px"></textarea>
-      <div class="row"><button type="button" class="btn p" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><a class="btn" href="/protocol/">Protocol</a></div>
-      <pre class="out" id="sdpLog">—</pre></div>
-  </section>
+<section class="panel on" id="tab-home"><div class="card"><h3>Главная</h3><p class="muted">Все 7 вкладок работают. Ctrl+F5 если видишь старую версию.</p><div class="row"><button type="button" class="btn p" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="stats">Stats</button></div><div class="kv"><div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div><div class="cell"><b id="kvMem">0</b><span>память</span></div><div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div><div class="cell"><b id="kvMods">0</b><span>модули</span></div></div></div><div class="card"><h3>Меню</h3><div class="lab-grid"><button type="button" class="btn" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="trust">Trust</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="lab">Lab</button><button type="button" class="btn" data-tab="stats">Stats</button></div><p class="muted" style="margin-top:10px">aksilove@internet.ru</p></div></section>
+<section class="panel" id="tab-chat"><div id="thread"></div><div class="chips"><button type="button" class="chip" data-q="Кто ты?">Кто ты?</button><button type="button" class="chip" data-q="статус">Статус</button></div></section>
+<section class="panel" id="tab-local"><div class="card"><h3>Local</h3><p class="muted" id="localCaps">Neuro offline</p><input class="box" id="localQ" placeholder="Вопрос…"><div class="row"><button type="button" class="btn p" id="localAsk">Спросить</button></div><div id="localAns" class="muted">—</div><div id="localMeta" class="muted"></div><div id="localTrace"></div><div id="wlOut" class="muted"></div><select id="wlModel" class="box"><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B</option></select><button type="button" class="btn" id="wlLoad">LLM</button><span id="wlGpu"></span><span id="wlState"></span></div></section>
+<section class="panel" id="tab-trust"><div class="card"><h3>Trust</h3><pre id="pqStatus" class="muted">—</pre><button type="button" class="btn p" id="pqBoot">Boot</button><button type="button" class="btn" id="pqExport">Export</button><textarea class="box" id="pqPeer"></textarea><textarea class="box" id="pqMsg"></textarea><button type="button" class="btn" id="pqSeal">Seal</button><button type="button" class="btn" id="pqOpen">Open</button><textarea class="box" id="pqEnv"></textarea></div></section>
+<section class="panel" id="tab-mem"><div class="card"><h3>Память <span id="memN">0</span></h3><input class="box" id="teachIn" placeholder="факт"><button type="button" class="btn p" id="btnTeach">Учить</button><button type="button" class="btn" id="btnWipe">Wipe</button><div id="memList" class="muted"></div><div id="chatList" class="muted"></div></div></section>
+<section class="panel" id="tab-lab"><div class="card"><h3>Lab</h3><pre id="labMetrics" class="muted">—</pre><button type="button" class="btn p" id="btnMetrics">ADIA</button><canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:240px;margin-top:8px;background:#1a1814;border-radius:12px"></canvas><div id="modStats" class="muted"></div></div></section>
+<section class="panel" id="tab-stats"><div class="card"><h3>Stats</h3><div id="statsBox" class="muted">—</div><div id="pulseBox" class="muted">—</div><textarea class="box" id="sdpBox"></textarea><button type="button" class="btn" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><button type="button" class="btn" id="sdpEmbed">Embed</button><pre id="sdpLog" class="muted">—</pre><span id="swarmLabel">3</span></div></section>
 </div>
-<div id="typingInd" class="muted" style="display:none;text-align:center;padding:4px;font-size:12px;position:fixed;left:0;right:0;bottom:calc(60px + env(safe-area-inset-bottom,0px));z-index:54;pointer-events:none">печатает…</div>
-<div class="composer" id="composer">
-  <input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send" autocomplete="off" maxlength="2000">
-  <button type="button" class="send" id="send" aria-label="send">↑</button>
-</div>
-<nav class="bnav" aria-label="nav">
-  <button type="button" class="on" data-tab="home"><span class="ic">✦</span>Home</button>
-  <button type="button" data-tab="chat"><span class="ic">💬</span>Чат</button>
-  <button type="button" data-tab="local"><span class="ic">◉</span>Local</button>
-  <button type="button" data-tab="trust"><span class="ic">🔐</span>Trust</button>
-  <button type="button" data-tab="mem"><span class="ic">🧠</span>Mem</button>
-  <button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
-  <button type="button" data-tab="stats"><span class="ic">📊</span>Stats</button>
+<div class="composer" id="composer"><input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send"><button type="button" class="send" id="send">↑</button></div>
+<nav class="bnav" id="bnav">
+<button type="button" data-tab="home" class="on"><span class="ic">⌂</span>Home</button>
+<button type="button" data-tab="chat"><span class="ic">💬</span>Chat</button>
+<button type="button" data-tab="local"><span class="ic">◉</span>Local</button>
+<button type="button" data-tab="trust"><span class="ic">🔐</span>Trust</button>
+<button type="button" data-tab="mem"><span class="ic">🧠</span>Mem</button>
+<button type="button" data-tab="lab"><span class="ic">⬡</span>Lab</button>
+<button type="button" data-tab="stats"><span class="ic">📊</span>Stats</button>
 </nav>
-<script src="/aksi-algorithm.js?v=36"></script>
-<script src="/aksi-compose.js?v=36"></script>
-<script src="/aksi-neuro.js?v=36"></script>
-<script src="/aksi-quantum.js?v=36"></script>
-<script src="/aksi-pq.js?v=36"></script>
-<script src="/local-ai/engine.js?v=36"></script>
-<script src="/aksi-knowledge.js?v=36"></script>
-<script src="/aksi-self-arch.js?v=3"></script>
-<script src="/aksi-secure-mem.js?v=1"></script>
-<script src="/aksi-sentiment.js?v=1"></script>
-<script src="/aksi-adia-assess.js?v=2"></script>
-<script src="/aksi-swarm.js?v=2"></script>
-<script src="/aksi-hrr.js?v=1"></script>
-<script src="/aksi-hrr-webgl.js?v=1"></script>
-<script src="/aksi-chats.js?v=1"></script>
-<script src="/aksi-stats.js?v=1"></script>
-<script src="/aksi-pulse.js?v=1"></script>
-<script src="/aksi-skills.js?v=1"></script>
-<script src="/app-runtime.js?v=36"></script>
-<script src="/aksi-mvp-boot.js?v=2"></script>
-<script src="/aksi-nav-fix.js?v=1"></script>
 <script>
 (function(){
-if(!('serviceWorker' in navigator))return;
-window.addEventListener('load',function(){
-navigator.serviceWorker.register('/sw.js?v=35').then(function(reg){
-try{reg.update()}catch(e){}
-if(reg.waiting){var b=document.getElementById('updateBanner');if(b)b.style.display='block'}
-reg.addEventListener('updatefound',function(){var n=reg.installing;if(!n)return;n.addEventListener('statechange',function(){if(n.state==='installed'&&navigator.serviceWorker.controller){var b=document.getElementById('updateBanner');if(b)b.style.display='block'}})});
-if(window.caches){caches.keys().then(function(keys){keys.forEach(function(k){if(k.indexOf('aksi-shell-v35')===-1)caches.delete(k)})})}
-}).catch(function(){});
-var bu=document.getElementById('btnUpdate');
-if(bu)bu.onclick=function(){navigator.serviceWorker.getRegistration().then(function(r){if(r&&r.waiting)r.waiting.postMessage({type:'SKIP_WAITING'});window.location.reload()})};
-navigator.serviceWorker.addEventListener('controllerchange',function(){window.location.reload()});
-});
+function showTab(t){
+t=String(t||'home').trim();
+document.querySelectorAll('.stage .panel').forEach(function(p){var on=p.id==='tab-'+t;p.classList.toggle('on',on);p.style.display=on?'block':'none';});
+document.querySelectorAll('.bnav [data-tab]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===t);});
+var c=document.getElementById('composer');
+if(c){if(t==='chat'){c.classList.add('on');c.style.display='flex';c.style.pointerEvents='auto';}else{c.classList.remove('on');c.style.display='none';c.style.pointerEvents='none';}}
+try{sessionStorage.setItem('aksi_tab',t);}catch(e){}
+if(typeof window.goTab==='function'&&!window.goTab.__simple){try{window.goTab(t);}catch(e){}}
+}
+window.AKSI_SHOW_TAB=showTab;window.AKSI_NAV_GO=showTab;
+function bind(){document.querySelectorAll('[data-tab]').forEach(function(btn){if(btn.__b)return;btn.__b=1;btn.style.pointerEvents='auto';var fn=function(e){var id=btn.getAttribute('data-tab');if(!id)return;try{e.preventDefault();e.stopPropagation();}catch(err){}showTab(id);};btn.addEventListener('click',fn,true);btn.addEventListener('touchend',function(e){fn(e);},{capture:true,passive:false});});}
+function boot(){bind();var t='home';try{t=sessionStorage.getItem('aksi_tab')||'home';}catch(e){}showTab(t);[50,300,1000].forEach(function(ms){setTimeout(bind,ms);});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
+<script src="/aksi-algorithm.js?v=47"></script>
+<script src="/aksi-neuro.js?v=47"></script>
+<script src="/aksi-knowledge.js?v=47"></script>
+<script src="/aksi-compose.js?v=47"></script>
+<script src="/aksi-quantum.js?v=47"></script>
+<script src="/aksi-pq.js?v=47"></script>
+<script src="/aksi-self-arch.js?v=47"></script>
+<script src="/aksi-secure-mem.js?v=47"></script>
+<script src="/aksi-swarm.js?v=47"></script>
+<script src="/aksi-stats.js?v=47"></script>
+<script src="/aksi-pulse.js?v=47"></script>
+<script src="/aksi-skills.js?v=47"></script>
+<script src="/aksi-web.js?v=47"></script>
+<script src="/aksi-organism.js?v=47"></script>
+<script src="/aksi-core-ai.js?v=47"></script>
+<script src="/app-runtime.js?v=47"></script>
+<script src="/aksi-mvp-boot.js?v=47"></script>
+<script src="/aksi-nav-fix.js?v=47"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js?v=47').catch(function(){});});}</script>
 </body>
 </html>
