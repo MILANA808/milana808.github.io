@@ -15,7 +15,7 @@ jobs:
       - name: Required runtime files
         run: |
           set -euo pipefail
-          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js aksi-algorithm.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js; do
+          for f in index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js aksi-algorithm.js aksi-proof.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js proof/studio.html; do
             test -f "$f" || { echo "missing $f"; exit 1; }
           done
 
@@ -69,18 +69,31 @@ jobs:
           print('local AI contract OK')
           PY
 
+      - name: Cryptographic proof contract
+        run: |
+          set -euo pipefail
+          node --check aksi-proof.js
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('aksi-proof.js').read_text(encoding='utf-8')
+          for needle in ('SHA-256','Ed25519','previous_hash','crypto.subtle','AKSI_PROOF'):
+              assert needle in p, needle
+          html=Path('proof/studio.html').read_text(encoding='utf-8')
+          assert 'aksi-proof.js' in html
+          assert 'Cryptographic proof' in html
+          print('cryptographic proof contract OK')
+          PY
+
       - name: Public surface privacy and secret scan
         run: |
           set -euo pipefail
-          # Public contact aksilove@internet.ru is ALLOWED.
-          # aksi-app.js excluded from FIO scan (legacy module); still checked for API secrets below via broader find if needed.
-          files="index.html 404.html aksi.html aksi-core.js aksi-runtime.js aksi-algorithm.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js"
-          if grep -nE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' $files aksi-app.js; then
+          files="index.html 404.html aksi.html aksi-app.js aksi-core.js aksi-runtime.js aksi-algorithm.js aksi-proof.js local-ai/index.html local-ai/engine.js local-ai/sw.js local-ai/manifest.json aksi-webllm.js proof/studio.html"
+          if grep -nE 'sk-[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|AIza[0-9A-Za-z_-]{20,}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----' $files; then
             echo 'Possible secret in public runtime surface'
             exit 1
           fi
-          if grep -nE 'Баширова|Альфия Ринатовна|Alfiya Bashirova|14\.02\.1995' $files; then
-            echo 'Private identity data in public runtime surface'
+          if grep -nE 'Баширова|Альфия Ринатовна|Alfiya Bashirova|14\.02\.1995|aksilove@internet\.ru' $files; then
+            echo 'Private identity/contact data in public runtime surface'
             exit 1
           fi
           echo 'Public surface privacy/secret scan OK'
@@ -92,16 +105,13 @@ jobs:
           from pathlib import Path
           root = Path('.').resolve()
           missing = []
-          for hp in [Path('index.html'), Path('local-ai/index.html')]:
+          for hp in [Path('index.html'), Path('local-ai/index.html'), Path('proof/studio.html')]:
               html = hp.read_text(encoding='utf-8', errors='replace')
               for src in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']', html, re.I):
                   if src.startswith(('http://', 'https://', '//')):
                       continue
                   clean = src.split('?', 1)[0].split('#', 1)[0]
-                  if clean.startswith('/'):
-                      p = (root / clean.lstrip('/')).resolve()
-                  else:
-                      p = (hp.parent / clean).resolve()
+                  p = (root / clean.lstrip('/')).resolve() if clean.startswith('/') else (hp.parent / clean).resolve()
                   if not p.is_file():
                       missing.append(f'{hp}: {src} -> {p}')
           if missing:
@@ -114,7 +124,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          for name in ['index.html', '404.html', 'aksi.html', 'local-ai/index.html']:
+          for name in ['index.html', '404.html', 'aksi.html', 'local-ai/index.html', 'proof/studio.html']:
               s = Path(name).read_text(encoding='utf-8', errors='replace').lower()
               if '<html' not in s or '</html>' not in s:
                   raise SystemExit('BAD ' + name)
