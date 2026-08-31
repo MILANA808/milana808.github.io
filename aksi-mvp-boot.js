@@ -1,5 +1,5 @@
 /**
- * AKSI MVP boot v2 — Pulse, Skills, Stats, Swarm, HRR, priority answers
+ * AKSI MVP boot v3 — Pulse, Skills, Stats, Swarm; nav via goTab
  * Контакт: aksilove@internet.ru
  */
 (function () {
@@ -38,12 +38,11 @@
     document.querySelectorAll(".bnav [data-tab]").forEach(function (b) {
       b.addEventListener("click", function () {
         var t = b.getAttribute("data-tab");
+        if (window.goTab) { try { window.goTab(t); } catch (e) {} }
+        else if (window.AKSI_NAV_GO) { try { window.AKSI_NAV_GO(t); } catch (e) {} }
         if (t === "stats") {
-          document.querySelectorAll(".stage .panel").forEach(function (p) { p.classList.toggle("on", p.id === "tab-stats"); });
-          document.querySelectorAll(".bnav [data-tab]").forEach(function (x) { x.classList.toggle("on", x.getAttribute("data-tab") === "stats"); });
-          var c = $("composer"); if (c) c.classList.remove("on");
-          if (window.AKSI_STATS) AKSI_STATS.renderInto($("statsBox"));
-          if (window.AKSI_PULSE && $("pulseBox")) AKSI_PULSE.renderInto($("pulseBox"));
+          if (window.AKSI_STATS) try { AKSI_STATS.renderInto($("statsBox")); } catch (e) {}
+          if (window.AKSI_PULSE && $("pulseBox")) try { AKSI_PULSE.renderInto($("pulseBox")); } catch (e) {}
           refreshChatList();
           try { if (window.AKSI_HRR_WEBGL && $("hrrGlCanvas")) AKSI_HRR_WEBGL.get().render($("hrrGlCanvas")); } catch (err) {}
         }
