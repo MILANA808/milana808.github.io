@@ -1,53 +1,107 @@
 /**
- * AKSI Swarm v2 — 1–3 agents, pure-JS offline
+ * AKSI Swarm — parallel offline agents (1–5), ADIA ranks best
+ * Contact: aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var PROFILES = [
-    { name: "Precise", temperature: 0.3, style: "precise" },
-    { name: "Balanced", temperature: 0.7, style: "balanced" },
-    { name: "Creative", temperature: 1.2, style: "creative" }
-  ];
+  var VER = "3.1-swarm";
   var agentCount = 3;
-  try { var saved = localStorage.getItem("aksi_swarm_n"); if (saved) agentCount = Math.max(1, Math.min(3, parseInt(saved, 10) || 3)); } catch (e) {}
-  function setAgentCount(n) { agentCount = Math.max(1, Math.min(3, Number(n) || 3)); try { localStorage.setItem("aksi_swarm_n", String(agentCount)); } catch (e) {} return agentCount; }
+  try {
+    var saved = localStorage.getItem("aksi_swarm_n");
+    if (saved) agentCount = Math.max(1, Math.min(5, parseInt(saved, 10) || 3));
+  } catch (e) {}
+
+  function setAgentCount(n) {
+    agentCount = Math.max(1, Math.min(5, Number(n) || 3));
+    try { localStorage.setItem("aksi_swarm_n", String(agentCount)); } catch (e) {}
+    return agentCount;
+  }
   function getAgentCount() { return agentCount; }
-  function agentText(q, profile) {
-    var text = "";
-    try { if (G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") { var n = G.AKSI_NEURO.think(q); if (n && n.text) text = n.text; } } catch (e) {}
-    try { if (G.AKSI_COMPOSE && typeof G.AKSI_COMPOSE.think === "function") { var c = G.AKSI_COMPOSE.think(q); if (c && c.text) { if (!text || profile.style !== "precise") text = c.text; } } } catch (e) {}
-    try { if (G.AKSI_SELF_ARCH && typeof G.AKSI_SELF_ARCH.answer === "function") { var sa = G.AKSI_SELF_ARCH.answer(q); if (sa && sa.text && /архитектур|pipeline|adia|протокол|кто ты|статус/i.test(q)) text = sa.text; } } catch (e) {}
-    if (!text) text = "Агент «" + profile.name + "» (T=" + profile.temperature + "): опор мало. «запомни: факт» или уточни вопрос.";
-    if (profile.temperature <= 0.4) text = text.split("\n").slice(0, 6).join("\n");
-    else if (profile.temperature >= 1.0) text = text + "\n\n[creative · T=" + profile.temperature + "]";
-    return text;
-  }
-  function runSwarm(query) {
-    query = String(query || "").trim();
-    var n = agentCount, profiles = PROFILES.slice(0, n);
-    return new Promise(function (resolve) {
-      var jobs = profiles.map(function (p) {
-        return Promise.resolve().then(function () {
-          var text = agentText(query, p);
-          var assess = G.AKSI_ADIA_ASSESS && G.AKSI_ADIA_ASSESS.assessSync ? G.AKSI_ADIA_ASSESS.assessSync(text, query) : { score: 50, axes: {}, pass: false };
-          if (G.AKSI_SENTIMENT && G.AKSI_SENTIMENT.heuristic) { var s = G.AKSI_SENTIMENT.heuristic(text); if (s.label === "NEGATIVE" && assess.score > 10) assess.score = Math.max(0, assess.score - 5); }
-          return { name: p.name, temperature: p.temperature, text: text, assess: assess, rank: (assess.score || 0) / 100 };
-        });
-      });
-      Promise.all(jobs).then(function (cands) {
-        cands.sort(function (a, b) { return b.rank - a.rank; });
-        var best = cands[0];
-        if (best && best.assess && !best.assess.pass && G.AKSI_ADIA_ASSESS) {
-          var hint = (G.AKSI_ADIA_ASSESS.REGEN_HINTS && G.AKSI_ADIA_ASSESS.REGEN_HINTS[0]) || "уточни, будь более логичным";
-          var regenText = agentText(query + "\n\n[ADIA] " + hint, PROFILES[0]);
-          var regenAssess = G.AKSI_ADIA_ASSESS.assessSync(regenText, query);
-          if (regenAssess.score > best.assess.score) { best = { name: "Precise-regen", temperature: 0.3, text: regenText, assess: regenAssess, rank: regenAssess.score / 100 }; cands.unshift(best); }
+
+  function profiles() {
+    return [
+      { name: "Neuro", weight: 1.0, run: function (q) {
+        if (G.AKSI_NEURO && AKSI_NEURO.think) {
+          var r = AKSI_NEURO.think(q);
+          return Promise.resolve({ text: (r && r.text) || "", meta: "swarm·neuro", score: 0.55 });
         }
-        resolve({ best: best, candidates: cands, agentCount: n });
-      }).catch(function () {
-        resolve({ best: { name: "fallback", text: agentText(query, PROFILES[1]), assess: { score: 40 }, rank: 0.4 }, candidates: [], agentCount: n });
-      });
-    });
+        return Promise.resolve({ text: "", meta: "swarm·neuro·miss", score: 0.1 });
+      }},
+      { name: "Composer", weight: 0.95, run: function (q) {
+        if (G.AKSI_COMPOSE && AKSI_COMPOSE.think) {
+          return Promise.resolve(AKSI_COMPOSE.think(q)).then(function (r) {
+            return { text: (r && r.text) || "", meta: "swarm·compose", score: 0.5 };
+          });
+        }
+        return Promise.resolve({ text: "", meta: "swarm·compose·miss", score: 0.1 });
+      }},
+      { name: "Resonance", weight: 0.9, run: function (q) {
+        if (G.AKSI_CORE_AI && AKSI_CORE_AI.think) {
+          var r = AKSI_CORE_AI.think(q);
+          return Promise.resolve({ text: (r && r.text) || "", meta: "swarm·core", score: 0.6 });
+        }
+        if (G.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
+          var a = AKSI_ALGORITHM.process(q, "swarm resonance", { offline: true, seal: false });
+          return Promise.resolve({ text: JSON.stringify(a.metrics || a).slice(0, 400), meta: "swarm·adia", score: 0.4 });
+        }
+        return Promise.resolve({ text: "", meta: "swarm·res·miss", score: 0.1 });
+      }},
+      { name: "SelfArch", weight: 0.85, run: function (q) {
+        if (G.AKSI_SELF_ARCH && AKSI_SELF_ARCH.answer) {
+          var r = AKSI_SELF_ARCH.answer(q);
+          return Promise.resolve({ text: (r && r.text) || String(r || ""), meta: "swarm·self", score: 0.5 });
+        }
+        return Promise.resolve({ text: "", meta: "swarm·self·miss", score: 0.1 });
+      }},
+      { name: "Knowledge", weight: 0.8, run: function (q) {
+        var K = G.AKSIKnowledge || G.AKSI_KNOWLEDGE;
+        if (K && K.search) {
+          var r = K.search(q);
+          var t = (r && (r.text || r.answer || r.snippet)) || "";
+          return Promise.resolve({ text: String(t), meta: "swarm·know", score: t ? 0.55 : 0.1 });
+        }
+        return Promise.resolve({ text: "", meta: "swarm·know·miss", score: 0.1 });
+      }}
+    ];
   }
-  G.AKSI_SWARM = { run: runSwarm, profiles: PROFILES, setAgentCount: setAgentCount, getAgentCount: getAgentCount };
+
+  function scoreWithAdia(text, q) {
+    try {
+      if (G.AKSI_ADIA_ASSESS && AKSI_ADIA_ASSESS.assessSync) {
+        var a = AKSI_ADIA_ASSESS.assessSync(text, { query: q });
+        return (a && a.score != null) ? a.score / 100 : 0.4;
+      }
+      if (G.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
+        var m = AKSI_ALGORITHM.process(q, text, { offline: true, seal: false });
+        return (m && m.metrics && m.metrics.EQS) || 0.4;
+      }
+    } catch (e) {}
+    return Math.min(1, (text || "").length / 400);
+  }
+
+  async function run(query) {
+    var q = String(query || "").trim();
+    var n = agentCount;
+    var list = profiles().slice(0, n);
+    var results = await Promise.all(list.map(function (p) {
+      return p.run(q).then(function (r) {
+        var text = (r && r.text) || "";
+        var sc = scoreWithAdia(text, q) * (p.weight || 1);
+        return { name: p.name, text: text, meta: (r && r.meta) || p.name, score: sc };
+      }).catch(function (e) {
+        return { name: p.name, text: "", meta: "error", score: 0, error: String(e && e.message || e) };
+      });
+    }));
+    results.sort(function (a, b) { return (b.score || 0) - (a.score || 0); });
+    var best = results[0] || { text: "", meta: "empty", score: 0 };
+    return { best: best, candidates: results, agentCount: n, version: VER };
+  }
+
+  G.AKSI_SWARM = {
+    version: VER,
+    run: run,
+    setAgentCount: setAgentCount,
+    getAgentCount: getAgentCount,
+    profiles: function () { return profiles().map(function (p) { return p.name; }); }
+  };
 })(typeof window !== "undefined" ? window : globalThis);
