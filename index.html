@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<title>АКСИ v47</title>
+<title>АКСИ v50</title>
 <style>
 :root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:58px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
 body{color:var(--ink);font:14px/1.45 system-ui,sans-serif;background:linear-gradient(180deg,#f7f0e4,#efe5d2);display:flex;flex-direction:column;max-width:740px;margin:0 auto}
-button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .top{min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:rgba(251,247,239,.95);z-index:40}
 .logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--a),#8a6544);color:#fff;display:grid;place-items:center;font-weight:900}
 .titles{flex:1}h1{font-size:16px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
@@ -26,12 +26,6 @@ button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .cell{background:var(--s2);border-radius:12px;padding:10px;text-align:center}.cell b{display:block;font-size:16px;font-weight:800}.cell span{font-size:10px;color:var(--muted)}
 #thread{display:flex;flex-direction:column;gap:10px;min-height:40vh}
-.msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:92%;padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word}
-.msg.me .bub{background:var(--a);color:#fff}.msg.ai .bub{background:var(--s);border:1px solid var(--line)}
-.meta{font-size:11px;color:var(--muted);margin-top:5px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-.chip{min-height:36px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600}
 .composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:740px;margin:0 auto;z-index:55;padding:8px 12px;display:none;gap:8px;align-items:flex-end;background:linear-gradient(to top,var(--bg) 70%,transparent);pointer-events:none}
 .composer.on{display:flex!important;pointer-events:auto}
 .composer input{flex:1;min-height:var(--tap);padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s);font-size:16px}
@@ -40,19 +34,48 @@ button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0
 .bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;font-weight:700;min-height:var(--bn);pointer-events:auto!important;z-index:101;background:transparent}
 .bnav button.on{color:var(--a);background:var(--s2)}.bnav .ic{font-size:15px;pointer-events:none}
 .box{width:100%;min-height:42px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;margin:6px 0}
-textarea.box{min-height:70px}
+#localAns{margin-top:10px;padding:12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);white-space:pre-wrap;min-height:48px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chip{min-height:36px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600}
 </style>
 </head>
 <body>
-<header class="top"><div class="logo">A</div><div class="titles"><h1>АКСИ</h1><div class="sub">v47 · вкладки исправлены</div></div><span class="pill" id="modePill">offline</span></header>
+<header class="top"><div class="logo">A</div><div class="titles"><h1>АКСИ</h1><div class="sub">v50 · Local Client · RAG · WebLLM</div></div><span class="pill" id="modePill">offline</span></header>
 <div class="stage" id="stage">
-<section class="panel on" id="tab-home"><div class="card"><h3>Главная</h3><p class="muted">Все 7 вкладок работают. Ctrl+F5 если видишь старую версию.</p><div class="row"><button type="button" class="btn p" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="stats">Stats</button></div><div class="kv"><div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div><div class="cell"><b id="kvMem">0</b><span>память</span></div><div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div><div class="cell"><b id="kvMods">0</b><span>модули</span></div></div></div><div class="card"><h3>Меню</h3><div class="lab-grid"><button type="button" class="btn" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="trust">Trust</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="lab">Lab</button><button type="button" class="btn" data-tab="stats">Stats</button></div><p class="muted" style="margin-top:10px">aksilove@internet.ru</p></div></section>
+<section class="panel on" id="tab-home"><div class="card"><h3>Главная</h3><p class="muted">Local-first: WebLLM, векторная память, AES-экспорт. Ctrl+F5 после обновления.</p><div class="row"><button type="button" class="btn p" data-tab="local">Local LLM</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="chat">Чат</button></div><div class="kv"><div class="cell"><b id="kvNeuro">—</b><span>ядро</span></div><div class="cell"><b id="kvMem">0</b><span>память</span></div><div class="cell"><b id="kvEqs">—</b><span>ADIA</span></div><div class="cell"><b id="kvMods">0</b><span>модули</span></div></div></div><div class="card"><h3>Меню</h3><div class="lab-grid"><button type="button" class="btn" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="local">Local</button><button type="button" class="btn" data-tab="trust">Trust</button><button type="button" class="btn" data-tab="mem">Mem</button><button type="button" class="btn" data-tab="lab">Lab</button><button type="button" class="btn" data-tab="stats">Stats</button></div><p class="muted" style="margin-top:10px">aksilove@internet.ru</p></div></section>
 <section class="panel" id="tab-chat"><div id="thread"></div><div class="chips"><button type="button" class="chip" data-q="Кто ты?">Кто ты?</button><button type="button" class="chip" data-q="статус">Статус</button></div></section>
-<section class="panel" id="tab-local"><div class="card"><h3>Local</h3><p class="muted" id="localCaps">Neuro offline</p><input class="box" id="localQ" placeholder="Вопрос…"><div class="row"><button type="button" class="btn p" id="localAsk">Спросить</button></div><div id="localAns" class="muted">—</div><div id="localMeta" class="muted"></div><div id="localTrace"></div><div id="wlOut" class="muted"></div><select id="wlModel" class="box"><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B</option></select><button type="button" class="btn" id="wlLoad">LLM</button><span id="wlGpu"></span><span id="wlState"></span></div></section>
-<section class="panel" id="tab-trust"><div class="card"><h3>Trust</h3><pre id="pqStatus" class="muted">—</pre><button type="button" class="btn p" id="pqBoot">Boot</button><button type="button" class="btn" id="pqExport">Export</button><textarea class="box" id="pqPeer"></textarea><textarea class="box" id="pqMsg"></textarea><button type="button" class="btn" id="pqSeal">Seal</button><button type="button" class="btn" id="pqOpen">Open</button><textarea class="box" id="pqEnv"></textarea></div></section>
-<section class="panel" id="tab-mem"><div class="card"><h3>Память <span id="memN">0</span></h3><input class="box" id="teachIn" placeholder="факт"><button type="button" class="btn p" id="btnTeach">Учить</button><button type="button" class="btn" id="btnWipe">Wipe</button><div id="memList" class="muted"></div><div id="chatList" class="muted"></div></div></section>
-<section class="panel" id="tab-lab"><div class="card"><h3>Lab</h3><pre id="labMetrics" class="muted">—</pre><button type="button" class="btn p" id="btnMetrics">ADIA</button><canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:240px;margin-top:8px;background:#1a1814;border-radius:12px"></canvas><div id="modStats" class="muted"></div></div></section>
-<section class="panel" id="tab-stats"><div class="card"><h3>Stats</h3><div id="statsBox" class="muted">—</div><div id="pulseBox" class="muted">—</div><textarea class="box" id="sdpBox"></textarea><button type="button" class="btn" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><button type="button" class="btn" id="sdpEmbed">Embed</button><pre id="sdpLog" class="muted">—</pre><span id="swarmLabel">3</span></div></section>
+<section class="panel" id="tab-local"><div class="card"><h3>Local LLM + RAG</h3><p class="muted" id="localCaps">Проверка WebGPU…</p>
+<div class="kv"><div class="cell"><b id="wlGpu">…</b><span>WebGPU</span></div><div class="cell"><b id="wlState">idle</b><span>модель</span></div></div>
+<select id="wlModel" class="box">
+<option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B (~0.4GB)</option>
+<option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B (~1GB)</option>
+<option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
+</select>
+<div class="row"><button type="button" class="btn p" id="wlLoad">Загрузить LLM</button><button type="button" class="btn" id="wlUnload">Выгрузить</button></div>
+<pre id="wlOut" class="muted" style="margin-top:8px;white-space:pre-wrap">Сначала загрузите модель (Chrome/Edge + WebGPU).</pre>
+<input class="box" id="localQ" placeholder="Вопрос…">
+<div class="row"><button type="button" class="btn p" id="localAsk">Спросить</button></div>
+<div id="localAns">—</div><div id="localMeta" class="muted"></div><div id="localTrace"></div>
+</div></section>
+<section class="panel" id="tab-trust"><div class="card"><h3>Trust · AES vault</h3><pre id="pqStatus" class="muted">—</pre>
+<div class="row"><button type="button" class="btn p" id="pqBoot">Status</button><button type="button" class="btn" id="pqExport">Export .aksi</button></div>
+<textarea class="box" id="pqPeer" placeholder="peer"></textarea>
+<textarea class="box" id="pqMsg" placeholder="message"></textarea>
+<div class="row"><button type="button" class="btn p" id="pqSeal">Seal RAG</button><button type="button" class="btn" id="pqOpen">Open</button></div>
+<textarea class="box" id="pqEnv" placeholder="envelope JSON"></textarea>
+</div></section>
+<section class="panel" id="tab-mem"><div class="card"><h3>Mem RAG · <span id="memN">0</span></h3>
+<input class="box" id="teachIn" placeholder="факт для векторной памяти">
+<div class="row"><button type="button" class="btn p" id="btnTeach">Учить</button><button type="button" class="btn" id="btnWipe">Wipe</button></div>
+<div id="memList" class="muted"></div><div id="chatList" class="muted"></div>
+</div></section>
+<section class="panel" id="tab-lab"><div class="card"><h3>Lab</h3><pre id="labMetrics" class="muted">—</pre><button type="button" class="btn p" id="btnMetrics">ADIA</button>
+<canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:240px;margin-top:8px;background:#1a1814;border-radius:12px"></canvas>
+<div id="modStats" class="muted"></div></div></section>
+<section class="panel" id="tab-stats"><div class="card"><h3>Stats · perf</h3><div id="statsBox" class="muted">—</div><div id="pulseBox" class="muted">—</div>
+<textarea class="box" id="sdpBox"></textarea>
+<div class="row"><button type="button" class="btn" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><button type="button" class="btn" id="sdpEmbed">Embed</button></div>
+<pre id="sdpLog" class="muted">—</pre><span id="swarmLabel">3</span>
+</div></section>
 </div>
 <div class="composer" id="composer"><input id="inp" type="text" placeholder="Сообщение…" enterkeyhint="send"><button type="button" class="send" id="send">↑</button></div>
 <nav class="bnav" id="bnav">
@@ -81,24 +104,23 @@ function boot(){bind();var t='home';try{t=sessionStorage.getItem('aksi_tab')||'h
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
-<script src="/aksi-algorithm.js?v=47"></script>
-<script src="/aksi-neuro.js?v=47"></script>
-<script src="/aksi-knowledge.js?v=47"></script>
-<script src="/aksi-compose.js?v=47"></script>
-<script src="/aksi-quantum.js?v=47"></script>
-<script src="/aksi-pq.js?v=47"></script>
-<script src="/aksi-self-arch.js?v=47"></script>
-<script src="/aksi-secure-mem.js?v=47"></script>
-<script src="/aksi-swarm.js?v=47"></script>
-<script src="/aksi-stats.js?v=47"></script>
-<script src="/aksi-pulse.js?v=47"></script>
-<script src="/aksi-skills.js?v=47"></script>
-<script src="/aksi-web.js?v=47"></script>
-<script src="/aksi-organism.js?v=47"></script>
-<script src="/aksi-core-ai.js?v=47"></script>
-<script src="/app-runtime.js?v=47"></script>
-<script src="/aksi-mvp-boot.js?v=47"></script>
-<script src="/aksi-nav-fix.js?v=47"></script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js?v=47').catch(function(){});});}</script>
+<script src="/aksi-security.js?v=50"></script>
+<script src="/aksi-algorithm.js?v=50"></script>
+<script src="/aksi-neuro.js?v=50"></script>
+<script src="/aksi-knowledge.js?v=50"></script>
+<script src="/aksi-compose.js?v=50"></script>
+<script src="/aksi-core-ai.js?v=50"></script>
+<script src="/aksi-secure-mem.js?v=50"></script>
+<script src="/aksi-swarm.js?v=50"></script>
+<script src="/aksi-stats.js?v=50"></script>
+<script src="/aksi-organism.js?v=50"></script>
+<script src="/app-runtime.js?v=50"></script>
+<script src="/aksi-rag.js?v=50"></script>
+<script src="/aksi-trust-vault.js?v=50"></script>
+<script src="/aksi-perf.js?v=50"></script>
+<script src="/aksi-webllm.js?v=50"></script>
+<script src="/aksi-client-boot.js?v=50"></script>
+<script src="/aksi-nav-fix.js?v=50"></script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js?v=50').catch(function(){});});}</script>
 </body>
 </html>
