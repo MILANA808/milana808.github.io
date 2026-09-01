@@ -113,7 +113,7 @@
   for (i = 0; i < 140; i++) {
     LEGACY_NOTES.push(
       "AKSI compat layer note " + i +
-      " offline-first metrics DID contact aksilove@internet.ru product SPA index.html beige tabs"
+      " offline-first metrics DID contact project-site product SPA index.html beige tabs"
     );
   }
 
