@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#efe5d2">
+<title>АКСИ · SPA · вкладки</title>
+<style>
+:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:58px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
+body{color:var(--ink);font:15px/1.5 system-ui,sans-serif;background:linear-gradient(180deg,#f7f0e4,#efe5d2);display:flex;flex-direction:column;max-width:740px;margin:0 auto}
+button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer}
+.top{min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:rgba(251,247,239,.96);z-index:40}
+.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,var(--a),#8a6544);color:#fff;display:grid;place-items:center;font-weight:900}
+.titles{flex:1}h1{font-size:17px;font-weight:800}.sub{font-size:12px;color:var(--muted)}.sub a{color:var(--muted)}
+.pill{padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid #b7d4c2;background:#e8f2ea;color:var(--ok)}
+.stage{flex:1;min-height:0;overflow:auto;padding:12px 12px calc(var(--bn)+76px+var(--safe-b))}
+.panel{display:none!important}.panel.on{display:block!important}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.hero{font-size:20px;font-weight:800;line-height:1.25;margin:4px 0 10px}
+.muted{color:var(--muted);font-size:14px;line-height:1.55}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{min-height:44px;padding:11px 16px;border-radius:12px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:14px}
+.btn.p{background:var(--a);color:#fff;border-color:var(--a)}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.cell{background:var(--s2);border-radius:12px;padding:12px;text-align:center}.cell b{display:block;font-size:18px;font-weight:800}.cell span{font-size:11px;color:var(--muted)}
+#thread{display:flex;flex-direction:column;gap:10px;min-height:42vh}
+.msg{display:flex;margin:6px 0}.msg.me{justify-content:flex-end}.msg.ai{justify-content:flex-start}
+.msg .bub{max-width:88%;padding:11px 13px;border-radius:14px;border:1px solid var(--line);background:var(--s);white-space:pre-wrap;word-break:break-word}
+.msg.me .bub{background:var(--a);color:#fff;border-color:var(--a)}
+.msg .meta{margin-top:6px;font-size:10px;opacity:.75;font-weight:600}
+.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:740px;margin:0 auto;z-index:55;padding:8px 12px;display:none;gap:8px;align-items:flex-end;background:linear-gradient(to top,var(--bg) 75%,transparent);pointer-events:none}
+.composer.on{display:flex!important;pointer-events:auto}
+.composer input{flex:1;min-height:var(--tap);padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s);font-size:16px}
+.composer .send{width:var(--tap);height:var(--tap);border-radius:14px;background:var(--a);color:#fff;font-size:18px;font-weight:800}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:100;max-width:740px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);display:flex;background:rgba(251,247,239,.98);border-top:1px solid var(--line)}
+.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;font-weight:700;min-height:var(--bn);background:transparent}
+.bnav button.on{color:var(--a);background:var(--s2)}
+.box{width:100%;min-height:44px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;margin:6px 0}
+#localAns{margin-top:10px;padding:12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);white-space:pre-wrap;min-height:48px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chip{min-height:38px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo">A</div>
+  <div class="titles"><h1>АКСИ</h1><div class="sub"><a href="/">← хаб</a> · SPA · вкладки</div></div>
+  <span class="pill" id="modePill">offline</span>
+</header>
+<div class="stage" id="stage">
+<section class="panel on" id="tab-home">
+  <div class="card">
+    <h3>SPA</h3>
+    <div class="hero">Чат · Память · Модель · Доверие · Лаб · Сеть</div>
+    <p class="muted">Полный продукт с нижними вкладками. Бот и модули — на <a href="/">главной</a>.</p>
+    <div class="row"><button type="button" class="btn p" data-tab="chat">Чат</button><button type="button" class="btn" data-tab="lab">Лаб</button></div>
+    <div class="kv">
+      <div class="cell"><b id="kvNeuro">—</b><span>разум</span></div>
+      <div class="cell"><b id="kvMem">0</b><span>фактов</span></div>
+      <div class="cell"><b id="kvEqs">—</b><span>QCLI</span></div>
+      <div class="cell"><b id="kvMods">7</b><span>вкладок</span></div>
+    </div>
+  </div>
+</section>
+<section class="panel" id="tab-chat">
+  <div id="thread"></div>
+  <div class="chips">
+    <button type="button" class="chip" data-q="Кто ты?">Кто ты?</button>
+    <button type="button" class="chip" data-q="как пользоваться">Как пользоваться?</button>
+    <button type="button" class="chip" data-q="архитектура">Архитектура</button>
+  </div>
+</section>
+<section class="panel" id="tab-local">
+  <div class="card">
+    <h3>Модель</h3>
+    <p class="muted" id="localCaps">WebGPU → LLM (опционально)</p>
+    <select id="wlModel" class="box"><option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B</option></select>
+    <div class="row"><button type="button" class="btn p" id="wlLoad">Загрузить</button><button type="button" class="btn" id="wlUnload">Выгрузить</button></div>
+    <input class="box" id="localQ" placeholder="Вопрос…">
+    <div class="row"><button type="button" class="btn p" id="localAsk">Спросить</button></div>
+    <div id="localAns">—</div>
+  </div>
+</section>
+<section class="panel" id="tab-trust">
+  <div class="card">
+    <h3>Доверие</h3>
+    <pre id="pqStatus" class="muted">—</pre>
+    <div class="row"><button type="button" class="btn p" id="pqBoot">Статус</button><button type="button" class="btn" id="pqExport">.aksi</button></div>
+    <div class="row"><button type="button" class="btn p" id="pqSeal">Зашифровать</button><button type="button" class="btn" id="pqOpen">Открыть</button></div>
+    <textarea class="box" id="pqEnv" placeholder="envelope"></textarea>
+  </div>
+</section>
+<section class="panel" id="tab-mem">
+  <div class="card">
+    <h3>Память</h3>
+    <input class="box" id="teachIn" placeholder="Факт…">
+    <div class="row"><button type="button" class="btn p" id="btnTeach">Учить</button><button type="button" class="btn" id="btnWipe">Очистить</button></div>
+    <div id="memList" class="muted"></div><span id="memN" style="display:none">0</span>
+  </div>
+</section>
+<section class="panel" id="tab-lab">
+  <div class="card">
+    <h3>Лаб · квант</h3>
+    <div class="row"><button type="button" class="btn p" id="btnMetrics">Симулятор</button></div>
+    <pre id="labMetrics" class="muted">—</pre>
+    <canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:240px;background:#12100e;border-radius:12px"></canvas>
+  </div>
+</section>
+<section class="panel" id="tab-stats">
+  <div class="card">
+    <h3>Сеть</h3>
+    <div id="statsBox" class="muted">—</div>
+    <textarea class="box" id="sdpBox" placeholder="SDP"></textarea>
+    <div class="row"><button type="button" class="btn" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button></div>
+    <pre id="sdpLog" class="muted">—</pre>
+  </div>
+</section>
+</div>
+<div class="composer" id="composer">
+  <input id="inp" type="text" placeholder="Вопрос…" enterkeyhint="send" autocomplete="off">
+  <button type="button" class="send" id="send">↑</button>
+</div>
+<nav class="bnav" id="bnav">
+  <button type="button" data-tab="home" class="on">⌂ Дом</button>
+  <button type="button" data-tab="chat">💬 Чат</button>
+  <button type="button" data-tab="mem">🧠 Память</button>
+  <button type="button" data-tab="local">◉ Модель</button>
+  <button type="button" data-tab="trust">🔐 Trust</button>
+  <button type="button" data-tab="lab">⬡ Лаб</button>
+  <button type="button" data-tab="stats">📊 Сеть</button>
+</nav>
+<script>
+(function(){
+function showTab(t){
+t=String(t||'home').trim();
+document.querySelectorAll('.stage .panel').forEach(function(p){var on=p.id==='tab-'+t;p.classList.toggle('on',on);p.style.display=on?'block':'none'});
+document.querySelectorAll('.bnav [data-tab]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===t)});
+var c=document.getElementById('composer');
+if(c){if(t==='chat'){c.classList.add('on');c.style.display='flex';c.style.pointerEvents='auto'}else{c.classList.remove('on');c.style.display='none';c.style.pointerEvents='none'}}
+}
+window.AKSI_SHOW_TAB=showTab;
+function bind(){document.querySelectorAll('[data-tab]').forEach(function(btn){if(btn.__b)return;btn.__b=1;btn.addEventListener('click',function(e){e.preventDefault();showTab(btn.getAttribute('data-tab'))},true)})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){bind();showTab('home')});else{bind();showTab('home')}
+})();
+</script>
+<script src="/agent.js?v=21"></script>
+<script src="/aksi-mind-l2.js?v=201"></script>
+<script src="/aksi-func.js?v=201"></script>
+<script src="/aksi-product.js?v=201"></script>
+<script src="/aksi-quantum.js?v=201"></script>
+<script src="/aksi-rag.js?v=201"></script>
+<script src="/aksi-trust-vault.js?v=201"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js?v=201').catch(function(){})}</script>
+</body>
+</html>
