@@ -1,7 +1,7 @@
 /**
  * AKSI Local Engine v3.0 — full offline AI pipeline with visible execution
  * INPUT → MEMORY → KERNEL (Compose|Neuro|WebLLM) → QUANTUM → METRICS → VERIFY
- * Remote only with explicit allowLocalServer. Contact: aksilove@internet.ru
+ * Remote only with explicit allowLocalServer.
  */
 (function (G) {
   "use strict";
@@ -128,10 +128,7 @@
     var n = runNeuro(prompt); if (n) return n;
     var p = String(prompt || "").trim();
     if (!p) return { text: "Готова к работе. Напишите запрос.", source: "offline-kernel", offline: true };
-    return {
-      text: "Локальная LLM ещё не загружена, Composer/Neuro не дали опоры.\nЗапрос в облако не отправлялся.\nЗагрузите модель WebGPU или используйте MATRIX «запомни:».",
-      source: "offline-kernel", offline: true, model: null
-    };
+    return { text: "Локальная LLM ещё не загружена, Composer/Neuro не дали опоры.\nЗапрос в облако не отправлялся.\nЗагрузите модель WebGPU или используйте MATRIX «запомни:».", source: "offline-kernel", offline: true, model: null };
   }
   async function ask(prompt, options) {
     options = options || {};
@@ -141,15 +138,14 @@
     try {
       var memories = options.useMemory === false ? [] : await retrieve(prompt, options.memoryLimit || 6);
       emit("context.built", { memoryHits: memories.length, contextChars: memories.reduce(function (n, x) { return n + x.text.length; }, 0) });
-      var system = "Ты локальный AI-ассистент АКСИ. Отвечай по-русски, честно. Отделяй факты от предположений. Этапы видны в execution trace.\nЛокальная память:\n" +
-        memories.map(function (x) { return "- " + x.text; }).join("\n");
+      var system = "Ты локальный AI-ассистент. Отвечай честно. Отделяй факты от предположений. Этапы видны в execution trace.\nЛокальная память:\n" + memories.map(function (x) { return "- " + x.text; }).join("\n");
       var result;
       if (engine && G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready()) {
         emit("inference.start", { engine: "WebLLM/WebGPU", model: model });
         result = await G.AKSI_WEBLLM.complete(prompt, { system: system, temperature: options.temperature != null ? options.temperature : 0.55, maxTokens: options.maxTokens || 700 });
         result.source = result.source || "webllm"; result.offline = true;
       } else if (options.allowLocalServer === true) {
-        emit("inference.start", { engine: "llama.cpp-localhost", endpoint: LOCAL_ENDPOINT });
+        emit("inference.start", { engine: "llama.cpp-localhost" });
         var r = await fetch(LOCAL_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: [{ role: "system", content: system }, { role: "user", content: String(prompt) }], temperature: options.temperature != null ? options.temperature : 0.55, max_tokens: options.maxTokens || 700, stream: false }) });
         if (!r.ok) throw new Error("Local llama.cpp вернул " + r.status);
         var j = await r.json();
