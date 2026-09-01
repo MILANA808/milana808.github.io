@@ -1,6 +1,6 @@
-/* AKSI SW v200 — network-first HTML, purge old shells */
-var CACHE = "aksi-shell-v200-hub";
-var PRE = ["/", "/index.html", "/agent.js", "/sw.js"];
+/* AKSI SW v201 — network-first, purge old shells */
+var CACHE = "aksi-shell-v201-hub";
+var PRE = ["/", "/index.html", "/agent.js", "/sw.js", "/spa/", "/spa/index.html"];
 self.addEventListener("install", function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
