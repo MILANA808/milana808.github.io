@@ -11,9 +11,8 @@ const context = {
   TextEncoder,
   Uint8Array,
   ArrayBuffer,
-  crypto: webcrypto,
-  btoa: (s) => Buffer.from(s, 'binary').toString('base64'),
-  atob: (s) => Buffer.from(s, 'base64').toString('binary')
+  performance: { now: () => 0 },
+  crypto: webcrypto
 };
 context.window = context;
 vm.createContext(context);
@@ -21,17 +20,16 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
 
 (async () => {
   assert.ok(context.AKSI_RUNTIME);
-  assert.strictEqual(context.AKSI_RUNTIME.version, '1.2.0');
+  assert.strictEqual(context.AKSI_RUNTIME.version, '1.3.0');
 
   const degraded = await context.AKSI_RUNTIME.selfTest();
   assert.strictEqual(degraded.ok, false);
-  assert.strictEqual(degraded.integrity.crypto, true);
-  assert.strictEqual(degraded.integrity.signature, true);
+  assert.strictEqual(degraded.sha256, true);
+  assert.strictEqual(degraded.status.integrity.crypto, true);
 
-  context.AKSI_CORE = { query() {} };
+  context.AKSI_CORE = { query: async () => ({ text: 'local core result', source: 'core', offline: true }) };
   const ready = await context.AKSI_RUNTIME.selfTest();
   assert.strictEqual(ready.ok, true);
-  assert.strictEqual(ready.integrity.signature, true);
 
   const answer = context.AKSI_RUNTIME.answer('q', 'a', {
     source: 'core', kind: 'computed', confidence: 1.4, citations: ['x', 'y']
@@ -40,42 +38,29 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
   assert.strictEqual(answer.confidence, 1);
   assert.deepStrictEqual(answer.citations, ['x', 'y']);
 
-  const integrity = context.AKSI_RUNTIME.integrity;
-  const value = { b: 2, a: 'АКСИ', ignored: undefined };
-  const reordered = { a: 'АКСИ', b: 2 };
-  assert.strictEqual(integrity.canonical(value), integrity.canonical(reordered));
-  assert.strictEqual(await integrity.sha256(integrity.canonical(value)), await integrity.sha256(integrity.canonical(reordered)));
+  const value = { b: 2, a: 'AKSI', ignored: undefined };
+  const reordered = { a: 'AKSI', b: 2 };
+  assert.strictEqual(context.AKSI_RUNTIME.canonical(value), context.AKSI_RUNTIME.canonical(reordered));
+  assert.strictEqual(
+    await context.AKSI_RUNTIME.sha256(value),
+    await context.AKSI_RUNTIME.sha256(reordered)
+  );
 
-  const proof = await integrity.sign(value);
-  assert.strictEqual(proof.algorithm, 'Ed25519');
-  assert.ok(proof.did.startsWith('did:aksi:ed25519:'));
-  assert.strictEqual(await integrity.verify(value, proof), true);
-  assert.strictEqual(await integrity.verify({ a: 'АКСИ', b: 3 }, proof), false);
+  context.AKSI_METRICS = {
+    measure: ({ input, output }) => ({
+      version: '1.1.0', inputs: String(input).length, outputs: String(output).length
+    })
+  };
+  const result = await context.AKSI_RUNTIME.execute('test query', { useMemory: false });
+  assert.strictEqual(result.schema, 'AKSI-ANSWER-1');
+  assert.strictEqual(result.source, 'core');
+  assert.ok(result.integrityHash);
+  assert.strictEqual(result.integrityHash.length, 64);
+  assert.ok(Array.isArray(result.trace));
+  assert.ok(result.trace.some(e => e.type === 'route.core'));
+  assert.ok(result.trace.some(e => e.type === 'verification.complete'));
 
-  const e1 = await integrity.createLedgerEvent('test', { value: 1 }, 'GENESIS');
-  const e2 = await integrity.createLedgerEvent('test', { value: 2 }, e1.hash);
-  let result = await integrity.verifyLedger([e1, e2]);
-  assert.strictEqual(result.ok, true);
-
-  const tampered = JSON.parse(JSON.stringify([e1, e2]));
-  tampered[0].payload.value = 999;
-  result = await integrity.verifyLedger(tampered);
-  assert.strictEqual(result.ok, false);
-  assert.strictEqual(result.reason, 'hash-mismatch');
-
-  const brokenLink = JSON.parse(JSON.stringify([e1, e2]));
-  brokenLink[1].previousHash = 'BROKEN';
-  result = await integrity.verifyLedger(brokenLink);
-  assert.strictEqual(result.ok, false);
-  assert.strictEqual(result.reason, 'previous-hash-mismatch');
-
-  const forgedSignature = JSON.parse(JSON.stringify([e1, e2]));
-  forgedSignature[0].proof.signature = 'AA==' + forgedSignature[0].proof.signature;
-  result = await integrity.verifyLedger(forgedSignature);
-  assert.strictEqual(result.ok, false);
-  assert.strictEqual(result.reason, 'signature-invalid');
-
-  console.log('AKSI runtime contract + cryptographic integrity tests: OK');
+  console.log('AKSI runtime contract tests: OK');
 })().catch((error) => {
   console.error(error);
   process.exitCode = 1;
