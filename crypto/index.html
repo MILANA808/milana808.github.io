@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0f14">
+<meta name="description" content="AKSI Cipher Suite — classical + post-quantum hybrid identity, seal, AEAD.">
+<title>AKSI Cipher Suite · classical + post-quantum</title>
+<style>
+:root{--bg:#0b0f14;--s:#121820;--s2:#1a222d;--ink:#e8eef6;--muted:#8b9bb0;--line:#243040;--a:#5b8def;--ok:#3ecf8e;--warn:#e6b84d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.55 system-ui,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#152033 0%,var(--bg) 55%);color:var(--ink);min-height:100vh}
+a{color:var(--a);text-decoration:none}
+.wrap{max-width:880px;margin:0 auto;padding:24px 16px 48px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#3d6fd8,#5b8def);display:grid;place-items:center;font-weight:900;color:#fff}
+h1{font-size:20px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
+.pill{margin-left:auto;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
+.pill.ok{border-color:#2a6b4e;background:#143528;color:var(--ok)}
+.hero h2{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:10px;letter-spacing:-.02em}
+.hero p{color:var(--muted);max-width:54ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:18px 0}
+.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.card b{font-size:14px;display:block;margin-bottom:4px}.card span{font-size:12px;color:var(--muted)}
+.panel{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+.panel h3{font-size:14px;font-weight:800;margin-bottom:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--a);color:#fff;font-weight:700;font-size:13px}
+button.ghost{background:var(--s2);border:1px solid var(--line);color:var(--ink)}
+pre{background:#0a0e14;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11px;overflow:auto;max-height:220px;color:#b8c7d9;margin-top:10px}
+.table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+.table td,.table th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+.table th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
+.ok{color:var(--ok)}.warn{color:var(--warn)}
+.foot{margin-top:28px;font-size:12px;color:var(--muted);text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">A</div>
+    <div><h1>AKSI Cipher Suite</h1><div class="sub"><a href="/">← хаб</a> · classical + post-quantum hybrid</div></div>
+    <span class="pill" id="stPill">booting…</span>
+  </header>
+  <section class="hero">
+    <h2>Identity you can verify. Secrets that stay on the device.</h2>
+    <p>Browser-native cryptography for a sovereign agent: signatures, sealed answers, AES-GCM envelopes. Post-quantum is hybrid — classical always works; ML-KEM joins when available.</p>
+  </section>
+  <div class="grid">
+    <div class="card"><h3>Sign</h3><b>Ed25519 / ECDSA P-256</b><span>DID-bound seals</span></div>
+    <div class="card"><h3>KEM</h3><b>ECDH P-256 + optional ML-KEM</b><span>Hybrid secrets</span></div>
+    <div class="card"><h3>AEAD</h3><b>AES-256-GCM</b><span>Memory envelopes</span></div>
+    <div class="card"><h3>Hash</h3><b>SHA-256</b><span>Canonical digests</span></div>
+  </div>
+  <div class="panel">
+    <h3>Live identity (this browser)</h3>
+    <div class="row">
+      <button type="button" id="btnBoot">Boot suite</button>
+      <button type="button" class="ghost" id="btnSeal">Seal sample</button>
+      <button type="button" class="ghost" id="btnEnc">Encrypt → decrypt</button>
+      <button type="button" class="ghost" id="btnPack">Public pack</button>
+    </div>
+    <pre id="out">Press Boot…</pre>
+  </div>
+  <div class="panel">
+    <h3>Real vs research</h3>
+    <table class="table">
+      <tr><th>Layer</th><th>Status</th></tr>
+      <tr><td>Web Crypto ECDSA / ECDH / AES-GCM / SHA-256</td><td class="ok">Production</td></tr>
+      <tr><td>Ed25519 Web Crypto</td><td class="ok">Where supported</td></tr>
+      <tr><td>ML-KEM-768 hybrid</td><td class="warn">Optional — clean fallback</td></tr>
+      <tr><td>DID did:aksi:…</td><td class="ok">From public key fingerprint</td></tr>
+      <tr><td>Backend seal (Milana-backend)</td><td class="ok">Ed25519 middleware</td></tr>
+    </table>
+  </div>
+  <footer class="foot">aksilove@internet.ru · @AKSILOVE · did:aksi</footer>
+</div>
+<script src="/aksi-ciphersuite.js?v=1"></script>
+<script>
+(function(){
+  var out=document.getElementById('out'),pill=document.getElementById('stPill');
+  function show(x){out.textContent=typeof x==='string'?x:JSON.stringify(x,null,2)}
+  async function boot(){show('booting…');var s=await AKSI_CRYPTO.boot({tryPq:true});pill.textContent=s.pq?'PQ hybrid':'classical';pill.className='pill'+(s.ready?' ok':'');show(s)}
+  document.getElementById('btnBoot').onclick=boot;
+  document.getElementById('btnSeal').onclick=async function(){if(!AKSI_CRYPTO.status().ready)await boot();show(await AKSI_CRYPTO.sealJson({answer:'AKSI online',qcli:0.81,ts:Date.now()}))};
+  document.getElementById('btnEnc').onclick=async function(){if(!AKSI_CRYPTO.status().ready)await boot();var env=await AKSI_CRYPTO.encryptToSelf('secret-'+Date.now());show({envelope:env,roundtrip:await AKSI_CRYPTO.decryptSelf(env)})};
+  document.getElementById('btnPack').onclick=async function(){if(!AKSI_CRYPTO.status().ready)await boot();show(await AKSI_CRYPTO.publicPack())};
+  boot().catch(function(e){show(String(e));pill.textContent='error'});
+})();
+</script>
+</body>
+</html>
