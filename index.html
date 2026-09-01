@@ -4,223 +4,141 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ — local-first AI with real-time quantum pipeline. Release 1.2">
-<meta property="og:title" content="АКСИ · Релиз 1.2 quantum pipeline">
+<meta name="description" content="АКСИ — локальный ИИ и сеть модулей. Чат, память, доверие, квант-лаб, бот.">
+<meta property="og:title" content="АКСИ · сеть суверенного ИИ">
+<meta property="og:description" content="Модули · бот · локальная сеть знаний.">
 <meta property="og:url" content="https://milana808.github.io/">
 <meta name="twitter:site" content="@AKSILOVE">
 <link rel="canonical" href="https://milana808.github.io/">
-<title>АКСИ · Релиз 1.2 — quantum pipeline</title>
+<title>АКСИ · суверенный ИИ · модули и сеть</title>
 <style>
-:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bn:58px;--tap:48px;--safe-b:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;height:100dvh;overflow:hidden}
-body{color:var(--ink);font:15px/1.5 system-ui,sans-serif;background:linear-gradient(180deg,#f7f0e4,#efe5d2);display:flex;flex-direction:column;max-width:740px;margin:0 auto}
-button,input,textarea,select{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer}
-.top{min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:rgba(251,247,239,.96);z-index:40;backdrop-filter:blur(10px)}
-.logo{width:36px;height:36px;border-radius:12px;background:linear-gradient(145deg,var(--a),#8a6544);color:#fff;display:grid;place-items:center;font-weight:900;box-shadow:0 4px 14px rgba(107,79,53,.35)}
-.titles{flex:1}h1{font-size:17px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
-.pill{padding:5px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid #b7d4c2;background:#e8f2ea;color:var(--ok);display:inline-flex;align-items:center}
-.pulse-dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:pulse 2s infinite;display:inline-block;margin-right:6px}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(47,107,72,.45)}70%{box-shadow:0 0 0 10px rgba(47,107,72,0)}}
-.stage{flex:1;min-height:0;overflow:auto;padding:12px 12px calc(var(--bn)+76px+var(--safe-b))}
-.panel{display:none!important}.panel.on{display:block!important}
-.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-.card h3{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-.hero{font-size:20px;font-weight:800;line-height:1.25;margin:4px 0 10px;background:linear-gradient(120deg,#2a241c,#6b4f35,#8a6544);-webkit-background-clip:text;background-clip:text;color:transparent}
-.muted{color:var(--muted);font-size:14px;line-height:1.55}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+:root{--bg:#f3ebdc;--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--safe:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:linear-gradient(165deg,#f7f0e4,#efe5d2 50%,#e8dcc8);color:var(--ink);font:15px/1.5 system-ui,-apple-system,sans-serif}
+a{color:inherit;text-decoration:none}button,input{font:inherit;border:0;background:0;color:inherit}button{cursor:pointer}
+.wrap{max-width:920px;margin:0 auto;padding:20px 16px calc(24px + var(--safe))}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#6b4f35,#8a6544);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 6px 18px rgba(107,79,53,.3)}
+.brand h1{font-size:20px;font-weight:800}.brand p{font-size:12px;color:var(--muted)}
+.pill{margin-left:auto;padding:6px 12px;border-radius:999px;font-size:11px;font-weight:700;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
+.hero{background:var(--s);border:1px solid var(--line);border-radius:20px;padding:22px 20px;margin-bottom:16px;box-shadow:0 8px 28px rgba(42,36,28,.04)}
+.hero h2{font-size:26px;font-weight:800;line-height:1.2;margin-bottom:8px;background:linear-gradient(120deg,#2a241c,#6b4f35 45%,#8a6544);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{color:var(--muted);font-size:15px;max-width:52ch;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
 .btn{min-height:44px;padding:11px 16px;border-radius:12px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:14px}
-.btn.p{background:var(--a);color:#fff;border-color:var(--a)}
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-.cell{background:var(--s2);border-radius:12px;padding:12px;text-align:center}.cell b{display:block;font-size:18px;font-weight:800}.cell span{font-size:11px;color:var(--muted)}
-.score-bar{height:6px;border-radius:99px;background:#e8dfd0;overflow:hidden;margin-top:8px}.score-bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#6b4f35,#c4a574);transition:width .6s}
-#thread{display:flex;flex-direction:column;gap:10px;min-height:42vh}
-.msg{display:flex;margin:6px 0}.msg.me{justify-content:flex-end}.msg.ai{justify-content:flex-start}
-.msg .bub{max-width:88%;padding:11px 13px;border-radius:14px;border:1px solid var(--line);background:var(--s);white-space:pre-wrap;word-break:break-word}
-.msg.me .bub{background:var(--a);color:#fff;border-color:var(--a)}
-.msg .meta{margin-top:6px;font-size:10px;opacity:.75;font-weight:600}
-.typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:#8a6544;animation:blink 1s infinite}
-@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
-.composer{position:fixed;left:0;right:0;bottom:calc(var(--bn)+var(--safe-b));max-width:740px;margin:0 auto;z-index:55;padding:8px 12px;display:none;gap:8px;align-items:flex-end;background:linear-gradient(to top,var(--bg) 75%,transparent);pointer-events:none}
-.composer.on{display:flex!important;pointer-events:auto}
-.composer input{flex:1;min-height:var(--tap);padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s);font-size:16px}
-.composer .send{width:var(--tap);height:var(--tap);border-radius:14px;background:var(--a);color:#fff;font-size:18px;font-weight:800}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:100;max-width:740px;margin:0 auto;height:calc(var(--bn)+var(--safe-b));padding-bottom:var(--safe-b);display:flex;background:rgba(251,247,239,.98);border-top:1px solid var(--line)}
-.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:10px;font-weight:700;min-height:var(--bn);background:transparent}
-.bnav button.on{color:var(--a);background:var(--s2)}
-.box{width:100%;min-height:44px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;margin:6px 0}
-#localAns{margin-top:10px;padding:12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);white-space:pre-wrap;min-height:48px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chip{min-height:38px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s);font-size:13px;font-weight:600}
-.check-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.check-row span{font-size:11px;padding:5px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
-.check-row span.ok{border-color:#b7d4c2;background:#e8f2ea;color:var(--ok)}
-.steps{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:14px;line-height:1.6}
+.btn.p{background:var(--a);color:#fff;border-color:var(--a);box-shadow:0 4px 14px rgba(107,79,53,.25)}
+.sec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.mod{display:flex;flex-direction:column;gap:6px;padding:14px 12px;border-radius:16px;border:1px solid var(--line);background:var(--s);min-height:108px;transition:transform .15s,box-shadow .15s}
+.mod:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(107,79,53,.1)}
+.mod .ic{font-size:22px}.mod b{font-size:14px;font-weight:800}.mod span{font-size:11px;color:var(--muted);line-height:1.35}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{font-size:13px;font-weight:800;margin-bottom:8px}.muted{color:var(--muted);font-size:13px}
+#botThread{min-height:120px;max-height:240px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.bub{padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--s2);max-width:92%;white-space:pre-wrap;font-size:14px}
+.bub.me{align-self:flex-end;background:var(--a);color:#fff;border-color:var(--a)}.bub .m{font-size:10px;opacity:.7;margin-top:4px}
+.composer{display:flex;gap:8px;margin-top:8px}
+.composer input{flex:1;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
+.composer button{width:48px;border-radius:12px;background:var(--a);color:#fff;font-weight:800}
+.foot{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);text-align:center}
+.net-map{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.net-map i{font-style:normal;font-size:11px;padding:5px 10px;border-radius:999px;background:var(--s2);border:1px solid var(--line)}
 </style>
 </head>
 <body>
-<header class="top">
-  <div class="logo">A</div>
-  <div class="titles"><h1>АКСИ</h1><div class="sub">Релиз 1.2 · quantum pipeline</div></div>
-  <span class="pill" id="modePill"><span class="pulse-dot"></span><span id="modeText">offline</span></span>
-</header>
-<div class="stage" id="stage">
-<section class="panel on" id="tab-home">
-  <div class="card">
-    <h3>Что это</h3>
-    <div class="hero">Offline-ИИ + quantum pipeline</div>
-    <p class="muted">Каждый ответ проходит state-vector симулятор в реальном времени. Можно подключить IBM Quantum по токену.</p>
-    <ol class="steps">
-      <li><b>Чат</b> — вопрос → ответ → QCLI</li>
-      <li><b>Память</b> — учить факты</li>
-      <li><b>Доверие</b> — AES-шифрование</li>
-      <li><b>Лаб</b> — симулятор и backend</li>
-    </ol>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">A</div>
+    <div class="brand"><h1>АКСИ</h1><p>суверенный ИИ · сеть модулей</p></div>
+    <span class="pill" id="statusPill">local</span>
+  </header>
+  <section class="hero">
+    <h2>Ваш ИИ. Ваша сеть. На вашем устройстве.</h2>
+    <p class="lead">АКСИ — набор рабочих модулей: память, доверие, квант-лаб, бот и контур «нового интернета» из ваших узлов и знаний. Не ещё один чат в чужом облаке.</p>
     <div class="row">
-      <button type="button" class="btn p" data-tab="chat">Начать чат</button>
-      <button type="button" class="btn" data-tab="lab">Квант-лаб</button>
+      <a class="btn p" href="#bot">Открыть бота</a>
+      <a class="btn" href="/chat/">Полный чат</a>
+      <a class="btn" href="/matrix/">MATRIX</a>
+      <a class="btn" href="/present.html">Презентация</a>
     </div>
-    <div id="productChecks" class="check-row"></div>
-    <div class="kv">
-      <div class="cell"><b id="kvNeuro">—</b><span>разум</span></div>
-      <div class="cell"><b id="kvMem">0</b><span>фактов</span></div>
-      <div class="cell"><b id="kvEqs">—</b><span>QCLI</span></div>
-      <div class="cell"><b id="kvMods">0</b><span>модулей</span></div>
+  </section>
+  <div class="sec">Модули</div>
+  <div class="grid">
+    <a class="mod" href="/chat/"><span class="ic">💬</span><b>Чат</b><span>Offline · Mind L2</span></a>
+    <a class="mod" href="/app/"><span class="ic">◉</span><b>Приложение</b><span>SPA · вкладки</span></a>
+    <a class="mod" href="/local-ai/"><span class="ic">🧠</span><b>Local AI</b><span>Конвейер</span></a>
+    <a class="mod" href="/matrix/"><span class="ic">⬡</span><b>MATRIX</b><span>WebLLM · RAG</span></a>
+    <a class="mod" href="/quantum/"><span class="ic">⚛️</span><b>Квант</b><span>Симулятор</span></a>
+    <a class="mod" href="/aksi-quantum.html"><span class="ic">🔬</span><b>Quantum Lab</b><span>Bloch · QCLI</span></a>
+    <a class="mod" href="/proof/"><span class="ic">🔏</span><b>Proof</b><span>Подпись</span></a>
+    <a class="mod" href="/globe/"><span class="ic">🌍</span><b>Globe</b><span>Узлы</span></a>
+    <a class="mod" href="/net/"><span class="ic">🕸️</span><b>Личная сеть</b><span>Ваши узлы</span></a>
+    <a class="mod" href="/protocol/"><span class="ic">📜</span><b>Protocol</b><span>HRR · swarm</span></a>
+    <a class="mod" href="/algorithm.html"><span class="ic">Σ</span><b>ADIA</b><span>Алгоритм</span></a>
+    <a class="mod" href="/backup/"><span class="ic">💾</span><b>Бэкап</b><span>Файл</span></a>
+    <a class="mod" href="/dreams/"><span class="ic">✦</span><b>Сны</b><span>SHA-печать</span></a>
+    <a class="mod" href="/hub/"><span class="ic">🗺️</span><b>Карта</b><span>Маршруты</span></a>
+    <a class="mod" href="/offer/"><span class="ic">◇</span><b>Offer</b><span>Продукт</span></a>
+    <a class="mod" href="#bot"><span class="ic">🤖</span><b>AKSI Bot</b><span>Агент</span></a>
+  </div>
+  <div class="sec">АКСИ-Сеть — «новый интернет» внутри</div>
+  <div class="card">
+    <h3>Не чужой веб — ваш контур</h3>
+    <p class="muted">Модули связаны как узлы: чат ↔ память ↔ доверие ↔ квант ↔ бот. Знания у вас; по желанию бот ходит во внешний поиск через API.</p>
+    <div class="net-map"><i>Chat</i><i>Mem</i><i>Trust</i><i>Quantum</i><i>Bot</i><i>Matrix</i><i>Globe</i><i>Protocol</i></div>
+    <div class="row" style="margin-top:12px">
+      <a class="btn" href="/net/">Открыть сеть</a>
+      <a class="btn" href="/universe/">Universe</a>
+      <a class="btn" href="/contour/">Contour</a>
     </div>
-    <div class="score-bar"><i id="scoreBar"></i></div>
-    <p class="muted" id="productReadyLabel" style="margin-top:10px">Релиз 1.2…</p>
   </div>
+  <div class="sec" id="bot">AKSI Bot</div>
   <div class="card">
-    <h3>Контакт</h3>
-    <p class="muted">aksilove@internet.ru · X @AKSILOVE</p>
-  </div>
-</section>
-<section class="panel" id="tab-chat">
-  <div id="thread"></div>
-  <div class="chips">
-    <button type="button" class="chip" data-q="Кто ты?">Кто ты?</button>
-    <button type="button" class="chip" data-q="quantum">Quantum pipeline</button>
-    <button type="button" class="chip" data-q="как пользоваться">Как пользоваться?</button>
-    <button type="button" class="chip" data-q="архитектура">Архитектура</button>
-  </div>
-</section>
-<section class="panel" id="tab-local">
-  <div class="card">
-    <h3>Большая модель (опционально)</h3>
-    <p class="muted" id="localCaps">WebGPU → LLM</p>
-    <div class="kv"><div class="cell"><b id="wlGpu">…</b><span>WebGPU</span></div><div class="cell"><b id="wlState">idle</b><span>модель</span></div></div>
-    <select id="wlModel" class="box">
-      <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B</option>
-      <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B</option>
-    </select>
-    <div class="row"><button type="button" class="btn p" id="wlLoad">Загрузить</button><button type="button" class="btn" id="wlUnload">Выгрузить</button></div>
-    <pre id="wlOut" class="muted">—</pre>
-    <input class="box" id="localQ" placeholder="Вопрос…">
-    <div class="row"><button type="button" class="btn p" id="localAsk">Спросить</button></div>
-    <div id="localAns">—</div><div id="localMeta" class="muted"></div><div id="localTrace"></div>
-  </div>
-</section>
-<section class="panel" id="tab-trust">
-  <div class="card">
-    <h3>Доверие · AES</h3>
-    <pre id="pqStatus" class="muted">—</pre>
-    <div class="row"><button type="button" class="btn p" id="pqBoot">Статус</button><button type="button" class="btn" id="pqExport">.aksi</button></div>
-    <div class="row"><button type="button" class="btn p" id="pqSeal">Зашифровать</button><button type="button" class="btn" id="pqOpen">Открыть</button></div>
-    <textarea class="box" id="pqEnv" placeholder="envelope JSON"></textarea>
-    <textarea class="box" id="pqPeer" style="display:none"></textarea><textarea class="box" id="pqMsg" style="display:none"></textarea>
-  </div>
-</section>
-<section class="panel" id="tab-mem">
-  <div class="card">
-    <h3>Память</h3>
-    <input class="box" id="teachIn" placeholder="Факт…">
-    <div class="row"><button type="button" class="btn p" id="btnTeach">Учить</button><button type="button" class="btn" id="btnWipe">Очистить</button></div>
-    <div id="memList" class="muted"></div><div id="chatList" class="muted"></div><span id="memN" style="display:none">0</span>
-  </div>
-</section>
-<section class="panel" id="tab-lab">
-  <div class="card">
-    <h3>Лаб · квантовый конвейер</h3>
-    <p class="muted">Каждый ответ чата → <b>state-vector</b> симулятор. Опционально IBM Quantum (токен).</p>
-    <div class="row">
-      <button type="button" class="btn p" id="btnMetrics">Прогнать симулятор</button>
-      <button type="button" class="btn" id="btnQLocal">Backend: local</button>
-      <button type="button" class="btn" id="btnQIbm">Backend: IBM</button>
+    <h3>Агент · восстановлен</h3>
+    <p class="muted">Сначала local-ядро. Опционально remote API и world search.</p>
+    <div id="botThread"></div>
+    <div class="composer">
+      <input id="botIn" type="text" placeholder="Спросите бота…" enterkeyhint="send" autocomplete="off">
+      <button type="button" id="botSend">↑</button>
     </div>
-    <input class="box" id="ibmToken" type="password" placeholder="IBM Quantum API token (опционально)">
-    <div class="row"><button type="button" class="btn" id="btnSaveIbm">Сохранить токен</button></div>
-    <pre id="labMetrics" class="muted" style="margin-top:10px;max-height:160px;overflow:auto">—</pre>
-    <pre id="qPipeLog" class="muted" style="max-height:90px;overflow:auto;font-size:12px"></pre>
-    <canvas id="hrrGlCanvas" width="256" height="256" style="width:100%;max-width:240px;margin-top:10px;background:#12100e;border-radius:12px"></canvas>
-    <div id="modStats" class="muted"></div>
-    <p class="muted" style="margin-top:8px;font-size:12px">local-sv = симуляция на устройстве · ibm-runtime = облачный QPU</p>
+    <div class="row" style="margin-top:10px">
+      <button type="button" class="btn" id="botCap">Статус API</button>
+      <button type="button" class="btn" id="botWeb">+ поиск</button>
+    </div>
+    <pre id="botMeta" class="muted" style="margin-top:8px;font-size:11px">—</pre>
   </div>
-</section>
-<section class="panel" id="tab-stats">
+  <div class="sec">Как пользоваться</div>
   <div class="card">
-    <h3>Сеть P2P</h3>
-    <div id="statsBox" class="muted">—</div>
-    <div id="pulseBox" class="muted">—</div>
-    <textarea class="box" id="sdpBox" placeholder="SDP"></textarea>
-    <div class="row"><button type="button" class="btn" id="sdpOffer">Offer</button><button type="button" class="btn" id="sdpAnswer">Answer</button><button type="button" class="btn" id="sdpEmbed">Embed</button></div>
-    <pre id="sdpLog" class="muted">—</pre>
-    <span id="swarmLabel" style="display:none">3</span>
+    <p class="muted">1. Модуль выше · 2. Факты в чате · 3. Trust — шифрование · 4. Lab — QCLI · 5. Бот — быстрый вход.</p>
   </div>
-</section>
+  <footer class="foot">aksilove@internet.ru · X @AKSILOVE · DID did:aksi:ed25519:sovereign-2026<br>© AKSI · offline-first</footer>
 </div>
-<div class="composer" id="composer">
-  <input id="inp" type="text" placeholder="Вопрос…" enterkeyhint="send" autocomplete="off">
-  <button type="button" class="send" id="send">↑</button>
-</div>
-<nav class="bnav" id="bnav">
-  <button type="button" data-tab="home" class="on"><span class="ic">⌂</span>Дом</button>
-  <button type="button" data-tab="chat"><span class="ic">💬</span>Чат</button>
-  <button type="button" data-tab="mem"><span class="ic">🧠</span>Память</button>
-  <button type="button" data-tab="local"><span class="ic">◉</span>Модель</button>
-  <button type="button" data-tab="trust"><span class="ic">🔐</span>Доверие</button>
-  <button type="button" data-tab="lab"><span class="ic">⬡</span>Лаб</button>
-  <button type="button" data-tab="stats"><span class="ic">📊</span>Сеть</button>
-</nav>
+<script src="/agent.js?v=2"></script>
+<script src="/aksi-mind-l2.js?v=130"></script>
+<script src="/aksi-func.js?v=130"></script>
 <script>
 (function(){
-function showTab(t){
-t=String(t||'home').trim();
-document.querySelectorAll('.stage .panel').forEach(function(p){var on=p.id==='tab-'+t;p.classList.toggle('on',on);p.style.display=on?'block':'none'});
-document.querySelectorAll('.bnav [data-tab]').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===t)});
-var c=document.getElementById('composer');
-if(c){if(t==='chat'){c.classList.add('on');c.style.display='flex';c.style.pointerEvents='auto'}else{c.classList.remove('on');c.style.display='none';c.style.pointerEvents='none'}}
-try{sessionStorage.setItem('aksi_tab',t)}catch(e){}
-}
-window.AKSI_SHOW_TAB=showTab;
-function bind(){document.querySelectorAll('[data-tab]').forEach(function(btn){if(btn.__b)return;btn.__b=1;btn.addEventListener('click',function(e){e.preventDefault();showTab(btn.getAttribute('data-tab'))},true)})}
-function boot(){bind();var t='home';try{t=sessionStorage.getItem('aksi_tab')||'home'}catch(e){}showTab(t);setTimeout(bind,300)}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  var th=document.getElementById('botThread'),inp=document.getElementById('botIn'),meta=document.getElementById('botMeta'),withWeb=false;
+  function bub(role,text,m){var d=document.createElement('div');d.className='bub'+(role==='me'?' me':'');d.textContent=text||'';if(m){var s=document.createElement('div');s.className='m';s.textContent=m;d.appendChild(s)}th.appendChild(d);th.scrollTop=th.scrollHeight}
+  async function ask(){
+    var q=(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);bub('ai','…');var last=th.lastChild;
+    try{
+      var r=await (window.AKSIAgent?AKSIAgent.ask(q,{alsoSearch:withWeb}):Promise.resolve({text:'нет agent.js',source:'err'}));
+      last.textContent=r.text||'—';
+      var mm=(r.source||'')+(r.offline?' · offline':'');
+      if(r.web&&r.web.text){mm+=' · web';last.textContent+='\n\n—\n'+String(r.web.text).slice(0,400)}
+      var s=document.createElement('div');s.className='m';s.textContent=mm;last.appendChild(s);
+      meta.textContent=JSON.stringify({source:r.source,offline:!!r.offline},null,0);
+    }catch(e){last.textContent=String(e.message||e)}
+  }
+  document.getElementById('botSend').onclick=ask;
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')ask()});
+  document.getElementById('botWeb').onclick=function(){withWeb=!withWeb;this.textContent=withWeb?'поиск: ON':'+ поиск'};
+  document.getElementById('botCap').onclick=async function(){
+    try{var c=await AKSIAgent.capabilities();meta.textContent=JSON.stringify(c,null,2).slice(0,800);document.getElementById('statusPill').textContent=c.offline?'local':'api'}catch(e){meta.textContent=String(e)}
+  };
+  bub('ai','АКСИ-бот на связи. Спросите что угодно или откройте модуль.');
 })();
 </script>
-<script src="/aksi-algorithm.js?v=120"></script>
-<script src="/aksi-neuro.js?v=120"></script>
-<script src="/aksi-knowledge.js?v=120"></script>
-<script src="/aksi-mind-l2.js?v=120"></script>
-<script src="/aksi-core-ai.js?v=120"></script>
-<script src="/app-runtime.js?v=120"></script>
-<script src="/aksi-rag.js?v=120"></script>
-<script src="/aksi-trust-vault.js?v=120"></script>
-<script src="/aksi-webllm.js?v=120"></script>
-<script src="/aksi-p2p-sdp.js?v=120"></script>
-<script src="/aksi-chats.js?v=120"></script>
-<script src="/aksi-quantum.js?v=120"></script>
-<script src="/aksi-qpipe.js?v=120"></script>
-<script src="/aksi-product.js?v=120"></script>
-<script src="/aksi-func.js?v=120"></script>
-<script>
-(function(){
-function bindQ(){
-  var b1=document.getElementById('btnQLocal'),b2=document.getElementById('btnQIbm'),save=document.getElementById('btnSaveIbm'),tok=document.getElementById('ibmToken');
-  if(b1)b1.onclick=function(){if(window.AKSI_QPIPE)AKSI_QPIPE.setBackend('local-sv');alert('Backend: local-sv')};
-  if(b2)b2.onclick=function(){if(window.AKSI_QPIPE)AKSI_QPIPE.setBackend('ibm-runtime');alert('Backend: ibm-runtime')};
-  if(save)save.onclick=function(){var t=tok&&tok.value;if(window.AKSI_QUANTUM&&AKSI_QUANTUM.setIbmToken)AKSI_QUANTUM.setIbmToken(t||'');alert(t?'Токен сохранён':'Очищено')};
-}
-setTimeout(bindQ,500);
-})();
-</script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js?v=120').catch(function(){})})}</script>
 </body>
 </html>
