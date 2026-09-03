@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1018">
+<title>АКСИ Genesis · future engine</title>
+<style>
+:root{--bg:#0c1018;--s:#141a24;--s2:#1c2430;--ink:#e6eef8;--muted:#8b9bb0;--a:#5b9fd4;--line:#2a3544}
+*{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(900px 500px at 20% -10%,#1a2740,var(--bg));color:var(--ink);min-height:100vh}
+a{color:var(--a)}.wrap{max-width:840px;margin:0 auto;padding:20px 14px 48px}
+.top{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(145deg,#3d7ab8,#5b9fd4);display:grid;place-items:center;font-weight:900}
+h1{font-size:18px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
+.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.flow{display:flex;flex-wrap:wrap;gap:5px}.flow span{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--s2);border:1px solid var(--line)}
+#thread{min-height:140px;max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.bub{padding:10px 12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);max-width:92%;white-space:pre-wrap;font-size:14px}
+.bub.me{align-self:flex-end;background:#2a5080;border-color:#3d6a9e}.bub .m{font-size:10px;opacity:.7;margin-top:4px}
+.composer{display:flex;gap:8px;margin-top:10px}
+.composer input{flex:1;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0a0e14;color:var(--ink);font-size:16px}
+.composer button,.btn{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#0a0e14;font-weight:800}
+.btn.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+pre{font-size:11px;background:#0a0e14;border-radius:10px;padding:10px;overflow:auto;max-height:200px;color:#9db0c4;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="logo">G</div><div><h1>АКСИ Genesis v2</h1><div class="sub"><a href="/">← хаб</a> · quantum · learn · attest</div></div></header>
+  <div class="card"><h3>Pipeline</h3>
+    <div class="flow"><span>SENSE</span><span>BIND</span><span>SUPERPOSE</span><span>COLLAPSE</span><span>SYNTHESIZE</span><span>Q-GATE</span><span>CRITIQUE</span><span>LEARN</span><span>ATTEST</span></div>
+    <p style="margin-top:10px;font-size:13px;color:var(--muted)">GenesisScore=(R×C×G×Q)×(1+0.3√n). «запомни:» / «выведи»</p>
+  </div>
+  <div class="card"><h3>Диалог</h3>
+    <div id="thread"></div>
+    <div class="composer"><input id="inp" placeholder="Вопрос · запомни: · выведи…" enterkeyhint="send"><button type="button" id="send">↑</button></div>
+    <div class="row">
+      <button type="button" class="btn g" data-q="кто ты">кто ты</button>
+      <button type="button" class="btn g" data-q="quantum gate">quantum gate</button>
+      <button type="button" class="btn g" data-q="выведи новое знание про обучение">выведи</button>
+    </div>
+  </div>
+  <div class="card"><h3>Thought · quantum · seal</h3><pre id="meta">—</pre></div>
+</div>
+<script src="/aksi-genesis.js?v=2"></script>
+<script src="/aksi-ciphersuite.js?v=1"></script>
+<script>
+(function(){
+  var th=document.getElementById('thread'),meta=document.getElementById('meta'),inp=document.getElementById('inp');
+  function bub(role,t){var d=document.createElement('div');d.className='bub'+(role==='me'?' me':'');d.textContent=t||'';th.appendChild(d);th.scrollTop=th.scrollHeight;return d}
+  async function ask(q0){
+    var q=q0||(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);var last=bub('ai','\u2026');
+    try{
+      if(window.AKSI_CRYPTO&&AKSI_CRYPTO.boot)try{await AKSI_CRYPTO.boot({tryPq:false})}catch(e){}
+      var r=await AKSI_GENESIS.think(q);var p=r.payload||r;
+      last.textContent=p.answer||'\u2014';
+      if(p.derived)last.textContent+='\n\n[derived] '+p.derived.text;
+      var m=(p.kind||'')+' \u00b7 G '+(p.critique&&p.critique.score)+' \u00b7 Q '+(p.quantum&&p.quantum.gate)+' \u00b7 '+p.ms+'ms';
+      var s=document.createElement('div');s.className='m';s.textContent=m;last.appendChild(s);
+      meta.textContent=JSON.stringify({thought:p.thought,quantum:p.quantum,critique:p.critique,seal:r.seal,derived:p.derived},null,2);
+    }catch(e){last.textContent=String(e.message||e)}
+  }
+  document.getElementById('send').onclick=function(){ask()};
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')ask()});
+  document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){ask(b.getAttribute('data-q'))}});
+  bub('ai','Genesis online');
+})();
+</script>
+</body>
+</html>
