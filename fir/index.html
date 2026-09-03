@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>АКСИ FIR · Full Intelligence Runtime</title>
+<style>
+:root{--bg:#0b1220;--s:#121a2a;--s2:#1a2438;--ink:#e8eef8;--muted:#8b9bb4;--a:#4d9fd6;--ok:#3ecf8e;--line:#2a3548}
+*{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(1000px 600px at 15% -15%,#152238,var(--bg));color:var(--ink);min-height:100vh}
+a{color:var(--a)}.wrap{max-width:880px;margin:0 auto;padding:18px 14px 48px}
+.top{display:flex;gap:12px;align-items:center;margin-bottom:16px}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#2d6a9f,#4d9fd6);display:grid;place-items:center;font-weight:900}
+h1{font-size:18px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
+.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.flow{display:flex;flex-wrap:wrap;gap:5px}.flow span{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--s2);border:1px solid var(--line)}
+.checks{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.checks i{font-style:normal;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
+.checks i.on{background:#143528;border-color:#2a6b4e;color:var(--ok);font-weight:700}
+#thread{min-height:150px;max-height:300px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.bub{padding:10px 12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);max-width:92%;white-space:pre-wrap;font-size:14px}
+.bub.me{align-self:flex-end;background:#1e4a72;border-color:#2d6a9f}.bub .m{font-size:10px;opacity:.7;margin-top:4px}
+.composer{display:flex;gap:8px;margin-top:10px}
+.composer input{flex:1;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0a1018;color:var(--ink);font-size:16px}
+.composer button,.btn{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#0a1018;font-weight:800}
+.btn.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+pre{font-size:11px;background:#0a1018;border-radius:10px;padding:10px;overflow:auto;max-height:220px;color:#9db0c8;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="logo">F</div><div><h1>АКСИ FIR</h1><div class="sub"><a href="/">← хаб</a> · Full Intelligence Runtime</div></div></header>
+  <div class="card"><h3>Инфраструктура</h3>
+    <div class="flow"><span>PLAN</span><span>NEURO</span><span>MIND</span><span>GENESIS</span><span>WEBLLM?</span><span>FUSE</span><span>Q-GATE</span><span>ADIA</span><span>ATTEST</span></div>
+    <div class="checks" id="checks"></div>
+  </div>
+  <div class="card"><h3>Диалог</h3>
+    <div id="thread"></div>
+    <div class="composer"><input id="inp" placeholder="Вопрос…" enterkeyhint="send"><button type="button" id="send">↑</button></div>
+    <div class="row">
+      <button type="button" class="btn g" data-q="кто ты">кто ты</button>
+      <button type="button" class="btn g" data-q="что такое ADIA">ADIA</button>
+      <button type="button" class="btn g" id="btnSt">статус</button>
+    </div>
+  </div>
+  <div class="card"><h3>Trace</h3><pre id="meta">—</pre></div>
+</div>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-mind-l2.js?v=2"></script>
+<script src="/aksi-genesis.js?v=21"></script>
+<script src="/aksi-ai.js?v=1"></script>
+<script src="/aksi-algorithm.js?v=37"></script>
+<script src="/aksi-ciphersuite.js?v=1"></script>
+<script src="/aksi-qpipe.js?v=1"></script>
+<script src="/aksi-webllm.js?v=1"></script>
+<script src="/aksi-fir.js?v=1"></script>
+<script>
+(function(){
+  async function bootChecks(){
+    var st=window.AKSI_FIR?await AKSI_FIR.status():{};
+    var el=document.getElementById('checks');el.innerHTML='';
+    [['FIR',!!window.AKSI_FIR],['Neuro',!!st.neuro],['Genesis',!!st.genesis],['Mind',!!st.mind],['WebLLM',!!st.webllm_present],['QPipe',!!st.qpipe],['Crypto',!!st.crypto],['ADIA',!!st.adia]].forEach(function(x){
+      var i=document.createElement('i');i.textContent=x[0]+(x[1]?' \u2713':' \u2014');if(x[1])i.className='on';el.appendChild(i);
+    });
+  }
+  bootChecks();
+  var th=document.getElementById('thread'),meta=document.getElementById('meta'),inp=document.getElementById('inp');
+  function bub(role,t){var d=document.createElement('div');d.className='bub'+(role==='me'?' me':'');d.textContent=t||'';th.appendChild(d);th.scrollTop=th.scrollHeight;return d}
+  async function ask(q0){
+    var q=q0||(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);var last=bub('ai','\u2026');
+    try{
+      if(!window.AKSI_FIR){last.textContent='FIR offline';return}
+      if(window.AKSI_CRYPTO&&AKSI_CRYPTO.boot)try{await AKSI_CRYPTO.boot({tryPq:false})}catch(e){}
+      var r=await AKSI_FIR.think(q);var p=r.payload||r;
+      last.textContent=p.answer||r.answer||'\u2014';
+      var m=(p.source||'')+' \u00b7 score '+(p.score||'')+' \u00b7 '+(p.ms||0)+'ms';
+      var s=document.createElement('div');s.className='m';s.textContent=m;last.appendChild(s);
+      meta.textContent=JSON.stringify({source:p.source,score:p.score,layers:p.layers,thought:p.thought,quantum:p.quantum,seal:r.seal||p.seal},null,2);
+    }catch(e){last.textContent=String(e.message||e)}
+  }
+  document.getElementById('send').onclick=function(){ask()};
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')ask()});
+  document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){ask(b.getAttribute('data-q'))}});
+  document.getElementById('btnSt').onclick=async function(){meta.textContent=JSON.stringify(await AKSI_FIR.status(),null,2)};
+  bub('ai','FIR online');
+})();
+</script>
+</body>
+</html>
