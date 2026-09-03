@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b1220">
-<title>АКСИ FIR · auto WebLLM</title>
+<title>АКСИ FIR · LLM loader</title>
 <style>
-:root{--bg:#0b1220;--s:#121a2a;--s2:#1a2438;--ink:#e8eef8;--muted:#8b9bb4;--a:#4d9fd6;--ok:#3ecf8e;--line:#2a3548}
+:root{--bg:#0b1220;--s:#121a2a;--s2:#1a2438;--ink:#e8eef8;--muted:#8b9bb4;--a:#4d9fd6;--ok:#3ecf8e;--bad:#e86a6a;--line:#2a3548}
 *{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(1000px 600px at 15% -15%,#152238,var(--bg));color:var(--ink);min-height:100vh}
 a{color:var(--a)}.wrap{max-width:880px;margin:0 auto;padding:18px 14px 48px}
 .top{display:flex;gap:12px;align-items:center;margin-bottom:16px}
@@ -14,11 +14,13 @@ a{color:var(--a)}.wrap{max-width:880px;margin:0 auto;padding:18px 14px 48px}
 h1{font-size:18px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
 .card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .card h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-.bar{height:10px;background:#0a1018;border-radius:999px;overflow:hidden;margin:8px 0;border:1px solid var(--line)}
+.bar{height:12px;background:#0a1018;border-radius:999px;overflow:hidden;margin:8px 0;border:1px solid var(--line)}
 .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2d6a9f,var(--a));transition:width .25s}
+#llmMsg{font-size:13px;color:var(--muted);min-height:1.4em}
+#llmMsg.err{color:var(--bad)}#llmMsg.ok{color:var(--ok)}
 .checks{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.checks i{font-style:normal;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
 .checks i.on{background:#143528;border-color:#2a6b4e;color:var(--ok);font-weight:700}
-#thread{min-height:150px;max-height:300px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+#thread{min-height:140px;max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px}
 .bub{padding:10px 12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);max-width:92%;white-space:pre-wrap;font-size:14px}
 .bub.me{align-self:flex-end;background:#1e4a72;border-color:#2d6a9f}.bub .m{font-size:10px;opacity:.7;margin-top:4px}
 .composer{display:flex;gap:8px;margin-top:10px}
@@ -26,32 +28,33 @@ h1{font-size:18px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
 .composer button,.btn{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#0a1018;font-weight:800}
 .btn.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-pre{font-size:11px;background:#0a1018;border-radius:10px;padding:10px;overflow:auto;max-height:200px;color:#9db0c8;margin-top:8px}
-#llmMsg{font-size:12px;color:var(--muted)}
+pre{font-size:11px;background:#0a1018;border-radius:10px;padding:10px;overflow:auto;max-height:180px;color:#9db0c8;margin-top:8px}
+.tip{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45}
 </style>
 </head>
 <body data-aksi-autoload="1">
 <div class="wrap">
-  <header class="top"><div class="logo">F</div><div><h1>АКСИ FIR</h1><div class="sub"><a href="/">← хаб</a> · WebLLM авто</div></div></header>
+  <header class="top"><div class="logo">F</div><div><h1>АКСИ FIR</h1><div class="sub"><a href="/">← хаб</a> · WebGPU или WASM</div></div></header>
   <div class="card">
-    <h3>Локальная LLM · автозагрузка</h3>
+    <h3>Загрузка LLM</h3>
     <div class="bar"><i id="llmBar"></i></div>
-    <div id="llmMsg">Старт Qwen 0.5B…</div>
+    <div id="llmMsg">Инициализация…</div>
     <div class="checks" id="checks"></div>
     <div class="row">
-      <button type="button" class="btn g" id="btnSkip">Не грузить LLM</button>
-      <button type="button" class="btn g" id="btnReload">Перезагрузить</button>
+      <button type="button" class="btn" id="btnGo">Загрузить LLM</button>
+      <button type="button" class="btn g" id="btnWasm">Только WASM</button>
+      <button type="button" class="btn g" id="btnClear">Сброс skip</button>
     </div>
+    <p class="tip">Если не грузится: 1) Chrome/Edge 2) включённый GPU 3) кнопка «Только WASM» (без WebGPU). Первый раз нужен интернет.</p>
   </div>
   <div class="card">
     <h3>Диалог</h3>
     <div id="thread"></div>
     <div class="composer"><input id="inp" placeholder="Спросите…" enterkeyhint="send"><button type="button" id="send">↑</button></div>
-    <div class="row"><button type="button" class="btn g" data-q="кто ты">кто ты</button><button type="button" class="btn g" id="btnSt">статус</button></div>
   </div>
-  <div class="card"><h3>Trace</h3><pre id="meta">—</pre></div>
+  <div class="card"><h3>Status JSON</h3><pre id="meta">—</pre></div>
 </div>
-<script>window.AKSI_WEBLLM_AUTO=true;</script>
+<script>window.AKSI_WEBLLM_AUTO=true;try{localStorage.removeItem('aksi_webllm_skip')}catch(e){}</script>
 <script src="/aksi-neuro.js?v=10"></script>
 <script src="/aksi-mind-l2.js?v=2"></script>
 <script src="/aksi-genesis.js?v=21"></script>
@@ -59,44 +62,55 @@ pre{font-size:11px;background:#0a1018;border-radius:10px;padding:10px;overflow:a
 <script src="/aksi-algorithm.js?v=37"></script>
 <script src="/aksi-ciphersuite.js?v=1"></script>
 <script src="/aksi-qpipe.js?v=1"></script>
-<script src="/aksi-webllm.js?v=13"></script>
+<script src="/aksi-webllm.js?v=14"></script>
 <script src="/aksi-fir.js?v=1"></script>
 <script>
 (function(){
-  var bar=document.getElementById('llmBar'),msg=document.getElementById('llmMsg');
-  function onProg(s){if(!s)return;bar.style.width=(s.progress||0)+'%';msg.textContent=(s.ready?'\u2713 LLM ready \u00b7 '+(s.model||''):(s.loading?'\u23f3 ':'')+(s.message||'')+(s.error?' \u00b7 '+s.error:''));refresh()}
+  var bar=document.getElementById('llmBar'),msg=document.getElementById('llmMsg'),meta=document.getElementById('meta');
+  function onProg(s){
+    if(!s)return;
+    bar.style.width=(s.progress||0)+'%';
+    msg.className=s.ready?'ok':(s.error&&!s.loading?'err':'');
+    msg.textContent=(s.ready?'\u2713 ':'')+(s.message||'')+(s.backend?' \u00b7 '+s.backend:'')+(s.model?' \u00b7 '+s.model:'')+(s.webgpu===false?' \u00b7 no WebGPU':'')+(s.error&&!s.ready?' | '+s.error:'');
+    meta.textContent=JSON.stringify(s,null,2);
+    refresh();
+  }
   window.addEventListener('aksi-webllm-progress',function(e){onProg(e.detail)});
   async function refresh(){
     var st=window.AKSI_FIR?await AKSI_FIR.status():{};
     var el=document.getElementById('checks');el.innerHTML='';
-    [['FIR',!!window.AKSI_FIR],['Neuro',!!st.neuro],['Genesis',!!st.genesis],['WebLLM',!!st.webllm],['QPipe',!!st.qpipe]].forEach(function(x){
+    [['FIR',!!window.AKSI_FIR],['Neuro',!!st.neuro],['Genesis',!!st.genesis],['LLM',!!(window.AKSI_WEBLLM&&AKSI_WEBLLM.ready())],['QPipe',!!st.qpipe]].forEach(function(x){
       var i=document.createElement('i');i.textContent=x[0]+(x[1]?' \u2713':' \u2014');if(x[1])i.className='on';el.appendChild(i);
     });
   }
-  function start(){
-    if(!window.AKSI_WEBLLM){msg.textContent='webllm missing';return}
-    if(AKSI_WEBLLM.ready()){onProg(AKSI_WEBLLM.status());return}
-    AKSI_WEBLLM.autoLoad({onProgress:onProg}).then(function(s){onProg(s);refresh()});
+  function start(forceModel){
+    if(!window.AKSI_WEBLLM){msg.textContent='aksi-webllm.js не загрузился';msg.className='err';return}
+    try{localStorage.removeItem('aksi_webllm_skip')}catch(e){}
+    msg.className='';msg.textContent='Загрузка…';
+    var opt={force:true,onProgress:onProg};
+    if(forceModel)opt.modelId=forceModel;
+    AKSI_WEBLLM.autoLoad(opt).then(onProg).catch(function(e){msg.className='err';msg.textContent=String(e.message||e)});
   }
-  setTimeout(start,300);setInterval(refresh,4000);
-  document.getElementById('btnSkip').onclick=function(){try{localStorage.setItem('aksi_webllm_skip','1')}catch(e){}msg.textContent='LLM skip \u00b7 Neuro/Genesis OK'};
-  document.getElementById('btnReload').onclick=function(){try{localStorage.removeItem('aksi_webllm_skip')}catch(e){}if(AKSI_WEBLLM.unload)AKSI_WEBLLM.unload();AKSI_WEBLLM.autoLoad({force:true,onProgress:onProg})};
-  var th=document.getElementById('thread'),meta=document.getElementById('meta'),inp=document.getElementById('inp');
+  setTimeout(function(){start()},600);
+  document.getElementById('btnGo').onclick=function(){start()};
+  document.getElementById('btnWasm').onclick=function(){start('Xenova/LaMini-Flan-T5-248M')};
+  document.getElementById('btnClear').onclick=function(){
+    try{localStorage.removeItem('aksi_webllm_skip');localStorage.removeItem('aksi_webllm_model')}catch(e){}
+    msg.textContent='skip сброшен';start();
+  };
+  var th=document.getElementById('thread'),inp=document.getElementById('inp');
   function bub(role,t){var d=document.createElement('div');d.className='bub'+(role==='me'?' me':'');d.textContent=t||'';th.appendChild(d);th.scrollTop=th.scrollHeight;return d}
-  async function ask(q0){
-    var q=q0||(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);var last=bub('ai','\u2026');
+  async function ask(){
+    var q=(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);var last=bub('ai','\u2026');
     try{
       var r=await AKSI_FIR.think(q,{forceLlm:!!(AKSI_WEBLLM&&AKSI_WEBLLM.ready())});
       var p=r.payload||r;last.textContent=p.answer||r.answer||'\u2014';
       var s=document.createElement('div');s.className='m';s.textContent=(p.source||'')+' \u00b7 '+(p.ms||0)+'ms';last.appendChild(s);
-      meta.textContent=JSON.stringify({source:p.source,layers:p.layers,score:p.score,thought:p.thought},null,2);
     }catch(e){last.textContent=String(e.message||e)}
   }
-  document.getElementById('send').onclick=function(){ask()};
+  document.getElementById('send').onclick=ask;
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')ask()});
-  document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){ask(b.getAttribute('data-q'))}});
-  document.getElementById('btnSt').onclick=async function(){meta.textContent=JSON.stringify({fir:await AKSI_FIR.status(),webllm:AKSI_WEBLLM&&AKSI_WEBLLM.status()},null,2)};
-  bub('ai','FIR + auto LLM. Пока грузится — Neuro/Genesis.');
+  bub('ai','FIR. Если LLM не встаёт — нажмите «Только WASM».');
 })();
 </script>
 </body>
