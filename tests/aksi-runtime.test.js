@@ -20,7 +20,7 @@ vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
 
 (async () => {
   assert.ok(context.AKSI_RUNTIME);
-  assert.strictEqual(context.AKSI_RUNTIME.version, '1.3.0');
+  assert.strictEqual(context.AKSI_RUNTIME.version, '1.4.0');
 
   const degraded = await context.AKSI_RUNTIME.selfTest();
   assert.strictEqual(degraded.ok, false);
