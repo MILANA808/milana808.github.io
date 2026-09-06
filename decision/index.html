@@ -1,1 +1,209 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#efe5d2">
+<meta name="description" content="АКСИ Decision Runtime — offline ответ · анти · score · gate · seal · verify">
+<title>АКСИ Decision · агент решений</title>
+<style>
+:root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f;--warn:#8a6a2f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}
+a{color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px 56px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#6b4f35,#8a6544);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}
+h1{font-size:18px;font-weight:800}
+.sub{font-size:12px;color:var(--muted)}
+.pill{margin-left:auto;font-size:11px;font-weight:800;padding:6px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h3{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.hero h2{font-size:22px;font-weight:800;margin-bottom:6px}
+.hero p{color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.col{background:var(--s2);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px}
+.col.pro{border-color:#b7d4c2}
+.col.con{border-color:#e0b8b0}
+.col .lbl{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;color:var(--muted)}
+.col.pro .lbl{color:var(--ok)}
+.col.con .lbl{color:var(--bad)}
+.col .body{font-size:14px;white-space:pre-wrap;word-break:break-word}
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+@media(max-width:600px){.meters{grid-template-columns:repeat(2,1fr)}}
+.m{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.m b{display:block;font-size:18px;font-weight:800}
+.m span{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.04em}
+.gate{margin-top:10px;padding:10px 12px;border-radius:12px;font-weight:700;font-size:13px;border:1px solid var(--line)}
+.gate.ok{background:#e8f2ea;color:var(--ok);border-color:#b7d4c2}
+.gate.no{background:#f8eaea;color:var(--bad);border-color:#e0b8b0}
+.composer{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.composer input{flex:1;min-width:180px;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
+button,.btn{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}
+button.g,.btn.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.seal{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;overflow:auto;margin-top:8px;max-height:140px}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:18px}
+.checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.checks i{font-style:normal;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
+.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">Δ</div>
+    <div>
+      <h1>АКСИ Decision</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/contour/">Contour</a> · агент решений · не чат</div>
+    </div>
+    <span class="pill" id="pill">OFFLINE</span>
+  </header>
+
+  <section class="card hero">
+    <h2>Решение с паспортом</h2>
+    <p>Ответ · анти-ответ · score AKSI/EQS · Gate · печать · Verify. Сервер выключен.</p>
+    <div class="checks" id="checks"></div>
+  </section>
+
+  <section class="card">
+    <h3>Запрос</h3>
+    <div class="composer">
+      <input id="q" type="text" placeholder="Спросите или: запомни: факт" autocomplete="off">
+      <button type="button" id="go">Решить</button>
+      <button type="button" class="g" id="ex1">Кто ты?</button>
+      <button type="button" class="g" id="ex2">Формула</button>
+    </div>
+  </section>
+
+  <section class="card" id="out" hidden>
+    <h3>Пакет решения</h3>
+    <div class="grid">
+      <div class="col pro"><div class="lbl">Ответ</div><div class="body" id="answer"></div></div>
+      <div class="col con"><div class="lbl">Анти / риски</div><div class="body" id="anti"></div></div>
+    </div>
+    <div class="meters">
+      <div class="m"><b id="vAksi">—</b><span>AKSI</span></div>
+      <div class="m"><b id="vEqs">—</b><span>EQS</span></div>
+      <div class="m"><b id="vPhi">—</b><span>Φ</span></div>
+      <div class="m"><b id="vQcli">—</b><span>QCLI</span></div>
+    </div>
+    <div class="gate no" id="gate">Gate: —</div>
+    <div class="row">
+      <button type="button" class="g" id="btnProof">Скачать proof</button>
+      <button type="button" class="g" id="btnVerify">Verify</button>
+      <button type="button" class="g" id="btnCopy">Копировать JSON</button>
+    </div>
+    <pre class="seal" id="seal"></pre>
+    <p class="sub" id="meta" style="margin-top:8px"></p>
+  </section>
+
+  <section class="card">
+    <h3>Статус контура</h3>
+    <pre class="seal" id="status"></pre>
+  </section>
+
+  <p class="foot">AKSI Decision Runtime · aksilove@internet.ru · формула (A×I×S)×(1+0.4√n)</p>
+</div>
+
+<script src="/aksi-purge.js?v=211"></script>
+<script src="/aksi-decision.js?v=210"></script>
+<script src="/aksi-zero.js?v=210"></script>
+<script src="/aksi-neuro.js?v=210"></script>
+<script src="/aksi-algorithm.js?v=210"></script>
+<script>
+(function () {
+  var last = null;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function refreshStatus() {
+    var st = window.AKSI_DECISION ? AKSI_DECISION.status() : { error: "no runtime" };
+    $("status").textContent = JSON.stringify(st, null, 2);
+    var bits = [
+      ["Decision", !!window.AKSI_DECISION],
+      ["Zero", !!(window.AKSI_ZERO)],
+      ["Neuro", !!(window.AKSI_NEURO)],
+      ["ADIA", !!(window.AKSI_ALGORITHM || window.ADIA)],
+      ["Offline", true]
+    ];
+    $("checks").innerHTML = bits.map(function (b) {
+      return "<i class=\"" + (b[1] ? "on" : "") + "\">" + b[0] + "</i>";
+    }).join("");
+  }
+
+  function show(p) {
+    last = p;
+    $("out").hidden = false;
+    $("answer").textContent = p.answer || "";
+    $("anti").textContent = p.anti || "";
+    $("vAksi").textContent = p.scores && p.scores.aksi != null ? p.scores.aksi : "—";
+    $("vEqs").textContent = p.scores && p.scores.eqs != null ? p.scores.eqs : "—";
+    $("vPhi").textContent = p.scores && p.scores.phi != null ? p.scores.phi : "—";
+    $("vQcli").textContent = p.scores && p.scores.qcli != null ? p.scores.qcli : "—";
+    var g = $("gate");
+    if (p.gate && p.gate.ok) {
+      g.className = "gate ok";
+      g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || "");
+    } else {
+      g.className = "gate no";
+      g.textContent = "Gate: ОТКЛОНЕНО — " + ((p.gate && p.gate.reason) || "");
+    }
+    $("seal").textContent = JSON.stringify(p.seal, null, 2);
+    $("meta").textContent = "id " + p.id + " · " + (p.ms || 0) + " ms · source " + (p.source || "—") +
+      (p.learned ? " · learned" : "") + " · offline";
+    refreshStatus();
+  }
+
+  async function run() {
+    var q = $("q").value;
+    if (!window.AKSI_DECISION) {
+      alert("AKSI_DECISION не загружен");
+      return;
+    }
+    try {
+      $("go").disabled = true;
+      var p = await AKSI_DECISION.decide(q);
+      show(p);
+    } catch (e) {
+      alert("Ошибка: " + (e && e.message || e));
+    } finally {
+      $("go").disabled = false;
+    }
+  }
+
+  $("go").onclick = run;
+  $("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") run();
+  });
+  $("ex1").onclick = function () { $("q").value = "Кто ты?"; run(); };
+  $("ex2").onclick = function () { $("q").value = "Какая формула AKSI?"; run(); };
+
+  $("btnProof").onclick = function () {
+    if (!last) return;
+    AKSI_DECISION.exportProof(last);
+  };
+  $("btnVerify").onclick = function () {
+    if (!last || !last.proof) return;
+    var v = AKSI_DECISION.verify(last.proof);
+    alert(v.ok ? "VERIFY OK · hash совпал" : "VERIFY FAIL · " + JSON.stringify(v));
+  };
+  $("btnCopy").onclick = function () {
+    if (!last) return;
+    var t = JSON.stringify(last.proof || last, null, 2);
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
+    else {
+      var ta = document.createElement("textarea");
+      ta.value = t;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+  };
+
+  refreshStatus();
+})();
+</script>
+</body>
+</html>
