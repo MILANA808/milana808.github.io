@@ -1,8 +1,8 @@
-/** AKSI WebLLM runtime — browser-local inference with truthful status. */
+/** AKSI WebLLM runtime — browser-local inference with truthful network/runtime status. */
 (function (G) {
   'use strict';
 
-  const VERSION = '1.6.1-webllm';
+  const VERSION = '1.6.2-webllm';
   const WEBLLM_VERSION = '0.2.84';
   const CDNS = [
     'https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@' + WEBLLM_VERSION + '/+esm',
@@ -30,6 +30,7 @@
   let lastError = null;
   let webgpu = null;
   let loadPromise = null;
+  let bootstrapNetworkUsed = false;
 
   function status() {
     return {
@@ -43,7 +44,9 @@
       backend,
       webgpu,
       error: lastError,
-      models: MODELS.slice()
+      models: MODELS.slice(),
+      inference_local: Boolean(engine || xfPipe),
+      network_required_for_bootstrap: bootstrapNetworkUsed
     };
   }
 
@@ -53,13 +56,8 @@
     } catch (_) {}
   }
 
-  function progressEvent() {
-    emit('aksi-webllm-progress', status());
-  }
-
-  function readyEvent() {
-    emit('aksi:webllm-ready', status());
-  }
+  function progressEvent() { emit('aksi-webllm-progress', status()); }
+  function readyEvent() { emit('aksi:webllm-ready', status()); }
 
   async function detectWebGPU() {
     if (webgpu !== null) return webgpu;
@@ -80,6 +78,7 @@
     let last;
     for (const url of urls) {
       try {
+        bootstrapNetworkUsed = true;
         message = 'подключение runtime…';
         progressEvent();
         return await import(url);
@@ -99,9 +98,7 @@
     const webllm = await importFirst(CDNS);
     const CreateMLCEngine = webllm.CreateMLCEngine ||
       (webllm.default && webllm.default.CreateMLCEngine);
-    if (typeof CreateMLCEngine !== 'function') {
-      throw new Error('CreateMLCEngine не найден');
-    }
+    if (typeof CreateMLCEngine !== 'function') throw new Error('CreateMLCEngine не найден');
 
     const engineInstance = await CreateMLCEngine(modelId, {
       initProgressCallback: function (info) {
@@ -177,6 +174,7 @@
     loading = true;
     progress = 0;
     lastError = null;
+    bootstrapNetworkUsed = false;
 
     let preferred = modelId || null;
     try {
@@ -190,10 +188,17 @@
         try {
           return await loadWebLLM(preferred || MODELS[0].id, onProgress);
         } catch (webllmError) {
-          lastError = String(webllmError && webllmError.message || webllmError);
+          const webllmMessage = String(webllmError && webllmError.message || webllmError);
           message = 'WebLLM недоступен → пробуем WASM';
+          lastError = webllmMessage;
           progressEvent();
-          return loadTransformers(MODELS[2].id, onProgress);
+          try {
+            return await loadTransformers(MODELS[2].id, onProgress);
+          } catch (transformersError) {
+            const transformersMessage = String(transformersError && transformersError.message || transformersError);
+            lastError = webllmMessage + ' | WASM: ' + transformersMessage;
+            throw transformersError;
+          }
         }
       }
       return loadTransformers(isTransformers ? preferred : MODELS[2].id, onProgress);
@@ -203,7 +208,7 @@
       return await loadPromise;
     } catch (error) {
       loading = false;
-      lastError = String(error && error.message || error);
+      lastError = lastError || String(error && error.message || error);
       message = 'ошибка: ' + lastError;
       progressEvent();
       if (typeof onProgress === 'function') onProgress(status());
@@ -254,9 +259,9 @@
         const text = reply && reply.choices && reply.choices[0] && reply.choices[0].message
           ? String(reply.choices[0].message.content || '').trim() : '';
         if (!text) throw new Error('WebLLM вернул пустой ответ');
-        return { text, source: 'webllm', offline: true, model: currentModel, backend };
+        return { text, source: 'webllm', inference_local: true, bootstrap_network_used: bootstrapNetworkUsed, model: currentModel, backend };
       } catch (error) {
-        return { text: null, source: 'webllm', error: String(error && error.message || error), offline: true, model: currentModel, backend };
+        return { text: null, source: 'webllm', error: String(error && error.message || error), inference_local: true, bootstrap_network_used: bootstrapNetworkUsed, model: currentModel, backend };
       }
     }
 
@@ -278,19 +283,16 @@
         }
         text = String(text || '').replace(input, '').trim();
         if (!text) throw new Error('Transformers.js вернул пустой ответ');
-        return { text, source: 'transformers', offline: true, model: currentModel, backend };
+        return { text, source: 'transformers', inference_local: true, bootstrap_network_used: bootstrapNetworkUsed, model: currentModel, backend };
       } catch (error) {
-        return { text: null, source: 'transformers', error: String(error && error.message || error), offline: true, model: currentModel, backend };
+        return { text: null, source: 'transformers', error: String(error && error.message || error), inference_local: true, bootstrap_network_used: bootstrapNetworkUsed, model: currentModel, backend };
       }
     }
 
-    return { text: null, source: 'none', error: 'модель не загружена', offline: true };
+    return { text: null, source: 'none', error: 'модель не загружена', inference_local: true, bootstrap_network_used: bootstrapNetworkUsed };
   }
 
-  async function think(question) {
-    const result = await complete(question);
-    return result && result.text ? result : null;
-  }
+  async function think(question) { return complete(question); }
 
   G.AKSI_WEBLLM = {
     version: VERSION,
