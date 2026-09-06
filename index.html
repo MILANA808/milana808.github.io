@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
 <meta http-equiv="Cache-Control" content="no-cache">
-<title>АКСИ · offline-first · Zero</title>
+<meta name="description" content="АКСИ Decision Runtime: offline ответ, score, gate, печать. Проверяемый ИИ.">
+<title>АКСИ · Decision Runtime · offline</title>
 <style>
 :root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48}
 *{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.5 system-ui,sans-serif;color:var(--ink);background:linear-gradient(165deg,#f7f0e4,#efe5d2 45%,#e8dcc8);min-height:100vh}
@@ -23,6 +24,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .sec{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px}
 .mod{padding:13px 12px;min-height:95px;display:flex;flex-direction:column;gap:4px}.mod .ic{font-size:20px}.mod b{font-size:13px;font-weight:800}.mod span{font-size:11px;color:var(--muted)}
+.mod.hot{border-color:#c4a882;box-shadow:0 0 0 1px rgba(107,79,53,.12)}
 .card{padding:14px;margin-bottom:12px}.card h3{font-size:13px;font-weight:800;margin-bottom:6px}
 #botThread{min-height:100px;max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin:8px 0}
 .bub{padding:10px 12px;border-radius:12px;background:var(--s2);border:1px solid var(--line);max-width:92%;white-space:pre-wrap;font-size:14px}
@@ -32,54 +34,53 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.checks i{font-style:normal;font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
 .checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
 .foot{margin-top:28px;text-align:center;font-size:12px;color:var(--muted)}.muted{color:var(--muted);font-size:13px}
+.tag{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:#efe6d6;margin-left:6px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><div class="logo">A</div><div class="brand"><h1>АКСИ</h1><p>offline-first · сервер позже</p></div><span class="pill" id="statusPill">…</span></header>
+  <header class="top"><div class="logo">A</div><div class="brand"><h1>АКСИ</h1><p>Decision Runtime · offline-first</p></div><span class="pill" id="statusPill">…</span></header>
   <section class="hero">
-    <h2>ИИ в браузере. Сервер — когда будете готовы.</h2>
-    <p>Zero: ответ, память, обучение, печать без бэкенда. API включится одной командой.</p>
+    <h2>Не чат. Решение с паспортом.</h2>
+    <p>Ответ · анти · score · gate · печать · verify. Без сервера. Данные остаются у вас.</p>
     <div class="row">
-      <a class="btn p" href="#bot">Бот</a>
+      <a class="btn p" href="/decision/">Decision Runtime</a>
+      <a class="btn" href="#bot">Бот</a>
       <a class="btn" href="/zero/">Zero</a>
       <a class="btn" href="/fir/">FIR</a>
-      <a class="btn" href="/genesis/">Genesis</a>
-      <a class="btn" href="/ai/">AI</a>
-      <a class="btn" href="/matrix/">MATRIX</a>
+      <a class="btn" href="/AKSI-PRIOR-ART.md">Prior-art</a>
     </div>
     <div class="checks" id="checks"></div>
   </section>
-  <div class="sec">Модули</div>
+  <div class="sec">Продукт</div>
   <div class="grid">
+    <a class="mod hot" href="/decision/"><span class="ic">Δ</span><b>Decision</b><span>score · gate · seal</span></a>
     <a class="mod" href="/zero/"><span class="ic">Z</span><b>Zero</b><span>без сервера</span></a>
+    <a class="mod" href="/proof/"><span class="ic">🔏</span><b>Proof</b><span>печать</span></a>
     <a class="mod" href="/fir/"><span class="ic">F</span><b>FIR</b><span>оркестратор</span></a>
     <a class="mod" href="/genesis/"><span class="ic">✦</span><b>Genesis</b><span>pipeline</span></a>
-    <a class="mod" href="/ai/"><span class="ic">🧠</span><b>AI live</b><span>чат</span></a>
     <a class="mod" href="/crypto/"><span class="ic">🔐</span><b>Crypto</b><span>подпись</span></a>
     <a class="mod" href="/matrix/"><span class="ic">⬡</span><b>MATRIX</b><span>WebLLM</span></a>
-    <a class="mod" href="/spa/"><span class="ic">◉</span><b>SPA</b><span>7 вкладок</span></a>
+    <a class="mod" href="/ai/"><span class="ic">🧠</span><b>AI live</b><span>чат</span></a>
     <a class="mod" href="/quantum/"><span class="ic">⚛️</span><b>Quantum</b><span>симулятор</span></a>
-    <a class="mod" href="/proof/"><span class="ic">🔏</span><b>Proof</b><span>печать</span></a>
     <a class="mod" href="/protocol/"><span class="ic">📜</span><b>Protocol</b><span>HRR</span></a>
-    <a class="mod" href="/chat/"><span class="ic">💬</span><b>Chat</b><span>диалог</span></a>
+    <a class="mod" href="/spa/"><span class="ic">◉</span><b>SPA</b><span>7 вкладок</span></a>
     <a class="mod" href="/offer/"><span class="ic">◇</span><b>Offer</b><span>продукт</span></a>
   </div>
   <div class="sec" id="bot">Бот · Zero-first</div>
   <div class="card">
-    <h3>Agent v4 · offline</h3>
+    <h3>Agent v4 · offline <span class="tag">server OFF</span></h3>
     <div id="botThread"></div>
     <div class="composer"><input id="botIn" type="text" placeholder="Вопрос · запомни: …" enterkeyhint="send" autocomplete="off"><button type="button" id="botSend">↑</button></div>
     <div class="row" style="margin-top:8px">
       <button type="button" class="btn" id="botWho">Кто ты?</button>
       <button type="button" class="btn" id="botZero">Zero</button>
       <button type="button" class="btn" id="botCap">Статус</button>
-      <button type="button" class="btn" id="botTeach">запомни demo</button>
+      <a class="btn" href="/decision/">Открыть Decision</a>
     </div>
     <pre id="botMeta" class="muted" style="margin-top:8px;font-size:11px;white-space:pre-wrap">—</pre>
-    <p class="muted" style="margin-top:8px">Сервер позже: <code>AKSIAgent.enableServer(true)</code></p>
   </div>
-  <footer class="foot">aksilove@internet.ru · v102 offline-first</footer>
+  <footer class="foot">aksilove@internet.ru · proprietary · v103 Decision</footer>
 </div>
 <script src="/aksi-neuro.js?v=10"></script>
 <script src="/aksi-knowledge.js?v=3"></script>
@@ -94,7 +95,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   function refreshChecks(){
     var list=[['Zero',!!(window.AKSI_ZERO&&AKSI_ZERO.think)],['Neuro',!!(window.AKSI_NEURO&&AKSI_NEURO.think)],['Genesis',!!(window.AKSI_GENESIS&&AKSI_GENESIS.think)],['FIR',!!(window.AKSI_FIR&&AKSI_FIR.think)],['Agent',!!window.AKSIAgent]];
     var el=document.getElementById('checks');el.innerHTML='';
-    list.forEach(function(x){var i=document.createElement('i');i.textContent=x[0]+(x[1]?' \u2713':' \u2026');if(x[1])i.className='on';el.appendChild(i)});
+    list.forEach(function(x){var i=document.createElement('i');i.textContent=x[0]+(x[1]?' ✓':' …');if(x[1])i.className='on';el.appendChild(i)});
     document.getElementById('statusPill').textContent=list.filter(function(x){return x[1]}).length+'/'+list.length+' offline';
   }
   setTimeout(refreshChecks,200);
@@ -102,24 +103,23 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   var th=document.getElementById('botThread'),inp=document.getElementById('botIn'),meta=document.getElementById('botMeta');
   function bub(role,t){var d=document.createElement('div');d.className='bub'+(role==='me'?' me':'');d.textContent=t||'';th.appendChild(d);th.scrollTop=th.scrollHeight;return d}
   async function ask(q0){
-    var q=q0||(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);var last=bub('ai','\u2026');
+    var q=q0||(inp.value||'').trim();if(!q)return;inp.value='';bub('me',q);var last=bub('ai','…');
     try{
       if(!window.AKSIAgent){last.textContent='Ctrl+Shift+R';return}
       var r=await AKSIAgent.ask(q);
-      last.textContent=r.text||'\u2014';
-      var m=(r.source||'')+(r.critique&&r.critique.score!=null?' \u00b7 score '+r.critique.score:'')+(r.ms?' \u00b7 '+r.ms+'ms':'')+(r.server?' \u00b7 server':' \u00b7 offline');
+      last.textContent=r.text||'—';
+      var m=(r.source||'')+(r.critique&&r.critique.score!=null?' · score '+r.critique.score:'')+(r.ms?' · '+r.ms+'ms':'')+(r.server?' · server':' · offline');
       var s=document.createElement('div');s.className='m';s.textContent=m;last.appendChild(s);
       meta.textContent=JSON.stringify({source:r.source,kind:r.kind,critique:r.critique,quantum:r.quantum,seal:r.seal,server:!!r.server,ms:r.ms},null,2);
       refreshChecks();
     }catch(e){last.textContent=String(e.message||e)}
   }
   document.getElementById('botSend').onclick=function(){ask()};
-  document.getElementById('botWho').onclick=function(){ask('\u043a\u0442\u043e \u0442\u044b')};
-  document.getElementById('botZero').onclick=function(){ask('\u0447\u0442\u043e \u0442\u0430\u043a\u043e\u0435 zero')};
-  document.getElementById('botTeach').onclick=function(){ask('\u0437\u0430\u043f\u043e\u043c\u043d\u0438: \u0434\u0435\u043c\u043e \u0410\u041a\u0421\u0418 offline')};
+  document.getElementById('botWho').onclick=function(){ask('кто ты')};
+  document.getElementById('botZero').onclick=function(){ask('что такое zero')};
   document.getElementById('botCap').onclick=async function(){try{meta.textContent=JSON.stringify(await AKSIAgent.capabilities(),null,2);refreshChecks()}catch(e){meta.textContent=String(e)}};
   inp.addEventListener('keydown',function(e){if(e.key==='Enter')ask()});
-  bub('ai','Offline-first. Zero \u2192 FIR \u2192 Genesis. \u0421\u0435\u0440\u0432\u0435\u0440 \u2014 \u043a\u043e\u0433\u0434\u0430 \u0441\u043a\u0430\u0436\u0435\u0442\u0435.');
+  bub('ai','Decision Runtime: /decision/ · ответ + score + gate + seal. Offline.');
 })();
 </script>
 </body>
