@@ -1,33 +1,33 @@
-# AKSI Verifiable Decision Receipts
+# AKSI Verifiable Decision & Outcome Receipts
 
-AKSI stores a signed DecisionPacket as portable evidence of a decision event.
+AKSI treats a decision and its observed result as portable evidence objects.
 
-## Product boundary
+## Chain
 
-A receipt proves:
-- which packet bytes were signed;
-- which AKSI identity signed them;
-- the timestamp recorded by the runtime;
-- the parent packet reference;
-- the policy/gate/evaluation fields included in the packet.
+`observation → evidence → candidates → evaluation → policy → gate → decision → authorization → action → outcome`
 
-A receipt does **not** prove that a decision was objectively correct, safe, or truthful.
+A `DecisionPacket` records the decision context. An `OutcomeReceipt` links the observed result to `decision_id` and `action_id`.
+
+## Guarantees
+
+A receipt proves which canonical bytes were signed, which signing identity/public key was used, and the integrity of the included fields. Tampering causes verification failure. Signatures do **not** prove that a decision or observation is objectively true or correct.
+
+The current Outcome Engine records outcomes and deliberately does not autonomously execute external actions.
 
 ## Commercial direction
 
-The strategic product is not a chatbot. It is an interoperability and assurance layer for AI decisions:
+`model/agent → evaluation → policy → gate → signed decision → authorized action → signed outcome → independent verifier`
 
-`model/agent → candidate decisions → evaluation → policy → gate → signed receipt → verifier`
-
-The intended API surface is model-agnostic so the same receipt format can sit around cloud LLMs, local models, agents, or deterministic software.
+The interface is model-agnostic and designed for cloud LLMs, local models, agents and deterministic software.
 
 ## Roadmap
 
-1. Evidence adapters (web/API/document/device observations).
+1. Evidence adapters with provenance and timestamps.
 2. Policy packs and allowlists.
-3. External verifier that needs no private key.
+3. Independent verifier.
 4. Enterprise SDK/API gateway.
-5. Outcome feedback: decision → real-world result → signed outcome receipt.
+5. Durable key lifecycle: persistence, rotation, revocation.
 6. Cross-organization trust and delegation.
+7. Production action gateway with explicit authorization.
 
-This roadmap is a product strategy, not a claim of global technical novelty.
+This is a product strategy, not a claim of global technical novelty.
