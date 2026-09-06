@@ -1,18 +1,16 @@
-"""
-АКСИ Backend v1.3 — local-first LLM bridge.
+"""АКСИ Backend v1.4 — local-first LLM bridge + verifiable proof API.
 
-Network policy: local Ollama is the default. Remote providers are NEVER
-selected implicitly: set AKSI_ALLOW_REMOTE=1 and choose AKSI_LLM_PROVIDER.
-
-The backend response signature is a SHA-256 integrity fingerprint, not an
-Ed25519 digital signature. Cryptographic identity/signatures are owned by the
-browser AKSI Runtime, where the private key can remain non-exportable.
+Remote providers are opt-in. Never put API keys in frontend code or Git.
+AKSI Proof hashes the canonical record and can add an Ed25519 signature when
+AKSI_SIGNING_PRIVATE_KEY is configured server-side. A signature proves record
+integrity/authorship, not the truth of the claims.
 """
 from __future__ import annotations
 
 import hashlib
 import os
 import time
+import uuid
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -20,7 +18,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-VERSION = "1.3.0"
+from proof import build_proof_record, verify_proof
+
+VERSION = "1.4.0"
 DID = "did:aksi:backend:local"
 SEED = os.getenv("RESONANCE_SEED", "AKSI_DIMAX_v3_2026")
 CONTACT = "aksilove@internet.ru"
@@ -38,24 +38,25 @@ XAI_MODEL = os.getenv("XAI_MODEL", "grok-2-latest")
 SYSTEM = (
     "Ты — АКСИ, суверенный локальный ИИ-помощник. "
     "Отвечай по-русски, ясно и честно. Не выдумывай факты. "
-    "Если не уверена — скажи об этом. Не называй себя ChatGPT, Claude или Gemini."
+    "Если не уверена — скажи об этом. Не называй себя ChatGPT, Claude или Gemini. "
+    "Всегда отделяй факты, источники, предположения и неизвестное."
 )
 
 KB = [
     (("кто ты", "что ты", "твоя идентичность"),
      "Я АКСИ — локальный помощник. Данные по умолчанию остаются локально. "
-     "Криптографические подписи ответов выполняет AKSI Runtime в браузере."),
+     "AKSI Proof позволяет формировать проверяемые записи происхождения ответа."),
     (("что умеешь", "возможности", "функции"),
      "Отвечаю offline, могу работать с Ollama, памятью и проверяемыми доказательствами. "
-     "Backend предоставляет /v1/chat/completions и /api/chat."),
+     "Backend предоставляет /v1/chat/completions, /api/chat и /api/proof."),
     (("помощь", "help", "команды"),
      "Команды: «запомни: …», «очисти память», формулы, «запутанность». "
-     "Локальный backend по умолчанию использует Ollama."),
+     "Локальный backend по умолчанию использует Ollama."
+    ),
 ]
 
-app = FastAPI(title="АКСИ Backend", description="Sovereign local-first LLM bridge", version=VERSION)
+app = FastAPI(title="АКСИ Backend", description="Sovereign local-first LLM bridge + AI proof provenance", version=VERSION)
 
-# Explicit allowlist. Override only for a deliberate deployment.
 allowed_origins = [x.strip() for x in os.getenv(
     "AKSI_ALLOWED_ORIGINS",
     "https://milana808.github.io,http://localhost:8000,http://127.0.0.1:8000"
@@ -88,8 +89,22 @@ class SimpleChat(BaseModel):
     history: List[Dict[str, Any]] = Field(default_factory=list)
 
 
+class ProofRequest(BaseModel):
+    question: str = Field(min_length=1, max_length=20000)
+    answer: str = Field(min_length=1, max_length=50000)
+    provider: str = "unknown"
+    model: str = "unknown"
+    claims: List[Dict[str, Any]] = Field(default_factory=list)
+    evidence: List[Dict[str, Any]] = Field(default_factory=list)
+    verification: Dict[str, Any] = Field(default_factory=lambda: {"status": "not_run"})
+
+
+class ProofVerifyRequest(BaseModel):
+    proof: Dict[str, Any]
+
+
 def _integrity_fingerprint(text: str) -> str:
-    """Return an integrity fingerprint; deliberately NOT a digital signature."""
+    """Legacy response fingerprint; deliberately NOT a digital signature."""
     return hashlib.sha256(f"{SEED}|{text}".encode("utf-8")).hexdigest()
 
 
@@ -184,7 +199,7 @@ async def root():
         "did": DID,
         "contact": CONTACT,
         "network_policy": "local-first; remote requires AKSI_ALLOW_REMOTE=1",
-        "endpoints": ["/health", "/api/identity", "/v1/chat/completions", "/api/chat", "/docs"],
+        "endpoints": ["/health", "/api/identity", "/api/proof", "/api/proof/verify", "/v1/chat/completions", "/api/chat", "/docs"],
         "frontend": "https://milana808.github.io/chat/",
     }
 
@@ -202,6 +217,7 @@ async def health():
         "remote_allowed": ALLOW_REMOTE,
         "xai": bool(XAI_API_KEY) and ALLOW_REMOTE,
         "openai": bool(OPENAI_API_KEY) and ALLOW_REMOTE,
+        "proof": {"schema": "aksi-proof/v1", "signing_configured": bool(os.getenv("AKSI_SIGNING_PRIVATE_KEY"))},
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 
@@ -209,7 +225,28 @@ async def health():
 @app.get("/api/identity")
 async def identity():
     return {"did": DID, "name": "AKSI", "contact": CONTACT, "version": VERSION,
-            "signature_note": "Backend fingerprint only; browser Runtime owns Ed25519 signatures."}
+            "signature_note": "Proof signatures are Ed25519 when a server-side key is configured; otherwise hash-only."}
+
+
+@app.post("/api/proof")
+async def create_proof(req: ProofRequest):
+    """Create a canonical provenance record without pretending it proves truth."""
+    record = build_proof_record(
+        question=req.question,
+        answer=req.answer,
+        provider=req.provider,
+        model=req.model,
+        claims=req.claims,
+        evidence=req.evidence,
+        verification=req.verification,
+        record_id=f"AKSI-{uuid.uuid4().hex}",
+    )
+    return record
+
+
+@app.post("/api/proof/verify")
+async def check_proof(req: ProofVerifyRequest):
+    return verify_proof(req.proof)
 
 
 @app.post("/v1/chat/completions")
@@ -219,13 +256,22 @@ async def openai_chat(req: ChatRequest):
         if m.role in ("user", "assistant", "system") and m.content:
             msgs.append({"role": m.role, "content": m.content[:8000]})
     text, provider = await generate(msgs, req.temperature)
+    proof = build_proof_record(
+        question=next((m["content"] for m in reversed(msgs) if m.get("role") == "user"), ""),
+        answer=text,
+        provider=provider,
+        model=req.model or (OPENAI_MODEL if provider == "openai" else OLLAMA_MODEL),
+        verification={"status": "not_run"},
+        record_id=f"AKSI-{uuid.uuid4().hex}",
+    )
     return {
         "id": f"aksi-{int(time.time())}",
         "object": "chat.completion",
         "created": int(time.time()),
         "model": req.model or OLLAMA_MODEL,
         "choices": [{"index": 0, "message": {"role": "assistant", "content": text}, "finish_reason": "stop"}],
-        "aksi": {"provider": provider, "did": DID, "integrity_fingerprint": _integrity_fingerprint(text), "version": VERSION},
+        "aksi": {"provider": provider, "did": DID, "integrity_fingerprint": _integrity_fingerprint(text), "version": VERSION,
+                 "proof": proof},
     }
 
 
@@ -242,8 +288,16 @@ async def simple_chat(body: SimpleChat):
             msgs.append({"role": "assistant" if role in ("assistant", "a") else "user", "content": content[:2000]})
     msgs.append({"role": "user", "content": message})
     text, provider = await generate(msgs, 0.5)
+    proof = build_proof_record(
+        question=message,
+        answer=text,
+        provider=provider,
+        model=OPENAI_MODEL if provider == "openai" else OLLAMA_MODEL,
+        verification={"status": "not_run"},
+        record_id=f"AKSI-{uuid.uuid4().hex}",
+    )
     return {"answer": text, "provider": provider, "did": DID,
-            "integrity_fingerprint": _integrity_fingerprint(text), "version": VERSION}
+            "integrity_fingerprint": _integrity_fingerprint(text), "version": VERSION, "proof": proof}
 
 
 if __name__ == "__main__":
