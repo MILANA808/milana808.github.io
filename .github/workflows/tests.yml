@@ -18,10 +18,14 @@ jobs:
           for f in aksi-*.js app-runtime.js sw.js; do
             [ -f "$f" ] || continue
             node --check "$f"
-            echo OK $f
+            echo "OK $f"
           done
+      - name: Runtime contract tests
+        run: node tests/aksi-runtime.test.js
       - name: Required files
         run: |
           test -f index.html
           test -f aksi-security.js
+          test -f aksi-runtime.js
+          test -f tests/aksi-runtime.test.js
           echo MVP files present
