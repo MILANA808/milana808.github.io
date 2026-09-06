@@ -1,44 +1,27 @@
 (function(){
   'use strict';
-  const KEY='aksi_platform_v1';
-  const state={events:[],models:[],online:navigator.onLine!==false};
+  const KEY='aksi_platform_v2';
+  const state={events:[],online:navigator.onLine!==false};
   const CATALOG=[
-    {id:'gpt',name:'GPT-compatible',family:'Generative / API',mode:'remote-or-gateway',status:'adapter',note:'Provider-neutral adapter; no vendor key is stored in browser.'},
-    {id:'bert',name:'BERT / encoder',family:'NLP / embeddings',mode:'local-or-server',status:'adapter',note:'Architecture slot for masked-language and embedding workloads.'},
-    {id:'transformers',name:'Transformers.js',family:'NLP / vision / audio',mode:'local-WASM',status:'local',note:'Runs compatible transformer models in-browser when weights are available.'},
-    {id:'webllm',name:'WebLLM / WebGPU',family:'LLM',mode:'local-GPU',status:'local',note:'Browser-local LLM runtime; model download is explicit.'},
-    {id:'wasm',name:'WASM inference',family:'portable runtime',mode:'local-CPU',status:'local',note:'Fallback path for devices without WebGPU.'},
-    {id:'onnx',name:'ONNX Runtime Web',family:'ML runtime',mode:'local-WASM/WebGPU',status:'adapter',note:'Portable execution target for ONNX models.'},
-    {id:'custom',name:'AKSI Custom Adapter',family:'any model',mode:'plugin',status:'ready',note:'Uniform request/response contract for future Python, JS, Rust or native runtimes.'}
+    {id:'gpt-compatible',name:'GPT-compatible',family:'Generative / API',mode:'remote-or-gateway',status:'adapter',note:'Provider-neutral adapter; no vendor key is stored in browser.'},
+    {id:'bert',name:'BERT / encoder',family:'NLP / embeddings',mode:'local-or-server',status:'adapter',note:'Architecture slot; becomes active only when a real runtime is loaded.'},
+    {id:'transformers-js',name:'Transformers.js',family:'NLP / vision / audio',mode:'local-WASM',status:'local',note:'Available when compatible weights/runtime are actually loaded.'},
+    {id:'webllm',name:'WebLLM / WebGPU',family:'LLM',mode:'local-GPU',status:'local',note:'Browser-local LLM; model loading is explicit and device-dependent.'},
+    {id:'onnx-web',name:'ONNX Runtime Web',family:'ML runtime',mode:'local-WASM/WebGPU',status:'adapter',note:'Portable execution target for ONNX models.'},
+    {id:'custom-python',name:'AKSI Python bridge',family:'custom runtime',mode:'local HTTP/WebSocket',status:'adapter',note:'Uniform gateway contract; inactive until connected.'},
+    {id:'custom-rust',name:'AKSI Rust bridge',family:'custom runtime',mode:'WASM/native',status:'adapter',note:'Uniform gateway contract; inactive until connected.'}
   ];
   function $(id){return document.getElementById(id)}
   function esc(s){return String(s==null?'':s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]))}
   function log(type,data){state.events.push({t:new Date().toISOString(),type,data});state.events=state.events.slice(-100);try{localStorage.setItem(KEY,JSON.stringify(state.events))}catch(e){};renderMonitor()}
   function load(){try{state.events=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){state.events=[]};state.online=navigator.onLine!==false}
-  function modelCard(m){return '<article class="model"><div><b>'+esc(m.name)+'</b><span>'+esc(m.family)+'</span></div><i class="tag '+esc(m.status)+'">'+esc(m.mode)+'</i><p>'+esc(m.note)+'</p></article>'}
-  function renderModels(){ $('modelGrid').innerHTML=CATALOG.map(modelCard).join('') }
-  function renderMonitor(){
-    $('netState').textContent=state.online?'ONLINE / OFFLINE-READY':'OFFLINE / LOCAL PATH';
-    $('netDot').textContent=state.online?'●':'●';
-    $('eventCount').textContent=state.events.length;
-    $('lastEvent').textContent=state.events.length?state.events[state.events.length-1].type:'none';
-    $('eventLog').textContent=state.events.slice(-8).map(e=>new Date(e.t).toLocaleTimeString()+'  '+e.type+'  '+JSON.stringify(e.data)).join('\n')||'No runtime events yet.';
-  }
-  function quantumDemo(kind){
-    const q=window.AKSIQuantum;
-    if(q&&q.run){ q.run('AKSI quantum '+kind).then(r=>{ $('quantumOut').textContent=JSON.stringify(r,null,2);log('quantum.run',{kind,trace_hash:r.trace_hash,entropy:r.entropy}); }).catch(e=>{ $('quantumOut').textContent='Quantum runtime error: '+e.message;log('quantum.error',{message:e.message}) });return; }
-    const examples={bell:{state:'(|00⟩ + |11⟩) / √2',use:'correlation / education'},grover:{state:'marked-state amplitude amplification',use:'search demonstration'},qft:{state:'quantum Fourier transform',use:'phase/frequency demonstration'}};
-    $('quantumOut').textContent=JSON.stringify({schema:'AKSI-QUANTUM-DEMO-1',kind,simulator:'not-loaded',example:examples[kind]||examples.bell},null,2);log('quantum.demo',{kind})
-  }
-  function boot(){
-    load();renderModels();renderMonitor();
-    $('runHealth').onclick=()=>{const checks={webgpu:!!navigator.gpu,crypto:!!(window.crypto&&crypto.subtle),storage:(()=>{try{localStorage.setItem('_a','1');localStorage.removeItem('_a');return true}catch(e){return false}})(),serviceWorker:'serviceWorker' in navigator,online:navigator.onLine!==false};$('healthOut').textContent=JSON.stringify(checks,null,2);log('health.scan',checks)};
-    $('clearLog').onclick=()=>{state.events=[];localStorage.removeItem(KEY);renderMonitor()};
-    $('bell').onclick=()=>quantumDemo('bell');$('grover').onclick=()=>quantumDemo('grover');$('qft').onclick=()=>quantumDemo('qft');
-    $('exportState').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'AKSI-PLATFORM-STATE-1',events:state.events,models:CATALOG},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-platform-state.json';a.click();URL.revokeObjectURL(a.href);log('state.export',{})};
-    addEventListener('online',()=>{state.online=true;log('network.online',{})});addEventListener('offline',()=>{state.online=false;log('network.offline',{})});
-    log('platform.boot',{version:'1.0',localFirst:true,models:CATALOG.length});
-  }
-  window.AKSIPlatform={version:'1.0',catalog:CATALOG,log,quantumDemo};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  function modelCard(m){return '<article class="model"><div><b>'+esc(m.name)+'</b><span>'+esc(m.family)+'</span></div><i class="tag '+esc(m.status)+'" id="model-status-'+esc(m.id)+'">'+esc(m.mode)+'</i><p>'+esc(m.note)+'</p></article>'}
+  function renderModels(){ $('modelGrid').innerHTML=CATALOG.map(modelCard).join('');const live=window.AKSIModeGateway?.list?.()||[];live.forEach(m=>{const el=$('model-status-'+m.id);if(el)el.textContent=m.runtime_loaded?'RUNTIME LOADED':m.mode||'adapter'}) }
+  function renderMonitor(){if(!$('netState'))return;$('netState').textContent=state.online?'ONLINE / OFFLINE-READY':'OFFLINE / LOCAL PATH';$('netDot').textContent='●';$('eventCount').textContent=state.events.length;$('lastEvent').textContent=state.events.length?state.events[state.events.length-1].type:'none';$('eventLog').textContent=state.events.slice(-8).map(e=>new Date(e.t).toLocaleTimeString()+'  '+e.type+'  '+JSON.stringify(e.data)).join('\n')||'No runtime events yet.'}
+  function quantumDemo(kind){const q=window.AKSIQuantum;if(q&&q.run){q.run('AKSI quantum '+kind).then(r=>{$('quantumOut').textContent=JSON.stringify(r,null,2);log('quantum.run',{kind,trace_hash:r.trace_hash,entropy:r.entropy})}).catch(e=>{$('quantumOut').textContent='Quantum runtime error: '+e.message;log('quantum.error',{message:e.message})});return}const examples={bell:{state:'(|00⟩ + |11⟩) / √2',use:'correlation / education'},grover:{state:'marked-state amplitude amplification',use:'search demonstration'},qft:{state:'quantum Fourier transform',use:'phase/frequency demonstration'}};$('quantumOut').textContent=JSON.stringify({schema:'AKSI-QUANTUM-DEMO-1',kind,simulator:'not-loaded',example:examples[kind]||examples.bell},null,2);log('quantum.demo',{kind})}
+  function workspace(){const main=document.querySelector('main');if(!main||document.getElementById('aksiWorkspace'))return;const s=document.createElement('section');s.id='aksiWorkspace';s.className='section card';s.innerHTML='<h2>AI Workspace · единый контур</h2><p style="color:var(--muted)">Один запрос → выбор реально загруженного runtime → выполнение → проверяемая запись VAI. Никаких фиктивных «активных» моделей.</p><textarea id="aksiPrompt" rows="4" placeholder="Например: объясни принцип работы квантового компьютера простыми словами" style="width:100%;resize:vertical;background:#0b0911;color:#f7f2ff;border:1px solid var(--line);border-radius:13px;padding:12px;font:inherit"></textarea><div class="btns"><button class="btn primary" id="aksiRun">Запустить AKSI</button><button class="btn" id="aksiPlan">Показать план</button><button class="btn" id="aksiVerify">Проверить последний receipt</button></div><pre id="aksiAnswer">Готова. Введи запрос и запусти AKSI.</pre></section>';main.insertBefore(s,main.children[1]||null)}
+  async function runWorkspace(){const prompt=($('aksiPrompt')?.value||'').trim();if(!prompt){$('aksiAnswer').textContent='Введите запрос.';return}const ai=window.AKSIIntelligence;if(!ai||!ai.run){$('aksiAnswer').textContent='Intelligence runtime не загружен.';return}$('aksiAnswer').textContent='Выполнение…';try{const out=await ai.run(prompt);const r=out.result||{};$('aksiAnswer').textContent=JSON.stringify({answer:r.text||r,model:r.model||null,runtime:r.source||null,receipt:out.receipt?{id:out.receipt.id,signature_status:out.receipt.signature_status}:null,events:out.events},null,2);log('intelligence.run',{receipt_id:out.receipt?.id||null,model:r.model||null,runtime:r.source||null})}catch(e){$('aksiAnswer').textContent='AKSI не запустила inference: '+e.message+'\n\nПричина: в браузере нет реально загруженного локального inference runtime. Это намеренно показывается честно, без имитации.';log('intelligence.error',{message:e.message})}}
+  function bindWorkspace(){if($('aksiRun'))$('aksiRun').onclick=runWorkspace;if($('aksiPlan'))$('aksiPlan').onclick=()=>{const q=($('aksiPrompt')?.value||'').trim();$('aksiAnswer').textContent=JSON.stringify(window.AKSIIntelligence?.plan(q)||{error:'runtime unavailable'},null,2)};if($('aksiVerify'))$('aksiVerify').onclick=async()=>{const list=window.AKSIVAI?.list?.()||[];const last=list[list.length-1];if(!last){$('aksiAnswer').textContent='Локальных receipts ещё нет.';return}const v=await window.AKSIVAI.verify(last);$('aksiAnswer').textContent=JSON.stringify(v,null,2)}}
+  function boot(){load();workspace();renderModels();renderMonitor();bindWorkspace();$('runHealth').onclick=()=>{const checks={webgpu:!!navigator.gpu,crypto:!!(window.crypto&&crypto.subtle),storage:(()=>{try{localStorage.setItem('_a','1');localStorage.removeItem('_a');return true}catch(e){return false}})(),serviceWorker:'serviceWorker' in navigator,online:navigator.onLine!==false,gateway:window.AKSIModeGateway?.health?.()||null};$('healthOut').textContent=JSON.stringify(checks,null,2);log('health.scan',checks);renderModels()};$('clearLog').onclick=()=>{state.events=[];localStorage.removeItem(KEY);renderMonitor()};$('bell').onclick=()=>quantumDemo('bell');$('grover').onclick=()=>quantumDemo('grover');$('qft').onclick=()=>quantumDemo('qft');$('exportState').onclick=()=>{const blob=new Blob([JSON.stringify({schema:'AKSI-PLATFORM-STATE-2',events:state.events,models:window.AKSIModeGateway?.list?.()||CATALOG},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-platform-state.json';a.click();URL.revokeObjectURL(a.href);log('state.export',{})};addEventListener('online',()=>{state.online=true;log('network.online',{})});addEventListener('offline',()=>{state.online=false;log('network.offline',{})});addEventListener('aksi:gateway-bridged',renderModels);addEventListener('aksi:vai-receipt',e=>log('vai.receipt',{id:e.detail?.id||null}));log('platform.boot',{version:'2.0',localFirst:true,models:CATALOG.length})}
+  window.AKSIPlatform={version:'2.0',catalog:CATALOG,log,quantumDemo,runWorkspace};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
