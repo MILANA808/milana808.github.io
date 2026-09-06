@@ -1,1 +1,398 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#efe5d2">
+<meta name="description" content="АКСИ Contour — единый рабочий контур: Decision + Superpose + Zero + Neuro + WebLLM + Seal">
+<title>АКСИ Contour · 100%</title>
+<style>
+:root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:920px;margin:0 auto;padding:12px 12px 48px}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(145deg,#6b4f35,#8a6544);color:#fff;display:grid;place-items:center;font-weight:900}
+h1{font-size:17px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
+.pill{margin-left:auto;font-size:11px;font-weight:800;padding:5px 11px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:12px;cursor:pointer}
+.tab.on{background:var(--a);color:#fff;border-color:var(--a)}
+.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+.card h3{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.panel{display:none}.panel.on{display:block}
+.composer{display:flex;gap:7px;flex-wrap:wrap}
+.composer input{flex:1;min-width:160px;min-height:44px;padding:9px 11px;border-radius:11px;border:1px solid var(--line);background:#fff;font-size:15px}
+button{font:inherit;cursor:pointer;border:0;border-radius:11px;padding:9px 13px;background:var(--a);color:#fff;font-weight:800}
+button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.col{background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:10px;min-height:90px}
+.col .lbl{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.col.pro{border-color:#b7d4c2}.col.con{border-color:#e0b8b0}
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+@media(max-width:500px){.meters{grid-template-columns:repeat(2,1fr)}}
+.m{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.m b{display:block;font-size:16px;font-weight:800}.m span{font-size:9px;color:var(--muted)}
+.gate{margin-top:8px;padding:8px 10px;border-radius:10px;font-weight:700;font-size:12px;border:1px solid var(--line)}
+.gate.ok{background:#e8f2ea;color:var(--ok);border-color:#b7d4c2}
+.gate.no{background:#f8eaea;color:var(--bad);border-color:#e0b8b0}
+.seal,.pre{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:9px;padding:9px;overflow:auto;max-height:130px;white-space:pre-wrap}
+.states{display:flex;flex-direction:column;gap:6px}
+.st{border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff}
+.st.sel{border-color:var(--ok)}
+.st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+.bar{height:5px;border-radius:99px;background:#eee;overflow:hidden;margin:4px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}
+.checks{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.checks i{font-style:normal;font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
+.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
+.foot{text-align:center;font-size:11px;color:var(--muted);margin-top:16px}
+.muted{color:var(--muted);font-size:12px}
+.phase{font-size:12px;color:var(--a);font-weight:600;min-height:1.2em;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">Δ</div>
+    <div>
+      <h1>АКСИ Contour</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/decision/">Decision</a> · <a href="/superpose/">Superpose</a> · единый контур</div>
+    </div>
+    <span class="pill" id="pill">OFFLINE</span>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button type="button" class="tab on" data-p="decision">Decision</button>
+    <button type="button" class="tab" data-p="superpose">Superpose</button>
+    <button type="button" class="tab" data-p="chat">Chat</button>
+    <button type="button" class="tab" data-p="mem">Memory</button>
+    <button type="button" class="tab" data-p="status">Status</button>
+  </div>
+
+  <section class="card">
+    <div class="checks" id="modChecks"></div>
+  </section>
+
+  <div class="panel on" id="p-decision">
+    <section class="card">
+      <h3>Decision Runtime · ответ + анти + Gate + печать</h3>
+      <div class="composer">
+        <input id="dq" type="text" placeholder="Вопрос или запомни: факт" autocomplete="off">
+        <button type="button" id="dgo">Решить</button>
+        <button type="button" class="g" data-q="Кто ты?" data-t="d">Кто ты?</button>
+        <button type="button" class="g" data-q="Какая формула AKSI?" data-t="d">Формула</button>
+      </div>
+    </section>
+    <section class="card" id="dout" hidden>
+      <div class="grid2">
+        <div class="col pro"><div class="lbl">Ответ</div><div id="danswer"></div></div>
+        <div class="col con"><div class="lbl">Анти / риски</div><div id="danti"></div></div>
+      </div>
+      <div class="meters">
+        <div class="m"><b id="vAksi">—</b><span>AKSI</span></div>
+        <div class="m"><b id="vEqs">—</b><span>EQS</span></div>
+        <div class="m"><b id="vPhi">—</b><span>Φ</span></div>
+        <div class="m"><b id="vQcli">—</b><span>QCLI</span></div>
+      </div>
+      <div class="gate no" id="dgate">Gate: —</div>
+      <div class="row">
+        <button type="button" class="g" id="dproof">Proof</button>
+        <button type="button" class="g" id="dverify">Verify</button>
+      </div>
+      <pre class="seal" id="dseal"></pre>
+      <p class="muted" id="dmeta"></p>
+    </section>
+  </div>
+
+  <div class="panel" id="p-superpose">
+    <section class="card">
+      <h3>Superpose · кандидаты → амплитуды → Born-коллапс</h3>
+      <div class="composer">
+        <input id="sq" type="text" placeholder="Вопрос для суперпозиции…" autocomplete="off">
+        <button type="button" id="sgo">Суперпозиция</button>
+        <button type="button" class="g" data-q="Кто ты?" data-t="s">Кто ты?</button>
+      </div>
+      <div class="row">
+        <button type="button" class="g" id="btnLlm">Загрузить WebLLM</button>
+        <button type="button" class="g" id="btnOff">Только offline</button>
+      </div>
+      <div class="phase" id="sphase">готово</div>
+    </section>
+    <section class="card" id="sbox" hidden>
+      <h3>Базис |ψ⟩</h3>
+      <div class="states" id="sstates"></div>
+    </section>
+    <section class="card" id="sansBox" hidden>
+      <h3>Коллапс</h3>
+      <div id="sanswer"></div>
+      <pre class="seal" id="smeta"></pre>
+    </section>
+  </div>
+
+  <div class="panel" id="p-chat">
+    <section class="card">
+      <h3>Chat · Mind path (Superpose → Decision → Zero → Neuro)</h3>
+      <div class="composer">
+        <input id="cq" type="text" placeholder="Сообщение…" autocomplete="off">
+        <button type="button" id="cgo">→</button>
+      </div>
+      <div class="row">
+        <button type="button" class="g" data-q="Кто ты?" data-t="c">Кто ты?</button>
+        <button type="button" class="g" data-q="статус" data-t="c">Статус</button>
+      </div>
+    </section>
+    <section class="card">
+      <div id="cthread" class="muted">—</div>
+    </section>
+  </div>
+
+  <div class="panel" id="p-mem">
+    <section class="card">
+      <h3>Memory · запомни: + Gate</h3>
+      <div class="composer">
+        <input id="mq" type="text" placeholder="запомни: факт" autocomplete="off">
+        <button type="button" id="mgo">Учить</button>
+      </div>
+      <p class="muted" id="mmsg" style="margin-top:8px">—</p>
+      <pre class="pre" id="mstatus" style="margin-top:8px">—</pre>
+    </section>
+  </div>
+
+  <div class="panel" id="p-status">
+    <section class="card">
+      <h3>Статус всех модулей</h3>
+      <pre class="pre" id="fullStatus">—</pre>
+      <div class="row" style="margin-top:8px">
+        <button type="button" class="g" id="btnRefresh">Обновить</button>
+        <button type="button" class="g" id="btnPurge">Очистить кэш</button>
+      </div>
+    </section>
+  </div>
+
+  <p class="foot">AKSI Contour v211 · Decision + Superpose + Zero + Neuro + Seal · aksilove@internet.ru</p>
+</div>
+
+<script src="/aksi-purge.js?v=211"></script>
+<script src="/aksi-knowledge.js?v=3"></script>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-zero.js?v=210"></script>
+<script src="/aksi-compose.js?v=3"></script>
+<script src="/aksi-quantum.js?v=5"></script>
+<script src="/aksi-qpipe.js?v=4"></script>
+<script src="/aksi-algorithm.js?v=4"></script>
+<script src="/aksi-decision.js?v=210"></script>
+<script src="/aksi-webllm.js?v=16"></script>
+<script src="/aksi-superpose.js?v=3"></script>
+<script src="/aksi-integrity-bridge.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+var $ = function(id){return document.getElementById(id)};
+var lastDecision = null, preferLocal = false;
+
+function setPill(){
+  var st = window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : {};
+  var p = $("pill");
+  if(st.ready){ p.textContent = "LLM · " + (st.backend||"on"); }
+  else if(st.loading){ p.textContent = "LLM " + Math.round((st.progress||0)*100) + "%"; }
+  else p.textContent = "OFFLINE";
+}
+
+function refreshMods(){
+  var bits = [
+    ["Decision", !!window.AKSI_DECISION],
+    ["Superpose", !!window.AKSI_SUPERPOSE],
+    ["Zero", !!window.AKSI_ZERO],
+    ["Neuro", !!window.AKSI_NEURO],
+    ["ADIA", !!(window.AKSI_ALGORITHM||window.ADIA)],
+    ["WebLLM", !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())],
+    ["Quantum", !!(window.AKSI_QUANTUM||window.AKSI_QPIPE)]
+  ];
+  $("modChecks").innerHTML = bits.map(function(b){
+    return "<i class=\""+(b[1]?"on":"")+"\">"+b[0]+"</i>";
+  }).join("");
+}
+
+function showPanel(name){
+  document.querySelectorAll(".panel").forEach(function(p){ p.classList.toggle("on", p.id==="p-"+name); });
+  document.querySelectorAll(".tab").forEach(function(t){ t.classList.toggle("on", t.getAttribute("data-p")===name); });
+}
+
+document.querySelectorAll(".tab").forEach(function(t){
+  t.onclick = function(){ showPanel(t.getAttribute("data-p")); };
+});
+
+document.querySelectorAll("[data-q]").forEach(function(b){
+  b.onclick = function(){
+    var q = b.getAttribute("data-q"), t = b.getAttribute("data-t");
+    if(t==="d"){ $("dq").value=q; runDecision(); }
+    else if(t==="s"){ $("sq").value=q; runSuperpose(); }
+    else if(t==="c"){ $("cq").value=q; runChat(); }
+  };
+});
+
+async function runDecision(){
+  var q = $("dq").value.trim();
+  if(!q || !window.AKSI_DECISION) return;
+  try{
+    $("dgo").disabled = true;
+    var p = await AKSI_DECISION.decide(q);
+    lastDecision = p;
+    $("dout").hidden = false;
+    $("danswer").textContent = p.answer || "";
+    $("danti").textContent = p.anti || "";
+    $("vAksi").textContent = (p.scores && p.scores.aksi != null) ? p.scores.aksi : "—";
+    $("vEqs").textContent = (p.scores && p.scores.eqs != null) ? p.scores.eqs : "—";
+    $("vPhi").textContent = (p.scores && p.scores.phi != null) ? p.scores.phi : "—";
+    $("vQcli").textContent = (p.scores && p.scores.qcli != null) ? p.scores.qcli : "—";
+    var g = $("dgate");
+    if(p.gate && p.gate.ok){ g.className="gate ok"; g.textContent="Gate: ПРИНЯТО — "+(p.gate.reason||""); }
+    else { g.className="gate no"; g.textContent="Gate: ОТКЛОНЕНО — "+((p.gate&&p.gate.reason)||""); }
+    $("dseal").textContent = JSON.stringify(p.seal, null, 2);
+    $("dmeta").textContent = "id "+p.id+" · "+(p.ms||0)+" ms · source "+(p.source||"—")+(p.learned?" · learned":"");
+  }catch(e){ alert("Ошибка: "+(e&&e.message||e)); }
+  finally{ $("dgo").disabled=false; refreshMods(); }
+}
+$("dgo").onclick = runDecision;
+$("dq").onkeydown = function(e){ if(e.key==="Enter") runDecision(); };
+$("dproof").onclick = function(){ if(lastDecision && AKSI_DECISION.exportProof) AKSI_DECISION.exportProof(lastDecision); };
+$("dverify").onclick = function(){
+  if(!lastDecision || !lastDecision.proof) return;
+  var v = AKSI_DECISION.verify(lastDecision.proof);
+  alert(v.ok ? "VERIFY OK · hash совпал" : "VERIFY FAIL · "+JSON.stringify(v));
+};
+
+function renderStates(list){
+  var root = $("sstates");
+  root.innerHTML = "";
+  $("sbox").hidden = false;
+  (list||[]).forEach(function(s){
+    var d = document.createElement("div");
+    d.className = "st"+(s.selected?" sel":"");
+    d.innerHTML = "<div class=\"top\"><span>|"+(s.i!=null?s.i:"?")+"⟩ · "+(s.source||"")+"</span><span>P="+(s.prob!=null?s.prob:"—")+(s.eqs!=null?" · EQS "+s.eqs:"")+"</span></div>"+
+      "<div class=\"bar\"><i style=\"width:"+Math.round((s.prob||0)*100)+"%\"></i></div>"+
+      "<div style=\"font-size:12px;white-space:pre-wrap\"></div>";
+    d.querySelector("div:last-child").textContent = s.text || s.preview || "";
+    root.appendChild(d);
+  });
+}
+async function runSuperpose(){
+  var q = $("sq").value.trim();
+  if(!q || !window.AKSI_SUPERPOSE) return;
+  $("sansBox").hidden = true;
+  $("sphase").textContent = "старт…";
+  try{
+    var unsub = AKSI_SUPERPOSE.on(function(ev){
+      if(ev.event==="phase") $("sphase").textContent = (ev.data.phase||"")+" — "+(ev.data.note||"");
+      if(ev.event==="superposition") renderStates(ev.data.states);
+      if(ev.event==="collapsed"){
+        renderStates(ev.data.superposition);
+        $("sansBox").hidden = false;
+        $("sanswer").textContent = ev.data.answer || "";
+        $("smeta").textContent = JSON.stringify({collapse:ev.data.collapse,scores:ev.data.scores,seal:ev.data.seal,ms:ev.data.ms,source:ev.data.source},null,2);
+        $("sphase").textContent = "готово · "+(ev.data.ms||0)+" ms";
+      }
+    });
+    await AKSI_SUPERPOSE.ask(q, { n: preferLocal ? 0 : 3, includeLocal: true, mode: "born" });
+    unsub();
+  }catch(e){ $("sphase").textContent = "ошибка: "+(e.message||e); }
+  refreshMods();
+}
+$("sgo").onclick = runSuperpose;
+$("sq").onkeydown = function(e){ if(e.key==="Enter") runSuperpose(); };
+$("btnLlm").onclick = function(){
+  preferLocal = false;
+  if(!window.AKSI_WEBLLM){ $("sphase").textContent="WebLLM модуль не найден"; return; }
+  $("sphase").textContent="загрузка WebLLM…";
+  AKSI_WEBLLM.load(null, function(s){ setPill(); }).then(function(){
+    $("sphase").textContent="WebLLM готов";
+    setPill(); refreshMods();
+  }).catch(function(e){
+    $("sphase").textContent="WebLLM недоступен — offline работает";
+    setPill();
+  });
+};
+$("btnOff").onclick = function(){
+  preferLocal = true;
+  $("sphase").textContent="только offline (Zero/Neuro/Decision)";
+  setPill();
+};
+
+async function runChat(){
+  var q = $("cq").value.trim();
+  if(!q) return;
+  var thread = $("cthread");
+  thread.textContent = "…";
+  try{
+    var ans = null, src = "";
+    if(window.AKSI_SUPERPOSE){
+      var r = await AKSI_SUPERPOSE.ask(q, { n: preferLocal?0:2, includeLocal:true, mode:"max" });
+      if(r && r.answer){ ans=r.answer; src=r.source||"superpose"; }
+    }
+    if(!ans && window.AKSI_DECISION){
+      var d = await AKSI_DECISION.decide(q);
+      if(d && d.answer){ ans=d.answer; src=d.source||"decision"; }
+    }
+    if(!ans && window.AKSI_ZERO && AKSI_ZERO.think){
+      var z = await Promise.resolve(AKSI_ZERO.think(q));
+      if(z){ ans=z.answer||z.text; src="zero"; }
+    }
+    if(!ans && window.AKSI_NEURO && AKSI_NEURO.think){
+      var n = await Promise.resolve(AKSI_NEURO.think(q));
+      if(n){ ans=n.text||n.answer; src="neuro"; }
+    }
+    thread.textContent = (ans||"Нет ответа") + "\n\n[source: "+(src||"—")+"]";
+  }catch(e){ thread.textContent = "Ошибка: "+(e.message||e); }
+  refreshMods();
+}
+$("cgo").onclick = runChat;
+$("cq").onkeydown = function(e){ if(e.key==="Enter") runChat(); };
+
+async function runMem(){
+  var q = $("mq").value.trim();
+  if(!q) return;
+  if(!/^запомни\s*[:：]/i.test(q) && !/^remember\s*[:：]/i.test(q)) q = "запомни: "+q;
+  $("mmsg").textContent = "…";
+  try{
+    if(window.AKSI_DECISION){
+      var p = await AKSI_DECISION.decide(q);
+      $("mmsg").textContent = p.answer || "—";
+      $("mstatus").textContent = JSON.stringify(AKSI_DECISION.status(), null, 2);
+    } else $("mmsg").textContent = "Decision не загружен";
+  }catch(e){ $("mmsg").textContent = "Ошибка: "+(e.message||e); }
+  refreshMods();
+}
+$("mgo").onclick = runMem;
+$("mq").onkeydown = function(e){ if(e.key==="Enter") runMem(); };
+
+function fullStatus(){
+  var o = {
+    decision: window.AKSI_DECISION ? AKSI_DECISION.status() : null,
+    superpose: window.AKSI_SUPERPOSE ? AKSI_SUPERPOSE.status() : null,
+    webllm: window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : null,
+    zero: !!window.AKSI_ZERO,
+    neuro: !!window.AKSI_NEURO,
+    algorithm: !!(window.AKSI_ALGORITHM||window.ADIA),
+    quantum: !!(window.AKSI_QUANTUM||window.AKSI_QPIPE),
+    integrity: !!window.AKSI_INTEGRITY
+  };
+  $("fullStatus").textContent = JSON.stringify(o, null, 2);
+}
+$("btnRefresh").onclick = function(){ fullStatus(); refreshMods(); setPill(); };
+$("btnPurge").onclick = function(){
+  if(window.AKSI_PURGE) AKSI_PURGE();
+  else location.reload();
+};
+
+refreshMods();
+setPill();
+fullStatus();
+if(window.AKSI_WEBLLM) window.addEventListener("aksi-webllm-progress", setPill);
+})();
+</script>
+</body>
+</html>
