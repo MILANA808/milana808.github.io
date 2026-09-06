@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-aksi-autoload="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1020">
-<meta name="description" content="АКСИ Superpose — новый способ общения с ИИ: суперпозиция ответов → коллапс → печать">
+<meta name="description" content="АКСИ Superpose — суперпозиция ответов → коллапс → печать">
 <title>АКСИ Superpose · ИИ через суперпозицию</title>
 <style>
 :root{--bg:#070b16;--card:#121a2e;--line:rgba(100,140,255,.22);--t:#e8eefc;--m:#8b9bb8;--a:#6ea8ff;--ok:#3ddea8}
@@ -41,7 +41,7 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
 .hint{font-size:12px;color:var(--m);margin-top:6px}
 </style>
 </head>
-<body>
+<body data-aksi-autoload="1">
 <div class="wrap">
   <header>
     <div class="logo">ψ</div>
@@ -53,13 +53,13 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
   </header>
   <section class="card hero">
     <h3>Не один ответ. Суперпозиция → коллапс.</h3>
-    <p>Несколько кандидатов (WebLLM + локальное ядро) получают амплитуды через score/QCLI, затем измерение выбирает один ответ с печатью.</p>
+    <p>Модель грузится сама (WebGPU → WebLLM, иначе WASM). Кандидаты → амплитуды → коллапс.</p>
     <div class="row">
-      <button type="button" id="btnLoad">Загрузить WebLLM</button>
+      <button type="button" id="btnLoad">Перезагрузить LLM</button>
       <button type="button" class="g" id="btnLocal">Только offline</button>
     </div>
     <div class="progress"><i id="bar"></i></div>
-    <div class="hint" id="loadMsg">WebLLM опционален: без него работают Zero/Neuro/Decision как базис.</div>
+    <div class="hint" id="loadMsg">Автозагрузка модели…</div>
   </section>
   <section class="card">
     <h2>Запрос</h2>
@@ -72,7 +72,7 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
       <button type="button" class="g" data-q="Как работает суперпозиция ответов?">Как это работает?</button>
       <button type="button" class="g" data-q="Что такое АКСИ?">АКСИ</button>
     </div>
-    <div class="phase" id="phase">готово к запуску</div>
+    <div class="phase" id="phase">модель грузится…</div>
   </section>
   <section class="card" id="boxStates" hidden>
     <h2>Базис · |ψ⟩</h2>
@@ -83,7 +83,7 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
     <div class="answer" id="answer"></div>
     <div class="meta" id="meta"></div>
   </section>
-  <p class="foot">AKSI Superpose v1 · state-vector + Born · не физический QPU · aksilove@internet.ru</p>
+  <p class="foot">AKSI Superpose · WebLLM/WASM auto · aksilove@internet.ru</p>
 </div>
 <script src="/aksi-knowledge.js?v=3"></script>
 <script src="/aksi-neuro.js?v=10"></script>
@@ -93,7 +93,7 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
 <script src="/aksi-qpipe.js?v=4"></script>
 <script src="/aksi-algorithm.js?v=4"></script>
 <script src="/aksi-decision.js?v=1"></script>
-<script src="/aksi-webllm.js?v=1"></script>
+<script src="/aksi-webllm.js?v=15"></script>
 <script src="/aksi-superpose.js?v=1"></script>
 <script>
 (function () {
@@ -103,10 +103,19 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
     var st = window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : {};
     var p = $("pill");
     if (st.ready) { p.textContent = "LLM · " + (st.backend || "on"); p.className = "pill on"; }
-    else if (st.loading) { p.textContent = "LLM " + Math.round((st.progress || 0) * 100) + "%"; p.className = "pill"; }
-    else { p.textContent = preferLocal ? "offline" : "LLM off"; p.className = "pill"; }
+    else if (st.loading) { p.textContent = "LLM " + Math.round(st.progress || 0) + "%"; p.className = "pill"; }
+    else { p.textContent = preferLocal ? "offline" : "LLM…"; p.className = "pill"; }
   }
   function setPhase(t) { $("phase").textContent = t || ""; }
+  function onProgress(s) {
+    s = s || (window.AKSI_WEBLLM && AKSI_WEBLLM.status()) || {};
+    var pct = s.progress || 0;
+    if (pct > 0 && pct <= 1) pct = Math.round(pct * 100);
+    else pct = Math.round(pct);
+    $("bar").style.width = pct + "%";
+    if (s.message) $("loadMsg").textContent = s.message;
+    setPill();
+  }
   function renderStates(list) {
     var root = $("states");
     root.innerHTML = "";
@@ -123,18 +132,17 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
   }
   function loadLLM() {
     preferLocal = false;
+    try { localStorage.removeItem("aksi_webllm_skip"); } catch (e) {}
     if (!window.AKSI_WEBLLM) { $("loadMsg").textContent = "Модуль WebLLM не найден"; return; }
     $("loadMsg").textContent = "Загрузка модели…";
-    AKSI_WEBLLM.load(null, function (s) {
-      $("bar").style.width = Math.round((s.progress || 0) * 100) + "%";
-      $("loadMsg").textContent = s.message || (s.loading ? "загрузка…" : (s.ready ? "модель готова" : "—"));
-      setPill();
-    }).then(function () {
-      $("loadMsg").textContent = "WebLLM готов. Кандидаты из модели + offline базиса.";
-      $("bar").style.width = "100%";
+    AKSI_WEBLLM.load(null, onProgress).then(function (s) {
+      $("loadMsg").textContent = s.ready
+        ? ("Готово · " + (s.backend || "") + " · " + (s.model || ""))
+        : ("Не загрузилась: " + (s.error || s.message || ""));
+      $("bar").style.width = s.ready ? "100%" : "0%";
       setPill();
     }).catch(function (e) {
-      $("loadMsg").textContent = "WebLLM недоступен (" + (e && e.message || e) + "). Offline-суперпозиция работает.";
+      $("loadMsg").textContent = "Ошибка: " + (e && e.message || e) + " · offline-базис доступен";
       setPill();
     });
   }
@@ -164,15 +172,29 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
   $("btnLoad").onclick = loadLLM;
   $("btnLocal").onclick = function () {
     preferLocal = true;
-    $("loadMsg").textContent = "Offline: только локальные базисы (Zero/Neuro/Decision).";
+    try { localStorage.setItem("aksi_webllm_skip", "1"); } catch (e) {}
+    $("loadMsg").textContent = "Offline: только Zero/Neuro/Decision.";
     setPill();
   };
   document.querySelectorAll("[data-q]").forEach(function (b) {
     b.onclick = function () { $("q").value = b.getAttribute("data-q"); run(); };
   });
-  if (window.AKSI_WEBLLM) window.addEventListener("aksi-webllm-progress", setPill);
+  if (window.AKSI_WEBLLM) {
+    window.addEventListener("aksi-webllm-progress", function (ev) { onProgress(ev.detail); });
+    setTimeout(function () {
+      if (preferLocal) return;
+      $("loadMsg").textContent = "Автозагрузка модели…";
+      AKSI_WEBLLM.autoLoad({}).then(function (s) {
+        onProgress(s);
+        $("loadMsg").textContent = s.ready
+          ? ("Модель готова · " + (s.backend || "") + " · " + (s.model || ""))
+          : ("Не загрузилась: " + (s.error || s.message || "—") + " · offline-базис работает");
+        if (s.ready) $("bar").style.width = "100%";
+        setPhase(s.ready ? "можно жать Суперпозиция" : "offline-суперпозиция доступна");
+      });
+    }, 500);
+  }
   setPill();
-  setPhase("нажмите «Суперпозиция» или загрузите WebLLM");
 })();
 </script>
 </body>
