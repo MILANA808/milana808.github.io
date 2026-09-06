@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-aksi-autoload="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<script src="/aksi-purge.js?v=210"></script>
 <meta name="theme-color" content="#05040a">
-<meta name="description" content="АКСИ MATRIX — локальный ИИ → квантовый симулятор → ADIA → ECDSA, offline-first.">
+<meta name="description" content="АКСИ MATRIX — локальный ИИ → квант → ADIA → ECDSA">
 <title>АКСИ MATRIX</title>
 <link rel="manifest" href="/manifest.json">
 <style>
@@ -54,12 +56,12 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
 .pub{font-size:11px;word-break:break-all;color:var(--dim);margin-top:8px}
 </style>
 </head>
-<body>
-<div id="boot"><h1>АКСИ MATRIX</h1><p>Локальный ИИ → квантовый симулятор → ADIA → ECDSA</p><div class="bar"><i id="bootBar"></i></div><div id="bootMsg">загрузка контура…</div></div>
+<body data-aksi-autoload="1">
+<div id="boot"><h1>АКСИ MATRIX</h1><p>Локальный ИИ → квантовый симулятор → ADIA → ECDSA</p><div class="bar"><i id="bootBar"></i></div><div id="bootMsg">очистка кэша / загрузка…</div></div>
 <div class="app" id="app" hidden>
 <header>
   <div class="dot"></div>
-  <div class="brand"><h1>MATRIX</h1><div class="sub" id="statusLine">v14 unified</div></div>
+  <div class="brand"><h1>MATRIX</h1><div class="sub" id="statusLine">v15 · purge</div></div>
   <div class="hdr-btns"><button type="button" id="btnTrust">Crypto</button><button type="button" id="btnPro">Info</button></div>
 </header>
 <nav class="tabs">
@@ -73,7 +75,7 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
 <section class="panel on" id="tab-chat">
   <div class="card">
     <h3>Контур ответа</h3>
-    <p class="muted">Каждый ответ: локальный ИИ → QPIPE/answerGate → ADIA → подпись ECDSA P-256</p>
+    <p class="muted">Каждый ответ: локальный ИИ → QPIPE → ADIA → ECDSA</p>
     <div class="row">
       <button type="button" class="btn p" id="btnModel">WebLLM</button>
       <button type="button" class="btn" id="btnVoice">Голос</button>
@@ -92,7 +94,6 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
     <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
     <button type="button" class="chip" data-ask="статус">Статус</button>
     <button type="button" class="chip" data-ask="что такое кубит?">Кубит</button>
-    <button type="button" class="chip" data-ask="запомни: MATRIX v14 unified pipeline">Запомни demo</button>
   </div>
 </section>
 <section class="panel" id="tab-crypto">
@@ -105,19 +106,18 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
       <button type="button" class="btn" data-crypto="did">DID</button>
     </div>
     <div class="pub" id="pubOut">—</div>
-    <textarea class="field" id="signMsg" placeholder="Сообщение для ручной подписи"></textarea>
+    <textarea class="field" id="signMsg" placeholder="Сообщение"></textarea>
     <div class="row">
       <button type="button" class="btn p" id="btnSign">Подписать</button>
       <button type="button" class="btn" id="btnVerify">Проверить</button>
       <button type="button" class="btn" id="btnDl">Скачать .json</button>
     </div>
-    <pre class="out" id="cryptoOut">Печать последнего ответа появится здесь</pre>
+    <pre class="out" id="cryptoOut">—</pre>
   </div>
 </section>
 <section class="panel" id="tab-bloch">
   <div class="card">
     <h3>Квантовый симулятор</h3>
-    <p class="muted">Каждый чат-ответ прогоняется через answerGate / QPIPE (state-vector). Ниже — ручная лаборатория.</p>
     <canvas id="bloch" width="220" height="220"></canvas>
     <div class="row" style="justify-content:center">
       <button type="button" class="btn p" id="btnBell">Белл Φ+</button>
@@ -137,8 +137,8 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
       <div class="c"><b id="kvRag">0</b><span>RAG</span></div>
       <div class="c"><b id="kvDid">local</b><span>DID</span></div>
     </div>
-    <p class="muted" style="margin-top:12px">v14 · aksilove@internet.ru · proprietary</p>
-    <div class="row" style="margin-top:10px"><a class="btn" href="/">← Home</a><a class="btn" href="/decision/">Decision</a></div>
+    <p class="muted" style="margin-top:12px">v15 · aksilove@internet.ru</p>
+    <div class="row" style="margin-top:10px"><a class="btn" href="/">← Home</a><a class="btn" href="/superpose/">Superpose</a></div>
   </div>
 </section>
 <section class="panel" id="tab-q2">
@@ -150,7 +150,7 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
 </section>
 </div>
 <div class="composer">
-  <input id="inp" type="text" placeholder="Спросите · ответ пройдёт через квант + подпись" enterkeyhint="send" autocomplete="off">
+  <input id="inp" type="text" placeholder="Спросите · ответ через квант + подпись" enterkeyhint="send" autocomplete="off">
   <button type="button" class="send" id="send">↑</button>
 </div>
 </div>
@@ -162,7 +162,13 @@ canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:1
 <script src="/aksi-qpipe.js?v=4"></script>
 <script src="/aksi-algorithm.js?v=4"></script>
 <script src="/aksi-decision.js?v=1"></script>
+<script src="/aksi-webllm.js?v=16"></script>
 <script src="/aksi-mind.js?v=15"></script>
-<script src="/matrix/app.js?v=14"></script>
+<script src="/matrix/app.js?v=15"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js?v=210').catch(function () {});
+}
+</script>
 </body>
 </html>
