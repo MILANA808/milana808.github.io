@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<script src="/aksi-purge.js?v=210"></script>
 <meta name="theme-color" content="#0b1020">
 <meta name="description" content="АКСИ Superpose — суперпозиция ответов → коллапс → печать">
 <title>АКСИ Superpose · ИИ через суперпозицию</title>
@@ -53,13 +56,14 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
   </header>
   <section class="card hero">
     <h3>Не один ответ. Суперпозиция → коллапс.</h3>
-    <p>Модель грузится сама (WebGPU → WebLLM, иначе WASM). Кандидаты → амплитуды → коллапс.</p>
+    <p>Модель грузится сама. При смене версии кэш чистится автоматически.</p>
     <div class="row">
       <button type="button" id="btnLoad">Перезагрузить LLM</button>
+      <button type="button" class="g" id="btnPurge">Сбросить кэш</button>
       <button type="button" class="g" id="btnLocal">Только offline</button>
     </div>
     <div class="progress"><i id="bar"></i></div>
-    <div class="hint" id="loadMsg">Автозагрузка модели…</div>
+    <div class="hint" id="loadMsg">Автозагрузка / очистка кэша…</div>
   </section>
   <section class="card">
     <h2>Запрос</h2>
@@ -83,7 +87,7 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
     <div class="answer" id="answer"></div>
     <div class="meta" id="meta"></div>
   </section>
-  <p class="foot">AKSI Superpose · WebLLM/WASM auto · aksilove@internet.ru</p>
+  <p class="foot">AKSI Superpose · purge v210 · aksilove@internet.ru</p>
 </div>
 <script src="/aksi-knowledge.js?v=3"></script>
 <script src="/aksi-neuro.js?v=10"></script>
@@ -93,12 +97,13 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
 <script src="/aksi-qpipe.js?v=4"></script>
 <script src="/aksi-algorithm.js?v=4"></script>
 <script src="/aksi-decision.js?v=1"></script>
-<script src="/aksi-webllm.js?v=15"></script>
-<script src="/aksi-superpose.js?v=1"></script>
+<script src="/aksi-webllm.js?v=16"></script>
+<script src="/aksi-superpose.js?v=2"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var preferLocal = false;
+  try { localStorage.removeItem('aksi_webllm_skip'); } catch (e) {}
   function setPill() {
     var st = window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : {};
     var p = $("pill");
@@ -170,6 +175,10 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
   $("go").onclick = run;
   $("q").addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
   $("btnLoad").onclick = loadLLM;
+  if ($("btnPurge")) $("btnPurge").onclick = function () {
+    if (window.AKSI_PURGE) AKSI_PURGE();
+    else location.reload();
+  };
   $("btnLocal").onclick = function () {
     preferLocal = true;
     try { localStorage.setItem("aksi_webllm_skip", "1"); } catch (e) {}
@@ -192,10 +201,17 @@ input[type=text]{flex:1;min-width:200px;min-height:46px;padding:10px 12px;border
         if (s.ready) $("bar").style.width = "100%";
         setPhase(s.ready ? "можно жать Суперпозиция" : "offline-суперпозиция доступна");
       });
-    }, 500);
+    }, 800);
   }
   setPill();
 })();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js?v=210').then(function (reg) {
+    try { if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e) {}
+  }).catch(function () {});
+}
 </script>
 </body>
 </html>
