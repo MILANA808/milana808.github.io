@@ -1,6 +1,20 @@
-/* AKSI SW v201 — network-first, purge old shells */
-var CACHE = "aksi-shell-v201-hub";
-var PRE = ["/", "/index.html", "/agent.js", "/sw.js", "/spa/", "/spa/index.html"];
+/* AKSI SW v210 — network-first HTML/JS, never sticky-cache LLM modules */
+var CACHE = "aksi-shell-v210";
+var PRE = ["/", "/index.html", "/sw.js"];
+var NO_CACHE = [
+  /aksi-webllm\.js/,
+  /aksi-superpose\.js/,
+  /matrix\/app\.js/,
+  /aksi-qpipe\.js/,
+  /aksi-quantum\.js/,
+  /\/superpose\//,
+  /\/matrix\//
+];
+function shouldBypass(url) {
+  var p = url.pathname + url.search;
+  for (var i = 0; i < NO_CACHE.length; i++) if (NO_CACHE[i].test(p)) return true;
+  return false;
+}
 self.addEventListener("install", function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
@@ -11,7 +25,9 @@ self.addEventListener("install", function (e) {
 self.addEventListener("activate", function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.map(function (k) { if (k !== CACHE) return caches.delete(k); }));
+      return Promise.all(keys.map(function (k) {
+        if (k !== CACHE) return caches.delete(k);
+      }));
     }).then(function () { return self.clients.claim(); })
   );
 });
@@ -20,10 +36,18 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (shouldBypass(url)) {
+    e.respondWith(
+      fetch(req, { cache: "no-store" }).catch(function () {
+        return caches.match(req);
+      })
+    );
+    return;
+  }
   var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
   if (isHTML) {
     e.respondWith(
-      fetch(req).then(function (res) {
+      fetch(req, { cache: "no-store" }).then(function (res) {
         var c = res.clone();
         caches.open(CACHE).then(function (cache) { cache.put(req, c); });
         return res;
@@ -44,5 +68,13 @@ self.addEventListener("fetch", function (e) {
   );
 });
 self.addEventListener("message", function (e) {
-  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (!e.data) return;
+  if (e.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (e.data.type === "PURGE") {
+    e.waitUntil(
+      caches.keys().then(function (keys) {
+        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      }).then(function () { return self.skipWaiting(); })
+    );
+  }
 });
