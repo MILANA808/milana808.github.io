@@ -1,9 +1,9 @@
 /**
- * AKSI cache purge boot — one-shot clear SW + Cache Storage when build changes
+ * AKSI cache purge boot — force clear SW + Cache Storage on build change
  * © AKSI · aksilove@internet.ru
  */
 (function () {
-  var BUILD = "20260907-v212";
+  var BUILD = "20260907-v213";
   var KEY = "aksi_build_id";
   var RELOAD = "aksi_purged_" + BUILD;
   function log(m) {
@@ -30,17 +30,12 @@
         log("caches deleted: " + keys.join(","));
       }
     } catch (e) { log("cache err " + e); }
-    try {
-      localStorage.removeItem("aksi_webllm_skip");
-    } catch (e) {}
+    try { localStorage.removeItem("aksi_webllm_skip"); } catch (e) {}
   }
   async function run() {
     var prev = null;
     try { prev = localStorage.getItem(KEY); } catch (e) {}
-    if (prev === BUILD) {
-      done();
-      return;
-    }
+    if (prev === BUILD) { done(); return; }
     log("build change " + prev + " → " + BUILD);
     await purgeAll();
     try { localStorage.setItem(KEY, BUILD); } catch (e) {}
@@ -51,10 +46,7 @@
         location.reload();
         return;
       }
-    } catch (e) {
-      location.reload();
-      return;
-    }
+    } catch (e) { location.reload(); return; }
     done();
   }
   window.AKSI_PURGE = function () {
