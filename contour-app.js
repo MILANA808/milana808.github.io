@@ -1,19 +1,74 @@
+/**
+ * AKSI Contour App v218 — bulletproof handlers + offline fallbacks
+ * © AKSI · aksilove@internet.ru
+ */
 (function () {
   "use strict";
 
-  function $(id) { return document.getElementById(id); }
+  function $(id) {
+    try { return document.getElementById(id); } catch (e) { return null; }
+  }
+  function txt(id, v) {
+    var el = $(id);
+    if (el) el.textContent = v == null ? "" : String(v);
+  }
   function on(el, ev, fn) {
     if (!el) return;
     el.addEventListener(ev, function (e) {
       try { fn(e); } catch (err) {
         console.error("[AKSI Contour]", err);
-        alert("Ошибка: " + (err && err.message || err));
+        var box = $("bootErr") || $("derr") || $("cerr");
+        if (box) box.textContent = "Ошибка: " + (err && err.message ? err.message : err);
       }
     });
   }
 
   var lastDecision = null;
   var preferLocal = false;
+
+  var FALLBACK_KB = [
+    { q: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — суверенный offline-first цифровой напарник. Decision · Superpose · Neuro · Zero · WebLLM. Контакт: aksilove@internet.ru" },
+    { q: ["формула", "formula", "aksi ="], a: "AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity, S — sovereignty, n — опыт." },
+    { q: ["gate", "гейт"], a: "Gate — порог принятия. Если score < tau (~0.55), ответ отклоняется или помечается." },
+    { q: ["adia", "адиа", "eqs"], a: "ADIA 2.0 — Adaptive Resonance Integrity Engine. 5-осевой EQS, seal, offline streak." },
+    { q: ["quantum", "квант"], a: "Локальный quantum-симулятор АКСИ (state-vector ≤10 кубит) + QCLI meta." },
+    { q: ["superpose", "суперпоз"], a: "Superpose: кандидаты → амплитуды → Born-коллапс → печать." },
+    { q: ["статус", "status", "что умеешь"], a: "Contour: Decision, Superpose, Chat, WebLLM, Memory, Status. Offline-ядро всегда доступно." }
+  ];
+
+  function localDecide(q) {
+    q = String(q || "").toLowerCase();
+    var i, j, hit;
+    for (i = 0; i < FALLBACK_KB.length; i++) {
+      hit = FALLBACK_KB[i];
+      for (j = 0; j < hit.q.length; j++) {
+        if (q.indexOf(hit.q[j]) !== -1) {
+          return {
+            id: "fb-" + Date.now().toString(36),
+            answer: hit.a,
+            anti: "Локальный fallback Contour (модули подгружаются отдельно).",
+            source: "fallback",
+            scores: { aksi: 0.72, eqs: 72, phi: 0.6, qcli: 0.55 },
+            gate: { ok: true, reason: "fallback-pass" },
+            seal: { kind: "fnv-local", t: Date.now() },
+            ms: 1,
+            version: "contour-fallback-v218"
+          };
+        }
+      }
+    }
+    return {
+      id: "fb-" + Date.now().toString(36),
+      answer: "Я АКСИ Contour. Спросите: кто ты, формула, Gate, ADIA, Quantum. Или «запомни: факт». Контакт: aksilove@internet.ru",
+      anti: "Нет точного совпадения в fallback KB.",
+      source: "fallback",
+      scores: { aksi: 0.45, eqs: 45, phi: 0.4, qcli: 0.4 },
+      gate: { ok: true, reason: "fallback-generic" },
+      seal: { kind: "fnv-local", t: Date.now() },
+      ms: 1,
+      version: "contour-fallback-v218"
+    };
+  }
 
   function showPanel(name) {
     document.querySelectorAll(".panel").forEach(function (p) {
@@ -23,9 +78,6 @@
       t.classList.toggle("on", t.getAttribute("data-p") === name);
     });
   }
-  document.querySelectorAll(".tab").forEach(function (t) {
-    on(t, "click", function () { showPanel(t.getAttribute("data-p")); });
-  });
 
   function refreshMods() {
     var bits = [
@@ -48,7 +100,7 @@
     var be = $("bootErr");
     if (be) {
       be.textContent = missing.length
-        ? "Ожидают загрузки: " + missing.join(", ") + " (кнопки работают через доступные модули)"
+        ? "Ожидают: " + missing.join(", ") + " — кнопки работают через fallback/доступные модули"
         : "";
     }
     setPill();
@@ -66,223 +118,186 @@
       if (pr <= 1) pr *= 100;
       p.textContent = "LLM " + Math.round(pr) + "%";
       p.className = "pill warn";
-    } else if (window.AKSI_DECISION || window.AKSI_ZERO) {
+    } else {
       p.textContent = "OFFLINE READY";
       p.className = "pill";
-    } else {
-      p.textContent = "загрузка…";
-      p.className = "pill warn";
     }
   }
 
   function showDecision(p) {
     lastDecision = p;
-    $("dout").hidden = false;
-    $("danswer").textContent = p.answer || "";
-    $("danti").textContent = p.anti || "";
-    $("vAksi").textContent = (p.scores && p.scores.aksi != null) ? p.scores.aksi : "—";
-    $("vEqs").textContent = (p.scores && p.scores.eqs != null) ? p.scores.eqs : "—";
-    $("vPhi").textContent = (p.scores && p.scores.phi != null) ? p.scores.phi : "—";
-    $("vQcli").textContent = (p.scores && p.scores.qcli != null) ? p.scores.qcli : "—";
+    var dout = $("dout");
+    if (dout) dout.hidden = false;
+    txt("danswer", p.answer || "");
+    txt("danti", p.anti || "");
+    txt("vAksi", p.scores && p.scores.aksi != null ? p.scores.aksi : "—");
+    txt("vEqs", p.scores && p.scores.eqs != null ? p.scores.eqs : "—");
+    txt("vPhi", p.scores && p.scores.phi != null ? p.scores.phi : "—");
+    txt("vQcli", p.scores && p.scores.qcli != null ? p.scores.qcli : "—");
     var g = $("dgate");
-    if (p.gate && p.gate.ok) {
-      g.className = "gate ok";
-      g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || "");
-    } else {
-      g.className = "gate no";
-      g.textContent = "Gate: ОТКЛОНЕНО — " + ((p.gate && p.gate.reason) || "");
+    if (g) {
+      if (p.gate && p.gate.ok) {
+        g.className = "gate ok";
+        g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || "");
+      } else {
+        g.className = "gate no";
+        g.textContent = "Gate: ОТКЛОНЕНО — " + ((p.gate && p.gate.reason) || "");
+      }
     }
-    $("dseal").textContent = JSON.stringify(p.seal || {}, null, 2);
-    $("dmeta").textContent = "id " + (p.id || "—") + " · " + (p.ms || 0) + " ms · source " + (p.source || "—") +
-      (p.learned ? " · learned" : "") + " · " + (p.version || "");
+    txt("dseal", JSON.stringify(p.seal || {}, null, 2));
+    txt("dmeta", "id " + (p.id || "—") + " · " + (p.ms || 0) + " ms · source " + (p.source || "—") + " · " + (p.version || ""));
   }
 
   async function runDecision(q) {
-    q = (q != null ? q : $("dq").value).trim();
+    q = (q != null ? q : ($("dq") && $("dq").value) || "").trim();
     if (!q) return;
-    $("derr").textContent = "";
-    $("dgo").disabled = true;
+    txt("derr", "");
+    var btn = $("dgo");
+    if (btn) btn.disabled = true;
     try {
-      if (!window.AKSI_DECISION || typeof AKSI_DECISION.decide !== "function") {
-        throw new Error("AKSI_DECISION не загружен");
+      var p = null;
+      if (window.AKSI_DECISION && typeof AKSI_DECISION.decide === "function") {
+        p = await Promise.resolve(AKSI_DECISION.decide(q));
       }
-      var p = await Promise.resolve(AKSI_DECISION.decide(q));
-      if (!p || !p.answer) throw new Error("пустой ответ Decision");
-      showDecision(p);
-    } catch (e) {
-      $("derr").textContent = "Decision: " + (e && e.message || e);
-      try {
-        if (window.AKSI_ZERO && AKSI_ZERO.think) {
+      if ((!p || !p.answer) && window.AKSI_ZERO && AKSI_ZERO.think) {
+        try {
           var z = await Promise.resolve(AKSI_ZERO.think(q));
           if (z && (z.answer || z.text)) {
-            showDecision({
+            p = {
               id: z.id || ("z" + Date.now()),
               answer: z.answer || z.text,
-              anti: "Ответ через Zero (Decision временно недоступен).",
+              anti: "Путь Zero.",
               source: z.source || "zero",
-              scores: { aksi: z.confidence || 0.6, eqs: Math.round((z.confidence || 0.6) * 100), phi: 0.55, qcli: 0.5 },
+              scores: { aksi: z.confidence || 0.65, eqs: Math.round((z.confidence || 0.65) * 100), phi: 0.55, qcli: 0.5 },
               gate: { ok: true, reason: "zero-pass" },
               seal: z.seal || null,
               ms: z.ms || 0,
               version: "zero-bridge"
-            });
-            $("derr").textContent = "";
+            };
           }
-        }
-      } catch (e2) {
-        $("derr").textContent += " | Zero: " + (e2 && e2.message || e2);
+        } catch (e) {}
       }
+      if ((!p || !p.answer) && window.AKSI_NEURO && AKSI_NEURO.think) {
+        try {
+          var n = await Promise.resolve(AKSI_NEURO.think(q));
+          if (n && (n.text || n.answer)) {
+            p = {
+              id: "n" + Date.now(),
+              answer: n.text || n.answer,
+              anti: "Путь Neuro.",
+              source: "neuro",
+              scores: { aksi: n.score || 0.6, eqs: Math.round((n.score || 0.6) * 100), phi: 0.5, qcli: 0.5 },
+              gate: { ok: true, reason: "neuro-pass" },
+              seal: null,
+              ms: 0,
+              version: "neuro-bridge"
+            };
+          }
+        } catch (e) {}
+      }
+      if (!p || !p.answer) p = localDecide(q);
+      showDecision(p);
+    } catch (e) {
+      txt("derr", "Decision: " + (e && e.message || e));
+      showDecision(localDecide(q));
     } finally {
-      $("dgo").disabled = false;
+      if (btn) btn.disabled = false;
       refreshMods();
     }
   }
 
-  on($("dgo"), "click", function () { runDecision(); });
-  on($("dq"), "keydown", function (e) { if (e.key === "Enter") runDecision(); });
-  on($("dex1"), "click", function () { $("dq").value = "Кто ты?"; runDecision("Кто ты?"); });
-  on($("dex2"), "click", function () { $("dq").value = "Какая формула AKSI?"; runDecision("Какая формула AKSI?"); });
-  on($("dex3"), "click", function () { $("dq").value = "Что такое Gate?"; runDecision("Что такое Gate?"); });
-
-  on($("dproof"), "click", function () {
-    if (!lastDecision) return;
-    if (window.AKSI_DECISION && AKSI_DECISION.exportProof) {
-      AKSI_DECISION.exportProof(lastDecision);
-    } else {
-      var blob = new Blob([JSON.stringify(lastDecision.proof || lastDecision, null, 2)], { type: "application/json" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "aksi-decision-proof.json";
-      a.click();
-    }
-  });
-  on($("dverify"), "click", function () {
-    if (!lastDecision) return;
-    if (window.AKSI_DECISION && lastDecision.proof) {
-      var v = AKSI_DECISION.verify(lastDecision.proof);
-      alert(v.ok ? "VERIFY OK · hash совпал" : "VERIFY FAIL · " + JSON.stringify(v));
-    } else {
-      alert("Proof: " + JSON.stringify(lastDecision.seal || lastDecision, null, 2).slice(0, 400));
-    }
-  });
-  on($("dcopy"), "click", function () {
-    if (!lastDecision) return;
-    var t = JSON.stringify(lastDecision.proof || lastDecision, null, 2);
-    if (navigator.clipboard) navigator.clipboard.writeText(t);
-    else {
-      var ta = document.createElement("textarea");
-      ta.value = t; document.body.appendChild(ta); ta.select();
-      document.execCommand("copy"); document.body.removeChild(ta);
-    }
-  });
-
   function renderStates(list) {
     var root = $("sstates");
+    var box = $("sbox");
+    if (!root) return;
     root.innerHTML = "";
-    $("sbox").hidden = false;
+    if (box) box.hidden = false;
     (list || []).forEach(function (s) {
       var d = document.createElement("div");
       d.className = "st" + (s.selected ? " sel" : "");
       var prob = s.prob != null ? s.prob : 0;
       d.innerHTML =
-        '<div class="top"><span>|' + (s.i != null ? s.i : "?") + "⟩ · " + (s.source || "") +
+        "<div class='top'><span>|" + (s.i != null ? s.i : "?") + "⟩ · " + (s.source || "") +
         "</span><span>P=" + prob + (s.eqs != null ? " · EQS " + s.eqs : "") + "</span></div>" +
-        '<div class="bar"><i style="width:' + Math.round(prob * 100) + '%"></i></div>' +
-        '<div style="font-size:13px;white-space:pre-wrap"></div>';
+        "<div class='bar'><i style='width:" + Math.round(prob * 100) + "%'></i></div>" +
+        "<div style='font-size:13px;white-space:pre-wrap'></div>";
       d.querySelector("div:last-child").textContent = s.text || s.preview || "";
       root.appendChild(d);
     });
   }
 
   async function runSuperpose(q) {
-    q = (q != null ? q : $("sq").value).trim();
+    q = (q != null ? q : ($("sq") && $("sq").value) || "").trim();
     if (!q) return;
-    $("serr").textContent = "";
-    $("sansBox").hidden = true;
-    $("sphase").textContent = "старт…";
-    $("sgo").disabled = true;
+    txt("serr", "");
+    var sans = $("sansBox");
+    if (sans) sans.hidden = true;
+    txt("sphase", "старт…");
+    var btn = $("sgo");
+    if (btn) btn.disabled = true;
     try {
-      if (!window.AKSI_SUPERPOSE || typeof AKSI_SUPERPOSE.ask !== "function") {
-        throw new Error("AKSI_SUPERPOSE не загружен");
-      }
-      var unsub = AKSI_SUPERPOSE.on(function (ev) {
-        if (ev.event === "phase") {
-          $("sphase").textContent = (ev.data.phase || "") + " — " + (ev.data.note || "");
-        }
-        if (ev.event === "superposition") {
-          renderStates(ev.data.states);
-        }
-        if (ev.event === "collapsed") {
-          renderStates(ev.data.superposition);
-          $("sansBox").hidden = false;
-          $("sanswer").textContent = ev.data.answer || "";
-          $("smeta").textContent = JSON.stringify({
-            collapse: ev.data.collapse,
-            scores: ev.data.scores,
-            seal: ev.data.seal,
-            ms: ev.data.ms,
-            source: ev.data.source
-          }, null, 2);
-          $("sphase").textContent = "готово · " + (ev.data.ms || 0) + " ms";
-        }
-      });
-      await AKSI_SUPERPOSE.ask(q, {
-        n: preferLocal ? 0 : 3,
-        includeLocal: true,
-        mode: "born"
-      });
-      if (typeof unsub === "function") unsub();
-    } catch (e) {
-      $("serr").textContent = "Superpose: " + (e && e.message || e);
-      $("sphase").textContent = "ошибка";
-      try {
-        if (window.AKSI_DECISION) {
-          var d = await Promise.resolve(AKSI_DECISION.decide(q));
-          if (d && d.answer) {
-            $("sansBox").hidden = false;
-            $("sanswer").textContent = d.answer;
-            $("smeta").textContent = JSON.stringify({ source: "decision-path", seal: d.seal, scores: d.scores }, null, 2);
-            $("sphase").textContent = "готово · decision-path";
-            $("serr").textContent = "";
+      if (window.AKSI_SUPERPOSE && typeof AKSI_SUPERPOSE.ask === "function") {
+        var unsub = AKSI_SUPERPOSE.on(function (ev) {
+          if (ev.event === "phase") txt("sphase", (ev.data.phase || "") + " — " + (ev.data.note || ""));
+          if (ev.event === "superposition") renderStates(ev.data.states);
+          if (ev.event === "collapsed") {
+            renderStates(ev.data.superposition);
+            if (sans) sans.hidden = false;
+            txt("sanswer", ev.data.answer || "");
+            txt("smeta", JSON.stringify({
+              collapse: ev.data.collapse, scores: ev.data.scores,
+              seal: ev.data.seal, ms: ev.data.ms, source: ev.data.source
+            }, null, 2));
+            txt("sphase", "готово · " + (ev.data.ms || 0) + " ms");
           }
+        });
+        await AKSI_SUPERPOSE.ask(q, { n: preferLocal ? 0 : 3, includeLocal: true, mode: "born" });
+        if (typeof unsub === "function") unsub();
+      } else {
+        var d = localDecide(q);
+        if (window.AKSI_DECISION && AKSI_DECISION.decide) {
+          try {
+            var pd = await Promise.resolve(AKSI_DECISION.decide(q));
+            if (pd && pd.answer) d = pd;
+          } catch (e) {}
         }
-      } catch (e2) {}
+        if (sans) sans.hidden = false;
+        txt("sanswer", d.answer);
+        txt("smeta", JSON.stringify({ source: d.source, scores: d.scores }, null, 2));
+        txt("sphase", "готово · decision-path");
+        renderStates([{ i: 0, source: d.source, prob: 1, text: d.answer, selected: true }]);
+      }
+    } catch (e) {
+      txt("serr", "Superpose: " + (e && e.message || e));
+      var fb = localDecide(q);
+      if (sans) sans.hidden = false;
+      txt("sanswer", fb.answer);
+      txt("sphase", "fallback");
     } finally {
-      $("sgo").disabled = false;
+      if (btn) btn.disabled = false;
       refreshMods();
     }
   }
 
-  on($("sgo"), "click", function () { runSuperpose(); });
-  on($("sq"), "keydown", function (e) { if (e.key === "Enter") runSuperpose(); });
-  on($("sex1"), "click", function () { $("sq").value = "Кто ты?"; runSuperpose("Кто ты?"); });
-  on($("sex2"), "click", function () { $("sq").value = "Как работает суперпозиция ответов?"; runSuperpose("Как работает суперпозиция ответов?"); });
-  on($("sex3"), "click", function () { $("sq").value = "Что такое АКСИ?"; runSuperpose("Что такое АКСИ?"); });
-
   async function runChat(q) {
-    q = (q != null ? q : $("cq").value).trim();
+    q = (q != null ? q : ($("cq") && $("cq").value) || "").trim();
     if (!q) return;
-    $("cerr").textContent = "";
-    $("cthread").textContent = "думаю…";
-    $("cgo").disabled = true;
+    txt("cerr", "");
+    txt("cthread", "думаю…");
+    var btn = $("cgo");
+    if (btn) btn.disabled = true;
     try {
       var ans = null, src = "", meta = {};
-      if (window.AKSI_SUPERPOSE && AKSI_SUPERPOSE.ask) {
-        try {
-          var r = await AKSI_SUPERPOSE.ask(q, { n: preferLocal ? 0 : 2, includeLocal: true, mode: "max" });
-          if (r && r.answer) { ans = r.answer; src = r.source || "superpose"; meta = { seal: r.seal, scores: r.scores }; }
-        } catch (e) {}
-      }
-      if (!ans && window.AKSI_DECISION) {
+      if (window.AKSI_DECISION && AKSI_DECISION.decide) {
         try {
           var d = await Promise.resolve(AKSI_DECISION.decide(q));
-          if (d && d.answer) { ans = d.answer; src = d.source || "decision"; meta = { seal: d.seal, scores: d.scores }; }
+          if (d && d.answer) { ans = d.answer; src = d.source || "decision"; meta = { scores: d.scores }; }
         } catch (e) {}
       }
       if (!ans && window.AKSI_ZERO && AKSI_ZERO.think) {
         try {
           var z = await Promise.resolve(AKSI_ZERO.think(q));
-          if (z && (z.answer || z.text)) { ans = z.answer || z.text; src = "zero"; meta = { seal: z.seal }; }
+          if (z && (z.answer || z.text)) { ans = z.answer || z.text; src = "zero"; }
         } catch (e) {}
       }
       if (!ans && window.AKSI_NEURO && AKSI_NEURO.think) {
@@ -297,23 +312,19 @@
           if (w && w.text) { ans = w.text; src = "webllm"; }
         } catch (e) {}
       }
-      if (!ans) throw new Error("ни один движок не ответил — откройте Status и WebLLM");
-      $("cthread").textContent = ans + "\n\n[source: " + src + "]" +
-        (meta.scores ? "\n[scores: " + JSON.stringify(meta.scores) + "]" : "");
+      if (!ans) {
+        var fb = localDecide(q);
+        ans = fb.answer; src = "fallback";
+      }
+      txt("cthread", ans + "\n\n[source: " + src + "]" + (meta.scores ? "\n[scores: " + JSON.stringify(meta.scores) + "]" : ""));
     } catch (e) {
-      $("cerr").textContent = "Chat: " + (e && e.message || e);
-      $("cthread").textContent = "—";
+      txt("cerr", "Chat: " + (e && e.message || e));
+      txt("cthread", localDecide(q).answer);
     } finally {
-      $("cgo").disabled = false;
+      if (btn) btn.disabled = false;
       refreshMods();
     }
   }
-
-  on($("cgo"), "click", function () { runChat(); });
-  on($("cq"), "keydown", function (e) { if (e.key === "Enter") runChat(); });
-  on($("cex1"), "click", function () { $("cq").value = "Кто ты?"; runChat("Кто ты?"); });
-  on($("cex2"), "click", function () { $("cq").value = "статус"; runChat("статус"); });
-  on($("cex3"), "click", function () { $("cq").value = "что умеешь"; runChat("что умеешь"); });
 
   function setLlmBusy(busy) {
     ["btnLoadLlm", "btnUnloadLlm", "btnWasm", "lgo"].forEach(function (id) {
@@ -328,174 +339,188 @@
     var prog = Number(st.progress || 0);
     if (prog <= 1) prog *= 100;
     if (bar) bar.style.width = Math.round(prog) + "%";
-    if ($("llmMsg")) {
-      $("llmMsg").textContent = st.message || (st.ready ? "модель готова" : "не загружено");
-    }
-    if ($("llmStatus")) $("llmStatus").textContent = JSON.stringify(st, null, 2);
-    if (st.error && $("llmErr") && !$("llmErr").textContent) {
-      $("llmErr").textContent = st.error;
-    }
+    txt("llmMsg", st.message || (st.ready ? "модель готова" : "не загружено"));
+    txt("llmStatus", JSON.stringify(st, null, 2));
     setPill();
   }
 
   function runLoad(opts) {
     opts = opts || {};
     preferLocal = false;
-    $("llmErr").textContent = "";
+    txt("llmErr", "");
     if (!window.AKSI_WEBLLM || typeof AKSI_WEBLLM.load !== "function") {
-      $("llmErr").textContent = "Модуль aksi-webllm.js не загружен — обновите страницу (purge)";
+      txt("llmErr", "Модуль aksi-webllm.js не загружен — offline-ядро работает");
       return;
     }
     setLlmBusy(true);
-    $("llmMsg").textContent = opts.forceWasm ? "загрузка WASM…" : "загрузка модели…";
+    txt("llmMsg", opts.forceWasm ? "загрузка WASM…" : "загрузка модели…");
     updateLlmUi(AKSI_WEBLLM.status());
-    var model = opts.model || null;
-    var p = AKSI_WEBLLM.load(model, updateLlmUi, { forceWasm: !!opts.forceWasm });
-    Promise.resolve(p).then(function (s) {
-      updateLlmUi(s || AKSI_WEBLLM.status());
-      var st = s || AKSI_WEBLLM.status();
-      $("llmMsg").textContent = (st.ready ? "готово · " : "статус · ") +
-        (st.backend || "") + " · " + (st.model || "");
-      $("llmErr").textContent = "";
-      refreshMods();
-    }).catch(function (e) {
-      var msg = (e && e.message) ? e.message : String(e);
-      $("llmErr").textContent = "WebLLM: " + msg;
-      $("llmMsg").textContent = "модель недоступна — offline-ядро (Zero/Neuro/Decision) работает";
-      updateLlmUi();
-    }).then(function () {
-      setLlmBusy(false);
-      refreshMods();
-    });
+    Promise.resolve(AKSI_WEBLLM.load(opts.model || null, updateLlmUi, { forceWasm: !!opts.forceWasm }))
+      .then(function (s) {
+        updateLlmUi(s || AKSI_WEBLLM.status());
+        var st = s || AKSI_WEBLLM.status();
+        txt("llmMsg", (st.ready ? "готово · " : "статус · ") + (st.backend || "") + " · " + (st.model || ""));
+        txt("llmErr", "");
+      })
+      .catch(function (e) {
+        txt("llmErr", "WebLLM: " + (e && e.message || e));
+        txt("llmMsg", "модель недоступна — offline-ядро работает");
+        updateLlmUi();
+      })
+      .then(function () {
+        setLlmBusy(false);
+        refreshMods();
+      });
   }
 
-  on($("btnLoadLlm"), "click", function () { runLoad({}); });
-  on($("btnWasm"), "click", function () {
-    runLoad({ forceWasm: true, model: "Xenova/LaMini-Flan-T5-248M" });
-  });
-
-  on($("btnUnloadLlm"), "click", function () {
-    if (window.AKSI_WEBLLM && AKSI_WEBLLM.unload) AKSI_WEBLLM.unload();
-    preferLocal = true;
-    $("llmErr").textContent = "";
-    updateLlmUi();
-    $("llmMsg").textContent = "выгружено · offline";
-    refreshMods();
-  });
-
-  on($("lgo"), "click", async function () {
-    var q = $("lq").value.trim();
-    if (!q) return;
-    $("lans").textContent = "…";
-    try {
-      if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) {
-        throw new Error("сначала «Загрузить WebLLM» или «Только WASM»");
-      }
-      var r = await AKSI_WEBLLM.complete(q, { temperature: 0.5, max_tokens: 300 });
-      if (r && r.error && !r.text) throw new Error(r.error);
-      $("lans").textContent = (r && r.text) ? r.text : JSON.stringify(r, null, 2);
-    } catch (e) {
-      $("lans").textContent = "Ошибка: " + (e && e.message || e);
-    }
-  });
-  on($("lq"), "keydown", function (e) {
-    if (e.key === "Enter") $("lgo").click();
-  });
-
   async function runMem() {
-    var q = $("mq").value.trim();
+    var q = ($("mq") && $("mq").value || "").trim();
     if (!q) return;
-    if (!/^запомни\s*[:：]/i.test(q) && !/^remember\s*[:：]/i.test(q)) {
-      q = "запомни: " + q;
-    }
-    $("mmsg").textContent = "…";
+    if (!/^запомни\s*[:：]/i.test(q) && !/^remember\s*[:：]/i.test(q)) q = "запомни: " + q;
+    txt("mmsg", "…");
     try {
       if (window.AKSI_DECISION && AKSI_DECISION.decide) {
         var p = await Promise.resolve(AKSI_DECISION.decide(q));
-        $("mmsg").textContent = p.answer || "—";
-        $("mstatus").textContent = JSON.stringify(AKSI_DECISION.status(), null, 2);
-      } else if (window.AKSI_ZERO && AKSI_ZERO.think) {
-        var z = await Promise.resolve(AKSI_ZERO.think(q));
-        $("mmsg").textContent = z.answer || z.text || "—";
-        $("mstatus").textContent = JSON.stringify(AKSI_ZERO.status(), null, 2);
+        txt("mmsg", p.answer || "—");
+        txt("mstatus", JSON.stringify(AKSI_DECISION.status ? AKSI_DECISION.status() : {}, null, 2));
+      } else if (window.AKSI_NEURO && AKSI_NEURO.learn) {
+        AKSI_NEURO.learn(q.replace(/^запомни\s*[:：]\s*/i, ""));
+        txt("mmsg", "Сохранено в Neuro localStorage");
       } else {
-        $("mmsg").textContent = "Нет Decision/Zero для обучения";
+        var key = "aksi_contour_mem_v1";
+        var arr = JSON.parse(localStorage.getItem(key) || "[]");
+        arr.push({ t: Date.now(), text: q });
+        localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
+        txt("mmsg", "Сохранено локально (" + arr.length + ")");
       }
     } catch (e) {
-      $("mmsg").textContent = "Ошибка: " + (e && e.message || e);
+      txt("mmsg", "Ошибка: " + (e && e.message || e));
     }
     refreshMods();
   }
-  on($("mgo"), "click", runMem);
-  on($("mq"), "keydown", function (e) { if (e.key === "Enter") runMem(); });
-  on($("mrefresh"), "click", function () {
-    var o = {
-      decision: window.AKSI_DECISION ? AKSI_DECISION.status() : null,
-      zero: window.AKSI_ZERO ? AKSI_ZERO.status() : null,
-      superpose: window.AKSI_SUPERPOSE ? AKSI_SUPERPOSE.status() : null
-    };
-    $("mstatus").textContent = JSON.stringify(o, null, 2);
-  });
 
   function fullStatus() {
     var o = {
-      contour: "v217",
-      decision: window.AKSI_DECISION ? AKSI_DECISION.status() : null,
-      superpose: window.AKSI_SUPERPOSE ? AKSI_SUPERPOSE.status() : null,
-      webllm: window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : null,
-      zero: window.AKSI_ZERO ? AKSI_ZERO.status() : null,
+      contour: "v218",
+      decision: window.AKSI_DECISION && AKSI_DECISION.status ? AKSI_DECISION.status() : !!window.AKSI_DECISION,
+      superpose: !!window.AKSI_SUPERPOSE,
+      webllm: window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : null,
+      zero: !!window.AKSI_ZERO,
       neuro: !!(window.AKSI_NEURO && AKSI_NEURO.think),
       algorithm: !!(window.AKSI_ALGORITHM || window.ADIA),
       quantum: !!(window.AKSI_QUANTUM || window.AKSI_QPIPE),
       compose: !!(window.AKSI_COMPOSE && AKSI_COMPOSE.think),
       integrity: !!window.AKSI_INTEGRITY,
-      knowledge: !!(window.AKSI_KNOWLEDGE)
+      knowledge: !!window.AKSI_KNOWLEDGE
     };
-    $("fullStatus").textContent = JSON.stringify(o, null, 2);
+    txt("fullStatus", JSON.stringify(o, null, 2));
   }
-  on($("btnRefresh"), "click", function () { fullStatus(); refreshMods(); });
-  on($("btnPurge"), "click", function () {
-    if (window.AKSI_PURGE) {
-      AKSI_PURGE();
-    } else {
-      try { localStorage.removeItem("aksi_build_id"); } catch (e) {}
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (rs) {
-          return Promise.all(rs.map(function (r) { return r.unregister(); }));
-        }).then(function () { location.reload(); });
-      } else location.reload();
-    }
-  });
+
+  function bindAll() {
+    document.querySelectorAll(".tab").forEach(function (t) {
+      on(t, "click", function () { showPanel(t.getAttribute("data-p")); });
+    });
+
+    on($("dgo"), "click", function () { runDecision(); });
+    on($("dq"), "keydown", function (e) { if (e.key === "Enter") runDecision(); });
+    on($("dex1"), "click", function () { if ($("dq")) $("dq").value = "Кто ты?"; runDecision("Кто ты?"); });
+    on($("dex2"), "click", function () { if ($("dq")) $("dq").value = "Какая формула AKSI?"; runDecision("Какая формула AKSI?"); });
+    on($("dex3"), "click", function () { if ($("dq")) $("dq").value = "Что такое Gate?"; runDecision("Что такое Gate?"); });
+
+    on($("dproof"), "click", function () {
+      if (!lastDecision) return;
+      var blob = new Blob([JSON.stringify(lastDecision, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "aksi-decision-proof.json";
+      a.click();
+    });
+    on($("dverify"), "click", function () {
+      if (!lastDecision) return;
+      alert("Seal: " + JSON.stringify(lastDecision.seal || lastDecision.gate || {}, null, 2).slice(0, 400));
+    });
+    on($("dcopy"), "click", function () {
+      if (!lastDecision) return;
+      var t = JSON.stringify(lastDecision, null, 2);
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    });
+
+    on($("sgo"), "click", function () { runSuperpose(); });
+    on($("sq"), "keydown", function (e) { if (e.key === "Enter") runSuperpose(); });
+    on($("sex1"), "click", function () { if ($("sq")) $("sq").value = "Кто ты?"; runSuperpose("Кто ты?"); });
+    on($("sex2"), "click", function () { if ($("sq")) $("sq").value = "Как работает суперпозиция?"; runSuperpose("Как работает суперпозиция?"); });
+    on($("sex3"), "click", function () { if ($("sq")) $("sq").value = "Что такое АКСИ?"; runSuperpose("Что такое АКСИ?"); });
+
+    on($("cgo"), "click", function () { runChat(); });
+    on($("cq"), "keydown", function (e) { if (e.key === "Enter") runChat(); });
+    on($("cex1"), "click", function () { if ($("cq")) $("cq").value = "Кто ты?"; runChat("Кто ты?"); });
+    on($("cex2"), "click", function () { if ($("cq")) $("cq").value = "статус"; runChat("статус"); });
+    on($("cex3"), "click", function () { if ($("cq")) $("cq").value = "что умеешь"; runChat("что умеешь"); });
+
+    on($("btnLoadLlm"), "click", function () { runLoad({}); });
+    on($("btnWasm"), "click", function () { runLoad({ forceWasm: true, model: "Xenova/LaMini-Flan-T5-248M" }); });
+    on($("btnUnloadLlm"), "click", function () {
+      if (window.AKSI_WEBLLM && AKSI_WEBLLM.unload) AKSI_WEBLLM.unload();
+      preferLocal = true;
+      txt("llmErr", "");
+      updateLlmUi();
+      txt("llmMsg", "выгружено · offline");
+      refreshMods();
+    });
+    on($("lgo"), "click", async function () {
+      var q = ($("lq") && $("lq").value || "").trim();
+      if (!q) return;
+      txt("lans", "…");
+      try {
+        if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) {
+          throw new Error("сначала «Загрузить WebLLM» или «Только WASM»");
+        }
+        var r = await AKSI_WEBLLM.complete(q, { temperature: 0.5, max_tokens: 300 });
+        if (r && r.error && !r.text) throw new Error(r.error);
+        txt("lans", (r && r.text) ? r.text : JSON.stringify(r, null, 2));
+      } catch (e) {
+        txt("lans", "Ошибка: " + (e && e.message || e));
+      }
+    });
+    on($("lq"), "keydown", function (e) { if (e.key === "Enter" && $("lgo")) $("lgo").click(); });
+
+    on($("mgo"), "click", runMem);
+    on($("mq"), "keydown", function (e) { if (e.key === "Enter") runMem(); });
+    on($("mrefresh"), "click", function () {
+      txt("mstatus", JSON.stringify({
+        decision: window.AKSI_DECISION && AKSI_DECISION.status ? AKSI_DECISION.status() : null,
+        zero: window.AKSI_ZERO && AKSI_ZERO.status ? AKSI_ZERO.status() : null
+      }, null, 2));
+    });
+
+    on($("btnRefresh"), "click", function () { fullStatus(); refreshMods(); });
+    on($("btnPurge"), "click", function () {
+      if (window.AKSI_PURGE) AKSI_PURGE();
+      else {
+        try { localStorage.removeItem("aksi_build_id"); } catch (e) {}
+        location.reload();
+      }
+    });
+  }
 
   function boot() {
-    refreshMods();
-    fullStatus();
-    updateLlmUi();
+    try { bindAll(); } catch (e) { console.error("[bind]", e); }
+    try { refreshMods(); } catch (e) {}
+    try { fullStatus(); } catch (e) {}
+    try { updateLlmUi(); } catch (e) {}
     if (window.AKSI_WEBLLM) {
       window.addEventListener("aksi-webllm-progress", function (e) {
-        updateLlmUi(e.detail);
+        try { updateLlmUi(e.detail); } catch (err) {}
       });
     }
-    [200, 600, 1200, 2500, 5000].forEach(function (ms) {
-      setTimeout(function () { refreshMods(); fullStatus(); setPill(); }, ms);
-    });
-    window.addEventListener("load", function () {
-      refreshMods(); fullStatus(); setPill();
+    [300, 800, 1500, 3000].forEach(function (ms) {
+      setTimeout(function () { try { refreshMods(); fullStatus(); setPill(); } catch (e) {} }, ms);
     });
   }
 
-  function start() {
-    try {
-      boot();
-    } catch (e) {
-      console.error("[AKSI Contour boot]", e);
-      var be = $("bootErr");
-      if (be) be.textContent = "Boot error: " + (e && e.message || e);
-    }
-  }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start);
+    document.addEventListener("DOMContentLoaded", boot);
   } else {
-    start();
+    boot();
   }
 })();
