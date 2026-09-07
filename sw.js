@@ -1,18 +1,19 @@
-/* AKSI SW v214 — network-first HTML/JS, never sticky-cache LLM modules */
-var CACHE = "aksi-shell-v214";
+/* AKSI SW v215 — network-first HTML/JS, never sticky-cache LLM modules */
+var CACHE = "aksi-shell-v215";
 var PRE = ["/", "/index.html", "/sw.js"];
 var NO_CACHE = [
   /aksi-webllm\.js/,
   /aksi-superpose\.js/,
   /aksi-decision\.js/,
-  /contour-app\.js/,
-  /matrix\/app\.js/,
   /aksi-qpipe\.js/,
   /aksi-quantum\.js/,
   /\/superpose\//,
   /\/decision\//,
   /\/contour\//,
-  /\/matrix\//
+  /contour-app\.js/,
+  /\/matrix\//,
+  /aksi-neuro\.js/,
+  /aksi-zero\.js/
 ];
 function shouldBypass(url) {
   var p = url.pathname + url.search;
@@ -40,16 +41,10 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-
   if (shouldBypass(url)) {
-    e.respondWith(
-      fetch(req, { cache: "no-store" }).catch(function () {
-        return caches.match(req);
-      })
-    );
+    e.respondWith(fetch(req, { cache: "no-store" }).catch(function () { return caches.match(req); }));
     return;
   }
-
   var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
   if (isHTML) {
     e.respondWith(
@@ -63,7 +58,6 @@ self.addEventListener("fetch", function (e) {
     );
     return;
   }
-
   e.respondWith(
     fetch(req).then(function (res) {
       if (res && res.ok) {
