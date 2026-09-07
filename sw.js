@@ -1,5 +1,5 @@
-/* AKSI SW v221 — network-first HTML/JS, never sticky-cache product modules */
-var CACHE = "aksi-shell-v221";
+/* AKSI SW v222 — network-first HTML/JS, never sticky-cache LLM modules */
+var CACHE = "aksi-shell-v222";
 var PRE = ["/", "/index.html", "/sw.js"];
 var NO_CACHE = [
   /aksi-webllm\.js/,
@@ -39,42 +39,53 @@ self.addEventListener("activate", function (e) {
     }).then(function () { return self.clients.claim(); })
   );
 });
-self.addEventListener("message", function (e) {
-  if (e.data && e.data.type === "PURGE") {
-    caches.keys().then(function (keys) {
-      return Promise.all(keys.map(function (k) { return caches.delete(k); }));
-    });
-  }
-});
 self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+
   if (shouldBypass(url)) {
-    e.respondWith(fetch(req).catch(function () { return caches.match(req); }));
-    return;
-  }
-  // network-first for HTML
-  if (url.pathname.endsWith(".html") || url.pathname === "/" || url.pathname.endsWith("/")) {
     e.respondWith(
-      fetch(req).then(function (res) {
-        var c = res.clone();
-        caches.open(CACHE).then(function (cache) { cache.put(req, c); });
-        return res;
-      }).catch(function () { return caches.match(req); })
+      fetch(req, { cache: "no-store" }).catch(function () {
+        return caches.match(req);
+      })
     );
     return;
   }
-  // cache-first for static
-  e.respondWith(
-    caches.match(req).then(function (hit) {
-      if (hit) return hit;
-      return fetch(req).then(function (res) {
+
+  var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
+  if (isHTML) {
+    e.respondWith(
+      fetch(req, { cache: "no-store" }).then(function (res) {
         var c = res.clone();
         caches.open(CACHE).then(function (cache) { cache.put(req, c); });
         return res;
-      });
-    })
+      }).catch(function () {
+        return caches.match(req).then(function (r) { return r || caches.match("/index.html"); });
+      })
+    );
+    return;
+  }
+
+  e.respondWith(
+    fetch(req).then(function (res) {
+      if (res && res.ok) {
+        var c = res.clone();
+        caches.open(CACHE).then(function (cache) { cache.put(req, c); });
+      }
+      return res;
+    }).catch(function () { return caches.match(req); })
   );
+});
+self.addEventListener("message", function (e) {
+  if (!e.data) return;
+  if (e.data.type === "SKIP_WAITING") self.skipWaiting();
+  if (e.data.type === "PURGE") {
+    e.waitUntil(
+      caches.keys().then(function (keys) {
+        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      }).then(function () { return self.skipWaiting(); })
+    );
+  }
 });
