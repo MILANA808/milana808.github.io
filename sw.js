@@ -5,6 +5,7 @@ var NO_CACHE = [
   /aksi-webllm\.js/,
   /aksi-superpose\.js/,
   /aksi-decision\.js/,
+  /contour-app\.js/,
   /matrix\/app\.js/,
   /aksi-qpipe\.js/,
   /aksi-quantum\.js/,
