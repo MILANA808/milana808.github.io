@@ -47,7 +47,6 @@
     };
   }
 
-  /** Rank / seal answer with ADIA */
   function evaluate(query, answer, opts) {
     opts = opts || {};
     var eng = G.AKSI_ALGORITHM || G.AKSI_ADIA || G.ADIA;
@@ -68,7 +67,6 @@
     };
   }
 
-  /** Full decision packet: engines → gate → seal */
   function decide(query, opts) {
     opts = opts || {};
     query = String(query || "").trim();
@@ -111,7 +109,6 @@
     });
   }
 
-  /** Mind-style answer path */
   function think(query, opts) {
     opts = opts || {};
     query = String(query || "").trim();
@@ -167,7 +164,6 @@
     });
   }
 
-  /** Superposition of candidates */
   function superpose(query, opts) {
     opts = opts || {};
     if (G.AKSI_SUPERPOSE && typeof G.AKSI_SUPERPOSE.ask === "function") {
@@ -184,7 +180,6 @@
     });
   }
 
-  /** Teach local memory */
   function learn(fact) {
     fact = String(fact || "").trim();
     if (!fact) return Promise.resolve({ ok: false });
