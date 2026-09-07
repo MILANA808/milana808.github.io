@@ -41,7 +41,7 @@
     var root = $("modChecks");
     if (root) {
       root.innerHTML = bits.map(function (b) {
-        return '<i class="' + (b[1] ? "on" : "") + '">' + b[0] + "</i>';
+        return "<i class='" + (b[1] ? "on" : "") + "'>" + b[0] + "</i>";
       }).join("");
     }
     var missing = bits.filter(function (b) { return !b[1]; }).map(function (b) { return b[0]; });
@@ -186,7 +186,7 @@
       var prob = s.prob != null ? s.prob : 0;
       d.innerHTML =
         '<div class="top"><span>|' + (s.i != null ? s.i : "?") + "⟩ · " + (s.source || "") +
-        "</span><span>P=" + prob + (s.eqs != null ? " · EQS " + s.eqs : "") + "</span></div>' +
+        "</span><span>P=" + prob + (s.eqs != null ? " · EQS " + s.eqs : "") + "</span></div>" +
         '<div class="bar"><i style="width:' + Math.round(prob * 100) + '%"></i></div>' +
         '<div style="font-size:13px;white-space:pre-wrap"></div>';
       d.querySelector("div:last-child").textContent = s.text || s.preview || "";
@@ -439,7 +439,7 @@
 
   function fullStatus() {
     var o = {
-      contour: "v216",
+      contour: "v217",
       decision: window.AKSI_DECISION ? AKSI_DECISION.status() : null,
       superpose: window.AKSI_SUPERPOSE ? AKSI_SUPERPOSE.status() : null,
       webllm: window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : null,
