@@ -27,14 +27,15 @@ h1{font-size:18px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
 .composer input{flex:1;min-width:180px;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
 button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}
 button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
-.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:640px){.grid2{grid-template-columns:1fr}}
 .col{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
 .col.pro{border-color:#b7d4c2}.col.con{border-color:#e0b8b0}
-.lbl{font-size:10px;font-weight:800;color:var(--muted);margin-bottom:4px}
-.meters{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.m{flex:1;min-width:70px;text-align:center;padding:8px;border-radius:10px;background:var(--s2);border:1px solid var(--line)}
+.lbl{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:4px;font-weight:700}
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.m{text-align:center;padding:8px 4px;border-radius:10px;background:var(--s2);border:1px solid var(--line)}
 .m b{display:block;font-size:17px;font-weight:800}.m span{font-size:9px;color:var(--muted);font-weight:700}
 .gate{margin-top:9px;padding:9px 11px;border-radius:11px;font-weight:700;font-size:13px;border:1px solid var(--line)}
 .gate.ok{background:#e8f2ea;color:var(--ok);border-color:#b7d4c2}
@@ -86,11 +87,10 @@ button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
     <p class="muted" style="margin-top:6px">Offline-first · Decision · Superpose · Chat · WebLLM · Memory · Product API</p>
   </section>
 
-  <!-- DECISION -->
   <div class="panel on" id="p-decision">
     <section class="card hero">
       <h3>Decision Runtime</h3>
-      <p>Ответ · анти · AKSI/EQS/Φ/QCLI · Gate · FNV-печать · Verify. Полный пакет решения.</p>
+      <p>Ответ · анти · AKSI/EQS/Φ/QCLI · Gate · FNV-печать · Verify. Полный пакет решения через Product API.</p>
     </section>
     <section class="card">
       <div class="composer">
@@ -126,7 +126,6 @@ button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
     </section>
   </div>
 
-  <!-- SUPERPOSE -->
   <div class="panel" id="p-superpose">
     <section class="card hero">
       <h3>Superpose</h3>
@@ -135,7 +134,7 @@ button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
     <section class="card">
       <div class="composer">
         <input id="sq" type="text" placeholder="Вопрос для суперпозиции" autocomplete="off">
-        <button type="button" id="sgo">Superpose</button>
+        <button type="button" id="sgo">Коллапс</button>
       </div>
       <div class="row">
         <button type="button" class="g" id="sex1">Кто ты?</button>
@@ -147,21 +146,17 @@ button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
     </section>
     <section class="card" id="sbox" hidden>
       <div class="states" id="sstates"></div>
-      <div id="sansBox" hidden>
-        <div class="lbl" style="margin-top:10px">Коллапс</div>
-        <div id="sanswer"></div>
-        <pre class="pre" id="smeta"></pre>
-      </div>
+    </section>
+    <section class="card" id="sansBox" hidden>
+      <div class="lbl">Ответ после коллапса</div>
+      <div id="sanswer"></div>
+      <pre class="seal" id="smeta" style="margin-top:8px"></pre>
     </section>
   </div>
 
-  <!-- CHAT -->
   <div class="panel" id="p-chat">
-    <section class="card hero">
-      <h3>Chat · Mind-path</h3>
-      <p>Product API → Superpose → Decision → Zero → Neuro → WebLLM → fallback</p>
-    </section>
     <section class="card">
+      <h3>Chat · Mind-path</h3>
       <div class="composer">
         <input id="cq" type="text" placeholder="Сообщение" autocomplete="off">
         <button type="button" id="cgo">Отправить</button>
@@ -172,17 +167,14 @@ button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
         <button type="button" class="g" id="cex3">что умеешь</button>
       </div>
       <div class="err" id="cerr"></div>
-      <pre class="pre" id="cthread" style="margin-top:10px;min-height:80px"></pre>
+      <pre class="pre" id="cthread" style="margin-top:10px;min-height:120px">—</pre>
     </section>
   </div>
 
-  <!-- WebLLM -->
   <div class="panel" id="p-llm">
-    <section class="card hero">
-      <h3>WebLLM (опционально)</h3>
-      <p>On-device модель. Offline-ядро работает без загрузки.</p>
-    </section>
     <section class="card">
+      <h3>WebLLM · on-device</h3>
+      <p class="muted">Опционально. Требует WebGPU или WASM fallback.</p>
       <div class="row">
         <button type="button" id="btnLoadLlm">Загрузить WebLLM</button>
         <button type="button" class="g" id="btnWasm">Только WASM</button>
@@ -191,63 +183,58 @@ button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
       <div class="progress"><i id="llmBar"></i></div>
       <p class="muted" id="llmMsg">не загружено</p>
       <div class="err" id="llmErr"></div>
-      <pre class="pre" id="llmStatus" style="margin-top:8px"></pre>
       <div class="composer" style="margin-top:10px">
-        <input id="lq" type="text" placeholder="Промпт для LLM" autocomplete="off">
-        <button type="button" id="lgo">Спросить LLM</button>
+        <input id="lq" type="text" placeholder="Вопрос к модели">
+        <button type="button" id="lgo">Спросить</button>
       </div>
-      <pre class="pre" id="lans" style="margin-top:8px"></pre>
+      <pre class="pre" id="lans" style="margin-top:8px">—</pre>
+      <pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
     </section>
   </div>
 
-  <!-- Memory -->
   <div class="panel" id="p-mem">
-    <section class="card hero">
-      <h3>Memory</h3>
-      <p>«запомни: факт» → Decision / Neuro / localStorage</p>
-    </section>
     <section class="card">
+      <h3>Memory</h3>
       <div class="composer">
-        <input id="mq" type="text" placeholder="запомни: мой факт" autocomplete="off">
+        <input id="mq" type="text" placeholder="запомни: факт" autocomplete="off">
         <button type="button" id="mgo">Сохранить</button>
       </div>
       <div class="row">
-        <button type="button" class="g" id="mrefresh">Статус памяти</button>
+        <button type="button" class="g" id="mrefresh">Обновить статус</button>
       </div>
       <p class="okmsg" id="mmsg"></p>
-      <pre class="pre" id="mstatus"></pre>
+      <pre class="seal" id="mstatus" style="margin-top:8px"></pre>
     </section>
   </div>
 
-  <!-- Status -->
   <div class="panel" id="p-status">
     <section class="card">
-      <h3>Status · модули</h3>
+      <h3>Status · АКСИ Runtime</h3>
       <div class="row">
         <button type="button" id="btnRefresh">Обновить</button>
         <button type="button" class="g" id="btnPurge">Purge cache</button>
       </div>
-      <pre class="pre" id="fullStatus" style="margin-top:10px;max-height:320px"></pre>
+      <pre class="seal" id="fullStatus" style="margin-top:10px;max-height:320px"></pre>
     </section>
   </div>
 
-  <p class="foot">АКСИ Contour v221 · Product API · ADIA 3.0 · aksilove@internet.ru · @AKSILOVE</p>
+  <p class="foot">АКСИ Contour · Product API · ADIA · Neuro · Zero · aksilove@internet.ru</p>
 </div>
 
-<script src="/aksi-purge.js?v=221"></script>
-<script src="/aksi-knowledge.js?v=221"></script>
-<script src="/aksi-neuro-seed.js?v=221"></script>
-<script src="/aksi-neuro.js?v=221"></script>
-<script src="/aksi-zero.js?v=221"></script>
-<script src="/aksi-compose.js?v=221"></script>
-<script src="/aksi-quantum.js?v=221"></script>
-<script src="/aksi-qpipe.js?v=221"></script>
-<script src="/aksi-algorithm.js?v=221"></script>
-<script src="/aksi-decision.js?v=221"></script>
-<script src="/aksi-webllm.js?v=221"></script>
-<script src="/aksi-superpose.js?v=221"></script>
-<script src="/aksi-integrity-bridge.js?v=221"></script>
-<script src="/aksi-api.js?v=221"></script>
-<script src="/contour-app.js?v=221"></script>
+<script src="/aksi-purge.js?v=222"></script>
+<script src="/aksi-knowledge.js?v=222"></script>
+<script src="/aksi-neuro-seed.js?v=222"></script>
+<script src="/aksi-neuro.js?v=222"></script>
+<script src="/aksi-zero.js?v=222"></script>
+<script src="/aksi-compose.js?v=222"></script>
+<script src="/aksi-quantum.js?v=222"></script>
+<script src="/aksi-qpipe.js?v=222"></script>
+<script src="/aksi-algorithm.js?v=222"></script>
+<script src="/aksi-decision.js?v=222"></script>
+<script src="/aksi-webllm.js?v=222"></script>
+<script src="/aksi-superpose.js?v=222"></script>
+<script src="/aksi-integrity-bridge.js?v=222"></script>
+<script src="/aksi-api.js?v=222"></script>
+<script src="/contour-app.js?v=222"></script>
 </body>
 </html>
