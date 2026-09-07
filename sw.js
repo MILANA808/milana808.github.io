@@ -1,5 +1,5 @@
-/* AKSI SW v216 — network-first HTML/JS, never sticky-cache LLM modules */
-var CACHE = "aksi-shell-v216";
+/* AKSI SW v217 — network-first HTML/JS, never sticky-cache LLM modules */
+var CACHE = "aksi-shell-v217";
 var PRE = ["/", "/index.html", "/sw.js"];
 var NO_CACHE = [
   /aksi-webllm\.js/,
@@ -40,16 +40,10 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-
   if (shouldBypass(url)) {
-    e.respondWith(
-      fetch(req, { cache: "no-store" }).catch(function () {
-        return caches.match(req);
-      })
-    );
+    e.respondWith(fetch(req, { cache: "no-store" }).catch(function () { return caches.match(req); }));
     return;
   }
-
   var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
   if (isHTML) {
     e.respondWith(
@@ -63,7 +57,6 @@ self.addEventListener("fetch", function (e) {
     );
     return;
   }
-
   e.respondWith(
     fetch(req).then(function (res) {
       if (res && res.ok) {
