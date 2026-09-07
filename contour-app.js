@@ -41,7 +41,7 @@
     var root = $("modChecks");
     if (root) {
       root.innerHTML = bits.map(function (b) {
-        return '<i class="' + (b[1] ? "on" : "") + '">' + b[0] + "</i>";
+        return '<i class="' + (b[1] ? "on" : "") + '">' + b[0] + "</i>';
       }).join("");
     }
     var missing = bits.filter(function (b) { return !b[1]; }).map(function (b) { return b[0]; });
@@ -62,7 +62,9 @@
       p.textContent = "LLM · " + (st.backend || "on");
       p.className = "pill";
     } else if (st.loading) {
-      p.textContent = "LLM " + Math.round((st.progress || 0) * (st.progress <= 1 ? 100 : 1)) + "%";
+      var pr = Number(st.progress || 0);
+      if (pr <= 1) pr *= 100;
+      p.textContent = "LLM " + Math.round(pr) + "%";
       p.className = "pill warn";
     } else if (window.AKSI_DECISION || window.AKSI_ZERO) {
       p.textContent = "OFFLINE READY";
@@ -184,7 +186,7 @@
       var prob = s.prob != null ? s.prob : 0;
       d.innerHTML =
         '<div class="top"><span>|' + (s.i != null ? s.i : "?") + "⟩ · " + (s.source || "") +
-        "</span><span>P=" + prob + (s.eqs != null ? " · EQS " + s.eqs : "") + "</span></div>" +
+        "</span><span>P=" + prob + (s.eqs != null ? " · EQS " + s.eqs : "") + "</span></div>' +
         '<div class="bar"><i style="width:' + Math.round(prob * 100) + '%"></i></div>' +
         '<div style="font-size:13px;white-space:pre-wrap"></div>';
       d.querySelector("div:last-child").textContent = s.text || s.preview || "";
@@ -313,58 +315,72 @@
   on($("cex2"), "click", function () { $("cq").value = "статус"; runChat("статус"); });
   on($("cex3"), "click", function () { $("cq").value = "что умеешь"; runChat("что умеешь"); });
 
+  function setLlmBusy(busy) {
+    ["btnLoadLlm", "btnUnloadLlm", "btnWasm", "lgo"].forEach(function (id) {
+      var el = $(id);
+      if (el) el.disabled = !!busy;
+    });
+  }
+
   function updateLlmUi(st) {
     st = st || (window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : {});
     var bar = $("llmBar");
     var prog = Number(st.progress || 0);
     if (prog <= 1) prog *= 100;
     if (bar) bar.style.width = Math.round(prog) + "%";
-    if ($("llmMsg")) $("llmMsg").textContent = st.message || (st.ready ? "модель готова" : "не загружено");
+    if ($("llmMsg")) {
+      $("llmMsg").textContent = st.message || (st.ready ? "модель готова" : "не загружено");
+    }
     if ($("llmStatus")) $("llmStatus").textContent = JSON.stringify(st, null, 2);
+    if (st.error && $("llmErr") && !$("llmErr").textContent) {
+      $("llmErr").textContent = st.error;
+    }
     setPill();
   }
 
-  on($("btnLoadLlm"), "click", function () {
+  function runLoad(opts) {
+    opts = opts || {};
     preferLocal = false;
     $("llmErr").textContent = "";
-    if (!window.AKSI_WEBLLM) {
-      $("llmErr").textContent = "Модуль aksi-webllm.js не загружен";
+    if (!window.AKSI_WEBLLM || typeof AKSI_WEBLLM.load !== "function") {
+      $("llmErr").textContent = "Модуль aksi-webllm.js не загружен — обновите страницу (purge)";
       return;
     }
-    $("llmMsg").textContent = "загрузка модели…";
-    var p = AKSI_WEBLLM.load
-      ? AKSI_WEBLLM.load(null, updateLlmUi)
-      : (AKSI_WEBLLM.autoLoad ? AKSI_WEBLLM.autoLoad({ onProgress: updateLlmUi }) : Promise.reject(new Error("нет load")));
+    setLlmBusy(true);
+    $("llmMsg").textContent = opts.forceWasm ? "загрузка WASM…" : "загрузка модели…";
+    updateLlmUi(AKSI_WEBLLM.status());
+    var model = opts.model || null;
+    var p = AKSI_WEBLLM.load(model, updateLlmUi, { forceWasm: !!opts.forceWasm });
     Promise.resolve(p).then(function (s) {
       updateLlmUi(s || AKSI_WEBLLM.status());
-      $("llmMsg").textContent = "WebLLM готов · " + ((s && s.model) || (AKSI_WEBLLM.status().model) || "");
+      var st = s || AKSI_WEBLLM.status();
+      $("llmMsg").textContent = (st.ready ? "готово · " : "статус · ") +
+        (st.backend || "") + " · " + (st.model || "");
+      $("llmErr").textContent = "";
       refreshMods();
     }).catch(function (e) {
-      $("llmErr").textContent = "WebLLM: " + (e && e.message || e);
-      $("llmMsg").textContent = "модель недоступна — offline-ядро работает";
+      var msg = (e && e.message) ? e.message : String(e);
+      $("llmErr").textContent = "WebLLM: " + msg;
+      $("llmMsg").textContent = "модель недоступна — offline-ядро (Zero/Neuro/Decision) работает";
       updateLlmUi();
+    }).then(function () {
+      setLlmBusy(false);
+      refreshMods();
     });
+  }
+
+  on($("btnLoadLlm"), "click", function () { runLoad({}); });
+  on($("btnWasm"), "click", function () {
+    runLoad({ forceWasm: true, model: "Xenova/LaMini-Flan-T5-248M" });
   });
 
   on($("btnUnloadLlm"), "click", function () {
     if (window.AKSI_WEBLLM && AKSI_WEBLLM.unload) AKSI_WEBLLM.unload();
     preferLocal = true;
+    $("llmErr").textContent = "";
     updateLlmUi();
     $("llmMsg").textContent = "выгружено · offline";
     refreshMods();
-  });
-
-  on($("btnWasm"), "click", function () {
-    preferLocal = false;
-    if (!window.AKSI_WEBLLM) return;
-    $("llmMsg").textContent = "загрузка WASM…";
-    Promise.resolve(AKSI_WEBLLM.load("Xenova/LaMini-Flan-T5-248M", updateLlmUi)).then(function (s) {
-      updateLlmUi(s);
-      $("llmMsg").textContent = "WASM готов";
-      refreshMods();
-    }).catch(function (e) {
-      $("llmErr").textContent = String(e && e.message || e);
-    });
   });
 
   on($("lgo"), "click", async function () {
@@ -373,9 +389,10 @@
     $("lans").textContent = "…";
     try {
       if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) {
-        throw new Error("сначала загрузите модель кнопкой «Загрузить WebLLM»");
+        throw new Error("сначала «Загрузить WebLLM» или «Только WASM»");
       }
       var r = await AKSI_WEBLLM.complete(q, { temperature: 0.5, max_tokens: 300 });
+      if (r && r.error && !r.text) throw new Error(r.error);
       $("lans").textContent = (r && r.text) ? r.text : JSON.stringify(r, null, 2);
     } catch (e) {
       $("lans").textContent = "Ошибка: " + (e && e.message || e);
@@ -422,7 +439,7 @@
 
   function fullStatus() {
     var o = {
-      contour: "v213",
+      contour: "v216",
       decision: window.AKSI_DECISION ? AKSI_DECISION.status() : null,
       superpose: window.AKSI_SUPERPOSE ? AKSI_SUPERPOSE.status() : null,
       webllm: window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : null,
@@ -459,13 +476,26 @@
         updateLlmUi(e.detail);
       });
     }
-    [300, 800, 1500, 3000].forEach(function (ms) {
-      setTimeout(function () { refreshMods(); fullStatus(); }, ms);
+    [200, 600, 1200, 2500, 5000].forEach(function (ms) {
+      setTimeout(function () { refreshMods(); fullStatus(); setPill(); }, ms);
+    });
+    window.addEventListener("load", function () {
+      refreshMods(); fullStatus(); setPill();
     });
   }
+
+  function start() {
+    try {
+      boot();
+    } catch (e) {
+      console.error("[AKSI Contour boot]", e);
+      var be = $("bootErr");
+      if (be) be.textContent = "Boot error: " + (e && e.message || e);
+    }
+  }
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
+    document.addEventListener("DOMContentLoaded", start);
   } else {
-    boot();
+    start();
   }
 })();
