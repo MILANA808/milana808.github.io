@@ -1,11 +1,12 @@
-/* AKSI SW v217 — network-first HTML/JS, never sticky-cache LLM modules */
-var CACHE = "aksi-shell-v217";
+/* AKSI SW v218 — network-first HTML/JS, never sticky-cache LLM modules */
+var CACHE = "aksi-shell-v218";
 var PRE = ["/", "/index.html", "/sw.js"];
 var NO_CACHE = [
   /aksi-webllm\.js/,
   /aksi-superpose\.js/,
   /aksi-decision\.js/,
   /contour-app\.js/,
+  /aksi-integrity-bridge\.js/,
   /matrix\/app\.js/,
   /aksi-qpipe\.js/,
   /aksi-quantum\.js/,
