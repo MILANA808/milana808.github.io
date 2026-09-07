@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#efe5d2">
+<meta name="description" content="АКСИ Product API — Decision · ADIA · Neuro · Superpose. Offline-first browser API.">
+<title>АКСИ Product API · v1</title>
+<style>
+:root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--blue:#3b6cff;--code:#1e1a16}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}
+a{color:var(--a);text-decoration:none}
+.wrap{max-width:920px;margin:0 auto;padding:16px 14px 64px}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(145deg,#6b4f35,#8a6544);color:#fff;display:grid;place-items:center;font-weight:900;font-size:20px}
+h1{font-size:22px;font-weight:800}
+.sub{font-size:12px;color:var(--muted)}
+.pill{margin-left:auto;font-size:11px;font-weight:800;padding:6px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.card h3{font-size:15px;font-weight:800;margin:12px 0 6px;font-family:ui-monospace,monospace;color:var(--a)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.chip{display:inline-block;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--s2);margin:2px}
+.chip.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
+.composer{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.composer input{flex:1;min-width:160px;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}
+button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
+button.blue{background:linear-gradient(135deg,#3b6cff,#7c5cff)}
+pre,code{font-family:ui-monospace,SFMono-Regular,monospace}
+pre{background:var(--code);color:#e8e0d5;border-radius:12px;padding:14px;overflow:auto;font-size:12px;line-height:1.45;max-height:280px;white-space:pre-wrap}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-size:11px;text-transform:uppercase}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:24px}
+.err{color:#8b3a2f;font-weight:600;font-size:13px;margin-top:8px}
+.okmsg{color:var(--ok);font-size:13px;margin-top:8px}
+.muted{color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">Δ</div>
+    <div>
+      <h1>АКСИ Product API</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/contour/">Contour</a> · <a href="/matrix/">MATRIX</a></div>
+    </div>
+    <span class="pill" id="pill">offline</span>
+  </header>
+
+  <section class="card">
+    <h2>Статус модулей</h2>
+    <div id="mods"></div>
+    <p class="muted" style="margin-top:8px">Формула: <code>AKSI = (A × I × S) × (1 + 0.4√n)</code> · offline-first · aksilove@internet.ru</p>
+  </section>
+
+  <section class="card">
+    <h2>Live playground</h2>
+    <div class="composer">
+      <input id="q" type="text" placeholder="Вопрос или: запомни: факт" value="Кто ты?">
+      <button type="button" id="btnDecide">decide</button>
+      <button type="button" class="g" id="btnThink">think</button>
+      <button type="button" class="g" id="btnSuper">superpose</button>
+      <button type="button" class="blue" id="btnLearn">learn</button>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="okmsg" id="out"></div>
+    <pre id="raw" style="margin-top:10px">// результат JSON</pre>
+  </section>
+
+  <section class="card">
+    <h2>Как подключить</h2>
+    <pre><script src="/aksi-neuro.js"></script>
+<script src="/aksi-zero.js"></script>
+<script src="/aksi-algorithm.js"></script>
+<script src="/aksi-decision.js"></script>
+<script src="/aksi-api.js"></script>
+
+// решение с Gate + seal
+const r = await AKSI.decide("Кто ты?");
+// r.answer, r.scores.aksi, r.gate.ok, r.seal
+
+// быстрый ответ Mind-path
+const t = await AKSI.think("формула AKSI");
+
+// оценка ADIA
+const s = AKSI.evaluate("q", "текст ответа");
+
+// обучение
+await AKSI.learn("запомни: мой факт");
+
+// статус модулей
+console.log(AKSI.status());</pre>
+  </section>
+
+  <section class="card">
+    <h2>Методы</h2>
+    <table>
+      <tr><th>Метод</th><th>Описание</th></tr>
+      <tr><td><code>AKSI.decide(q)</code></td><td>Полный пакет: ответ · anti · EQS/AKSI · Gate · seal</td></tr>
+      <tr><td><code>AKSI.think(q)</code></td><td>Mind-path: Zero → Neuro → WebLLM</td></tr>
+      <tr><td><code>AKSI.evaluate(q, a)</code></td><td>ADIA 3.0 scores (EQS, AKSI formula)</td></tr>
+      <tr><td><code>AKSI.superpose(q)</code></td><td>Кандидаты → Born-коллапс</td></tr>
+      <tr><td><code>AKSI.learn(fact)</code></td><td>Локальная память «запомни:»</td></tr>
+      <tr><td><code>AKSI.loadWebLLM()</code></td><td>Опциональная on-device LLM</td></tr>
+      <tr><td><code>AKSI.status()</code></td><td>Версия + карта модулей</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Алгоритмы в продукте</h2>
+    <div class="grid">
+      <div>
+        <h3>ADIA 3.0</h3>
+        <p class="muted">candidates → EQS → rank → gate → FNV seal. Policy companion/lab/strict.</p>
+      </div>
+      <div>
+        <h3>Decision Runtime</h3>
+        <p class="muted">KB + Zero + Neuro → score → Gate τ≈0.55 → ledger.</p>
+      </div>
+      <div>
+        <h3>Neuro</h3>
+        <p class="muted">Offline resonance SEED + lexical retrieve + learn.</p>
+      </div>
+      <div>
+        <h3>Superpose</h3>
+        <p class="muted">Multi-engine amplitudes → Born collapse → seal.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Backend (опционально)</h2>
+    <p class="muted">Сервер не обязателен. При необходимости: optional AKSI backend — health, world search, chat bridge.</p>
+  </section>
+
+  <p class="foot">АКСИ Product API v1.0 · Contour · ADIA · Neuro · aksilove@internet.ru · @AKSILOVE</p>
+</div>
+
+<script src="/aksi-purge.js?v=222"></script>
+<script src="/aksi-knowledge.js?v=222"></script>
+<script src="/aksi-neuro.js?v=222"></script>
+<script src="/aksi-zero.js?v=222"></script>
+<script src="/aksi-algorithm.js?v=222"></script>
+<script src="/aksi-decision.js?v=222"></script>
+<script src="/aksi-webllm.js?v=222"></script>
+<script src="/aksi-superpose.js?v=222"></script>
+<script src="/aksi-integrity-bridge.js?v=222"></script>
+<script src="/aksi-api.js?v=222"></script>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function refresh() {
+    var st = window.AKSI && AKSI.status ? AKSI.status() : { modules: {} };
+    var m = st.modules || {};
+    var root = $("mods");
+    if (root) {
+      root.innerHTML = Object.keys(m).map(function (k) {
+        return "<span class='chip " + (m[k] ? "on" : "") + "'>" + k + "</span>";
+      }).join(" ");
+    }
+    var p = $("pill");
+    if (p) p.textContent = (st.product || "АКСИ") + " · " + (st.version || "");
+  }
+  async function run(kind) {
+    $("err").textContent = "";
+    $("out").textContent = "…";
+    var q = ($("q").value || "").trim();
+    if (!q) return;
+    if (!window.AKSI) {
+      $("err").textContent = "AKSI API ещё загружается — обновите страницу";
+      return;
+    }
+    try {
+      var r;
+      if (kind === "decide") r = await AKSI.decide(q);
+      else if (kind === "think") r = await AKSI.think(q);
+      else if (kind === "superpose") r = await AKSI.superpose(q);
+      else if (kind === "learn") r = await AKSI.learn(q);
+      else r = await AKSI.decide(q);
+      $("out").textContent = (r && (r.answer || r.text)) ? (r.answer || r.text) : JSON.stringify(r).slice(0, 200);
+      $("raw").textContent = JSON.stringify(r, null, 2);
+    } catch (e) {
+      $("err").textContent = String(e && e.message || e);
+      $("out").textContent = "";
+    }
+    refresh();
+  }
+  $("btnDecide").onclick = function () { run("decide"); };
+  $("btnThink").onclick = function () { run("think"); };
+  $("btnSuper").onclick = function () { run("superpose"); };
+  $("btnLearn").onclick = function () { run("learn"); };
+  $("q").addEventListener("keydown", function (e) { if (e.key === "Enter") run("decide"); });
+  refresh();
+  setTimeout(refresh, 800);
+  setTimeout(refresh, 2000);
+})();
+</script>
+</body>
+</html>
