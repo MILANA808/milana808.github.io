@@ -3,7 +3,7 @@
  * © AKSI · aksilove@internet.ru
  */
 (function () {
-  var BUILD = "20260908-v226";
+  var BUILD = "20260909-v230";
   var KEY = "aksi_build_id";
   var RELOAD = "aksi_purged_" + BUILD;
   function log(m) {
