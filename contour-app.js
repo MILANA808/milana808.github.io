@@ -1,12 +1,13 @@
 /**
- * AKSI Contour App v221 — Product Runtime
- * Unified path: Product API (AKSI.*) → Decision / Superpose / Zero / Neuro / fallback
- * Offline-first. All algorithms wired. Contact: aksilove@internet.ru
+ * AKSI Contour App v225 — Product Runtime (mass-ready offline core)
+ * Product API → Decision / Superpose / Zero / Neuro / fallback
+ * WebLLM optional. Contact: aksilove@internet.ru
  */
 (function () {
   "use strict";
-
-  var VER = "221";
+  var VER = "225";
+  var lastDecision = null;
+  var preferLocal = true;
 
   function $(id) {
     try { return document.getElementById(id); } catch (e) { return null; }
@@ -26,19 +27,16 @@
     });
   }
 
-  var lastDecision = null;
-  var preferLocal = false;
-
-  /* ——— FALLBACK KB (always works offline) ——— */
   var FALLBACK_KB = [
     { q: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — суверенный offline-first цифровой напарник. Decision · Superpose · Neuro · Zero · WebLLM · Product API. Контакт: aksilove@internet.ru" },
     { q: ["формула", "formula", "aksi ="], a: "AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity (EQS), S — sovereignty/structure, n — опыт (sealed history)." },
     { q: ["gate", "гейт"], a: "Gate — порог принятия (τ ≈ 0.55). Если score ниже — ответ отклоняется или помечается, в официальную память не пишется." },
-    { q: ["adia", "адиа", "eqs"], a: "ADIA 3.0 — Unified Resonance Decision Engine. 5-осевой EQS, rank, FNV-seal, policy companion/lab/strict." },
+    { q: ["adia", "адиа", "eqs"], a: "ADIA — Unified Resonance Decision Engine. Многоосевой EQS, rank, печать, policy companion/lab/strict." },
     { q: ["quantum", "квант"], a: "Локальный quantum-симулятор АКСИ (state-vector) + QCLI meta. Прозрачность, не «магия»." },
     { q: ["superpose", "суперпоз"], a: "Superpose: кандидаты от движков → амплитуды → Born-коллапс → печать." },
     { q: ["api", "продукт"], a: "Product API: AKSI.decide / think / evaluate / superpose / learn / status. Документация: /api/" },
-    { q: ["статус", "status", "что умеешь"], a: "Contour v" + VER + ": Decision, Superpose, Chat, WebLLM, Memory, Status. Offline-ядро всегда доступно." }
+    { q: ["статус", "status", "что умеешь"], a: "Contour v" + VER + ": Decision, Superpose, Chat, WebLLM, Memory, Status. Offline-ядро всегда доступно." },
+    { q: ["webllm", "llm", "модель"], a: "WebLLM — опциональная локальная модель (WebGPU или WASM). Без неё работают Decision, Neuro и Zero. Кнопка «Только WASM» не требует WebGPU." }
   ];
 
   function localDecide(q) {
@@ -51,7 +49,7 @@
           return {
             id: "fb-" + Date.now().toString(36),
             answer: hit.a,
-            anti: "Локальный fallback Contour (модули подгружаются отдельно).",
+            anti: "Локальный fallback Contour.",
             source: "fallback",
             scores: { aksi: 0.72, eqs: 72, phi: 0.6, qcli: 0.55 },
             gate: { ok: true, reason: "fallback-pass" },
@@ -93,8 +91,7 @@
       ["Neuro", !!(window.AKSI_NEURO && AKSI_NEURO.think)],
       ["ADIA", !!(window.AKSI_ALGORITHM || window.ADIA)],
       ["WebLLM", !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())],
-      ["Quantum", !!(window.AKSI_QUANTUM || window.AKSI_QPIPE)],
-      ["Compose", !!(window.AKSI_COMPOSE && AKSI_COMPOSE.think)]
+      ["Quantum", !!(window.AKSI_QUANTUM || window.AKSI_QPIPE)]
     ];
     var root = $("modChecks");
     if (root) {
@@ -106,7 +103,7 @@
     var be = $("bootErr");
     if (be) {
       be.textContent = missing.length
-        ? "Ожидают: " + missing.join(", ") + " — кнопки работают через Product API / fallback"
+        ? "Опционально не готово: " + missing.join(", ") + " — Decision/Chat работают через fallback"
         : "";
     }
     setPill();
@@ -235,6 +232,22 @@
     });
   }
 
+  async function runDecisionPath(q) {
+    if (window.AKSI && AKSI.decide) {
+      try {
+        var r = await AKSI.decide(q);
+        if (r && r.answer) return r;
+      } catch (e) {}
+    }
+    if (window.AKSI_DECISION && AKSI_DECISION.decide) {
+      try {
+        var p = await Promise.resolve(AKSI_DECISION.decide(q));
+        if (p && p.answer) return p;
+      } catch (e) {}
+    }
+    return localDecide(q);
+  }
+
   async function runSuperpose(q) {
     q = (q != null ? q : ($("sq") && $("sq").value) || "").trim();
     if (!q) return;
@@ -245,40 +258,51 @@
     var btn = $("sgo");
     if (btn) btn.disabled = true;
     try {
-      if (window.AKSI && typeof AKSI.superpose === "function" && !window.AKSI_SUPERPOSE) {
-        var apiR = await AKSI.superpose(q);
-        if (sans) sans.hidden = false;
-        txt("sanswer", apiR.answer || "");
-        txt("smeta", JSON.stringify({ source: apiR.source, scores: apiR.scores, seal: apiR.seal }, null, 2));
-        txt("sphase", "готово · Product API");
-        renderStates(apiR.superposition || [{ i: 0, source: apiR.source, prob: 1, text: apiR.answer, selected: true }]);
-        return;
+      if (window.AKSI && typeof AKSI.superpose === "function") {
+        try {
+          var apiR = await AKSI.superpose(q);
+          if (apiR && apiR.answer) {
+            if (sans) sans.hidden = false;
+            txt("sanswer", apiR.answer || "");
+            txt("smeta", JSON.stringify({ source: apiR.source, scores: apiR.scores, seal: apiR.seal }, null, 2));
+            txt("sphase", "готово · Product API");
+            renderStates(apiR.superposition || [{ i: 0, source: apiR.source, prob: 1, text: apiR.answer, selected: true }]);
+            return;
+          }
+        } catch (e) { console.warn(e); }
       }
       if (window.AKSI_SUPERPOSE && typeof AKSI_SUPERPOSE.ask === "function") {
-        var unsub = AKSI_SUPERPOSE.on(function (ev) {
-          if (ev.event === "phase") txt("sphase", (ev.data.phase || "") + " — " + (ev.data.note || ""));
-          if (ev.event === "superposition") renderStates(ev.data.states);
-          if (ev.event === "collapsed") {
-            renderStates(ev.data.superposition);
-            if (sans) sans.hidden = false;
-            txt("sanswer", ev.data.answer || "");
-            txt("smeta", JSON.stringify({
-              collapse: ev.data.collapse, scores: ev.data.scores,
-              seal: ev.data.seal, ms: ev.data.ms, source: ev.data.source
-            }, null, 2));
-            txt("sphase", "готово · " + (ev.data.ms || 0) + " ms");
+        var unsub = null;
+        try {
+          if (AKSI_SUPERPOSE.on) {
+            unsub = AKSI_SUPERPOSE.on(function (ev) {
+              if (ev.event === "phase") txt("sphase", (ev.data.phase || "") + " — " + (ev.data.note || ""));
+              if (ev.event === "superposition") renderStates(ev.data.states);
+              if (ev.event === "collapsed") {
+                renderStates(ev.data.superposition);
+                if (sans) sans.hidden = false;
+                txt("sanswer", ev.data.answer || "");
+                txt("smeta", JSON.stringify({
+                  collapse: ev.data.collapse, scores: ev.data.scores,
+                  seal: ev.data.seal, ms: ev.data.ms, source: ev.data.source
+                }, null, 2));
+                txt("sphase", "готово · " + (ev.data.ms || 0) + " ms");
+              }
+            });
           }
-        });
-        await AKSI_SUPERPOSE.ask(q, { n: preferLocal ? 0 : 3, includeLocal: true, mode: "born" });
-        if (typeof unsub === "function") unsub();
-      } else {
-        var d = await runDecisionPath(q);
-        if (sans) sans.hidden = false;
-        txt("sanswer", d.answer);
-        txt("smeta", JSON.stringify({ source: d.source, scores: d.scores }, null, 2));
-        txt("sphase", "готово · decision-path");
-        renderStates([{ i: 0, source: d.source, prob: 1, text: d.answer, selected: true }]);
+          await AKSI_SUPERPOSE.ask(q, { n: 2, includeLocal: true, mode: "born" });
+          if (typeof unsub === "function") unsub();
+          return;
+        } catch (e) {
+          if (typeof unsub === "function") unsub();
+        }
       }
+      var d = await runDecisionPath(q);
+      if (sans) sans.hidden = false;
+      txt("sanswer", d.answer);
+      txt("smeta", JSON.stringify({ source: d.source, scores: d.scores }, null, 2));
+      txt("sphase", "готово · decision-path");
+      renderStates([{ i: 0, source: d.source, prob: 1, text: d.answer, selected: true }]);
     } catch (e) {
       txt("serr", "Superpose: " + (e && e.message || e));
       var fb = localDecide(q);
@@ -289,18 +313,6 @@
       if (btn) btn.disabled = false;
       refreshMods();
     }
-  }
-
-  async function runDecisionPath(q) {
-    if (window.AKSI && AKSI.decide) {
-      var r = await AKSI.decide(q);
-      if (r && r.answer) return r;
-    }
-    if (window.AKSI_DECISION && AKSI_DECISION.decide) {
-      var p = await Promise.resolve(AKSI_DECISION.decide(q));
-      if (p && p.answer) return p;
-    }
-    return localDecide(q);
   }
 
   async function runChat(q) {
@@ -320,12 +332,6 @@
             src = t.source || "api";
             meta = { scores: t.score || t.scores };
           }
-        } catch (e) {}
-      }
-      if (!ans && window.AKSI_SUPERPOSE && AKSI_SUPERPOSE.ask) {
-        try {
-          var r = await AKSI_SUPERPOSE.ask(q, { n: preferLocal ? 0 : 2, includeLocal: true, mode: "max" });
-          if (r && r.answer) { ans = r.answer; src = r.source || "superpose"; meta = { scores: r.scores }; }
         } catch (e) {}
       }
       if (!ans && window.AKSI_DECISION) {
@@ -348,7 +354,11 @@
       }
       if (!ans && window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready() && AKSI_WEBLLM.complete) {
         try {
-          var w = await AKSI_WEBLLM.complete(q, { temperature: 0.4, max_tokens: 280 });
+          var w = await AKSI_WEBLLM.complete(q, {
+            temperature: 0.45,
+            max_tokens: 600,
+            system: "Ты — АКСИ. Отвечай полностью на русском языке, ясно и по существу."
+          });
           if (w && w.text) { ans = w.text; src = "webllm"; }
         } catch (e) {}
       }
@@ -386,26 +396,32 @@
 
   function runLoad(opts) {
     opts = opts || {};
-    preferLocal = false;
+    preferLocal = !!opts.forceWasm;
     txt("llmErr", "");
     if (!window.AKSI_WEBLLM || typeof AKSI_WEBLLM.load !== "function") {
-      txt("llmErr", "Модуль aksi-webllm.js не загружен — offline-ядро работает");
+      txt("llmErr", "Модуль aksi-webllm.js не загружен — offline Neuro/Zero работают. Decision и Chat доступны.");
       return;
     }
     setLlmBusy(true);
-    txt("llmMsg", opts.forceWasm ? "загрузка WASM…" : "загрузка модели…");
-    updateLlmUi(AKSI_WEBLLM.status());
+    txt("llmMsg", opts.forceWasm ? "загрузка WASM (без WebGPU)…" : "загрузка WebLLM / fallback…");
+    try { updateLlmUi(AKSI_WEBLLM.status()); } catch (e0) {}
     Promise.resolve(AKSI_WEBLLM.load(opts.model || null, updateLlmUi, { forceWasm: !!opts.forceWasm }))
       .then(function (s) {
-        updateLlmUi(s || AKSI_WEBLLM.status());
-        var st = s || AKSI_WEBLLM.status();
-        txt("llmMsg", (st.ready ? "готово · " : "статус · ") + (st.backend || "") + " · " + (st.model || ""));
-        txt("llmErr", "");
+        var st = s || (AKSI_WEBLLM.status && AKSI_WEBLLM.status()) || {};
+        updateLlmUi(st);
+        if (st.ready) {
+          txt("llmMsg", "готово · " + (st.backend || "") + " · " + (st.model || ""));
+          txt("llmErr", "");
+        } else {
+          txt("llmMsg", (st.message || "статус") + " · " + (st.backend || ""));
+          if (st.error) txt("llmErr", String(st.error).slice(0, 220));
+        }
       })
       .catch(function (e) {
-        txt("llmErr", "WebLLM: " + (e && e.message || e));
+        var msg = String((e && e.message) || e).slice(0, 260);
+        txt("llmErr", "Ошибка: " + msg + " — Decision/Chat работают без модели. Проверьте сеть или блокировщик.");
         txt("llmMsg", "модель недоступна — offline-ядро работает");
-        updateLlmUi();
+        try { updateLlmUi(AKSI_WEBLLM.status && AKSI_WEBLLM.status()); } catch (e1) {}
       })
       .then(function () {
         setLlmBusy(false);
@@ -422,46 +438,42 @@
       if (window.AKSI && typeof AKSI.learn === "function") {
         var lr = await AKSI.learn(q);
         txt("mmsg", (lr && lr.ok !== false) ? ("Сохранено · " + (lr.source || "api")) : "Не удалось");
-      } else if (window.AKSI_DECISION && AKSI_DECISION.decide) {
-        var p = await Promise.resolve(AKSI_DECISION.decide(q));
-        txt("mmsg", p.answer || "—");
-        txt("mstatus", JSON.stringify(AKSI_DECISION.status ? AKSI_DECISION.status() : {}, null, 2));
       } else if (window.AKSI_NEURO && AKSI_NEURO.learn) {
         AKSI_NEURO.learn(q.replace(/^запомни\s*[:：]\s*/i, ""));
-        txt("mmsg", "Сохранено в Neuro localStorage");
+        txt("mmsg", "Сохранено в Neuro");
       } else {
-        try {
-          var key = "aksi_contour_mem_v1";
-          var arr = JSON.parse(localStorage.getItem(key) || "[]");
-          arr.push({ t: Date.now(), text: q });
-          localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
-          txt("mmsg", "Сохранено локально (" + arr.length + ")");
-        } catch (e) {
-          txt("mmsg", "Не удалось сохранить: " + e.message);
-        }
+        var key = "aksi_contour_mem_v1";
+        var arr = JSON.parse(localStorage.getItem(key) || "[]");
+        arr.push({ t: Date.now(), text: q });
+        localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
+        txt("mmsg", "Сохранено локально (" + arr.length + ")");
+      }
+      if ($("mstatus")) {
+        txt("mstatus", JSON.stringify({
+          local: (JSON.parse(localStorage.getItem("aksi_contour_mem_v1") || "[]")).length,
+          neuro: window.AKSI_NEURO && AKSI_NEURO.status ? AKSI_NEURO.status() : null
+        }, null, 2));
       }
     } catch (e) {
       txt("mmsg", "Ошибка: " + (e && e.message || e));
     }
-    refreshMods();
   }
 
   function fullStatus() {
     var o = {
       contour: "v" + VER,
-      productApi: window.AKSI ? (AKSI.status ? AKSI.status() : { version: AKSI.version }) : null,
-      decision: window.AKSI_DECISION && AKSI_DECISION.status ? AKSI_DECISION.status() : !!window.AKSI_DECISION,
-      superpose: window.AKSI_SUPERPOSE && AKSI_SUPERPOSE.status ? AKSI_SUPERPOSE.status() : !!window.AKSI_SUPERPOSE,
+      time: new Date().toISOString(),
+      modules: {
+        AKSI: !!(window.AKSI && AKSI.decide),
+        DECISION: !!(window.AKSI_DECISION && AKSI_DECISION.decide),
+        SUPERPOSE: !!(window.AKSI_SUPERPOSE && AKSI_SUPERPOSE.ask),
+        ZERO: !!(window.AKSI_ZERO && AKSI_ZERO.think),
+        NEURO: !!(window.AKSI_NEURO && AKSI_NEURO.think),
+        WEBLLM: !!(window.AKSI_WEBLLM),
+        WEBLLM_READY: !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())
+      },
       webllm: window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : null,
-      zero: window.AKSI_ZERO && AKSI_ZERO.status ? AKSI_ZERO.status() : !!window.AKSI_ZERO,
-      neuro: !!(window.AKSI_NEURO && AKSI_NEURO.think),
-      algorithm: !!(window.AKSI_ALGORITHM || window.ADIA),
-      quantum: !!(window.AKSI_QUANTUM || window.AKSI_QPIPE),
-      compose: !!(window.AKSI_COMPOSE && AKSI_COMPOSE.think),
-      integrity: !!window.AKSI_INTEGRITY,
-      knowledge: !!window.AKSI_KNOWLEDGE,
-      formula: "AKSI=(A×I×S)×(1+0.4√n)",
-      contact: "aksilove@internet.ru"
+      api: window.AKSI && AKSI.status ? AKSI.status() : null
     };
     txt("fullStatus", JSON.stringify(o, null, 2));
   }
@@ -471,34 +483,14 @@
       on(t, "click", function () { showPanel(t.getAttribute("data-p")); });
     });
     on($("dgo"), "click", function () { runDecision(); });
-    on($("dq"), "keydown", function (e) { if (e.key === "Enter") runDecision(); });
     on($("dex1"), "click", function () { if ($("dq")) $("dq").value = "Кто ты?"; runDecision("Кто ты?"); });
-    on($("dex2"), "click", function () { if ($("dq")) $("dq").value = "Какая формула AKSI?"; runDecision("Какая формула AKSI?"); });
-    on($("dex3"), "click", function () { if ($("dq")) $("dq").value = "Что такое Gate?"; runDecision("Что такое Gate?"); });
-    on($("dproof"), "click", function () {
-      if (!lastDecision) return;
-      var blob = new Blob([JSON.stringify(lastDecision, null, 2)], { type: "application/json" });
-      var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "aksi-decision-proof.json";
-      a.click();
-    });
-    on($("dverify"), "click", function () {
-      if (!lastDecision) return;
-      alert("Seal: " + JSON.stringify(lastDecision.seal || lastDecision.gate || {}, null, 2).slice(0, 400));
-    });
-    on($("dcopy"), "click", function () {
-      if (!lastDecision) return;
-      var t = JSON.stringify(lastDecision, null, 2);
-      if (navigator.clipboard) navigator.clipboard.writeText(t);
-    });
+    on($("dex2"), "click", function () { if ($("dq")) $("dq").value = "Формула AKSI"; runDecision("Формула AKSI"); });
+    on($("dex3"), "click", function () { if ($("dq")) $("dq").value = "Gate"; runDecision("Gate"); });
     on($("sgo"), "click", function () { runSuperpose(); });
-    on($("sq"), "keydown", function (e) { if (e.key === "Enter") runSuperpose(); });
     on($("sex1"), "click", function () { if ($("sq")) $("sq").value = "Кто ты?"; runSuperpose("Кто ты?"); });
-    on($("sex2"), "click", function () { if ($("sq")) $("sq").value = "Как работает суперпозиция?"; runSuperpose("Как работает суперпозиция?"); });
+    on($("sex2"), "click", function () { if ($("sq")) $("sq").value = "Суперпозиция"; runSuperpose("Суперпозиция"); });
     on($("sex3"), "click", function () { if ($("sq")) $("sq").value = "Что такое АКСИ?"; runSuperpose("Что такое АКСИ?"); });
     on($("cgo"), "click", function () { runChat(); });
-    on($("cq"), "keydown", function (e) { if (e.key === "Enter") runChat(); });
     on($("cex1"), "click", function () { if ($("cq")) $("cq").value = "Кто ты?"; runChat("Кто ты?"); });
     on($("cex2"), "click", function () { if ($("cq")) $("cq").value = "статус"; runChat("статус"); });
     on($("cex3"), "click", function () { if ($("cq")) $("cq").value = "что умеешь"; runChat("что умеешь"); });
@@ -506,65 +498,84 @@
     on($("btnWasm"), "click", function () { runLoad({ forceWasm: true, model: "Xenova/LaMini-Flan-T5-248M" }); });
     on($("btnUnloadLlm"), "click", function () {
       if (window.AKSI_WEBLLM && AKSI_WEBLLM.unload) AKSI_WEBLLM.unload();
-      preferLocal = true;
-      txt("llmErr", "");
-      updateLlmUi();
       txt("llmMsg", "выгружено · offline");
+      updateLlmUi();
       refreshMods();
     });
     on($("lgo"), "click", async function () {
       var q = ($("lq") && $("lq").value || "").trim();
       if (!q) return;
       txt("lans", "…");
+      txt("llmErr", "");
       try {
         if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) {
-          throw new Error("сначала «Загрузить WebLLM» или «Только WASM»");
+          throw new Error("сначала «Только WASM» или «Загрузить WebLLM»");
         }
-        var r = await AKSI_WEBLLM.complete(q, { temperature: 0.5, max_tokens: 300 });
-        if (r && r.error && !r.text) throw new Error(r.error);
-        txt("lans", (r && r.text) ? r.text : JSON.stringify(r, null, 2));
+        var r = await AKSI_WEBLLM.complete(q, {
+          temperature: 0.45,
+          max_tokens: 700,
+          system: "Ты — АКСИ, локальный ИИ. Отвечай только на русском, полными предложениями. Не смешивай языки."
+        });
+        txt("lans", (r && r.text) ? r.text : (r && r.error ? ("Ошибка модели: " + r.error) : JSON.stringify(r, null, 2)));
       } catch (e) {
         txt("lans", "Ошибка: " + (e && e.message || e));
       }
     });
-    on($("lq"), "keydown", function (e) { if (e.key === "Enter" && $("lgo")) $("lgo").click(); });
-    on($("mgo"), "click", runMem);
-    on($("mq"), "keydown", function (e) { if (e.key === "Enter") runMem(); });
-    on($("mrefresh"), "click", function () {
-      txt("mstatus", JSON.stringify({
-        decision: window.AKSI_DECISION && AKSI_DECISION.status ? AKSI_DECISION.status() : null,
-        zero: window.AKSI_ZERO && AKSI_ZERO.status ? AKSI_ZERO.status() : null,
-        api: window.AKSI && AKSI.status ? AKSI.status() : null
-      }, null, 2));
-    });
+    on($("mgo"), "click", function () { runMem(); });
+    on($("mrefresh"), "click", function () { runMem(); });
     on($("btnRefresh"), "click", function () { fullStatus(); refreshMods(); });
     on($("btnPurge"), "click", function () {
-      if (window.AKSI_PURGE) AKSI_PURGE();
-      else {
-        try { localStorage.removeItem("aksi_build_id"); } catch (e) {}
-        location.reload();
-      }
+      if (window.AKSI_PURGE) window.AKSI_PURGE();
+      else location.reload();
+    });
+    ["dq", "sq", "cq", "lq", "mq"].forEach(function (id) {
+      var el = $(id);
+      if (!el) return;
+      on(el, "keydown", function (e) {
+        if (e.key === "Enter") {
+          if (id === "dq") runDecision();
+          if (id === "sq") runSuperpose();
+          if (id === "cq") runChat();
+          if (id === "lq") { var b = $("lgo"); if (b) b.click(); }
+          if (id === "mq") runMem();
+        }
+      });
+    });
+    on($("dcopy"), "click", function () {
+      if (!lastDecision) return;
+      try {
+        navigator.clipboard.writeText(JSON.stringify(lastDecision, null, 2));
+        txt("dmeta", "скопировано");
+      } catch (e) {}
+    });
+    on($("dproof"), "click", function () {
+      if (!lastDecision) return;
+      try {
+        var blob = new Blob([JSON.stringify(lastDecision, null, 2)], { type: "application/json" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "aksi-proof-" + (lastDecision.id || "x") + ".json";
+        a.click();
+      } catch (e) {}
+    });
+    on($("dverify"), "click", function () {
+      if (!lastDecision) return;
+      txt("dmeta", "verify local: seal=" + !!(lastDecision.seal) + " · gate=" + !!(lastDecision.gate && lastDecision.gate.ok));
     });
   }
 
   function boot() {
     try { bindAll(); } catch (e) { console.error("[bind]", e); }
-    try { refreshMods(); } catch (e) {}
-    try { fullStatus(); } catch (e) {}
-    try { updateLlmUi(); } catch (e) {}
-    if (window.AKSI_WEBLLM) {
-      window.addEventListener("aksi-webllm-progress", function (e) {
-        try { updateLlmUi(e.detail); } catch (err) {}
-      });
-    }
-    [200, 600, 1200, 2500, 5000].forEach(function (ms) {
-      setTimeout(function () { try { refreshMods(); fullStatus(); setPill(); } catch (e) {} }, ms);
-    });
+    refreshMods();
+    fullStatus();
+    setTimeout(refreshMods, 400);
+    setTimeout(refreshMods, 1200);
+    setTimeout(refreshMods, 3000);
+    try {
+      window.addEventListener("aksi-webllm-progress", function () { updateLlmUi(); refreshMods(); });
+    } catch (e) {}
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    boot();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
