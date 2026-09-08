@@ -4,57 +4,98 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0f14">
-<meta name="description" content="AKSI Cipher Suite — classical + post-quantum hybrid identity, seal, AEAD.">
-<title>AKSI Cipher Suite · classical + post-quantum</title>
+<meta name="description" content="АКСИ Crypto Stack — Pi Fractal · Cipher Suite · PQ · Vault IndexedDB">
+<title>АКСИ Crypto · Pi · PQ · Vault</title>
 <style>
-:root{--bg:#0b0f14;--s:#121820;--s2:#1a222d;--ink:#e8eef6;--muted:#8b9bb0;--line:#243040;--a:#5b8def;--ok:#3ecf8e;--warn:#e6b84d}
+:root{--bg:#0b0f14;--s:#121820;--s2:#1a222d;--ink:#e8eef6;--muted:#8b9bb0;--line:#243040;--a:#5b8def;--ok:#3ecf8e;--warn:#e6b84d;--pi:#c4a35a}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:15px/1.55 system-ui,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#152033 0%,var(--bg) 55%);color:var(--ink);min-height:100vh}
 a{color:var(--a);text-decoration:none}
-.wrap{max-width:880px;margin:0 auto;padding:24px 16px 48px}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:28px}
-.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#3d6fd8,#5b8def);display:grid;place-items:center;font-weight:900;color:#fff}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 48px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(145deg,#3d6fd8,#c4a35a);display:grid;place-items:center;font-weight:900;color:#fff}
 h1{font-size:20px;font-weight:800}.sub{font-size:12px;color:var(--muted)}
 .pill{margin-left:auto;font-size:11px;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
 .pill.ok{border-color:#2a6b4e;background:#143528;color:var(--ok)}
-.hero h2{font-size:28px;font-weight:800;line-height:1.2;margin-bottom:10px;letter-spacing:-.02em}
-.hero p{color:var(--muted);max-width:54ch}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:18px 0}
+.hero h2{font-size:26px;font-weight:800;line-height:1.2;margin-bottom:10px;letter-spacing:-.02em}
+.hero p{color:var(--muted);max-width:58ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:18px 0}
 .card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:14px}
-.card h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.card h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
 .card b{font-size:14px;display:block;margin-bottom:4px}.card span{font-size:12px;color:var(--muted)}
 .panel{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
 .panel h3{font-size:14px;font-weight:800;margin-bottom:10px}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
 button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--a);color:#fff;font-weight:700;font-size:13px}
 button.ghost{background:var(--s2);border:1px solid var(--line);color:var(--ink)}
-pre{background:#0a0e14;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11px;overflow:auto;max-height:220px;color:#b8c7d9;margin-top:10px}
+button.pi{background:linear-gradient(135deg,#8a6b2f,#c4a35a);color:#1a1408}
+input,textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0a0e14;color:var(--ink);font:inherit;margin-top:6px}
+textarea{min-height:72px;resize:vertical}
+label{font-size:12px;color:var(--muted);font-weight:600}
+pre{background:#0a0e14;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11px;overflow:auto;max-height:260px;color:#b8c7d9;margin-top:10px;white-space:pre-wrap;word-break:break-word}
 .table{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
-.table td,.table th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
-.table th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase}
-.ok{color:var(--ok)}.warn{color:var(--warn)}
-.foot{margin-top:28px;font-size:12px;color:var(--muted);text-align:center}
+.table th,.table td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.table .ok{color:var(--ok)}.table .warn{color:var(--warn)}
+.foot{margin-top:28px;text-align:center;font-size:12px;color:var(--muted)}
+.checks{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.checks i{font-style:normal;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
+.checks i.on{background:#143528;border-color:#2a6b4e;color:var(--ok);font-weight:700}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="logo">A</div>
-    <div><h1>AKSI Cipher Suite</h1><div class="sub"><a href="/">← хаб</a> · classical + post-quantum hybrid</div></div>
-    <span class="pill" id="stPill">booting…</span>
+    <div class="logo">π</div>
+    <div>
+      <h1>АКСИ Crypto Stack</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/contour/">Contour</a> · <a href="/matrix/">MATRIX</a> · <a href="/decision/">Decision</a></div>
+    </div>
+    <span class="pill" id="stPill">…</span>
   </header>
+
   <section class="hero">
-    <h2>Identity you can verify. Secrets that stay on the device.</h2>
-    <p>Browser-native cryptography for a sovereign agent: signatures, sealed answers, AES-GCM envelopes. Post-quantum is hybrid — classical always works; ML-KEM joins when available.</p>
+    <h2>Local-first криптография без сервера</h2>
+    <p>Pi-Entropy vault · Web Crypto Cipher Suite · optional PQ · IndexedDB. Пароль и ключи не уходят с устройства.</p>
+    <div class="checks" id="modChecks"></div>
   </section>
+
   <div class="grid">
-    <div class="card"><h3>Sign</h3><b>Ed25519 / ECDSA P-256</b><span>DID-bound seals</span></div>
-    <div class="card"><h3>KEM</h3><b>ECDH P-256 + optional ML-KEM</b><span>Hybrid secrets</span></div>
-    <div class="card"><h3>AEAD</h3><b>AES-256-GCM</b><span>Memory envelopes</span></div>
-    <div class="card"><h3>Hash</h3><b>SHA-256</b><span>Canonical digests</span></div>
+    <div class="card"><h3>Pi Fractal</h3><b>PiFractalCrypto</b><span>PBKDF2 + AES-GCM · соль из Math.PI</span></div>
+    <div class="card"><h3>Identity</h3><b>ECDSA / Ed25519</b><span>DID + seal decision packets</span></div>
+    <div class="card"><h3>KEM</h3><b>ECDH + optional ML-KEM</b><span>Hybrid secrets</span></div>
+    <div class="card"><h3>Vault</h3><b>IndexedDB + π</b><span>Encrypted memory entries</span></div>
   </div>
+
   <div class="panel">
-    <h3>Live identity (this browser)</h3>
+    <h3>1 · Pi Fractal encrypt / decrypt</h3>
+    <label>Текст</label>
+    <textarea id="piText" placeholder="Секрет для шифрования…"></textarea>
+    <label>Пароль</label>
+    <input id="piPass" type="password" placeholder="пароль (только в браузере)" autocomplete="off">
+    <div class="row">
+      <button type="button" class="pi" id="btnPiEnc">Encrypt π</button>
+      <button type="button" class="ghost" id="btnPiDec">Decrypt π</button>
+      <button type="button" class="ghost" id="btnPiTest">Self-test</button>
+    </div>
+    <pre id="piOut">—</pre>
+  </div>
+
+  <div class="panel">
+    <h3>2 · Vault (IndexedDB + optional π)</h3>
+    <label>Факт в память</label>
+    <input id="vText" type="text" placeholder="запомни: …">
+    <label>Пароль vault (опционально — тогда запись шифруется π)</label>
+    <input id="vPass" type="password" placeholder="пусто = открытый текст в IDB" autocomplete="off">
+    <div class="row">
+      <button type="button" id="btnVPut">Сохранить</button>
+      <button type="button" class="ghost" id="btnVList">Список</button>
+      <button type="button" class="ghost" id="btnVStatus">Status</button>
+    </div>
+    <pre id="vOut">—</pre>
+  </div>
+
+  <div class="panel">
+    <h3>3 · Cipher Suite (DID · seal · AEAD self)</h3>
     <div class="row">
       <button type="button" id="btnBoot">Boot suite</button>
       <button type="button" class="ghost" id="btnSeal">Seal sample</button>
@@ -63,30 +104,157 @@ pre{background:#0a0e14;border:1px solid var(--line);border-radius:10px;padding:1
     </div>
     <pre id="out">Press Boot…</pre>
   </div>
+
   <div class="panel">
-    <h3>Real vs research</h3>
+    <h3>Слои — честный статус</h3>
     <table class="table">
       <tr><th>Layer</th><th>Status</th></tr>
       <tr><td>Web Crypto ECDSA / ECDH / AES-GCM / SHA-256</td><td class="ok">Production</td></tr>
+      <tr><td>PiFractalCrypto (Pi-Entropy PBKDF2 salt + random IV)</td><td class="ok">Production client</td></tr>
+      <tr><td>Vault IndexedDB</td><td class="ok">Production client</td></tr>
       <tr><td>Ed25519 Web Crypto</td><td class="ok">Where supported</td></tr>
-      <tr><td>ML-KEM-768 hybrid</td><td class="warn">Optional — clean fallback</td></tr>
+      <tr><td>ML-KEM-768 hybrid</td><td class="warn">Optional — fallback classical</td></tr>
       <tr><td>DID did:aksi:…</td><td class="ok">From public key fingerprint</td></tr>
-      <tr><td>Backend seal (Milana-backend)</td><td class="ok">Ed25519 middleware</td></tr>
+      <tr><td>Server / backend not required</td><td class="ok">Offline-by-default</td></tr>
     </table>
   </div>
-  <footer class="foot">aksilove@internet.ru · @AKSILOVE · did:aksi</footer>
+
+  <footer class="foot">АКСИ Crypto Stack · aksilove@internet.ru · @AKSILOVE</footer>
 </div>
-<script src="/aksi-ciphersuite.js?v=1"></script>
+
+<script src="/pi-crypto.js?v=1"></script>
+<script src="/aksi-vault.js?v=1"></script>
+<script src="/aksi-ciphersuite.js?v=2"></script>
+<script src="/aksi-pq.js?v=1"></script>
 <script>
-(function(){
-  var out=document.getElementById('out'),pill=document.getElementById('stPill');
-  function show(x){out.textContent=typeof x==='string'?x:JSON.stringify(x,null,2)}
-  async function boot(){show('booting…');var s=await AKSI_CRYPTO.boot({tryPq:true});pill.textContent=s.pq?'PQ hybrid':'classical';pill.className='pill'+(s.ready?' ok':'');show(s)}
-  document.getElementById('btnBoot').onclick=boot;
-  document.getElementById('btnSeal').onclick=async function(){if(!AKSI_CRYPTO.status().ready)await boot();show(await AKSI_CRYPTO.sealJson({answer:'AKSI online',qcli:0.81,ts:Date.now()}))};
-  document.getElementById('btnEnc').onclick=async function(){if(!AKSI_CRYPTO.status().ready)await boot();var env=await AKSI_CRYPTO.encryptToSelf('secret-'+Date.now());show({envelope:env,roundtrip:await AKSI_CRYPTO.decryptSelf(env)})};
-  document.getElementById('btnPack').onclick=async function(){if(!AKSI_CRYPTO.status().ready)await boot();show(await AKSI_CRYPTO.publicPack())};
-  boot().catch(function(e){show(String(e));pill.textContent='error'});
+(function () {
+  var out = document.getElementById("out");
+  var pill = document.getElementById("stPill");
+  var piOut = document.getElementById("piOut");
+  var vOut = document.getElementById("vOut");
+  var lastCipher = null;
+
+  function show(el, x) {
+    el.textContent = typeof x === "string" ? x : JSON.stringify(x, null, 2);
+  }
+
+  function refreshMods() {
+    var bits = [
+      ["Pi", !!(window.PiFractalCrypto || window.AKSI_PI_CRYPTO)],
+      ["Vault", !!(window.AKSI_VAULT)],
+      ["Suite", !!(window.AKSI_CRYPTO)],
+      ["PQ", !!(window.AKSI_PQ)]
+    ];
+    var root = document.getElementById("modChecks");
+    if (root) {
+      root.innerHTML = bits.map(function (b) {
+        return "<i class='" + (b[1] ? "on" : "") + "'>" + b[0] + "</i>";
+      }).join("");
+    }
+    var ok = bits.filter(function (b) { return b[1]; }).length;
+    pill.textContent = ok + "/" + bits.length + " modules";
+    pill.className = "pill" + (ok >= 3 ? " ok" : "");
+  }
+
+  function pi() {
+    if (window.PiFractalCrypto) return new PiFractalCrypto();
+    if (window.AKSI_PI_CRYPTO) return AKSI_PI_CRYPTO.create();
+    throw new Error("pi-crypto не загружен");
+  }
+
+  document.getElementById("btnPiEnc").onclick = async function () {
+    try {
+      var t = document.getElementById("piText").value || "АКСИ · π test";
+      var p = document.getElementById("piPass").value;
+      if (!p) throw new Error("введите пароль");
+      lastCipher = await pi().encrypt(t, p);
+      show(piOut, { ciphertext: lastCipher, note: "IV случайный, соль Pi-детерминированная" });
+    } catch (e) {
+      show(piOut, "Ошибка: " + (e.message || e));
+    }
+  };
+
+  document.getElementById("btnPiDec").onclick = async function () {
+    try {
+      var p = document.getElementById("piPass").value;
+      if (!p) throw new Error("введите пароль");
+      if (!lastCipher) throw new Error("сначала Encrypt");
+      var plain = await pi().decrypt(lastCipher, p);
+      show(piOut, { plaintext: plain });
+    } catch (e) {
+      show(piOut, "Ошибка: " + (e.message || e));
+    }
+  };
+
+  document.getElementById("btnPiTest").onclick = async function () {
+    try {
+      var ok = await pi().selfTest();
+      show(piOut, { selfTest: ok });
+    } catch (e) {
+      show(piOut, "Ошибка: " + (e.message || e));
+    }
+  };
+
+  document.getElementById("btnVPut").onclick = async function () {
+    try {
+      if (!window.AKSI_VAULT) throw new Error("vault не загружен");
+      var t = document.getElementById("vText").value;
+      var p = document.getElementById("vPass").value || null;
+      var r = await AKSI_VAULT.learn(t, p);
+      show(vOut, r);
+    } catch (e) {
+      show(vOut, "Ошибка: " + (e.message || e));
+    }
+  };
+
+  document.getElementById("btnVList").onclick = async function () {
+    try {
+      show(vOut, await AKSI_VAULT.list(30));
+    } catch (e) {
+      show(vOut, "Ошибка: " + (e.message || e));
+    }
+  };
+
+  document.getElementById("btnVStatus").onclick = async function () {
+    try {
+      show(vOut, await AKSI_VAULT.status());
+    } catch (e) {
+      show(vOut, "Ошибка: " + (e.message || e));
+    }
+  };
+
+  async function boot() {
+    show(out, "booting…");
+    if (!window.AKSI_CRYPTO) {
+      show(out, "aksi-ciphersuite.js не загружен");
+      return;
+    }
+    var s = await AKSI_CRYPTO.boot({ tryPq: true });
+    pill.textContent = (s.pq ? "PQ hybrid" : "classical") + " · ready";
+    pill.className = "pill" + (s.ready ? " ok" : "");
+    show(out, s);
+    refreshMods();
+  }
+
+  document.getElementById("btnBoot").onclick = boot;
+  document.getElementById("btnSeal").onclick = async function () {
+    if (!AKSI_CRYPTO.status().ready) await boot();
+    show(out, await AKSI_CRYPTO.sealJson({ answer: "AKSI online", qcli: 0.81, ts: Date.now() }));
+  };
+  document.getElementById("btnEnc").onclick = async function () {
+    if (!AKSI_CRYPTO.status().ready) await boot();
+    var env = await AKSI_CRYPTO.encryptToSelf("secret-" + Date.now());
+    show(out, { envelope: env, roundtrip: await AKSI_CRYPTO.decryptSelf(env) });
+  };
+  document.getElementById("btnPack").onclick = async function () {
+    if (!AKSI_CRYPTO.status().ready) await boot();
+    show(out, await AKSI_CRYPTO.publicPack());
+  };
+
+  refreshMods();
+  boot().catch(function (e) {
+    show(out, String(e));
+  });
 })();
 </script>
 </body>
