@@ -1,5 +1,5 @@
-/* AKSI SW v222 — network-first HTML/JS, never sticky-cache LLM modules */
-var CACHE = "aksi-shell-v222";
+/* AKSI SW v225 — network-first HTML/JS, never sticky-cache LLM/Contour modules */
+var CACHE = "aksi-shell-v225";
 var PRE = ["/", "/index.html", "/sw.js"];
 var NO_CACHE = [
   /aksi-webllm\.js/,
@@ -8,6 +8,8 @@ var NO_CACHE = [
   /aksi-api\.js/,
   /aksi-algorithm\.js/,
   /aksi-integrity-bridge\.js/,
+  /aksi-neuro\.js/,
+  /aksi-zero\.js/,
   /matrix\/app\.js/,
   /aksi-qpipe\.js/,
   /aksi-quantum\.js/,
@@ -16,6 +18,7 @@ var NO_CACHE = [
   /\/contour\//,
   /\/api\//,
   /contour-app\.js/,
+  /aksi-purge\.js/,
   /\/matrix\//
 ];
 function shouldBypass(url) {
@@ -44,7 +47,6 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-
   if (shouldBypass(url)) {
     e.respondWith(
       fetch(req, { cache: "no-store" }).catch(function () {
@@ -53,7 +55,6 @@ self.addEventListener("fetch", function (e) {
     );
     return;
   }
-
   var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
   if (isHTML) {
     e.respondWith(
@@ -67,7 +68,6 @@ self.addEventListener("fetch", function (e) {
     );
     return;
   }
-
   e.respondWith(
     fetch(req).then(function (res) {
       if (res && res.ok) {
