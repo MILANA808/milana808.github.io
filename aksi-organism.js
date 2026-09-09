@@ -1,12 +1,10 @@
 /**
- * AKSI Organism v1 — единый живой runtime
- * Связывает: API · Decision · Neuro · Zero · Vault π · Crypto · WebLLM · Quantum
- * Offline-first. Один pulse() — состояние всего организма.
+ * AKSI Organism v1.1 — + π-Contour computational path
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0-organism";
+  var VER = "1.1.0-organism-pi";
 
   function organ(name, ok, detail) {
     return { name: name, ok: !!ok, detail: detail || null };
@@ -22,6 +20,7 @@
       algorithm: !!(G.AKSI_ALGORITHM || G.ADIA),
       vault: !!(G.AKSI_VAULT && G.AKSI_VAULT.learn),
       pi: !!(G.PiFractalCrypto || (G.AKSI_PI_CRYPTO && G.AKSI_PI_CRYPTO.PiFractalCrypto)),
+      piContour: !!(G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process),
       ciphersuite: !!(G.AKSI_CRYPTO && G.AKSI_CRYPTO.boot),
       pq: !!(G.AKSI_PQ),
       webllm: !!(G.AKSI_WEBLLM),
@@ -42,6 +41,7 @@
       organ("algorithm", m.algorithm),
       organ("vault", m.vault),
       organ("pi", m.pi),
+      organ("piContour", m.piContour),
       organ("ciphersuite", m.ciphersuite),
       organ("webllm", m.webllm, m.webllmReady ? "ready" : "optional"),
       organ("quantum", m.quantum)
@@ -53,10 +53,6 @@
     } catch (e) {
       vaultSt = { error: String(e.message || e) };
     }
-    var cryptoSt = null;
-    try {
-      if (G.AKSI_CRYPTO && G.AKSI_CRYPTO.status) cryptoSt = G.AKSI_CRYPTO.status();
-    } catch (e) {}
     return {
       version: VER,
       formula: "AKSI = (A × I × S) × (1 + 0.4√n)",
@@ -67,7 +63,6 @@
       organs: organs,
       modules: m,
       vault: vaultSt,
-      crypto: cryptoSt,
       contact: "aksilove@internet.ru"
     };
   }
@@ -77,16 +72,47 @@
     query = String(query || "").trim();
     if (!query) return { text: "", source: "empty" };
 
+    var preferPi = /π|\bpi\b|пи\b|контур|формул|theta|угол/i.test(query) || opts.pi === true;
+    if (G.AKSI_PI_CONTOUR && typeof G.AKSI_PI_CONTOUR.process === "function" && preferPi) {
+      try {
+        var pi = await G.AKSI_PI_CONTOUR.process(query, opts);
+        if (pi && (pi.answer || pi.text)) {
+          return {
+            text: pi.answer || pi.text,
+            answer: pi.answer || pi.text,
+            source: pi.source || "pi-contour",
+            scores: pi.scores || null,
+            seal: pi.seal || null,
+            features: pi.features || null,
+            gate: pi.gate || null
+          };
+        }
+      } catch (e) {}
+    }
+
     if (G.AKSI && typeof G.AKSI.think === "function") {
       try {
         var t = await G.AKSI.think(query, opts);
         if (t && (t.text || t.answer)) {
+          if (G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process) {
+            try {
+              var pe = await G.AKSI_PI_CONTOUR.process(query, {
+                candidates: [{ text: t.text || t.answer, source: t.source || "api", score: 0.7 }]
+              });
+              if (pe && pe.seal) {
+                t.seal = t.seal || pe.seal;
+                t.scores = t.scores || pe.scores;
+                t.features = pe.features;
+              }
+            } catch (e2) {}
+          }
           return {
             text: t.text || t.answer,
             answer: t.text || t.answer,
             source: t.source || "api",
             scores: t.score || t.scores || null,
-            seal: t.seal || null
+            seal: t.seal || null,
+            features: t.features || null
           };
         }
       } catch (e) {}
@@ -126,25 +152,50 @@
       } catch (e) {}
     }
 
-    if (opts.allowWebLLM && G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready()) {
+    if (G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process) {
       try {
-        var w = await G.AKSI_WEBLLM.complete(query, {
-          temperature: 0.45,
-          max_tokens: 512,
-          system: "Ты — АКСИ. Отвечай полностью на русском."
-        });
-        if (w && w.text) return { text: w.text, answer: w.text, source: "webllm" };
+        var p2 = await G.AKSI_PI_CONTOUR.process(query, opts);
+        if (p2 && p2.answer) {
+          return {
+            text: p2.answer,
+            answer: p2.answer,
+            source: "pi-contour",
+            scores: p2.scores,
+            seal: p2.seal,
+            features: p2.features,
+            gate: p2.gate
+          };
+        }
       } catch (e) {}
     }
 
     return {
-      text: "Я АКСИ — суверенный offline-организм. Decision, Vault π, Crypto, Neuro. Спросите «кто ты» или «запомни: факт». Контакт: aksilove@internet.ru",
-      answer: "Я АКСИ — суверенный offline-организм. Decision, Vault π, Crypto, Neuro. Спросите «кто ты» или «запомни: факт». Контакт: aksilove@internet.ru",
+      text: "Я АКСИ — offline-организм с π-контуром. Спросите «π» или «формула». Контакт: aksilove@internet.ru",
+      answer: "Я АКСИ — offline-организм с π-контуром. Спросите «π» или «формула». Контакт: aksilove@internet.ru",
       source: "organism-fallback"
     };
   }
 
   async function decide(query, opts) {
+    if (G.AKSI_PI_CONTOUR && /π|\bpi\b|пи\b|контур|формул/i.test(String(query || ""))) {
+      try {
+        var pr = await G.AKSI_PI_CONTOUR.process(query, opts);
+        if (pr && pr.answer) {
+          return {
+            id: "pi-" + Date.now().toString(36),
+            answer: pr.answer,
+            anti: "π-contour",
+            source: pr.source,
+            scores: pr.scores,
+            gate: pr.gate,
+            seal: pr.seal,
+            features: pr.features,
+            ms: 0,
+            version: VER
+          };
+        }
+      } catch (e) {}
+    }
     if (G.AKSI && G.AKSI.decide) {
       try {
         var p = await G.AKSI.decide(query, opts);
@@ -160,6 +211,7 @@
       scores: t.scores || { aksi: 0.6, eqs: 60, phi: 0.5, qcli: 0.5 },
       gate: t.gate || { ok: true, reason: "organism" },
       seal: t.seal || { kind: "organism", t: Date.now() },
+      features: t.features || null,
       ms: 0,
       version: VER
     };
@@ -177,12 +229,6 @@
     if (G.AKSI && G.AKSI.learn) {
       try {
         return await G.AKSI.learn(fact);
-      } catch (e) {}
-    }
-    if (G.AKSI_NEURO && G.AKSI_NEURO.learn) {
-      try {
-        G.AKSI_NEURO.learn(fact.replace(/^запомни\s*[:：]\s*/i, ""));
-        return { ok: true, source: "neuro" };
       } catch (e) {}
     }
     try {
