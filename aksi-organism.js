@@ -1,11 +1,11 @@
 /**
- * AKSI Organism v1.2 — NO circular calls to AKSI API
+ * AKSI Organism v1.2.1 — no circular API calls; formula ≠ forced pi
  * Path: Pi → Decision → Zero → Neuro → local
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.2.0-organism";
+  var VER = "1.2.1-organism";
 
   function modules() {
     return {
@@ -41,9 +41,9 @@
     if (/кто ты|who are you|привет/.test(q))
       return "Я АКСИ — offline Organism. Decision · π-Contour · Vault. Контакт: aksilove@internet.ru";
     if (/формул|formula/.test(q))
-      return "AKSI = (A × I × S) × (1 + 0.4√n). π-Contour: query → SHA-256 → θ ∈ [0,2π) → seal.";
+      return "AKSI = (A × I × S) × (1 + 0.4√n). A — agency, I — integrity (EQS/100), S — structure, n — sealed history.";
     if (/контур|π|\bpi\b|пи\b/.test(q))
-      return "π-Contour — детерминированный вычислительный путь ответа АКСИ.";
+      return "π-Contour — детерминированный вычислительный путь: query → SHA-256 → θ ∈ [0,2π) → seal.";
     if (/gate|гейт/.test(q))
       return "Gate τ ≈ 0.55 — порог принятия решения.";
     if (/статус|status|что умеешь/.test(q))
@@ -56,7 +56,7 @@
     query = String(query || "").trim();
     if (!query) return { text: "", answer: "", source: "empty" };
 
-    if (G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process && /π|\bpi\b|пи\b|контур|формул/i.test(query)) {
+    if (G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process && /π|\bpi\b|пи\b|контур/i.test(query)) {
       try {
         var pr = await G.AKSI_PI_CONTOUR.process(query);
         if (pr && pr.answer) {
@@ -101,7 +101,7 @@
     query = String(query || "").trim();
     if (!query) return { ok: false, answer: "", error: "empty" };
 
-    if (G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process && /π|\bpi\b|пи\b|контур|формул/i.test(query)) {
+    if (G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process && /π|\bpi\b|пи\b|контур/i.test(query)) {
       try {
         var pr = await G.AKSI_PI_CONTOUR.process(query);
         if (pr && pr.answer) {
