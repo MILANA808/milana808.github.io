@@ -1,12 +1,11 @@
 /**
- * AKSI Crystal v1 — holographic multi-layer memory
- * Layers: Neuro (lexical) + RAG IndexedDB + HRR field
- * Associations via resonance, not claimed omniscience.
+ * AKSI Crystal v1.1 — holographic multi-layer memory
+ * Layers: Neuro + RAG IndexedDB + HRR field
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0-crystal";
+  var VER = "1.1.0-crystal";
   var DB_NAME = "aksi_crystal_v1";
   var STORE = "traces";
   var holo = null;
@@ -128,12 +127,15 @@
   function seedDefaults() {
     var h = getHRR();
     var seeds = [
-      "АКСИ — offline Decision Integrity. Формула AKSI = (A × I × S) × (1 + 0.4√n).",
-      "π-Contour: query → SHA-256 → θ ∈ [0,2π) → seal.",
-      "Динозавры — мезозойская эра; ассоциация в Crystal — пример дальней семантической связи через резонанс следов памяти, не энциклопедия.",
-      "HRR — holographic reduced representations: суперпозиция следов в комплексном поле.",
-      "Swarm — обмен слепками мысли через WebRTC DataChannel и manual SDP без центрального сервера.",
-      "Контакт: aksilove@internet.ru"
+      "АКСИ — локальный Decision Integrity runtime: вопрос → ответ → Gate → seal. Offline-first.",
+      "Формула: AKSI = (A × I × S) × (1 + 0.4√n). A — agency, I — integrity, S — structure, n — sealed history.",
+      "π-Contour: query → SHA-256 → θ ∈ [0,2π) → sin/cos features → FNV seal. Тот же текст → тот же угол.",
+      "Crystal: Neuro (лексика) + RAG IndexedDB + HRR-поле. Запись следов усиливает резонанс.",
+      "HRR — holographic reduced representations: суперпозиция следов в комплексном поле N×N.",
+      "Swarm: обмен слепками мысли через WebRTC DataChannel, manual SDP, без своего signaling-сервера.",
+      "Gate τ ≈ 0.55 — порог принятия. EQS — инженерный score целостности ответа.",
+      "Vault: локальное шифрование следов (AES-GCM / PiFractal). Данные не уходят на сервер по умолчанию.",
+      "Контакт поддержки: aksilove@internet.ru. Публично без ФИО."
     ];
     for (var i = 0; i < seeds.length; i++) {
       try { if (h.write) h.write(seeds[i], 1); } catch (e) {}
@@ -170,7 +172,7 @@
     var top = uniq.slice(0, k);
     var answer = top.length
       ? top.map(function (t, i) { return (i + 1) + ". [" + (t.layer || "?") + "] " + String(t.text).slice(0, 220); }).join("\n")
-      : "Crystal: следов по запросу мало. Добавьте факты («запомни: …») — поле нарастает локально.";
+      : "Crystal: мало следов. Добавьте «запомни: факт» — поле нарастает локально.";
     return { ok: true, answer: answer, associations: top, layers: { neuro: layers.neuro.length, rag: layers.rag.length, hrr: layers.hrr.length }, source: "crystal", version: VER };
   }
 
