@@ -1,5 +1,5 @@
 /**
- * AKSI Organism v1.2.1 — no circular API calls; formula ≠ forced pi
+ * AKSI Organism v1.2.1 — NO circular calls to AKSI API
  * Path: Pi → Decision → Zero → Neuro → local
  * © AKSI · aksilove@internet.ru
  */
@@ -43,7 +43,7 @@
     if (/формул|formula/.test(q))
       return "AKSI = (A × I × S) × (1 + 0.4√n). A — agency, I — integrity (EQS/100), S — structure, n — sealed history.";
     if (/контур|π|\bpi\b|пи\b/.test(q))
-      return "π-Contour — детерминированный вычислительный путь: query → SHA-256 → θ ∈ [0,2π) → seal.";
+      return "π-Contour — детерминированный путь: query → SHA-256 → θ ∈ [0,2π) → seal.";
     if (/gate|гейт/.test(q))
       return "Gate τ ≈ 0.55 — порог принятия решения.";
     if (/статус|status|что умеешь/.test(q))
