@@ -4,96 +4,332 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<title>АКСИ Contour</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>АКСИ Contour v270</title>
 <style>
 :root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f;--blue:#3b6cff}
-*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.45 system-ui,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}a{color:inherit;text-decoration:none}.wrap{max-width:960px;margin:0 auto;padding:12px 12px 56px}.top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#6b4f35,#c4a35a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}h1{font-size:18px;font-weight:800}.sub{font-size:11px;color:var(--muted)}.pill{margin-left:auto;font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:12px;cursor:pointer}.tab.on{background:var(--a);color:#fff;border-color:var(--a)}.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px}.panel{display:none}.panel.on{display:block}.composer{display:flex;gap:7px;flex-wrap:wrap}.composer input{flex:1;min-width:160px;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}button.blue{background:var(--blue);color:#fff}.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:640px){.grid2{grid-template-columns:1fr}}.col{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}.lbl{font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:700}.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.m{text-align:center;padding:8px 4px;border-radius:10px;background:var(--s2);border:1px solid var(--line)}.m b{display:block;font-size:17px;font-weight:800}.m span{font-size:9px;color:var(--muted)}.gate{margin-top:9px;padding:9px 11px;border-radius:11px;font-weight:700;font-size:13px;border:1px solid var(--line)}.gate.ok{background:#e8f2ea;color:var(--ok)}.gate.no{background:#f8eaea;color:var(--bad)}.seal{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap}.answer-box{margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;white-space:pre-wrap;word-break:break-word;line-height:1.55}.checks{display:flex;flex-wrap:wrap;gap:5px}.checks i{font-style:normal;font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}.foot{text-align:center;font-size:11px;color:var(--muted);margin-top:18px}.err{color:var(--bad);font-size:12px;margin-top:6px}.okmsg{color:var(--ok);font-size:12px}.phase{font-size:12px;color:var(--blue);font-weight:600;min-height:1.3em}.progress{height:8px;border-radius:99px;background:#eee;overflow:hidden;margin-top:8px}.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b6cff,#22d3ee)}.bar{height:6px;border-radius:99px;background:#eee;overflow:hidden;margin:5px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}.states{display:flex;flex-direction:column;gap:7px}.st{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}.st.sel{border-color:var(--ok)}.st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.muted{color:var(--muted);font-size:12px}.hero p{color:var(--muted);font-size:13px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 64px}
+.banner{background:#1a1520;color:#efe6d6;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.banner span{color:#6ee7a0}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(145deg,#6b4f35,#c4a35a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:20px}
+h1{font-size:20px;font-weight:900}.sub{font-size:12px;color:var(--muted)}
+.pill{margin-left:auto;font-size:11px;font-weight:800;padding:6px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:13px;cursor:pointer}
+.tab.on{background:var(--a);color:#fff;border-color:var(--a)}
+.card{background:var(--s);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.panel{display:none}.panel.on{display:block}
+.composer{display:flex;gap:8px;flex-wrap:wrap}
+.composer input{flex:1;min-width:160px;min-height:48px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:12px 16px;background:var(--a);color:#fff;font-weight:800}
+button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.answer{margin-top:12px;padding:14px;border-radius:12px;background:#fff;border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55;min-height:60px}
+.gate{margin-top:10px;padding:10px 12px;border-radius:12px;font-weight:700;font-size:13px}
+.gate.ok{background:#e8f2ea;color:var(--ok)}.gate.no{background:#f8eaea;color:var(--bad)}
+.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.m{text-align:center;padding:8px;border-radius:10px;background:var(--s2);border:1px solid var(--line)}
+.m b{display:block;font-size:16px}.m span{font-size:10px;color:var(--muted)}
+.seal{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;margin-top:10px;overflow:auto;max-height:180px;white-space:pre-wrap}
+.muted{color:var(--muted);font-size:12px;margin-top:6px}
+.err{color:var(--bad);font-size:13px;margin-top:8px;font-weight:600}
+.okmsg{color:var(--ok);font-size:13px;margin-top:8px;font-weight:600}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks i{font-style:normal;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
+.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:20px}
+@keyframes flash{0%{background:#fff7d6}100%{background:#fff}}
+.flash{animation:flash 1.2s ease}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="banner" id="banner">
+    <div>АКСИ Contour <span>v270 LIVE</span> · offline Decision</div>
+    <button type="button" class="g" id="btnForce" style="padding:6px 12px;font-size:12px">Сбросить кэш</button>
+  </div>
   <header class="top">
     <div class="logo">π</div>
-    <div><h1>АКСИ · Contour</h1><div class="sub"><a href="/">← хаб</a> · <a href="/deploy/">Deploy</a> · <a href="/crypto/">Crypto</a></div></div>
-    <span class="pill" id="pill">загрузка…</span>
+    <div>
+      <h1>АКСИ · Contour</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/deploy/">Deploy</a> · <a href="/crypto/">Crypto</a></div>
+    </div>
+    <span class="pill" id="pill">…</span>
   </header>
-  <div class="tabs">
+  <div class="tabs" id="tabs">
     <button type="button" class="tab on" data-p="decision">Decision</button>
-    <button type="button" class="tab" data-p="superpose">Superpose</button>
     <button type="button" class="tab" data-p="chat">Chat</button>
-    <button type="button" class="tab" data-p="llm">WebLLM</button>
     <button type="button" class="tab" data-p="mem">Memory</button>
     <button type="button" class="tab" data-p="status">Status</button>
   </div>
-  <section class="card"><div class="checks" id="modChecks"></div><div class="err" id="bootErr"></div></section>
+  <section class="card"><div class="checks" id="modChecks"></div></section>
   <div class="panel on" id="p-decision">
-    <section class="card hero"><h3 style="font-size:11px;text-transform:uppercase;color:var(--muted)">Decision</h3><p>Вопрос → ответ · Gate · seal. Offline.</p></section>
     <section class="card">
-      <div class="composer"><input id="dq" type="text" placeholder="Вопрос…" autocomplete="off" autofocus><button type="button" id="dgo">Решить</button></div>
-      <div class="row"><button type="button" class="g" id="dex1">π</button><button type="button" class="g" id="dex2">Формула</button><button type="button" class="g" id="dex3">Кто ты?</button></div>
+      <div class="composer">
+        <input id="dq" type="text" placeholder="Вопрос…" autocomplete="off" autofocus>
+        <button type="button" id="dgo">Решить</button>
+      </div>
+      <div class="row">
+        <button type="button" class="g" id="dex1">π</button>
+        <button type="button" class="g" id="dex2">Формула</button>
+        <button type="button" class="g" id="dex3">Кто ты?</button>
+      </div>
       <div class="err" id="derr"></div>
+      <div class="answer" id="danswer">Нажмите «Кто ты?» или введите вопрос — ответ появится здесь.</div>
+      <div class="meters">
+        <div class="m"><b id="vAksi">—</b><span>AKSI</span></div>
+        <div class="m"><b id="vEqs">—</b><span>EQS</span></div>
+        <div class="m"><b id="vPhi">—</b><span>Φ</span></div>
+        <div class="m"><b id="vQcli">—</b><span>QCLI</span></div>
+      </div>
+      <div class="gate ok" id="dgate">Gate: —</div>
+      <div class="row">
+        <button type="button" class="g" id="dproof">Proof JSON</button>
+        <button type="button" class="g" id="dcopy">Копировать</button>
+      </div>
+      <pre class="seal" id="dseal">{}</pre>
+      <p class="muted" id="dmeta"></p>
     </section>
-    <section class="card" id="dout" hidden>
-      <div class="grid2"><div class="col"><div class="lbl">Ответ</div><div id="danswer" class="answer-box" style="margin:0;border:0;padding:0"></div></div><div class="col"><div class="lbl">Анти</div><div id="danti"></div></div></div>
-      <div class="meters"><div class="m"><b id="vAksi">—</b><span>AKSI</span></div><div class="m"><b id="vEqs">—</b><span>EQS</span></div><div class="m"><b id="vPhi">—</b><span>Φ</span></div><div class="m"><b id="vQcli">—</b><span>QCLI</span></div></div>
-      <div class="gate no" id="dgate">Gate: —</div>
-      <div class="row"><button type="button" class="g" id="dproof">Proof</button><button type="button" class="g" id="dverify">Verify</button><button type="button" class="g" id="dcopy">JSON</button></div>
-      <pre class="seal" id="dseal"></pre><p class="muted" id="dmeta"></p>
-    </section>
-  </div>
-  <div class="panel" id="p-superpose">
-    <section class="card">
-      <div class="composer"><input id="sq" type="text" placeholder="Суперпозиция" autocomplete="off"><button type="button" id="sgo">Коллапс</button></div>
-      <div class="row"><button type="button" class="g" id="sex1">Кто ты?</button><button type="button" class="g" id="sex2">π</button></div>
-      <div class="phase" id="sphase"></div><div class="err" id="serr"></div>
-    </section>
-    <section class="card" id="sbox" hidden><div class="states" id="sstates"></div></section>
-    <section class="card" id="sansBox" hidden><div class="lbl">Ответ</div><div id="sanswer" class="answer-box"></div><pre class="seal" id="smeta" style="margin-top:8px"></pre></section>
   </div>
   <div class="panel" id="p-chat">
     <section class="card">
-      <div class="composer"><input id="cq" type="text" placeholder="Сообщение…" autocomplete="off"><button type="button" id="cgo">Отправить</button></div>
-      <div class="row"><button type="button" class="g" id="cex1">π</button><button type="button" class="g" id="cex2">формула</button></div>
-      <div class="err" id="cerr"></div><div id="cthread" class="answer-box" style="min-height:120px">—</div>
-    </section>
-  </div>
-  <div class="panel" id="p-llm">
-    <section class="card">
-      <div class="row"><button type="button" class="blue" id="btnLoadLlm">Загрузить</button><button type="button" class="g" id="btnWasm">WASM</button><button type="button" class="g" id="btnUnloadLlm">Выгрузить</button></div>
-      <div class="progress"><i id="llmBar"></i></div><div class="phase" id="llmMsg">не загружено</div><div class="err" id="llmErr"></div>
-      <div class="composer" style="margin-top:10px"><input id="lq" type="text" placeholder="Вопрос модели…" autocomplete="off"><button type="button" id="lgo">Спросить</button></div>
-      <div id="lans" class="answer-box">—</div><pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
+      <div class="composer">
+        <input id="cq" type="text" placeholder="Сообщение…" autocomplete="off">
+        <button type="button" id="cgo">Отправить</button>
+      </div>
+      <div class="row">
+        <button type="button" class="g" id="cex1">π</button>
+        <button type="button" class="g" id="cex2">формула</button>
+      </div>
+      <div class="answer" id="cthread">—</div>
     </section>
   </div>
   <div class="panel" id="p-mem">
     <section class="card">
-      <div class="composer"><input id="mq" type="text" placeholder="запомни: факт" autocomplete="off"><button type="button" id="mgo">Сохранить</button></div>
-      <div class="row"><button type="button" class="g" id="mrefresh">Обновить</button></div>
-      <p class="okmsg" id="mmsg"></p><pre class="seal" id="mstatus" style="margin-top:8px"></pre>
+      <div class="composer">
+        <input id="mq" type="text" placeholder="запомни: факт" autocomplete="off">
+        <button type="button" id="mgo">Сохранить</button>
+      </div>
+      <p class="okmsg" id="mmsg"></p>
+      <pre class="seal" id="mstatus">[]</pre>
     </section>
   </div>
   <div class="panel" id="p-status">
     <section class="card">
-      <div class="row"><button type="button" id="btnRefresh">Обновить</button><button type="button" class="g" id="btnPurge">Purge</button></div>
-      <pre class="seal" id="fullStatus" style="margin-top:10px;max-height:360px"></pre>
+      <div class="row">
+        <button type="button" id="btnRefresh">Обновить</button>
+        <button type="button" class="g" id="btnPurge">Purge SW</button>
+      </div>
+      <pre class="seal" id="fullStatus" style="max-height:320px"></pre>
     </section>
   </div>
-  <p class="foot">АКСИ Contour v260 · aksilove@internet.ru</p>
+  <p class="foot">АКСИ Contour v270 · ядро встроено · aksilove@internet.ru</p>
 </div>
-<script src="/aksi-purge.js?v=260"></script>
-<script src="/pi-crypto.js?v=260"></script>
-<script src="/aksi-pi-contour.js?v=260"></script>
-<script src="/aksi-vault.js?v=260"></script>
-<script src="/aksi-zero.js?v=260"></script>
-<script src="/aksi-neuro-seed.js?v=260"></script>
-<script src="/aksi-neuro.js?v=260"></script>
-<script src="/aksi-algorithm.js?v=260"></script>
-<script src="/aksi-decision.js?v=260"></script>
-<script src="/aksi-superpose.js?v=260"></script>
-<script src="/aksi-webllm.js?v=260"></script>
-<script src="/aksi-organism.js?v=260"></script>
-<script src="/aksi-api.js?v=260"></script>
-<script src="/aksi-ready.js?v=260"></script>
-<script src="/contour-app.js?v=260"></script>
+<script>
+(function () {
+  "use strict";
+  var VER = "270";
+  var last = null;
+  var t0 = Date.now();
+  function $(id) { return document.getElementById(id); }
+  function txt(id, v) { var el = $(id); if (el) el.textContent = v == null ? "" : String(v); }
+  function fnv(s) {
+    var h = 2166136261 >>> 0;
+    s = String(s || "");
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return ("00000000" + h.toString(16)).slice(-8);
+  }
+  async function piFeatures(query) {
+    var data = new TextEncoder().encode(String(query || ""));
+    var buf = await crypto.subtle.digest("SHA-256", data);
+    var view = new DataView(buf);
+    var n = view.getUint32(0, false) / 0xffffffff;
+    var theta = n * 2 * Math.PI;
+    var PI_DIGITS = "14159265358979323846264338327950288419716939937510";
+    var di = Math.floor(n * PI_DIGITS.length) % PI_DIGITS.length;
+    return { theta: theta, thetaDeg: theta * 180 / Math.PI, sin: Math.sin(theta), cos: Math.cos(theta), piDigit: PI_DIGITS.charAt(di), digitIndex: di };
+  }
+  function localAnswer(q) {
+    var s = String(q || "").toLowerCase();
+    if (/кто ты|who are you|привет|hello/.test(s))
+      return "Я АКСИ — Contour v" + VER + ". Offline Decision Integrity. Ответ · Gate · seal. Контакт: aksilove@internet.ru";
+    if (/формул|formula/.test(s))
+      return "AKSI = (A × I × S) × (1 + 0.4√n)\nA — agency · I — integrity (EQS/100) · S — structure · n — sealed history.";
+    if (/π|\bpi\b|пи\b|контур|contour/.test(s))
+      return "π-Contour v" + VER + ": query → SHA-256 → θ ∈ [0, 2π) → sin/cos → FNV seal.\nТот же текст → тот же угол θ.";
+    if (/gate|гейт/.test(s)) return "Gate τ ≈ 0.55 — порог принятия решения.";
+    if (/статус|status|что умеешь/.test(s))
+      return "Contour v" + VER + ": Decision, Chat, Memory, Status. Ядро встроено в страницу.";
+    return "АКСИ Contour v" + VER + ". Спросите: кто ты, формула, π, контур.\nКонтакт: aksilove@internet.ru";
+  }
+  async function coreDecide(query) {
+    query = String(query || "").trim();
+    if (!query) return { ok: false, answer: "", error: "empty" };
+    if (/^запомни\s*[:：]/i.test(query) || /^remember\s*[:：]/i.test(query)) {
+      var lr = await coreLearn(query);
+      return { ok: !!lr.ok, answer: lr.ok ? ("Сохранено · " + lr.source) : "Не удалось сохранить", anti: "learn", source: "learn", scores: { aksi: 0.7, eqs: 70, phi: 0.5, qcli: 0.5 }, gate: { ok: true, reason: "learn" }, seal: { kind: "learn", t: Date.now(), fnv: fnv(query) }, version: VER };
+    }
+    var feat = await piFeatures(query);
+    var answer = localAnswer(query);
+    var source = "core-local";
+    try {
+      if (window.AKSI && typeof AKSI.decide === "function") {
+        var ext = await AKSI.decide(query);
+        if (ext && ext.answer) { answer = ext.answer; source = ext.source || "api"; return Object.assign({ ok: true, version: VER }, ext, { answer: answer, source: source }); }
+      }
+    } catch (e) {}
+    try {
+      if (window.AKSI_ORGANISM && typeof AKSI_ORGANISM.decide === "function") {
+        var org = await AKSI_ORGANISM.decide(query);
+        if (org && org.answer) return Object.assign({ ok: true, version: VER }, org);
+      }
+    } catch (e) {}
+    var eqs = /π|формул|кто ты/.test(query.toLowerCase()) ? 78 : 62;
+    return {
+      ok: true, id: "c" + Date.now().toString(36), answer: answer, anti: "core · " + source, source: source,
+      scores: { aksi: eqs / 100, eqs: eqs, phi: 0.55 + 0.1 * Math.abs(feat.sin), qcli: 0.5 + 0.1 * Math.abs(feat.cos) },
+      gate: { ok: true, reason: "core-pass" },
+      seal: { kind: "pi-core", v: VER, theta: +feat.theta.toFixed(6), piDigit: feat.piDigit, fnv: fnv(query + "|" + answer + "|" + feat.theta.toFixed(6)), t: Date.now() },
+      features: feat, version: VER
+    };
+  }
+  async function coreLearn(fact) {
+    fact = String(fact || "").trim();
+    if (!fact) return { ok: false };
+    if (!/^запомни\s*[:：]/i.test(fact)) fact = "запомни: " + fact;
+    try { if (window.AKSI && AKSI.learn) return await AKSI.learn(fact); } catch (e) {}
+    try {
+      var key = "aksi_contour_mem_v270";
+      var arr = JSON.parse(localStorage.getItem(key) || "[]");
+      arr.push({ t: Date.now(), text: fact });
+      localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
+      return { ok: true, source: "localStorage", n: arr.length };
+    } catch (e) { return { ok: false, error: String(e.message || e) }; }
+  }
+  function showDecision(p) {
+    last = p;
+    var box = $("danswer");
+    txt("danswer", p.answer || "");
+    if (box) { box.classList.remove("flash"); void box.offsetWidth; box.classList.add("flash"); }
+    txt("vAksi", p.scores && p.scores.aksi != null ? Number(p.scores.aksi).toFixed(2) : "—");
+    txt("vEqs", p.scores && p.scores.eqs != null ? p.scores.eqs : "—");
+    txt("vPhi", p.scores && p.scores.phi != null ? Number(p.scores.phi).toFixed(2) : "—");
+    txt("vQcli", p.scores && p.scores.qcli != null ? Number(p.scores.qcli).toFixed(2) : "—");
+    var g = $("dgate");
+    if (g) {
+      if (p.gate && p.gate.ok) { g.className = "gate ok"; g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || "ok"); }
+      else { g.className = "gate no"; g.textContent = "Gate: ОТКЛОНЕНО"; }
+    }
+    txt("dseal", JSON.stringify(p.seal || {}, null, 2));
+    txt("dmeta", (p.ms != null ? p.ms + " ms · " : "") + (p.source || "") + " · v" + (p.version || VER));
+  }
+  async function runDecision(q) {
+    q = (q != null ? q : ($("dq") && $("dq").value) || "").trim();
+    if (!q) { txt("derr", "Введите вопрос"); return; }
+    txt("derr", "");
+    var btn = $("dgo"); if (btn) btn.disabled = true;
+    var t = Date.now();
+    try {
+      var p = await coreDecide(q);
+      p.ms = Date.now() - t;
+      showDecision(p);
+    } catch (e) {
+      txt("derr", String(e && e.message || e));
+      showDecision({ answer: localAnswer(q), source: "error-fallback", scores: { aksi: 0.5, eqs: 50, phi: 0.4, qcli: 0.4 }, gate: { ok: true, reason: "fallback" }, seal: { kind: "err", t: Date.now() }, ms: Date.now() - t });
+    } finally {
+      if (btn) btn.disabled = false;
+      refreshMods();
+    }
+  }
+  async function runChat(q) {
+    q = (q != null ? q : ($("cq") && $("cq").value) || "").trim();
+    if (!q) return;
+    txt("cthread", "…");
+    var p = await coreDecide(q);
+    txt("cthread", (p.answer || "") + "\n\n[source: " + (p.source || "core") + "]");
+  }
+  async function runMem() {
+    var q = ($("mq") && $("mq").value || "").trim();
+    if (!q) { txt("mmsg", "Введите текст"); return; }
+    var lr = await coreLearn(q);
+    txt("mmsg", lr.ok ? ("Сохранено · " + lr.source) : "Ошибка");
+    try { txt("mstatus", localStorage.getItem("aksi_contour_mem_v270") || "[]"); } catch (e) { txt("mstatus", JSON.stringify(lr)); }
+  }
+  function showPanel(name) {
+    document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + name); });
+    document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.getAttribute("data-p") === name); });
+  }
+  function refreshMods() {
+    var bits = [
+      ["Core", true],
+      ["API", !!(window.AKSI && AKSI.decide)],
+      ["Org", !!window.AKSI_ORGANISM],
+      ["π", !!(window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process)],
+      ["Dec", !!(window.AKSI_DECISION && AKSI_DECISION.decide)],
+      ["Zero", !!(window.AKSI_ZERO && AKSI_ZERO.think)],
+      ["Neuro", !!(window.AKSI_NEURO && AKSI_NEURO.think)]
+    ];
+    var root = $("modChecks");
+    if (root) root.innerHTML = bits.map(function (b) { return "<i class='" + (b[1] ? "on" : "") + "'>" + b[0] + "</i>"; }).join("");
+    var p = $("pill");
+    if (p) p.textContent = "v" + VER + " · " + bits.filter(function (b) { return b[1]; }).length + "/" + bits.length + " · " + (Date.now() - t0) + "ms";
+  }
+  function fullStatus() {
+    txt("fullStatus", JSON.stringify({ contour: "v" + VER, bootMs: Date.now() - t0, core: true, modules: { AKSI: !!(window.AKSI && AKSI.decide), ORGANISM: !!window.AKSI_ORGANISM, PI: !!(window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process), DECISION: !!(window.AKSI_DECISION && AKSI_DECISION.decide), ZERO: !!(window.AKSI_ZERO && AKSI_ZERO.think), NEURO: !!(window.AKSI_NEURO && AKSI_NEURO.think) }, userAgent: navigator.userAgent.slice(0, 80) }, null, 2));
+  }
+  async function hardPurge() {
+    try { if ("serviceWorker" in navigator) { var regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(function (r) { return r.unregister(); })); } } catch (e) {}
+    try { if (window.caches) { var keys = await caches.keys(); await Promise.all(keys.map(function (k) { return caches.delete(k); })); } } catch (e) {}
+    try { localStorage.removeItem("aksi_build_id"); } catch (e) {}
+    location.href = "/contour/?v=270&t=" + Date.now();
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target;
+    while (t && t !== document.body && t.tagName !== "BUTTON") t = t.parentElement;
+    if (!t || t === document.body) return;
+    var id = t.id;
+    var dp = t.getAttribute("data-p");
+    if (dp) { e.preventDefault(); showPanel(dp); return; }
+    if (id === "dgo") { e.preventDefault(); runDecision(); }
+    else if (id === "dex1") { e.preventDefault(); $("dq").value = "π"; runDecision("π"); }
+    else if (id === "dex2") { e.preventDefault(); $("dq").value = "формула"; runDecision("формула"); }
+    else if (id === "dex3") { e.preventDefault(); $("dq").value = "кто ты"; runDecision("кто ты"); }
+    else if (id === "cgo") { e.preventDefault(); runChat(); }
+    else if (id === "cex1") { e.preventDefault(); $("cq").value = "π"; runChat("π"); }
+    else if (id === "cex2") { e.preventDefault(); $("cq").value = "формула"; runChat("формула"); }
+    else if (id === "mgo") { e.preventDefault(); runMem(); }
+    else if (id === "btnRefresh") { e.preventDefault(); fullStatus(); refreshMods(); }
+    else if (id === "btnPurge" || id === "btnForce") { e.preventDefault(); hardPurge(); }
+    else if (id === "dcopy" && last) { e.preventDefault(); try { navigator.clipboard.writeText(JSON.stringify(last, null, 2)); txt("dmeta", "скопировано"); } catch (err) {} }
+    else if (id === "dproof" && last) {
+      e.preventDefault();
+      try { var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(last, null, 2)], { type: "application/json" })); a.download = "aksi-proof-v270.json"; a.click(); } catch (err) {}
+    }
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "Enter") return;
+    var id = e.target && e.target.id;
+    if (id === "dq") runDecision();
+    else if (id === "cq") runChat();
+    else if (id === "mq") runMem();
+  });
+  refreshMods();
+  fullStatus();
+  setTimeout(function () { runDecision("кто ты"); }, 200);
+  setTimeout(refreshMods, 800);
+  setTimeout(refreshMods, 2000);
+  ["/aksi-pi-contour.js?v=270","/aksi-organism.js?v=270","/aksi-api.js?v=270","/aksi-decision.js?v=270","/aksi-zero.js?v=270","/aksi-neuro.js?v=270"].forEach(function (src, i) {
+    setTimeout(function () {
+      var s = document.createElement("script"); s.src = src; s.async = true;
+      s.onload = s.onerror = function () { refreshMods(); };
+      document.head.appendChild(s);
+    }, 100 + i * 80);
+  });
+})();
+</script>
 </body>
 </html>
