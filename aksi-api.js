@@ -1,19 +1,12 @@
 /**
- * AKSI Product API v1.0 — unified browser API for the sovereign stack
- * Wraps Decision · ADIA · Neuro · Zero · Superpose · WebLLM
+ * AKSI Product API v1.1-organism — unified browser API for the sovereign stack
+ * Wraps Decision · ADIA · Neuro · Zero · Superpose · WebLLM · Vault · Organism
  * Offline-first. Contact: aksilove@internet.ru
- *
- * Usage:
- *   const r = await AKSI.decide("Кто ты?");
- *   const t = await AKSI.think("формула AKSI");
- *   const s = AKSI.evaluate("q", "answer text");
- *   AKSI.learn("запомни: факт");
- *   console.log(AKSI.status());
  */
 (function (G) {
   "use strict";
 
-  var VERSION = "1.0.0-product";
+  var VERSION = "1.1.0-organism";
   var FORMULA = "AKSI=(A×I×S)×(1+0.4√n)";
 
   function has(name, fn) {
@@ -32,7 +25,10 @@
       quantum: !!(G.AKSI_QUANTUM || G.AKSI_QPIPE),
       compose: has("AKSI_COMPOSE", "think"),
       integrity: !!G.AKSI_INTEGRITY,
-      knowledge: !!G.AKSI_KNOWLEDGE
+      knowledge: !!G.AKSI_KNOWLEDGE,
+      vault: !!(G.AKSI_VAULT && G.AKSI_VAULT.learn),
+      organism: !!G.AKSI_ORGANISM,
+      pi: !!(G.PiFractalCrypto || G.AKSI_PI_CRYPTO)
     };
   }
 
@@ -43,7 +39,7 @@
       offline: true,
       modules: modules(),
       contact: "aksilove@internet.ru",
-      product: "AKSI Contour + ADIA + Neuro"
+      product: "AKSI Organism Contour"
     };
   }
 
@@ -72,6 +68,9 @@
     query = String(query || "").trim();
     if (!query) {
       return Promise.resolve({ ok: false, error: "empty query", answer: "" });
+    }
+    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.decide === "function" && !G.AKSI_DECISION) {
+      return Promise.resolve(G.AKSI_ORGANISM.decide(query, opts));
     }
     if (G.AKSI_DECISION && typeof G.AKSI_DECISION.decide === "function") {
       return Promise.resolve(G.AKSI_DECISION.decide(query)).then(function (r) {
@@ -114,6 +113,19 @@
     query = String(query || "").trim();
     if (!query) return Promise.resolve({ text: "", source: "empty" });
 
+    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.think === "function") {
+      return Promise.resolve(G.AKSI_ORGANISM.think(query, opts)).then(function (t) {
+        if (t && (t.text || t.answer)) return t;
+        return null;
+      }).catch(function () { return null; }).then(function (t) {
+        if (t) return t;
+        return thinkFallback(query);
+      });
+    }
+    return thinkFallback(query);
+  }
+
+  function thinkFallback(query) {
     function fromNeuro() {
       if (G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") {
         return Promise.resolve(G.AKSI_NEURO.think(query)).then(function (n) {
@@ -125,7 +137,6 @@
       }
       return Promise.resolve(null);
     }
-
     function fromZero() {
       if (G.AKSI_ZERO && typeof G.AKSI_ZERO.think === "function") {
         return Promise.resolve(G.AKSI_ZERO.think(query)).then(function (z) {
@@ -137,7 +148,6 @@
       }
       return Promise.resolve(null);
     }
-
     function fromWebLLM() {
       if (G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready() && G.AKSI_WEBLLM.complete) {
         return G.AKSI_WEBLLM.complete(query, { temperature: 0.4, max_tokens: 280 }).then(function (w) {
@@ -147,7 +157,6 @@
       }
       return Promise.resolve(null);
     }
-
     return fromZero().then(function (z) {
       if (z) return z;
       return fromNeuro();
@@ -157,8 +166,8 @@
     }).then(function (w) {
       if (w) return w;
       return {
-        text: "АКСИ API online. Модули Decision/Neuro ещё загружаются. Спросите «кто ты» или «формула». Контакт: aksilove@internet.ru",
-        answer: "АКСИ API online. Модули Decision/Neuro ещё загружаются. Спросите «кто ты» или «формула». Контакт: aksilove@internet.ru",
+        text: "АКСИ Organism online. Спросите «кто ты» или «формула». Контакт: aksilove@internet.ru",
+        answer: "АКСИ Organism online. Спросите «кто ты» или «формула». Контакт: aksilove@internet.ru",
         source: "api-bootstrap"
       };
     });
@@ -185,6 +194,12 @@
     if (!fact) return Promise.resolve({ ok: false });
     if (!/^запомни\s*[:：]/i.test(fact) && !/^remember\s*[:：]/i.test(fact)) {
       fact = "запомни: " + fact;
+    }
+    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.remember === "function") {
+      return Promise.resolve(G.AKSI_ORGANISM.remember(fact));
+    }
+    if (G.AKSI_VAULT && typeof G.AKSI_VAULT.learn === "function") {
+      return Promise.resolve(G.AKSI_VAULT.learn(fact));
     }
     if (G.AKSI_DECISION && G.AKSI_DECISION.decide) {
       return Promise.resolve(G.AKSI_DECISION.decide(fact));
