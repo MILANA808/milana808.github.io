@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#efe5d2">
+<meta name="description" content="АКСИ — внедрение: Contour runtime, API, health-check, embed">
+<title>АКСИ · Deploy</title>
+<style>
+:root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}
+a{color:var(--a);font-weight:700}
+.wrap{max-width:820px;margin:0 auto;padding:20px 14px 56px}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(145deg,#6b4f35,#c4a35a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:20px}
+h1{font-size:24px;margin:12px 0 6px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
+.pill.bad{background:#f8eaea;color:var(--bad);border-color:#e0b8b0}
+.pill.warn{background:#f7f0d8;color:#7a5a10;border-color:#e0d4a0}
+pre{font-family:ui-monospace,monospace;font-size:12px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:12px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}
+.list{margin:8px 0 0 18px}.list li{margin:4px 0}
+.checks i{font-style:normal;display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-size:11px}
+.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
+.foot{text-align:center;font-size:12px;color:var(--muted);margin-top:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Δ</div>
+  <h1>АКСИ · Внедрение</h1>
+  <p class="sub">Готовый offline-first runtime. Не AGI — проверяемый Decision + π-Contour + Vault.</p>
+  <section class="card">
+    <h2>Статус готовности</h2>
+    <p><span class="pill" id="readyPill">проверка…</span> <span id="readyScore" class="sub"></span></p>
+    <div class="checks" id="checks"></div>
+    <div class="row">
+      <button type="button" id="btnCheck">Проверить снова</button>
+      <a href="/contour/" style="display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;background:#6b4f35;color:#fff;text-decoration:none;font-weight:800">Открыть Contour</a>
+      <a href="/crypto/" style="display:inline-flex;align-items:center;padding:10px 14px;border-radius:12px;background:#efe6d6;border:1px solid #ddd0bb;text-decoration:none;font-weight:700;color:#2a241c">Crypto π</a>
+    </div>
+    <pre id="report" style="margin-top:12px">—</pre>
+  </section>
+  <section class="card">
+    <h2>Куда внедрять</h2>
+    <ul class="list">
+      <li><b>Веб / PWA</b> — ссылка или iframe на /contour/</li>
+      <li><b>Внутренний инструмент</b> — Decision packet в браузере без бэкенда</li>
+      <li><b>Демо клиенту</b> — Contour + Status + Proof JSON</li>
+      <li><b>Свой сайт</b> — embed скриптов + AKSI.decide</li>
+    </ul>
+  </section>
+  <section class="card">
+    <h2>Минимальный embed</h2>
+<pre>&lt;script src="https://milana808.github.io/pi-crypto.js"&gt;&lt;/script&gt;
+&lt;script src="https://milana808.github.io/aksi-pi-contour.js"&gt;&lt;/script&gt;
+&lt;script src="https://milana808.github.io/aksi-vault.js"&gt;&lt;/script&gt;
+&lt;script src="https://milana808.github.io/aksi-organism.js"&gt;&lt;/script&gt;
+&lt;script src="https://milana808.github.io/aksi-api.js"&gt;&lt;/script&gt;
+&lt;script src="https://milana808.github.io/aksi-ready.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const r = await AKSI.decide("кто ты");
+  console.log(r.answer, r.gate, r.seal);
+  console.log(await AKSI_READY.check());
+&lt;/script&gt;</pre>
+  </section>
+  <section class="card">
+    <h2>Product API</h2>
+<pre>await AKSI.decide(query)
+await AKSI.think(query)
+await AKSI.learn("запомни: факт")
+await AKSI_PI_CONTOUR.process("π")
+await AKSI_READY.check()</pre>
+  </section>
+  <section class="card">
+    <h2>Честные границы</h2>
+    <ul class="list">
+      <li>Ядро offline в браузере без сервера</li>
+      <li>WebLLM опционален (CDN + WebGPU/WASM)</li>
+      <li>π/FNV seal — integrity ledger, не замена Ed25519</li>
+      <li>Нет AGI-обещаний — есть проверяемый Decision path</li>
+    </ul>
+  </section>
+  <p class="foot">АКСИ Deploy · aksilove@internet.ru · <a href="/contour/">Contour</a> · <a href="/">хаб</a></p>
+</div>
+<script src="/pi-crypto.js?v=235"></script>
+<script src="/aksi-pi-contour.js?v=235"></script>
+<script src="/aksi-vault.js?v=235"></script>
+<script src="/aksi-organism.js?v=235"></script>
+<script src="/aksi-api.js?v=235"></script>
+<script src="/aksi-ready.js?v=235"></script>
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  async function run(){
+    if (!window.AKSI_READY) {
+      $("readyPill").textContent = "AKSI_READY не загружен";
+      $("readyPill").className = "pill bad";
+      return;
+    }
+    var r = await AKSI_READY.check();
+    $("readyPill").textContent = r.ready ? "READY · можно внедрять" : "PARTIAL · ядро частично";
+    $("readyPill").className = "pill " + (r.ready ? "" : "warn");
+    $("readyScore").textContent = r.score + "% · " + r.ms + " ms";
+    $("checks").innerHTML = (r.tests||[]).map(function(t){
+      return "<i class='" + (t.ok?"on":"") + "'>" + t.name + "</i>";
+    }).join("");
+    $("report").textContent = JSON.stringify(r, null, 2);
+  }
+  $("btnCheck").onclick = run;
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
+  else setTimeout(run, 200);
+})();
+</script>
+</body>
+</html>
