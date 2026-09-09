@@ -1,12 +1,7 @@
-/**
- * AKSI cache purge boot
- * © AKSI · aksilove@internet.ru
- */
 (function () {
-  var BUILD = "20260909-v231";
+  var BUILD = "20260909-v232";
   var KEY = "aksi_build_id";
   var RELOAD = "aksi_purged_" + BUILD;
-  function log(m) { try { console.log("[AKSI purge]", m); } catch (e) {} }
   function done() {
     try { window.dispatchEvent(new CustomEvent("aksi-cache-purged", { detail: { build: BUILD } })); } catch (e) {}
   }
@@ -31,7 +26,6 @@
     var prev = null;
     try { prev = localStorage.getItem(KEY); } catch (e) {}
     if (prev === BUILD) { done(); return; }
-    log("build " + prev + " → " + BUILD);
     await purgeAll();
     try { localStorage.setItem(KEY, BUILD); } catch (e) {}
     try {
