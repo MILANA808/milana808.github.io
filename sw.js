@@ -1,35 +1,37 @@
-/* AKSI SW v225 — network-first HTML/JS, never sticky-cache LLM/Contour modules */
-var CACHE = "aksi-shell-v225";
-var PRE = ["/", "/index.html", "/sw.js"];
-var NO_CACHE = [
-  /aksi-webllm\.js/,
-  /aksi-superpose\.js/,
-  /aksi-decision\.js/,
-  /aksi-api\.js/,
-  /aksi-algorithm\.js/,
-  /aksi-integrity-bridge\.js/,
-  /aksi-neuro\.js/,
-  /aksi-zero\.js/,
-  /matrix\/app\.js/,
-  /aksi-qpipe\.js/,
-  /aksi-quantum\.js/,
-  /\/superpose\//,
-  /\/decision\//,
-  /\/contour\//,
-  /\/api\//,
-  /contour-app\.js/,
-  /aksi-purge\.js/,
-  /\/matrix\//
+/* AKSI SW v270 — offline-first shell for Contour + Sovereign Crystal + Swarm */
+var CACHE = "aksi-shell-v270";
+var PRE = [
+  "/",
+  "/index.html",
+  "/sw.js",
+  "/contour/",
+  "/contour/index.html",
+  "/sovereign/",
+  "/sovereign/index.html",
+  "/aksi-purge.js",
+  "/aksi-neuro.js",
+  "/aksi-knowledge.js",
+  "/aksi-hrr.js",
+  "/aksi-crystal.js",
+  "/aksi-swarm.js",
+  "/aksi-p2p-sdp.js",
+  "/aksi-organism.js",
+  "/aksi-api.js",
+  "/aksi-pi-contour.js",
+  "/aksi-zero.js"
 ];
-function shouldBypass(url) {
-  var p = url.pathname + url.search;
-  for (var i = 0; i < NO_CACHE.length; i++) if (NO_CACHE[i].test(p)) return true;
+var NET_FIRST = [/\/contour\//, /\/sovereign\//, /index\.html$/, /aksi-purge\.js/, /contour-app\.js/];
+function isNetFirst(url) {
+  var p = url.pathname;
+  for (var i = 0; i < NET_FIRST.length; i++) if (NET_FIRST[i].test(p)) return true;
   return false;
 }
 self.addEventListener("install", function (e) {
   e.waitUntil(
     caches.open(CACHE).then(function (c) {
-      return Promise.all(PRE.map(function (u) { return c.add(u).catch(function () {}); }));
+      return Promise.all(PRE.map(function (u) {
+        return c.add(u).catch(function () {});
+      }));
     }).then(function () { return self.skipWaiting(); })
   );
 });
@@ -47,45 +49,37 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (shouldBypass(url)) {
+  if (isNetFirst(url)) {
     e.respondWith(
-      fetch(req, { cache: "no-store" }).catch(function () {
-        return caches.match(req);
-      })
-    );
-    return;
-  }
-  var isHTML = req.mode === "navigate" || (req.headers.get("accept") || "").indexOf("text/html") !== -1;
-  if (isHTML) {
-    e.respondWith(
-      fetch(req, { cache: "no-store" }).then(function (res) {
-        var c = res.clone();
-        caches.open(CACHE).then(function (cache) { cache.put(req, c); });
+      fetch(req).then(function (res) {
         return res;
       }).catch(function () {
-        return caches.match(req).then(function (r) { return r || caches.match("/index.html"); });
+        return caches.match(req).then(function (c) {
+          return c || caches.match("/contour/") || caches.match("/");
+        });
       })
     );
     return;
   }
   e.respondWith(
-    fetch(req).then(function (res) {
-      if (res && res.ok) {
-        var c = res.clone();
-        caches.open(CACHE).then(function (cache) { cache.put(req, c); });
-      }
-      return res;
-    }).catch(function () { return caches.match(req); })
+    caches.match(req).then(function (cached) {
+      if (cached) return cached;
+      return fetch(req).then(function (res) {
+        if (res && res.ok && res.type === "basic") {
+          var clone = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(req, clone); });
+        }
+        return res;
+      }).catch(function () {
+        return caches.match("/") || new Response("АКСИ offline", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+      });
+    })
   );
 });
 self.addEventListener("message", function (e) {
-  if (!e.data) return;
-  if (e.data.type === "SKIP_WAITING") self.skipWaiting();
-  if (e.data.type === "PURGE") {
-    e.waitUntil(
-      caches.keys().then(function (keys) {
-        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
-      }).then(function () { return self.skipWaiting(); })
-    );
+  if (e.data && e.data.type === "PURGE") {
+    caches.keys().then(function (keys) {
+      return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+    });
   }
 });
