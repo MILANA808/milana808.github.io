@@ -1,12 +1,11 @@
 /**
- * AKSI Product API v1.1-organism — unified browser API for the sovereign stack
- * Wraps Decision · ADIA · Neuro · Zero · Superpose · WebLLM · Vault · Organism
+ * AKSI Product API v1.2-deploy — unified browser API
  * Offline-first. Contact: aksilove@internet.ru
  */
 (function (G) {
   "use strict";
 
-  var VERSION = "1.1.0-organism";
+  var VERSION = "1.2.0-deploy";
   var FORMULA = "AKSI=(A×I×S)×(1+0.4√n)";
 
   function has(name, fn) {
@@ -28,7 +27,9 @@
       knowledge: !!G.AKSI_KNOWLEDGE,
       vault: !!(G.AKSI_VAULT && G.AKSI_VAULT.learn),
       organism: !!G.AKSI_ORGANISM,
-      pi: !!(G.PiFractalCrypto || G.AKSI_PI_CRYPTO)
+      pi: !!(G.PiFractalCrypto || G.AKSI_PI_CRYPTO),
+      piContour: !!(G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process),
+      ready: !!(G.AKSI_READY)
     };
   }
 
@@ -39,7 +40,8 @@
       offline: true,
       modules: modules(),
       contact: "aksilove@internet.ru",
-      product: "AKSI Organism Contour"
+      product: "AKSI Contour + π + Vault",
+      deploy: "https://milana808.github.io/deploy/"
     };
   }
 
@@ -69,6 +71,31 @@
     if (!query) {
       return Promise.resolve({ ok: false, error: "empty query", answer: "" });
     }
+    if (G.AKSI_PI_CONTOUR && typeof G.AKSI_PI_CONTOUR.process === "function" && /π|\bpi\b|пи\b|контур|формул/i.test(query)) {
+      return Promise.resolve(G.AKSI_PI_CONTOUR.process(query)).then(function (pr) {
+        if (!pr || !pr.answer) return null;
+        return {
+          ok: true,
+          id: "pi-" + Date.now().toString(36),
+          answer: pr.answer,
+          anti: "π-contour",
+          source: pr.source || "pi-contour",
+          scores: pr.scores || {},
+          gate: pr.gate || { ok: true, reason: "pi-pass" },
+          seal: pr.seal || null,
+          features: pr.features || null,
+          version: VERSION,
+          offline: true
+        };
+      }).then(function (p) {
+        if (p) return p;
+        return decideCore(query, opts);
+      });
+    }
+    return decideCore(query, opts);
+  }
+
+  function decideCore(query, opts) {
     if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.decide === "function" && !G.AKSI_DECISION) {
       return Promise.resolve(G.AKSI_ORGANISM.decide(query, opts));
     }
@@ -166,8 +193,8 @@
     }).then(function (w) {
       if (w) return w;
       return {
-        text: "АКСИ Organism online. Спросите «кто ты» или «формула». Контакт: aksilove@internet.ru",
-        answer: "АКСИ Organism online. Спросите «кто ты» или «формула». Контакт: aksilove@internet.ru",
+        text: "АКСИ API online. Спросите «кто ты», «π» или «формула». Контакт: aksilove@internet.ru",
+        answer: "АКСИ API online. Спросите «кто ты», «π» или «формула». Контакт: aksilove@internet.ru",
         source: "api-bootstrap"
       };
     });
