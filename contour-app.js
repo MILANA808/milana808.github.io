@@ -1,6 +1,6 @@
 /**
  * AKSI Contour App v240 FAST
- * Critical path: PI → Organism → API → local KB
+ * Critical path: PI -> Organism -> API -> local KB
  * Contact: aksilove@internet.ru
  */
 (function () {
@@ -21,19 +21,17 @@
     el.addEventListener(ev, function (e) {
       try { fn(e); } catch (err) {
         console.error("[Contour]", err);
-        var box = $("bootErr") || $("derr");
-        if (box) box.textContent = "Ошибка: " + (err && err.message ? err.message : err);
       }
     });
   }
 
   var KB = [
-    { q: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — быстрый offline Contour. Decision · π · Vault. Контакт: aksilove@internet.ru" },
-    { q: ["формула", "formula"], a: "AKSI = (A × I × S) × (1 + 0.4√n). π-Contour: query→SHA-256→θ∈[0,2π)→seal." },
-    { q: ["контур", "contour"], a: "π-Contour — детерминированный путь ответа. Тот же запрос → тот же θ и seal." },
-    { q: ["gate", "гейт"], a: "Gate τ ≈ 0.55. Ниже порога — ответ помечается." },
-    { q: ["статус", "status", "что умеешь"], a: "Contour Fast v" + VER + ": Decision, Chat, π, Memory, optional WebLLM." },
-    { q: ["vault", "память"], a: "Vault — IndexedDB. «запомни: факт»." }
+    { q: ["кто ты", "who are you", "привет"], a: "Я АКСИ — быстрый offline Contour. Decision, pi, Vault. aksilove@internet.ru" },
+    { q: ["формула", "formula"], a: "AKSI = (A x I x S) x (1 + 0.4*sqrt(n)). pi-Contour: query->SHA-256->theta->seal." },
+    { q: ["контур", "contour"], a: "pi-Contour: deterministic path. Same query -> same theta and seal." },
+    { q: ["gate", "гейт"], a: "Gate tau ~ 0.55." },
+    { q: ["статус", "status"], a: "Contour Fast v" + VER + ": Decision, Chat, pi, Memory." },
+    { q: ["vault", "память"], a: "Vault IndexedDB. Command: zapomni fact." }
   ];
 
   function localDecide(q) {
@@ -57,7 +55,7 @@
     }
     return {
       id: "fb-" + Date.now().toString(36),
-      answer: "АКСИ Contour Fast v" + VER + ". Спросите: π, формула, кто ты. Контакт: aksilove@internet.ru",
+      answer: "AKSI Contour Fast v" + VER + ". Ask: pi, formula, kto ty. aksilove@internet.ru",
       anti: "no-kb-hit",
       source: "fallback",
       scores: { aksi: 0.5, eqs: 50, phi: 0.45, qcli: 0.4 },
@@ -79,13 +77,12 @@
 
   function refreshMods() {
     var bits = [
-      ["π", !!(window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process)],
+      ["pi", !!(window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process)],
       ["API", !!(window.AKSI && AKSI.decide)],
       ["Org", !!window.AKSI_ORGANISM],
       ["Vault", !!(window.AKSI_VAULT && AKSI_VAULT.learn)],
       ["Zero", !!(window.AKSI_ZERO && AKSI_ZERO.think)],
       ["Neuro", !!(window.AKSI_NEURO && AKSI_NEURO.think)],
-      ["Dec", !!(window.AKSI_DECISION && AKSI_DECISION.decide)],
       ["LLM", !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())]
     ];
     var root = $("modChecks");
@@ -97,8 +94,7 @@
     var p = $("pill");
     if (p) {
       var ms = Date.now() - tBoot;
-      var core = bits[0][1] || bits[1][1];
-      p.textContent = core ? ("FAST · " + ms + "ms") : "boot…";
+      p.textContent = (bits[0][1] || bits[1][1]) ? ("FAST · " + ms + "ms") : "boot...";
     }
   }
 
@@ -108,22 +104,22 @@
     if (dout) dout.hidden = false;
     txt("danswer", p.answer || "");
     txt("danti", p.anti || "");
-    txt("vAksi", p.scores && p.scores.aksi != null ? p.scores.aksi : "—");
-    txt("vEqs", p.scores && p.scores.eqs != null ? p.scores.eqs : "—");
-    txt("vPhi", p.scores && p.scores.phi != null ? p.scores.phi : "—");
-    txt("vQcli", p.scores && p.scores.qcli != null ? p.scores.qcli : "—");
+    txt("vAksi", p.scores && p.scores.aksi != null ? p.scores.aksi : "-");
+    txt("vEqs", p.scores && p.scores.eqs != null ? p.scores.eqs : "-");
+    txt("vPhi", p.scores && p.scores.phi != null ? p.scores.phi : "-");
+    txt("vQcli", p.scores && p.scores.qcli != null ? p.scores.qcli : "-");
     var g = $("dgate");
     if (g) {
       if (p.gate && p.gate.ok) {
         g.className = "gate ok";
-        g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || "");
+        g.textContent = "Gate: OK — " + (p.gate.reason || "");
       } else {
         g.className = "gate no";
-        g.textContent = "Gate: ОТКЛОНЕНО — " + ((p.gate && p.gate.reason) || "");
+        g.textContent = "Gate: NO — " + ((p.gate && p.gate.reason) || "");
       }
     }
     txt("dseal", JSON.stringify(p.seal || {}, null, 2));
-    txt("dmeta", (p.ms != null ? p.ms + " ms · " : "") + "source " + (p.source || "—") + " · " + (p.version || ""));
+    txt("dmeta", (p.ms != null ? p.ms + " ms · " : "") + "source " + (p.source || "-"));
   }
 
   async function runDecision(q) {
@@ -142,7 +138,7 @@
             p = {
               id: "pi-" + Date.now().toString(36),
               answer: pr.answer,
-              anti: "π · θ=" + ((pr.features && pr.features.theta != null) ? pr.features.theta.toFixed(4) : "?"),
+              anti: "pi",
               source: "pi-contour",
               scores: pr.scores || {},
               gate: pr.gate || { ok: true, reason: "pi-pass" },
@@ -185,7 +181,7 @@
               answer: n.text || n.answer,
               anti: "neuro",
               source: "neuro",
-              scores: { aksi: n.score || 0.6, eqs: Math.round((n.score || 0.6) * 100), phi: 0.5, qcli: 0.5 },
+              scores: { aksi: 0.6, eqs: 60, phi: 0.5, qcli: 0.5 },
               gate: { ok: true, reason: "neuro" },
               seal: null,
               ms: Date.now() - t0
@@ -220,8 +216,7 @@
       d.className = "st" + (s.selected ? " sel" : "");
       var prob = s.prob != null ? s.prob : 0;
       d.innerHTML =
-        "<div class='top'><span>|" + (s.i != null ? s.i : "?") + "⟩ · " + (s.source || "") +
-        "</span><span>P=" + prob + "</span></div>" +
+        "<div class='top'><span>" + (s.source || "") + "</span><span>P=" + prob + "</span></div>" +
         "<div class='bar'><i style='width:" + Math.round(prob * 100) + "%'></i></div>" +
         "<div style='font-size:13px;white-space:pre-wrap'></div>";
       d.querySelector("div:last-child").textContent = s.text || "";
@@ -232,8 +227,6 @@
   async function runSuperpose(q) {
     q = (q != null ? q : ($("sq") && $("sq").value) || "").trim();
     if (!q) return;
-    txt("serr", "");
-    txt("sphase", "…");
     var sans = $("sansBox");
     if (sans) sans.hidden = true;
     var btn = $("sgo");
@@ -245,8 +238,8 @@
       if (!d || !d.answer) d = localDecide(q);
       if (sans) sans.hidden = false;
       txt("sanswer", d.answer);
-      txt("smeta", JSON.stringify({ source: d.source, scores: d.scores, seal: d.seal }, null, 2));
-      txt("sphase", "готово");
+      txt("smeta", JSON.stringify({ source: d.source, scores: d.scores }, null, 2));
+      txt("sphase", "ok");
       renderStates([{ i: 0, source: d.source, prob: 1, text: d.answer, selected: true }]);
     } catch (e) {
       txt("serr", String(e && e.message || e));
@@ -258,8 +251,7 @@
   async function runChat(q) {
     q = (q != null ? q : ($("cq") && $("cq").value) || "").trim();
     if (!q) return;
-    txt("cerr", "");
-    txt("cthread", "…");
+    txt("cthread", "...");
     var btn = $("cgo");
     if (btn) btn.disabled = true;
     try {
@@ -285,18 +277,10 @@
       if (!ans) { ans = localDecide(q).answer; src = "fallback"; }
       txt("cthread", ans + "\n\n[source: " + src + "]");
     } catch (e) {
-      txt("cerr", String(e && e.message || e));
       txt("cthread", localDecide(q).answer);
     } finally {
       if (btn) btn.disabled = false;
     }
-  }
-
-  function setLlmBusy(busy) {
-    ["btnLoadLlm", "btnUnloadLlm", "btnWasm", "lgo"].forEach(function (id) {
-      var el = $(id);
-      if (el) el.disabled = !!busy;
-    });
   }
 
   function updateLlmUi(st) {
@@ -305,29 +289,26 @@
     var prog = Number(st.progress || 0);
     if (prog <= 1) prog *= 100;
     if (bar) bar.style.width = Math.round(prog) + "%";
-    txt("llmMsg", st.message || (st.ready ? "готово" : "не загружено"));
+    txt("llmMsg", st.message || (st.ready ? "ready" : "off"));
     txt("llmStatus", JSON.stringify(st, null, 2));
   }
 
   function runLoad(opts) {
     opts = opts || {};
-    txt("llmErr", "");
     if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.load) {
-      txt("llmErr", "модуль ещё грузится в фоне — подождите 1–2 с");
+      txt("llmErr", "module still loading in background");
       return;
     }
-    setLlmBusy(true);
     Promise.resolve(AKSI_WEBLLM.load(opts.model || null, updateLlmUi, { forceWasm: !!opts.forceWasm }))
-      .then(function () { updateLlmUi(); })
-      .catch(function (e) { txt("llmErr", String(e && e.message || e).slice(0, 200)); })
-      .then(function () { setLlmBusy(false); refreshMods(); });
+      .then(function () { updateLlmUi(); refreshMods(); })
+      .catch(function (e) { txt("llmErr", String(e && e.message || e).slice(0, 200)); });
   }
 
   async function runMem() {
     var q = ($("mq") && $("mq").value || "").trim();
     if (!q) return;
     if (!/^запомни\s*[:：]/i.test(q)) q = "запомни: " + q;
-    txt("mmsg", "…");
+    txt("mmsg", "...");
     try {
       var lr = null;
       if (window.AKSI && AKSI.learn) lr = await AKSI.learn(q);
@@ -347,7 +328,7 @@
   }
 
   function fullStatus() {
-    var o = {
+    txt("fullStatus", JSON.stringify({
       contour: "v" + VER,
       bootMs: Date.now() - tBoot,
       modules: {
@@ -359,8 +340,7 @@
         neuro: !!window.AKSI_NEURO,
         llm: !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())
       }
-    };
-    txt("fullStatus", JSON.stringify(o, null, 2));
+    }, null, 2));
   }
 
   function bindAll() {
@@ -381,27 +361,25 @@
     on($("btnWasm"), "click", function () { runLoad({ forceWasm: true }); });
     on($("btnUnloadLlm"), "click", function () {
       if (window.AKSI_WEBLLM && AKSI_WEBLLM.unload) AKSI_WEBLLM.unload();
-      updateLlmUi();
-      refreshMods();
+      updateLlmUi(); refreshMods();
     });
     on($("lgo"), "click", async function () {
       var q = ($("lq") && $("lq").value || "").trim();
       if (!q) return;
-      txt("lans", "…");
+      txt("lans", "...");
       try {
-        if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) throw new Error("загрузите модель");
-        var r = await AKSI_WEBLLM.complete(q, { temperature: 0.4, max_tokens: 500, system: "Ты АКСИ. Отвечай по-русски полно." });
+        if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) throw new Error("load model first");
+        var r = await AKSI_WEBLLM.complete(q, { temperature: 0.4, max_tokens: 500, system: "You are AKSI. Answer in Russian fully." });
         txt("lans", (r && r.text) || JSON.stringify(r));
       } catch (e) {
-        txt("lans", "Ошибка: " + (e && e.message || e));
+        txt("lans", "Error: " + (e && e.message || e));
       }
     });
     on($("mgo"), "click", function () { runMem(); });
     on($("mrefresh"), "click", function () { runMem(); });
     on($("btnRefresh"), "click", function () { fullStatus(); refreshMods(); });
     on($("btnPurge"), "click", function () {
-      if (window.AKSI_PURGE) AKSI_PURGE();
-      else location.reload();
+      if (window.AKSI_PURGE) AKSI_PURGE(); else location.reload();
     });
     ["dq", "sq", "cq", "lq", "mq"].forEach(function (id) {
       var el = $(id);
@@ -417,7 +395,7 @@
     });
     on($("dcopy"), "click", function () {
       if (!lastDecision) return;
-      try { navigator.clipboard.writeText(JSON.stringify(lastDecision, null, 2)); txt("dmeta", "copied"); } catch (e) {}
+      try { navigator.clipboard.writeText(JSON.stringify(lastDecision, null, 2)); } catch (e) {}
     });
     on($("dproof"), "click", function () {
       if (!lastDecision) return;
