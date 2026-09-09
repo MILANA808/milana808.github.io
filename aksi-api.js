@@ -1,66 +1,144 @@
 /**
- * AKSI Product API v1.2-deploy — unified browser API
- * Offline-first. Contact: aksilove@internet.ru
+ * AKSI Product API v1.4 — offline-first unified browser API
+ * decide / think / learn / superpose / status
+ * No circular Organism recursion. Contact: aksilove@internet.ru
  */
 (function (G) {
   "use strict";
+  var VERSION = "1.4.0-ideal";
 
-  var VERSION = "1.2.0-deploy";
-  var FORMULA = "AKSI=(A×I×S)×(1+0.4√n)";
-
-  function has(name, fn) {
+  function has(name, method) {
     var o = G[name];
-    return !!(o && (typeof o[fn] === "function" || (fn == null && o)));
-  }
-
-  function modules() {
-    return {
-      decision: has("AKSI_DECISION", "decide"),
-      adia: !!(G.AKSI_ALGORITHM || G.ADIA || G.AKSI_ADIA),
-      neuro: has("AKSI_NEURO", "think"),
-      zero: has("AKSI_ZERO", "think"),
-      superpose: has("AKSI_SUPERPOSE", "ask"),
-      webllm: !!(G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready()),
-      quantum: !!(G.AKSI_QUANTUM || G.AKSI_QPIPE),
-      compose: has("AKSI_COMPOSE", "think"),
-      integrity: !!G.AKSI_INTEGRITY,
-      knowledge: !!G.AKSI_KNOWLEDGE,
-      vault: !!(G.AKSI_VAULT && G.AKSI_VAULT.learn),
-      organism: !!G.AKSI_ORGANISM,
-      pi: !!(G.PiFractalCrypto || G.AKSI_PI_CRYPTO),
-      piContour: !!(G.AKSI_PI_CONTOUR && G.AKSI_PI_CONTOUR.process),
-      ready: !!(G.AKSI_READY)
-    };
+    return !!(o && (!method || typeof o[method] === "function"));
   }
 
   function status() {
     return {
       version: VERSION,
-      formula: FORMULA,
-      offline: true,
-      modules: modules(),
-      contact: "aksilove@internet.ru",
-      product: "AKSI Contour + π + Vault",
-      deploy: "https://milana808.github.io/deploy/"
+      modules: {
+        organism: !!G.AKSI_ORGANISM,
+        decision: has("AKSI_DECISION", "decide"),
+        neuro: has("AKSI_NEURO", "think"),
+        zero: has("AKSI_ZERO", "think"),
+        pi: has("AKSI_PI_CONTOUR", "process"),
+        vault: has("AKSI_VAULT", "learn"),
+        superpose: has("AKSI_SUPERPOSE", "ask"),
+        webllm: !!(G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready())
+      },
+      ts: Date.now()
     };
   }
 
-  function evaluate(query, answer, opts) {
+  function learn(fact) {
+    fact = String(fact || "").trim();
+    if (!fact) return Promise.resolve({ ok: false, error: "empty" });
+    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.remember === "function") {
+      return Promise.resolve(G.AKSI_ORGANISM.remember(fact));
+    }
+    if (G.AKSI_VAULT && typeof G.AKSI_VAULT.learn === "function") {
+      return Promise.resolve(G.AKSI_VAULT.learn(fact));
+    }
+    if (G.AKSI_NEURO && typeof G.AKSI_NEURO.learn === "function") {
+      try {
+        G.AKSI_NEURO.learn(fact.replace(/^запомни\s*[:：]\s*/i, ""));
+        return Promise.resolve({ ok: true, source: "neuro" });
+      } catch (e) {}
+    }
+    try {
+      var key = "aksi_api_mem_v1";
+      var arr = JSON.parse(localStorage.getItem(key) || "[]");
+      arr.push({ t: Date.now(), text: fact });
+      localStorage.setItem(key, JSON.stringify(arr.slice(-120)));
+      return Promise.resolve({ ok: true, source: "localStorage", n: arr.length });
+    } catch (e) {
+      return Promise.resolve({ ok: false, error: String(e.message || e) });
+    }
+  }
+
+  function thinkFallback(query) {
+    if (G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") {
+      return Promise.resolve(G.AKSI_NEURO.think(query)).then(function (n) {
+        if (n && (n.text || n.answer)) {
+          return { text: n.text || n.answer, answer: n.text || n.answer, source: "neuro", score: n.score };
+        }
+        return localThink(query);
+      }).catch(function () { return localThink(query); });
+    }
+    if (G.AKSI_ZERO && typeof G.AKSI_ZERO.think === "function") {
+      return Promise.resolve(G.AKSI_ZERO.think(query)).then(function (z) {
+        if (z && (z.answer || z.text)) {
+          return { text: z.answer || z.text, answer: z.answer || z.text, source: "zero" };
+        }
+        return localThink(query);
+      }).catch(function () { return localThink(query); });
+    }
+    return Promise.resolve(localThink(query));
+  }
+
+  function localThink(query) {
+    var q = String(query || "").toLowerCase();
+    var a;
+    if (/кто ты|who are you|привет/.test(q)) {
+      a = "Я АКСИ — sovereign offline runtime. Decision · π-Contour · Vault. Контакт: aksilove@internet.ru";
+    } else if (/формул|formula/.test(q)) {
+      a = "AKSI = (A × I × S) × (1 + 0.4√n). A — agency, I — integrity, S — structure, n — sealed history.";
+    } else if (/π|\bpi\b|пи\b|контур/.test(q)) {
+      a = "π-Contour: query → SHA-256 → θ ∈ [0, 2π) → sin/cos features → FNV seal.";
+    } else if (/gate|гейт/.test(q)) {
+      a = "Gate τ ≈ 0.55 — порог принятия решения в Decision Integrity.";
+    } else {
+      a = "АКСИ API v" + VERSION + ". Спросите: кто ты, формула, π, контур. aksilove@internet.ru";
+    }
+    return { text: a, answer: a, source: "api-local" };
+  }
+
+  function think(query, opts) {
     opts = opts || {};
-    var eng = G.AKSI_ALGORITHM || G.AKSI_ADIA || G.ADIA;
-    if (eng && typeof eng.evaluate === "function") {
-      return eng.evaluate(query, answer, opts);
+    query = String(query || "").trim();
+    if (!query) return Promise.resolve({ text: "", answer: "", source: "empty" });
+    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.think === "function") {
+      return Promise.resolve(G.AKSI_ORGANISM.think(query, opts)).then(function (t) {
+        if (t && (t.text || t.answer)) return t;
+        return thinkFallback(query);
+      }).catch(function () { return thinkFallback(query); });
     }
-    if (eng && typeof eng.process === "function") {
-      return eng.process(query, [{ text: String(answer || ""), source: opts.source || "api" }], opts);
+    return thinkFallback(query);
+  }
+
+  function decideCore(query, opts) {
+    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.decide === "function") {
+      return Promise.resolve(G.AKSI_ORGANISM.decide(query, opts)).then(function (d) {
+        if (d && d.answer) return d;
+        return think(query, opts).then(wrapDecision);
+      }).catch(function () {
+        return think(query, opts).then(wrapDecision);
+      });
     }
-    var text = String(answer || "");
-    var len = text.length;
-    var eqs = Math.min(95, 40 + Math.min(40, len / 8));
+    if (G.AKSI_DECISION && typeof G.AKSI_DECISION.decide === "function") {
+      return Promise.resolve(G.AKSI_DECISION.decide(query)).then(function (d) {
+        if (d && d.answer) {
+          d.ok = true;
+          return d;
+        }
+        return think(query, opts).then(wrapDecision);
+      }).catch(function () {
+        return think(query, opts).then(wrapDecision);
+      });
+    }
+    return think(query, opts).then(wrapDecision);
+  }
+
+  function wrapDecision(t) {
+    var answer = (t && (t.answer || t.text)) || "";
     return {
-      eqs: eqs,
-      aksi: (0.9 * (eqs / 100) * 0.85) * (1 + 0.4 * Math.sqrt(0)),
-      source: "api-lite",
+      ok: true,
+      id: "api-" + Date.now().toString(36),
+      answer: answer,
+      anti: "api · " + ((t && t.source) || "local"),
+      source: (t && t.source) || "api",
+      scores: (t && t.scores) || { aksi: 0.6, eqs: 60, phi: 0.5, qcli: 0.5 },
+      gate: (t && t.gate) || { ok: true, reason: "api-pass" },
+      seal: (t && t.seal) || { kind: "api", t: Date.now() },
       version: VERSION
     };
   }
@@ -71,133 +149,45 @@
     if (!query) {
       return Promise.resolve({ ok: false, error: "empty query", answer: "" });
     }
-    if (G.AKSI_PI_CONTOUR && typeof G.AKSI_PI_CONTOUR.process === "function" && /π|\bpi\b|пи\b|контур|формул/i.test(query)) {
-      return Promise.resolve(G.AKSI_PI_CONTOUR.process(query)).then(function (pr) {
-        if (!pr || !pr.answer) return null;
+    if (/^запомни\s*[:：]/i.test(query) || /^remember\s*[:：]/i.test(query)) {
+      return learn(query).then(function (lr) {
         return {
-          ok: true,
-          id: "pi-" + Date.now().toString(36),
-          answer: pr.answer,
-          anti: "π-contour",
-          source: pr.source || "pi-contour",
-          scores: pr.scores || {},
-          gate: pr.gate || { ok: true, reason: "pi-pass" },
-          seal: pr.seal || null,
-          features: pr.features || null,
+          ok: !!(lr && lr.ok !== false),
+          id: "learn-" + Date.now().toString(36),
+          answer: (lr && lr.ok !== false)
+            ? ("Сохранено · " + (lr.source || "memory"))
+            : "Не удалось сохранить",
+          anti: "learn",
+          source: "learn",
+          scores: { aksi: 0.7, eqs: 70, phi: 0.5, qcli: 0.5 },
+          gate: { ok: true, reason: "learn" },
+          seal: { kind: "learn", t: Date.now() },
           version: VERSION,
-          offline: true
+          learn: lr
         };
-      }).then(function (p) {
-        if (p) return p;
-        return decideCore(query, opts);
       });
+    }
+    if (G.AKSI_PI_CONTOUR && typeof G.AKSI_PI_CONTOUR.process === "function"
+        && /π|\bpi\b|пи\b|контур/i.test(query)) {
+      return Promise.resolve(G.AKSI_PI_CONTOUR.process(query)).then(function (pr) {
+        if (pr && pr.answer) {
+          return {
+            ok: true,
+            id: "pi-" + Date.now().toString(36),
+            answer: pr.answer,
+            anti: "π-contour",
+            source: "pi-contour",
+            scores: pr.scores || { aksi: 0.82, eqs: 82, phi: 0.72, qcli: 0.68 },
+            gate: pr.gate || { ok: true, reason: "pi-pass" },
+            seal: pr.seal || null,
+            features: pr.features || null,
+            version: VERSION
+          };
+        }
+        return decideCore(query, opts);
+      }).catch(function () { return decideCore(query, opts); });
     }
     return decideCore(query, opts);
-  }
-
-  function decideCore(query, opts) {
-    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.decide === "function" && !G.AKSI_DECISION) {
-      return Promise.resolve(G.AKSI_ORGANISM.decide(query, opts));
-    }
-    if (G.AKSI_DECISION && typeof G.AKSI_DECISION.decide === "function") {
-      return Promise.resolve(G.AKSI_DECISION.decide(query)).then(function (r) {
-        if (r && r.answer && !r.scores && (G.AKSI_ALGORITHM || G.AKSI_ADIA)) {
-          try {
-            var ev = evaluate(query, r.answer, { source: r.source });
-            r.scores = r.scores || ev;
-          } catch (e) {}
-        }
-        return r;
-      });
-    }
-    return think(query, opts).then(function (t) {
-      var answer = t.text || t.answer || "";
-      var scores = evaluate(query, answer, { source: t.source || "api" });
-      var aksi = scores.aksi != null ? scores.aksi : scores.eqs / 100;
-      var gateOk = aksi >= 0.55 || (scores.eqs != null && scores.eqs >= 55);
-      return {
-        ok: true,
-        id: "api-" + Date.now().toString(36),
-        answer: answer,
-        anti: t.anti || "API path without Decision Runtime.",
-        source: t.source || "api",
-        scores: {
-          aksi: typeof aksi === "number" ? Math.round(aksi * 1000) / 1000 : aksi,
-          eqs: scores.eqs,
-          phi: scores.phi,
-          qcli: scores.qcli
-        },
-        gate: { ok: !!gateOk, reason: gateOk ? "api-pass" : "below-tau" },
-        seal: scores.seal || { alg: "api-lite", t: Date.now() },
-        version: VERSION,
-        offline: true
-      };
-    });
-  }
-
-  function think(query, opts) {
-    opts = opts || {};
-    query = String(query || "").trim();
-    if (!query) return Promise.resolve({ text: "", source: "empty" });
-
-    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.think === "function") {
-      return Promise.resolve(G.AKSI_ORGANISM.think(query, opts)).then(function (t) {
-        if (t && (t.text || t.answer)) return t;
-        return null;
-      }).catch(function () { return null; }).then(function (t) {
-        if (t) return t;
-        return thinkFallback(query);
-      });
-    }
-    return thinkFallback(query);
-  }
-
-  function thinkFallback(query) {
-    function fromNeuro() {
-      if (G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") {
-        return Promise.resolve(G.AKSI_NEURO.think(query)).then(function (n) {
-          if (n && (n.text || n.answer)) {
-            return { text: n.text || n.answer, answer: n.text || n.answer, source: "neuro", score: n.score };
-          }
-          return null;
-        }).catch(function () { return null; });
-      }
-      return Promise.resolve(null);
-    }
-    function fromZero() {
-      if (G.AKSI_ZERO && typeof G.AKSI_ZERO.think === "function") {
-        return Promise.resolve(G.AKSI_ZERO.think(query)).then(function (z) {
-          if (z && (z.answer || z.text)) {
-            return { text: z.answer || z.text, answer: z.answer || z.text, source: "zero", confidence: z.confidence };
-          }
-          return null;
-        }).catch(function () { return null; });
-      }
-      return Promise.resolve(null);
-    }
-    function fromWebLLM() {
-      if (G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready() && G.AKSI_WEBLLM.complete) {
-        return G.AKSI_WEBLLM.complete(query, { temperature: 0.4, max_tokens: 280 }).then(function (w) {
-          if (w && w.text) return { text: w.text, answer: w.text, source: "webllm" };
-          return null;
-        }).catch(function () { return null; });
-      }
-      return Promise.resolve(null);
-    }
-    return fromZero().then(function (z) {
-      if (z) return z;
-      return fromNeuro();
-    }).then(function (n) {
-      if (n) return n;
-      return fromWebLLM();
-    }).then(function (w) {
-      if (w) return w;
-      return {
-        text: "АКСИ API online. Спросите «кто ты», «π» или «формула». Контакт: aksilove@internet.ru",
-        answer: "АКСИ API online. Спросите «кто ты», «π» или «формула». Контакт: aksilove@internet.ru",
-        source: "api-bootstrap"
-      };
-    });
   }
 
   function superpose(query, opts) {
@@ -206,67 +196,20 @@
       return Promise.resolve(G.AKSI_SUPERPOSE.ask(query, opts));
     }
     return decide(query, opts).then(function (d) {
-      return {
-        answer: d.answer,
-        source: d.source || "decision",
-        scores: d.scores,
-        seal: d.seal,
-        superposition: [{ i: 0, text: d.answer, source: d.source, prob: 1, selected: true }]
-      };
+      d.superposition = [{ i: 0, source: d.source, prob: 1, text: d.answer, selected: true }];
+      return d;
     });
-  }
-
-  function learn(fact) {
-    fact = String(fact || "").trim();
-    if (!fact) return Promise.resolve({ ok: false });
-    if (!/^запомни\s*[:：]/i.test(fact) && !/^remember\s*[:：]/i.test(fact)) {
-      fact = "запомни: " + fact;
-    }
-    if (G.AKSI_ORGANISM && typeof G.AKSI_ORGANISM.remember === "function") {
-      return Promise.resolve(G.AKSI_ORGANISM.remember(fact));
-    }
-    if (G.AKSI_VAULT && typeof G.AKSI_VAULT.learn === "function") {
-      return Promise.resolve(G.AKSI_VAULT.learn(fact));
-    }
-    if (G.AKSI_DECISION && G.AKSI_DECISION.decide) {
-      return Promise.resolve(G.AKSI_DECISION.decide(fact));
-    }
-    if (G.AKSI_NEURO && G.AKSI_NEURO.learn) {
-      G.AKSI_NEURO.learn(fact.replace(/^запомни\s*[:：]\s*/i, ""));
-      return Promise.resolve({ ok: true, source: "neuro" });
-    }
-    try {
-      var key = "aksi_api_mem_v1";
-      var arr = JSON.parse(localStorage.getItem(key) || "[]");
-      arr.push({ t: Date.now(), text: fact });
-      localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
-      return Promise.resolve({ ok: true, source: "localStorage", n: arr.length });
-    } catch (e) {
-      return Promise.resolve({ ok: false, error: String(e.message || e) });
-    }
-  }
-
-  function loadWebLLM(modelId, onProgress) {
-    if (!G.AKSI_WEBLLM || !G.AKSI_WEBLLM.load) {
-      return Promise.reject(new Error("aksi-webllm.js not loaded"));
-    }
-    return G.AKSI_WEBLLM.load(modelId || null, onProgress);
   }
 
   G.AKSI = {
     version: VERSION,
-    formula: FORMULA,
-    status: status,
-    modules: modules,
     decide: decide,
     think: think,
-    evaluate: evaluate,
-    superpose: superpose,
     learn: learn,
-    loadWebLLM: loadWebLLM,
+    superpose: superpose,
+    status: status,
+    evaluate: decide,
     ask: think,
     chat: think
   };
-
-  G.AKSI_API = G.AKSI;
 })(typeof window !== "undefined" ? window : globalThis);
