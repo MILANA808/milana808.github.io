@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ — единый живой offline-организм: Decision · Vault π · Crypto · Chat">
-<title>АКСИ Contour · Organism</title>
+<meta name="description" content="АКСИ — π-контур · Decision · Vault · Organism">
+<title>АКСИ Contour · π</title>
 <style>
 :root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f;--blue:#3b6cff}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -45,9 +45,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .states{display:flex;flex-direction:column;gap:7px}
 .st{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}
 .st.sel{border-color:var(--ok)}
-.st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
-.bar{height:6px;border-radius:99px;background:#eee;overflow:hidden;margin:5px 0}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}
 .checks{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 .checks i{font-style:normal;font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
 .checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
@@ -59,15 +56,18 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .err{color:var(--bad);font-size:12px;margin-top:6px;font-weight:600}
 .okmsg{color:var(--ok);font-size:12px;margin-top:6px}
 .hero p{color:var(--muted);font-size:13px;max-width:62ch}
+.bar{height:6px;border-radius:99px;background:#eee;overflow:hidden;margin:5px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}
+.st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="logo">Δ</div>
+    <div class="logo">π</div>
     <div>
-      <h1>АКСИ · Organism</h1>
-      <div class="sub"><a href="/">← хаб</a> · <a href="/crypto/">Crypto π</a> · <a href="/matrix/">MATRIX</a> · <a href="/decision/">Decision</a></div>
+      <h1>АКСИ · π-Contour</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/crypto/">Crypto π</a> · <a href="/matrix/">MATRIX</a></div>
     </div>
     <span class="pill" id="pill">загрузка…</span>
   </header>
@@ -82,46 +82,45 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <section class="card">
     <div class="checks" id="modChecks"></div>
     <div class="err" id="bootErr"></div>
-    <p class="muted" style="margin-top:6px">Единый организм · Decision · Vault π · Crypto · Chat · offline-first</p>
+    <p class="muted" style="margin-top:6px">π-контур: query → SHA-256 → θ ∈ [0,2π) → sin/cos → rank → seal</p>
   </section>
   <div class="panel on" id="p-decision">
-    <section class="card hero"><h3>Decision Runtime</h3><p>Ответ · анти · EQS · Gate · печать. Полный текст на русском.</p></section>
+    <section class="card hero"><h3>Decision · π</h3><p>Спросите «π», «формула», «контур» — ответ через вычислительный контур Math.PI.</p></section>
     <section class="card">
-      <div class="composer"><input id="dq" type="text" placeholder="Вопрос… или запомни: факт" autocomplete="off"><button type="button" id="dgo">Решить</button></div>
-      <div class="row"><button type="button" class="g" id="dex1">Кто ты?</button><button type="button" class="g" id="dex2">Формула AKSI</button><button type="button" class="g" id="dex3">Gate</button></div>
+      <div class="composer"><input id="dq" type="text" placeholder="π · формула · контур · вопрос…" autocomplete="off"><button type="button" id="dgo">Решить</button></div>
+      <div class="row"><button type="button" class="g" id="dex1">π</button><button type="button" class="g" id="dex2">Формула AKSI</button><button type="button" class="g" id="dex3">контур</button></div>
       <div class="err" id="derr"></div>
     </section>
     <section class="card" id="dout" hidden>
       <div class="grid2"><div class="col pro"><div class="lbl">Ответ</div><div id="danswer" class="answer-box" style="margin:0;border:0;padding:0"></div></div><div class="col con"><div class="lbl">Анти / риски</div><div id="danti"></div></div></div>
       <div class="meters"><div class="m"><b id="vAksi">—</b><span>AKSI</span></div><div class="m"><b id="vEqs">—</b><span>EQS</span></div><div class="m"><b id="vPhi">—</b><span>Φ</span></div><div class="m"><b id="vQcli">—</b><span>QCLI</span></div></div>
       <div class="gate no" id="dgate">Gate: —</div>
-      <div class="row"><button type="button" class="g" id="dproof">Скачать Proof</button><button type="button" class="g" id="dverify">Verify</button><button type="button" class="g" id="dcopy">Копировать JSON</button></div>
+      <div class="row"><button type="button" class="g" id="dproof">Proof</button><button type="button" class="g" id="dverify">Verify</button><button type="button" class="g" id="dcopy">JSON</button></div>
       <pre class="seal" id="dseal"></pre><p class="muted" id="dmeta"></p>
     </section>
   </div>
   <div class="panel" id="p-superpose">
-    <section class="card hero"><h3>Superpose</h3><p>Кандидаты → Born-коллапс → печать.</p></section>
+    <section class="card hero"><h3>Superpose</h3><p>Кандидаты → Born-коллапс.</p></section>
     <section class="card">
-      <div class="composer"><input id="sq" type="text" placeholder="Вопрос для суперпозиции" autocomplete="off"><button type="button" id="sgo">Коллапс</button></div>
-      <div class="row"><button type="button" class="g" id="sex1">Кто ты?</button><button type="button" class="g" id="sex2">Суперпозиция</button><button type="button" class="g" id="sex3">Что такое АКСИ?</button></div>
+      <div class="composer"><input id="sq" type="text" placeholder="Суперпозиция" autocomplete="off"><button type="button" id="sgo">Коллапс</button></div>
+      <div class="row"><button type="button" class="g" id="sex1">Кто ты?</button><button type="button" class="g" id="sex2">π</button><button type="button" class="g" id="sex3">АКСИ</button></div>
       <div class="phase" id="sphase"></div><div class="err" id="serr"></div>
     </section>
     <section class="card" id="sbox" hidden><div class="states" id="sstates"></div></section>
-    <section class="card" id="sansBox" hidden><div class="lbl">Ответ после коллапса</div><div id="sanswer" class="answer-box"></div><pre class="seal" id="smeta" style="margin-top:8px"></pre></section>
+    <section class="card" id="sansBox" hidden><div class="lbl">Ответ</div><div id="sanswer" class="answer-box"></div><pre class="seal" id="smeta" style="margin-top:8px"></pre></section>
   </div>
   <div class="panel" id="p-chat">
     <section class="card">
-      <h3>Chat · Organism path</h3>
-      <div class="composer"><input id="cq" type="text" placeholder="Сообщение на русском…" autocomplete="off"><button type="button" id="cgo">Отправить</button></div>
-      <div class="row"><button type="button" class="g" id="cex1">Кто ты?</button><button type="button" class="g" id="cex2">статус</button><button type="button" class="g" id="cex3">что умеешь</button></div>
+      <h3>Chat · π-path</h3>
+      <div class="composer"><input id="cq" type="text" placeholder="Сообщение…" autocomplete="off"><button type="button" id="cgo">Отправить</button></div>
+      <div class="row"><button type="button" class="g" id="cex1">π</button><button type="button" class="g" id="cex2">формула</button><button type="button" class="g" id="cex3">контур</button></div>
       <div class="err" id="cerr"></div><div id="cthread" class="answer-box" style="min-height:140px">—</div>
     </section>
   </div>
   <div class="panel" id="p-llm">
     <section class="card">
       <h3>WebLLM · опционально</h3>
-      <p class="muted">Организм работает без модели. WASM если нет WebGPU.</p>
-      <div class="row"><button type="button" class="blue" id="btnLoadLlm">Загрузить WebLLM</button><button type="button" class="g" id="btnWasm">Только WASM</button><button type="button" class="g" id="btnUnloadLlm">Выгрузить</button></div>
+      <div class="row"><button type="button" class="blue" id="btnLoadLlm">Загрузить</button><button type="button" class="g" id="btnWasm">WASM</button><button type="button" class="g" id="btnUnloadLlm">Выгрузить</button></div>
       <div class="progress"><i id="llmBar"></i></div><div class="phase" id="llmMsg">не загружено</div><div class="err" id="llmErr"></div>
       <div class="composer" style="margin-top:10px"><input id="lq" type="text" placeholder="Вопрос модели…" autocomplete="off"><button type="button" id="lgo">Спросить</button></div>
       <div id="lans" class="answer-box">—</div><pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
@@ -137,30 +136,31 @@ button:disabled{opacity:.5;cursor:not-allowed}
   </div>
   <div class="panel" id="p-status">
     <section class="card">
-      <h3>Status · пульс организма</h3>
-      <div class="row"><button type="button" id="btnRefresh">Обновить</button><button type="button" class="g" id="btnPurge">Purge cache</button></div>
+      <h3>Status · пульс</h3>
+      <div class="row"><button type="button" id="btnRefresh">Обновить</button><button type="button" class="g" id="btnPurge">Purge</button></div>
       <pre class="seal" id="fullStatus" style="margin-top:10px;max-height:360px"></pre>
     </section>
   </div>
-  <p class="foot">АКСИ Organism v232 · единый продукт · aksilove@internet.ru</p>
+  <p class="foot">АКСИ π-Contour v233 · aksilove@internet.ru</p>
 </div>
-<script src="/aksi-purge.js?v=232"></script>
-<script src="/aksi-knowledge.js?v=232"></script>
-<script src="/aksi-neuro-seed.js?v=232"></script>
-<script src="/aksi-neuro.js?v=232"></script>
-<script src="/aksi-zero.js?v=232"></script>
-<script src="/aksi-compose.js?v=232"></script>
-<script src="/aksi-quantum.js?v=232"></script>
-<script src="/aksi-qpipe.js?v=232"></script>
-<script src="/aksi-algorithm.js?v=232"></script>
-<script src="/aksi-decision.js?v=232"></script>
-<script src="/aksi-webllm.js?v=232"></script>
-<script src="/aksi-superpose.js?v=232"></script>
-<script src="/aksi-integrity-bridge.js?v=232"></script>
-<script src="/pi-crypto.js?v=232"></script>
-<script src="/aksi-vault.js?v=232"></script>
-<script src="/aksi-organism.js?v=232"></script>
-<script src="/aksi-api.js?v=232"></script>
-<script src="/contour-app.js?v=232"></script>
+<script src="/aksi-purge.js?v=233"></script>
+<script src="/aksi-knowledge.js?v=233"></script>
+<script src="/aksi-neuro-seed.js?v=233"></script>
+<script src="/aksi-neuro.js?v=233"></script>
+<script src="/aksi-zero.js?v=233"></script>
+<script src="/aksi-compose.js?v=233"></script>
+<script src="/aksi-quantum.js?v=233"></script>
+<script src="/aksi-qpipe.js?v=233"></script>
+<script src="/aksi-algorithm.js?v=233"></script>
+<script src="/aksi-decision.js?v=233"></script>
+<script src="/aksi-webllm.js?v=233"></script>
+<script src="/aksi-superpose.js?v=233"></script>
+<script src="/aksi-integrity-bridge.js?v=233"></script>
+<script src="/pi-crypto.js?v=233"></script>
+<script src="/aksi-pi-contour.js?v=233"></script>
+<script src="/aksi-vault.js?v=233"></script>
+<script src="/aksi-organism.js?v=233"></script>
+<script src="/aksi-api.js?v=233"></script>
+<script src="/contour-app.js?v=233"></script>
 </body>
 </html>
