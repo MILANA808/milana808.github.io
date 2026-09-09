@@ -1,11 +1,11 @@
 /**
- * AKSI Contour App v225 — Product Runtime (mass-ready offline core)
+ * AKSI Contour App v231 — Organism product · Vault π · unified path
  * Product API → Decision / Superpose / Zero / Neuro / fallback
  * WebLLM optional. Contact: aksilove@internet.ru
  */
 (function () {
   "use strict";
-  var VER = "225";
+  var VER = "231";
   var lastDecision = null;
   var preferLocal = true;
 
@@ -28,15 +28,16 @@
   }
 
   var FALLBACK_KB = [
-    { q: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — суверенный offline-first цифровой напарник. Decision · Superpose · Neuro · Zero · WebLLM · Product API. Контакт: aksilove@internet.ru" },
+    { q: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — единый живой offline-организм. Decision · Vault π · Crypto · Neuro · Zero. Контакт: aksilove@internet.ru" },
     { q: ["формула", "formula", "aksi ="], a: "AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity (EQS), S — sovereignty/structure, n — опыт (sealed history)." },
     { q: ["gate", "гейт"], a: "Gate — порог принятия (τ ≈ 0.55). Если score ниже — ответ отклоняется или помечается, в официальную память не пишется." },
     { q: ["adia", "адиа", "eqs"], a: "ADIA — Unified Resonance Decision Engine. Многоосевой EQS, rank, печать, policy companion/lab/strict." },
     { q: ["quantum", "квант"], a: "Локальный quantum-симулятор АКСИ (state-vector) + QCLI meta. Прозрачность, не «магия»." },
     { q: ["superpose", "суперпоз"], a: "Superpose: кандидаты от движков → амплитуды → Born-коллапс → печать." },
-    { q: ["api", "продукт"], a: "Product API: AKSI.decide / think / evaluate / superpose / learn / status. Документация: /api/" },
-    { q: ["статус", "status", "что умеешь"], a: "Contour v" + VER + ": Decision, Superpose, Chat, WebLLM, Memory, Status. Offline-ядро всегда доступно." },
-    { q: ["webllm", "llm", "модель"], a: "WebLLM — опциональная локальная модель (WebGPU или WASM). Без неё работают Decision, Neuro и Zero. Кнопка «Только WASM» не требует WebGPU." }
+    { q: ["api", "продукт", "организм"], a: "Organism API: AKSI.decide / think / learn · AKSI_ORGANISM.pulse / remember · Vault π · Crypto. /contour/ /crypto/" },
+    { q: ["статус", "status", "что умеешь"], a: "Contour Organism v" + VER + ": Decision, Superpose, Chat, WebLLM, Memory/Vault, Status. Offline-ядро всегда доступно." },
+    { q: ["webllm", "llm", "модель"], a: "WebLLM — опциональная локальная модель. Без неё работают Decision, Neuro, Zero и Vault." },
+    { q: ["vault", "память", "pi", "π"], a: "Vault π — IndexedDB + опциональное шифрование PiFractalCrypto. запомни: факт → Organism.remember → Vault." }
   ];
 
   function localDecide(q) {
@@ -62,7 +63,7 @@
     }
     return {
       id: "fb-" + Date.now().toString(36),
-      answer: "Я АКСИ Contour v" + VER + ". Спросите: кто ты, формула, Gate, ADIA, API, Quantum. Или «запомни: факт». Контакт: aksilove@internet.ru",
+      answer: "Я АКСИ Contour Organism v" + VER + ". Спросите: кто ты, формула, Gate, Vault, API. Или «запомни: факт». Контакт: aksilove@internet.ru",
       anti: "Нет точного совпадения в fallback KB.",
       source: "fallback",
       scores: { aksi: 0.45, eqs: 45, phi: 0.4, qcli: 0.4 },
@@ -90,6 +91,9 @@
       ["Zero", !!(window.AKSI_ZERO && AKSI_ZERO.think)],
       ["Neuro", !!(window.AKSI_NEURO && AKSI_NEURO.think)],
       ["ADIA", !!(window.AKSI_ALGORITHM || window.ADIA)],
+      ["Vault", !!(window.AKSI_VAULT && AKSI_VAULT.learn)],
+      ["Pi", !!(window.PiFractalCrypto || window.AKSI_PI_CRYPTO)],
+      ["Organism", !!(window.AKSI_ORGANISM)],
       ["WebLLM", !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())],
       ["Quantum", !!(window.AKSI_QUANTUM || window.AKSI_QPIPE)]
     ];
@@ -103,7 +107,7 @@
     var be = $("bootErr");
     if (be) {
       be.textContent = missing.length
-        ? "Опционально не готово: " + missing.join(", ") + " — Decision/Chat работают через fallback"
+        ? "Опционально: " + missing.join(", ") + " — ядро Decision/Chat работает"
         : "";
     }
     setPill();
@@ -122,7 +126,7 @@
       p.textContent = "LLM " + Math.round(pr) + "%";
       p.className = "pill warn";
     } else {
-      p.textContent = "OFFLINE READY · v" + VER;
+      p.textContent = "ORGANISM · v" + VER;
       p.className = "pill";
     }
   }
@@ -162,8 +166,11 @@
       if (window.AKSI && typeof AKSI.decide === "function") {
         try { p = await AKSI.decide(q); } catch (e) { console.warn("[Contour] AKSI.decide", e); }
       }
+      if ((!p || !p.answer) && window.AKSI_ORGANISM && AKSI_ORGANISM.decide) {
+        try { p = await AKSI_ORGANISM.decide(q); } catch (e) {}
+      }
       if ((!p || !p.answer) && window.AKSI_DECISION && typeof AKSI_DECISION.decide === "function") {
-        try { p = await Promise.resolve(AKSI_DECISION.decide(q)); } catch (e) { console.warn("[Contour] DECISION", e); }
+        try { p = await Promise.resolve(AKSI_DECISION.decide(q)); } catch (e) {}
       }
       if ((!p || !p.answer) && window.AKSI_ZERO && AKSI_ZERO.think) {
         try {
@@ -269,7 +276,7 @@
             renderStates(apiR.superposition || [{ i: 0, source: apiR.source, prob: 1, text: apiR.answer, selected: true }]);
             return;
           }
-        } catch (e) { console.warn(e); }
+        } catch (e) {}
       }
       if (window.AKSI_SUPERPOSE && typeof AKSI_SUPERPOSE.ask === "function") {
         var unsub = null;
@@ -324,13 +331,19 @@
     if (btn) btn.disabled = true;
     try {
       var ans = null, src = "", meta = {};
-      if (window.AKSI && typeof AKSI.think === "function") {
+      if (window.AKSI_ORGANISM && AKSI_ORGANISM.think) {
+        try {
+          var ot = await AKSI_ORGANISM.think(q);
+          if (ot && (ot.text || ot.answer)) {
+            ans = ot.text || ot.answer; src = ot.source || "organism"; meta = { scores: ot.scores };
+          }
+        } catch (e) {}
+      }
+      if (!ans && window.AKSI && typeof AKSI.think === "function") {
         try {
           var t = await AKSI.think(q);
           if (t && (t.text || t.answer)) {
-            ans = t.text || t.answer;
-            src = t.source || "api";
-            meta = { scores: t.score || t.scores };
+            ans = t.text || t.answer; src = t.source || "api"; meta = { scores: t.score || t.scores };
           }
         } catch (e) {}
       }
@@ -350,16 +363,6 @@
         try {
           var n = await Promise.resolve(AKSI_NEURO.think(q));
           if (n && (n.text || n.answer)) { ans = n.text || n.answer; src = "neuro"; }
-        } catch (e) {}
-      }
-      if (!ans && window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready() && AKSI_WEBLLM.complete) {
-        try {
-          var w = await AKSI_WEBLLM.complete(q, {
-            temperature: 0.45,
-            max_tokens: 600,
-            system: "Ты — АКСИ. Отвечай полностью на русском языке, ясно и по существу."
-          });
-          if (w && w.text) { ans = w.text; src = "webllm"; }
         } catch (e) {}
       }
       if (!ans) {
@@ -399,11 +402,11 @@
     preferLocal = !!opts.forceWasm;
     txt("llmErr", "");
     if (!window.AKSI_WEBLLM || typeof AKSI_WEBLLM.load !== "function") {
-      txt("llmErr", "Модуль aksi-webllm.js не загружен — offline Neuro/Zero работают. Decision и Chat доступны.");
+      txt("llmErr", "Модуль aksi-webllm.js не загружен — offline-ядро работает");
       return;
     }
     setLlmBusy(true);
-    txt("llmMsg", opts.forceWasm ? "загрузка WASM (без WebGPU)…" : "загрузка WebLLM / fallback…");
+    txt("llmMsg", opts.forceWasm ? "загрузка WASM…" : "загрузка WebLLM…");
     try { updateLlmUi(AKSI_WEBLLM.status()); } catch (e0) {}
     Promise.resolve(AKSI_WEBLLM.load(opts.model || null, updateLlmUi, { forceWasm: !!opts.forceWasm }))
       .then(function (s) {
@@ -418,10 +421,8 @@
         }
       })
       .catch(function (e) {
-        var msg = String((e && e.message) || e).slice(0, 260);
-        txt("llmErr", "Ошибка: " + msg + " — Decision/Chat работают без модели. Проверьте сеть или блокировщик.");
-        txt("llmMsg", "модель недоступна — offline-ядро работает");
-        try { updateLlmUi(AKSI_WEBLLM.status && AKSI_WEBLLM.status()); } catch (e1) {}
+        txt("llmErr", "Ошибка: " + String((e && e.message) || e).slice(0, 260));
+        txt("llmMsg", "модель недоступна — организм работает offline");
       })
       .then(function () {
         setLlmBusy(false);
@@ -435,25 +436,34 @@
     if (!/^запомни\s*[:：]/i.test(q) && !/^remember\s*[:：]/i.test(q)) q = "запомни: " + q;
     txt("mmsg", "…");
     try {
-      if (window.AKSI && typeof AKSI.learn === "function") {
-        var lr = await AKSI.learn(q);
-        txt("mmsg", (lr && lr.ok !== false) ? ("Сохранено · " + (lr.source || "api")) : "Не удалось");
+      var lr = null;
+      if (window.AKSI_ORGANISM && typeof AKSI_ORGANISM.remember === "function") {
+        lr = await AKSI_ORGANISM.remember(q);
+      } else if (window.AKSI_VAULT && typeof AKSI_VAULT.learn === "function") {
+        lr = await AKSI_VAULT.learn(q);
+      } else if (window.AKSI && typeof AKSI.learn === "function") {
+        lr = await AKSI.learn(q);
       } else if (window.AKSI_NEURO && AKSI_NEURO.learn) {
         AKSI_NEURO.learn(q.replace(/^запомни\s*[:：]\s*/i, ""));
-        txt("mmsg", "Сохранено в Neuro");
+        lr = { ok: true, source: "neuro" };
       } else {
         var key = "aksi_contour_mem_v1";
         var arr = JSON.parse(localStorage.getItem(key) || "[]");
         arr.push({ t: Date.now(), text: q });
         localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
-        txt("mmsg", "Сохранено локально (" + arr.length + ")");
+        lr = { ok: true, source: "local", n: arr.length };
       }
-      if ($("mstatus")) {
-        txt("mstatus", JSON.stringify({
-          local: (JSON.parse(localStorage.getItem("aksi_contour_mem_v1") || "[]")).length,
-          neuro: window.AKSI_NEURO && AKSI_NEURO.status ? AKSI_NEURO.status() : null
-        }, null, 2));
-      }
+      txt("mmsg", (lr && lr.ok !== false)
+        ? ("Сохранено · " + (lr.source || "ok") + (lr.enc ? " · π" : "") + (lr.id ? " · " + lr.id : ""))
+        : "Не удалось");
+      var st = { learn: lr };
+      try {
+        if (window.AKSI_VAULT && AKSI_VAULT.status) st.vault = await AKSI_VAULT.status();
+      } catch (e1) {}
+      try {
+        if (window.AKSI_ORGANISM && AKSI_ORGANISM.pulse) st.organism = await AKSI_ORGANISM.pulse();
+      } catch (e2) {}
+      if ($("mstatus")) txt("mstatus", JSON.stringify(st, null, 2));
     } catch (e) {
       txt("mmsg", "Ошибка: " + (e && e.message || e));
     }
@@ -469,6 +479,9 @@
         SUPERPOSE: !!(window.AKSI_SUPERPOSE && AKSI_SUPERPOSE.ask),
         ZERO: !!(window.AKSI_ZERO && AKSI_ZERO.think),
         NEURO: !!(window.AKSI_NEURO && AKSI_NEURO.think),
+        VAULT: !!(window.AKSI_VAULT),
+        PI: !!(window.PiFractalCrypto || window.AKSI_PI_CRYPTO),
+        ORGANISM: !!(window.AKSI_ORGANISM),
         WEBLLM: !!(window.AKSI_WEBLLM),
         WEBLLM_READY: !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready())
       },
@@ -476,6 +489,12 @@
       api: window.AKSI && AKSI.status ? AKSI.status() : null
     };
     txt("fullStatus", JSON.stringify(o, null, 2));
+    if (window.AKSI_ORGANISM && AKSI_ORGANISM.pulse) {
+      AKSI_ORGANISM.pulse().then(function (p) {
+        o.organism = p;
+        txt("fullStatus", JSON.stringify(o, null, 2));
+      }).catch(function () {});
+    }
   }
 
   function bindAll() {
@@ -506,7 +525,6 @@
       var q = ($("lq") && $("lq").value || "").trim();
       if (!q) return;
       txt("lans", "…");
-      txt("llmErr", "");
       try {
         if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) {
           throw new Error("сначала «Только WASM» или «Загрузить WebLLM»");
@@ -514,9 +532,9 @@
         var r = await AKSI_WEBLLM.complete(q, {
           temperature: 0.45,
           max_tokens: 700,
-          system: "Ты — АКСИ, локальный ИИ. Отвечай только на русском, полными предложениями. Не смешивай языки."
+          system: "Ты — АКСИ. Отвечай только на русском, полными предложениями."
         });
-        txt("lans", (r && r.text) ? r.text : (r && r.error ? ("Ошибка модели: " + r.error) : JSON.stringify(r, null, 2)));
+        txt("lans", (r && r.text) ? r.text : JSON.stringify(r, null, 2));
       } catch (e) {
         txt("lans", "Ошибка: " + (e && e.message || e));
       }
