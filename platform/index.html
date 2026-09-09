@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0812">
+<title>АКСИ Platform · Whole Stack</title>
+<style>
+:root{--ink:#f4f0ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:rgba(18,12,32,.9)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:radial-gradient(ellipse at 15% 0%,#2a1860,transparent 45%),#0a0812;color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:880px;margin:0 auto;padding:14px 12px 80px}
+.badge{display:inline-block;background:var(--ok);color:#0a0812;font-weight:900;font-size:11px;padding:5px 10px;border-radius:999px;margin-bottom:10px}
+h1{font-size:clamp(24px,5vw,34px);font-weight:900;letter-spacing:-.03em}
+.lead{color:var(--muted);margin:8px 0 14px;max-width:52ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:12px;cursor:pointer;color:var(--ink)}
+.tab.on{background:var(--v);border-color:transparent}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h3{font-size:12px;font-weight:800;color:var(--c);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+.composer{display:flex;gap:8px;flex-wrap:wrap}
+input{flex:1;min-width:140px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#120e1c;color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:11px 14px;background:var(--v);color:#fff;font-weight:800}
+button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink)}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.out{margin-top:10px;padding:12px;border-radius:12px;background:#120e1c;border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;min-height:52px;font-size:13px}
+.panel{display:none}.panel.on{display:block}
+.muted{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.mod{padding:10px;border-radius:12px;border:1px solid var(--line);font-size:12px;font-weight:700}
+.mod.on{border-color:var(--ok);color:var(--ok)}
+.foot{text-align:center;margin-top:20px;color:var(--muted);font-size:12px}
+.status{font-size:12px;color:var(--c);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">PLATFORM v300 · WHOLE AKSI</div>
+  <h1>АКСИ · единая платформа</h1>
+  <p class="lead">Brain RU · Crystal · Reality · Swarm · π · Offline. Один вход. Русский по умолчанию.</p>
+  <div class="tabs">
+    <button type="button" class="tab on" data-p="brain">Brain</button>
+    <button type="button" class="tab" data-p="crystal">Crystal</button>
+    <button type="button" class="tab" data-p="reality">Reality</button>
+    <button type="button" class="tab" data-p="swarm">Swarm</button>
+    <button type="button" class="tab" data-p="status">Status</button>
+  </div>
+  <div class="panel on" id="p-brain">
+    <div class="card">
+      <h3>Brain RU · Decision</h3>
+      <div class="composer">
+        <input id="bq" placeholder="Вопрос на русском…" autofocus>
+        <button type="button" id="bgo">Решить</button>
+      </div>
+      <div class="row">
+        <button type="button" class="g" data-q="кто ты">кто ты</button>
+        <button type="button" class="g" data-q="миссия">миссия</button>
+        <button type="button" class="g" data-q="формула">формула</button>
+        <button type="button" class="g" data-q="как пользоваться">как пользоваться</button>
+      </div>
+      <div class="out" id="bout">—</div>
+      <div class="status" id="bmeta"></div>
+    </div>
+  </div>
+  <div class="panel" id="p-crystal">
+    <div class="card">
+      <h3>Crystal · память</h3>
+      <div class="composer"><input id="cq" placeholder="Резонанс…"><button type="button" id="cgo">Найти</button></div>
+      <div class="out" id="cout">—</div>
+    </div>
+    <div class="card">
+      <h3>Записать</h3>
+      <div class="composer"><input id="cw" placeholder="запомни: факт"><button type="button" id="cwrite">Вписать</button></div>
+      <div class="status" id="cmsg"></div>
+    </div>
+  </div>
+  <div class="panel" id="p-reality">
+    <div class="card">
+      <h3>Reality · observe-only</h3>
+      <p class="muted">Включи capability → наблюдение. Не автономные действия.</p>
+      <div class="row">
+        <button type="button" class="g" id="rNet">Сеть ON+probe</button>
+        <button type="button" class="g" id="rState">World State</button>
+        <a class="g" href="/reality/" style="padding:11px 14px;border-radius:12px;border:1px solid var(--line);display:inline-block">Полный UI →</a>
+      </div>
+      <div class="out" id="rout">—</div>
+    </div>
+  </div>
+  <div class="panel" id="p-swarm">
+    <div class="card">
+      <h3>Swarm · P2P SDP</h3>
+      <p class="muted">Полный интерфейс на Sovereign.</p>
+      <a href="/sovereign/index.html?v=300" style="color:var(--c);font-weight:800">Открыть Swarm →</a>
+    </div>
+  </div>
+  <div class="panel" id="p-status">
+    <div class="card">
+      <h3>Модули</h3>
+      <div class="grid" id="mods"></div>
+      <div class="out" id="sout" style="margin-top:12px;font-size:11px">—</div>
+    </div>
+  </div>
+  <p class="foot"><a href="/contour/?v=300">Contour</a> · <a href="/sovereign/index.html">Sovereign</a> · <a href="/">Хаб</a> · aksilove@internet.ru</p>
+</div>
+<script src="/aksi-neuro.js?v=300"></script>
+<script src="/aksi-crystal.js?v=300"></script>
+<script src="/aksi-mind.js?v=300"></script>
+<script src="/aksi-brain-ru.js?v=300"></script>
+<script src="/aksi-pi-contour.js?v=300"></script>
+<script src="/aksi-organism.js?v=300"></script>
+<script src="/aksi-reality.js?v=300"></script>
+<script src="/aksi-api.js?v=300"></script>
+<script src="/aksi-swarm.js?v=300"></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function show(n){
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+n)});
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-p')===n)});
+    if(n==='status') renderMods();
+  }
+  document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){show(t.getAttribute('data-p'))});});
+  async function brain(q){
+    q=q||$('bq').value; if(!q)return;
+    $('bout').textContent='…'; $('bmeta').textContent='';
+    try{
+      var p = window.AKSI_BRAIN ? await AKSI_BRAIN.decide(q) : (window.AKSI ? await AKSI.decide(q) : {answer:'Brain не загружен'});
+      $('bout').textContent=p.answer||p.text||'—';
+      $('bmeta').textContent='source: '+(p.source||'?')+' · '+(p.version||'');
+    }catch(e){$('bout').textContent=String(e.message||e)}
+  }
+  $('bgo').onclick=function(){brain()};
+  document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){$('bq').value=b.getAttribute('data-q');brain(b.getAttribute('data-q'))};});
+  $('bq').addEventListener('keydown',function(e){if(e.key==='Enter')brain()});
+  $('cgo').onclick=async function(){var q=$('cq').value; if(!q||!window.AKSI_CRYSTAL)return; var r=await AKSI_CRYSTAL.associate(q,{k:5}); $('cout').textContent=r.answer;};
+  $('cwrite').onclick=async function(){var t=$('cw').value; if(!t||!window.AKSI_CRYSTAL)return; var r=await AKSI_CRYSTAL.remember(t); $('cmsg').textContent=r.ok?'Записано':'Ошибка';};
+  $('rNet').onclick=async function(){try{if(!window.AKSI_REALITY){$('rout').textContent='Reality не загружен';return;} AKSI_REALITY.setCapability('network',true); $('rout').textContent=JSON.stringify(await AKSI_REALITY.networkProbe(),null,2);}catch(e){$('rout').textContent=String(e.message||e)}};
+  $('rState').onclick=function(){$('rout').textContent=window.AKSI_REALITY?JSON.stringify(AKSI_REALITY.worldState(),null,2):'—';};
+  function renderMods(){
+    var list=[['BRAIN',!!window.AKSI_BRAIN],['MIND',!!window.AKSI_MIND],['CRYSTAL',!!window.AKSI_CRYSTAL],['NEURO',!!window.AKSI_NEURO],['API',!!(window.AKSI&&AKSI.decide)],['REALITY',!!window.AKSI_REALITY],['SWARM',!!window.AKSI_SWARM],['PI',!!(window.AKSI_PI_CONTOUR&&AKSI_PI_CONTOUR.process)],['ORG',!!window.AKSI_ORGANISM]];
+    $('mods').innerHTML=list.map(function(m){return '<div class="mod '+(m[1]?'on':'')+'">'+m[0]+' · '+(m[1]?'ON':'off')+'</div>';}).join('');
+    $('sout').textContent=JSON.stringify(window.AKSI&&AKSI.status?AKSI.status():{brain:!!window.AKSI_BRAIN},null,2);
+  }
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js?v=300').catch(function(){});
+  setTimeout(function(){brain('кто ты'); renderMods();},250);
+})();
+</script>
+</body>
+</html>
