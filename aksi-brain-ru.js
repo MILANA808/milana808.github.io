@@ -1,12 +1,12 @@
 /**
- * AKSI Brain RU v2.0 — fusion router
+ * AKSI Brain RU v2.1 — fusion router
  * Mind(leaf) → Crystal → Neuro → Organism → WebLLM(RU-gate) → KB
- * Multi-hit fusion. No AKSI.decide recursion. Depth guard.
+ * Identity queries: single best answer (no double fusion).
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "2.0.0-brain-fusion";
+  var VER = "2.1.0-brain-fusion";
   var depth = 0;
   var KB = [
     { k: ["кто ты", "who are you", "привет", "здравствуй", "представься"], a: "Я АКСИ — суверенная локальная платформа Decision Integrity.\nСтек: Brain RU · Mind · Crystal · Neuro · π-Contour · Reality · Swarm · Vault · offline SW.\nОтвет → Gate → seal. Без обязательного облака.\nКонтакт: aksilove@internet.ru" },
@@ -18,7 +18,7 @@
     { k: ["gate", "гейт", "eqs", "seal", "proof"], a: "Decision Integrity:\n• EQS — инженерный score\n• Gate τ ≈ 0.55\n• seal — FNV / π / brain-метка\nАудируемый след, не «доказательство истины»." },
     { k: ["offline", "без сети", "автоном", "sovereign"], a: "Offline-first: Service Worker кэширует shell.\nPlatform / Contour / Sovereign работают без сети после установки SW." },
     { k: ["webllm", "веб ллм", "llm", "qwen"], a: "WebLLM (Qwen) — опция.\nBrain принимает только русский ответ; английский/мусор отсекается." },
-    { k: ["как пользоваться", "помощ", "help", "с чего", "миссия", "платформ", "platform"], a: "Миссия АКСИ — суверенный Decision Integrity в браузере.\n\n1) /platform.html — единый вход\n2) /contour/ — Decision · Chat · Memory\n3) /sovereign/ — Mind · Crystal · Swarm\n4) /reality/ — наблюдения\n5) «запомни: …» — Crystal\n\nКонтакт: aksilove@internet.ru" },
+    { k: ["как пользоваться", "помощ", "help", "с чего", "миссия", "платформ", "platform"], a: "Миссия АКСИ — суверенный Decision Integrity в браузере.\n\n1) /aksi.html — главный вход\n2) /platform.html — Brain / Crystal / Reality\n3) /contour/ — Decision · Chat\n4) /sovereign/ — Swarm · Offline\n5) /reality/ — сенсоры\n\nКонтакт: aksilove@internet.ru" },
     { k: ["vault", "шифр", "crypto"], a: "Vault / PiFractalCrypto: локальный AES-GCM, соль из Math.PI + PBKDF2.\nДанные по умолчанию не уходят на сервер." },
     { k: ["статус", "что умеешь", "возможности"], a: "Умею: русский Decision, Crystal learn, π-seal, Gate, Reality observe, Swarm SDP, offline SW.\nНе умею: всезнание; критические решения — за человеком." },
     { k: ["контакт", "email", "связаться"], a: "Публичный контакт: aksilove@internet.ru · X @AKSILOVE" }
@@ -93,7 +93,7 @@
       var candidates = [];
       var layers = [];
       var kbs = kbHits(query);
-      for (var ki = 0; ki < kbs.length; ki++) candidates.push({ t: kbs[ki], s: "kb", w: 3 });
+      for (var ki = 0; ki < kbs.length; ki++) candidates.push({ t: kbs[ki], s: "kb", w: 5 });
       if (G.AKSI_MIND && typeof G.AKSI_MIND.reason === "function") {
         try {
           var m = await G.AKSI_MIND.reason(query, { crystal: true });
@@ -119,7 +119,7 @@
           var n = await Promise.resolve(G.AKSI_NEURO.think(query));
           if (n && (n.text || n.answer) && !garbage(n.text || n.answer) && !mostlyEnglish(n.text || n.answer)) {
             layers.push("neuro");
-            candidates.push({ t: n.text || n.answer, s: "neuro", w: 3 });
+            candidates.push({ t: n.text || n.answer, s: "neuro", w: 2.2 });
           }
         } catch (e) {}
       }
@@ -148,11 +148,17 @@
         return packet("АКСИ Brain RU v" + VER + ".\nМало следов. Спросите: кто ты · миссия · формула · crystal.\nИли «запомни: …»\nКонтакт: aksilove@internet.ru", "fallback", { layers: layers });
       }
       candidates.sort(function (a, b) { return b.w - a.w; });
+      var qlow = query.toLowerCase();
+      var single = /кто ты|представься|who are you|привет|формул|миссия|что умеешь|как пользоваться|платформ/.test(qlow);
       var top = [], seenS = {};
-      for (var i = 0; i < candidates.length && top.length < 3; i++) {
+      var limit = single ? 1 : 3;
+      for (var i = 0; i < candidates.length && top.length < limit; i++) {
         var key = candidates[i].t.slice(0, 50);
         if (seenS[key]) continue;
+        var first = candidates[i].t.split("\n")[0].slice(0, 48);
+        if (seenS["L:" + first]) continue;
         seenS[key] = 1;
+        seenS["L:" + first] = 1;
         top.push(candidates[i].t);
       }
       var answer = fuse(top);
