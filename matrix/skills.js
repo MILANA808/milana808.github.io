@@ -1,4 +1,78 @@
 // AKSI MATRIX skills — local utilities
+
+function calcExpression(input) {
+  const s = String(input || "").trim();
+  if (!s || s.length > 256) return null;
+  let i = 0;
+
+  function skip() { while (/\s/.test(s[i] || "")) i++; }
+  function number() {
+    skip();
+    const start = i;
+    let dots = 0;
+    while (i < s.length && /[0-9.]/.test(s[i])) {
+      if (s[i] === ".") dots++;
+      if (dots > 1) return null;
+      i++;
+    }
+    if (start === i) return null;
+    const n = Number(s.slice(start, i));
+    return Number.isFinite(n) ? n : null;
+  }
+  function factor() {
+    skip();
+    if (s[i] === "+" || s[i] === "-") {
+      const sign = s[i++] === "-" ? -1 : 1;
+      const v = factor();
+      return v == null ? null : sign * v;
+    }
+    if (s[i] === "(") {
+      i++;
+      const v = expr();
+      skip();
+      if (s[i] !== ")") return null;
+      i++;
+      return v;
+    }
+    return number();
+  }
+  function term() {
+    let v = factor();
+    if (v == null) return null;
+    while (true) {
+      skip();
+      const op = s[i];
+      if (op !== "*" && op !== "/" && op !== "%") break;
+      i++;
+      const rhs = factor();
+      if (rhs == null) return null;
+      if ((op === "/" || op === "%") && rhs === 0) return null;
+      v = op === "*" ? v * rhs : op === "/" ? v / rhs : v % rhs;
+      if (!Number.isFinite(v)) return null;
+    }
+    return v;
+  }
+  function expr() {
+    let v = term();
+    if (v == null) return null;
+    while (true) {
+      skip();
+      const op = s[i];
+      if (op !== "+" && op !== "-") break;
+      i++;
+      const rhs = term();
+      if (rhs == null) return null;
+      v = op === "+" ? v + rhs : v - rhs;
+      if (!Number.isFinite(v)) return null;
+    }
+    return v;
+  }
+
+  const value = expr();
+  skip();
+  return i === s.length && value != null && Number.isFinite(value) ? value : null;
+}
+
 export async function runSkill(skill, sha256hex) {
   if (skill.name === "hash") {
     const h = await sha256hex(skill.arg || "");
@@ -21,18 +95,14 @@ export async function runSkill(skill, sha256hex) {
     return "Время: " + d.toISOString() + " · local " + d.toLocaleString();
   }
   if (skill.name === "calc") {
-    const safe = (skill.arg || "").replace(/[^0-9+\-*/().%\s]/g, "");
-    try {
-      const v = Function('"use strict"; return (' + safe + ")")();
-      if (typeof v === "number" && Number.isFinite(v)) return "Результат: " + v;
-    } catch {}
-    return "Не удалось вычислить выражение безопасно.";
+    const v = calcExpression(skill.arg || "");
+    return v == null ? "Не удалось вычислить выражение безопасно." : "Результат: " + v;
   }
   return null;
 }
 
 export function detectSkill(userText) {
-  const low = userText.toLowerCase().trim();
+  const low = String(userText || "").toLowerCase().trim();
   const hashM = low.match(/(?:hash|хеш|sha256)\s+(.+)/i) || low.match(/^sha256[:\s]+(.+)/i);
   if (hashM) return { name: "hash", arg: hashM[1].trim() };
   if (/(uuid|guid|сгенерируй id|новый id)/i.test(low)) return { name: "uuid" };
