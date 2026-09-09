@@ -312,8 +312,8 @@
           try {
             if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) throw new Error("Сначала «Загрузить»");
             var r = await AKSI_WEBLLM.complete(q, {
-              temperature: 0.4, max_tokens: 500,
-              system: "Ты АКСИ. Отвечай по-русски полными предложениями."
+              temperature: 0.3, max_tokens: 480,
+              system: "Ты — АКСИ. Отвечай ТОЛЬКО на русском. Ясно и по делу. Без английского. Не выдумывай."
             });
             txt("lans", (r && r.text) || JSON.stringify(r));
           } catch (err) {
