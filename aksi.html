@@ -2,164 +2,129 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#0a0a0c">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="description" content="АКСИ — полный агент: чат, ядро, LLM, DKV, Vision">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0812">
+<meta name="description" content="АКСИ — суверенная Decision Integrity платформа. Offline Brain RU.">
 <title>АКСИ</title>
 <style>
-:root{--bg:#0a0a0c;--s1:#121214;--s2:#1a1a1e;--line:#2a2a30;--t:#f4f4f5;--m:#a1a1aa;--dim:#71717a;--a:#8b5cf6;--a2:#6d28d9;--ok:#34d399;--font:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--pad:14px;--max:720px}
-*{box-sizing:border-box;margin:0;padding:0}html{height:100%}
-body{min-height:100%;min-height:100dvh;background:var(--bg);color:var(--t);font:14.5px/1.5 var(--font);display:flex;flex-direction:column;max-width:var(--max);margin:0 auto;padding-top:env(safe-area-inset-top,0)}
-@media(min-width:768px){:root{--pad:20px}body{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
-header{display:flex;align-items:center;gap:10px;padding:12px var(--pad);border-bottom:1px solid var(--line);background:rgba(10,10,12,.92);backdrop-filter:blur(14px);position:sticky;top:0;z-index:40}
-.logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--a2),var(--a));display:grid;place-items:center;font:700 13px/1 var(--font);color:#fff}.logo.pulse{box-shadow:0 0 0 4px rgba(139,92,246,.4)}
-header h1{font-size:15px;font-weight:650}header p{font-size:11px;color:var(--m)}
-.stats{margin-left:auto;display:flex;gap:6px;font-size:10px;color:var(--dim);flex-wrap:wrap;justify-content:flex-end;max-width:58%}.stats b{color:var(--ok);font-weight:600}
-nav{display:flex;flex-wrap:wrap;gap:4px;padding:8px var(--pad);border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:61px;z-index:30}
-nav button{flex:0 0 auto;padding:8px 10px;border:0;border-radius:9px;background:0;color:var(--m);font:11.5px/1 var(--font);cursor:pointer}nav button.on{background:var(--s2);color:var(--t)}
-main{flex:1;overflow:auto;padding:var(--pad);padding-bottom:calc(108px + var(--safe-b))}.panel{display:none}.panel.on{display:block}
-#thread{display:flex;flex-direction:column;gap:12px}.msg{display:flex}.msg.me{justify-content:flex-end}
-.bub{max-width:min(92%,420px);padding:11px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.5}
-.msg.me .bub{background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;border-bottom-right-radius:5px}.msg.ai .bub{background:var(--s2);border:1px solid var(--line);border-bottom-left-radius:5px}
-.meta{font-size:10px;color:var(--dim);margin-top:4px}.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:12.5px;cursor:pointer}
-.card{background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:10px}.card h2{font-size:13px;margin:0 0 8px;font-weight:600}.muted{color:var(--m);font-size:13px;line-height:1.55}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.btn{min-height:42px;padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:13px/1 var(--font);cursor:pointer}.btn.p{background:linear-gradient(135deg,var(--a2),var(--a));border:0;color:#fff}
-input,textarea{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--s1);color:var(--t);font:inherit;outline:0}textarea{min-height:90px;resize:vertical}
-.fact{padding:12px;border:1px solid var(--line);border-radius:11px;margin-bottom:7px;font-size:13px;background:var(--s1)}.fact button{float:right;border:0;background:0;color:var(--dim);font-size:16px;cursor:pointer}
-.bar{position:fixed;left:0;right:0;bottom:0;max-width:var(--max);margin:0 auto;padding:10px var(--pad) calc(10px + var(--safe-b));display:flex;gap:8px;background:linear-gradient(transparent,var(--bg) 28%);z-index:50}
-.bar input{flex:1;min-height:48px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--s2);color:var(--t)}
-.bar .icon{width:48px;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--s1);color:var(--t);font-size:17px;flex-shrink:0;cursor:pointer}
-.bar .send{width:48px;height:48px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--a2),var(--a));color:#fff;font-size:18px;flex-shrink:0;cursor:pointer}
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kv .cell{background:var(--s1);border:1px solid var(--line);border-radius:12px;padding:12px}.kv .cell b{display:block;font-size:17px;color:var(--ok)}.kv .cell span{font-size:11px;color:var(--dim)}
-pre.out{background:var(--s1);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:11.5px;overflow:auto;white-space:pre-wrap;margin-top:10px;max-height:280px}
-.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(139,92,246,.18);color:var(--a);font-size:11px;margin-top:8px}
-code{font-size:12px;background:var(--s1);padding:2px 6px;border-radius:6px}
+:root{--bg:#0a0812;--ink:#f4f0ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:rgba(18,12,32,.92)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 system-ui,-apple-system,sans-serif;background:radial-gradient(ellipse at 20% 0%,#2a1860 0%,transparent 50%),var(--bg);color:var(--ink);min-height:100vh}
+a{color:var(--c);text-decoration:none}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 88px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#b681ff,#5b2fc0);display:grid;place-items:center;font-weight:900}
+.badge{margin-left:auto;font-size:11px;font-weight:900;background:var(--ok);color:#0a0812;padding:5px 10px;border-radius:999px}
+h1{font-size:clamp(22px,5vw,30px);font-weight:900;letter-spacing:-.03em}
+.lead{color:var(--muted);margin:6px 0 14px;font-size:13px}
+.composer{display:flex;gap:8px;margin-bottom:10px}
+input#q{flex:1;padding:14px 14px;border-radius:14px;border:1px solid var(--line);background:#120e1c;color:var(--ink);font:inherit}
+button#go{padding:14px 18px;border:0;border-radius:14px;background:linear-gradient(135deg,#b681ff,#5b2fc0);color:#fff;font-weight:900;cursor:pointer;font:inherit}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips button{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);padding:8px 12px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
+.out{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;white-space:pre-wrap;word-break:break-word;min-height:120px;font-size:14px}
+.meta{margin-top:8px;font-size:12px;color:var(--muted)}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.nav a{padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-weight:800;font-size:12px;color:var(--ink)}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-top:14px}
+.mod{font-size:11px;font-weight:800;padding:8px;border-radius:10px;border:1px solid var(--line);text-align:center}
+.mod.on{border-color:var(--ok);color:var(--ok)}
+.foot{margin-top:24px;text-align:center;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo" id="logoPulse">A</div>
-  <div><h1>АКСИ</h1><p>полный агент · ядро · интернет · LLM</p></div>
-  <div class="stats">
-    <span id="stClock">MSK —</span>
-    <span>EQS <b id="stEqs">—</b></span>
-    <span>QCLI <b id="stQ">—</b></span>
-    <span id="stBadge">—</span>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">A</div>
+    <div>
+      <h1>АКСИ</h1>
+      <div class="lead">Decision Integrity · Brain fusion · offline-first</div>
+    </div>
+    <div class="badge">LIVE</div>
   </div>
-</header>
-<nav>
-  <button type="button" class="on" data-tab="chat">Чат</button>
-  <button type="button" data-tab="teach">Учить</button>
-  <button type="button" data-tab="mem">Память</button>
-  <button type="button" data-tab="metrics">Метрики</button>
-  <button type="button" data-tab="quantum">Квант</button>
-  <button type="button" data-tab="proof">Цепочка</button>
-  <button type="button" data-tab="protocol">Протокол</button>
-  <button type="button" data-tab="edge">Edge</button>
-  <button type="button" data-tab="dkv">DKV</button>
-  <button type="button" data-tab="vision">Зрение</button>
-  <button type="button" data-tab="about">О себе</button>
-</nav>
-<main>
-  <section class="panel on" id="tab-chat"><div id="thread"></div>
-    <div class="chips" id="chips">
-      <button type="button" class="chip" data-ask="привет">привет</button>
-      <button type="button" class="chip" data-ask="кто ты">кто ты</button>
-      <button type="button" class="chip" data-ask="что такое искусственный интеллект">что такое ИИ</button>
-      <button type="button" class="chip" data-ask="найди квантовые компьютеры">поиск</button>
-      <button type="button" class="chip" data-ask="формула">формула</button>
-      <button type="button" class="chip" data-ask="что умеешь">что умеешь</button>
-    </div>
-  </section>
-  <section class="panel" id="tab-teach"><div class="card"><h2>Научи меня</h2><p class="muted">Или: <b>запомни: …</b></p>
-    <textarea id="teachBox" placeholder="Факт" style="margin-top:10px"></textarea>
-    <div class="row"><button type="button" class="btn p" id="btnTeach">Запомнить</button></div></div></section>
-  <section class="panel" id="tab-mem"><div class="card"><h2>Память · <span id="memN">0</span></h2><div id="memList"></div>
-    <div class="row"><button type="button" class="btn" id="btnExp">Сохранить</button><button type="button" class="btn" id="btnImp">Загрузить</button><button type="button" class="btn" id="btnWipe">Забыть</button></div>
-    <input type="file" id="impFile" accept=".json" hidden></div></section>
-  <section class="panel" id="tab-metrics"><div class="card"><h2>EQS · QCLI</h2>
-    <textarea id="mIn" placeholder="Текст" style="margin-top:10px"></textarea>
-    <div class="row"><button type="button" class="btn p" id="btnMet">Посчитать</button></div>
-    <div class="kv" style="margin-top:12px">
-      <div class="cell"><b id="mEqs">—</b><span>EQS</span></div>
-      <div class="cell"><b id="mQcli">—</b><span>QCLI</span></div>
-      <div class="cell"><b id="mH">—</b><span>H</span></div>
-      <div class="cell"><b id="mHeff">—</b><span>H_eff</span></div>
-    </div><div id="mLevel" class="badge">—</div></div></section>
-  <section class="panel" id="tab-quantum"><div class="card"><h2>Квант</h2>
-    <div class="row"><button type="button" class="btn p" id="btnBell">Bell Φ+</button><button type="button" class="btn" id="btnSuper">Суперпозиция</button></div>
-    <pre class="out" id="qOut">—</pre></div></section>
-  <section class="panel" id="tab-proof"><div class="card"><h2>Цепочка</h2>
-    <div class="row"><button type="button" class="btn p" id="btnProof">Проверить</button><button type="button" class="btn" id="btnProofClear">Очистить</button></div>
-    <pre class="out" id="pOut">—</pre></div></section>
-  <section class="panel" id="tab-protocol"><div class="card"><h2>Agent-v1</h2>
-    <div class="kv" style="margin-top:10px">
-      <div class="cell"><b id="prDid">—</b><span>DID</span></div>
-      <div class="cell"><b id="prMsg">0</b><span>msg</span></div>
-      <div class="cell"><b id="prEqs">—</b><span>EQS</span></div>
-      <div class="cell"><b>v1</b><span>protocol</span></div>
-    </div>
-    <div class="row"><button type="button" class="btn p" id="btnHandshake">Handshake</button><button type="button" class="btn" id="btnEnvelope">Envelope</button></div>
-    <pre class="out" id="prOut">—</pre></div></section>
-  <section class="panel" id="tab-edge"><div class="card"><h2>Edge</h2>
-    <div class="kv" style="margin-top:12px">
-      <div class="cell"><b id="eMode">cpu</b><span>режим</span></div>
-      <div class="cell"><b id="eMs">—</b><span>ms</span></div>
-      <div class="cell"><b id="eHits">—</b><span>hits</span></div>
-      <div class="cell"><b id="eCache">0</b><span>cache</span></div>
-    </div>
-    <textarea id="eQuery" style="margin-top:12px">что умеешь</textarea>
-    <div class="row"><button type="button" class="btn p" id="btnEdge">Прогнать</button><button type="button" class="btn" id="btnEdgeClear">Сброс</button></div>
-    <pre class="out" id="eOut">—</pre></div></section>
-  <section class="panel" id="tab-vision"><div id="vision-root"></div></section>
-  <section class="panel" id="tab-dkv"><div id="dkv-root"></div></section>
-  <section class="panel" id="tab-about"><div class="card"><h2>АКСИ</h2>
-    <p class="muted">Ядро интернет · LLM · DKV · Vision · Agent-v1</p></div>
-    <div class="card"><h2>Нейросеть</h2>
-    <label class="muted" style="display:flex;gap:8px;margin:10px 0"><input type="checkbox" id="llmOn" checked> LLM</label>
-    <input id="llmBase" value="http://127.0.0.1:11434" style="margin-bottom:8px">
-    <input id="llmModel" value="llama3.2" style="margin-bottom:8px">
-    <input id="llmKey" type="password" placeholder="API key" style="margin-bottom:8px">
-    <div class="row"><button type="button" class="btn p" id="btnLlmSave">Сохранить</button><button type="button" class="btn" id="btnLlmTest">Тест</button></div>
-    <p class="muted" id="llmStatus" style="margin-top:10px">—</p></div>
-    <div class="card"><h2>Слой</h2><p class="muted">DID: <b id="didVal">—</b><br>aksilove@internet.ru</p></div>
-    <div class="card"><h2>Экспорт</h2><div class="row"><button type="button" class="btn p" id="btnFullExp">Бэкап</button></div></div></section>
-</main>
-<div class="bar">
-  <input id="inp" type="text" placeholder="Спроси АКСИ…" enterkeyhint="send" autocomplete="off">
-  <button type="button" class="icon" id="btnVoice">🎤</button>
-  <button type="button" class="send" id="send">↑</button>
+  <div class="composer">
+    <input id="q" placeholder="Спросите АКСИ…" autofocus autocomplete="off">
+    <button type="button" id="go">→</button>
+  </div>
+  <div class="chips">
+    <button type="button" data-q="кто ты">кто ты</button>
+    <button type="button" data-q="миссия">миссия</button>
+    <button type="button" data-q="формула">формула</button>
+    <button type="button" data-q="что умеешь">что умеешь</button>
+    <button type="button" data-q="как пользоваться">как пользоваться</button>
+  </div>
+  <div class="out" id="out">Загрузка ядра…</div>
+  <div class="meta" id="meta"></div>
+  <div class="mods" id="mods"></div>
+  <div class="nav">
+    <a href="/platform.html">Platform</a>
+    <a href="/contour/">Contour</a>
+    <a href="/sovereign/index.html">Sovereign</a>
+    <a href="/reality/">Reality</a>
+    <a href="/crypto/">Crypto</a>
+  </div>
+  <p class="foot">aksilove@internet.ru</p>
 </div>
-<script src="aksi-dkv.js?v=16"></script>
-<script src="aksi-vision.js?v=4"></script>
-<script src="aksi-app.js?v=17"></script>
-<script src="aksi-net.js?v=3"></script>
-<script src="aksi-llm.js?v=5"></script>
+<script src="/aksi-neuro.js?v=302"></script>
+<script src="/aksi-crystal.js?v=302"></script>
+<script src="/aksi-mind.js?v=302"></script>
+<script src="/aksi-brain-ru.js?v=302"></script>
+<script src="/aksi-pi-contour.js?v=302"></script>
+<script src="/aksi-reality.js?v=302"></script>
+<script src="/aksi-api.js?v=302"></script>
 <script>
 (function(){
-  var dkvOn=false,visOn=false;
-  function mountDkv(){
-    if(dkvOn) return;
-    var api = window.AKSI_DKV || window.DKV;
-    if(!api || typeof api.mount !== "function") return;
-    try{ api.mount("#dkv-root"); dkvOn=true; }catch(e){}
+  var $ = function(id){ return document.getElementById(id); };
+  function mods(){
+    var list = [
+      ['BRAIN', !!window.AKSI_BRAIN],
+      ['MIND', !!window.AKSI_MIND],
+      ['CRYSTAL', !!window.AKSI_CRYSTAL],
+      ['NEURO', !!window.AKSI_NEURO],
+      ['API', !!(window.AKSI && AKSI.decide)],
+      ['PI', !!(window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process)],
+      ['REALITY', !!window.AKSI_REALITY]
+    ];
+    $('mods').innerHTML = list.map(function(m){
+      return '<div class="mod '+(m[1]?'on':'')+'">'+m[0]+'</div>';
+    }).join('');
   }
-  function mountVis(){
-    if(visOn) return;
-    if(!window.AKSI_VISION || typeof AKSI_VISION.mount !== "function") return;
-    try{ AKSI_VISION.mount("#vision-root"); visOn=true; }catch(e){}
+  async function ask(q){
+    q = String(q || $('q').value || '').trim();
+    if (!q) return;
+    $('q').value = q;
+    $('out').textContent = '…';
+    $('meta').textContent = '';
+    try {
+      var p;
+      if (window.AKSI_BRAIN) p = await AKSI_BRAIN.decide(q);
+      else if (window.AKSI) p = await AKSI.decide(q);
+      else p = { answer: 'Ядро ещё грузится. Обновите страницу (Ctrl+Shift+R).', source: 'boot' };
+      $('out').textContent = p.answer || p.text || '—';
+      $('meta').textContent = 'source: ' + (p.source || '?') + (p.version ? ' · ' + p.version : '');
+    } catch (e) {
+      $('out').textContent = String(e && e.message || e);
+    }
+    mods();
   }
-  document.addEventListener("click",function(e){
-    var el=e.target.closest&&e.target.closest("[data-tab]");
-    if(!el)return;
-    var t=el.getAttribute("data-tab");
-    if(t==="dkv")setTimeout(mountDkv,40);
-    if(t==="vision")setTimeout(mountVis,40);
-  },true);
-  var h=(location.hash||"").replace(/^#/,"");
-  if(h==="dkv")setTimeout(mountDkv,300);
-  if(h==="vision")setTimeout(mountVis,300);
+  $('go').onclick = function(){ ask(); };
+  $('q').addEventListener('keydown', function(e){ if (e.key === 'Enter') ask(); });
+  document.querySelectorAll('[data-q]').forEach(function(b){
+    b.onclick = function(){ ask(b.getAttribute('data-q')); };
+  });
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js?v=302').catch(function(){});
+  }
+  function boot(){
+    mods();
+    if (window.AKSI_BRAIN || window.AKSI) ask('кто ты');
+    else {
+      $('out').textContent = 'Подключение модулей…';
+      setTimeout(boot, 300);
+    }
+  }
+  setTimeout(boot, 150);
+  setTimeout(mods, 800);
 })();
 </script>
 </body>
