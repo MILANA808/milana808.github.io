@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0812">
-<title>АКСИ Platform · Whole Stack</title>
+<title>АКСИ Platform</title>
 <style>
 :root{--ink:#f4f0ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:rgba(18,12,32,.9)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -36,9 +36,9 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
 </head>
 <body>
 <div class="wrap">
-  <div class="badge">PLATFORM v300 · WHOLE AKSI</div>
+  <div class="badge">PLATFORM v301 · FUSION</div>
   <h1>АКСИ · единая платформа</h1>
-  <p class="lead">Brain RU · Crystal · Reality · Swarm · Offline. Русский по умолчанию.</p>
+  <p class="lead">Brain fusion · Crystal · Reality · Swarm · Offline. Русский по умолчанию.</p>
   <div class="tabs">
     <button type="button" class="tab on" data-p="brain">Brain</button>
     <button type="button" class="tab" data-p="crystal">Crystal</button>
@@ -47,12 +47,13 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
   </div>
   <div class="panel on" id="p-brain">
     <div class="card">
-      <h3>Brain RU</h3>
+      <h3>Brain RU fusion</h3>
       <div class="composer"><input id="bq" placeholder="Вопрос…" autofocus><button type="button" id="bgo">Решить</button></div>
       <div class="row">
         <button type="button" class="g" data-q="кто ты">кто ты</button>
         <button type="button" class="g" data-q="миссия">миссия</button>
         <button type="button" class="g" data-q="формула">формула</button>
+        <button type="button" class="g" data-q="что умеешь">что умеешь</button>
       </div>
       <div class="out" id="bout">—</div>
       <div class="status" id="bmeta"></div>
@@ -81,15 +82,15 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
   <div class="panel" id="p-status">
     <div class="card"><div class="grid" id="mods"></div><div class="out" id="sout" style="font-size:11px;margin-top:10px">—</div></div>
   </div>
-  <p class="foot"><a href="/contour/?v=300">Contour</a> · <a href="/sovereign/index.html">Sovereign</a> · <a href="/">Хаб</a> · aksilove@internet.ru</p>
+  <p class="foot"><a href="/contour/">Contour</a> · <a href="/sovereign/index.html">Sovereign</a> · <a href="/">Хаб</a> · aksilove@internet.ru</p>
 </div>
-<script src="/aksi-neuro.js?v=300"></script>
-<script src="/aksi-crystal.js?v=300"></script>
-<script src="/aksi-mind.js?v=300"></script>
-<script src="/aksi-brain-ru.js?v=300"></script>
-<script src="/aksi-reality.js?v=300"></script>
-<script src="/aksi-api.js?v=300"></script>
-<script src="/aksi-swarm.js?v=300"></script>
+<script src="/aksi-neuro.js?v=301"></script>
+<script src="/aksi-crystal.js?v=301"></script>
+<script src="/aksi-mind.js?v=301"></script>
+<script src="/aksi-brain-ru.js?v=301"></script>
+<script src="/aksi-reality.js?v=301"></script>
+<script src="/aksi-api.js?v=301"></script>
+<script src="/aksi-swarm.js?v=301"></script>
 <script>
 (function(){
   function $(id){return document.getElementById(id)}
@@ -105,7 +106,7 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
     try{
       var p=window.AKSI_BRAIN?await AKSI_BRAIN.decide(q):(window.AKSI?await AKSI.decide(q):{answer:'нет Brain'});
       $('bout').textContent=p.answer||'—';
-      $('bmeta').textContent='source: '+(p.source||'?');
+      $('bmeta').textContent='source: '+(p.source||'?')+' · '+(p.version||'');
     }catch(e){$('bout').textContent=String(e.message||e)}
   }
   $('bgo').onclick=function(){brain()};
@@ -118,7 +119,7 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
   function renderMods(){
     var list=[['BRAIN',!!window.AKSI_BRAIN],['MIND',!!window.AKSI_MIND],['CRYSTAL',!!window.AKSI_CRYSTAL],['API',!!(window.AKSI&&AKSI.decide)],['REALITY',!!window.AKSI_REALITY],['SWARM',!!window.AKSI_SWARM]];
     $('mods').innerHTML=list.map(function(m){return '<div class="mod '+(m[1]?'on':'')+'">'+m[0]+'</div>'}).join('');
-    $('sout').textContent=JSON.stringify({brain:!!window.AKSI_BRAIN,api:window.AKSI&&AKSI.version},null,2);
+    $('sout').textContent=JSON.stringify({brain:window.AKSI_BRAIN&&AKSI_BRAIN.version,api:window.AKSI&&AKSI.version},null,2);
   }
   setTimeout(function(){brain('кто ты');renderMods()},200);
 })();
