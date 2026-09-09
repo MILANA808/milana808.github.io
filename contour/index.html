@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ Contour — Decision + Superpose + Chat + WebLLM + Memory + Vault π">
-<title>АКСИ Contour</title>
+<meta name="description" content="АКСИ — единый живой offline-организм: Decision · Vault π · Crypto · Chat">
+<title>АКСИ Contour · Organism</title>
 <style>
 :root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f;--blue:#3b6cff}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -13,7 +13,7 @@ body{font:14px/1.45 system-ui,-apple-system,sans-serif;background:linear-gradien
 a{color:inherit;text-decoration:none}
 .wrap{max-width:960px;margin:0 auto;padding:12px 12px 56px}
 .top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#6b4f35,#8a6544);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}
+.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#6b4f35,#c4a35a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}
 h1{font-size:18px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
 .pill{margin-left:auto;font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
@@ -40,14 +40,14 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .gate{margin-top:9px;padding:9px 11px;border-radius:11px;font-weight:700;font-size:13px;border:1px solid var(--line)}
 .gate.ok{background:#e8f2ea;color:var(--ok);border-color:#b7d4c2}
 .gate.no{background:#f8eaea;color:var(--bad);border-color:#e0b8b0}
-.seal,.pre{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word}
-.answer-box{margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:14px;color:var(--ink);max-height:none;overflow:visible}
+.seal{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word}
+.answer-box{margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:14px;max-height:none;overflow:visible}
 .states{display:flex;flex-direction:column;gap:7px}
 .st{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}
-.st.sel{border-color:var(--ok);box-shadow:0 0 0 1px rgba(47,107,72,.2)}
+.st.sel{border-color:var(--ok)}
 .st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
 .bar{height:6px;border-radius:99px;background:#eee;overflow:hidden;margin:5px 0}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48);transition:width .35s}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}
 .checks{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 .checks i{font-style:normal;font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
 .checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
@@ -66,12 +66,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <header class="top">
     <div class="logo">Δ</div>
     <div>
-      <h1>АКСИ Contour</h1>
-      <div class="sub"><a href="/">← хаб</a> · <a href="/api/">API</a> · <a href="/crypto/">Crypto π</a> · <a href="/matrix/">MATRIX</a></div>
+      <h1>АКСИ · Organism</h1>
+      <div class="sub"><a href="/">← хаб</a> · <a href="/crypto/">Crypto π</a> · <a href="/matrix/">MATRIX</a> · <a href="/decision/">Decision</a></div>
     </div>
     <span class="pill" id="pill">загрузка…</span>
   </header>
-
   <div class="tabs" id="tabs">
     <button type="button" class="tab on" data-p="decision">Decision</button>
     <button type="button" class="tab" data-p="superpose">Superpose</button>
@@ -80,163 +79,88 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <button type="button" class="tab" data-p="mem">Memory</button>
     <button type="button" class="tab" data-p="status">Status</button>
   </div>
-
   <section class="card">
     <div class="checks" id="modChecks"></div>
     <div class="err" id="bootErr"></div>
-    <p class="muted" style="margin-top:6px">Offline-first · Decision · Vault π · WebLLM optional · Product API</p>
+    <p class="muted" style="margin-top:6px">Единый организм · Decision · Vault π · Crypto · Chat · offline-first</p>
   </section>
-
   <div class="panel on" id="p-decision">
-    <section class="card hero">
-      <h3>Decision Runtime</h3>
-      <p>Ответ · анти · AKSI/EQS/Φ/QCLI · Gate · печать · Verify. Русский язык, полный текст ответа.</p>
-    </section>
+    <section class="card hero"><h3>Decision Runtime</h3><p>Ответ · анти · EQS · Gate · печать. Полный текст на русском.</p></section>
     <section class="card">
-      <div class="composer">
-        <input id="dq" type="text" placeholder="Вопрос на русском… или: запомни: факт" autocomplete="off">
-        <button type="button" id="dgo">Решить</button>
-      </div>
-      <div class="row">
-        <button type="button" class="g" id="dex1">Кто ты?</button>
-        <button type="button" class="g" id="dex2">Формула AKSI</button>
-        <button type="button" class="g" id="dex3">Gate</button>
-      </div>
+      <div class="composer"><input id="dq" type="text" placeholder="Вопрос… или запомни: факт" autocomplete="off"><button type="button" id="dgo">Решить</button></div>
+      <div class="row"><button type="button" class="g" id="dex1">Кто ты?</button><button type="button" class="g" id="dex2">Формула AKSI</button><button type="button" class="g" id="dex3">Gate</button></div>
       <div class="err" id="derr"></div>
     </section>
     <section class="card" id="dout" hidden>
-      <div class="grid2">
-        <div class="col pro"><div class="lbl">Ответ</div><div id="danswer" class="answer-box" style="margin:0;border:0;padding:0"></div></div>
-        <div class="col con"><div class="lbl">Анти / риски</div><div id="danti"></div></div>
-      </div>
-      <div class="meters">
-        <div class="m"><b id="vAksi">—</b><span>AKSI</span></div>
-        <div class="m"><b id="vEqs">—</b><span>EQS</span></div>
-        <div class="m"><b id="vPhi">—</b><span>Φ</span></div>
-        <div class="m"><b id="vQcli">—</b><span>QCLI</span></div>
-      </div>
+      <div class="grid2"><div class="col pro"><div class="lbl">Ответ</div><div id="danswer" class="answer-box" style="margin:0;border:0;padding:0"></div></div><div class="col con"><div class="lbl">Анти / риски</div><div id="danti"></div></div></div>
+      <div class="meters"><div class="m"><b id="vAksi">—</b><span>AKSI</span></div><div class="m"><b id="vEqs">—</b><span>EQS</span></div><div class="m"><b id="vPhi">—</b><span>Φ</span></div><div class="m"><b id="vQcli">—</b><span>QCLI</span></div></div>
       <div class="gate no" id="dgate">Gate: —</div>
-      <div class="row">
-        <button type="button" class="g" id="dproof">Скачать Proof</button>
-        <button type="button" class="g" id="dverify">Verify</button>
-        <button type="button" class="g" id="dcopy">Копировать JSON</button>
-      </div>
-      <pre class="seal" id="dseal"></pre>
-      <p class="muted" id="dmeta"></p>
+      <div class="row"><button type="button" class="g" id="dproof">Скачать Proof</button><button type="button" class="g" id="dverify">Verify</button><button type="button" class="g" id="dcopy">Копировать JSON</button></div>
+      <pre class="seal" id="dseal"></pre><p class="muted" id="dmeta"></p>
     </section>
   </div>
-
   <div class="panel" id="p-superpose">
-    <section class="card hero">
-      <h3>Superpose</h3>
-      <p>Кандидаты → амплитуды → Born-коллапс → печать.</p>
-    </section>
+    <section class="card hero"><h3>Superpose</h3><p>Кандидаты → Born-коллапс → печать.</p></section>
     <section class="card">
-      <div class="composer">
-        <input id="sq" type="text" placeholder="Вопрос для суперпозиции" autocomplete="off">
-        <button type="button" id="sgo">Коллапс</button>
-      </div>
-      <div class="row">
-        <button type="button" class="g" id="sex1">Кто ты?</button>
-        <button type="button" class="g" id="sex2">Суперпозиция</button>
-        <button type="button" class="g" id="sex3">Что такое АКСИ?</button>
-      </div>
-      <div class="phase" id="sphase"></div>
-      <div class="err" id="serr"></div>
+      <div class="composer"><input id="sq" type="text" placeholder="Вопрос для суперпозиции" autocomplete="off"><button type="button" id="sgo">Коллапс</button></div>
+      <div class="row"><button type="button" class="g" id="sex1">Кто ты?</button><button type="button" class="g" id="sex2">Суперпозиция</button><button type="button" class="g" id="sex3">Что такое АКСИ?</button></div>
+      <div class="phase" id="sphase"></div><div class="err" id="serr"></div>
     </section>
-    <section class="card" id="sbox" hidden>
-      <div class="states" id="sstates"></div>
-    </section>
-    <section class="card" id="sansBox" hidden>
-      <div class="lbl">Ответ после коллапса</div>
-      <div id="sanswer" class="answer-box"></div>
-      <pre class="seal" id="smeta" style="margin-top:8px"></pre>
-    </section>
+    <section class="card" id="sbox" hidden><div class="states" id="sstates"></div></section>
+    <section class="card" id="sansBox" hidden><div class="lbl">Ответ после коллапса</div><div id="sanswer" class="answer-box"></div><pre class="seal" id="smeta" style="margin-top:8px"></pre></section>
   </div>
-
   <div class="panel" id="p-chat">
     <section class="card">
-      <h3>Chat · Mind-path</h3>
-      <div class="composer">
-        <input id="cq" type="text" placeholder="Сообщение на русском…" autocomplete="off">
-        <button type="button" id="cgo">Отправить</button>
-      </div>
-      <div class="row">
-        <button type="button" class="g" id="cex1">Кто ты?</button>
-        <button type="button" class="g" id="cex2">статус</button>
-        <button type="button" class="g" id="cex3">что умеешь</button>
-      </div>
-      <div class="err" id="cerr"></div>
-      <div id="cthread" class="answer-box" style="min-height:140px">—</div>
+      <h3>Chat · Organism path</h3>
+      <div class="composer"><input id="cq" type="text" placeholder="Сообщение на русском…" autocomplete="off"><button type="button" id="cgo">Отправить</button></div>
+      <div class="row"><button type="button" class="g" id="cex1">Кто ты?</button><button type="button" class="g" id="cex2">статус</button><button type="button" class="g" id="cex3">что умеешь</button></div>
+      <div class="err" id="cerr"></div><div id="cthread" class="answer-box" style="min-height:140px">—</div>
     </section>
   </div>
-
   <div class="panel" id="p-llm">
     <section class="card">
-      <h3>WebLLM · локальная модель</h3>
-      <p class="muted">Опционально. Сначала «Только WASM». Decision/Chat работают без модели.</p>
-      <div class="row">
-        <button type="button" class="blue" id="btnLoadLlm">Загрузить WebLLM</button>
-        <button type="button" class="g" id="btnWasm">Только WASM</button>
-        <button type="button" class="g" id="btnUnloadLlm">Выгрузить</button>
-      </div>
-      <div class="progress"><i id="llmBar"></i></div>
-      <div class="phase" id="llmMsg">модель не загружена — offline-ядро работает</div>
-      <div class="err" id="llmErr"></div>
-      <div class="composer" style="margin-top:10px">
-        <input id="lq" type="text" placeholder="Вопрос на русском…" autocomplete="off">
-        <button type="button" id="lgo">Спросить модель</button>
-      </div>
-      <div id="lans" class="answer-box">—</div>
-      <pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
+      <h3>WebLLM · опционально</h3>
+      <p class="muted">Организм работает без модели. WASM если нет WebGPU.</p>
+      <div class="row"><button type="button" class="blue" id="btnLoadLlm">Загрузить WebLLM</button><button type="button" class="g" id="btnWasm">Только WASM</button><button type="button" class="g" id="btnUnloadLlm">Выгрузить</button></div>
+      <div class="progress"><i id="llmBar"></i></div><div class="phase" id="llmMsg">не загружено</div><div class="err" id="llmErr"></div>
+      <div class="composer" style="margin-top:10px"><input id="lq" type="text" placeholder="Вопрос модели…" autocomplete="off"><button type="button" id="lgo">Спросить</button></div>
+      <div id="lans" class="answer-box">—</div><pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
     </section>
   </div>
-
   <div class="panel" id="p-mem">
     <section class="card">
       <h3>Memory · Vault π</h3>
-      <div class="composer">
-        <input id="mq" type="text" placeholder="запомни: факт" autocomplete="off">
-        <button type="button" id="mgo">Сохранить</button>
-      </div>
-      <div class="row">
-        <button type="button" class="g" id="mrefresh">Обновить статус</button>
-      </div>
-      <p class="okmsg" id="mmsg"></p>
-      <pre class="seal" id="mstatus" style="margin-top:8px"></pre>
+      <div class="composer"><input id="mq" type="text" placeholder="запомни: факт" autocomplete="off"><button type="button" id="mgo">Сохранить</button></div>
+      <div class="row"><button type="button" class="g" id="mrefresh">Обновить</button></div>
+      <p class="okmsg" id="mmsg"></p><pre class="seal" id="mstatus" style="margin-top:8px"></pre>
     </section>
   </div>
-
   <div class="panel" id="p-status">
     <section class="card">
-      <h3>Status · АКСИ Runtime</h3>
-      <div class="row">
-        <button type="button" id="btnRefresh">Обновить</button>
-        <button type="button" class="g" id="btnPurge">Purge cache</button>
-      </div>
-      <pre class="seal" id="fullStatus" style="margin-top:10px;max-height:320px"></pre>
+      <h3>Status · пульс организма</h3>
+      <div class="row"><button type="button" id="btnRefresh">Обновить</button><button type="button" class="g" id="btnPurge">Purge cache</button></div>
+      <pre class="seal" id="fullStatus" style="margin-top:10px;max-height:360px"></pre>
     </section>
   </div>
-
-  <p class="foot">АКСИ Contour v230 · Vault π · Product API · aksilove@internet.ru</p>
+  <p class="foot">АКСИ Organism v231 · единый продукт · aksilove@internet.ru</p>
 </div>
-
-<script src="/aksi-purge.js?v=230"></script>
-<script src="/aksi-knowledge.js?v=230"></script>
-<script src="/aksi-neuro-seed.js?v=230"></script>
-<script src="/aksi-neuro.js?v=230"></script>
-<script src="/aksi-zero.js?v=230"></script>
-<script src="/aksi-compose.js?v=230"></script>
-<script src="/aksi-quantum.js?v=230"></script>
-<script src="/aksi-qpipe.js?v=230"></script>
-<script src="/aksi-algorithm.js?v=230"></script>
-<script src="/aksi-decision.js?v=230"></script>
-<script src="/aksi-webllm.js?v=230"></script>
-<script src="/aksi-superpose.js?v=230"></script>
-<script src="/aksi-integrity-bridge.js?v=230"></script>
-<script src="/aksi-api.js?v=230"></script>
-<script src="/pi-crypto.js?v=230"></script>
-<script src="/aksi-vault.js?v=230"></script>
-<script src="/contour-app.js?v=230"></script>
+<script src="/aksi-purge.js?v=231"></script>
+<script src="/aksi-knowledge.js?v=231"></script>
+<script src="/aksi-neuro-seed.js?v=231"></script>
+<script src="/aksi-neuro.js?v=231"></script>
+<script src="/aksi-zero.js?v=231"></script>
+<script src="/aksi-compose.js?v=231"></script>
+<script src="/aksi-quantum.js?v=231"></script>
+<script src="/aksi-qpipe.js?v=231"></script>
+<script src="/aksi-algorithm.js?v=231"></script>
+<script src="/aksi-decision.js?v=231"></script>
+<script src="/aksi-webllm.js?v=231"></script>
+<script src="/aksi-superpose.js?v=231"></script>
+<script src="/aksi-integrity-bridge.js?v=231"></script>
+<script src="/pi-crypto.js?v=231"></script>
+<script src="/aksi-vault.js?v=231"></script>
+<script src="/aksi-organism.js?v=231"></script>
+<script src="/aksi-api.js?v=231"></script>
+<script src="/contour-app.js?v=231"></script>
 </body>
 </html>
