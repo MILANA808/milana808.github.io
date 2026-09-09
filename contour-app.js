@@ -33,7 +33,7 @@
     { q: ["контур", "contour"], a: "π-Contour — детерминированный путь ответа. Тот же запрос → тот же θ и seal." },
     { q: ["gate", "гейт"], a: "Gate τ ≈ 0.55. Ниже порога — ответ помечается." },
     { q: ["статус", "status", "что умеешь"], a: "Contour Fast v" + VER + ": Decision, Chat, π, Memory, optional WebLLM." },
-    { q: ["vault", "память"], a: "Vault — IndexedDB. «запомни: факт».") }
+    { q: ["vault", "память"], a: "Vault — IndexedDB. «запомни: факт»." }
   ];
 
   function localDecide(q) {
