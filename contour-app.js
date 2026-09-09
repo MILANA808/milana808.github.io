@@ -1,28 +1,23 @@
 /**
- * AKSI Contour App v250 — full working buttons, no recursion
+ * AKSI Contour App v260 — ideal product shell
  * Event delegation · offline-first · aksilove@internet.ru
  */
 (function () {
   "use strict";
-  var VER = "250";
+  var VER = "260";
   var lastDecision = null;
   var tBoot = Date.now();
 
-  function $(id) {
-    try { return document.getElementById(id); } catch (e) { return null; }
-  }
-  function txt(id, v) {
-    var el = $(id);
-    if (el) el.textContent = v == null ? "" : String(v);
-  }
+  function $(id) { try { return document.getElementById(id); } catch (e) { return null; } }
+  function txt(id, v) { var el = $(id); if (el) el.textContent = v == null ? "" : String(v); }
 
   var KB = [
     { q: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — Contour v" + VER + ". Decision · π · Vault · Chat. Контакт: aksilove@internet.ru" },
-    { q: ["формула", "formula"], a: "AKSI = (A × I × S) × (1 + 0.4√n). π-Contour: query→SHA-256→θ→seal." },
-    { q: ["контур", "contour"], a: "π-Contour — детерминированный путь. Тот же запрос → тот же θ и seal." },
+    { q: ["формула", "formula"], a: "AKSI = (A × I × S) × (1 + 0.4√n). A — agency, I — integrity, S — structure, n — sealed history." },
+    { q: ["контур", "contour"], a: "π-Contour: query → SHA-256 → θ ∈ [0,2π) → seal. Тот же запрос → тот же θ." },
     { q: ["gate", "гейт"], a: "Gate τ ≈ 0.55 — порог принятия." },
     { q: ["статус", "status", "что умеешь"], a: "Contour v" + VER + ": Decision, Superpose, Chat, Memory, WebLLM (опц.), Status." },
-    { q: ["vault", "память"], a: "Vault: IndexedDB. Команда «запомни: факт»." }
+    { q: ["vault", "память"], a: "Vault / localStorage. Команда «запомни: факт»." }
   ];
 
   function localDecide(q) {
@@ -31,15 +26,9 @@
       for (var j = 0; j < KB[i].q.length; j++) {
         if (ql.indexOf(KB[i].q[j]) !== -1) {
           return {
-            id: "fb-" + Date.now().toString(36),
-            answer: KB[i].a,
-            anti: "local",
-            source: "fallback",
+            id: "fb-" + Date.now().toString(36), answer: KB[i].a, anti: "local", source: "fallback",
             scores: { aksi: 0.72, eqs: 72, phi: 0.6, qcli: 0.55 },
-            gate: { ok: true, reason: "fallback" },
-            seal: { kind: "local", t: Date.now() },
-            ms: 0,
-            version: "fb-" + VER
+            gate: { ok: true, reason: "fallback" }, seal: { kind: "local", t: Date.now() }, ms: 0, version: "fb-" + VER
           };
         }
       }
@@ -47,24 +36,16 @@
     return {
       id: "fb-" + Date.now().toString(36),
       answer: "АКСИ Contour v" + VER + ". Спросите: кто ты, π, формула, контур. aksilove@internet.ru",
-      anti: "no-hit",
-      source: "fallback",
+      anti: "no-hit", source: "fallback",
       scores: { aksi: 0.5, eqs: 50, phi: 0.4, qcli: 0.4 },
-      gate: { ok: true, reason: "generic" },
-      seal: { kind: "local", t: Date.now() },
-      ms: 0,
-      version: "fb-" + VER
+      gate: { ok: true, reason: "generic" }, seal: { kind: "local", t: Date.now() }, ms: 0, version: "fb-" + VER
     };
   }
 
   function showPanel(name) {
     if (!name) return;
-    document.querySelectorAll(".panel").forEach(function (p) {
-      p.classList.toggle("on", p.id === "p-" + name);
-    });
-    document.querySelectorAll(".tab").forEach(function (t) {
-      t.classList.toggle("on", t.getAttribute("data-p") === name);
-    });
+    document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("on", p.id === "p-" + name); });
+    document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.getAttribute("data-p") === name); });
   }
 
   function refreshMods() {
@@ -103,13 +84,8 @@
     txt("vQcli", p.scores && p.scores.qcli != null ? p.scores.qcli : "—");
     var g = $("dgate");
     if (g) {
-      if (p.gate && p.gate.ok) {
-        g.className = "gate ok";
-        g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || "");
-      } else {
-        g.className = "gate no";
-        g.textContent = "Gate: ОТКЛОНЕНО — " + ((p.gate && p.gate.reason) || "");
-      }
+      if (p.gate && p.gate.ok) { g.className = "gate ok"; g.textContent = "Gate: ПРИНЯТО — " + (p.gate.reason || ""); }
+      else { g.className = "gate no"; g.textContent = "Gate: ОТКЛОНЕНО — " + ((p.gate && p.gate.reason) || ""); }
     }
     txt("dseal", JSON.stringify(p.seal || {}, null, 2));
     txt("dmeta", (p.ms != null ? p.ms + " ms · " : "") + (p.source || "") + " · " + (p.version || ""));
@@ -119,13 +95,12 @@
     q = (q != null ? q : ($("dq") && $("dq").value) || "").trim();
     if (!q) { txt("derr", "Введите вопрос"); return; }
     txt("derr", "");
-    var btn = $("dgo");
-    if (btn) btn.disabled = true;
+    var btn = $("dgo"); if (btn) btn.disabled = true;
     var t0 = Date.now();
     try {
       var p = null;
       if (window.AKSI && typeof AKSI.decide === "function") {
-        try { p = await AKSI.decide(q); } catch (e) { console.warn("AKSI.decide", e); }
+        try { p = await AKSI.decide(q); } catch (e) { console.warn(e); }
       }
       if ((!p || !p.answer) && window.AKSI_ORGANISM && AKSI_ORGANISM.decide) {
         try { p = await AKSI_ORGANISM.decide(q); } catch (e) {}
@@ -133,7 +108,7 @@
       if ((!p || !p.answer) && window.AKSI_DECISION && AKSI_DECISION.decide) {
         try { p = await Promise.resolve(AKSI_DECISION.decide(q)); } catch (e) {}
       }
-      if ((!p || !p.answer) && window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process && /π|\bpi\b|пи\b|контур|формул/i.test(q)) {
+      if ((!p || !p.answer) && window.AKSI_PI_CONTOUR && AKSI_PI_CONTOUR.process && /π|\bpi\b|пи\b|контур/i.test(q)) {
         try {
           var pr = await AKSI_PI_CONTOUR.process(q);
           if (pr && pr.answer) {
@@ -170,11 +145,9 @@
   }
 
   function renderStates(list) {
-    var root = $("sstates");
-    var box = $("sbox");
+    var root = $("sstates"); var box = $("sbox");
     if (!root) return;
-    root.innerHTML = "";
-    if (box) box.hidden = false;
+    root.innerHTML = ""; if (box) box.hidden = false;
     (list || []).forEach(function (s) {
       var d = document.createElement("div");
       d.className = "st" + (s.selected ? " sel" : "");
@@ -240,8 +213,7 @@
   function updateLlmUi(st) {
     st = st || (window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : {});
     var bar = $("llmBar");
-    var prog = Number(st.progress || 0);
-    if (prog <= 1) prog *= 100;
+    var prog = Number(st.progress || 0); if (prog <= 1) prog *= 100;
     if (bar) bar.style.width = Math.round(prog) + "%";
     txt("llmMsg", st.message || (st.ready ? "модель готова" : "не загружено"));
     txt("llmStatus", JSON.stringify(st, null, 2));
@@ -339,7 +311,10 @@
           txt("lans", "…");
           try {
             if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready || !AKSI_WEBLLM.ready()) throw new Error("Сначала «Загрузить»");
-            var r = await AKSI_WEBLLM.complete(q, { temperature: 0.4, max_tokens: 500, system: "Ты АКСИ. Отвечай по-русски полными предложениями." });
+            var r = await AKSI_WEBLLM.complete(q, {
+              temperature: 0.4, max_tokens: 500,
+              system: "Ты АКСИ. Отвечай по-русски полными предложениями."
+            });
             txt("lans", (r && r.text) || JSON.stringify(r));
           } catch (err) {
             txt("lans", "Ошибка: " + (err && err.message || err));
@@ -369,7 +344,7 @@
         if (lastDecision) txt("dmeta", "seal=" + !!lastDecision.seal + " · gate=" + !!(lastDecision.gate && lastDecision.gate.ok));
       }
     } catch (err) {
-      console.error("[Contour click]", err);
+      console.error("[Contour]", err);
       txt("bootErr", "Ошибка: " + (err && err.message || err));
     }
   }
@@ -389,9 +364,9 @@
     document.addEventListener("keydown", onKey, false);
     refreshMods();
     fullStatus();
-    setTimeout(refreshMods, 500);
-    setTimeout(refreshMods, 1500);
-    setTimeout(refreshMods, 4000);
+    setTimeout(refreshMods, 400);
+    setTimeout(refreshMods, 1200);
+    setTimeout(refreshMods, 3500);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
