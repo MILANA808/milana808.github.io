@@ -4,74 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#efe5d2">
-<meta name="description" content="АКСИ Contour — Decision · π · Chat · Memory">
 <title>АКСИ Contour</title>
 <style>
 :root{--s:#fbf7ef;--s2:#efe6d6;--ink:#2a241c;--muted:#7a6f60;--line:#ddd0bb;--a:#6b4f35;--ok:#2f6b48;--bad:#8b3a2f;--blue:#3b6cff}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font:14px/1.45 system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:960px;margin:0 auto;padding:12px 12px 56px}
-.top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#6b4f35,#c4a35a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}
-h1{font-size:18px;font-weight:800}.sub{font-size:11px;color:var(--muted)}
-.pill{margin-left:auto;font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:12px;cursor:pointer}
-.tab.on{background:var(--a);color:#fff;border-color:var(--a)}
-.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px}
-.card h3{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.panel{display:none}.panel.on{display:block}
-.composer{display:flex;gap:7px;flex-wrap:wrap}
-.composer input{flex:1;min-width:160px;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}
-button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}
-button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}
-button.blue{background:var(--blue);color:#fff}
-button:disabled{opacity:.5;cursor:not-allowed}
-.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:640px){.grid2{grid-template-columns:1fr}}
-.col{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}
-.col.pro{border-color:#b7d4c2}.col.con{border-color:#e0b8b0}
-.lbl{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:4px;font-weight:700}
-.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
-.m{text-align:center;padding:8px 4px;border-radius:10px;background:var(--s2);border:1px solid var(--line)}
-.m b{display:block;font-size:17px;font-weight:800}.m span{font-size:9px;color:var(--muted);font-weight:700}
-.gate{margin-top:9px;padding:9px 11px;border-radius:11px;font-weight:700;font-size:13px;border:1px solid var(--line)}
-.gate.ok{background:#e8f2ea;color:var(--ok);border-color:#b7d4c2}
-.gate.no{background:#f8eaea;color:var(--bad);border-color:#e0b8b0}
-.seal{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-word}
-.answer-box{margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;white-space:pre-wrap;word-break:break-word;line-height:1.55;font-size:14px}
-.states{display:flex;flex-direction:column;gap:7px}
-.st{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}
-.st.sel{border-color:var(--ok)}
-.checks{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.checks i{font-style:normal;font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}
-.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}
-.foot{text-align:center;font-size:11px;color:var(--muted);margin-top:18px}
-.muted{color:var(--muted);font-size:12px}
-.phase{font-size:12px;color:var(--blue);font-weight:600;min-height:1.3em;margin-top:6px}
-.progress{height:8px;border-radius:99px;background:#eee;overflow:hidden;margin-top:8px}
-.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b6cff,#22d3ee);transition:width .2s}
-.err{color:var(--bad);font-size:12px;margin-top:6px;font-weight:600}
-.okmsg{color:var(--ok);font-size:12px;margin-top:6px}
-.hero p{color:var(--muted);font-size:13px;max-width:62ch}
-.bar{height:6px;border-radius:99px;background:#eee;overflow:hidden;margin:5px 0}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}
-.st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}
+*{box-sizing:border-box;margin:0;padding:0}body{font:14px/1.45 system-ui,sans-serif;background:linear-gradient(165deg,#f7f0e4,#efe5d2);color:var(--ink);min-height:100vh}a{color:inherit;text-decoration:none}.wrap{max-width:960px;margin:0 auto;padding:12px 12px 56px}.top{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,#6b4f35,#c4a35a);color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}h1{font-size:18px;font-weight:800}.sub{font-size:11px;color:var(--muted)}.pill{margin-left:auto;font-size:11px;font-weight:800;padding:5px 12px;border-radius:999px;background:#e8f2ea;color:var(--ok);border:1px solid #b7d4c2}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.tab{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--s2);font-weight:700;font-size:12px;cursor:pointer}.tab.on{background:var(--a);color:#fff;border-color:var(--a)}.card{background:var(--s);border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:10px}.panel{display:none}.panel.on{display:block}.composer{display:flex;gap:7px;flex-wrap:wrap}.composer input{flex:1;min-width:160px;min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:16px}button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 14px;background:var(--a);color:#fff;font-weight:800}button.g{background:var(--s2);color:var(--ink);border:1px solid var(--line)}button.blue{background:var(--blue);color:#fff}.row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:640px){.grid2{grid-template-columns:1fr}}.col{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}.lbl{font-size:10px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;font-weight:700}.meters{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.m{text-align:center;padding:8px 4px;border-radius:10px;background:var(--s2);border:1px solid var(--line)}.m b{display:block;font-size:17px;font-weight:800}.m span{font-size:9px;color:var(--muted)}.gate{margin-top:9px;padding:9px 11px;border-radius:11px;font-weight:700;font-size:13px;border:1px solid var(--line)}.gate.ok{background:#e8f2ea;color:var(--ok)}.gate.no{background:#f8eaea;color:var(--bad)}.seal{font-family:ui-monospace,monospace;font-size:11px;background:#2a241c;color:#efe6d6;border-radius:10px;padding:10px;overflow:auto;max-height:220px;white-space:pre-wrap}.answer-box{margin-top:8px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff;white-space:pre-wrap;word-break:break-word;line-height:1.55}.checks{display:flex;flex-wrap:wrap;gap:5px}.checks i{font-style:normal;font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--s2)}.checks i.on{background:#e8f2ea;border-color:#b7d4c2;color:var(--ok);font-weight:700}.foot{text-align:center;font-size:11px;color:var(--muted);margin-top:18px}.err{color:var(--bad);font-size:12px;margin-top:6px}.okmsg{color:var(--ok);font-size:12px}.phase{font-size:12px;color:var(--blue);font-weight:600;min-height:1.3em}.progress{height:8px;border-radius:99px;background:#eee;overflow:hidden;margin-top:8px}.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3b6cff,#22d3ee)}.bar{height:6px;border-radius:99px;background:#eee;overflow:hidden;margin:5px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,#6b4f35,#2f6b48)}.states{display:flex;flex-direction:column;gap:7px}.st{border:1px solid var(--line);border-radius:11px;padding:9px;background:#fff}.st.sel{border-color:var(--ok)}.st .top{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.muted{color:var(--muted);font-size:12px}.hero p{color:var(--muted);font-size:13px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="logo">π</div>
-    <div>
-      <h1>АКСИ · Contour</h1>
-      <div class="sub"><a href="/">← хаб</a> · <a href="/deploy/">Deploy</a> · <a href="/crypto/">Crypto</a></div>
-    </div>
+    <div><h1>АКСИ · Contour</h1><div class="sub"><a href="/">← хаб</a> · <a href="/deploy/">Deploy</a> · <a href="/crypto/">Crypto</a></div></div>
     <span class="pill" id="pill">загрузка…</span>
   </header>
-  <div class="tabs" id="tabs">
+  <div class="tabs">
     <button type="button" class="tab on" data-p="decision">Decision</button>
     <button type="button" class="tab" data-p="superpose">Superpose</button>
     <button type="button" class="tab" data-p="chat">Chat</button>
@@ -79,122 +25,75 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <button type="button" class="tab" data-p="mem">Memory</button>
     <button type="button" class="tab" data-p="status">Status</button>
   </div>
-  <section class="card">
-    <div class="checks" id="modChecks"></div>
-    <div class="err" id="bootErr"></div>
-  </section>
+  <section class="card"><div class="checks" id="modChecks"></div><div class="err" id="bootErr"></div></section>
   <div class="panel on" id="p-decision">
-    <section class="card hero"><h3>Decision</h3><p>Вопрос → ответ · scores · Gate · seal. Offline.</p></section>
+    <section class="card hero"><h3 style="font-size:11px;text-transform:uppercase;color:var(--muted)">Decision</h3><p>Вопрос → ответ · Gate · seal. Offline.</p></section>
     <section class="card">
       <div class="composer"><input id="dq" type="text" placeholder="Вопрос…" autocomplete="off" autofocus><button type="button" id="dgo">Решить</button></div>
-      <div class="row">
-        <button type="button" class="g" id="dex1">π</button>
-        <button type="button" class="g" id="dex2">Формула</button>
-        <button type="button" class="g" id="dex3">Кто ты?</button>
-      </div>
+      <div class="row"><button type="button" class="g" id="dex1">π</button><button type="button" class="g" id="dex2">Формула</button><button type="button" class="g" id="dex3">Кто ты?</button></div>
       <div class="err" id="derr"></div>
     </section>
     <section class="card" id="dout" hidden>
-      <div class="grid2">
-        <div class="col pro"><div class="lbl">Ответ</div><div id="danswer" class="answer-box" style="margin:0;border:0;padding:0"></div></div>
-        <div class="col con"><div class="lbl">Анти</div><div id="danti"></div></div>
-      </div>
-      <div class="meters">
-        <div class="m"><b id="vAksi">—</b><span>AKSI</span></div>
-        <div class="m"><b id="vEqs">—</b><span>EQS</span></div>
-        <div class="m"><b id="vPhi">—</b><span>Φ</span></div>
-        <div class="m"><b id="vQcli">—</b><span>QCLI</span></div>
-      </div>
+      <div class="grid2"><div class="col"><div class="lbl">Ответ</div><div id="danswer" class="answer-box" style="margin:0;border:0;padding:0"></div></div><div class="col"><div class="lbl">Анти</div><div id="danti"></div></div></div>
+      <div class="meters"><div class="m"><b id="vAksi">—</b><span>AKSI</span></div><div class="m"><b id="vEqs">—</b><span>EQS</span></div><div class="m"><b id="vPhi">—</b><span>Φ</span></div><div class="m"><b id="vQcli">—</b><span>QCLI</span></div></div>
       <div class="gate no" id="dgate">Gate: —</div>
-      <div class="row">
-        <button type="button" class="g" id="dproof">Proof</button>
-        <button type="button" class="g" id="dverify">Verify</button>
-        <button type="button" class="g" id="dcopy">JSON</button>
-      </div>
-      <pre class="seal" id="dseal"></pre>
-      <p class="muted" id="dmeta"></p>
+      <div class="row"><button type="button" class="g" id="dproof">Proof</button><button type="button" class="g" id="dverify">Verify</button><button type="button" class="g" id="dcopy">JSON</button></div>
+      <pre class="seal" id="dseal"></pre><p class="muted" id="dmeta"></p>
     </section>
   </div>
   <div class="panel" id="p-superpose">
     <section class="card">
       <div class="composer"><input id="sq" type="text" placeholder="Суперпозиция" autocomplete="off"><button type="button" id="sgo">Коллапс</button></div>
-      <div class="row">
-        <button type="button" class="g" id="sex1">Кто ты?</button>
-        <button type="button" class="g" id="sex2">π</button>
-      </div>
-      <div class="phase" id="sphase"></div>
-      <div class="err" id="serr"></div>
+      <div class="row"><button type="button" class="g" id="sex1">Кто ты?</button><button type="button" class="g" id="sex2">π</button></div>
+      <div class="phase" id="sphase"></div><div class="err" id="serr"></div>
     </section>
     <section class="card" id="sbox" hidden><div class="states" id="sstates"></div></section>
-    <section class="card" id="sansBox" hidden>
-      <div class="lbl">Ответ</div>
-      <div id="sanswer" class="answer-box"></div>
-      <pre class="seal" id="smeta" style="margin-top:8px"></pre>
-    </section>
+    <section class="card" id="sansBox" hidden><div class="lbl">Ответ</div><div id="sanswer" class="answer-box"></div><pre class="seal" id="smeta" style="margin-top:8px"></pre></section>
   </div>
   <div class="panel" id="p-chat">
     <section class="card">
       <div class="composer"><input id="cq" type="text" placeholder="Сообщение…" autocomplete="off"><button type="button" id="cgo">Отправить</button></div>
-      <div class="row">
-        <button type="button" class="g" id="cex1">π</button>
-        <button type="button" class="g" id="cex2">формула</button>
-      </div>
-      <div class="err" id="cerr"></div>
-      <div id="cthread" class="answer-box" style="min-height:120px">—</div>
+      <div class="row"><button type="button" class="g" id="cex1">π</button><button type="button" class="g" id="cex2">формула</button></div>
+      <div class="err" id="cerr"></div><div id="cthread" class="answer-box" style="min-height:120px">—</div>
     </section>
   </div>
   <div class="panel" id="p-llm">
     <section class="card">
-      <h3>WebLLM · опционально</h3>
-      <div class="row">
-        <button type="button" class="blue" id="btnLoadLlm">Загрузить</button>
-        <button type="button" class="g" id="btnWasm">WASM</button>
-        <button type="button" class="g" id="btnUnloadLlm">Выгрузить</button>
-      </div>
-      <div class="progress"><i id="llmBar"></i></div>
-      <div class="phase" id="llmMsg">не загружено</div>
-      <div class="err" id="llmErr"></div>
-      <div class="composer" style="margin-top:10px">
-        <input id="lq" type="text" placeholder="Вопрос модели…" autocomplete="off">
-        <button type="button" id="lgo">Спросить</button>
-      </div>
-      <div id="lans" class="answer-box">—</div>
-      <pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
+      <div class="row"><button type="button" class="blue" id="btnLoadLlm">Загрузить</button><button type="button" class="g" id="btnWasm">WASM</button><button type="button" class="g" id="btnUnloadLlm">Выгрузить</button></div>
+      <div class="progress"><i id="llmBar"></i></div><div class="phase" id="llmMsg">не загружено</div><div class="err" id="llmErr"></div>
+      <div class="composer" style="margin-top:10px"><input id="lq" type="text" placeholder="Вопрос модели…" autocomplete="off"><button type="button" id="lgo">Спросить</button></div>
+      <div id="lans" class="answer-box">—</div><pre class="seal" id="llmStatus" style="margin-top:8px"></pre>
     </section>
   </div>
   <div class="panel" id="p-mem">
     <section class="card">
       <div class="composer"><input id="mq" type="text" placeholder="запомни: факт" autocomplete="off"><button type="button" id="mgo">Сохранить</button></div>
       <div class="row"><button type="button" class="g" id="mrefresh">Обновить</button></div>
-      <p class="okmsg" id="mmsg"></p>
-      <pre class="seal" id="mstatus" style="margin-top:8px"></pre>
+      <p class="okmsg" id="mmsg"></p><pre class="seal" id="mstatus" style="margin-top:8px"></pre>
     </section>
   </div>
   <div class="panel" id="p-status">
     <section class="card">
-      <div class="row">
-        <button type="button" id="btnRefresh">Обновить</button>
-        <button type="button" class="g" id="btnPurge">Purge</button>
-      </div>
+      <div class="row"><button type="button" id="btnRefresh">Обновить</button><button type="button" class="g" id="btnPurge">Purge</button></div>
       <pre class="seal" id="fullStatus" style="margin-top:10px;max-height:360px"></pre>
     </section>
   </div>
-  <p class="foot">АКСИ Contour v250 · aksilove@internet.ru</p>
+  <p class="foot">АКСИ Contour v251 · aksilove@internet.ru</p>
 </div>
-<script src="/aksi-purge.js?v=250"></script>
-<script src="/pi-crypto.js?v=250"></script>
-<script src="/aksi-pi-contour.js?v=250"></script>
-<script src="/aksi-vault.js?v=250"></script>
-<script src="/aksi-zero.js?v=250"></script>
-<script src="/aksi-neuro-seed.js?v=250"></script>
-<script src="/aksi-neuro.js?v=250"></script>
-<script src="/aksi-algorithm.js?v=250"></script>
-<script src="/aksi-decision.js?v=250"></script>
-<script src="/aksi-superpose.js?v=250"></script>
-<script src="/aksi-webllm.js?v=250"></script>
-<script src="/aksi-organism.js?v=250"></script>
-<script src="/aksi-api.js?v=250"></script>
-<script src="/aksi-ready.js?v=250"></script>
-<script src="/contour-app.js?v=250"></script>
+<script src="/aksi-purge.js?v=251"></script>
+<script src="/pi-crypto.js?v=251"></script>
+<script src="/aksi-pi-contour.js?v=251"></script>
+<script src="/aksi-vault.js?v=251"></script>
+<script src="/aksi-zero.js?v=251"></script>
+<script src="/aksi-neuro-seed.js?v=251"></script>
+<script src="/aksi-neuro.js?v=251"></script>
+<script src="/aksi-algorithm.js?v=251"></script>
+<script src="/aksi-decision.js?v=251"></script>
+<script src="/aksi-superpose.js?v=251"></script>
+<script src="/aksi-webllm.js?v=251"></script>
+<script src="/aksi-organism.js?v=251"></script>
+<script src="/aksi-api.js?v=251"></script>
+<script src="/aksi-ready.js?v=251"></script>
+<script src="/contour-app.js?v=251"></script>
 </body>
 </html>
