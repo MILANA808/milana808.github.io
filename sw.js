@@ -1,26 +1,39 @@
-/* AKSI SW v270 — offline-first shell for Contour + Sovereign Crystal + Swarm */
-var CACHE = "aksi-shell-v270";
+/* AKSI SW v302 — full platform offline shell */
+var CACHE = "aksi-shell-v302";
 var PRE = [
   "/",
   "/index.html",
+  "/aksi.html",
+  "/platform.html",
   "/sw.js",
   "/contour/",
   "/contour/index.html",
   "/sovereign/",
   "/sovereign/index.html",
-  "/aksi-purge.js",
-  "/aksi-neuro.js",
-  "/aksi-knowledge.js",
-  "/aksi-hrr.js",
-  "/aksi-crystal.js",
-  "/aksi-swarm.js",
-  "/aksi-p2p-sdp.js",
-  "/aksi-organism.js",
+  "/reality/",
+  "/aksi-brain-ru.js",
+  "/aksi-mind.js",
   "/aksi-api.js",
+  "/aksi-crystal.js",
+  "/aksi-neuro.js",
+  "/aksi-reality.js",
+  "/aksi-swarm.js",
+  "/aksi-organism.js",
   "/aksi-pi-contour.js",
-  "/aksi-zero.js"
+  "/aksi-zero.js",
+  "/aksi-decision.js"
 ];
-var NET_FIRST = [/\/contour\//, /\/sovereign\//, /index\.html$/, /aksi-purge\.js/, /contour-app\.js/];
+var NET_FIRST = [
+  /\/aksi\.html/,
+  /\/platform\.html/,
+  /\/contour\//,
+  /\/sovereign\//,
+  /\/reality\//,
+  /index\.html$/,
+  /aksi-brain-ru\.js/,
+  /aksi-api\.js/,
+  /aksi-mind\.js/
+];
 function isNetFirst(url) {
   var p = url.pathname;
   for (var i = 0; i < NET_FIRST.length; i++) if (NET_FIRST[i].test(p)) return true;
@@ -47,39 +60,30 @@ self.addEventListener("activate", function (e) {
 self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
-  var url = new URL(req.url);
+  var url;
+  try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;
   if (isNetFirst(url)) {
     e.respondWith(
       fetch(req).then(function (res) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, copy); });
         return res;
       }).catch(function () {
         return caches.match(req).then(function (c) {
-          return c || caches.match("/contour/") || caches.match("/");
+          return c || caches.match("/aksi.html");
         });
       })
     );
     return;
   }
   e.respondWith(
-    caches.match(req).then(function (cached) {
-      if (cached) return cached;
-      return fetch(req).then(function (res) {
-        if (res && res.ok && res.type === "basic") {
-          var clone = res.clone();
-          caches.open(CACHE).then(function (c) { c.put(req, clone); });
-        }
+    caches.match(req).then(function (c) {
+      return c || fetch(req).then(function (res) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (cache) { cache.put(req, copy); });
         return res;
-      }).catch(function () {
-        return caches.match("/") || new Response("АКСИ offline", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
-      });
+      }).catch(function () { return caches.match("/aksi.html"); });
     })
   );
-});
-self.addEventListener("message", function (e) {
-  if (e.data && e.data.type === "PURGE") {
-    caches.keys().then(function (keys) {
-      return Promise.all(keys.map(function (k) { return caches.delete(k); }));
-    });
-  }
 });

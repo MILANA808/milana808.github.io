@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0812">
-<meta name="description" content="АКСИ — суверенная Decision Integrity. Offline Brain.">
 <title>АКСИ</title>
 <style>
 :root{--bg:#0a0812;--ink:#f4f0ff;--muted:#a89bb8;--line:rgba(180,150,255,.25);--ok:#6ee7a0;--card:rgba(18,12,32,.94)}
@@ -13,20 +12,20 @@ body{font:15px/1.45 system-ui,sans-serif;background:radial-gradient(ellipse at 2
 a{color:#67e8f9;text-decoration:none}
 .wrap{max-width:720px;margin:0 auto;padding:16px 14px 80px}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#b681ff,#5b2fc0);display:grid;place-items:center;font-weight:900;font-size:18px}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#b681ff,#5b2fc0);display:grid;place-items:center;font-weight:900}
 .badge{margin-left:auto;background:var(--ok);color:#0a0812;font-weight:900;font-size:11px;padding:5px 10px;border-radius:999px}
 h1{font-size:clamp(22px,5vw,28px);font-weight:900}
-.lead{color:var(--muted);font-size:13px;margin-top:2px}
+.lead{color:var(--muted);font-size:13px}
 .composer{display:flex;gap:8px;margin:12px 0 10px}
 #q{flex:1;padding:14px;border-radius:14px;border:1px solid var(--line);background:#120e1c;color:var(--ink);font:inherit}
 #go{padding:14px 18px;border:0;border-radius:14px;background:linear-gradient(135deg,#b681ff,#5b2fc0);color:#fff;font-weight:900;cursor:pointer;font:inherit}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .chips button{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--ink);padding:8px 12px;border-radius:999px;font-weight:700;font-size:12px;cursor:pointer}
-.out{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;white-space:pre-wrap;word-break:break-word;min-height:130px;font-size:14px}
+.out{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;white-space:pre-wrap;word-break:break-word;min-height:130px}
 .meta{margin-top:8px;font-size:12px;color:var(--muted)}
 .nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
 .nav a{padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-weight:800;font-size:12px;color:var(--ink)}
-.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin-top:14px}
+.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:6px;margin-top:14px}
 .mod{font-size:11px;font-weight:800;padding:8px;border-radius:10px;border:1px solid var(--line);text-align:center}
 .mod.on{border-color:var(--ok);color:var(--ok)}
 .foot{margin-top:22px;text-align:center;color:var(--muted);font-size:12px}
@@ -36,11 +35,11 @@ h1{font-size:clamp(22px,5vw,28px);font-weight:900}
 <div class="wrap">
   <div class="top">
     <div class="logo">A</div>
-    <div><h1>АКСИ</h1><div class="lead">Decision Integrity · offline-first</div></div>
-    <div class="badge">CORE</div>
+    <div><h1>АКСИ</h1><div class="lead">Decision Integrity · full stack</div></div>
+    <div class="badge">v302</div>
   </div>
   <div class="composer">
-    <input id="q" placeholder="Спросите АКСИ…" autofocus autocomplete="off">
+    <input id="q" placeholder="Спросите АКСИ…" autofocus>
     <button type="button" id="go">→</button>
   </div>
   <div class="chips">
@@ -66,53 +65,22 @@ h1{font-size:clamp(22px,5vw,28px);font-weight:900}
 window.AKSI_CORE=(function(){
   var VER="2.1.0-core";
   var KB=[
-    ["кто ты|привет|представься|who are you","Я АКСИ — суверенная Decision Integrity платформа.\nСтек: Brain · Mind · Crystal · Neuro · π · Reality · Swarm · Vault · offline.\nОтвет → Gate → seal.\nКонтакт: aksilove@internet.ru"],
+    ["кто ты|привет|представься","Я АКСИ — суверенная Decision Integrity платформа.\nСтек: Brain · Mind · Crystal · Neuro · π · Reality · Swarm · Vault · offline.\nКонтакт: aksilove@internet.ru"],
     ["формул|formula","AKSI = (A × I × S) × (1 + 0.4√n)\nA — agency · I — integrity · S — structure · n — sealed history"],
-    ["контур|π|пи|pi-contour","π-Contour: query → SHA-256 → θ ∈ [0,2π) → FNV seal.\nОдин текст → один θ."],
-    ["crystal|кристал|памят","Crystal: Neuro + RAG (IndexedDB) + HRR.\nКоманда: «запомни: факт»."],
-    ["swarm|p2p","Swarm: WebRTC DataChannel + manual SDP, без своего signaling."],
-    ["reality|реальн","Reality Layer: opt-in geo/camera/mic/network → RealityEvent (observe-only).\n/reality/"],
-    ["gate|eqs|seal|proof","EQS — инженерный score. Gate τ≈0.55.\nseal — аудируемый след решения, не «доказательство истины»."],
-    ["offline|автоном|sovereign","Service Worker кэширует shell.\nПосле установки — Platform/Contour без сети."],
-    ["миссия|платформ|как пользоваться|помощ|help","Миссия АКСИ — суверенный Decision Integrity в браузере.\n\n1) /aksi.html — главный вход\n2) /platform.html — Brain / Crystal / Reality\n3) /contour/ — Decision · Chat\n4) /sovereign/ — Swarm · Offline\n5) /reality/ — сенсоры\n\nКонтакт: aksilove@internet.ru"],
-    ["что умеешь|статус|возможности","Умею: русский Decision, память, π-seal, Reality observe, Swarm SDP, offline.\nНе умею: всезнание; критические решения — за человеком."],
-    ["webllm|веб ллм|llm","WebLLM — опция. Основной путь — offline Core/Brain. Английский мусор отсекается."],
-    ["vault|шифр|crypto","Vault / PiFractal: AES-GCM локально, соль из Math.PI + PBKDF2."],
-    ["контакт|email","Публичный контакт: aksilove@internet.ru"]
+    ["контур|π|пи","π-Contour: query → SHA-256 → θ ∈ [0,2π) → FNV seal."],
+    ["миссия|как пользоваться|помощ|платформ","1) /aksi.html — вход\n2) /platform.html — Brain/Crystal/Reality\n3) /contour/ — Decision\n4) /sovereign/ — Swarm\n5) /reality/ — сенсоры\nКонтакт: aksilove@internet.ru"],
+    ["что умеешь|статус","Умею: Decision, память, π-seal, Reality, Swarm, offline.\nНе умею: всезнание; критические решения — за человеком."],
+    ["crystal|кристал|памят","Crystal: Neuro + RAG + HRR. «запомни: факт»."],
+    ["контакт|email","aksilove@internet.ru"]
   ];
-  function hit(q){
-    q=String(q||"").toLowerCase();
-    for(var i=0;i<KB.length;i++){
-      var keys=KB[i][0].split("|");
-      for(var j=0;j<keys.length;j++) if(q.indexOf(keys[j])!==-1) return KB[i][1];
-    }
-    return null;
-  }
+  function hit(q){q=String(q||"").toLowerCase();for(var i=0;i<KB.length;i++){var k=KB[i][0].split("|");for(var j=0;j<k.length;j++)if(q.indexOf(k[j])!==-1)return KB[i][1];}return null;}
   function decide(q){
-    q=String(q||"").trim();
-    if(!q) return Promise.resolve({ok:false,answer:"",source:"empty"});
-    if(/^запомни\s*[:：]/i.test(q)||/^remember\s*[:：]/i.test(q)){
-      var fact=q.replace(/^(запомни|remember)\s*[:：]\s*/i,"");
-      try{
-        var arr=JSON.parse(localStorage.getItem("aksi_core_mem")||"[]");
-        arr.push({t:Date.now(),text:fact});
-        localStorage.setItem("aksi_core_mem",JSON.stringify(arr.slice(-200)));
-      }catch(e){}
-      return Promise.resolve({ok:true,answer:"Сохранено: «"+fact.slice(0,160)+"»",source:"learn",version:VER});
-    }
-    try{
-      var mem=JSON.parse(localStorage.getItem("aksi_core_mem")||"[]");
-      var ql=q.toLowerCase();
-      for(var m=mem.length-1;m>=0;m--){
-        if(mem[m].text && ql.length>3 && (mem[m].text.toLowerCase().indexOf(ql)!==-1 || ql.indexOf(mem[m].text.toLowerCase().slice(0,12))!==-1))
-          return Promise.resolve({ok:true,answer:"Из памяти: "+mem[m].text,source:"core-mem",version:VER});
-      }
-    }catch(e){}
-    var a=hit(q);
-    if(a) return Promise.resolve({ok:true,answer:a,source:"core-kb",version:VER,scores:{aksi:0.9,eqs:90}});
-    if(window.AKSI_BRAIN&&typeof AKSI_BRAIN.decide==="function") return AKSI_BRAIN.decide(q);
-    if(window.AKSI&&typeof AKSI.decide==="function") return AKSI.decide(q);
-    return Promise.resolve({ok:true,answer:"АКСИ Core.\nСпросите: кто ты · миссия · формула · что умеешь.\nИли «запомни: …»\nКонтакт: aksilove@internet.ru",source:"core-fallback",version:VER});
+    q=String(q||"").trim();if(!q)return Promise.resolve({ok:false,answer:"",source:"empty"});
+    if(/^запомни\s*[:：]/i.test(q)){var f=q.replace(/^запомни\s*[:：]\s*/i,"");try{var a=JSON.parse(localStorage.getItem("aksi_core_mem")||"[]");a.push({t:Date.now(),text:f});localStorage.setItem("aksi_core_mem",JSON.stringify(a.slice(-200)));}catch(e){}return Promise.resolve({ok:true,answer:"Сохранено: «"+f.slice(0,140)+"»",source:"learn",version:VER});}
+    var a=hit(q);if(a)return Promise.resolve({ok:true,answer:a,source:"core-kb",version:VER});
+    if(window.AKSI_BRAIN)return AKSI_BRAIN.decide(q);
+    if(window.AKSI)return AKSI.decide(q);
+    return Promise.resolve({ok:true,answer:"АКСИ Core. Спросите: кто ты · миссия · формула.\naksilove@internet.ru",source:"core-fallback",version:VER});
   }
   return {version:VER,decide:decide,think:decide};
 })();
@@ -121,38 +89,37 @@ window.AKSI_CORE=(function(){
 <script src="/aksi-crystal.js?v=302"></script>
 <script src="/aksi-mind.js?v=302"></script>
 <script src="/aksi-brain-ru.js?v=302"></script>
-<script src="/aksi-api.js?v=302"></script>
+<script src="/aksi-pi-contour.js?v=302"></script>
+<script src="/aksi-organism.js?v=302"></script>
 <script src="/aksi-reality.js?v=302"></script>
+<script src="/aksi-swarm.js?v=302"></script>
+<script src="/aksi-api.js?v=302"></script>
 <script>
 (function(){
   function $(id){return document.getElementById(id)}
   function mods(){
-    var list=[["CORE",!!window.AKSI_CORE],["BRAIN",!!window.AKSI_BRAIN],["MIND",!!window.AKSI_MIND],["CRYSTAL",!!window.AKSI_CRYSTAL],["API",!!(window.AKSI&&AKSI.decide)],["REALITY",!!window.AKSI_REALITY]];
-    $("mods").innerHTML=list.map(function(m){return '<div class="mod '+(m[1]?"on":"")+'">'+m[0]+"</div>"}).join("");
+    var L=[["CORE",!!window.AKSI_CORE],["BRAIN",!!window.AKSI_BRAIN],["MIND",!!window.AKSI_MIND],["CRYSTAL",!!window.AKSI_CRYSTAL],["NEURO",!!window.AKSI_NEURO],["API",!!(window.AKSI&&AKSI.decide)],["PI",!!window.AKSI_PI_CONTOUR],["ORG",!!window.AKSI_ORGANISM],["REALITY",!!window.AKSI_REALITY],["SWARM",!!window.AKSI_SWARM]];
+    $("mods").innerHTML=L.map(function(m){return '<div class="mod '+(m[1]?"on":"")+'">'+m[0]+"</div>"}).join("");
   }
   async function ask(q){
-    q=String(q||$("q").value||"").trim(); if(!q)return;
-    $("q").value=q; $("out").textContent="…"; $("meta").textContent="";
+    q=String(q||$("q").value||"").trim();if(!q)return;
+    $("q").value=q;$("out").textContent="…";$("meta").textContent="";
     try{
-      var p;
-      if(window.AKSI_BRAIN) p=await AKSI_BRAIN.decide(q);
-      else if(window.AKSI_CORE) p=await AKSI_CORE.decide(q);
-      else if(window.AKSI) p=await AKSI.decide(q);
-      else p={answer:"Нет ядра",source:"none"};
+      var p=window.AKSI_BRAIN?await AKSI_BRAIN.decide(q):window.AKSI_CORE?await AKSI_CORE.decide(q):window.AKSI?await AKSI.decide(q):{answer:"нет ядра"};
       $("out").textContent=p.answer||p.text||"—";
       $("meta").textContent="source: "+(p.source||"?")+(p.version?" · "+p.version:"");
     }catch(e){
-      if(window.AKSI_CORE){ var p2=await AKSI_CORE.decide(q); $("out").textContent=p2.answer; $("meta").textContent="source: core-recover"; }
-      else $("out").textContent=String(e.message||e);
+      try{var p2=await AKSI_CORE.decide(q);$("out").textContent=p2.answer;$("meta").textContent="source: core-recover";}
+      catch(e2){$("out").textContent=String(e.message||e)}
     }
     mods();
   }
   $("go").onclick=function(){ask()};
   $("q").addEventListener("keydown",function(e){if(e.key==="Enter")ask()});
   document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){ask(b.getAttribute("data-q"))}});
-  if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=302").catch(function(){});
-  mods();
-  ask("кто ты");
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js?v=302").catch(function(){});
+  setTimeout(function(){mods();ask("кто ты");},200);
+  setTimeout(mods,1000);
 })();
 </script>
 </body>
