@@ -1,12 +1,14 @@
 /**
- * AKSI WebLLM runtime v1.9.0 — надёжная загрузка через script module
- * WebGPU (MLC) + WASM (Transformers.js) · русский · прогресс 0–100
+ * AKSI WebLLM runtime v2.0.0-ru — Russian-first
+ * WebGPU (MLC Qwen) + WASM fallback · language retry
  * © AKSI · aksilove@internet.ru
+ *
+ * Note: browser WebLLM cannot be fine-tuned here. Quality = model choice + prompts + params.
  */
 (function (G) {
   "use strict";
 
-  var VERSION = "1.9.0-webllm";
+  var VERSION = "2.0.0-ru";
   var WEBLLM_VERSION = "0.2.79";
 
   var CDNS_WEBLLM = [
@@ -21,10 +23,10 @@
   ];
 
   var MODELS = [
-    { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen 0.5B WebGPU", backend: "webllm" },
-    { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B WebGPU", backend: "webllm" },
-    { id: "Xenova/LaMini-Flan-T5-248M", label: "LaMini WASM", backend: "transformers" },
-    { id: "Xenova/flan-t5-small", label: "Flan-T5 small WASM", backend: "transformers" }
+    { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen 0.5B RU (рекомендуется)", backend: "webllm" },
+    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen 1.5B RU (если хватает VRAM)", backend: "webllm" },
+    { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B (слабее по-русски)", backend: "webllm" },
+    { id: "Xenova/LaMini-Flan-T5-248M", label: "LaMini WASM (fallback)", backend: "transformers" }
   ];
 
   var engine = null;
@@ -86,80 +88,36 @@
 
   function importEsm(url, timeoutMs) {
     timeoutMs = timeoutMs || 60000;
-    bootstrapNetworkUsed = true;
     return new Promise(function (resolve, reject) {
-      var id = "aksi_esm_" + Math.random().toString(36).slice(2, 9);
-      var done = false;
-      var timer = setTimeout(function () {
-        if (done) return;
-        done = true;
-        cleanup();
-        reject(new Error("таймаут " + timeoutMs + "ms · " + url.replace(/^https:\/\//, "").slice(0, 50)));
-      }, timeoutMs);
-
-      function cleanup() {
-        try {
-          var s = document.getElementById(id);
-          if (s && s.parentNode) s.parentNode.removeChild(s);
-        } catch (e) {}
-        try { delete G[id + "_resolve"]; delete G[id + "_reject"]; } catch (e) {}
-      }
-
-      G[id + "_resolve"] = function (m) {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        cleanup();
+      var t = setTimeout(function () { reject(new Error("timeout " + url)); }, timeoutMs);
+      import(url).then(function (m) {
+        clearTimeout(t);
+        bootstrapNetworkUsed = true;
         resolve(m);
-      };
-      G[id + "_reject"] = function (err) {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        cleanup();
-        reject(err instanceof Error ? err : new Error(String(err)));
-      };
-
-      var script = document.createElement("script");
-      script.type = "module";
-      script.id = id;
-      script.textContent =
-        "import * as mod from " + JSON.stringify(url) + ";\n" +
-        "window[" + JSON.stringify(id + "_resolve") + "](mod);\n";
-      script.onerror = function () {
-        G[id + "_reject"](new Error("script onerror · " + url.replace(/^https:\/\//, "").slice(0, 50)));
-      };
-      try {
-        (document.head || document.documentElement).appendChild(script);
-      } catch (e) {
-        clearTimeout(timer);
-        done = true;
+      }).catch(function (e) {
+        clearTimeout(t);
         reject(e);
-      }
+      });
     });
   }
 
   function importNative(url, timeoutMs) {
-    timeoutMs = timeoutMs || 60000;
-    bootstrapNetworkUsed = true;
+    timeoutMs = timeoutMs || 45000;
     return new Promise(function (resolve, reject) {
-      var done = false;
-      var t = setTimeout(function () {
-        if (done) return;
-        done = true;
-        reject(new Error("таймаут import " + timeoutMs + "ms"));
-      }, timeoutMs);
-      import(url).then(function (m) {
-        if (done) return;
-        done = true;
+      var t = setTimeout(function () { reject(new Error("timeout script " + url)); }, timeoutMs);
+      var s = document.createElement("script");
+      s.type = "module";
+      s.src = url;
+      s.onload = function () {
         clearTimeout(t);
-        resolve(m);
-      }).catch(function (e) {
-        if (done) return;
-        done = true;
+        bootstrapNetworkUsed = true;
+        reject(new Error("native module load does not expose exports — use ESM import"));
+      };
+      s.onerror = function () {
         clearTimeout(t);
-        reject(e);
-      });
+        reject(new Error("script error " + url));
+      };
+      document.head.appendChild(s);
     });
   }
 
@@ -228,41 +186,25 @@
       backend = "webllm";
       currentModel = modelId;
       lastError = null;
-      setProgress(100, "готово · WebLLM · " + modelId);
-      try { G.localStorage.setItem("aksi_webllm_model", modelId); } catch (e) {}
-      try { G.dispatchEvent(new CustomEvent("aksi:webllm-ready", { detail: status() })); } catch (e) {}
-      if (typeof onProgress === "function") onProgress(status());
+      loading = false;
+      setProgress(100, "готово · " + modelId);
       return status();
     });
   }
 
   function loadTransformers(modelId, onProgress) {
     modelId = modelId || "Xenova/LaMini-Flan-T5-248M";
-    setProgress(5, "загрузка Transformers.js (WASM)…");
+    setProgress(5, "загрузка Transformers.js…");
     return importFirst(CDNS_XF).then(function (mod) {
       var pipeline = extractPipeline(mod);
       if (typeof pipeline !== "function") throw new Error("pipeline не найден");
-      try {
-        var env = mod.env || (mod.default && mod.default.env);
-        if (env) {
-          env.allowLocalModels = false;
-          env.useBrowserCache = true;
-          env.allowRemoteModels = true;
-        }
-      } catch (e) {}
-      setProgress(15, "скачивание модели " + modelId + "…");
+      setProgress(20, "скачивание WASM-модели…");
       var task = /T5|flan|LaMini/i.test(modelId) ? "text2text-generation" : "text-generation";
       return pipeline(task, modelId, {
         progress_callback: function (info) {
-          var p = 15;
           if (info && typeof info.progress === "number") {
-            var pr = info.progress;
-            if (pr > 1) pr = pr / 100;
-            p = 15 + Math.max(0, Math.min(1, pr)) * 80;
+            setProgress(20 + info.progress * 75, info.status || "загрузка…");
           }
-          var msg = (info && info.status) ? String(info.status) : "загрузка WASM…";
-          if (info && info.file) msg += " · " + String(info.file).slice(-36);
-          setProgress(p, msg);
           if (typeof onProgress === "function") onProgress(status());
         }
       });
@@ -272,84 +214,44 @@
       backend = "transformers";
       currentModel = modelId;
       lastError = null;
-      setProgress(100, "готово · WASM · " + modelId);
-      try { G.localStorage.setItem("aksi_webllm_model", modelId); } catch (e) {}
-      try { G.dispatchEvent(new CustomEvent("aksi:webllm-ready", { detail: status() })); } catch (e) {}
-      if (typeof onProgress === "function") onProgress(status());
+      loading = false;
+      setProgress(100, "WASM готов · " + modelId);
       return status();
     });
   }
 
   function loadModel(modelId, onProgress, opts) {
     opts = opts || {};
-    if (typeof modelId === "object" && modelId !== null && !Array.isArray(modelId)) {
-      opts = modelId;
-      modelId = opts.model || opts.modelId || null;
-      onProgress = opts.onProgress || onProgress;
-    }
-    if (typeof onProgress === "object" && onProgress !== null && onProgress.forceWasm != null) {
-      opts = onProgress;
-      onProgress = opts.onProgress || null;
-    }
     if (loading && loadPromise) return loadPromise;
-
     loading = true;
-    progress = 0;
     lastError = null;
-    bootstrapNetworkUsed = false;
-    message = "старт…";
-    emit();
-    if (typeof onProgress === "function") onProgress(status());
-
-    var preferred = modelId || null;
-    try { if (!preferred) preferred = G.localStorage.getItem("aksi_webllm_model"); } catch (e) {}
-
-    var forceWasm = !!(opts && opts.forceWasm) ||
-      (preferred && /Xenova|transformers|flan|LaMini/i.test(preferred));
-
-    loadPromise = detectWebGPU().then(function (gpu) {
-      if (forceWasm || !gpu) {
-        setProgress(3, forceWasm ? "WASM (принудительно)" : "нет WebGPU → WASM");
-        return loadTransformers(
-          preferred && /Xenova|flan|LaMini/i.test(preferred) ? preferred : "Xenova/LaMini-Flan-T5-248M",
-          onProgress
-        );
-      }
-      setProgress(3, "WebGPU → WebLLM");
-      return loadWebLLM(preferred || MODELS[0].id, onProgress).catch(function (err) {
-        var first = String((err && err.message) || err);
-        lastError = first;
-        setProgress(progress || 15, "WebLLM сбой → WASM: " + first.slice(0, 80));
-        return loadTransformers("Xenova/LaMini-Flan-T5-248M", onProgress).catch(function (e2) {
-          lastError = first + " | WASM: " + String((e2 && e2.message) || e2);
-          throw new Error(lastError);
-        });
+    setProgress(1, "старт…");
+    var forceWasm = !!(opts.forceWasm);
+    var id = modelId || (forceWasm ? "Xenova/LaMini-Flan-T5-248M" : MODELS[0].id);
+    var isXf = forceWasm || /Xenova\//i.test(id);
+    loadPromise = (isXf ? loadTransformers(id, onProgress) : loadWebLLM(id, onProgress))
+      .catch(function (e) {
+        lastError = String((e && e.message) || e);
+        loading = false;
+        setProgress(progress, "ошибка: " + lastError.slice(0, 120));
+        if (!isXf) {
+          setProgress(5, "WebGPU/MLC не вышло — пробуем WASM…");
+          return loadTransformers("Xenova/LaMini-Flan-T5-248M", onProgress);
+        }
+        throw e;
+      })
+      .finally(function () {
+        loading = false;
+        loadPromise = null;
       });
-    }).then(function (st) {
-      loading = false;
-      loadPromise = null;
-      return st;
-    }).catch(function (error) {
-      loading = false;
-      loadPromise = null;
-      lastError = lastError || String((error && error.message) || error);
-      message = "ошибка: " + lastError.slice(0, 200);
-      progress = 0;
-      emit();
-      if (typeof onProgress === "function") onProgress(status());
-      throw error;
-    });
-
     return loadPromise;
   }
 
-  function autoLoad(options) {
-    options = options || {};
-    if (engine || xfPipe) return Promise.resolve(status());
-    try {
-      if (G.localStorage.getItem("aksi_webllm_skip") === "1") return Promise.resolve(status());
-    } catch (e) {}
-    return loadModel(options.modelId || options.model || null, options.onProgress || null, options);
+  function autoLoad(onProgress) {
+    return detectWebGPU().then(function (ok) {
+      if (ok) return loadModel(MODELS[0].id, onProgress);
+      return loadModel("Xenova/LaMini-Flan-T5-248M", onProgress, { forceWasm: true });
+    });
   }
 
   function unload() {
@@ -357,35 +259,84 @@
     xfPipe = null;
     backend = null;
     currentModel = null;
-    loading = false;
-    loadPromise = null;
     progress = 0;
-    lastError = null;
     message = "выгружено";
-    try { G.localStorage.removeItem("aksi_webllm_model"); } catch (e) {}
+    lastError = null;
     emit();
+  }
+
+  var RU_SYSTEM =
+    "Ты — АКСИ, локальный русскоязычный ассистент Decision Integrity.\n" +
+    "Правила:\n" +
+    "1) Отвечай ТОЛЬКО на русском языке. Никогда не переключайся на английский.\n" +
+    "2) Пиши ясно, по делу, полными предложениями.\n" +
+    "3) Не выдумывай факты. Если не уверен — скажи честно.\n" +
+    "4) Без «As an AI…». Без лишнего английского.\n" +
+    "5) Если вопрос на русском — ответ тоже на русском.";
+
+  function looksMostlyEnglish(text) {
+    text = String(text || "");
+    if (text.length < 12) return false;
+    var cyr = (text.match(/[А-Яа-яЁё]/g) || []).length;
+    var lat = (text.match(/[A-Za-z]/g) || []).length;
+    if (lat < 20) return false;
+    return lat > cyr * 2.2;
+  }
+
+  function forceRuUser(prompt) {
+    prompt = String(prompt || "").trim();
+    if (!prompt) return prompt;
+    if (!/ответь на русском/i.test(prompt)) {
+      return "Ответь на русском языке.\n\n" + prompt;
+    }
+    return prompt;
   }
 
   function complete(prompt, options) {
     options = options || {};
-    var system = options.system ||
-      "Ты — АКСИ, локальный ИИ-ассистент. Всегда отвечай на русском языке, ясно и по делу. Не выдумывай факты.";
-    var temperature = options.temperature != null ? options.temperature : 0.55;
-    var maxTokens = options.max_tokens || options.maxTokens || 512;
+    var system = options.system || RU_SYSTEM;
+    var maxTokens = options.max_tokens || options.maxTokens || 480;
+    var temperature = options.temperature != null ? options.temperature : 0.35;
+    var userMsg = forceRuUser(prompt);
 
-    if (backend === "webllm" && engine) {
+    function runChat(sys, user, temp) {
       return engine.chat.completions.create({
         messages: [
-          { role: "system", content: system },
-          { role: "user", content: String(prompt || "").slice(0, 6000) }
+          { role: "system", content: sys },
+          { role: "user", content: String(user || "").slice(0, 6000) }
         ],
-        temperature: temperature,
+        temperature: temp,
         max_tokens: maxTokens,
         stream: false
       }).then(function (reply) {
         var text = reply && reply.choices && reply.choices[0] && reply.choices[0].message
           ? String(reply.choices[0].message.content || "").trim() : "";
         if (!text) throw new Error("WebLLM вернул пустой ответ");
+        return text;
+      });
+    }
+
+    if (backend === "webllm" && engine) {
+      return runChat(system, userMsg, temperature).then(function (text) {
+        if (looksMostlyEnglish(text)) {
+          var strict =
+            system +
+            "\n\nСтоп. Предыдущий ответ был на английском — это ошибка. " +
+            "Перепиши ответ полностью по-русски. Только русский.";
+          return runChat(strict, userMsg + "\n\n(Повтори ответ строго по-русски.)", 0.2).then(function (t2) {
+            if (t2) text = t2;
+            return {
+              text: text,
+              source: "webllm",
+              inference_local: true,
+              model: currentModel,
+              backend: backend,
+              language_retry: true
+            };
+          }).catch(function () {
+            return { text: text, source: "webllm", inference_local: true, model: currentModel, backend: backend, language_warn: true };
+          });
+        }
         return { text: text, source: "webllm", inference_local: true, model: currentModel, backend: backend };
       }).catch(function (error) {
         return { text: null, source: "webllm", error: String((error && error.message) || error), model: currentModel, backend: backend };
@@ -394,12 +345,11 @@
 
     if (backend === "transformers" && xfPipe) {
       var q = String(prompt || "").slice(0, 1500);
-      var isT5 = /T5|flan|LaMini/i.test(currentModel || "");
-      var input = isT5 ? ("Ответь полностью на русском языке.\nВопрос: " + q) : q;
+      var input = "Ответь полностью на русском языке, без английских фраз.\nВопрос: " + q;
       return Promise.resolve().then(function () {
         return xfPipe(input, {
-          max_new_tokens: Math.min(320, maxTokens),
-          temperature: temperature,
+          max_new_tokens: Math.min(280, maxTokens),
+          temperature: Math.min(0.5, temperature),
           do_sample: temperature > 0.05
         });
       }).then(function (output) {
@@ -409,6 +359,7 @@
         } else if (typeof output === "string") text = output;
         text = String(text || "").replace(input, "").trim();
         if (text.indexOf(q) === 0) text = text.slice(q.length).trim();
+        text = text.replace(/^(Answer:|Response:)\s*/i, "").trim();
         if (!text) throw new Error("WASM-модель вернула пустой ответ");
         return { text: text, source: "transformers", inference_local: true, model: currentModel, backend: backend };
       }).catch(function (error) {
@@ -419,7 +370,7 @@
     return Promise.resolve({
       text: null,
       source: "none",
-      error: "модель не загружена — нажмите «Только WASM» (рекомендуется) или «Загрузить WebLLM»",
+      error: "модель не загружена — выберите Qwen 0.5B (WebGPU) или WASM fallback",
       inference_local: false,
       model: currentModel,
       backend: backend
