@@ -1,1 +1,127 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090711"><title>АКСИ · Sovereign AI Platform</title><style>:root{--bg:#08070e;--p:#151020;--line:#302444;--txt:#f7f2ff;--muted:#aaa0bb;--cyan:#67e8f9;--ok:#6ee7a0;--warn:#ffd166}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#28144c,transparent 35%),linear-gradient(145deg,#08070e,#0d0917);color:var(--txt);font:14px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1200px;margin:auto;padding:18px 14px 60px}.nav{display:flex;gap:12px;align-items:center;margin-bottom:16px}.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-weight:900;font-size:20px;background:linear-gradient(145deg,#b681ff,#5730b5)}.brand b{display:block;font-size:18px}.brand span{color:var(--muted);font-size:11px}.pill{margin-left:auto;border:1px solid rgba(110,231,160,.25);color:var(--ok);padding:6px 10px;border-radius:999px;font-size:11px}.hero,.card{border:1px solid var(--line);background:rgba(21,16,32,.82);border-radius:22px;padding:22px;box-shadow:0 20px 70px rgba(0,0,0,.22)}.hero h1{font-size:clamp(32px,6vw,62px);line-height:1;margin:8px 0}.hero h1 em{font-style:normal;color:var(--cyan)}.ey{color:var(--cyan);font-size:10px;letter-spacing:.16em;font-weight:800}.hero p{color:#c7bfd2;max-width:850px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.model{padding:15px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}.model div{display:flex;justify-content:space-between;gap:8px}.model b{font-size:14px}.model span,.model p{color:var(--muted);font-size:11px}.model p{margin:10px 0 0}.tag{font-style:normal;font-size:9px;color:var(--cyan);border:1px solid rgba(103,232,249,.18);padding:3px 6px;border-radius:99px;white-space:nowrap}.section{margin-top:20px}.section h2{font-size:14px;letter-spacing:.08em;text-transform:uppercase;margin:0}.split{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.btn{border:1px solid var(--line);border-radius:12px;background:#171123;color:var(--txt);padding:10px 13px;font-weight:800;cursor:pointer}.primary{border-color:transparent;background:linear-gradient(135deg,#a978ff,#6840d0)}pre{white-space:pre-wrap;word-break:break-word;background:#0b0911;border:1px solid var(--line);border-radius:13px;padding:12px;min-height:110px;color:#ddd;font-size:11px;overflow:auto}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.kpi{border:1px solid var(--line);border-radius:14px;padding:12px}.kpi b{font-size:20px;display:block}.kpi span{font-size:10px;color:var(--muted)}.edition{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.edition article{border:1px solid var(--line);border-radius:16px;padding:15px;background:rgba(255,255,255,.025)}.edition b{display:block;margin-bottom:5px}.edition p{margin:0;color:var(--muted);font-size:11px}.foot{text-align:center;color:#756d80;margin-top:22px;font-size:10px}@media(max-width:800px){.grid,.edition,.split{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}@media(max-width:500px){.kpis{grid-template-columns:1fr}.hero,.card{padding:17px}.pill{font-size:9px}}</style></head><body><main class="wrap"><header class="nav"><div class="logo">A</div><div class="brand"><b>АКСИ · Sovereign AI</b><span>local-first · multi-model · verifiable runtime</span></div><div class="pill"><span id="netDot">●</span> <span id="netState">CHECKING</span></div></header><section class="hero"><div class="ey">ONE CONTROL PLANE FOR PRIVATE AI</div><h1>Не одна модель.<br><em>Один проверяемый контур.</em></h1><p>АКСИ объединяет разные ML-движки через единый адаптерный контракт, оставляет локальный путь первым, умеет работать без сети, наблюдает состояние runtime и отделяет криптографическую целостность от утверждений о правде.</p><div class="kpis"><div class="kpi"><b>7</b><span>модельных адаптеров</span></div><div class="kpi"><b>4</b><span>режима orchestration</span></div><div class="kpi"><b>VAI/1</b><span>verifiable execution records</span></div></div></section><section class="section"><h2>Model Gateway</h2><div class="grid" id="modelGrid"></div></section><section class="section split"><div class="card"><h2>System Health & Diagnostics</h2><div class="btns"><button class="btn primary" id="runHealth">Запустить диагностику</button><button class="btn" id="clearLog">Очистить журнал</button><button class="btn" id="exportState">Экспорт состояния</button></div><pre id="healthOut">Нажми «Запустить диагностику». Проверяются WebGPU, Web Crypto, localStorage, Service Worker и сеть.</pre><div class="kpis"><div class="kpi"><b id="eventCount">0</b><span>runtime events</span></div><div class="kpi"><b id="lastEvent">none</b><span>last event</span></div></div><pre id="eventLog">No runtime events yet.</pre></div><div class="card"><h2>Policy Firewall</h2><p style="color:var(--muted)">Перед чувствительным действием AKSI может проверить capability policy. По умолчанию сеть, файлы и внешняя inference блокируются в Sovereign-профиле.</p><div class="btns"><button class="btn primary" id="policyCheck">Проверить Sovereign policy</button></div><pre id="policyOut">Policy decision не запущен.</pre></div></section><section class="section split"><div class="card"><h2>Quantum Lab</h2><p style="color:var(--muted)">Демонстрационный слой. Если локальный state-vector runtime загружен, кнопка запускает его; иначе показывает спецификацию эксперимента.</p><div class="btns"><button class="btn primary" id="bell">Bell state</button><button class="btn" id="grover">Grover</button><button class="btn" id="qft">QFT</button></div><pre id="quantumOut">Выбери эксперимент.</pre></div><div class="card"><h2>VAI Execution Receipt</h2><p style="color:var(--muted)">Создаёт локальную запись выполнения: intent/context hashes, model, actions, experiments, sources, result hash, uncertainty и связь с предыдущей записью.</p><div class="btns"><button class="btn primary" id="makeReceipt">Создать receipt</button></div><pre id="receiptOut">Receipt ещё не создан.</pre></div></section><section class="section"><h2>Product Editions</h2><div class="edition"><article><b>AKSI Enterprise</b><p>On-prem / private cloud, SSO, RBAC, audit trail, model gateway, policy controls и интеграция с корпоративными системами.</p></article><article><b>AKSI Sovereign</b><p>Локальное исполнение, контролируемый стек зависимостей, offline-first режим и профиль требований информационной безопасности. Соответствие конкретным нормам требует отдельной сертификации.</p></article><article><b>AKSI Finance</b><p>Изоляция финансовых данных, строгие политики доступа, журнал действий, подпись записей и отдельный контур ключей. Не является автоматически банковским сертифицированным продуктом.</p></article></div></section><section class="section card"><h2>УТП</h2><p style="font-size:17px">«Ваши данные остаются под вашим контролем. АКСИ может работать локально, объединять несколько моделей и оставлять проверяемый след того, <b>какой runtime, контекст и результат</b> были использованы.»</p><p style="color:var(--muted);font-size:11px">Криптографическая подпись подтверждает целостность и происхождение записи, а не истинность самого ответа. Это принципиальное правило AKSI.</p></section><div class="foot">AKSI Platform · experimental software · security claims require independent audit</div></main><script src="aksi-model-gateway.js?v=1"></script><script src="aksi-intelligence-orchestrator.js?v=1"></script><script src="aksi-policy-firewall.js?v=1"></script><script src="aksi-vai-receipts.js?v=1"></script><script src="aksi-quantum-runtime.js?v=1"></script><script src="aksi-platform.js?v=1"></script><script>document.addEventListener('DOMContentLoaded',()=>{const p=document.getElementById('policyCheck'),r=document.getElementById('makeReceipt');if(p)p.onclick=()=>{const x=window.AKSIPolicyFirewall.decide('sovereign','network',{reason:'demo'});document.getElementById('policyOut').textContent=JSON.stringify(x,null,2)};if(r)r.onclick=async()=>{const x=await window.AKSIVAI.create({intent:'platform demo execution',context:{mode:window.AKSIIntelligence&&window.AKSIIntelligence.state.mode||'auto'},model:'adapter-selected',actions:['policy-check'],experiments:[],result:'local receipt demo',uncertainty:.2,status:'OBSERVATION'});document.getElementById('receiptOut').textContent=JSON.stringify(x,null,2)}});</script></body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0812">
+<title>АКСИ Platform · Whole Stack</title>
+<style>
+:root{--ink:#f4f0ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:rgba(18,12,32,.9)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:radial-gradient(ellipse at 15% 0%,#2a1860,transparent 45%),#0a0812;color:var(--ink);min-height:100vh}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:880px;margin:0 auto;padding:14px 12px 80px}
+.badge{display:inline-block;background:var(--ok);color:#0a0812;font-weight:900;font-size:11px;padding:5px 10px;border-radius:999px;margin-bottom:10px}
+h1{font-size:clamp(24px,5vw,34px);font-weight:900}
+.lead{color:var(--muted);margin:8px 0 14px;max-width:52ch}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-weight:700;font-size:12px;cursor:pointer;color:var(--ink)}
+.tab.on{background:var(--v);border-color:transparent}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
+.card h3{font-size:12px;font-weight:800;color:var(--c);margin-bottom:8px;text-transform:uppercase}
+.composer{display:flex;gap:8px;flex-wrap:wrap}
+input{flex:1;min-width:140px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#120e1c;color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:11px 14px;background:var(--v);color:#fff;font-weight:800}
+button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink)}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.out{margin-top:10px;padding:12px;border-radius:12px;background:#120e1c;border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;min-height:52px;font-size:13px}
+.panel{display:none}.panel.on{display:block}
+.muted{color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.mod{padding:10px;border-radius:12px;border:1px solid var(--line);font-size:12px;font-weight:700}
+.mod.on{border-color:var(--ok);color:var(--ok)}
+.foot{text-align:center;margin-top:20px;color:var(--muted);font-size:12px}
+.status{font-size:12px;color:var(--c);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="badge">PLATFORM v300 · WHOLE AKSI</div>
+  <h1>АКСИ · единая платформа</h1>
+  <p class="lead">Brain RU · Crystal · Reality · Swarm · Offline. Русский по умолчанию.</p>
+  <div class="tabs">
+    <button type="button" class="tab on" data-p="brain">Brain</button>
+    <button type="button" class="tab" data-p="crystal">Crystal</button>
+    <button type="button" class="tab" data-p="reality">Reality</button>
+    <button type="button" class="tab" data-p="status">Status</button>
+  </div>
+  <div class="panel on" id="p-brain">
+    <div class="card">
+      <h3>Brain RU</h3>
+      <div class="composer"><input id="bq" placeholder="Вопрос…" autofocus><button type="button" id="bgo">Решить</button></div>
+      <div class="row">
+        <button type="button" class="g" data-q="кто ты">кто ты</button>
+        <button type="button" class="g" data-q="миссия">миссия</button>
+        <button type="button" class="g" data-q="формула">формула</button>
+      </div>
+      <div class="out" id="bout">—</div>
+      <div class="status" id="bmeta"></div>
+    </div>
+  </div>
+  <div class="panel" id="p-crystal">
+    <div class="card">
+      <h3>Crystal</h3>
+      <div class="composer"><input id="cq" placeholder="Резонанс…"><button type="button" id="cgo">Найти</button></div>
+      <div class="out" id="cout">—</div>
+      <div class="composer" style="margin-top:10px"><input id="cw" placeholder="запомни: факт"><button type="button" id="cwrite">Вписать</button></div>
+      <div class="status" id="cmsg"></div>
+    </div>
+  </div>
+  <div class="panel" id="p-reality">
+    <div class="card">
+      <h3>Reality</h3>
+      <div class="row">
+        <button type="button" class="g" id="rNet">Сеть probe</button>
+        <button type="button" class="g" id="rState">World State</button>
+        <a href="/reality/" style="padding:11px 14px;border-radius:12px;border:1px solid var(--line)">/reality/</a>
+      </div>
+      <div class="out" id="rout">—</div>
+    </div>
+  </div>
+  <div class="panel" id="p-status">
+    <div class="card"><div class="grid" id="mods"></div><div class="out" id="sout" style="font-size:11px;margin-top:10px">—</div></div>
+  </div>
+  <p class="foot"><a href="/contour/?v=300">Contour</a> · <a href="/sovereign/index.html">Sovereign</a> · <a href="/">Хаб</a> · aksilove@internet.ru</p>
+</div>
+<script src="/aksi-neuro.js?v=300"></script>
+<script src="/aksi-crystal.js?v=300"></script>
+<script src="/aksi-mind.js?v=300"></script>
+<script src="/aksi-brain-ru.js?v=300"></script>
+<script src="/aksi-reality.js?v=300"></script>
+<script src="/aksi-api.js?v=300"></script>
+<script src="/aksi-swarm.js?v=300"></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function show(n){
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.toggle('on',p.id==='p-'+n)});
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t.getAttribute('data-p')===n)});
+    if(n==='status') renderMods();
+  }
+  document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){show(t.getAttribute('data-p'))});});
+  async function brain(q){
+    q=q||$('bq').value; if(!q)return;
+    $('bout').textContent='…';
+    try{
+      var p=window.AKSI_BRAIN?await AKSI_BRAIN.decide(q):(window.AKSI?await AKSI.decide(q):{answer:'нет Brain'});
+      $('bout').textContent=p.answer||'—';
+      $('bmeta').textContent='source: '+(p.source||'?');
+    }catch(e){$('bout').textContent=String(e.message||e)}
+  }
+  $('bgo').onclick=function(){brain()};
+  document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){$('bq').value=b.getAttribute('data-q');brain(b.getAttribute('data-q'))};});
+  $('bq').addEventListener('keydown',function(e){if(e.key==='Enter')brain()});
+  $('cgo').onclick=async function(){if(!window.AKSI_CRYSTAL)return;var r=await AKSI_CRYSTAL.associate($('cq').value,{k:5});$('cout').textContent=r.answer;};
+  $('cwrite').onclick=async function(){if(!window.AKSI_CRYSTAL)return;var r=await AKSI_CRYSTAL.remember($('cw').value);$('cmsg').textContent=r.ok?'Записано':'ошибка';};
+  $('rNet').onclick=async function(){try{AKSI_REALITY.setCapability('network',true);$('rout').textContent=JSON.stringify(await AKSI_REALITY.networkProbe(),null,2)}catch(e){$('rout').textContent=String(e.message||e)}};
+  $('rState').onclick=function(){$('rout').textContent=window.AKSI_REALITY?JSON.stringify(AKSI_REALITY.worldState(),null,2):'—'};
+  function renderMods(){
+    var list=[['BRAIN',!!window.AKSI_BRAIN],['MIND',!!window.AKSI_MIND],['CRYSTAL',!!window.AKSI_CRYSTAL],['API',!!(window.AKSI&&AKSI.decide)],['REALITY',!!window.AKSI_REALITY],['SWARM',!!window.AKSI_SWARM]];
+    $('mods').innerHTML=list.map(function(m){return '<div class="mod '+(m[1]?'on':'')+'">'+m[0]+'</div>'}).join('');
+    $('sout').textContent=JSON.stringify({brain:!!window.AKSI_BRAIN,api:window.AKSI&&AKSI.version},null,2);
+  }
+  setTimeout(function(){brain('кто ты');renderMods()},200);
+})();
+</script>
+</body>
+</html>
