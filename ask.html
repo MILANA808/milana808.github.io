@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0914">
+<title>АКСИ — спроси · суперпозиция · коллапс</title>
+<meta name="description" content="АКСИ: вопрос → суперпозиция кандидатов → коллапс квантового симулятора → ответ. Без своего сервера.">
+<link rel="canonical" href="https://milana808.github.io/ask.html">
+<style>
+:root{--bg:#0b0914;--ink:#f5f1ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:#140f22}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(ellipse at 30% -10%,#3a1d7a 0%,transparent 50%),var(--bg);color:var(--ink);min-height:100vh}
+a{color:var(--c)}
+.wrap{max-width:640px;margin:0 auto;padding:28px 16px 80px}
+.logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#c9a0ff,#5b2fc0);display:grid;place-items:center;font-weight:900;font-size:20px;margin-bottom:14px}
+h1{font-size:clamp(26px,6vw,34px);font-weight:900;letter-spacing:-.02em;margin-bottom:8px}
+.lead{color:var(--muted);font-size:15px;margin-bottom:22px;max-width:36em}
+.composer{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+input{flex:1;min-width:180px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#120c1c;color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:14px 18px;background:var(--v);color:#fff;font-weight:800}
+button:disabled{opacity:.5;cursor:wait}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chips button{padding:8px 12px;font-size:13px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--c);margin-bottom:10px}
+.answer{white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55;min-height:3em}
+.meta{margin-top:12px;font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sup{list-style:none}
+.sup li{padding:10px 0;border-top:1px solid var(--line);font-size:13px}
+.sup li:first-child{border-top:0}
+.sup .p{color:var(--c);font-weight:800}
+.sup .sel{color:var(--ok)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+.step{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+.step b{display:block;font-size:12px;margin-bottom:4px}
+.step span{font-size:11px;color:var(--muted)}
+footer{margin-top:28px;font-size:12px;color:var(--muted);text-align:center}
+label{font-size:12px;color:var(--muted)}
+select{padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#120c1c;color:var(--ink);font:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">A</div>
+  <h1>Спроси АКСИ</h1>
+  <p class="lead">Один вопрос → несколько ответов в суперпозиции → <b>коллапс</b> локального квантового симулятора → один ответ. Без своего сервера. Позже — адаптер к реальному квантовому компьютеру или HPC.</p>
+  <div class="steps">
+    <div class="step"><b>1. Кандидаты</b><span>Brain · Neuro · Web · Knowledge</span></div>
+    <div class="step"><b>2. Суперпозиция</b><span>вероятности амплитуд</span></div>
+    <div class="step"><b>3. Коллапс</b><span>измерение → ответ</span></div>
+  </div>
+  <div class="composer">
+    <input id="q" placeholder="Любой вопрос на русском…" autocomplete="off" autofocus>
+    <button type="button" id="go">Спросить</button>
+  </div>
+  <div class="chips">
+    <button type="button" data-q="что такое АКСИ">что такое АКСИ</button>
+    <button type="button" data-q="как устроен коллапс ответа">как устроен коллапс</button>
+    <button type="button" data-q="искусственный интеллект">искусственный интеллект</button>
+    <button type="button" data-q="формула AKSI">формула</button>
+  </div>
+  <div class="row" style="margin-bottom:14px;gap:12px">
+    <label>Бэкенд коллапса
+      <select id="backend">
+        <option value="local-sim">local-sim (сейчас)</option>
+        <option value="ibm">IBM Quantum (позже)</option>
+        <option value="hpc">HPC / суперкомпьютер (позже)</option>
+      </select>
+    </label>
+    <label class="row"><input type="checkbox" id="useNet" checked style="width:auto"> Internet</label>
+  </div>
+  <div class="card">
+    <h2>Ответ после коллапса</h2>
+    <div class="answer" id="out">Задайте вопрос — АКСИ соберёт кандидатов и измерит состояние.</div>
+    <div class="meta" id="meta"></div>
+  </div>
+  <div class="card" id="supCard" style="display:none">
+    <h2>Суперпозиция кандидатов</h2>
+    <ul class="sup" id="sup"></ul>
+  </div>
+  <div class="card" id="qCard" style="display:none">
+    <h2>Квантовые метрики (симулятор)</h2>
+    <div class="meta" id="qmeta"></div>
+  </div>
+  <p style="margin-top:16px;font-size:13px;color:var(--muted)">Лаборатория: <a href="/aksi.html">/aksi.html</a> · <a href="/offer/">/offer/</a></p>
+  <footer>aksilove@internet.ru · Q-Select</footer>
+</div>
+<script src="/aksi-internet.js?v=330"></script>
+<script src="/aksi-neuro.js?v=330"></script>
+<script src="/aksi-knowledge.js?v=330"></script>
+<script src="/aksi-crystal.js?v=330"></script>
+<script src="/aksi-mind.js?v=330"></script>
+<script src="/aksi-brain-ru.js?v=330"></script>
+<script src="/aksi-api.js?v=330"></script>
+<script src="/aksi-zero.js?v=330"></script>
+<script src="/aksi-algorithm.js?v=330"></script>
+<script src="/aksi-quantum.js?v=330"></script>
+<script src="/aksi-qselect.js?v=330"></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  if(!window.AKSI_CORE){
+    window.AKSI_CORE={version:"ask-core",decide:function(q){
+      q=String(q||"").toLowerCase();
+      if(/кто ты|что такое акси|акси/.test(q)) return Promise.resolve({answer:"АКСИ — Decision Integrity: вопрос → суперпозиция кандидатов → коллапс → ответ.\naksilove@internet.ru",source:"core"});
+      if(/коллапс|суперпозиц/.test(q)) return Promise.resolve({answer:"Кандидаты получают амплитуды. Симулятор измеряет состояние — остаётся один ответ. Это модель выбора, не доказательство истины.",source:"core"});
+      if(/формул/.test(q)) return Promise.resolve({answer:"AKSI = (A × I × S) × (1 + 0.4√n)",source:"core"});
+      return Promise.resolve({answer:null,source:"core-empty"});
+    }};
+  }
+  async function ask(q){
+    q=String(q||$("q").value||"").trim();if(!q)return;
+    $("q").value=q;$("go").disabled=true;
+    $("out").textContent="Собираю кандидатов в суперпозицию…";$("meta").textContent="";
+    $("supCard").style.display="none";$("qCard").style.display="none";
+    try{
+      if(window.AKSI_QSELECT&&AKSI_QSELECT.setBackend) AKSI_QSELECT.setBackend($("backend").value);
+      if(!window.AKSI_QSELECT){$("out").textContent="Q-Select не загрузился";return;}
+      var r=await AKSI_QSELECT.select(q,{internet:!!$("useNet").checked,backend:$("backend").value});
+      $("out").textContent=r.answer||"—";
+      $("meta").textContent="коллапс ← "+(r.collapsedFrom||"?")+" · P="+((r.probability||0)*100).toFixed(1)+"% · "+(r.backendLabel||r.backend);
+      if(r.superposition&&r.superposition.length){
+        $("supCard").style.display="block";
+        $("sup").innerHTML=r.superposition.map(function(s){
+          return "<li class=\""+(s.selected?"sel":"")+"\"><span class=\"p\">"+(s.probability*100).toFixed(1)+"%</span> · <b>"+s.source+"</b>"+(s.selected?" ← измерение":"")+"<br>"+String(s.preview).replace(/</g,"&lt;")+(s.preview.length>=120?"…":"")+"</li>";
+        }).join("");
+      }
+      if(r.quantum){
+        $("qCard").style.display="block";
+        $("qmeta").textContent="entropy="+r.quantum.entropy+" · purity="+r.quantum.purity+" · QCLI="+r.quantum.QCLI+(r.quantum.circuit?" · "+r.quantum.circuit:"");
+      }
+    }catch(e){$("out").textContent="Ошибка: "+(e.message||e);}
+    finally{$("go").disabled=false;}
+  }
+  $("go").onclick=function(){ask()};
+  $("q").addEventListener("keydown",function(e){if(e.key==="Enter")ask()});
+  document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){ask(b.getAttribute("data-q"))};});
+})();
+</script>
+</body>
+</html>
