@@ -1,11 +1,10 @@
 /**
- * AKSI Q-Select v1.0 — answer selection via superposition + collapse
- * Local quantum simulator. Adapter slot for real QC / HPC later.
+ * AKSI Q-Select v1.1 — superposition + collapse; prefers comprehended answers
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0-qselect";
+  var VER = "1.1.0-qselect";
 
   var backends = {
     "local-sim": {
@@ -25,14 +24,14 @@
       id: "ibm",
       label: "IBM Quantum (подключение)",
       collapse: async function () {
-        throw new Error("IBM Quantum: задайте API-токен позже. Сейчас — local-sim.");
+        throw new Error("IBM Quantum: позже. Сейчас — local-sim.");
       }
     },
     hpc: {
       id: "hpc",
-      label: "Суперкомпьютер / HPC (подключение)",
+      label: "HPC (подключение)",
       collapse: async function () {
-        throw new Error("HPC adapter: endpoint не задан. Сейчас — local-sim.");
+        throw new Error("HPC: позже. Сейчас — local-sim.");
       }
     }
   };
@@ -68,6 +67,7 @@
     for (var i = 0; i < words.length; i++) if (low.indexOf(words[i]) !== -1) s += 0.05;
     if (t.length > 40 && t.length < 1200) s += 0.08;
     if (c.source === "internet-synthesis" || c.source === "internet") s += 0.1;
+    if (String(c.source).indexOf("comprehend") !== -1) s += 0.2;
     if (c.source === "kb" || c.source === "core-kb") s += 0.05;
     s += hash01(q + "|" + t.slice(0, 80)) * 0.08;
     return Math.max(0.01, Math.min(1, s));
@@ -133,7 +133,13 @@
 
     if (opts.internet !== false) {
       try {
-        if (G.AKSI_INTERNET && G.AKSI_INTERNET.research) {
+        if (G.AKSI_COMPREHEND && G.AKSI_COMPREHEND.answer) {
+          var ca = await G.AKSI_COMPREHEND.answer(query, { useLLM: opts.useLLM !== false });
+          if (ca && ca.answer) {
+            push(ca.answer, ca.source || "comprehend", 0.9);
+            layers.push("comprehend");
+          }
+        } else if (G.AKSI_INTERNET && G.AKSI_INTERNET.research) {
           var ir = await G.AKSI_INTERNET.research(query);
           if (ir && ir.ok && ir.answer) {
             push(ir.answer, ir.source || "internet", 0.75);
@@ -158,11 +164,7 @@
     } catch (e) {}
 
     if (!cands.length) {
-      push(
-        "АКСИ пока не собрала кандидатов.\nПопробуйте переформулировать или включить Internet.\naksilove@internet.ru",
-        "fallback",
-        0.3
-      );
+      push("АКСИ пока не собрала кандидатов. Переформулируйте или включите «Полный веб».\naksilove@internet.ru", "fallback", 0.3);
     }
 
     return { candidates: cands, layers: layers };
@@ -218,8 +220,6 @@
     try {
       if (G.AKSI_ALGORITHM && typeof G.AKSI_ALGORITHM.seal === "function") {
         seal = G.AKSI_ALGORITHM.seal(query, chosen.text, { eqs: amps[idx] });
-      } else if (G.AKSI_QUANTUM && G.AKSI_QUANTUM.sealAnswer) {
-        seal = G.AKSI_QUANTUM.sealAnswer(query, chosen.text);
       }
     } catch (e) {}
 
@@ -247,13 +247,7 @@
       backendLabel: backend.label,
       backendNote: backend._note || null,
       quantum: qmeta
-        ? {
-            entropy: qmeta.entropy,
-            purity: qmeta.purity,
-            QCLI: qmeta.QCLI || qmeta.qcli,
-            circuit: qmeta.circuit,
-            nQubits: qmeta.nQubits
-          }
+        ? { entropy: qmeta.entropy, purity: qmeta.purity, QCLI: qmeta.QCLI || qmeta.qcli, circuit: qmeta.circuit, nQubits: qmeta.nQubits }
         : null,
       seal: seal,
       version: VER,
