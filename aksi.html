@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0812">
-<title>АКСИ WHOLE · все модули</title>
-<meta name="description" content="АКСИ — полный хаб: Brain, Crystal, WebLLM, Quantum, ADIA, Decision, Reality, Swarm, Vault, Proof. aksilove@internet.ru">
+<title>АКСИ WHOLE · Internet deep</title>
+<meta name="description" content="АКСИ: Brain + Internet deep research (Wikipedia). aksilove@internet.ru">
 <link rel="canonical" href="https://milana808.github.io/aksi.html">
 <style>
 :root{--bg:#0a0812;--ink:#f4f0ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:rgba(18,12,32,.94)}
@@ -48,11 +48,12 @@ button:disabled{opacity:.45;cursor:wait}
 <div class="wrap">
   <div class="top">
     <div class="logo">A</div>
-    <div><h1>АКСИ · WHOLE</h1><div class="lead">Все модули в одном хабе</div></div>
-    <div class="badge">v310</div>
+    <div><h1>АКСИ · WHOLE</h1><div class="lead">Brain + Internet deep + modules</div></div>
+    <div class="badge">v320</div>
   </div>
   <div class="tabs">
     <button type="button" class="tab on" data-p="chat">Chat</button>
+    <button type="button" class="tab" data-p="net">Internet</button>
     <button type="button" class="tab" data-p="crystal">Crystal</button>
     <button type="button" class="tab" data-p="llm">WebLLM</button>
     <button type="button" class="tab" data-p="quantum">Quantum</button>
@@ -66,6 +67,7 @@ button:disabled{opacity:.45;cursor:wait}
     <button type="button" class="tab" data-p="know">Knowledge</button>
     <button type="button" class="tab" data-p="status">Status</button>
   </div>
+
   <div class="panel on" id="p-chat">
     <div class="card">
       <h3>Brain RU</h3>
@@ -79,6 +81,21 @@ button:disabled{opacity:.45;cursor:wait}
       <div class="out" id="cout">…</div><div class="meta" id="cmeta"></div>
     </div>
   </div>
+
+  <div class="panel" id="p-net">
+    <div class="card">
+      <h3>Internet · глубинный поиск</h3>
+      <p class="muted">Работает без backend: Wikipedia RU/EN. «Глубоко» = интернет + локальный Brain.</p>
+      <div class="composer" style="margin-top:8px">
+        <input id="nq" placeholder="Что исследовать в интернете?">
+        <button type="button" id="ngo">Исследовать</button>
+        <button type="button" class="g" id="ndeep">Глубоко</button>
+      </div>
+      <div class="out" id="nout">—</div>
+      <div class="meta" id="nmeta"></div>
+    </div>
+  </div>
+
   <div class="panel" id="p-crystal">
     <div class="card"><h3>Crystal</h3>
       <div class="composer"><input id="xq" placeholder="Найти…"><button type="button" id="xgo">Найти</button></div>
@@ -87,115 +104,78 @@ button:disabled{opacity:.45;cursor:wait}
       <div class="composer"><input id="xw" placeholder="запомни: факт"><button type="button" id="xwrite">Вписать</button></div>
       <div class="meta" id="xmsg"></div></div>
   </div>
+
   <div class="panel" id="p-llm">
     <div class="card"><h3>WebLLM</h3>
-      <div class="composer"><select id="llmModel"><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B</option><option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC">Qwen 1.5B</option><option value="Xenova/LaMini-Flan-T5-248M">LaMini WASM</option></select><button type="button" id="llmLoad">Загрузить</button></div>
+      <div class="composer"><select id="llmModel"><option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B</option><option value="Xenova/LaMini-Flan-T5-248M">LaMini WASM</option></select><button type="button" id="llmLoad">Загрузить</button></div>
       <div class="prog" id="llmProg">не загружена</div>
       <div class="composer"><input id="llmQ" placeholder="Промпт…"><button type="button" id="llmGo" disabled>Спросить</button></div>
       <div class="out" id="llmOut">—</div></div>
   </div>
-  <div class="panel" id="p-quantum">
-    <div class="card"><h3>Quantum</h3>
-      <div class="composer"><input id="qq" placeholder="Запрос…"><button type="button" id="qgo">Quantum</button></div>
-      <div class="row"><button type="button" class="g" id="qStatus">Status</button></div>
-      <div class="out" id="qout">—</div></div>
-  </div>
-  <div class="panel" id="p-adia">
-    <div class="card"><h3>ADIA / Metrics</h3>
-      <div class="composer"><input id="aq" placeholder="Текст…"><button type="button" id="ago">Evaluate</button></div>
-      <div class="out" id="aout">—</div></div>
-  </div>
-  <div class="panel" id="p-decision">
-    <div class="card"><h3>Decision</h3>
-      <div class="composer"><input id="dq" placeholder="Решение…"><button type="button" id="dgo">Decide</button></div>
-      <div class="out" id="dout">—</div><div class="meta" id="dmeta"></div></div>
-  </div>
-  <div class="panel" id="p-zero">
-    <div class="card"><h3>Zero</h3>
-      <div class="composer"><input id="zq" placeholder="Zero think…"><button type="button" id="zgo">Think</button></div>
-      <div class="out" id="zout">—</div></div>
-  </div>
-  <div class="panel" id="p-reality">
-    <div class="card"><h3>Reality</h3>
-      <div class="row"><button type="button" class="g" id="rNet">Network</button><button type="button" class="g" id="rState">World State</button><a href="/reality/" style="padding:10px;border:1px solid var(--line);border-radius:10px;font-weight:800">Full</a></div>
-      <div class="out" id="rout">—</div></div>
-  </div>
-  <div class="panel" id="p-swarm">
-    <div class="card"><h3>Swarm</h3>
-      <div class="row"><button type="button" id="sOffer">Offer</button><button type="button" class="g" id="sAcceptOffer">Accept offer</button><button type="button" class="g" id="sAcceptAnswer">Accept answer</button></div>
-      <textarea id="sBox" placeholder="SDP…" style="margin-top:8px"></textarea>
-      <div class="out" id="sout">—</div></div>
-  </div>
-  <div class="panel" id="p-crypto">
-    <div class="card"><h3>Vault / PQ</h3>
-      <div class="row"><button type="button" class="g" id="vStat">Vault status</button><button type="button" class="g" id="pqStat">PQ status</button><a href="/crypto/" style="padding:10px;border:1px solid var(--line);border-radius:10px;font-weight:800">Crypto</a></div>
-      <div class="out" id="vout">—</div></div>
-  </div>
-  <div class="panel" id="p-proof">
-    <div class="card"><h3>Proof / Seal</h3>
-      <div class="composer"><input id="pq2" placeholder="Текст…"><button type="button" id="pSeal">Seal</button></div>
-      <div class="out" id="pout">—</div></div>
-  </div>
-  <div class="panel" id="p-know">
-    <div class="card"><h3>Knowledge / HRR</h3>
-      <div class="composer"><input id="kq" placeholder="Поиск…"><button type="button" id="kgo">Search</button></div>
-      <div class="row"><button type="button" class="g" id="kHrr">HRR</button></div>
-      <div class="out" id="kout">—</div></div>
-  </div>
-  <div class="panel" id="p-status">
-    <div class="card"><h3>Модули</h3><div class="mods" id="mods"></div>
-      <div class="out" id="stOut" style="font-size:10px;margin-top:10px">—</div>
-      <button type="button" class="g" id="stRefresh" style="margin-top:8px">Обновить + догрузить всё</button></div>
-  </div>
+
+  <div class="panel" id="p-quantum"><div class="card"><h3>Quantum</h3><div class="composer"><input id="qq" placeholder="Запрос…"><button type="button" id="qgo">Quantum</button></div><div class="row"><button type="button" class="g" id="qStatus">Status</button></div><div class="out" id="qout">—</div></div></div>
+  <div class="panel" id="p-adia"><div class="card"><h3>ADIA</h3><div class="composer"><input id="aq" placeholder="Текст…"><button type="button" id="ago">Evaluate</button></div><div class="out" id="aout">—</div></div></div>
+  <div class="panel" id="p-decision"><div class="card"><h3>Decision</h3><div class="composer"><input id="dq" placeholder="Решение…"><button type="button" id="dgo">Decide</button></div><div class="out" id="dout">—</div></div></div>
+  <div class="panel" id="p-zero"><div class="card"><h3>Zero</h3><div class="composer"><input id="zq" placeholder="Zero…"><button type="button" id="zgo">Think</button></div><div class="out" id="zout">—</div></div></div>
+  <div class="panel" id="p-reality"><div class="card"><h3>Reality</h3><div class="row"><button type="button" class="g" id="rNet">Network</button><button type="button" class="g" id="rState">World State</button></div><div class="out" id="rout">—</div></div></div>
+  <div class="panel" id="p-swarm"><div class="card"><h3>Swarm</h3><div class="row"><button type="button" id="sOffer">Offer</button><button type="button" class="g" id="sAcceptOffer">Accept offer</button><button type="button" class="g" id="sAcceptAnswer">Accept answer</button></div><textarea id="sBox" placeholder="SDP…" style="margin-top:8px"></textarea><div class="out" id="sout">—</div></div></div>
+  <div class="panel" id="p-crypto"><div class="card"><h3>Crypto</h3><div class="row"><button type="button" class="g" id="vStat">Vault</button><button type="button" class="g" id="pqStat">PQ</button></div><div class="out" id="vout">—</div></div></div>
+  <div class="panel" id="p-proof"><div class="card"><h3>Proof</h3><div class="composer"><input id="pq2" placeholder="Текст…"><button type="button" id="pSeal">Seal</button></div><div class="out" id="pout">—</div></div></div>
+  <div class="panel" id="p-know"><div class="card"><h3>Knowledge</h3><div class="composer"><input id="kq" placeholder="Поиск…"><button type="button" id="kgo">Search</button></div><div class="row"><button type="button" class="g" id="kHrr">HRR</button></div><div class="out" id="kout">—</div></div></div>
+  <div class="panel" id="p-status"><div class="card"><h3>Модули</h3><div class="mods" id="mods"></div><div class="out" id="stOut" style="font-size:10px;margin-top:10px">—</div><button type="button" class="g" id="stRefresh" style="margin-top:8px">Обновить</button></div></div>
+
   <div class="nav">
-    <a href="/contour/">Contour</a><a href="/sovereign/index.html">Sovereign</a><a href="/matrix/">MATRIX</a>
-    <a href="/protocol/">Protocol</a><a href="/local-ai/">Local AI</a><a href="/offer/">Offer</a>
+    <a href="/contour/">Contour</a><a href="/sovereign/index.html">Sovereign</a><a href="/matrix/">MATRIX</a><a href="/offer/">Offer</a>
   </div>
-  <p class="foot">aksilove@internet.ru · WHOLE v310</p>
+  <p class="foot">aksilove@internet.ru · v320 Internet deep</p>
 </div>
 <script>
 window.AKSI_CORE=(function(){
   var VER="2.1.0-core";
-  var KB=[["кто ты|привет","Я АКСИ WHOLE — хаб всех модулей.\nChat·Crystal·WebLLM·Quantum·ADIA·Decision·Zero·Reality·Swarm·Crypto·Proof·Knowledge\naksilove@internet.ru"],["формул","AKSI = (A × I × S) × (1 + 0.4√n)"],["миссия|как пользоваться","Вкладки сверху = все модули. Chat = Brain RU."],["что умеешь","Полный стек на вкладках. Status = карта модулей."]];
+  var KB=[["кто ты|привет","Я АКСИ WHOLE v320.\nЕсть Internet deep (Wikipedia) + Brain + модули.\naksilove@internet.ru"],["формул","AKSI = (A × I × S) × (1 + 0.4√n)"],["миссия|как пользоваться","Chat — локальный Brain. Internet — глубинный поиск в открытых источниках."],["что умеешь","Decision, Internet research, Crystal, WebLLM, Quantum, Swarm…"]];
   function hit(q){q=String(q||"").toLowerCase();for(var i=0;i<KB.length;i++){var k=KB[i][0].split("|");for(var j=0;j<k.length;j++)if(q.indexOf(k[j])!==-1)return KB[i][1];}return null;}
   function decide(q){q=String(q||"").trim();if(!q)return Promise.resolve({ok:false,answer:""});
     if(/^запомни\s*[:：]/i.test(q)){var f=q.replace(/^запомни\s*[:：]\s*/i,"");try{var a=JSON.parse(localStorage.getItem("aksi_core_mem")||"[]");a.push({t:Date.now(),text:f});localStorage.setItem("aksi_core_mem",JSON.stringify(a.slice(-200)));}catch(e){}return Promise.resolve({ok:true,answer:"Сохранено: «"+f.slice(0,120)+"»",source:"learn",version:VER});}
     var a=hit(q);if(a)return Promise.resolve({ok:true,answer:a,source:"core-kb",version:VER});
     if(window.AKSI_BRAIN)return AKSI_BRAIN.decide(q);if(window.AKSI)return AKSI.decide(q);
-    return Promise.resolve({ok:true,answer:"АКСИ Core WHOLE",source:"core-fallback",version:VER});}
+    return Promise.resolve({ok:true,answer:"АКСИ Core",source:"core-fallback",version:VER});}
   return {version:VER,decide:decide,think:decide};
 })();
 </script>
 <script>
 (function(){
   var loaded={};
-  function loadScript(src){if(loaded[src])return loaded[src];loaded[src]=new Promise(function(res){var s=document.createElement("script");s.src=src+(src.indexOf("?")>=0?"&":"?")+"v=310";s.async=true;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s);});return loaded[src];}
-  var CORE=["/aksi-neuro.js","/aksi-crystal.js","/aksi-mind.js","/aksi-brain-ru.js","/aksi-api.js","/aksi-reality.js","/aksi-swarm.js","/aksi-webllm.js","/aksi-pi-contour.js","/aksi-organism.js"];
-  var EXTRA={quantum:["/aksi-quantum.js"],adia:["/aksi-algorithm.js"],decision:["/aksi-decision.js","/aksi-superpose.js"],zero:["/aksi-zero.js","/aksi-fir.js"],crypto:["/aksi-vault.js","/aksi-pq.js"],proof:["/aksi-seal.js","/aksi-proof.js"],know:["/aksi-knowledge.js","/aksi-hrr.js"]};
+  function loadScript(src){if(loaded[src])return loaded[src];loaded[src]=new Promise(function(res){var s=document.createElement("script");s.src=src+(src.indexOf("?")>=0?"&":"?")+"v=320";s.async=true;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s);});return loaded[src];}
+  var CORE=["/aksi-internet.js","/aksi-neuro.js","/aksi-crystal.js","/aksi-mind.js","/aksi-brain-ru.js","/aksi-api.js","/aksi-reality.js","/aksi-swarm.js","/aksi-webllm.js","/aksi-pi-contour.js","/aksi-organism.js"];
+  var EXTRA={quantum:["/aksi-quantum.js"],adia:["/aksi-algorithm.js"],decision:["/aksi-decision.js"],zero:["/aksi-zero.js"],crypto:["/aksi-vault.js","/aksi-pq.js"],proof:["/aksi-seal.js","/aksi-proof.js"],know:["/aksi-knowledge.js","/aksi-hrr.js"]};
   function loadCore(){return Promise.all(CORE.map(loadScript));}
   function loadTab(n){return Promise.all((EXTRA[n]||[]).map(loadScript));}
   function $(id){return document.getElementById(id)}
   function show(n){document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("on",p.id==="p-"+n)});document.querySelectorAll(".tab").forEach(function(t){t.classList.toggle("on",t.getAttribute("data-p")===n)});loadTab(n).then(function(){if(n==="status")renderMods()});}
   document.querySelectorAll(".tab").forEach(function(t){t.addEventListener("click",function(){show(t.getAttribute("data-p"))});});
   function renderMods(){
-    var N=[["CORE",!!window.AKSI_CORE],["BRAIN",!!window.AKSI_BRAIN],["MIND",!!window.AKSI_MIND],["CRYSTAL",!!window.AKSI_CRYSTAL],["NEURO",!!window.AKSI_NEURO],["API",!!(window.AKSI&&AKSI.decide)],["WEBLLM",!!window.AKSI_WEBLLM],["LLM",!!(window.AKSI_WEBLLM&&AKSI_WEBLLM.ready&&AKSI_WEBLLM.ready())],["QUANTUM",!!window.AKSI_QUANTUM],["ADIA",!!(window.AKSI_ALGORITHM||window.AKSI_ADIA)],["DECISION",!!window.AKSI_DECISION],["ZERO",!!window.AKSI_ZERO],["FIR",!!window.AKSI_FIR],["REALITY",!!window.AKSI_REALITY],["SWARM",!!window.AKSI_SWARM],["VAULT",!!window.AKSI_VAULT],["PQ",!!window.AKSI_PQ],["SEAL",!!window.AKSI_SEAL],["PROOF",!!window.AKSI_PROOF],["KNOW",!!window.AKSI_KNOWLEDGE],["HRR",!!window.AKSI_HRR],["PI",!!window.AKSI_PI_CONTOUR],["ORG",!!window.AKSI_ORGANISM]];
+    var N=[["CORE",!!window.AKSI_CORE],["BRAIN",!!window.AKSI_BRAIN],["INTERNET",!!window.AKSI_INTERNET],["CRYSTAL",!!window.AKSI_CRYSTAL],["NEURO",!!window.AKSI_NEURO],["API",!!(window.AKSI&&AKSI.decide)],["WEBLLM",!!window.AKSI_WEBLLM],["QUANTUM",!!window.AKSI_QUANTUM],["ADIA",!!window.AKSI_ALGORITHM],["DECISION",!!window.AKSI_DECISION],["ZERO",!!window.AKSI_ZERO],["REALITY",!!window.AKSI_REALITY],["SWARM",!!window.AKSI_SWARM],["VAULT",!!window.AKSI_VAULT],["SEAL",!!window.AKSI_SEAL],["KNOW",!!window.AKSI_KNOWLEDGE]];
     $("mods").innerHTML=N.map(function(m){return '<div class="mod '+(m[1]?"on":"")+'">'+m[0]+"</div>"}).join("");
-    $("stOut").textContent=JSON.stringify({brain:window.AKSI_BRAIN&&AKSI_BRAIN.version,api:window.AKSI&&AKSI.version,webllm:window.AKSI_WEBLLM&&AKSI_WEBLLM.version},null,2);
+    $("stOut").textContent=JSON.stringify({brain:window.AKSI_BRAIN&&AKSI_BRAIN.version,internet:window.AKSI_INTERNET&&AKSI_INTERNET.version},null,2);
   }
   async function askBrain(q){q=String(q||$("cq").value||"").trim();if(!q)return;$("cq").value=q;$("cout").textContent="…";
-    try{var p=window.AKSI_BRAIN?await AKSI_BRAIN.decide(q):await AKSI_CORE.decide(q);$("cout").textContent=p.answer||p.text||"—";$("cmeta").textContent="source: "+(p.source||"?");}catch(e){try{$("cout").textContent=(await AKSI_CORE.decide(q)).answer;}catch(e2){$("cout").textContent=String(e.message||e)}}
-    renderMods();}
+    try{var p=window.AKSI_BRAIN?await AKSI_BRAIN.decide(q):await AKSI_CORE.decide(q);$("cout").textContent=p.answer||p.text||"—";$("cmeta").textContent="source: "+(p.source||"?");}catch(e){try{$("cout").textContent=(await AKSI_CORE.decide(q)).answer;}catch(e2){$("cout").textContent=String(e.message||e)}}renderMods();}
   $("cgo").onclick=function(){askBrain()};$("cq").addEventListener("keydown",function(e){if(e.key==="Enter")askBrain()});
   document.querySelectorAll("[data-q]").forEach(function(b){b.addEventListener("click",function(){askBrain(b.getAttribute("data-q"))});});
+
+  $("ngo").onclick=async function(){await loadScript("/aksi-internet.js");var q=$("nq").value.trim();if(!q)return;$("nout").textContent="Ищу…";try{var r=await AKSI_INTERNET.research(q);$("nout").textContent=r.answer||"—";$("nmeta").textContent="source: "+(r.source||"?")+" · evidence "+((r.evidence||[]).length);}catch(e){$("nout").textContent=String(e.message||e)}};
+  $("ndeep").onclick=async function(){await loadScript("/aksi-internet.js");var q=$("nq").value.trim();if(!q)return;$("nout").textContent="Глубокий проход…";try{var r=await AKSI_INTERNET.deep(q);$("nout").textContent=r.answer||"—";$("nmeta").textContent="source: "+(r.source||"?");}catch(e){$("nout").textContent=String(e.message||e)}};
+  $("nq").addEventListener("keydown",function(e){if(e.key==="Enter")$("ngo").click()});
+
   $("xgo").onclick=async function(){await loadCore();var q=$("xq").value.trim();if(!q)return;$("xout").textContent="…";try{if(window.AKSI_CRYSTAL&&AKSI_CRYSTAL.associate){var r=await AKSI_CRYSTAL.associate(q,{k:5});$("xout").textContent=r.answer||JSON.stringify(r,null,2);}else $("xout").textContent="Crystal нет";}catch(e){$("xout").textContent=String(e.message||e)}};
   $("xwrite").onclick=async function(){await loadCore();var t=$("xw").value.trim();if(!t)return;if(!/^запомни/i.test(t))t="запомни: "+t;try{if(window.AKSI_BRAIN)await AKSI_BRAIN.decide(t);else await AKSI_CORE.decide(t);$("xmsg").textContent="Записано";}catch(e){$("xmsg").textContent=String(e.message||e)}};
-  $("llmLoad").onclick=async function(){await loadScript("/aksi-webllm.js");if(!window.AKSI_WEBLLM){$("llmProg").textContent="нет модуля";return}$("llmLoad").disabled=true;$("llmProg").textContent="загрузка…";try{await AKSI_WEBLLM.load($("llmModel").value,function(i){var m=(i&&(i.text||i.progress))||"";$("llmProg").textContent=typeof m==="string"?m:"…"});$("llmProg").textContent="готово";$("llmGo").disabled=false;}catch(e){$("llmProg").textContent=String(e.message||e)}$("llmLoad").disabled=false;renderMods();};
-  $("llmGo").onclick=async function(){var q=$("llmQ").value.trim();if(!q||!AKSI_WEBLLM.ready())return;$("llmOut").textContent="…";try{var r=await AKSI_WEBLLM.complete(q,{temperature:0.3,max_tokens:400,system:"Ты АКСИ. Только русский."});$("llmOut").textContent=(r&&(r.text||r.answer))||"—";}catch(e){$("llmOut").textContent=String(e.message||e)}};
-  $("qgo").onclick=async function(){await loadTab("quantum");var q=$("qq").value.trim();$("qout").textContent="…";try{if(window.AKSI_QUANTUM&&AKSI_QUANTUM.think){$("qout").textContent=JSON.stringify(await Promise.resolve(AKSI_QUANTUM.think(q)),null,2).slice(0,2000);}else if(window.AKSI_QUANTUM){$("qout").textContent="keys: "+Object.keys(AKSI_QUANTUM).join(", ");}else $("qout").textContent="Quantum нет";}catch(e){$("qout").textContent=String(e.message||e)}};
-  $("qStatus").onclick=async function(){await loadTab("quantum");$("qout").textContent=window.AKSI_QUANTUM?JSON.stringify({v:AKSI_QUANTUM.version,keys:Object.keys(AKSI_QUANTUM)},null,2):"нет";};
-  $("ago").onclick=async function(){await loadTab("adia");var q=$("aq").value.trim();$("aout").textContent="…";try{var A=window.AKSI_ALGORITHM||window.AKSI_ADIA;if(A&&A.evaluate)$("aout").textContent=JSON.stringify(await Promise.resolve(A.evaluate(q)),null,2).slice(0,2500);else if(A&&A.process)$("aout").textContent=JSON.stringify(await Promise.resolve(A.process(q)),null,2).slice(0,2500);else $("aout").textContent="ADIA keys: "+Object.keys(A||{}).join(", ");}catch(e){$("aout").textContent=String(e.message||e)}};
-  $("dgo").onclick=async function(){await loadTab("decision");var q=$("dq").value.trim();$("dout").textContent="…";try{if(window.AKSI_DECISION&&AKSI_DECISION.decide){var r=await AKSI_DECISION.decide(q);$("dout").textContent=(r.answer||r.text||JSON.stringify(r)).slice(0,3000);}else if(window.AKSI_BRAIN)$("dout").textContent=(await AKSI_BRAIN.decide(q)).answer;else $("dout").textContent="нет";}catch(e){$("dout").textContent=String(e.message||e)}};
-  $("zgo").onclick=async function(){await loadTab("zero");var q=$("zq").value.trim();$("zout").textContent="…";try{if(window.AKSI_ZERO&&AKSI_ZERO.think){var r=await Promise.resolve(AKSI_ZERO.think(q));$("zout").textContent=(r.text||r.answer||JSON.stringify(r)).slice(0,2000);}else $("zout").textContent="Zero keys: "+Object.keys(window.AKSI_ZERO||{}).join(", ");}catch(e){$("zout").textContent=String(e.message||e)}};
+  $("llmLoad").onclick=async function(){await loadScript("/aksi-webllm.js");if(!window.AKSI_WEBLLM){$("llmProg").textContent="нет";return}$("llmLoad").disabled=true;try{await AKSI_WEBLLM.load($("llmModel").value,function(i){$("llmProg").textContent=(i&&i.text)||"…"});$("llmProg").textContent="готово";$("llmGo").disabled=false;}catch(e){$("llmProg").textContent=String(e.message||e)}$("llmLoad").disabled=false;};
+  $("llmGo").onclick=async function(){var q=$("llmQ").value.trim();if(!q||!AKSI_WEBLLM.ready())return;$("llmOut").textContent="…";try{var r=await AKSI_WEBLLM.complete(q,{temperature:0.3,system:"Ты АКСИ. Только русский."});$("llmOut").textContent=(r&&(r.text||r.answer))||"—";}catch(e){$("llmOut").textContent=String(e.message||e)}};
+  $("qgo").onclick=async function(){await loadTab("quantum");var q=$("qq").value.trim();$("qout").textContent="…";try{if(window.AKSI_QUANTUM&&AKSI_QUANTUM.think)$("qout").textContent=JSON.stringify(await Promise.resolve(AKSI_QUANTUM.think(q)),null,2).slice(0,2000);else $("qout").textContent="keys: "+Object.keys(window.AKSI_QUANTUM||{}).join(", ");}catch(e){$("qout").textContent=String(e.message||e)}};
+  $("qStatus").onclick=async function(){await loadTab("quantum");$("qout").textContent=window.AKSI_QUANTUM?JSON.stringify({keys:Object.keys(AKSI_QUANTUM)},null,2):"нет";};
+  $("ago").onclick=async function(){await loadTab("adia");var q=$("aq").value.trim();$("aout").textContent="…";try{var A=window.AKSI_ALGORITHM;if(A&&A.evaluate)$("aout").textContent=JSON.stringify(await Promise.resolve(A.evaluate(q)),null,2).slice(0,2500);else $("aout").textContent="ADIA: "+Object.keys(A||{}).join(", ");}catch(e){$("aout").textContent=String(e.message||e)}};
+  $("dgo").onclick=async function(){await loadTab("decision");var q=$("dq").value.trim();$("dout").textContent="…";try{if(window.AKSI_DECISION&&AKSI_DECISION.decide){var r=await AKSI_DECISION.decide(q);$("dout").textContent=(r.answer||r.text||JSON.stringify(r)).slice(0,3000);}else if(window.AKSI_BRAIN)$("dout").textContent=(await AKSI_BRAIN.decide(q)).answer;}catch(e){$("dout").textContent=String(e.message||e)}};
+  $("zgo").onclick=async function(){await loadTab("zero");var q=$("zq").value.trim();$("zout").textContent="…";try{if(window.AKSI_ZERO&&AKSI_ZERO.think){var r=await Promise.resolve(AKSI_ZERO.think(q));$("zout").textContent=(r.text||r.answer||JSON.stringify(r)).slice(0,2000);}else $("zout").textContent="нет";}catch(e){$("zout").textContent=String(e.message||e)}};
   $("rNet").onclick=async function(){await loadCore();try{AKSI_REALITY.setCapability("network",true);$("rout").textContent=JSON.stringify(await AKSI_REALITY.networkProbe(),null,2);}catch(e){$("rout").textContent=String(e.message||e)}};
   $("rState").onclick=async function(){await loadCore();$("rout").textContent=window.AKSI_REALITY?JSON.stringify(AKSI_REALITY.worldState(),null,2):"нет";};
   $("sOffer").onclick=async function(){await loadCore();try{var o=await AKSI_SWARM.createOffer();$("sBox").value=typeof o==="string"?o:JSON.stringify(o,null,2);$("sout").textContent="Offer OK";}catch(e){$("sout").textContent=String(e.message||e)}};
@@ -203,12 +183,12 @@ window.AKSI_CORE=(function(){
   $("sAcceptAnswer").onclick=async function(){try{await AKSI_SWARM.acceptAnswer($("sBox").value.trim());$("sout").textContent="Accepted";}catch(e){$("sout").textContent=String(e.message||e)}};
   $("vStat").onclick=async function(){await loadTab("crypto");try{if(window.AKSI_VAULT&&AKSI_VAULT.status)$("vout").textContent=JSON.stringify(await Promise.resolve(AKSI_VAULT.status()),null,2);else $("vout").textContent="Vault: "+Object.keys(window.AKSI_VAULT||{}).join(", ");}catch(e){$("vout").textContent=String(e.message||e)}};
   $("pqStat").onclick=async function(){await loadTab("crypto");try{if(window.AKSI_PQ&&AKSI_PQ.status)$("vout").textContent=JSON.stringify(await Promise.resolve(AKSI_PQ.status()),null,2);else $("vout").textContent="PQ: "+Object.keys(window.AKSI_PQ||{}).join(", ");}catch(e){$("vout").textContent=String(e.message||e)}};
-  $("pSeal").onclick=async function(){await loadTab("proof");var t=$("pq2").value.trim();$("pout").textContent="…";try{if(window.AKSI_SEAL&&AKSI_SEAL.seal)$("pout").textContent=JSON.stringify(await Promise.resolve(AKSI_SEAL.seal(t)),null,2).slice(0,2000);else if(window.AKSI_PROOF)$("pout").textContent="Proof keys: "+Object.keys(AKSI_PROOF).join(", ");else $("pout").textContent="нет seal";}catch(e){$("pout").textContent=String(e.message||e)}};
-  $("kgo").onclick=async function(){await loadTab("know");var q=$("kq").value.trim();$("kout").textContent="…";try{if(window.AKSI_KNOWLEDGE&&AKSI_KNOWLEDGE.search)$("kout").textContent=JSON.stringify(await Promise.resolve(AKSI_KNOWLEDGE.search(q)),null,2).slice(0,2500);else if(window.AKSI_KNOWLEDGE&&AKSI_KNOWLEDGE.topics)$("kout").textContent="topics: "+AKSI_KNOWLEDGE.topics.length;else $("kout").textContent="Knowledge: "+Object.keys(window.AKSI_KNOWLEDGE||{}).join(", ");}catch(e){$("kout").textContent=String(e.message||e)}};
-  $("kHrr").onclick=async function(){await loadTab("know");$("kout").textContent=window.AKSI_HRR?JSON.stringify({v:AKSI_HRR.version,keys:Object.keys(AKSI_HRR)},null,2):"нет";};
+  $("pSeal").onclick=async function(){await loadTab("proof");var t=$("pq2").value.trim();try{if(window.AKSI_SEAL&&AKSI_SEAL.seal)$("pout").textContent=JSON.stringify(await Promise.resolve(AKSI_SEAL.seal(t)),null,2).slice(0,2000);else $("pout").textContent="нет seal";}catch(e){$("pout").textContent=String(e.message||e)}};
+  $("kgo").onclick=async function(){await loadTab("know");var q=$("kq").value.trim();try{if(window.AKSI_KNOWLEDGE&&AKSI_KNOWLEDGE.search)$("kout").textContent=JSON.stringify(await Promise.resolve(AKSI_KNOWLEDGE.search(q)),null,2).slice(0,2500);else $("kout").textContent="Knowledge: "+Object.keys(window.AKSI_KNOWLEDGE||{}).join(", ");}catch(e){$("kout").textContent=String(e.message||e)}};
+  $("kHrr").onclick=async function(){await loadTab("know");$("kout").textContent=window.AKSI_HRR?JSON.stringify({keys:Object.keys(AKSI_HRR)},null,2):"нет";};
   $("stRefresh").onclick=function(){loadCore().then(function(){return Promise.all(Object.keys(EXTRA).map(loadTab))}).then(renderMods)};
-  if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js?v=310").catch(function(){});
-  loadCore().then(function(){renderMods();askBrain("кто ты");});
+  if("serviceWorker" in navigator)navigator.serviceWorker.register("/sw.js?v=320").catch(function(){});
+  loadCore().then(function(){renderMods();askBrain("кто ты"); loadScript("/aksi-internet-ui.js");});
 })();
 </script>
 </body>
