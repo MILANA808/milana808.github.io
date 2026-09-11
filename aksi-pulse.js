@@ -1,7 +1,11 @@
-/** AKSI Pulse Engine v1 — multi-agent collapse + seal · © AKSI · aksilove@internet.ru */
+/**
+ * AKSI Pulse Organism v2 — answers about the question, not generic fluff
+ * Priority: local knowledge → Wikipedia/DDG → honest gap
+ * © AKSI · aksilove@internet.ru
+ */
 (function () {
   "use strict";
-  var VER = "1.0.0-pulse";
+  var VER = "2.0.0-organism";
 
   function fnv1a(s) {
     var h = 2166136261 >>> 0;
@@ -12,143 +16,138 @@
     }
     return ("00000000" + h.toString(16)).slice(-8);
   }
+
   function seal(query, answer, meta) {
-    var payload = query + "|" + answer + "|" + JSON.stringify(meta || {});
-    var h = fnv1a(payload);
-    var chain = fnv1a(h + "|" + Date.now());
-    return { kind: "aksi-pulse-seal", hash: h, chain: chain, t: Date.now(), version: VER };
-  }
-
-  var KB = [
-    {
-      k: ["кто ты", "привет", "здравствуй", "представься", "what are you"],
-      a: "Я АКСИ — локальный Decision Integrity runtime в браузере.\n\nКак отвечаю:\n1) несколько внутренних агентов дают кандидаты;\n2) кандидаты в суперпозиции (вероятности);\n3) коллапс выбирает один ответ;\n4) печать следа (seal).\n\nВеб — опция. Контакт: aksilove@internet.ru"
-    },
-    {
-      k: ["формул", "formula", "aksi ="],
-      a: "AKSI = (A × I × S) × (1 + 0.4√n)\n\nA — agency\nI — integrity\nS — structure / sovereignty\nn — число sealed-записей\n\nИнженерная метафора опыта, не физический закон."
-    },
-    {
-      k: ["коллапс", "суперпозиц", "q-select", "квант симул"],
-      a: "Коллапс в АКСИ — выбор одного ответа из нескольких кандидатов.\n\nАгенты (Ядро, Память, Рассуждение, Критик, Веб) получают амплитуды.\nСимулятор измеряет состояние — остаётся один ответ + seal.\n\nЭто модель выбора, не физический квантовый компьютер."
-    },
-    {
-      k: ["квантовый компьютер", "кубит", "quantum computer"],
-      a: "Квантовый компьютер обрабатывает информацию в кубитах, которые могут быть в суперпозиции 0 и 1.\n\nСуперпозиция, интерференция и запутанность дают преимущество на ряде задач (факторизация, поиск).\nПолноценные универсальные машины большой мощности ещё в развитии; есть прототипы и облачные сервисы.\n\nВ АКСИ «суперпозиция» — аналогия для выбора между кандидатами ответов."
-    },
-    {
-      k: ["искусственный интеллект", "ии", "нейросет", "machine learning", "llm"],
-      a: "Искусственный интеллект — системы для задач, обычно связанных с человеческим рассуждением: распознавание, поиск, генерация, решения.\n\nСовременный ИИ чаще статистические модели на данных. Они не «понимают» мир как человек, но полезны.\n\nАКСИ — локальный контур в браузере: агенты → коллапс → seal. Польза — прозрачность и автономность."
-    },
-    {
-      k: ["миссия", "зачем", "польза", "что умеешь"],
-      a: "Миссия АКСИ — ясный проверяемый ответ в браузере без обязательной сдачи данных облаку.\n\nУмею: локальный ответ, мультиагентный коллапс, seal-след, память («запомни: …»), опциональный веб.\nНе претендую на AGI. aksilove@internet.ru"
-    },
-    {
-      k: ["офлайн", "без сети", "автоном", "sovereign"],
-      a: "АКСИ offline-first: отвечает без сервера. Веб включается отдельно и не блокирует локальный ответ."
-    }
-  ];
-
-  function kbAnswer(q) {
-    q = String(q || "").toLowerCase();
-    for (var i = 0; i < KB.length; i++) {
-      for (var j = 0; j < KB[i].k.length; j++) {
-        if (q.indexOf(KB[i].k[j]) !== -1) return KB[i].a;
-      }
-    }
-    return null;
-  }
-
-  function agentCore(q) {
-    var a = kbAnswer(q);
-    if (a) return { source: "ядро", text: a, conf: 0.92 };
-    if (/^запомни\s*[:：]/i.test(q)) {
-      var fact = q.replace(/^запомни\s*[:：]\s*/i, "");
-      try {
-        var mem = JSON.parse(localStorage.getItem("aksi_pulse_mem") || "[]");
-        mem.push({ t: Date.now(), text: fact });
-        localStorage.setItem("aksi_pulse_mem", JSON.stringify(mem.slice(-300)));
-      } catch (e) {}
-      return { source: "ядро", text: "Запомнила: «" + fact.slice(0, 200) + "».", conf: 0.95 };
-    }
+    var h = fnv1a(query + "|" + answer + "|" + JSON.stringify(meta || {}));
     return {
-      source: "ядро",
-      text:
-        "Пока нет глубокого готового ответа на «" +
-        q +
-        "».\nУточните вопрос, напишите «запомни: …» или включите веб-дополнение.",
-      conf: 0.35
+      kind: "aksi-organism-seal",
+      hash: h,
+      chain: fnv1a(h + "|" + Date.now()),
+      t: Date.now(),
+      version: VER
     };
   }
 
-  function agentMemory(q) {
+  function norm(s) {
+    return String(s || "")
+      .toLowerCase()
+      .replace(/ё/g, "е")
+      .replace(/[^\p{L}\p{N}\s]/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  var SEED = [
+    {
+      k: ["кто ты", "что ты такое", "представься", "привет", "здравствуй"],
+      a: "Я АКСИ — локальный ИИ-организм в браузере.\n\nУ меня есть:\n• встроенное знание;\n• поиск Wikipedia;\n• выбор одного ответа из кандидатов;\n• печать следа (seal).\n\nЯ не облачный GPT. Если факта нет — скажу прямо.\nКонтакт: aksilove@internet.ru"
+    },
+    {
+      k: ["формула aksi", "формула акс", "aksi =", "формул"],
+      a: "AKSI = (A × I × S) × (1 + 0.4√n)\n\nA — agency\nI — integrity\nS — structure / sovereignty\nn — число sealed-записей\n\nИнженерная формула продукта, не физический закон."
+    },
+    {
+      k: ["квантовый компьютер", "квантовые компьютеры", "кубит", "quantum computing"],
+      a: "Квантовый компьютер использует кубиты вместо обычных битов.\n\nКубит может быть в суперпозиции 0 и 1. За счёт суперпозиции, интерференции и запутанности некоторые алгоритмы (Шора, Гровера) теоретически быстрее классических.\n\nСейчас есть прототипы и облачные процессоры; универсальный отказоустойчивый компьютер большой мощности ещё не создан.\n\nОбычный бит — строго 0 или 1; кубит — вероятностная комбинация до измерения."
+    },
+    {
+      k: ["искусственный интеллект", "что такое ии", "нейросеть", "машинное обучение"],
+      a: "Искусственный интеллект — системы для задач восприятия, вывода, обучения и генерации.\n\nСовременные продукты чаще крупные нейросети, обученные на данных: они предсказывают следующий сигнал, а не «думают» как человек.\n\nАКСИ — локальный контур с явным решением (знание → кандидаты → выбор → след), не скрытая облачная модель."
+    },
+    {
+      k: ["блокчейн", "bitcoin", "биткоин", "криптовалют"],
+      a: "Блокчейн — распределённый журнал, блоки связаны хешами. Менять прошлое без пересчёта цепочки крайне сложно.\n\nБиткоин (2009) — криптовалюта без банка через сеть и консенсус.\n\nБлокчейн фиксирует согласованную историю по правилам протокола, а не «абсолютную истину»."
+    },
+    {
+      k: ["теория относительности", "эйнштейн", "e=mc"],
+      a: "Специальная теория относительности (1905): скорость света постоянна; пространство и время связаны.\n\nСледствия: замедление времени, E = mc².\n\nОбщая теория (1915): гравитация — искривление пространства-времени массой и энергией."
+    },
+    {
+      k: ["фотосинтез"],
+      a: "Фотосинтез — растения, водоросли и некоторые бактерии превращают свет, воду и CO₂ в сахара и выделяют кислород.\n\nУпрощённо: 6CO₂ + 6H₂O + свет → C₆H₁₂O₆ + 6O₂.\nИдёт в хлоропластах с хлорофиллом."
+    },
+    {
+      k: ["днк", "ген", "хромосом"],
+      a: "ДНК хранит генетическую информацию — двойная спираль из нуклеотидов A, T, G, C.\n\nГен — участок ДНК, кодирующий белок или РНК. Хромосомы — упакованная ДНК."
+    },
+    {
+      k: ["коллапс", "суперпозиция агент", "как работает коллапс"],
+      a: "В АКСИ коллапс — механизм выбора ответа, не физический квантовый компьютер:\n\n1) кандидаты из знания/веба/памяти;\n2) веса по релевантности;\n3) выбор одного;\n4) seal-след.\n\nРешение наблюдаемо."
+    },
+    {
+      k: ["офлайн", "без интернета", "автономн"],
+      a: "Offline-first: базовые ответы из встроенного знания и памяти браузера.\nWikipedia дополняет, но не обязательна."
+    },
+    {
+      k: ["миссия", "зачем акс", "польза"],
+      a: "Миссия — ответ в браузере с прозрачным контуром: что искали, какие кандидаты, что выбрали, какой seal.\n\naksilove@internet.ru"
+    }
+  ];
+
+  function seedMatch(q) {
+    var nq = norm(q);
+    var best = null;
+    var bestScore = 0;
+    for (var i = 0; i < SEED.length; i++) {
+      var s = 0;
+      for (var j = 0; j < SEED[i].k.length; j++) {
+        var k = norm(SEED[i].k[j]);
+        if (nq.indexOf(k) !== -1) s += 10 + k.length;
+        else {
+          var parts = k.split(" ");
+          var hit = 0;
+          for (var p = 0; p < parts.length; p++) {
+            if (parts[p].length > 2 && nq.indexOf(parts[p]) !== -1) hit++;
+          }
+          if (hit === parts.length && parts.length > 0) s += 6 + k.length;
+        }
+      }
+      if (s > bestScore) {
+        bestScore = s;
+        best = SEED[i];
+      }
+    }
+    if (bestScore >= 6)
+      return { text: best.a, conf: Math.min(0.98, 0.75 + bestScore / 40), source: "знание" };
+    return null;
+  }
+
+  function memSave(fact) {
     try {
-      var mem = JSON.parse(localStorage.getItem("aksi_pulse_mem") || "[]");
-      var ql = q.toLowerCase();
+      var mem = JSON.parse(localStorage.getItem("aksi_org_mem") || "[]");
+      mem.push({ t: Date.now(), text: String(fact).slice(0, 500) });
+      localStorage.setItem("aksi_org_mem", JSON.stringify(mem.slice(-400)));
+    } catch (e) {}
+  }
+
+  function memSearch(q) {
+    try {
+      var mem = JSON.parse(localStorage.getItem("aksi_org_mem") || "[]");
+      var nq = norm(q);
+      var words = nq.split(" ").filter(function (w) {
+        return w.length > 3;
+      });
       var hits = [];
       for (var i = mem.length - 1; i >= 0 && hits.length < 3; i--) {
-        var words = ql.split(/\s+/);
+        var t = norm(mem[i].text);
         var ok = false;
         for (var w = 0; w < words.length; w++) {
-          if (words[w].length > 3 && String(mem[i].text).toLowerCase().indexOf(words[w]) !== -1) {
+          if (t.indexOf(words[w]) !== -1) {
             ok = true;
             break;
           }
         }
         if (ok) hits.push(mem[i].text);
       }
-      if (hits.length) {
-        return { source: "память", text: "Из вашей локальной памяти:\n• " + hits.join("\n• "), conf: 0.7 };
-      }
+      if (hits.length)
+        return { text: "Из вашей памяти:\n• " + hits.join("\n• "), conf: 0.72, source: "память" };
     } catch (e) {}
     return null;
   }
 
-  function agentCritic(q, draft) {
-    var issues = [];
-    if (!draft || draft.length < 40) issues.push("ответ короткий");
-    if (/нет глубокого готового|нет готового/i.test(draft || "")) issues.push("низкая уверенность");
-    if (issues.length) {
-      return {
-        source: "критик",
-        text: "Критик: " + issues.join("; ") + ". Рекомендация: уточнить вопрос или включить веб.",
-        conf: 0.4
-      };
-    }
-    return {
-      source: "критик",
-      text: "Критик: структура ответа приемлема (локальная проверка).",
-      conf: 0.55
-    };
-  }
-
-  function agentReason(q) {
-    var ql = q.toLowerCase();
-    if (/почему|зачем/.test(ql)) {
-      return {
-        source: "рассуждение",
-        text: "Разбор «почему/зачем»: явление → ближайшая причина → гипотеза vs факт. Без веба — общая логика.",
-        conf: 0.45
-      };
-    }
-    if (/как /.test(ql)) {
-      return {
-        source: "рассуждение",
-        text: "Разбор «как»: вход → шаги → результат. Для точных инструкций — узкий вопрос или веб.",
-        conf: 0.45
-      };
-    }
-    return {
-      source: "рассуждение",
-      text: "Локальное рассуждение: сущности и связи. Определение → «что / зачем / отличие». Процесс → этапы.",
-      conf: 0.4
-    };
-  }
-
-  function withTimeout(promise, ms) {
+  function withTimeout(p, ms) {
     return Promise.race([
-      promise,
+      p,
       new Promise(function (resolve) {
         setTimeout(function () {
           resolve(null);
@@ -157,64 +156,135 @@
     ]);
   }
 
-  async function agentWeb(q) {
+  async function fetchWiki(q) {
+    var topic = String(q)
+      .replace(/^(что такое|кто такой|кто такая|who is|what is)\s+/i, "")
+      .replace(/\?+$/, "")
+      .trim();
+    if (!topic) topic = q;
+
     try {
-      var topic = q.replace(/^что такое\s+/i, "").trim();
-      var url =
+      var url1 =
         "https://ru.wikipedia.org/api/rest_v1/page/summary/" +
         encodeURIComponent(topic.replace(/\s+/g, "_"));
-      var r = await withTimeout(
-        fetch(url, { mode: "cors" }).then(function (res) {
-          if (!res.ok) throw new Error("wiki");
-          return res.json();
+      var r1 = await withTimeout(
+        fetch(url1, { mode: "cors" }).then(function (r) {
+          if (!r.ok) throw new Error("x");
+          return r.json();
         }),
-        3500
+        4000
       );
-      if (r && r.extract) {
+      if (r1 && r1.extract && r1.type !== "disambiguation") {
         return {
-          source: "веб·вики",
-          text:
-            r.title +
-            "\n\n" +
-            r.extract +
-            (r.content_urls && r.content_urls.desktop ? "\n\n→ " + r.content_urls.desktop.page : ""),
-          conf: 0.8
+          title: r1.title,
+          text: r1.extract,
+          url: (r1.content_urls && r1.content_urls.desktop && r1.content_urls.desktop.page) || "",
+          conf: 0.9,
+          source: "wikipedia"
         };
       }
+    } catch (e) {}
+
+    try {
       var sUrl =
         "https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
-        encodeURIComponent(q) +
+        encodeURIComponent(topic) +
         "&srlimit=1&format=json&origin=*";
       var s = await withTimeout(
-        fetch(sUrl, { mode: "cors" }).then(function (res) {
-          return res.json();
+        fetch(sUrl, { mode: "cors" }).then(function (r) {
+          return r.json();
+        }),
+        4000
+      );
+      var hit = s && s.query && s.query.search && s.query.search[0];
+      if (hit && hit.title) {
+        var url2 =
+          "https://ru.wikipedia.org/api/rest_v1/page/summary/" +
+          encodeURIComponent(hit.title.replace(/ /g, "_"));
+        var r2 = await withTimeout(
+          fetch(url2, { mode: "cors" }).then(function (r) {
+            if (!r.ok) throw new Error("x");
+            return r.json();
+          }),
+          4000
+        );
+        if (r2 && r2.extract) {
+          return {
+            title: r2.title,
+            text: r2.extract,
+            url: (r2.content_urls && r2.content_urls.desktop && r2.content_urls.desktop.page) || "",
+            conf: 0.88,
+            source: "wikipedia"
+          };
+        }
+      }
+    } catch (e) {}
+
+    try {
+      var urlE =
+        "https://en.wikipedia.org/api/rest_v1/page/summary/" +
+        encodeURIComponent(topic.replace(/\s+/g, "_"));
+      var re = await withTimeout(
+        fetch(urlE, { mode: "cors" }).then(function (r) {
+          if (!r.ok) throw new Error("x");
+          return r.json();
+        }),
+        4000
+      );
+      if (re && re.extract) {
+        return {
+          title: re.title,
+          text: re.extract,
+          url: (re.content_urls && re.content_urls.desktop && re.content_urls.desktop.page) || "",
+          conf: 0.82,
+          source: "wikipedia-en"
+        };
+      }
+    } catch (e) {}
+
+    return null;
+  }
+
+  async function fetchDdg(q) {
+    try {
+      var url =
+        "https://api.duckduckgo.com/?q=" +
+        encodeURIComponent(q) +
+        "&format=json&no_html=1&skip_disambig=1";
+      var d = await withTimeout(
+        fetch(url, { mode: "cors" }).then(function (r) {
+          return r.json();
         }),
         3500
       );
-      var hit = s && s.query && s.query.search && s.query.search[0];
-      if (hit) {
-        var sumUrl =
-          "https://ru.wikipedia.org/api/rest_v1/page/summary/" +
-          encodeURIComponent(hit.title.replace(/ /g, "_"));
-        var sum = await withTimeout(
-          fetch(sumUrl, { mode: "cors" }).then(function (res) {
-            return res.json();
-          }),
-          3500
-        );
-        if (sum && sum.extract) {
-          return { source: "веб·вики", text: sum.title + "\n\n" + sum.extract, conf: 0.78 };
-        }
+      if (d && d.AbstractText) {
+        return {
+          title: d.Heading || "DuckDuckGo",
+          text: d.AbstractText,
+          url: d.AbstractURL || "",
+          conf: 0.8,
+          source: "ddg"
+        };
       }
     } catch (e) {}
     return null;
   }
 
-  function normalize(weights) {
+  function composeFromFact(q, fact) {
+    var body = String(fact.text || "").trim();
+    if (!body) return null;
+    var lead = body.length > 900 ? body.slice(0, 897) + "…" : body;
+    var out = lead;
+    if (fact.url) out += "\n\n→ " + fact.url;
+    out += "\n\n(Источник: " + (fact.source || "web") + (fact.title ? " · " + fact.title : "") + ")";
+    return out;
+  }
+
+  function normalizeAmps(weights) {
     var sum = 0;
-    for (var i = 0; i < weights.length; i++) sum += Math.max(0.01, weights[i]);
+    for (var i = 0; i < weights.length; i++) sum += Math.max(0.001, weights[i]);
     return weights.map(function (w) {
-      return Math.max(0.01, w) / sum;
+      return Math.max(0.001, w) / sum;
     });
   }
 
@@ -228,83 +298,120 @@
     return amps.length - 1;
   }
 
-  function score(c) {
-    var s = c.conf || 0.5;
-    if (c.source === "ядро" && c.conf > 0.8) s += 0.15;
-    if (String(c.source).indexOf("веб") === 0) s += 0.12;
-    if (c.source === "память") s += 0.08;
-    if ((c.text || "").length > 80 && (c.text || "").length < 2000) s += 0.05;
-    return Math.max(0.05, Math.min(1, s));
+  function $(id) {
+    try {
+      return document.getElementById(id);
+    } catch (e) {
+      return null;
+    }
   }
 
   function setPipe(step) {
     try {
-      if (typeof document === "undefined") return;
       document.querySelectorAll("#pipe div").forEach(function (el) {
         el.classList.toggle("on", Number(el.getAttribute("data-s")) <= step);
       });
     } catch (e) {}
   }
 
-  function $(id) {
-    try {
-      return typeof document !== "undefined" ? document.getElementById(id) : null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async function pulse(query, opts) {
+  async function think(query, opts) {
     opts = opts || {};
     query = String(query || "").trim();
     if (!query) return { ok: false, answer: "" };
 
-    setPipe(1);
-    var cands = [];
-    function push(c) {
-      if (!c || !c.text) return;
-      for (var i = 0; i < cands.length; i++) {
-        if (cands[i].text.slice(0, 80) === c.text.slice(0, 80)) return;
-      }
-      cands.push(c);
+    if (/^запомни\s*[:：]/i.test(query)) {
+      var fact = query.replace(/^запомни\s*[:：]\s*/i, "");
+      memSave(fact);
+      return {
+        ok: true,
+        answer: "Запомнила: «" + fact.slice(0, 240) + "».",
+        source: "organism:memory-write",
+        probability: 1,
+        seal: seal(query, fact, { kind: "learn" }),
+        version: VER
+      };
     }
 
-    push(agentCore(query));
-    push(agentMemory(query));
-    push(agentReason(query));
-    push(agentCritic(query, cands[0] && cands[0].text));
+    setPipe(1);
+    var cands = [];
 
-    if (opts.web) {
-      var w = await agentWeb(query);
-      if (w) push(w);
+    function push(text, source, conf) {
+      text = String(text || "").trim();
+      if (!text || text.length < 8) return;
+      for (var i = 0; i < cands.length; i++) {
+        if (cands[i].text.slice(0, 60) === text.slice(0, 60)) return;
+      }
+      cands.push({ text: text, source: source, conf: conf });
+    }
+
+    var seed = seedMatch(query);
+    if (seed) push(seed.text, seed.source, seed.conf);
+
+    var mem = memSearch(query);
+    if (mem) push(mem.text, mem.source, mem.conf);
+
+    var useWeb = opts.web !== false;
+    if (useWeb) {
+      var wiki = await fetchWiki(query);
+      if (wiki) {
+        var composed = composeFromFact(query, wiki);
+        if (composed) push(composed, wiki.source, wiki.conf);
+      }
+      if (!wiki) {
+        var ddg = await fetchDdg(query);
+        if (ddg) {
+          var c2 = composeFromFact(query, ddg);
+          if (c2) push(c2, ddg.source, ddg.conf);
+        }
+      }
     }
 
     setPipe(2);
-    var amps = normalize(cands.map(score));
+
+    if (!cands.length) {
+      push(
+        "По запросу «" +
+          query +
+          "» нет надёжного факта ни во встроенном знании, ни из веба.\n\n" +
+          "• переформулируйте короче («что такое X»);\n" +
+          "• проверьте сеть / галочку «Веб-факты»;\n" +
+          "• или «запомни: …»\n\n" +
+          "Лучше честный пробел, чем убедительный бред.\naksilove@internet.ru",
+        "честный-пробел",
+        0.3
+      );
+    }
+
+    var weights = cands.map(function (c) {
+      var w = c.conf;
+      if (c.source === "знание") w += 0.25;
+      if (String(c.source).indexOf("wikipedia") === 0) w += 0.2;
+      if (c.source === "ddg") w += 0.12;
+      if (c.source === "память") w += 0.1;
+      if (c.source === "честный-пробел") w *= 0.5;
+      return w;
+    });
+    var amps = normalizeAmps(weights);
+
     setPipe(3);
     var maxI = 0;
     for (var i = 1; i < amps.length; i++) if (amps[i] > amps[maxI]) maxI = i;
-    var idx = amps[maxI] >= 0.45 ? maxI : collapse(amps);
+    var idx = amps[maxI] >= 0.34 ? maxI : collapse(amps);
     var chosen = cands[idx];
 
     setPipe(4);
-    var s = seal(query, chosen.text, { source: chosen.source, p: amps[idx], n: cands.length });
-    try {
-      var trail = JSON.parse(localStorage.getItem("aksi_pulse_trail") || "[]");
-      trail.push({ q: query.slice(0, 80), h: s.hash, t: s.t, src: chosen.source });
-      localStorage.setItem("aksi_pulse_trail", JSON.stringify(trail.slice(-50)));
-    } catch (e) {}
+    var s = seal(query, chosen.text, { src: chosen.source, p: amps[idx] });
 
     return {
       ok: true,
       answer: chosen.text,
-      source: "pulse:" + chosen.source,
+      source: "organism:" + chosen.source,
       probability: +amps[idx].toFixed(4),
       superposition: cands.map(function (c, i) {
         return {
           source: c.source,
           probability: +amps[i].toFixed(4),
-          preview: c.text.slice(0, 140),
+          preview: c.text.slice(0, 120),
           selected: i === idx
         };
       }),
@@ -318,17 +425,19 @@
     if (!q) return;
     if ($("q")) $("q").value = q;
     if ($("go")) $("go").disabled = true;
-    if ($("out")) $("out").textContent = "Считаю…";
+    if ($("out")) $("out").textContent = "Думаю по существу…";
     if ($("meta")) $("meta").textContent = "";
     if ($("supCard")) $("supCard").hidden = true;
     if ($("trailCard")) $("trailCard").hidden = true;
     try {
-      var r = await pulse(q, { web: !!($("useWeb") && $("useWeb").checked) });
+      var web = true;
+      if ($("useWeb") && $("useWeb").checked === false) web = false;
+      var r = await think(q, { web: web });
       if ($("out")) $("out").textContent = r.answer || "—";
       if ($("meta"))
         $("meta").textContent =
-          "коллапс ← " + (r.source || "") + " · P=" + ((r.probability || 0) * 100).toFixed(0) + "% · " + r.version;
-      if (r.superposition && r.superposition.length && $("supCard") && $("sup")) {
+          (r.source || "") + " · P=" + ((r.probability || 0) * 100).toFixed(0) + "% · " + (r.version || "");
+      if (r.superposition && $("sup") && $("supCard")) {
         $("supCard").hidden = false;
         $("sup").innerHTML = r.superposition
           .map(function (s) {
@@ -340,53 +449,48 @@
               "%</span> · <b>" +
               s.source +
               "</b>" +
-              (s.selected ? " ← измерение" : "") +
+              (s.selected ? " ← выбор" : "") +
               "<br>" +
-              String(s.preview).replace(/</g, "&lt;") +
-              (s.preview.length >= 140 ? "…" : "") +
+              String(s.preview).replace(/</g, "<") +
               "</li>"
             );
           })
           .join("");
       }
-      if (r.seal && $("trailCard") && $("trail")) {
+      if (r.seal && $("trail") && $("trailCard")) {
         $("trailCard").hidden = false;
         $("trail").textContent =
-          "hash " +
-          r.seal.hash +
-          " · chain " +
-          r.seal.chain +
-          " · " +
-          new Date(r.seal.t).toISOString() +
-          "\n(FNV-след — для аудита, не доказательство истины)";
+          "seal " + r.seal.hash + " · " + new Date(r.seal.t).toISOString() + " · аудит, не «истина»";
       }
     } catch (e) {
-      if ($("out"))
-        $("out").textContent = "Сбой: " + (e.message || e) + "\nПопробуйте ещё раз — ядро локальное.";
+      if ($("out")) $("out").textContent = "Сбой: " + (e.message || e);
     } finally {
       if ($("go")) $("go").disabled = false;
     }
   }
 
-  function bootUI() {
-    if (typeof document === "undefined" || !$("go")) return;
+  function boot() {
+    if (!$("go")) return;
     $("go").onclick = function () {
       ask();
     };
-    $("q").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") ask();
-    });
+    if ($("q"))
+      $("q").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") ask();
+      });
     document.querySelectorAll("[data-q]").forEach(function (b) {
       b.onclick = function () {
         ask(b.getAttribute("data-q"));
       };
     });
   }
+
   if (typeof document !== "undefined") {
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootUI);
-    else bootUI();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+    else boot();
   }
   if (typeof window !== "undefined") {
-    window.AKSI_PULSE = { version: VER, ask: pulse, seal: seal };
+    window.AKSI_PULSE = { version: VER, ask: think, think: think, seal: seal };
+    window.AKSI_ORGANISM = window.AKSI_PULSE;
   }
 })();
