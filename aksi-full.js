@@ -1,7 +1,7 @@
-/** AKSI Full System v8.3 · ranking-fix · aksilove@internet.ru */
+/** AKSI Full System v8.4 · depth · aksilove@internet.ru */
 (function () {
   "use strict";
-  var VER = "8.3.0";
+  var VER = "8.4.0";
   var history = [];
   function $(id) { try { return document.getElementById(id); } catch (e) { return null; } }
   function status(m) { var e = $("status"); if (e) e.textContent = m || ""; }
@@ -37,7 +37,7 @@
       a: "AKSI = (A × I × S) × (1 + 0.4√n)\nA — agency, I — integrity, S — structure / sovereignty, n — история seal." },
     { k: ["гравитац", "тяготен"],
       a: "Гравитация — притяжение масс.\nНьютон: сила ∝ массам / r².\nОТО Эйнштейна: искривление пространства-времени массой и энергией." },
-    { k: ["фотосинтез"], a: "Фотосинтез: 6CO₂ + 6H₂O + свет → C₆H₁₂O₆ + 6O₂.\nХлоропласты, хлорофилл." },
+    { k: ["фотосинтез"], a: "Фотосинтез — процесс, при котором растения, водоросли и цианобактерии превращают свет, CO₂ и воду в органику и кислород.\n\nУравнение: 6CO₂ + 6H₂O + свет → C₆H₁₂O₆ + 6O₂.\nИдёт в хлоропластах; пигмент — хлорофилл. Световая фаза даёт ATP/NADPH, темновая (цикл Кальвина) фиксирует углерод.\n\nДля развёрнутого ответа с источниками включите Веб или Кору." },
     { k: ["днк", "ген ", "хромосом", "рнк"],
       a: "ДНК — двойная спираль (A,T,G,C). Ген — участок ДНК. РНК — считывание и синтез белков." },
     { k: ["блокчейн", "биткоин", "bitcoin", "криптовалют"],
@@ -103,7 +103,7 @@
     });
   }
   function stripTopic(q) {
-    return String(q).replace(/^(что такое|кто такой|кто такая|what is|who is|расскажи про|расскажи о|объясни|почему|как работает)\s+/i, "").replace(/\?+$/g, "").trim() || q;
+    return String(q).replace(/^(что такое|кто такой|кто такая|what is|who is|расскажи про|расскажи о|объясни|почему|как работает|подробно)\s+/i, "").replace(/\?+$/g, "").trim() || q;
   }
   async function fetchWiki(q) {
     var topic = stripTopic(q);
@@ -182,6 +182,13 @@
     });
     var out = lead;
     if (points.length) out += "\n\n" + points.join("\n");
+    if (body.length > 120 && points.length < 2) {
+      var more = sentences.slice(1, 5).map(function (s) {
+        if (s.length > 180) s = s.slice(0, 177) + "…";
+        return "• " + s;
+      });
+      if (more.length) out = lead + "\n\n" + more.join("\n");
+    }
     if (primary.url) out += "\n\n→ " + primary.url;
     out += "\n\nИсточник: " + (primary.source || "факт") + (primary.title ? " · " + primary.title : "");
     if (ranked[1] && ranked[1].text && ranked[1].source !== primary.source) {
@@ -288,20 +295,29 @@
     }
     if (!cands.length) {
       push({
-        text: "По «" + query + "» нет надёжного факта.\n\n• «что такое X»\n• Веб включён\n• «Кора WebLLM»\n• «запомни: …»\n\naksilove@internet.ru",
+        text: "По «" + query + "» нет надёжного факта.\n\n• «что такое X» или «расскажи подробно про X»\n• Веб включён\n• «Кора WebLLM» для свободной генерации\n• «запомни: …»\n\naksilove@internet.ru",
         conf: 0.2, source: "пробел"
       });
     }
+    var wantDepth = /подробн|расскажи|объясни|детально|fully|explain|detail/i.test(query);
     var weights = cands.map(function (c) {
       var w = c.conf || 0.5;
+      var len = String(c.text || "").length;
       if (c.source === "кора") w += 0.45;
-      if (c.source === "ядро") w += (c.conf >= 0.85 ? 0.55 : 0.28);
-      if (c.source === "синтез") w += 0.22;
+      if (c.source === "ядро") {
+        w += (c.conf >= 0.85 ? 0.55 : 0.28);
+        if (wantDepth && len < 180) w -= 0.35;
+      }
+      if (c.source === "синтез") {
+        w += 0.22;
+        if (wantDepth) w += 0.35;
+        if (len > 200) w += 0.12;
+      }
       if (c.source === "knowledge") w += 0.14;
       if (c.source === "neuro") w += 0.12;
       if (String(c.source).indexOf("wiki") === 0 || c.source === "web") w += 0.08;
       if (c.source === "пробел") w *= 0.25;
-      return w;
+      return Math.max(0.01, w);
     });
     var amps = normalize(weights);
     setPipe(4); status("4 · Выбор…");
