@@ -42,7 +42,7 @@ label{font-size:12px;color:var(--muted)}
 <div class="wrap">
   <div class="logo">A</div>
   <h1>АКСИ Organism</h1>
-  <p class="lead">Инстинкт + чувства (веб) + <b>кора</b> (WebLLM) + выбор + seal.</p>
+  <p class="lead">Инстинкт + чувства (веб) + <b>кора</b> (локальная нейросеть) + выбор + seal.</p>
   <div class="pipeline" id="pipe">
     <div data-s="1">1 · Чувства</div>
     <div data-s="2">2 · Кора</div>
@@ -53,7 +53,7 @@ label{font-size:12px;color:var(--muted)}
     <button type="button" class="g" id="cortexBtn">Включить нейрокортекс</button>
     <label class="row"><input type="checkbox" id="useWeb" checked style="width:auto"> Веб-факты</label>
   </div>
-  <div class="status" id="orgStatus">Кора выключена. Для генерации «как нейросеть» — включите нейрокортекс (нужен WebGPU).</div>
+  <div class="status" id="orgStatus">Кора выключена. Для генерации как у нейросети — включите нейрокортекс (WebGPU, первый раз долго).</div>
   <div class="composer">
     <input id="q" placeholder="Вопрос…" autocomplete="off" autofocus>
     <button type="button" id="go">Спросить</button>
@@ -78,8 +78,31 @@ label{font-size:12px;color:var(--muted)}
     <div class="trail" id="trail"></div>
   </div>
   <p style="font-size:13px;color:var(--muted)"><a href="/aksi.html">Лаборатория</a></p>
-  <footer>aksilove@internet.ru · Organism v3</footer>
+  <footer>aksilove@internet.ru · Organism + Cortex</footer>
 </div>
 <script src="/aksi-pulse.js?v=3"></script>
+<script src="/aksi-cortex.js?v=1"></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function status(m){var e=$("orgStatus");if(e)e.textContent=m||""}
+  var btn=$("cortexBtn");
+  if(btn){
+    btn.addEventListener("click", async function(){
+      btn.disabled=true;
+      try{
+        if(!window.AKSI_CORTEX){status("модуль коры не загрузился");return;}
+        await AKSI_CORTEX.ensure(function(info){
+          status(typeof info==="string"?info:(info&&(info.text||info.progress))||"загрузка коры…");
+        });
+        if(AKSI_CORTEX.install) AKSI_CORTEX.install();
+        status(AKSI_CORTEX.ready()?"Нейрокортекс готов — спрашивайте":"Кора не поднялась (нужен WebGPU)");
+        btn.textContent=AKSI_CORTEX.ready()?"Кора ON":"Кора — сбой";
+      }catch(e){status("Кора: "+(e.message||e));}
+      finally{btn.disabled=false;}
+    });
+  }
+})();
+</script>
 </body>
 </html>
