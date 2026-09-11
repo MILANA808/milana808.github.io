@@ -1,13 +1,22 @@
-/** AKSI Full System v9.0 · generation-first · aksilove@internet.ru */
+/** AKSI Full System v9.1 · complete generation product · aksilove@internet.ru */
 (function () {
   "use strict";
-  var VER = "9.0.0";
+  var VER = "9.1.0";
   var history = [];
   var lastSup = [];
   var genMode = true;
+  var loadingModel = false;
 
   function $(id) { try { return document.getElementById(id); } catch (e) { return null; } }
   function status(m) { var e = $("status"); if (e) e.textContent = m || ""; }
+  function setBar(pct) {
+    var b = $("loadBar");
+    var f = $("loadFill");
+    if (!b || !f) return;
+    if (pct == null || pct < 0) { b.style.display = "none"; return; }
+    b.style.display = "block";
+    f.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  }
   function setPipe(n) {
     try {
       document.querySelectorAll("#pipe div").forEach(function (el) {
@@ -28,23 +37,21 @@
 
   var SEED = [
     { k: ["кто ты", "что ты", "представься", "привет", "здравствуй"],
-      a: "Я АКСИ — локальный ИИ в браузере.\n\nОсновной режим: генерация следующего токена (Кора WebLLM / WASM).\nВеб — только контекст, не замена модели.\n\nВключите «Режим LLM» и дождитесь загрузки коры.\naksilove@internet.ru" },
+      a: "Я АКСИ — локальный ИИ в браузере.\n\nОсновной режим: генерация следующего токена (WebLLM / WASM).\nВеб — только контекст для модели.\n\nНажмите «Загрузить LLM», дождитесь готовности, затем спрашивайте.\naksilove@internet.ru" },
     { k: ["вопрос нашего времени", "мировой вопрос", "главн проблем", "проблема ии"],
-      a: "Вопрос нашего времени: как получить пользу от сильных моделей без потери контроля над данными и решением.\n\nАКСИ отвечает локальной генерацией (next-token) + явным seal, а не только поиском." },
+      a: "Вопрос нашего времени: польза сильных моделей без потери контроля над данными и решением.\n\nАКСИ — локальная next-token генерация + seal, а не облачный чёрный ящик." },
     { k: ["искусственный интеллект", "что такое ии", "llm", "языков модель", "chatgpt", "gpt"],
-      a: "ИИ / LLM предсказывают следующий токен по контексту. Облачные чаты сильны, но забирают данные.\nАКСИ считает токены локально в браузере (WebGPU Qwen или WASM fallback)." },
+      a: "LLM предсказывает следующий токен по контексту. АКСИ считает токены локально (Qwen через WebGPU или WASM)." },
     { k: ["нейронн сеть", "нейронная сеть", "нейронные сети"],
-      a: "Нейронная сеть — слои узлов и веса, обучение на данных. LLM — крупные сети, обученные предсказывать следующий токен." },
-    { k: ["квантовый компьютер", "квантовые компьютер", "кубит"],
-      a: "Квантовый компьютер работает с кубитами в суперпозиции. В АКСИ «коллапс» — выбор среди кандидатов ответа, не физический QC." },
+      a: "Нейронная сеть — слои узлов и веса. LLM — большая сеть, обученная предсказывать следующий токен текста." },
     { k: ["гравитац", "тяготен"],
       a: "Гравитация — притяжение масс. Ньютон: F ∝ m1·m2/r². ОТО: искривление пространства-времени." },
     { k: ["фотосинтез"],
-      a: "Фотосинтез: свет + CO₂ + H₂O → органика + O₂. Хлоропласты, хлорофилл; световая и темновая фазы." },
+      a: "Фотосинтез: свет + CO₂ + H₂O → органика + O₂. Хлоропласты, хлорофилл." },
     { k: ["блокчейн", "биткоин", "bitcoin"],
       a: "Блокчейн — цепочка блоков с хешами. Биткоин (2009) — децентрализованная криптовалюта." },
     { k: ["миссия", "зачем", "польза", "что умеешь"],
-      a: "Миссия АКСИ — полезная генерация в браузере с контролем: next-token кора + факты + seal.\naksilove@internet.ru" }
+      a: "Миссия — полезная локальная генерация с контролем: next-token + контекст + seal.\naksilove@internet.ru" }
   ];
 
   function seedMatch(q) {
@@ -120,93 +127,144 @@
 
   function cortexReady() {
     try {
-      if (window.AKSI_WEBLLM && AKSI_WEBLLM.ready) return !!AKSI_WEBLLM.ready();
+      if (window.AKSI_WEBLLM && typeof AKSI_WEBLLM.ready === "function") return !!AKSI_WEBLLM.ready();
       return !!(window.AKSI_WEBLLM && AKSI_WEBLLM.status && AKSI_WEBLLM.status().ready);
     } catch (e) { return false; }
   }
   function loadScript(src) {
     return new Promise(function (resolve, reject) {
+      var base = src.split("?")[0];
+      if (document.querySelector('script[src="' + base + '"]') || document.querySelector('script[src^="' + base + '"]')) {
+        resolve(); return;
+      }
       var s = document.createElement("script");
       s.src = src;
       s.onload = resolve;
-      s.onerror = function () { reject(new Error(src)); };
+      s.onerror = function () { reject(new Error("Не загрузился " + src)); };
       document.head.appendChild(s);
     });
   }
 
+  function onProgressInfo(info) {
+    if (typeof info === "string") { status(info); return; }
+    if (!info) return;
+    var p = info.progress;
+    if (p != null) {
+      var n = Number(p);
+      if (n <= 1) n = n * 100;
+      setBar(n);
+      status(Math.round(n) + "% · " + (info.message || info.text || info.progress_text || "загрузка модели…"));
+    } else if (info.message || info.text) {
+      status(String(info.message || info.text));
+    }
+  }
+
   async function ensureCortex() {
-    status("Загрузка модели (next-token)… первый раз может занять несколько минут");
-    if (!window.AKSI_WEBLLM) await loadScript("/aksi-webllm.js?v=9");
-    if (!window.AKSI_WEBLLM) throw new Error("aksi-webllm.js не загрузился");
     if (cortexReady()) {
-      status("Кора готова — генерация токенов");
+      setBar(100);
+      status("Модель готова — генерация токенов");
+      updateCortexBtn();
       return true;
     }
-    if (AKSI_WEBLLM.autoLoad) {
-      await AKSI_WEBLLM.autoLoad(function (info) {
-        if (typeof info === "string") status(info);
-        else if (info) {
-          var p = info.progress != null ? Math.round(Number(info.progress)) : null;
-          var m = info.message || info.text || info.progress_text || "";
-          status((p != null ? p + "% · " : "") + (m || "загрузка модели…"));
-        }
-      });
-    } else if (AKSI_WEBLLM.load) {
-      await AKSI_WEBLLM.load(null, function () {});
+    if (loadingModel) {
+      status("Модель уже загружается…");
+      return false;
     }
-    var ok = cortexReady();
-    status(ok ? "Кора готова — можно генерировать" : "Модель не поднялась (нужен Chrome + WebGPU или WASM)");
+    loadingModel = true;
     updateCortexBtn();
-    return ok;
+    try {
+      status("Подключаю runtime WebLLM…");
+      setBar(2);
+      if (!window.AKSI_WEBLLM) await loadScript("/aksi-webllm.js?v=91");
+      if (!window.AKSI_WEBLLM) throw new Error("aksi-webllm.js не загрузился");
+
+      status("Скачиваю веса модели (первый раз 2–10 мин)…");
+      if (AKSI_WEBLLM.autoLoad) {
+        await AKSI_WEBLLM.autoLoad(onProgressInfo);
+      } else if (AKSI_WEBLLM.load) {
+        await AKSI_WEBLLM.load(null, onProgressInfo);
+      }
+      var ok = cortexReady();
+      setBar(ok ? 100 : -1);
+      status(ok ? "Модель готова — спрашивайте" : "Модель не поднялась. Нужен Chrome/Edge + WebGPU или WASM.");
+      updateCortexBtn();
+      renderSys();
+      return ok;
+    } catch (e) {
+      setBar(-1);
+      status("Ошибка загрузки: " + (e.message || e));
+      updateCortexBtn();
+      throw e;
+    } finally {
+      loadingModel = false;
+      updateCortexBtn();
+    }
   }
 
   function updateCortexBtn() {
     var btn = $("cortexBtn");
     if (!btn) return;
+    if (loadingModel) {
+      btn.textContent = "Загрузка…";
+      btn.disabled = true;
+      return;
+    }
+    btn.disabled = false;
     if (cortexReady()) {
-      btn.textContent = "LLM ON";
-      btn.style.background = "rgba(110,231,160,.25)";
+      btn.textContent = "LLM ON ✓";
+      btn.style.background = "rgba(110,231,160,.3)";
+      btn.style.color = "#ecfdf5";
     } else {
       btn.textContent = "Загрузить LLM";
+      btn.style.background = "";
+      btn.style.color = "";
     }
   }
 
   async function generateAnswer(query, contextFacts) {
-    if (!cortexReady()) return null;
+    if (!cortexReady()) return { error: "модель не готова" };
     var ctx = "";
     if (contextFacts && contextFacts.length) {
       ctx = contextFacts.slice(0, 3).map(function (f, i) {
-        return (i + 1) + ") " + String(f.text || "").slice(0, 320);
+        return (i + 1) + ") " + String(f.text || "").slice(0, 360);
       }).join("\n");
     }
     var mem = memSearch(query);
-    if (mem) ctx += (ctx ? "\n" : "") + "Память:\n" + mem.slice(0, 400);
-    var hist = history.slice(-3).map(function (t) {
-      return "Пользователь: " + t.q + "\nАКСИ: " + String(t.a).slice(0, 200);
+    if (mem) ctx += (ctx ? "\n" : "") + "Память пользователя:\n" + mem.slice(0, 400);
+    var hist = history.slice(-4).map(function (t) {
+      return "Пользователь: " + t.q + "\nАКСИ: " + String(t.a).slice(0, 220);
     }).join("\n");
 
     status("Генерация токенов…");
     setPipe(3);
-    var prompt =
-      (hist ? "Недавний диалог:\n" + hist + "\n\n" : "") +
-      (ctx ? "Справка (не копируй дословно, используй как фон):\n" + ctx + "\n\n" : "") +
-      "Вопрос пользователя: " + query + "\n\n" +
-      "Сгенерируй полный ответ на русском: сначала суть (1–2 предложения), затем пояснение.";
+    if ($("out")) $("out").textContent = "⏳ Модель пишет…";
 
-    var r = await AKSI_WEBLLM.complete(prompt, {
-      system:
-        "Ты АКСИ — локальная языковая модель. Ты генерируешь ответ по токенам, как LLM.\n" +
-        "Только русский язык. Пиши связный текст, не список ссылок.\n" +
-        "Не говори что ты поисковик. Если фактов мало — рассуждай осторожно и помечай неуверенность.",
-      temperature: 0.55,
-      max_tokens: 700
-    });
+    var prompt =
+      (hist ? "Диалог:\n" + hist + "\n\n" : "") +
+      (ctx ? "Справка (фон, не копируй дословно):\n" + ctx + "\n\n" : "") +
+      "Вопрос: " + query + "\n\n" +
+      "Ответь полностью по-русски: сначала прямой ответ, затем краткое пояснение.";
+
+    var r;
+    try {
+      r = await AKSI_WEBLLM.complete(prompt, {
+        system:
+          "Ты АКСИ — локальная языковая модель. Ты генерируешь текст по токенам.\n" +
+          "Только русский. Связные предложения. Не выдавай себя за поисковик.\n" +
+          "Не выдумывай точные даты/цифры без справки. Если не уверен — скажи об этом.",
+        temperature: 0.6,
+        max_tokens: 768
+      });
+    } catch (e) {
+      return { error: String((e && e.message) || e) };
+    }
+
+    if (r && r.error && !r.text) return { error: r.error };
     var text = String((r && (r.text || r.answer)) || "").trim();
-    if (!text || text.length < 20) return null;
-    if (!/[а-яёА-ЯЁ]/.test(text)) return null;
+    if (!text || text.length < 12) return { error: "пустой ответ модели" };
     return {
       text: text,
-      conf: 0.97,
+      conf: 0.98,
       source: "генерация",
       model: (r && r.model) || "",
       backend: (r && r.backend) || ""
@@ -225,12 +283,12 @@
     }
 
     var wantGen = opts.generate !== false && genMode;
-    setPipe(1); status(wantGen ? "1 · Готовлю генерацию…" : "1 · Ищу факты…");
+    setPipe(1);
 
     var facts = [];
     var useWeb = opts.web !== false && !!($("useWeb") && $("useWeb").checked);
     if (useWeb) {
-      status("1 · Контекст из веба…");
+      status("Собираю контекст…");
       var w = await fetchWiki(query);
       if (w) facts.push(w);
     }
@@ -239,27 +297,25 @@
 
     setPipe(2);
 
-    if (wantGen) {
-      if (!cortexReady()) {
-        status("Модель не загружена — запускаю загрузку…");
-        try {
-          var ok = await ensureCortex();
-          if (!ok) wantGen = false;
-        } catch (e) {
-          status("Загрузка модели: " + (e.message || e));
-          wantGen = false;
-        }
+    if (wantGen && !cortexReady()) {
+      status("Модель нужна для генерации — загружаю…");
+      try {
+        var okLoad = await ensureCortex();
+        if (!okLoad) wantGen = false;
+      } catch (e) {
+        wantGen = false;
+        status("Загрузка не удалась: " + (e.message || e));
       }
     }
 
     if (wantGen && cortexReady()) {
       var gen = await generateAnswer(query, facts);
-      if (gen) {
-        setPipe(5); status("");
-        var h = sealPush(query, gen.text, "генерация", gen.conf);
+      if (gen && gen.text) {
+        setPipe(5); status(""); setBar(-1);
+        var h = sealPush(query, gen.text, "генерация", 1);
         history.push({ q: query, a: gen.text });
-        if (history.length > 12) history = history.slice(-12);
-        lastSup = [{ source: "генерация", probability: 1, preview: gen.text.slice(0, 160), selected: true }];
+        if (history.length > 16) history = history.slice(-16);
+        lastSup = [{ source: "генерация", probability: 1, preview: gen.text.slice(0, 180), selected: true }];
         return {
           ok: true,
           answer: gen.text,
@@ -273,33 +329,34 @@
           version: VER
         };
       }
+      if (gen && gen.error) status("Генерация: " + gen.error);
     }
 
-    setPipe(4); status("4 · Запасной путь (без модели)…");
-    var answer = seed ? seed.text : null;
-    if (!answer && facts[0] && facts[0].text) {
-      answer = String(facts[0].text).slice(0, 600) +
-        "\n\n— Это контекст из источника, не генерация модели.\nВключите «Режим LLM» и дождитесь загрузки коры для next-token ответа.";
-    }
-    if (!answer) {
+    setPipe(4);
+    var answer = null;
+    var src = "пробел";
+    if (seed) { answer = seed.text; src = "ядро"; }
+    else if (facts[0] && facts[0].text) {
+      answer = String(facts[0].text).slice(0, 700) +
+        "\n\n— Это справочный контекст, не генерация LLM.\nНажмите «Загрузить LLM» для next-token ответа.";
+      src = "контекст";
+    } else {
       answer =
-        "Чтобы АКСИ генерировала ответ как LLM (следующий токен), нужно:\n\n" +
-        "1) Chrome / Edge с WebGPU (или WASM fallback)\n" +
-        "2) Нажать «Загрузить LLM» и дождаться 100%\n" +
+        "Для ответа как у LLM нужна локальная модель.\n\n" +
+        "1) Chrome или Edge\n" +
+        "2) «Загрузить LLM» → дождаться 100%\n" +
         "3) Спросить снова\n\n" +
-        "Без модели доступны только ядро и веб-контекст — это не генерация.\n" +
-        "aksilove@internet.ru";
+        "Галочка «Режим LLM» должна быть включена.\naksilove@internet.ru";
     }
-    setPipe(5); status("");
-    var src = seed ? "ядро" : (facts[0] ? "контекст" : "пробел");
-    var h2 = sealPush(query, answer, src, 0.4);
+    setPipe(5); status(""); setBar(-1);
+    var h2 = sealPush(query, answer, src, 0.35);
     history.push({ q: query, a: answer });
-    lastSup = [{ source: src, probability: 0.4, preview: answer.slice(0, 140), selected: true }];
+    lastSup = [{ source: src, probability: 0.35, preview: answer.slice(0, 140), selected: true }];
     return {
       ok: true,
       answer: answer,
       source: src,
-      probability: 0.4,
+      probability: 0.35,
       superposition: lastSup,
       seal: h2,
       cortex: cortexReady(),
@@ -312,7 +369,7 @@
     if (!lastSup.length) { el.innerHTML = '<li class="meta">Нет данных</li>'; return; }
     el.innerHTML = lastSup.map(function (s) {
       return '<li class="' + (s.selected ? "sel" : "") + '"><span class="p">' + ((s.probability || 0) * 100).toFixed(0) +
-        "%</span> · <b>" + s.source + "</b>" + (s.selected ? " ← выбран" : "") + "<br>" +
+        "%</span> · <b>" + s.source + "</b>" + (s.selected ? " ←" : "") + "<br>" +
         String(s.preview || "").replace(/</g, "<") + "</li>";
     }).join("");
   }
@@ -337,9 +394,11 @@
     try { st = (window.AKSI_WEBLLM && AKSI_WEBLLM.status && AKSI_WEBLLM.status()) || {}; } catch (e) {}
     el.textContent =
       "Версия: " + VER +
-      "\nРежим: " + (genMode ? "ГЕНЕРАЦИЯ (next-token)" : "только факты") +
-      "\nКора: " + (cortexReady() ? "ON · " + (st.model || st.currentModel || "") : "OFF") +
+      "\nРежим: " + (genMode ? "ГЕНЕРАЦИЯ next-token" : "факты") +
+      "\nМодель: " + (cortexReady() ? "ON" : "OFF") +
+      "\nИмя: " + (st.model || "—") +
       "\nBackend: " + (st.backend || "—") +
+      "\nWebGPU: " + (st.webgpu === true ? "да" : st.webgpu === false ? "нет" : "?") +
       "\nПамять: " + memAll().length +
       "\nSeal: " + sealsAll().length +
       "\naksilove@internet.ru";
@@ -361,9 +420,10 @@
       if ($("out")) $("out").textContent = r.answer || "—";
       if ($("meta")) {
         var extra = r.model ? (" · " + r.model) : "";
+        var be = r.backend ? (" · " + r.backend) : "";
         $("meta").textContent =
           (r.source || "") + " · seal " + (r.seal || "") +
-          " · " + (r.cortex ? "LLM" : "без LLM") + extra + " · " + VER;
+          " · " + (r.source === "генерация" ? "LLM ✓" : "без генерации") + extra + be + " · " + VER;
       }
       lastSup = r.superposition || lastSup;
       renderSup(); renderSeals(); renderSys();
@@ -371,7 +431,6 @@
       if ($("out")) $("out").textContent = "Ошибка: " + (e.message || e);
     } finally {
       if ($("go")) $("go").disabled = false;
-      if (!cortexReady()) status("");
     }
   }
 
@@ -407,16 +466,7 @@
       if (confirm("Очистить память?")) { memWrite([]); renderMem(); }
     };
     if ($("cortexBtn")) $("cortexBtn").onclick = async function () {
-      var btn = $("cortexBtn"); btn.disabled = true;
-      try {
-        await ensureCortex();
-      } catch (e) {
-        status("LLM: " + (e.message || e));
-      } finally {
-        btn.disabled = false;
-        updateCortexBtn();
-        renderSys();
-      }
+      try { await ensureCortex(); } catch (e) { status("LLM: " + (e.message || e)); }
     };
     if ($("useGen")) {
       $("useGen").checked = true;
@@ -425,9 +475,13 @@
         renderSys();
       };
     }
+    loadScript("/aksi-webllm.js?v=91").catch(function () {});
+    window.addEventListener("aksi-webllm-progress", function (ev) {
+      try { onProgressInfo(ev.detail); updateCortexBtn(); } catch (e) {}
+    });
     updateCortexBtn();
     renderSys();
-    status("Режим LLM: нажмите «Загрузить LLM», затем спрашивайте — ответ будет генерацией токенов");
+    status("Нажмите «Загрузить LLM» → дождитесь 100% → задайте вопрос (meta: генерация)");
   }
 
   if (typeof document !== "undefined") {
