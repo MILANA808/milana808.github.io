@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0914">
-<title>АКСИ Organism — ответ по существу</title>
-<meta name="description" content="АКСИ: знание + веб-факты + выбор. Отвечает по теме. aksilove@internet.ru">
+<title>АКСИ Organism — инстинкт · чувства · кора</title>
+<meta name="description" content="АКСИ: знание + веб + WebLLM кора. aksilove@internet.ru">
 <link rel="canonical" href="https://milana808.github.io/ask.html">
 <style>
 :root{--bg:#0b0914;--ink:#f5f1ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:#140f22}
@@ -14,26 +14,27 @@ body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(ellipse at 30
 a{color:var(--c)}
 .wrap{max-width:680px;margin:0 auto;padding:24px 16px 72px}
 .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#c9a0ff,#5b2fc0);display:grid;place-items:center;font-weight:900;font-size:20px;margin-bottom:12px}
-h1{font-size:clamp(24px,5vw,32px);font-weight:900}
-.lead{color:var(--muted);margin:8px 0 16px;font-size:14px}
-.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+h1{font-size:clamp(22px,5vw,30px);font-weight:900}
+.lead{color:var(--muted);margin:8px 0 14px;font-size:14px}
+.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
 .pipeline div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center;font-size:10px;font-weight:800;color:var(--muted)}
 .pipeline div.on{border-color:var(--ok);color:var(--ok)}
-.composer{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-input{flex:1;min-width:160px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#120c1c;color:var(--ink);font:inherit}
-button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:14px 18px;background:var(--v);color:#fff;font-weight:800}
+.composer{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+input{flex:1;min-width:140px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#120c1c;color:var(--ink);font:inherit}
+button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:12px 16px;background:var(--v);color:#fff;font-weight:800}
+button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink)}
 button:disabled{opacity:.5}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .chips button{padding:8px 12px;font-size:12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);font-weight:700}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px}
 .card h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--c);margin-bottom:10px}
-.answer{white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55;min-height:4em}
-.meta{margin-top:10px;font-size:12px;color:var(--muted)}
+.answer{white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55;min-height:3.5em}
+.meta,.status{margin-top:8px;font-size:12px;color:var(--muted)}
 .sup{list-style:none}.sup li{padding:8px 0;border-top:1px solid var(--line);font-size:13px}.sup li:first-child{border-top:0}
 .sup .p{color:var(--c);font-weight:800}.sup .sel{color:var(--ok)}
 .trail{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);word-break:break-all}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-footer{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+footer{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
 label{font-size:12px;color:var(--muted)}
 </style>
 </head>
@@ -41,15 +42,20 @@ label{font-size:12px;color:var(--muted)}
 <div class="wrap">
   <div class="logo">A</div>
   <h1>АКСИ Organism</h1>
-  <p class="lead">Ответ по теме. Знание → веб-факты → выбор → след. Если не знаю — скажу прямо.</p>
+  <p class="lead">Инстинкт + чувства (веб) + <b>кора</b> (WebLLM) + выбор + seal.</p>
   <div class="pipeline" id="pipe">
-    <div data-s="1">1 · Органы</div>
-    <div data-s="2">2 · Кандидаты</div>
+    <div data-s="1">1 · Чувства</div>
+    <div data-s="2">2 · Кора</div>
     <div data-s="3">3 · Выбор</div>
     <div data-s="4">4 · Seal</div>
   </div>
+  <div class="row">
+    <button type="button" class="g" id="cortexBtn">Включить нейрокортекс</button>
+    <label class="row"><input type="checkbox" id="useWeb" checked style="width:auto"> Веб-факты</label>
+  </div>
+  <div class="status" id="orgStatus">Кора выключена. Для генерации «как нейросеть» — включите нейрокортекс (нужен WebGPU).</div>
   <div class="composer">
-    <input id="q" placeholder="Спросите по существу…" autocomplete="off" autofocus>
+    <input id="q" placeholder="Вопрос…" autocomplete="off" autofocus>
     <button type="button" id="go">Спросить</button>
   </div>
   <div class="chips">
@@ -57,14 +63,10 @@ label{font-size:12px;color:var(--muted)}
     <button type="button" data-q="что такое квантовый компьютер">квантовый компьютер</button>
     <button type="button" data-q="что такое искусственный интеллект">ИИ</button>
     <button type="button" data-q="фотосинтез">фотосинтез</button>
-    <button type="button" data-q="формула AKSI">формула</button>
-  </div>
-  <div class="row" style="margin-bottom:12px">
-    <label class="row"><input type="checkbox" id="useWeb" checked style="width:auto"> Веб-факты (Wikipedia)</label>
   </div>
   <div class="card">
     <h2>Ответ</h2>
-    <div class="answer" id="out">Задайте вопрос — отвечу по существу.</div>
+    <div class="answer" id="out">Спросите — или сначала включите нейрокортекс.</div>
     <div class="meta" id="meta"></div>
   </div>
   <div class="card" id="supCard" hidden>
@@ -75,9 +77,9 @@ label{font-size:12px;color:var(--muted)}
     <h2>Seal</h2>
     <div class="trail" id="trail"></div>
   </div>
-  <p style="font-size:13px;color:var(--muted)"><a href="/aksi.html">Лаборатория</a> · <a href="/offer/">Offer</a></p>
-  <footer>aksilove@internet.ru · Organism v2</footer>
+  <p style="font-size:13px;color:var(--muted)"><a href="/aksi.html">Лаборатория</a></p>
+  <footer>aksilove@internet.ru · Organism v3</footer>
 </div>
-<script src="/aksi-pulse.js?v=2"></script>
+<script src="/aksi-pulse.js?v=3"></script>
 </body>
 </html>
