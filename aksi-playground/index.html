@@ -5,12 +5,12 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AKSI Quantum Playground</title>
-<meta name="description" content="Интерактивная калибровка выбора ответа ИИ: комплексные амплитуды, Born rule, интерференция, Ed25519 decision receipts.">
+<meta name="description" content="АКСИ: любой вопрос → кандидаты → квантовая калибровка → Ed25519 receipt. Born rule + интерференция.">
 <style>
 :root{--bg:#0a0a0f;--ink:#e0e0e8;--muted:#8b8b9a;--line:#1e1e2a;--blue:#2d6dff;--green:#4ade80;--red:#f87171;--orange:#fb923c;--card:#12121a;--panel:#0e0e16}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:14px/1.45 system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-.mono{font-family:ui-monospace,"JetBrains Mono","Fira Code",monospace;font-size:11px}
+.mono{font-family:ui-monospace,monospace;font-size:11px}
 header{border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:8px}
 .brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .brand h1{font-size:16px;font-weight:800}
@@ -28,7 +28,7 @@ button:disabled{opacity:.5}
 .zone h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .cand{border:1px solid var(--line);border-left:4px solid #555;border-radius:10px;padding:10px;background:var(--panel)}
 .cand.on{outline:1px solid rgba(255,255,255,.25)}
-.cand .t{font-size:13px;margin-bottom:8px;max-height:88px;overflow:auto}
+.cand .t{font-size:13px;margin-bottom:8px;max-height:100px;overflow:auto;white-space:pre-wrap}
 .cand .m{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;font-size:11px;color:var(--muted)}
 .cand .m b{color:var(--ink);font-weight:600}
 .bar{height:5px;background:#1a1a28;border-radius:99px;overflow:hidden;margin-top:2px}
@@ -38,7 +38,7 @@ canvas{width:100%;height:auto;background:#08080e;border-radius:10px;border:1px s
 .sl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .sl input[type=range]{width:100%;accent-color:var(--blue)}
 .sl .v{color:var(--ink);font-weight:700}
-.final{font-size:15px;line-height:1.5;padding:12px;background:var(--panel);border-radius:10px;border:1px solid var(--line);min-height:72px}
+.final{font-size:15px;line-height:1.55;padding:12px;background:var(--panel);border-radius:10px;border:1px solid var(--line);min-height:72px;white-space:pre-wrap}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .col{background:var(--panel);border-radius:10px;padding:10px;border:1px solid var(--line)}
 .col .n{font-size:20px;font-weight:800}
@@ -59,33 +59,38 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
 .hint{font-size:11px;color:var(--muted)}
 .toast{position:fixed;bottom:16px;right:16px;background:#1a1a28;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-size:13px;z-index:99;display:none}
 .toast.on{display:block}
+.status{font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
 <header>
   <div class="brand">
     <h1>AKSI Quantum Playground</h1>
-    <span class="sub">калибровка выбора ответа · комплексные амплитуды · Born rule · не quantum advantage</span>
+    <span class="sub">любой вопрос → кандидаты → интерференция → коллапс · не quantum advantage</span>
   </div>
   <div class="row">
     <input type="text" id="q" placeholder="Спроси что угодно…" value="Что такое доверие к ИИ?">
     <button type="button" id="run">Запустить</button>
   </div>
   <div class="presets">
-    <button type="button" data-q="Что такое доверие к ИИ?">Что такое доверие к ИИ?</button>
-    <button type="button" data-q="Объясни квантовую суперпозицию">Объясни квантовую суперпозицию</button>
-    <button type="button" data-q="Стоит ли доверять нейросети?">Стоит ли доверять нейросети?</button>
+    <button type="button" data-q="Что такое доверие к ИИ?">Доверие к ИИ</button>
+    <button type="button" data-q="Объясни квантовую суперпозицию">Суперпозиция</button>
+    <button type="button" data-q="Стоит ли доверять нейросети?">Доверие к нейросети</button>
+    <button type="button" data-q="Что такое АКСИ?">Что такое АКСИ?</button>
+    <button type="button" data-q="Кто написал Войну и мир?">Война и мир</button>
+    <button type="button" data-q="Сколько планет в Солнечной системе?">Планеты</button>
   </div>
+  <p class="status" id="status">Режим: local · online-fetch при наличии сети</p>
 </header>
 <div class="grid">
   <section class="zone">
-    <h2>Кандидаты <span id="modeBadge" class="badge">demo</span></h2>
+    <h2>Кандидаты <span id="modeBadge" class="badge">—</span></h2>
     <div id="cands"></div>
     <div class="formula mono">
       φᵢ = π·(1−alignᵢ)·λ<br>
       aᵢ = √Pᵢ e^{iφᵢ} + √(Pᵢ·cf)·e^{i(φᵢ+π/2)}<br>
       Mᵢ = |aᵢ|² + λ·Σ 2 Re(aᵢāⱼ) → P_q<br>
-      λ=0: классика · λ>0: интерференционная калибровка
+      λ=0: классика · λ>0: интерференция меняет ранг
     </div>
   </section>
   <section class="zone">
@@ -97,7 +102,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
     <label class="sl">Контрфактический вес: <span class="v" id="vCf">25%</span>
       <input type="range" id="sCf" min="0" max="100" value="25">
     </label>
-    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. Полупрозрачные — контрфакт (+π/2). Ползунок λ меняет ранжирование через кросс-термы.</p>
+    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. Ползунок λ меняет P_q через кросс-термы.</p>
     <div class="xt mono" id="crossBox">cross-terms —</div>
   </section>
   <section class="zone">
@@ -124,7 +129,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
   <div class="kv mono"><span>SHA-256 ans</span><code id="ansHash">—</code></div>
   <div class="kv mono"><span>Public key</span><code id="pub">—</code></div>
   <div class="kv mono"><span>prev hash</span><code id="prevH">null</code></div>
-  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.2.1</p>
+  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.3 · любой вопрос + quantum gate</p>
 </footer>
 <div class="toast" id="toast"></div>
 <script type="module">
@@ -146,7 +151,7 @@ function hexToBuf(hex){
   for (let i=0;i<a.length;i++) a[i]=parseInt(hex.substr(i*2,2),16);
   return a.buffer;
 }
-const DB = "aksi-qp-v2";
+const DB = "aksi-qp-v3";
 function idbReq(mode, fn) {
   return new Promise((res, rej) => {
     const r = indexedDB.open(DB, 1);
@@ -191,33 +196,158 @@ async function verifySig(hex, bytes) {
   catch (e) { return false; }
 }
 
-const DEMO = {
-  "Что такое доверие к ИИ?": [
-    { engine:"Local Brain", text:"Доверие к ИИ — не вера в «разум», а проверяемость: происхождение ответа, правило выбора, воспроизводимость и право отказать при низкой согласованности сигналов.", eqs:0.84, mem:0.90, src:0.95, coh:0.86, spe:0.80 },
-    { engine:"Template", text:"Доверие строится на прозрачности модели, аудите данных и контроле пользователя над автономными действиями.", eqs:0.72, mem:0.52, src:0.70, coh:0.74, spe:0.68 },
-    { engine:"WebLLM/demo", text:"Trust means calibrated confidence: raise it when contexts agree, defer when signals conflict — fluency alone is not evidence.", eqs:0.64, mem:0.38, src:0.45, coh:0.70, spe:0.62 }
-  ],
-  "Объясни квантовую суперпозицию": [
-    { engine:"Local Brain", text:"Суперпозиция — линейная комбинация базисных состояний. Исход измерения — с вероятностью |a|² (Born). Интерференция возможна, потому что складываются амплитуды, а не вероятности.", eqs:0.88, mem:0.92, src:0.95, coh:0.90, spe:0.84 },
-    { engine:"Template", text:"До наблюдения — несколько амплитуд; после — один исход. Математика гильбертова пространства, не бытовая «смесь».", eqs:0.75, mem:0.58, src:0.70, coh:0.78, spe:0.70 },
-    { engine:"WebLLM/demo", text:"Amplitudes can cancel: constructive reinforce, destructive suppress. Classical mixtures cannot encode cancellation.", eqs:0.68, mem:0.34, src:0.45, coh:0.68, spe:0.64 }
-  ],
-  "Стоит ли доверять нейросети?": [
-    { engine:"Local Brain", text:"Частично. Сеть сильна на паттернах обучения, слаба вне распределения. Нужны границы, калибровка и отказ при конфликте контекстов.", eqs:0.81, mem:0.86, src:0.95, coh:0.83, spe:0.80 },
-    { engine:"Template", text:"Нейросеть — инструмент. Полное доверие без проверки опаснее осторожного использования с аудитом.", eqs:0.70, mem:0.48, src:0.70, coh:0.72, spe:0.66 },
-    { engine:"WebLLM/demo", text:"Do not equate fluent text with reliable knowledge. Prefer systems that expose uncertainty and can defer.", eqs:0.61, mem:0.30, src:0.45, coh:0.66, spe:0.58 }
-  ]
-};
+const KB = [
+  {k:["акси","aksi","кто ты","что ты"], a:"Я АКСИ — локальный offline-first ИИ-слой. Работаю в браузере: кандидаты ответов, квантовая калибровка (Born + интерференция), Ed25519 decision receipts. Контакт: aksilove@internet.ru. Не претендую на AGI и quantum advantage."},
+  {k:["доверие","trust","ии","нейросет"], a:"Доверие к ИИ — не вера в «разум», а проверяемость: откуда ответ, по какому правилу выбран, можно ли воспроизвести и отказать при низкой согласованности. Fluency ≠ evidence."},
+  {k:["суперпозиц","superposition","квант"], a:"Суперпозиция — линейная комбинация базисных состояний. Измерение даёт исход с вероятностью |a|² (правило Борна). Интерференция возможна, потому что складываются амплитуды, а не вероятности."},
+  {k:["born","борн","вероятност"], a:"Правило Борна: вероятность исхода = квадрат модуля амплитуды. В этом playground при λ>0 добавляется интерференционный вес кросс-термов — это калибровка, не физический quantum advantage."},
+  {k:["планет","солнечн"], a:"В Солнечной системе 8 планет: Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун. Плутон с 2006 года классифицируется как карликовая планета."},
+  {k:["войн","мир","толст"], a:"Роман «Война и мир» написал Лев Николаевич Толстой (1863–1869)."},
+  {k:["земл","планет зем"], a:"Земля — третья планета от Солнца, оборот ~365 суток, сутки ~24 часа. Единственная известная планета с устойчивой жизнью."},
+  {k:["формул","aksi ="], a:"Формула АКСИ: AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity, S — sovereignty, n — накопленный опыт (seals)."},
+  {k:["интерферен","interference"], a:"Интерференция: конструктивная усиливает, деструктивная ослабляет. В playground Mᵢ = |aᵢ|² + λ·Σ 2 Re(aᵢāⱼ). При λ=0 система сводится к классическим вероятностям."},
+  {k:["привет","hello","здравств"], a:"Привет. Я АКСИ Quantum Playground. Задайте любой вопрос — соберу кандидаты, прогоню через калибровку и подпишу decision receipt."},
+  {k:["памят","memory","indexeddb"], a:"Ключи Ed25519 и seals хранятся локально (IndexedDB / localStorage). Данные не уходят на сервер АКСИ."},
+  {k:["wifi","интернет","онлайн"], a:"При наличии сети playground запрашивает краткие факты (Wikipedia REST). Offline всегда доступен локальный слой."}
+];
 
-function defaultCands(q) {
-  for (const k of Object.keys(DEMO)) {
-    if (q.includes(k.slice(0, 12)) || k.includes(q.slice(0, 12))) return DEMO[k].map(c => Object.assign({}, c));
+function localAnswer(q) {
+  const s = q.toLowerCase();
+  let best = null, score = 0;
+  for (const row of KB) {
+    let sc = 0;
+    for (const k of row.k) if (s.includes(k)) sc += k.length;
+    if (sc > score) { score = sc; best = row; }
   }
-  return [
-    { engine:"Local Brain", text:"Ответ из локальных эвристик и сигналов качества. Без претензии на абсолютную истину.", eqs:0.76, mem:0.70, src:0.95, coh:0.80, spe:0.72 },
-    { engine:"Template", text:"При слабой согласованности источников лучше уточнить вопрос или отложить решение.", eqs:0.67, mem:0.44, src:0.70, coh:0.70, spe:0.64 },
-    { engine:"WebLLM/demo", text:"Limited evidence; confidence should track consistency of contexts.", eqs:0.58, mem:0.28, src:0.45, coh:0.64, spe:0.55 }
-  ];
+  if (best && score >= 3) return { text: best.a, score: Math.min(0.95, 0.55 + score / 40) };
+  return null;
+}
+
+function structuralAnswer(q) {
+  const s = q.trim();
+  if (!s) return "Пустой вопрос.";
+  if (/^(кто|what is|что так|что такое|who|when|где|how|как|почему|зачем)/i.test(s)) {
+    return "По вопросу «" + s.slice(0, 120) + "»: локальный слой не нашёл точного факта. Рекомендация — сверить с первичным источником. Система может отложить решение (DEFERRED), если согласованность низкая.";
+  }
+  return "Ответ по эвристикам АКСИ на «" + s.slice(0, 100) + "». Без претензии на абсолютную истину: проверяйте критические факты.";
+}
+
+async function fetchWiki(q) {
+  try {
+    const title = encodeURIComponent(q.replace(/[?!.]+$/g, "").slice(0, 80));
+    const url = "https://ru.wikipedia.org/api/rest_v1/page/summary/" + title;
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 4500);
+    const r = await fetch(url, { signal: ctrl.signal, headers: { Accept: "application/json" } });
+    clearTimeout(t);
+    if (!r.ok) {
+      const url2 = "https://en.wikipedia.org/api/rest_v1/page/summary/" + title;
+      const r2 = await fetch(url2, { signal: AbortSignal.timeout(4000), headers: { Accept: "application/json" } });
+      if (!r2.ok) return null;
+      const j2 = await r2.json();
+      if (j2.extract) return { text: j2.extract.slice(0, 500), title: j2.title || q, lang: "en" };
+      return null;
+    }
+    const j = await r.json();
+    if (j.extract) return { text: j.extract.slice(0, 500), title: j.title || q, lang: "ru" };
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function fetchDDG(q) {
+  try {
+    const url = "https://api.duckduckgo.com/?q=" + encodeURIComponent(q) + "&format=json&no_html=1&skip_disambig=1";
+    const r = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (j.AbstractText) return j.AbstractText.slice(0, 450);
+    if (j.Answer) return String(j.Answer).slice(0, 300);
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function scoreText(text, q) {
+  const words = q.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const t = text.toLowerCase();
+  let hit = 0;
+  for (const w of words) if (t.includes(w)) hit++;
+  const cov = words.length ? hit / words.length : 0;
+  const len = Math.min(1, text.length / 280);
+  return Math.max(0.35, Math.min(0.95, 0.35 + cov * 0.4 + len * 0.2));
+}
+
+async function buildCandidates(q) {
+  const online = typeof navigator !== "undefined" && navigator.onLine !== false;
+  let wiki = null, ddg = null;
+  const status = document.getElementById("status");
+  if (online) {
+    status.textContent = "Запрос фактов (Wikipedia / DDG)…";
+    [wiki, ddg] = await Promise.all([fetchWiki(q), fetchDDG(q)]);
+  }
+  const loc = localAnswer(q);
+  const cands = [];
+
+  if (wiki && wiki.text) {
+    cands.push({
+      engine: "Wikipedia/" + (wiki.lang || "ru"),
+      text: wiki.text,
+      eqs: scoreText(wiki.text, q) * 0.95 + 0.04,
+      mem: 0.55, src: 0.92, coh: 0.88, spe: 0.80
+    });
+  }
+  if (ddg) {
+    cands.push({
+      engine: "DDG Instant",
+      text: ddg,
+      eqs: scoreText(ddg, q) * 0.9 + 0.05,
+      mem: 0.45, src: 0.78, coh: 0.82, spe: 0.75
+    });
+  }
+  if (loc) {
+    cands.push({
+      engine: "Local Brain",
+      text: loc.text,
+      eqs: loc.score,
+      mem: 0.92, src: 0.95, coh: 0.90, spe: 0.85
+    });
+  }
+
+  while (cands.length < 3) {
+    if (cands.length === 0) {
+      cands.push({
+        engine: "Local Brain",
+        text: structuralAnswer(q),
+        eqs: 0.55, mem: 0.5, src: 0.6, coh: 0.65, spe: 0.5
+      });
+    } else if (cands.length === 1) {
+      cands.push({
+        engine: "Template",
+        text: "Краткий шаблон: вопрос принят. При низкой согласованности источников лучше уточнить формулировку или проверить факт в первичном источнике.",
+        eqs: 0.48, mem: 0.4, src: 0.55, coh: 0.6, spe: 0.45
+      });
+    } else {
+      cands.push({
+        engine: "Conservative",
+        text: "Осторожный режим: при конфликте или дефиците данных АКСИ предпочитает DEFERRED, а не уверенный, но непроверяемый ответ.",
+        eqs: 0.42, mem: 0.35, src: 0.5, coh: 0.55, spe: 0.4
+      });
+    }
+  }
+
+  cands.sort((a, b) => b.eqs - a.eqs);
+  const top = cands.slice(0, 3);
+  top.forEach(c => {
+    c.eqs = Math.min(0.96, Math.max(0.38, c.eqs + (Math.random() - 0.5) * 0.02));
+  });
+  const mode = (wiki || ddg) ? "hybrid" : "local";
+  status.textContent = mode === "hybrid"
+    ? "Режим: hybrid (local + online facts) · сеть доступна"
+    : "Режим: local offline · сеть не дала фактов или offline";
+  return { cands: top, mode };
 }
 
 function analyze(cands, lambda, cfW) {
@@ -235,9 +365,9 @@ function analyze(cands, lambda, cfW) {
   });
   const sumP = prepared.reduce((s, x) => s + x.P, 0);
   prepared.forEach(x => { x.P_c = x.P / sumP; });
-  const raw = prepared.map((xi, i) => {
+  const raw = prepared.map((xi) => {
     let s = cabs2(xi.a);
-    for (let j = 0; j < N; j++) if (j !== i) {
+    for (let j = 0; j < N; j++) if (j !== xi.i) {
       const cross = cmul(xi.a, cconj(prepared[j].a));
       s += lambda * 2 * cross.re;
     }
@@ -266,7 +396,7 @@ function collapse(pQ) {
   return pQ.length - 1;
 }
 
-const state = { query: "", mode: "demo", cands: [], lambda: 0.45, cfW: 0.25, analysis: null, chosen: 0, decision: "DEFERRED", anim: 0 };
+const state = { query: "", mode: "local", cands: [], lambda: 0.45, cfW: 0.25, analysis: null, chosen: 0, decision: "DEFERRED", anim: 0 };
 const cv = document.getElementById("cv");
 const ctx = cv.getContext("2d");
 const COLORS = ["#2d6dff", "#4ade80", "#fb923c"];
@@ -287,8 +417,6 @@ function drawPlane() {
     ctx.beginPath(); ctx.moveTo(x, 16); ctx.lineTo(x, h - 16); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(16, y); ctx.lineTo(w - 16, y); ctx.stroke();
   }
-  ctx.strokeStyle = "#1e1e2a";
-  ctx.beginPath(); ctx.arc(cx, cy, R * 0.85, 0, Math.PI * 2); ctx.stroke();
   ctx.strokeStyle = "#3a3a4a"; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.moveTo(16, cy); ctx.lineTo(w - 16, cy); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(cx, 16); ctx.lineTo(cx, h - 16); ctx.stroke();
@@ -324,7 +452,7 @@ function drawPlane() {
   ctx.font = "11px system-ui";
   prepared.forEach((p, i) => {
     ctx.fillStyle = COLORS[i];
-    ctx.fillText((i + 1) + " " + p.c.engine.slice(0, 12) + "  Pq=" + (state.analysis.pQ[i] * 100).toFixed(0) + "%", 18, h - 48 + i * 14);
+    ctx.fillText((i + 1) + " " + p.c.engine.slice(0, 14) + "  Pq=" + (state.analysis.pQ[i] * 100).toFixed(0) + "%", 18, h - 48 + i * 14);
   });
 }
 
@@ -376,7 +504,7 @@ function renderResult() {
   else if (qd < 0) dg.textContent = "QD " + qd.toFixed(3) + " — классика ЗАВЫШАЕТ на " + (Math.abs(qd) * 100).toFixed(1) + "%";
   else dg.textContent = "QD +" + qd.toFixed(3) + " — классика ЗАНИЖАЕТ на " + (qd * 100).toFixed(1) + "%";
   let exp = state.lambda < 0.08 ? "λ≈0: кросс-термы выключены, P_q ≈ P_c."
-    : a.total_interference > 0.08 ? "Constructive: согласованные фазы усиливают согласованные пути."
+    : a.total_interference > 0.08 ? "Constructive: согласованные фазы усиливают путь."
     : a.total_interference < -0.08 ? "Destructive: конфликт контекстов перераспределяет массу."
     : "Смешанные фазы — умеренный сдвиг.";
   if (state.cfW > 0.35) exp += " Контрфакт сильнее тянет слабо согласованные кандидаты.";
@@ -399,24 +527,16 @@ async function seal() {
   const ansHash = await sha256hex(ch.c.text);
   const body = {
     born_rule: {
-      interpretation: a.total_interference < -0.05 ? "destructive_diagnostic" : a.total_interference > 0.05 ? "constructive_diagnostic" : "neutral",
       p_classical_chosen: +ch.P_c.toFixed(6),
       p_quantum_chosen: +a.pQ[state.chosen].toFixed(6),
       quantum_divergence: +(a.pQ[state.chosen] - ch.P_c).toFixed(6)
     },
     candidates: a.prepared.map(p => ({
       amplitude: { im: +p.a.im.toFixed(6), re: +p.a.re.toFixed(6) },
-      coherence: p.c.coh,
-      context_alignment: +p.align.toFixed(6),
       engine_name: p.c.engine,
       eqs: p.eqs,
-      id: "engine_" + p.i,
-      memory_resonance: p.c.mem,
       phase: +p.phi.toFixed(6),
-      source_trust: p.c.src,
-      specificity: p.c.spe,
-      text: p.c.text,
-      text_hash: null
+      text: p.c.text
     })),
     confidence: +a.pQ[state.chosen].toFixed(6),
     decision: state.decision,
@@ -436,17 +556,11 @@ async function seal() {
     receipt_id: (crypto.randomUUID && crypto.randomUUID()) || ("r-" + Date.now()),
     timestamp: new Date().toISOString()
   };
-  for (const c of body.candidates) c.text_hash = await sha256hex(c.text);
   lastCanonical = JSON.stringify(body);
   body.signature = await signBytes(new TextEncoder().encode(lastCanonical));
   lastReceipt = body;
   prevReceiptHash = await sha256hex(JSON.stringify(body));
   sealedN++;
-  try {
-    const hist = JSON.parse(localStorage.getItem("aksi_qp_seals_v2") || "[]");
-    hist.push({ t: Date.now(), h: prevReceiptHash, d: state.decision });
-    localStorage.setItem("aksi_qp_seals_v2", JSON.stringify(hist.slice(-80)));
-  } catch (e) {}
   document.getElementById("sig").textContent = body.signature;
   document.getElementById("ansHash").textContent = ansHash;
   document.getElementById("pub").textContent = pubHex;
@@ -483,16 +597,19 @@ async function run() {
   if (!q) return;
   state.query = q;
   document.getElementById("run").disabled = true;
-  state.mode = "demo";
-  document.getElementById("modeBadge").textContent = "demo mode";
-  state.cands = defaultCands(q);
-  state.cands.forEach(c => {
-    c.eqs = Math.min(0.95, Math.max(0.42, c.eqs + (Math.random() - 0.5) * 0.03));
-    c.mem = Math.min(0.95, Math.max(0.2, c.mem + (Math.random() - 0.5) * 0.04));
-  });
-  recompute(true);
-  animateCollapse();
-  await seal();
+  document.getElementById("final").textContent = "Сбор кандидатов…";
+  try {
+    const built = await buildCandidates(q);
+    state.cands = built.cands;
+    state.mode = built.mode;
+    document.getElementById("modeBadge").textContent = built.mode;
+    recompute(true);
+    animateCollapse();
+    await seal();
+  } catch (e) {
+    document.getElementById("final").textContent = "Ошибка: " + (e.message || e);
+    toast("Ошибка генерации");
+  }
   document.getElementById("run").disabled = false;
 }
 
@@ -510,7 +627,7 @@ document.getElementById("run").onclick = run;
 document.getElementById("btnRecollapse").onclick = async () => {
   if (!state.analysis) return;
   recompute(true); animateCollapse(); await seal();
-  toast("Новый коллапс по калиброванному распределению");
+  toast("Новый коллапс");
 };
 document.querySelectorAll("[data-q]").forEach(b => {
   b.onclick = () => { document.getElementById("q").value = b.getAttribute("data-q"); run(); };
@@ -530,13 +647,8 @@ document.getElementById("btnDl").onclick = () => {
 };
 
 (async function init() {
-  try { sealedN = JSON.parse(localStorage.getItem("aksi_qp_seals_v2") || "[]").length; } catch (e) {}
-  document.getElementById("sealCount").textContent = "Sealed: " + sealedN;
   await ensureKeys();
   document.getElementById("pub").textContent = pubHex;
-  let gpu = false;
-  try { if (navigator.gpu) { const ad = await navigator.gpu.requestAdapter(); gpu = !!ad; } } catch (e) {}
-  document.getElementById("modeBadge").textContent = gpu ? "demo · WebGPU detected" : "demo mode";
   await run();
 })();
 </script>
