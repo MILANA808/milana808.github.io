@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0914">
-<title>АКСИ — локальная генерация (LLM)</title>
-<meta name="description" content="АКСИ: next-token генерация в браузере. WebLLM / WASM. Веб только как контекст. aksilove@internet.ru">
+<title>АКСИ — локальная LLM-генерация</title>
+<meta name="description" content="АКСИ: next-token генерация в браузере. WebLLM Qwen / WASM. aksilove@internet.ru">
 <link rel="canonical" href="https://milana808.github.io/ask.html">
 <style>
 :root{--bg:#0b0914;--ink:#f5f1ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:#140f22}
@@ -16,7 +16,8 @@ a{color:var(--c)}
 .top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
 .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#c9a0ff,#5b2fc0);display:grid;place-items:center;font-weight:900}
 h1{font-size:clamp(20px,4.5vw,26px);font-weight:900}
-.lead{color:var(--muted);font-size:13px;margin-bottom:12px;line-height:1.45}
+.lead{color:var(--muted);font-size:13px;margin-bottom:8px;line-height:1.45}
+.warn{font-size:12px;color:#fcd34d;margin-bottom:10px;line-height:1.4}
 .pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:12px}
 .pipe div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;padding:6px 2px;text-align:center;font-size:9px;font-weight:800;color:var(--muted)}
 .pipe div.on{border-color:var(--ok);color:var(--ok)}
@@ -35,8 +36,10 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
 .card h2{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--c);margin-bottom:8px}
 .answer{white-space:pre-wrap;word-break:break-word;font-size:15px;min-height:3em}
 .meta,.status{font-size:12px;color:var(--muted);margin-top:8px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;gap:12px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
 label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.bar{display:none;height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin:8px 0 4px}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#a978ff,#67e8f9);transition:width .25s}
 .sup{list-style:none}.sup li{padding:8px 0;border-top:1px solid var(--line);font-size:13px}.sup li:first-child{border-top:0}
 .sup .p{color:var(--c);font-weight:800}.sup .sel{color:var(--ok)}
 .trail{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);word-break:break-all}
@@ -45,14 +48,13 @@ label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
 .bnav button{flex:1;max-width:90px;padding:9px 4px;font-size:10px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--muted)}
 .bnav button.on{color:var(--ink);border-color:var(--line);background:rgba(169,120,255,.18)}
 footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
-.warn{font-size:12px;color:#fcd34d;margin-bottom:10px;line-height:1.4}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top"><div class="logo">A</div><div><h1>АКСИ</h1></div></div>
-  <p class="lead">Не поиск. <b>Генерация следующего токена</b> локально в браузере (как LLM). Веб — только справка для модели.</p>
-  <p class="warn">Шаг 1: нажмите «Загрузить LLM» и дождитесь готовности (2–10 мин в первый раз, Chrome + WebGPU). Шаг 2: спрашивайте — в meta должно быть «генерация».</p>
+  <p class="lead">Полноценная <b>локальная LLM</b>: модель считает следующий токен в браузере. Веб — только справка.</p>
+  <p class="warn">1) «Загрузить LLM» → полоска до 100% (2–10 мин в первый раз, Chrome/Edge). 2) Спросить. В meta должно быть «генерация · LLM ✓».</p>
   <div class="pipe" id="pipe">
     <div data-s="1">1 Контекст</div>
     <div data-s="2">2 Модель</div>
@@ -69,14 +71,15 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
   </div>
   <div class="panel on" id="p-chat">
     <div class="status" id="status"></div>
+    <div class="bar" id="loadBar"><i id="loadFill"></i></div>
     <div class="composer">
-      <input type="text" id="q" placeholder="Спросите — ответ сгенерирует модель…" autocomplete="off" autofocus>
+      <input type="text" id="q" placeholder="Спросите — ответит модель…" autocomplete="off" autofocus>
       <button type="button" id="go">Спросить</button>
     </div>
     <div class="chips">
       <button type="button" data-q="кто ты">кто ты</button>
       <button type="button" data-q="вопрос нашего времени">вопрос времени</button>
-      <button type="button" data-q="объясни что такое нейронная сеть простыми словами">нейронная сеть</button>
+      <button type="button" data-q="объясни нейронную сеть простыми словами">нейронная сеть</button>
       <button type="button" data-q="почему небо голубое">небо</button>
     </div>
     <div class="row">
@@ -86,15 +89,12 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
     </div>
     <div class="card">
       <h2>Ответ</h2>
-      <div class="answer" id="out">Сначала загрузите LLM. Потом вопрос — модель будет считать следующий токен, а не копировать Wikipedia.</div>
+      <div class="answer" id="out">Сначала «Загрузить LLM». После 100% модель генерирует ответ токен за токеном — это не копипаст из Wikipedia.</div>
       <div class="meta" id="meta"></div>
     </div>
   </div>
   <div class="panel" id="p-sup">
-    <div class="card">
-      <h2>Кандидаты</h2>
-      <ul class="sup" id="supList"><li class="meta">После вопроса</li></ul>
-    </div>
+    <div class="card"><h2>Кандидаты</h2><ul class="sup" id="supList"><li class="meta">После вопроса</li></ul></div>
   </div>
   <div class="panel" id="p-mem">
     <div class="card">
@@ -111,16 +111,10 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
     </div>
   </div>
   <div class="panel" id="p-seal">
-    <div class="card">
-      <h2>След</h2>
-      <ul class="list" id="sealList"><li class="meta">Пусто</li></ul>
-    </div>
+    <div class="card"><h2>След</h2><ul class="list" id="sealList"><li class="meta">Пусто</li></ul></div>
   </div>
   <div class="panel" id="p-sys">
-    <div class="card">
-      <h2>Статус</h2>
-      <div id="sysOut" class="answer" style="font-size:13px">—</div>
-    </div>
+    <div class="card"><h2>Статус</h2><div id="sysOut" class="answer" style="font-size:13px">—</div></div>
     <div class="card">
       <h2>Платформа</h2>
       <p class="meta"><a href="/aksi.html">Лаборатория</a> · <a href="/matrix/">MATRIX</a></p>
@@ -136,7 +130,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
   <button type="button" data-tab="seal">След</button>
   <button type="button" data-tab="sys">Система</button>
 </nav>
-<script src="/aksi-full.js?v=90"></script>
+<script src="/aksi-full.js?v=91"></script>
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js?v=303").catch(function () {});
