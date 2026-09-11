@@ -1,8 +1,9 @@
-/* AKSI SW v302 — full platform offline shell */
-var CACHE = "aksi-shell-v302";
+/* AKSI SW v303 — network-first product surface */
+var CACHE = "aksi-shell-v303";
 var PRE = [
   "/",
   "/index.html",
+  "/ask.html",
   "/aksi.html",
   "/platform.html",
   "/sw.js",
@@ -11,11 +12,13 @@ var PRE = [
   "/sovereign/",
   "/sovereign/index.html",
   "/reality/",
+  "/aksi-full.js",
+  "/aksi-neuro.js",
+  "/aksi-knowledge.js",
   "/aksi-brain-ru.js",
   "/aksi-mind.js",
   "/aksi-api.js",
   "/aksi-crystal.js",
-  "/aksi-neuro.js",
   "/aksi-reality.js",
   "/aksi-swarm.js",
   "/aksi-organism.js",
@@ -24,15 +27,22 @@ var PRE = [
   "/aksi-decision.js"
 ];
 var NET_FIRST = [
+  /\/ask\.html/,
   /\/aksi\.html/,
   /\/platform\.html/,
   /\/contour\//,
   /\/sovereign\//,
   /\/reality\//,
   /index\.html$/,
+  /aksi-full\.js/,
+  /aksi-webllm\.js/,
+  /aksi-boost\.js/,
+  /aksi-knowledge\.js/,
+  /aksi-neuro\.js/,
   /aksi-brain-ru\.js/,
   /aksi-api\.js/,
-  /aksi-mind\.js/
+  /aksi-mind\.js/,
+  /sw\.js/
 ];
 function isNetFirst(url) {
   var p = url.pathname;
@@ -71,7 +81,7 @@ self.addEventListener("fetch", function (e) {
         return res;
       }).catch(function () {
         return caches.match(req).then(function (c) {
-          return c || caches.match("/aksi.html");
+          return c || caches.match("/ask.html") || caches.match("/aksi.html");
         });
       })
     );
@@ -83,7 +93,7 @@ self.addEventListener("fetch", function (e) {
         var copy = res.clone();
         caches.open(CACHE).then(function (cache) { cache.put(req, copy); });
         return res;
-      }).catch(function () { return caches.match("/aksi.html"); });
+      }).catch(function () { return caches.match("/ask.html"); });
     })
   );
 });
