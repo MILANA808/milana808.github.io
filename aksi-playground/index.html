@@ -66,7 +66,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
 <header>
   <div class="brand">
     <h1>AKSI Quantum Playground</h1>
-    <span class="sub">любой вопрос → кандидаты → интерференция → коллапс · не quantum advantage</span>
+    <span class="sub">opensearch → кандидаты → интерференция → коллапс · не quantum advantage</span>
   </div>
   <div class="row">
     <input type="text" id="q" placeholder="Спроси что угодно…" value="Что такое доверие к ИИ?">
@@ -129,7 +129,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
   <div class="kv mono"><span>SHA-256 ans</span><code id="ansHash">—</code></div>
   <div class="kv mono"><span>Public key</span><code id="pub">—</code></div>
   <div class="kv mono"><span>prev hash</span><code id="prevH">null</code></div>
-  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.3 · любой вопрос + quantum gate</p>
+  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.3.1 · wiki-opensearch + quantum gate</p>
 </footer>
 <div class="toast" id="toast"></div>
 <script type="module">
@@ -232,24 +232,41 @@ function structuralAnswer(q) {
   return "Ответ по эвристикам АКСИ на «" + s.slice(0, 100) + "». Без претензии на абсолютную истину: проверяйте критические факты.";
 }
 
+function wikiQuery(q) {
+  let s = String(q || "").replace(/[?!.]+$/g, "").trim();
+  s = s.replace(/^(что такое|кто такой|кто такая|кто написал|сколько|когда|где|как|почему|зачем|what is|who is|who wrote|how many|when|where|why)\s+/i, "");
+  s = s.replace(/\s+(в мире|на земле|есть|было|были)\??$/i, "");
+  return s.slice(0, 80).trim() || String(q).slice(0, 80);
+}
+
+async function wikiSummary(lang, title) {
+  const url = "https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title);
+  const r = await fetch(url, { signal: AbortSignal.timeout(4000), headers: { Accept: "application/json" } });
+  if (!r.ok) return null;
+  const j = await r.json();
+  if (!j.extract) return null;
+  return { text: j.extract.slice(0, 520), title: j.title || title, lang };
+}
+
 async function fetchWiki(q) {
   try {
-    const title = encodeURIComponent(q.replace(/[?!.]+$/g, "").slice(0, 80));
-    const url = "https://ru.wikipedia.org/api/rest_v1/page/summary/" + title;
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 4500);
-    const r = await fetch(url, { signal: ctrl.signal, headers: { Accept: "application/json" } });
-    clearTimeout(t);
-    if (!r.ok) {
-      const url2 = "https://en.wikipedia.org/api/rest_v1/page/summary/" + title;
-      const r2 = await fetch(url2, { signal: AbortSignal.timeout(4000), headers: { Accept: "application/json" } });
-      if (!r2.ok) return null;
-      const j2 = await r2.json();
-      if (j2.extract) return { text: j2.extract.slice(0, 500), title: j2.title || q, lang: "en" };
-      return null;
+    const seed = wikiQuery(q);
+    for (const lang of ["ru", "en"]) {
+      try {
+        const os = "https://" + lang + ".wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=json&origin=*&search=" + encodeURIComponent(seed);
+        const r = await fetch(os, { signal: AbortSignal.timeout(4000) });
+        if (!r.ok) continue;
+        const data = await r.json();
+        const title = data && data[1] && data[1][0];
+        if (!title) continue;
+        const sum = await wikiSummary(lang, title);
+        if (sum) return sum;
+      } catch (e) {}
     }
-    const j = await r.json();
-    if (j.extract) return { text: j.extract.slice(0, 500), title: j.title || q, lang: "ru" };
+    for (const lang of ["ru", "en"]) {
+      const sum = await wikiSummary(lang, seed);
+      if (sum) return sum;
+    }
     return null;
   } catch (e) {
     return null;
