@@ -4,57 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AKSI Quantum Playground</title>
-<meta name="description" content="Интерактивная визуализация: как квантовая интерференция меняет выбор ответа ИИ.">
+<meta name="description" content="Интерактивная калибровка выбора ответа ИИ: комплексные амплитуды, Born rule, интерференция, Ed25519 decision receipts.">
 <style>
-:root{--bg:#0a0a0f;--ink:#e0e0e8;--muted:#8b8b9a;--line:#1e1e2a;--blue:#2d6dff;--green:#4ade80;--red:#f87171;--orange:#fb923c;--card:#12121a}
+:root{--bg:#0a0a0f;--ink:#e0e0e8;--muted:#8b8b9a;--line:#1e1e2a;--blue:#2d6dff;--green:#4ade80;--red:#f87171;--orange:#fb923c;--card:#12121a;--panel:#0e0e16}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-.mono{font-family:"JetBrains Mono","Fira Code",ui-monospace,monospace;font-size:11px}
-header{min-height:80px;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-direction:column;justify-content:center;gap:8px}
+body{font:14px/1.45 system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.mono{font-family:ui-monospace,"JetBrains Mono","Fira Code",monospace;font-size:11px}
+header{border-bottom:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{font-size:16px;font-weight:800}
+.brand .sub{font-size:12px;color:var(--muted)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-input[type=text]{flex:1;min-width:180px;background:#0e0e16;border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit}
+input[type=text]{flex:1;min-width:160px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;color:var(--ink);font:inherit}
 button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--blue);color:#fff;font-weight:700}
 button.g{background:#1a1a28;border:1px solid var(--line);color:var(--ink)}
-button:disabled{opacity:.5;cursor:wait}
+button:disabled{opacity:.5}
 .presets{display:flex;gap:6px;flex-wrap:wrap}
 .presets button{padding:5px 10px;font-size:11px;font-weight:600;background:#15151f}
-.grid{display:grid;grid-template-columns:minmax(240px,30%) minmax(280px,40%) minmax(240px,30%);gap:12px;padding:12px 16px;min-height:calc(100vh - 220px)}
-@media(max-width:980px){.grid{grid-template-columns:1fr}}
-.zone{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:0}
-.zone h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.cand{border:1px solid var(--line);border-left:4px solid #555;border-radius:10px;padding:10px;background:#0e0e16}
-.cand .t{font-size:13px;margin-bottom:8px;max-height:90px;overflow:auto}
-.cand .m{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:minmax(220px,28%) minmax(300px,44%) minmax(220px,28%);gap:12px;padding:12px 16px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}}
+.zone{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.zone h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cand{border:1px solid var(--line);border-left:4px solid #555;border-radius:10px;padding:10px;background:var(--panel)}
+.cand.on{outline:1px solid rgba(255,255,255,.25)}
+.cand .t{font-size:13px;margin-bottom:8px;max-height:88px;overflow:auto}
+.cand .m{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;font-size:11px;color:var(--muted)}
 .cand .m b{color:var(--ink);font-weight:600}
 .bar{height:5px;background:#1a1a28;border-radius:99px;overflow:hidden;margin-top:2px}
-.bar>i{display:block;height:100%;background:var(--green)}
-.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;background:#1a1a28;color:var(--muted);margin-bottom:6px}
+.bar>i{display:block;height:100%}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;background:#1a1a28;color:var(--muted)}
 canvas{width:100%;height:auto;background:#08080e;border-radius:10px;border:1px solid var(--line)}
 .sl{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
 .sl input[type=range]{width:100%;accent-color:var(--blue)}
 .sl .v{color:var(--ink);font-weight:700}
-.final{font-size:15px;line-height:1.5;padding:12px;background:#0e0e16;border-radius:10px;border:1px solid var(--line);min-height:80px}
+.final{font-size:15px;line-height:1.5;padding:12px;background:var(--panel);border-radius:10px;border:1px solid var(--line);min-height:72px}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.col{background:#0e0e16;border-radius:10px;padding:10px;border:1px solid var(--line)}
-.col .n{font-size:22px;font-weight:800}
+.col{background:var(--panel);border-radius:10px;padding:10px;border:1px solid var(--line)}
+.col .n{font-size:20px;font-weight:800}
 .divg{padding:10px;border-radius:10px;font-size:13px;font-weight:700}
 .divg.pos{background:rgba(74,222,128,.12);color:var(--green)}
 .divg.neg{background:rgba(248,113,113,.12);color:var(--red)}
 .divg.neu{background:#15151f;color:var(--muted)}
-.decision{font-size:14px;font-weight:800;padding:8px 10px;border-radius:8px;text-align:center}
+.decision{font-size:13px;font-weight:800;padding:8px 10px;border-radius:8px;text-align:center}
 .decision.ok{background:rgba(74,222,128,.15);color:var(--green)}
 .decision.no{background:rgba(248,113,113,.15);color:var(--red)}
 .explain{font-size:12px;color:var(--muted)}
+.xt{font-size:11px;color:var(--muted);line-height:1.5}
 footer{border-top:1px solid var(--line);padding:12px 16px;display:grid;gap:8px}
-footer .kv{display:grid;grid-template-columns:120px 1fr;gap:6px;align-items:start}
+footer .kv{display:grid;grid-template-columns:110px 1fr;gap:6px}
 footer .kv span{color:var(--muted);font-size:11px}
 footer .kv code{word-break:break-all;color:#b8c0ff}
-.score{font-size:13px;color:var(--ink)}
+.formula{font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;line-height:1.55}
 .hint{font-size:11px;color:var(--muted)}
+.toast{position:fixed;bottom:16px;right:16px;background:#1a1a28;border:1px solid var(--line);padding:10px 14px;border-radius:10px;font-size:13px;z-index:99;display:none}
+.toast.on{display:block}
 </style>
 </head>
 <body>
 <header>
+  <div class="brand">
+    <h1>AKSI Quantum Playground</h1>
+    <span class="sub">калибровка выбора ответа · комплексные амплитуды · Born rule · не quantum advantage</span>
+  </div>
   <div class="row">
     <input type="text" id="q" placeholder="Спроси что угодно…" value="Что такое доверие к ИИ?">
     <button type="button" id="run">Запустить</button>
@@ -65,406 +76,456 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
     <button type="button" data-q="Стоит ли доверять нейросети?">Стоит ли доверять нейросети?</button>
   </div>
 </header>
-
 <div class="grid">
   <section class="zone">
-    <h2>Кандидаты <span id="modeBadge" class="badge">demo mode</span></h2>
+    <h2>Кандидаты <span id="modeBadge" class="badge">demo</span></h2>
     <div id="cands"></div>
+    <div class="formula mono">
+      φᵢ = π·(1−alignᵢ)·λ<br>
+      aᵢ = √Pᵢ e^{iφᵢ} + √(Pᵢ·cf)·e^{i(φᵢ+π/2)}<br>
+      P_q(i) = |aᵢ|² / Σ|aⱼ|²<br>
+      cross(i,j) = 2√(P̂ᵢP̂ⱼ) cos(Δφ) — диагностика
+    </div>
   </section>
-
   <section class="zone">
     <h2>Комплексная плоскость</h2>
-    <canvas id="cv" width="560" height="420"></canvas>
-    <label class="sl">Сила интерференции: <span class="v" id="vInt">40%</span>
-      <input type="range" id="sInt" min="0" max="100" value="40">
+    <canvas id="cv" width="640" height="460"></canvas>
+    <label class="sl">Сила интерференции λ: <span class="v" id="vInt">45%</span>
+      <input type="range" id="sInt" min="0" max="100" value="45">
     </label>
-    <label class="sl">Контрфактический вес: <span class="v" id="vCf">20%</span>
-      <input type="range" id="sCf" min="0" max="100" value="20">
+    <label class="sl">Контрфактический вес: <span class="v" id="vCf">25%</span>
+      <input type="range" id="sCf" min="0" max="100" value="25">
     </label>
-    <p class="hint">0% = классика (фазы 0). 100% = полные фазы + кросс-термы Born rule. Это engineering-визуализация, не quantum advantage.</p>
+    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. Полупрозрачные — контрфакт (+π/2). Ползунки обновляют фазы и Born-массы мгновенно.</p>
+    <div class="xt mono" id="crossBox">cross-terms —</div>
   </section>
-
   <section class="zone">
     <h2>Результат коллапса</h2>
     <div class="final" id="final">Нажмите «Запустить»</div>
     <div class="cols">
-      <div class="col"><div class="hint">Классическая</div><div class="n" id="pClass">—</div></div>
-      <div class="col"><div class="hint">Квантовая (Born)</div><div class="n" id="pQuant">—</div></div>
+      <div class="col"><div class="hint">Классика P_c</div><div class="n" id="pClass">—</div></div>
+      <div class="col"><div class="hint">Born P_q</div><div class="n" id="pQuant">—</div></div>
     </div>
     <div class="divg neu" id="divg">Quantum divergence —</div>
     <p class="explain" id="explain"></p>
     <div class="decision ok" id="decision">—</div>
   </section>
 </div>
-
 <footer>
   <div class="row">
     <button type="button" class="g" id="btnVerify">Проверить подпись</button>
     <button type="button" class="g" id="btnDl">Скачать Decision Receipt</button>
-    <span class="score mono" id="aksiScore">AKSI score —</span>
-    <span class="hint mono" id="sealCount">Sealed decisions: 0</span>
+    <button type="button" class="g" id="btnRecollapse">Коллапс снова</button>
+    <span class="mono" id="aksiScore">AKSI score —</span>
+    <span class="hint mono" id="sealCount">Sealed: 0</span>
   </div>
   <div class="kv mono"><span>Ed25519 sig</span><code id="sig">—</code></div>
-  <div class="kv mono"><span>SHA-256 answer</span><code id="ansHash">—</code></div>
+  <div class="kv mono"><span>SHA-256 ans</span><code id="ansHash">—</code></div>
   <div class="kv mono"><span>Public key</span><code id="pub">—</code></div>
-  <div class="kv mono"><span>prev receipt</span><code id="prevH">null</code></div>
-  <p class="hint">AKSI Quantum Playground · aksilove@internet.ru</p>
+  <div class="kv mono"><span>prev hash</span><code id="prevH">null</code></div>
+  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.1</p>
 </footer>
-
+<div class="toast" id="toast"></div>
 <script type="module">
-function C(re, im){ return { re: re||0, im: im||0 }; }
-function cadd(a,b){ return C(a.re+b.re, a.im+b.im); }
-function cmul(a,b){ return C(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re); }
-function cconj(a){ return C(a.re, -a.im); }
-function cabs2(a){ return a.re*a.re + a.im*a.im; }
-function cabs(a){ return Math.sqrt(cabs2(a)); }
-function fromPolar(r, phi){ return C(r*Math.cos(phi), r*Math.sin(phi)); }
+const C = (re=0, im=0) => ({ re, im });
+const cadd = (a,b) => C(a.re+b.re, a.im+b.im);
+const cabs2 = a => a.re*a.re + a.im*a.im;
+const cabs = a => Math.sqrt(cabs2(a));
+const fromPolar = (r, phi) => C(r*Math.cos(phi), r*Math.sin(phi));
 
-async function sha256hex(str){
+async function sha256hex(str) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-}
-
-const DB = "aksi-qp-keys";
-async function idbGet(k){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(DB,1);
-    r.onupgradeneeded=()=>r.result.createObjectStore("s");
-    r.onsuccess=()=>{ const t=r.result.transaction("s","readonly").objectStore("s").get(k); t.onsuccess=()=>res(t.result||null); t.onerror=()=>rej(t.error); };
-    r.onerror=()=>rej(r.error);
-  });
-}
-async function idbSet(k,v){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(DB,1);
-    r.onupgradeneeded=()=>r.result.createObjectStore("s");
-    r.onsuccess=()=>{ const t=r.result.transaction("s","readwrite").objectStore("s").put(v,k); t.onsuccess=()=>res(); t.onerror=()=>rej(t.error); };
-    r.onerror=()=>rej(r.error);
-  });
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
 }
 function bufToHex(buf){ return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join(""); }
-function hexToBuf(hex){ const a=new Uint8Array(hex.length/2); for(let i=0;i<a.length;i++) a[i]=parseInt(hex.substr(i*2,2),16); return a.buffer; }
+function hexToBuf(hex){
+  const a = new Uint8Array(hex.length/2);
+  for (let i=0;i<a.length;i++) a[i]=parseInt(hex.substr(i*2,2),16);
+  return a.buffer;
+}
+const DB = "aksi-qp-v2";
+function idbReq(mode, fn) {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(DB, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("s");
+    r.onsuccess = () => { const t = r.result.transaction("s", mode); fn(t.objectStore("s"), res, rej); };
+    r.onerror = () => rej(r.error);
+  });
+}
+const idbGet = k => idbReq("readonly", (st,res,rej)=>{ const q=st.get(k); q.onsuccess=()=>res(q.result||null); q.onerror=()=>rej(q.error); });
+const idbSet = (k,v) => idbReq("readwrite", (st,res,rej)=>{ const q=st.put(v,k); q.onsuccess=()=>res(); q.onerror=()=>rej(q.error); });
 
-let keyPair=null, pubHex="—", sealedN=0, prevReceiptHash=null, lastReceipt=null;
+let keyPair=null, pubHex="—", sealedN=0, prevReceiptHash=null, lastReceipt=null, lastCanonical="";
 
-async function ensureKeys(){
-  try{
+async function ensureKeys() {
+  try {
     const stored = await idbGet("ed25519");
-    if(stored && stored.pub && stored.priv){
+    if (stored && stored.pub && stored.priv) {
       keyPair = {
-        publicKey: await crypto.subtle.importKey("raw", hexToBuf(stored.pub), {name:"Ed25519"}, true, ["verify"]),
-        privateKey: await crypto.subtle.importKey("pkcs8", hexToBuf(stored.priv), {name:"Ed25519"}, true, ["sign"])
+        publicKey: await crypto.subtle.importKey("raw", hexToBuf(stored.pub), { name:"Ed25519" }, true, ["verify"]),
+        privateKey: await crypto.subtle.importKey("pkcs8", hexToBuf(stored.priv), { name:"Ed25519" }, true, ["sign"])
       };
       pubHex = stored.pub; return;
     }
-  }catch(e){}
-  try{
-    keyPair = await crypto.subtle.generateKey({name:"Ed25519"}, true, ["sign","verify"]);
-    const rawPub = await crypto.subtle.exportKey("raw", keyPair.publicKey);
-    const pkcs8 = await crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
-    pubHex = bufToHex(rawPub);
-    await idbSet("ed25519", { pub: pubHex, priv: bufToHex(pkcs8) });
-  }catch(e){
-    pubHex = "Ed25519 unsupported in this browser";
+  } catch (e) {}
+  try {
+    keyPair = await crypto.subtle.generateKey({ name:"Ed25519" }, true, ["sign","verify"]);
+    pubHex = bufToHex(await crypto.subtle.exportKey("raw", keyPair.publicKey));
+    const pkcs8 = bufToHex(await crypto.subtle.exportKey("pkcs8", keyPair.privateKey));
+    await idbSet("ed25519", { pub: pubHex, priv: pkcs8 });
+  } catch (e) {
+    pubHex = "Ed25519 unsupported — Chrome/Edge 113+";
     keyPair = null;
   }
 }
-async function signBytes(bytes){
-  if(!keyPair) return "no-key";
-  return bufToHex(await crypto.subtle.sign({name:"Ed25519"}, keyPair.privateKey, bytes));
+async function signBytes(bytes) {
+  if (!keyPair) return "no-key";
+  return bufToHex(await crypto.subtle.sign({ name:"Ed25519" }, keyPair.privateKey, bytes));
 }
-async function verifySig(hex, bytes){
-  if(!keyPair || hex==="no-key") return false;
-  try{ return await crypto.subtle.verify({name:"Ed25519"}, keyPair.publicKey, hexToBuf(hex), bytes); }
-  catch(e){ return false; }
+async function verifySig(hex, bytes) {
+  if (!keyPair || hex === "no-key") return false;
+  try { return await crypto.subtle.verify({ name:"Ed25519" }, keyPair.publicKey, hexToBuf(hex), bytes); }
+  catch (e) { return false; }
 }
 
 const DEMO = {
   "Что такое доверие к ИИ?": [
-    { engine:"Local Brain", text:"Доверие к ИИ — не вера в «разум», а проверяемость: откуда ответ, как выбран, можно ли воспроизвести решение и ограничить действие при низкой уверенности.", eqs:0.82, mem:0.88, src:0.95, coh:0.84, spe:0.78 },
-    { engine:"Template", text:"Доверие строится на прозрачности модели, аудите данных и контроле пользователя над тем, когда система может действовать автономно.", eqs:0.71, mem:0.55, src:0.70, coh:0.75, spe:0.70 },
-    { engine:"WebLLM/demo", text:"Trust in AI means calibrated confidence: high scores when evidence is consistent, refusal when contexts conflict — not maximum fluency.", eqs:0.66, mem:0.40, src:0.45, coh:0.72, spe:0.65 }
+    { engine:"Local Brain", text:"Доверие к ИИ — не вера в «разум», а проверяемость: происхождение ответа, правило выбора, воспроизводимость и право отказать при низкой согласованности сигналов.", eqs:0.84, mem:0.90, src:0.95, coh:0.86, spe:0.80 },
+    { engine:"Template", text:"Доверие строится на прозрачности модели, аудите данных и контроле пользователя над автономными действиями.", eqs:0.72, mem:0.52, src:0.70, coh:0.74, spe:0.68 },
+    { engine:"WebLLM/demo", text:"Trust means calibrated confidence: raise it when contexts agree, defer when signals conflict — fluency alone is not evidence.", eqs:0.64, mem:0.38, src:0.45, coh:0.70, spe:0.62 }
   ],
   "Объясни квантовую суперпозицию": [
-    { engine:"Local Brain", text:"Суперпозиция — линейная комбинация базисных состояний; при измерении исход с вероятностью по правилу Борна |a|².", eqs:0.86, mem:0.90, src:0.95, coh:0.88, spe:0.82 },
-    { engine:"Template", text:"В суперпозиции система описывается несколькими амплитудами до наблюдения; это математика, а не бытовая смесь.", eqs:0.74, mem:0.60, src:0.70, coh:0.80, spe:0.72 },
-    { engine:"WebLLM/demo", text:"Superposition lets amplitudes interfere: constructive paths reinforce, destructive cancel — classical mixtures cannot.", eqs:0.69, mem:0.35, src:0.45, coh:0.70, spe:0.68 }
+    { engine:"Local Brain", text:"Суперпозиция — линейная комбинация базисных состояний. Исход измерения — с вероятностью |a|² (Born). Интерференция возможна, потому что складываются амплитуды, а не вероятности.", eqs:0.88, mem:0.92, src:0.95, coh:0.90, spe:0.84 },
+    { engine:"Template", text:"До наблюдения — несколько амплитуд; после — один исход. Математика гильбертова пространства, не бытовая «смесь».", eqs:0.75, mem:0.58, src:0.70, coh:0.78, spe:0.70 },
+    { engine:"WebLLM/demo", text:"Amplitudes can cancel: constructive reinforce, destructive suppress. Classical mixtures cannot encode cancellation.", eqs:0.68, mem:0.34, src:0.45, coh:0.68, spe:0.64 }
   ],
   "Стоит ли доверять нейросети?": [
-    { engine:"Local Brain", text:"Частично: сеть сильна в паттернах, но ошибается вне распределения. Нужны границы, калибровка и право отказать при конфликте сигналов.", eqs:0.80, mem:0.85, src:0.95, coh:0.82, spe:0.80 },
-    { engine:"Template", text:"Нейросети — инструменты. Полное доверие без проверки опаснее осторожного использования с аудитом.", eqs:0.73, mem:0.50, src:0.70, coh:0.74, spe:0.70 },
-    { engine:"WebLLM/demo", text:"Never fully trust fluent output alone; prefer systems that expose uncertainty and can defer under conflicting contexts.", eqs:0.62, mem:0.32, src:0.45, coh:0.68, spe:0.60 }
+    { engine:"Local Brain", text:"Частично. Сеть сильна на паттернах обучения, слаба вне распределения. Нужны границы, калибровка и отказ при конфликте контекстов.", eqs:0.81, mem:0.86, src:0.95, coh:0.83, spe:0.80 },
+    { engine:"Template", text:"Нейросеть — инструмент. Полное доверие без проверки опаснее осторожного использования с аудитом.", eqs:0.70, mem:0.48, src:0.70, coh:0.72, spe:0.66 },
+    { engine:"WebLLM/demo", text:"Do not equate fluent text with reliable knowledge. Prefer systems that expose uncertainty and can defer.", eqs:0.61, mem:0.30, src:0.45, coh:0.66, spe:0.58 }
   ]
 };
 
-function defaultCands(q){
-  for(const k of Object.keys(DEMO)){
-    if(q.indexOf(k.slice(0,14))!==-1 || k.indexOf(q.slice(0,14))!==-1) return DEMO[k].map(c=>({...c}));
+function defaultCands(q) {
+  for (const k of Object.keys(DEMO)) {
+    if (q.includes(k.slice(0, 12)) || k.includes(q.slice(0, 12))) return DEMO[k].map(c => Object.assign({}, c));
   }
   return [
-    { engine:"Local Brain", text:"По запросу: ответ из локальных эвристик и сигналов качества, без претензии на абсолютную истину.", eqs:0.75, mem:0.70, src:0.95, coh:0.80, spe:0.72 },
-    { engine:"Template", text:"Шаблон: уточните контекст; при низкой согласованности источников решение лучше отложить.", eqs:0.68, mem:0.45, src:0.70, coh:0.70, spe:0.65 },
-    { engine:"WebLLM/demo", text:"Cautious synthesis: evidence limited; confidence should track consistency of contexts.", eqs:0.60, mem:0.30, src:0.45, coh:0.65, spe:0.55 }
+    { engine:"Local Brain", text:"Ответ из локальных эвристик и сигналов качества. Без претензии на абсолютную истину.", eqs:0.76, mem:0.70, src:0.95, coh:0.80, spe:0.72 },
+    { engine:"Template", text:"При слабой согласованности источников лучше уточнить вопрос или отложить решение.", eqs:0.67, mem:0.44, src:0.70, coh:0.70, spe:0.64 },
+    { engine:"WebLLM/demo", text:"Limited evidence; confidence should track consistency of contexts.", eqs:0.58, mem:0.28, src:0.45, coh:0.64, spe:0.55 }
   ];
 }
 
-function analyze(cands, intS, cfW){
+/** Corrected Born: P_q(i)=|a_i|²/Σ|a_j|² ; cross-terms diagnostic only */
+function analyze(cands, lambda, cfW) {
   const N = cands.length;
-  const prepared = cands.map((c,i)=>{
+  const prepared = cands.map((c, i) => {
     const eqs = +c.eqs;
-    const align = (c.mem + c.src + c.coh + c.spe)/4;
-    const P = eqs;
-    const phi = Math.PI * (1 - align) * intS;
-    const amp = fromPolar(Math.sqrt(Math.max(1e-12,P)), phi);
-    let ampCf = C(0,0);
-    if(cfW > 0){
-      ampCf = fromPolar(Math.sqrt(Math.max(1e-12, P*cfW)), phi + Math.PI/2);
-    }
+    const align = (c.mem + c.src + c.coh + c.spe) / 4;
+    const P = Math.max(1e-12, eqs);
+    const phi = Math.PI * (1 - align) * lambda;
+    const amp = fromPolar(Math.sqrt(P), phi);
+    const ampCf = cfW > 1e-9 ? fromPolar(Math.sqrt(P * cfW), phi + Math.PI / 2) : C(0, 0);
     const a = cadd(amp, ampCf);
     return { i, c, eqs, align, P, phi, a, amp, ampCf };
   });
-  let sumP = prepared.reduce((s,x)=>s+x.P,0) || 1;
-  prepared.forEach(x=>{ x.P_n = x.P/sumP; });
-  const psi = prepared.reduce((s,x)=>cadd(s,x.a), C(0,0));
-  const raw = prepared.map((xi,i)=>{
-    let s = cabs2(xi.a);
-    for(let j=0;j<N;j++) if(j!==i){
-      const cross = cmul(xi.a, cconj(prepared[j].a));
-      s += 2 * cross.re;
-    }
-    return s;
-  });
-  const rawPos = raw.map(v=>Math.max(1e-12, v));
-  const sumRaw = rawPos.reduce((a,b)=>a+b,0);
-  const pQ = rawPos.map(v=>v/sumRaw);
+  const sumP = prepared.reduce((s, x) => s + x.P, 0);
+  prepared.forEach(x => { x.P_c = x.P / sumP; });
+  const masses = prepared.map(x => cabs2(x.a));
+  const sumM = masses.reduce((s, m) => s + m, 0) || 1;
+  const pQ = masses.map(m => m / sumM);
   const cross_terms = [];
-  for(let i=0;i<N;i++) for(let j=i+1;j<N;j++){
-    const val = 2*Math.sqrt(prepared[i].P_n*prepared[j].P_n)*Math.cos(prepared[i].phi-prepared[j].phi);
-    cross_terms.push({ pair:[i,j], value:+val.toFixed(4), effect: val>=0?"constructive":"destructive" });
+  let total_interference = 0;
+  for (let i = 0; i < N; i++) {
+    for (let j = i + 1; j < N; j++) {
+      const val = 2 * Math.sqrt(prepared[i].P_c * prepared[j].P_c) * Math.cos(prepared[i].phi - prepared[j].phi);
+      cross_terms.push({ pair: [i, j], value: +val.toFixed(4), effect: val >= 0 ? "constructive" : "destructive" });
+      total_interference += val;
+    }
   }
-  const total_interference = cross_terms.reduce((s,t)=>s+t.value,0);
-  const p_classical = prepared.reduce((s,x)=>s+x.eqs,0)/N;
-  return { prepared, psi, pQ, cross_terms, total_interference, p_classical };
+  const psi = prepared.reduce((s, x) => cadd(s, x.a), C(0, 0));
+  return { prepared, psi, pQ, cross_terms, total_interference: +total_interference.toFixed(4) };
 }
 
-function collapse(pQ){
-  const r = Math.random(); let acc=0;
-  for(let i=0;i<pQ.length;i++){ acc+=pQ[i]; if(r<=acc) return i; }
-  return pQ.length-1;
+function collapse(pQ) {
+  const r = Math.random();
+  let acc = 0;
+  for (let i = 0; i < pQ.length; i++) { acc += pQ[i]; if (r <= acc) return i; }
+  return pQ.length - 1;
 }
 
-let state = { query:"", mode:"demo", cands:[], intS:0.4, cfW:0.2, analysis:null, chosen:0, decision:"DEFERRED" };
+const state = { query: "", mode: "demo", cands: [], lambda: 0.45, cfW: 0.25, analysis: null, chosen: 0, decision: "DEFERRED", anim: 0 };
 const cv = document.getElementById("cv");
 const ctx = cv.getContext("2d");
-const COLORS = ["#2d6dff","#4ade80","#fb923c"];
+const COLORS = ["#2d6dff", "#4ade80", "#fb923c"];
 
-function drawPlane(){
-  const w=cv.width, h=cv.height;
-  ctx.clearRect(0,0,w,h);
-  const cx=w/2, cy=h/2, R=Math.min(w,h)*0.38;
-  ctx.strokeStyle="#1a1a28"; ctx.lineWidth=1;
-  for(let i=-4;i<=4;i++){
-    const x=cx+i*R/4, y=cy+i*R/4;
-    ctx.beginPath(); ctx.moveTo(x,20); ctx.lineTo(x,h-20); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(20,y); ctx.lineTo(w-20,y); ctx.stroke();
-  }
-  ctx.strokeStyle="#3a3a4a"; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(20,cy); ctx.lineTo(w-20,cy); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx,20); ctx.lineTo(cx,h-20); ctx.stroke();
-  ctx.fillStyle="#8b8b9a"; ctx.font="11px system-ui";
-  ctx.fillText("Re", w-28, cy-6); ctx.fillText("Im", cx+6, 28);
-  if(!state.analysis) return;
-  const { prepared, psi } = state.analysis;
-  let maxA = cabs(psi);
-  prepared.forEach(p=>{ maxA=Math.max(maxA, cabs(p.a)); });
-  maxA = Math.max(maxA, 0.5);
-  const sc = R / maxA;
-  function arrow(c, color, width){
-    const x = cx + c.re*sc, y = cy - c.im*sc;
-    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=width;
-    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
-    const ang = Math.atan2(cy-y, x-cx);
-    ctx.beginPath();
-    ctx.moveTo(x,y);
-    ctx.lineTo(x-10*Math.cos(ang-0.35), y+10*Math.sin(ang-0.35));
-    ctx.lineTo(x-10*Math.cos(ang+0.35), y+10*Math.sin(ang+0.35));
-    ctx.closePath(); ctx.fill();
-  }
-  prepared.forEach((p,i)=>{
-    if(state.cfW>0.02) arrow(p.ampCf, COLORS[i]+"66", 1.5);
-    arrow(p.a, COLORS[i], 2.5);
-  });
-  arrow(psi, "#ffffff", 3.5);
-  const ch = prepared[state.chosen];
-  if(ch){
-    ctx.strokeStyle="#fff8"; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.arc(cx+ch.a.re*sc, cy-ch.a.im*sc, 8, 0, Math.PI*2); ctx.stroke();
-  }
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg; el.classList.add("on");
+  setTimeout(() => el.classList.remove("on"), 2200);
 }
 
-function eqsColor(e){ return `rgb(${Math.round(180-e*120)},${Math.round(80+e*140)},120)`; }
-function escapeHtml(s){ return String(s).replace(/&/g,"&").replace(/</g,"<"); }
+function drawPlane() {
+  const w = cv.width, h = cv.height;
+  ctx.clearRect(0, 0, w, h);
+  const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.40;
+  ctx.strokeStyle = "#15151f"; ctx.lineWidth = 1;
+  for (let i = -4; i <= 4; i++) {
+    const x = cx + i * R / 4, y = cy + i * R / 4;
+    ctx.beginPath(); ctx.moveTo(x, 16); ctx.lineTo(x, h - 16); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(16, y); ctx.lineTo(w - 16, y); ctx.stroke();
+  }
+  ctx.strokeStyle = "#1e1e2a";
+  ctx.beginPath(); ctx.arc(cx, cy, R * 0.85, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = "#3a3a4a"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(16, cy); ctx.lineTo(w - 16, cy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, 16); ctx.lineTo(cx, h - 16); ctx.stroke();
+  ctx.fillStyle = "#8b8b9a"; ctx.font = "12px system-ui";
+  ctx.fillText("Re", w - 28, cy - 8); ctx.fillText("Im", cx + 8, 28);
+  if (!state.analysis) return;
+  const { prepared, psi } = state.analysis;
+  let maxA = Math.max(cabs(psi), 0.4);
+  prepared.forEach(p => { maxA = Math.max(maxA, cabs(p.a)); });
+  const sc = (R * 0.9) / maxA;
+  function arrow(c, color, width, alpha) {
+    const x = cx + c.re * sc, y = cy - c.im * sc;
+    ctx.globalAlpha = alpha; ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width;
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke();
+    const ang = Math.atan2(cy - y, x - cx); const ah = 9 + width;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - ah * Math.cos(ang - 0.4), y + ah * Math.sin(ang - 0.4));
+    ctx.lineTo(x - ah * Math.cos(ang + 0.4), y + ah * Math.sin(ang + 0.4));
+    ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  prepared.forEach((p, i) => {
+    if (state.cfW > 0.02) arrow(p.ampCf, COLORS[i], 1.4, 0.35);
+    arrow(p.a, COLORS[i], 2.6, (state.anim && i !== state.chosen) ? 0.22 : 1);
+  });
+  arrow(psi, "#ffffff", 3.4, 0.95);
+  const ch = prepared[state.chosen];
+  if (ch) {
+    const x = cx + ch.a.re * sc, y = cy - ch.a.im * sc;
+    ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2); ctx.stroke();
+  }
+  ctx.font = "11px system-ui";
+  prepared.forEach((p, i) => {
+    ctx.fillStyle = COLORS[i];
+    ctx.fillText((i + 1) + " " + p.c.engine.slice(0, 12) + "  Pq=" + (state.analysis.pQ[i] * 100).toFixed(0) + "%", 18, h - 48 + i * 14);
+  });
+}
 
-function renderCands(){
+function eqsColor(e) { return "rgb(" + Math.round(180 - e * 120) + "," + Math.round(80 + e * 140) + ",120)"; }
+function esc(s) { return String(s).replace(/&/g, "&").replace(/</g, "<"); }
+
+function renderCands() {
   const box = document.getElementById("cands");
-  if(!state.analysis){ box.innerHTML=""; return; }
-  box.innerHTML = state.analysis.prepared.map((p,i)=>{
-    const sel = i===state.chosen ? "outline:1px solid #fff3;" : "";
-    return `<div class="cand" style="border-left-color:${COLORS[i]};${sel}">
-      <div class="badge">${p.c.engine}</div>
-      <div class="t">${escapeHtml(p.c.text)}</div>
-      <div class="m">
-        <div>EQS <b>${p.eqs.toFixed(2)}</b><div class="bar"><i style="width:${p.eqs*100}%;background:${eqsColor(p.eqs)}"></i></div></div>
-        <div>mem <b>${p.c.mem.toFixed(2)}</b></div>
-        <div>src <b>${p.c.src.toFixed(2)}</b></div>
-        <div>φ <b>${p.phi.toFixed(3)} rad</b></div>
-        <div>Born <b>${(state.analysis.pQ[i]*100).toFixed(1)}%</b></div>
-        <div>align <b>${p.align.toFixed(2)}</b></div>
-      </div></div>`;
+  if (!state.analysis) { box.innerHTML = ""; return; }
+  box.innerHTML = state.analysis.prepared.map((p, i) => {
+    const on = i === state.chosen ? " on" : "";
+    return '<div class="cand' + on + '" style="border-left-color:' + COLORS[i] + '">' +
+      '<div class="badge">' + esc(p.c.engine) + '</div>' +
+      '<div class="t">' + esc(p.c.text) + '</div>' +
+      '<div class="m">' +
+      '<div>EQS <b>' + p.eqs.toFixed(2) + '</b><div class="bar"><i style="width:' + (p.eqs * 100) + '%;background:' + eqsColor(p.eqs) + '"></i></div></div>' +
+      '<div>mem <b>' + p.c.mem.toFixed(2) + '</b></div>' +
+      '<div>src <b>' + p.c.src.toFixed(2) + '</b></div>' +
+      '<div>φ <b>' + p.phi.toFixed(3) + '</b></div>' +
+      '<div>P_c <b>' + (p.P_c * 100).toFixed(1) + '%</b></div>' +
+      '<div>P_q <b>' + (state.analysis.pQ[i] * 100).toFixed(1) + '%</b></div>' +
+      '</div></div>';
   }).join("");
 }
 
-function renderResult(){
-  if(!state.analysis) return;
+function renderCross() {
+  const a = state.analysis;
+  if (!a) return;
+  document.getElementById("crossBox").innerHTML = a.cross_terms.map(t => {
+    const col = t.value >= 0 ? "#4ade80" : "#f87171";
+    const sign = t.value >= 0 ? "+" : "";
+    return '<span style="color:' + col + '">[' + t.pair[0] + '↔' + t.pair[1] + '] ' + sign + t.value + ' ' + t.effect + '</span>';
+  }).join(" · ") + " · Σcross=" + a.total_interference;
+}
+
+function renderResult() {
+  if (!state.analysis) return;
   const a = state.analysis;
   const ch = a.prepared[state.chosen];
   const pq = a.pQ[state.chosen];
+  const pc = ch.P_c;
   document.getElementById("final").textContent = ch.c.text;
-  document.getElementById("pClass").textContent = a.p_classical.toFixed(3);
+  document.getElementById("pClass").textContent = pc.toFixed(3);
   document.getElementById("pQuant").textContent = pq.toFixed(3);
-  const qd = pq - a.p_classical;
+  const qd = pq - pc;
   const dg = document.getElementById("divg");
-  dg.className = "divg " + (Math.abs(qd)<0.02 ? "neu" : qd>0 ? "pos" : "neg");
-  if(Math.abs(qd)<0.02) dg.textContent = "Quantum divergence ≈ 0 — контексты не конфликтуют";
-  else if(qd<0) dg.textContent = `QD ${qd.toFixed(3)} — классика ЗАВЫШАЕТ на ${(Math.abs(qd)*100).toFixed(1)}%`;
-  else dg.textContent = `QD +${qd.toFixed(3)} — классика ЗАНИЖАЕТ на ${(qd*100).toFixed(1)}%`;
-  let exp = state.intS < 0.08 ? "Интерференция почти выключена — ближе к классическому EQS."
-    : a.total_interference > 0.05 ? "Ответы в фазе — конструктивная интерференция."
-    : a.total_interference < -0.05 ? "Ответы в противофазе — деструктивная интерференция гасит уверенность."
+  dg.className = "divg " + (Math.abs(qd) < 0.015 ? "neu" : qd > 0 ? "pos" : "neg");
+  if (Math.abs(qd) < 0.015) dg.textContent = "QD ≈ 0 — фазы почти не смещают массу относительно классики";
+  else if (qd < 0) dg.textContent = "QD " + qd.toFixed(3) + " — классика ЗАВЫШАЕТ путь на " + (Math.abs(qd) * 100).toFixed(1) + "%";
+  else dg.textContent = "QD +" + qd.toFixed(3) + " — классика ЗАНИЖАЕТ путь на " + (qd * 100).toFixed(1) + "%";
+  let exp = state.lambda < 0.08 ? "λ≈0: фазы обнулены, P_q ≈ P_c."
+    : a.total_interference > 0.08 ? "Constructive cross-terms: согласованные фазы."
+    : a.total_interference < -0.08 ? "Destructive cross-terms: конфликт контекстов."
     : "Смешанные фазы — умеренный сдвиг.";
-  if(state.cfW > 0.4) exp += " Высокий контрфактический вес может подавлять пик.";
+  if (state.cfW > 0.35) exp += " Контрфакт (+π/2) размазывает |a|².";
   document.getElementById("explain").textContent = exp;
-  state.decision = pq >= 0.55 ? "ALLOWED" : "DEFERRED";
+  state.decision = pq >= 0.40 ? "ALLOWED" : "DEFERRED";
   const dec = document.getElementById("decision");
-  if(state.decision==="ALLOWED"){ dec.className="decision ok"; dec.textContent = "ALLOWED · confidence "+pq.toFixed(3); }
-  else { dec.className="decision no"; dec.textContent = "DEFERRED · интерференция подавляет уверенность ("+pq.toFixed(3)+")"; }
+  if (state.decision === "ALLOWED") {
+    dec.className = "decision ok";
+    dec.textContent = "ALLOWED · Born confidence " + pq.toFixed(3);
+  } else {
+    dec.className = "decision no";
+    dec.textContent = "DEFERRED · Born-масса размыта (" + pq.toFixed(3) + ")";
+  }
 }
 
-async function seal(){
-  if(!state.analysis) return;
+async function seal() {
+  if (!state.analysis) return;
   const a = state.analysis;
   const ch = a.prepared[state.chosen];
   const ansHash = await sha256hex(ch.c.text);
-  const receipt = {
-    receipt_id: (crypto.randomUUID && crypto.randomUUID()) || ("r-"+Date.now()),
-    timestamp: new Date().toISOString(),
+  const body = {
+    born_rule: {
+      interpretation: a.total_interference < -0.05 ? "destructive_diagnostic" : a.total_interference > 0.05 ? "constructive_diagnostic" : "neutral",
+      p_classical_chosen: +ch.P_c.toFixed(6),
+      p_quantum_chosen: +a.pQ[state.chosen].toFixed(6),
+      quantum_divergence: +(a.pQ[state.chosen] - ch.P_c).toFixed(6)
+    },
+    candidates: a.prepared.map(p => ({
+      amplitude: { im: +p.a.im.toFixed(6), re: +p.a.re.toFixed(6) },
+      coherence: p.c.coh,
+      context_alignment: +p.align.toFixed(6),
+      engine_name: p.c.engine,
+      eqs: p.eqs,
+      id: "engine_" + p.i,
+      memory_resonance: p.c.mem,
+      phase: +p.phi.toFixed(6),
+      source_trust: p.c.src,
+      specificity: p.c.spe,
+      text: p.c.text,
+      text_hash: null
+    })),
+    confidence: +a.pQ[state.chosen].toFixed(6),
+    decision: state.decision,
+    final_answer: ch.c.text,
+    final_answer_hash: ansHash,
+    interference: {
+      counterfactual_weight: state.cfW,
+      cross_terms: a.cross_terms,
+      strength: state.lambda,
+      total_interference: a.total_interference
+    },
+    mode: state.mode,
+    prev_receipt_hash: prevReceiptHash,
+    public_key: pubHex,
     query: state.query,
     query_hash: await sha256hex(state.query),
-    mode: state.mode,
-    candidates: a.prepared.map(p=>({
-      id: "engine_"+p.i, engine_name: p.c.engine, text: p.c.text,
-      eqs: p.eqs, memory_resonance: p.c.mem, source_trust: p.c.src,
-      coherence: p.c.coh, specificity: p.c.spe,
-      context_alignment: +p.align.toFixed(4), phase: +p.phi.toFixed(4),
-      amplitude: { re:+p.a.re.toFixed(4), im:+p.a.im.toFixed(4) }
-    })),
-    interference: {
-      strength: state.intS, counterfactual_weight: state.cfW,
-      cross_terms: a.cross_terms, total_interference: +a.total_interference.toFixed(4)
-    },
-    born_rule: {
-      p_classical: +a.p_classical.toFixed(4),
-      p_quantum: +a.pQ[state.chosen].toFixed(4),
-      quantum_divergence: +(a.pQ[state.chosen]-a.p_classical).toFixed(4),
-      interpretation: a.total_interference<0 ? "destructive_interference_from_context_conflict" : "constructive_or_neutral"
-    },
-    final_answer: ch.c.text, final_answer_hash: ansHash,
-    decision: state.decision, confidence: +a.pQ[state.chosen].toFixed(4),
-    prev_receipt_hash: prevReceiptHash, public_key: pubHex, signature: null
+    receipt_id: (crypto.randomUUID && crypto.randomUUID()) || ("r-" + Date.now()),
+    timestamp: new Date().toISOString()
   };
-  for(const c of receipt.candidates) c.text_hash = await sha256hex(c.text);
-  const payload = JSON.stringify(receipt);
-  receipt.signature = await signBytes(new TextEncoder().encode(payload));
-  lastReceipt = receipt;
-  prevReceiptHash = await sha256hex(JSON.stringify(receipt));
+  for (const c of body.candidates) c.text_hash = await sha256hex(c.text);
+  lastCanonical = JSON.stringify(body);
+  body.signature = await signBytes(new TextEncoder().encode(lastCanonical));
+  lastReceipt = body;
+  prevReceiptHash = await sha256hex(JSON.stringify(body));
   sealedN++;
-  try{
-    const hist = JSON.parse(localStorage.getItem("aksi_qp_seals")||"[]");
-    hist.push({ t:Date.now(), h:prevReceiptHash, d:state.decision });
-    localStorage.setItem("aksi_qp_seals", JSON.stringify(hist.slice(-50)));
-  }catch(e){}
-  document.getElementById("sig").textContent = receipt.signature;
+  try {
+    const hist = JSON.parse(localStorage.getItem("aksi_qp_seals_v2") || "[]");
+    hist.push({ t: Date.now(), h: prevReceiptHash, d: state.decision });
+    localStorage.setItem("aksi_qp_seals_v2", JSON.stringify(hist.slice(-80)));
+  } catch (e) {}
+  document.getElementById("sig").textContent = body.signature;
   document.getElementById("ansHash").textContent = ansHash;
   document.getElementById("pub").textContent = pubHex;
-  document.getElementById("prevH").textContent = receipt.prev_receipt_hash || "null";
-  document.getElementById("sealCount").textContent = "Sealed decisions: "+sealedN;
-  const A=0.85, I=state.decision==="ALLOWED"?0.9:0.55, S=0.8;
-  document.getElementById("aksiScore").textContent = `AKSI=${((A*I*S)*(1+0.4*Math.sqrt(sealedN))).toFixed(3)}`;
+  document.getElementById("prevH").textContent = body.prev_receipt_hash || "null";
+  document.getElementById("sealCount").textContent = "Sealed: " + sealedN;
+  const A = 0.88, I = state.decision === "ALLOWED" ? 0.92 : 0.5, S = 0.85;
+  document.getElementById("aksiScore").textContent = "AKSI=" + ((A * I * S) * (1 + 0.4 * Math.sqrt(sealedN))).toFixed(3);
 }
 
-function recompute(doCollapse){
-  if(!state.cands.length) return;
-  state.analysis = analyze(state.cands, state.intS, state.cfW);
-  if(doCollapse) state.chosen = collapse(state.analysis.pQ);
+let sealTimer = null;
+function sealDebounced() { clearTimeout(sealTimer); sealTimer = setTimeout(() => seal(), 280); }
+
+function recompute(doCollapse) {
+  if (!state.cands.length) return;
+  state.analysis = analyze(state.cands, state.lambda, state.cfW);
+  if (doCollapse) state.chosen = collapse(state.analysis.pQ);
   else {
-    let best=0;
-    for(let i=1;i<state.analysis.pQ.length;i++) if(state.analysis.pQ[i]>state.analysis.pQ[best]) best=i;
+    let best = 0;
+    for (let i = 1; i < state.analysis.pQ.length; i++) if (state.analysis.pQ[i] > state.analysis.pQ[best]) best = i;
     state.chosen = best;
   }
-  renderCands(); renderResult(); drawPlane();
+  renderCands(); renderCross(); renderResult(); drawPlane();
 }
 
-async function run(){
+function animateCollapse() {
+  state.anim = 1;
+  let frames = 0;
+  const tick = () => { drawPlane(); frames++; if (frames < 20) requestAnimationFrame(tick); else state.anim = 0; };
+  requestAnimationFrame(tick);
+}
+
+async function run() {
   const q = document.getElementById("q").value.trim();
-  if(!q) return;
+  if (!q) return;
   state.query = q;
   document.getElementById("run").disabled = true;
   state.mode = "demo";
   document.getElementById("modeBadge").textContent = "demo mode";
   state.cands = defaultCands(q);
-  state.cands.forEach(c=>{
-    c.eqs = Math.min(0.95, Math.max(0.4, c.eqs + (Math.random()-0.5)*0.04));
-    c.mem = Math.min(0.95, Math.max(0.2, c.mem + (Math.random()-0.5)*0.05));
+  state.cands.forEach(c => {
+    c.eqs = Math.min(0.95, Math.max(0.42, c.eqs + (Math.random() - 0.5) * 0.03));
+    c.mem = Math.min(0.95, Math.max(0.2, c.mem + (Math.random() - 0.5) * 0.04));
   });
   recompute(true);
+  animateCollapse();
   await seal();
   document.getElementById("run").disabled = false;
 }
 
-document.getElementById("sInt").oninput = (e)=>{
-  state.intS = e.target.value/100;
-  document.getElementById("vInt").textContent = e.target.value+"%";
-  recompute(false); seal();
+document.getElementById("sInt").oninput = e => {
+  state.lambda = e.target.value / 100;
+  document.getElementById("vInt").textContent = e.target.value + "%";
+  recompute(false); sealDebounced();
 };
-document.getElementById("sCf").oninput = (e)=>{
-  state.cfW = e.target.value/100;
-  document.getElementById("vCf").textContent = e.target.value+"%";
-  recompute(false); seal();
+document.getElementById("sCf").oninput = e => {
+  state.cfW = e.target.value / 100;
+  document.getElementById("vCf").textContent = e.target.value + "%";
+  recompute(false); sealDebounced();
 };
 document.getElementById("run").onclick = run;
-document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{ document.getElementById("q").value=b.getAttribute("data-q"); run(); });
-document.getElementById("q").addEventListener("keydown", e=>{ if(e.key==="Enter") run(); });
-document.getElementById("btnVerify").onclick = async ()=>{
-  if(!lastReceipt){ alert("Нет receipt"); return; }
-  const copy = {...lastReceipt}; const sig = copy.signature; copy.signature = null;
-  const ok = await verifySig(sig, new TextEncoder().encode(JSON.stringify(copy)));
-  alert(ok ? "Подпись VALID ✓" : "INVALID или ключ недоступен");
+document.getElementById("btnRecollapse").onclick = async () => {
+  if (!state.analysis) return;
+  recompute(true); animateCollapse(); await seal();
+  toast("Новый коллапс по Born-распределению");
 };
-document.getElementById("btnDl").onclick = ()=>{
-  if(!lastReceipt) return;
+document.querySelectorAll("[data-q]").forEach(b => {
+  b.onclick = () => { document.getElementById("q").value = b.getAttribute("data-q"); run(); };
+});
+document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") run(); });
+document.getElementById("btnVerify").onclick = async () => {
+  if (!lastReceipt || !lastCanonical) { toast("Нет receipt"); return; }
+  const ok = await verifySig(lastReceipt.signature, new TextEncoder().encode(lastCanonical));
+  toast(ok ? "Подпись VALID ✓" : "INVALID или ключ недоступен");
+};
+document.getElementById("btnDl").onclick = () => {
+  if (!lastReceipt) return;
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(lastReceipt,null,2)],{type:"application/json"}));
-  a.download = "aksi-decision-receipt.json"; a.click();
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(lastReceipt, null, 2)], { type: "application/json" }));
+  a.download = "aksi-decision-receipt.json";
+  a.click();
 };
 
-(async function init(){
-  try{ sealedN = JSON.parse(localStorage.getItem("aksi_qp_seals")||"[]").length; }catch(e){}
-  document.getElementById("sealCount").textContent = "Sealed decisions: "+sealedN;
+(async function init() {
+  try { sealedN = JSON.parse(localStorage.getItem("aksi_qp_seals_v2") || "[]").length; } catch (e) {}
+  document.getElementById("sealCount").textContent = "Sealed: " + sealedN;
   await ensureKeys();
   document.getElementById("pub").textContent = pubHex;
-  let gpu=false;
-  try{ if(navigator.gpu){ const ad=await navigator.gpu.requestAdapter(); gpu=!!ad; } }catch(e){}
-  document.getElementById("modeBadge").textContent = gpu ? "demo · WebGPU available" : "demo mode";
+  let gpu = false;
+  try { if (navigator.gpu) { const ad = await navigator.gpu.requestAdapter(); gpu = !!ad; } } catch (e) {}
+  document.getElementById("modeBadge").textContent = gpu ? "demo · WebGPU detected" : "demo mode";
   await run();
 })();
 </script>
