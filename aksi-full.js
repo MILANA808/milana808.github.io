@@ -1,7 +1,7 @@
-/** AKSI Full System v8.2 · destination · aksilove@internet.ru */
+/** AKSI Full System v8.3 · ranking-fix · aksilove@internet.ru */
 (function () {
   "use strict";
-  var VER = "8.2.0";
+  var VER = "8.3.0";
   var history = [];
   function $(id) { try { return document.getElementById(id); } catch (e) { return null; } }
   function status(m) { var e = $("status"); if (e) e.textContent = m || ""; }
@@ -265,7 +265,10 @@
     var kh = knowledgeHit(query); if (kh) { facts.push(kh); push(kh); }
     var nh = neuroHit(query); if (nh) push(nh);
     var mem = memSearch(query); if (mem) push(mem);
-    if (opts.web !== false) {
+    var nq0 = norm(query);
+    var isIdentity = /^(кто ты|что ты|представься|привет|здравствуй|hello|hi)$/.test(nq0)
+      || nq0 === "кто ты" || nq0.indexOf("кто ты") === 0 && nq0.length < 12;
+    if (opts.web !== false && !isIdentity) {
       var pair = await Promise.all([fetchWiki(query), fetchDDG(query)]);
       if (pair[0]) facts.push(pair[0]);
       if (pair[1]) facts.push(pair[1]);
@@ -291,13 +294,13 @@
     }
     var weights = cands.map(function (c) {
       var w = c.conf || 0.5;
-      if (c.source === "кора") w += 0.4;
-      if (c.source === "синтез") w += 0.32;
-      if (c.source === "ядро") w += 0.26;
+      if (c.source === "кора") w += 0.45;
+      if (c.source === "ядро") w += (c.conf >= 0.85 ? 0.55 : 0.28);
+      if (c.source === "синтез") w += 0.22;
       if (c.source === "knowledge") w += 0.14;
       if (c.source === "neuro") w += 0.12;
-      if (String(c.source).indexOf("wiki") === 0 || c.source === "web") w += 0.1;
-      if (c.source === "пробел") w *= 0.3;
+      if (String(c.source).indexOf("wiki") === 0 || c.source === "web") w += 0.08;
+      if (c.source === "пробел") w *= 0.25;
       return w;
     });
     var amps = normalize(weights);
