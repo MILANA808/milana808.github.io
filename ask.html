@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0914">
-<title>АКСИ — ИИ под вашим контролем</title>
-<meta name="description" content="АКСИ: полезный ИИ без потери контроля. Факты → синтез → выбор → seal. Локальная кора. aksilove@internet.ru">
+<title>АКСИ — локальная генерация (LLM)</title>
+<meta name="description" content="АКСИ: next-token генерация в браузере. WebLLM / WASM. Веб только как контекст. aksilove@internet.ru">
 <link rel="canonical" href="https://milana808.github.io/ask.html">
 <style>
 :root{--bg:#0b0914;--ink:#f5f1ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:#140f22}
@@ -35,8 +35,8 @@ button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var
 .card h2{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--c);margin-bottom:8px}
 .answer{white-space:pre-wrap;word-break:break-word;font-size:15px;min-height:3em}
 .meta,.status{font-size:12px;color:var(--muted);margin-top:8px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
-label{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;gap:12px}
+label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
 .sup{list-style:none}.sup li{padding:8px 0;border-top:1px solid var(--line);font-size:13px}.sup li:first-child{border-top:0}
 .sup .p{color:var(--c);font-weight:800}.sup .sel{color:var(--ok)}
 .trail{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);word-break:break-all}
@@ -45,17 +45,19 @@ label{font-size:12px;color:var(--muted)}
 .bnav button{flex:1;max-width:90px;padding:9px 4px;font-size:10px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--muted)}
 .bnav button.on{color:var(--ink);border-color:var(--line);background:rgba(169,120,255,.18)}
 footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
+.warn{font-size:12px;color:#fcd34d;margin-bottom:10px;line-height:1.4}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top"><div class="logo">A</div><div><h1>АКСИ</h1></div></div>
-  <p class="lead">Куда идут все: сильный ИИ <b>без</b> потери контроля. Здесь — факты, синтез, выбор и seal. Кора WebLLM — локальная нейросеть в браузере.</p>
+  <p class="lead">Не поиск. <b>Генерация следующего токена</b> локально в браузере (как LLM). Веб — только справка для модели.</p>
+  <p class="warn">Шаг 1: нажмите «Загрузить LLM» и дождитесь готовности (2–10 мин в первый раз, Chrome + WebGPU). Шаг 2: спрашивайте — в meta должно быть «генерация».</p>
   <div class="pipe" id="pipe">
-    <div data-s="1">1 Найти</div>
-    <div data-s="2">2 Синтез</div>
-    <div data-s="3">3 Кандидаты</div>
-    <div data-s="4">4 Выбор</div>
+    <div data-s="1">1 Контекст</div>
+    <div data-s="2">2 Модель</div>
+    <div data-s="3">3 Токены</div>
+    <div data-s="4">4 Ответ</div>
     <div data-s="5">5 Seal</div>
   </div>
   <div class="tabs">
@@ -68,23 +70,23 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
   <div class="panel on" id="p-chat">
     <div class="status" id="status"></div>
     <div class="composer">
-      <input type="text" id="q" placeholder="Спросите что угодно…" autocomplete="off" autofocus>
+      <input type="text" id="q" placeholder="Спросите — ответ сгенерирует модель…" autocomplete="off" autofocus>
       <button type="button" id="go">Спросить</button>
     </div>
     <div class="chips">
       <button type="button" data-q="кто ты">кто ты</button>
       <button type="button" data-q="вопрос нашего времени">вопрос времени</button>
-      <button type="button" data-q="что такое искусственный интеллект">ИИ</button>
-      <button type="button" data-q="нейронная сеть">нейронная сеть</button>
-      <button type="button" data-q="гравитация">гравитация</button>
+      <button type="button" data-q="объясни что такое нейронная сеть простыми словами">нейронная сеть</button>
+      <button type="button" data-q="почему небо голубое">небо</button>
     </div>
     <div class="row">
-      <label class="row"><input type="checkbox" id="useWeb" checked style="width:auto"> Веб</label>
-      <button type="button" class="g" id="cortexBtn">Кора WebLLM</button>
+      <label><input type="checkbox" id="useGen" checked style="width:auto"> Режим LLM</label>
+      <label><input type="checkbox" id="useWeb" checked style="width:auto"> Веб-контекст</label>
+      <button type="button" class="g" id="cortexBtn">Загрузить LLM</button>
     </div>
     <div class="card">
       <h2>Ответ</h2>
-      <div class="answer" id="out">Спросите. Для режима как у LLM — включите Кору.</div>
+      <div class="answer" id="out">Сначала загрузите LLM. Потом вопрос — модель будет считать следующий токен, а не копировать Wikipedia.</div>
       <div class="meta" id="meta"></div>
     </div>
   </div>
@@ -121,7 +123,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
     </div>
     <div class="card">
       <h2>Платформа</h2>
-      <p class="meta"><a href="/aksi.html">Лаборатория</a> · <a href="/matrix/">MATRIX</a> · <a href="/offer/">Offer</a></p>
+      <p class="meta"><a href="/aksi.html">Лаборатория</a> · <a href="/matrix/">MATRIX</a></p>
       <p class="meta">aksilove@internet.ru</p>
     </div>
   </div>
@@ -134,7 +136,7 @@ footer{text-align:center;font-size:11px;color:var(--muted);margin:12px 0}
   <button type="button" data-tab="seal">След</button>
   <button type="button" data-tab="sys">Система</button>
 </nav>
-<script src="/aksi-full.js?v=85"></script>
+<script src="/aksi-full.js?v=90"></script>
 <script>
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js?v=303").catch(function () {});
