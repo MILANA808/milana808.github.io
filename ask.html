@@ -4,104 +4,288 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0914">
-<title>АКСИ Organism — инстинкт · чувства · кора</title>
-<meta name="description" content="АКСИ: знание + веб + WebLLM кора. aksilove@internet.ru">
+<title>АКСИ — ответ</title>
+<meta name="description" content="АКСИ: мгновенный ответ. aksilove@internet.ru">
 <link rel="canonical" href="https://milana808.github.io/ask.html">
 <style>
 :root{--bg:#0b0914;--ink:#f5f1ff;--muted:#a89bb8;--line:rgba(180,150,255,.22);--v:#a978ff;--c:#67e8f9;--ok:#6ee7a0;--card:#140f22}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(ellipse at 30% -10%,#3a1d7a 0%,transparent 50%),var(--bg);color:var(--ink);min-height:100vh}
+body{font:15px/1.55 system-ui,sans-serif;background:radial-gradient(ellipse at 30% -10%,#3a1d7a 0%,transparent 50%),var(--bg);color:var(--ink);min-height:100vh}
 a{color:var(--c)}
-.wrap{max-width:680px;margin:0 auto;padding:24px 16px 72px}
+.wrap{max-width:640px;margin:0 auto;padding:24px 16px 64px}
 .logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#c9a0ff,#5b2fc0);display:grid;place-items:center;font-weight:900;font-size:20px;margin-bottom:12px}
-h1{font-size:clamp(22px,5vw,30px);font-weight:900}
+h1{font-size:clamp(22px,5vw,28px);font-weight:900}
 .lead{color:var(--muted);margin:8px 0 14px;font-size:14px}
-.pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}
-.pipeline div{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center;font-size:10px;font-weight:800;color:var(--muted)}
-.pipeline div.on{border-color:var(--ok);color:var(--ok)}
-.composer{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-input{flex:1;min-width:140px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#120c1c;color:var(--ink);font:inherit}
+.composer{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+input[type=text]{flex:1;min-width:160px;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:#120c1c;color:var(--ink);font:inherit}
 button{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:12px 16px;background:var(--v);color:#fff;font-weight:800}
+button:disabled{opacity:.55;cursor:wait}
 button.g{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--ink)}
-button:disabled{opacity:.5}
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .chips button{padding:8px 12px;font-size:12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--ink);font-weight:700}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:10px}
 .card h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--c);margin-bottom:10px}
-.answer{white-space:pre-wrap;word-break:break-word;font-size:15px;line-height:1.55;min-height:3.5em}
-.meta,.status{margin-top:8px;font-size:12px;color:var(--muted)}
-.sup{list-style:none}.sup li{padding:8px 0;border-top:1px solid var(--line);font-size:13px}.sup li:first-child{border-top:0}
-.sup .p{color:var(--c);font-weight:800}.sup .sel{color:var(--ok)}
-.trail{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);word-break:break-all}
+.answer{white-space:pre-wrap;word-break:break-word;font-size:15px;min-height:3em}
+.meta{margin-top:10px;font-size:12px;color:var(--muted)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
-footer{margin-top:18px;text-align:center;font-size:12px;color:var(--muted)}
 label{font-size:12px;color:var(--muted)}
+footer{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}
+.status{font-size:12px;color:var(--muted);margin-bottom:8px;min-height:1.2em}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="logo">A</div>
-  <h1>АКСИ Organism</h1>
-  <p class="lead">Инстинкт + чувства (веб) + <b>кора</b> (локальная нейросеть) + выбор + seal.</p>
-  <div class="pipeline" id="pipe">
-    <div data-s="1">1 · Чувства</div>
-    <div data-s="2">2 · Кора</div>
-    <div data-s="3">3 · Выбор</div>
-    <div data-s="4">4 · Seal</div>
-  </div>
-  <div class="row">
-    <button type="button" class="g" id="cortexBtn">Включить нейрокортекс</button>
-    <label class="row"><input type="checkbox" id="useWeb" checked style="width:auto"> Веб-факты</label>
-  </div>
-  <div class="status" id="orgStatus">Кора выключена. Для генерации как у нейросети — включите нейрокортекс (WebGPU, первый раз долго).</div>
+  <h1>АКСИ</h1>
+  <p class="lead">Ответ сразу из ядра. Веб — опция. Без зависаний.</p>
+  <div class="status" id="status"></div>
   <div class="composer">
-    <input id="q" placeholder="Вопрос…" autocomplete="off" autofocus>
+    <input type="text" id="q" placeholder="Ваш вопрос…" autocomplete="off" autofocus>
     <button type="button" id="go">Спросить</button>
   </div>
-  <div class="chips">
+  <div class="chips" id="chips">
     <button type="button" data-q="кто ты">кто ты</button>
     <button type="button" data-q="что такое квантовый компьютер">квантовый компьютер</button>
     <button type="button" data-q="что такое искусственный интеллект">ИИ</button>
     <button type="button" data-q="фотосинтез">фотосинтез</button>
+    <button type="button" data-q="формула AKSI">формула</button>
+  </div>
+  <div class="row">
+    <label class="row"><input type="checkbox" id="useWeb" style="width:auto"> Искать в Wikipedia</label>
   </div>
   <div class="card">
     <h2>Ответ</h2>
-    <div class="answer" id="out">Спросите — или сначала включите нейрокортекс.</div>
+    <div class="answer" id="out">Напишите вопрос и нажмите «Спросить».</div>
     <div class="meta" id="meta"></div>
   </div>
-  <div class="card" id="supCard" hidden>
-    <h2>Кандидаты</h2>
-    <ul class="sup" id="sup"></ul>
-  </div>
-  <div class="card" id="trailCard" hidden>
-    <h2>Seal</h2>
-    <div class="trail" id="trail"></div>
-  </div>
-  <p style="font-size:13px;color:var(--muted)"><a href="/aksi.html">Лаборатория</a></p>
-  <footer>aksilove@internet.ru · Organism + Cortex</footer>
+  <p style="font-size:13px;color:var(--muted)"><a href="/aksi.html">Лаборатория</a> · <a href="/">Домой</a></p>
+  <footer>aksilove@internet.ru · core v4</footer>
 </div>
-<script src="/aksi-pulse.js?v=3"></script>
-<script src="/aksi-cortex.js?v=1"></script>
 <script>
-(function(){
-  function $(id){return document.getElementById(id)}
-  function status(m){var e=$("orgStatus");if(e)e.textContent=m||""}
-  var btn=$("cortexBtn");
-  if(btn){
-    btn.addEventListener("click", async function(){
-      btn.disabled=true;
-      try{
-        if(!window.AKSI_CORTEX){status("модуль коры не загрузился");return;}
-        await AKSI_CORTEX.ensure(function(info){
-          status(typeof info==="string"?info:(info&&(info.text||info.progress))||"загрузка коры…");
-        });
-        if(AKSI_CORTEX.install) AKSI_CORTEX.install();
-        status(AKSI_CORTEX.ready()?"Нейрокортекс готов — спрашивайте":"Кора не поднялась (нужен WebGPU)");
-        btn.textContent=AKSI_CORTEX.ready()?"Кора ON":"Кора — сбой";
-      }catch(e){status("Кора: "+(e.message||e));}
-      finally{btn.disabled=false;}
+(function () {
+  "use strict";
+  var VER = "4.0.0-core";
+
+  function $(id) { return document.getElementById(id); }
+  function status(m) { var e = $("status"); if (e) e.textContent = m || ""; }
+
+  function norm(s) {
+    return String(s || "")
+      .toLowerCase()
+      .replace(/ё/g, "е")
+      .replace(/[^a-zа-я0-9\s]/gi, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  var SEED = [
+    {
+      k: ["кто ты", "что ты", "представься", "привет", "здравствуй"],
+      a: "Я АКСИ — локальный ИИ-контур в браузере.\n\nОтвечаю из встроенного знания. По желанию могу дополнить фактом из Wikipedia.\nНе облачный GPT: если не знаю — скажу прямо.\n\nКонтакт: aksilove@internet.ru"
+    },
+    {
+      k: ["формул", "aksi =", "формула aksi"],
+      a: "AKSI = (A × I × S) × (1 + 0.4√n)\n\nA — agency (действие)\nI — integrity (целостность)\nS — structure / sovereignty\nn — число sealed-записей\n\nИнженерная формула продукта, не физический закон."
+    },
+    {
+      k: ["квантовый компьютер", "квантовые компьютер", "кубит"],
+      a: "Квантовый компьютер считает на кубитах. Кубит может быть в суперпозиции состояний 0 и 1.\n\nЗа счёт суперпозиции, интерференции и запутанности некоторые алгоритмы (Шора, Гровера) теоретически быстрее классических.\n\nСейчас есть прототипы и облачные процессоры; универсальный отказоустойчивый компьютер большой мощности ещё в разработке.\n\nОбычный бит — строго 0 или 1; кубит — вероятностная комбинация до измерения."
+    },
+    {
+      k: ["искусственный интеллект", "что такое ии", "нейросет", "машинное обучение"],
+      a: "Искусственный интеллект — системы для задач восприятия, вывода, обучения и генерации текста или решений.\n\nСовременные чат-ИИ — крупные нейросети, обученные на данных: они предсказывают следующий токен, а не «думают» как человек.\n\nАКСИ здесь — компактный локальный контур: знание → (опционально веб) → ответ, без обязательного облака."
+    },
+    {
+      k: ["фотосинтез"],
+      a: "Фотосинтез — процесс, при котором растения, водоросли и некоторые бактерии превращают свет, воду и CO₂ в органические вещества и выделяют кислород.\n\nУпрощённо: 6CO₂ + 6H₂O + свет → C₆H₁₂O₆ + 6O₂.\nПроходит в хлоропластах с участием хлорофилла."
+    },
+    {
+      k: ["днк", "ген ", "хромосом"],
+      a: "ДНК (дезоксирибонуклеиновая кислота) хранит генетическую информацию. Структура — двойная спираль из нуклеотидов A, T, G, C.\n\nГен — участок ДНК, кодирующий белок или РНК. Хромосомы — упакованная ДНК в клетке."
+    },
+    {
+      k: ["блокчейн", "биткоин", "bitcoin"],
+      a: "Блокчейн — распределённый журнал записей: блоки связаны криптографическими хешами.\n\nБиткоин (2009) — криптовалюта без банка, на сети майнеров и правилах консенсуса.\n\nБлокчейн фиксирует согласованную историю по протоколу, а не «абсолютную истину»."
+    },
+    {
+      k: ["теория относительности", "эйнштейн", "e=mc"],
+      a: "Специальная теория относительности (1905): скорость света в вакууме постоянна; пространство и время связаны.\n\nСледствия: замедление времени, E = mc².\n\nОбщая теория (1915): гравитация — искривление пространства-времени массой и энергией."
+    },
+    {
+      k: ["миссия", "зачем", "польза", "что умеешь"],
+      a: "Миссия АКСИ — дать ясный ответ в браузере без обязательной сдачи данных облаку.\n\nСейчас: ответы из ядра, опционально Wikipedia, локальная память («запомни: …»).\nКонтакт: aksilove@internet.ru"
+    },
+    {
+      k: ["офлайн", "без интернет", "автоном"],
+      a: "Этот экран отвечает offline-first: ядро не требует сети. Поиск Wikipedia включается галочкой и не обязателен."
+    }
+  ];
+
+  function seedAnswer(q) {
+    var nq = norm(q);
+    var best = null, score = 0;
+    for (var i = 0; i < SEED.length; i++) {
+      var s = 0;
+      for (var j = 0; j < SEED[i].k.length; j++) {
+        var k = norm(SEED[i].k[j]);
+        if (!k) continue;
+        if (nq.indexOf(k) !== -1) s += 10 + k.length;
+      }
+      if (s > score) { score = s; best = SEED[i]; }
+    }
+    if (score >= 6) return best.a;
+    return null;
+  }
+
+  function withTimeout(promise, ms) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var t = setTimeout(function () {
+        if (!done) { done = true; resolve(null); }
+      }, ms);
+      promise.then(function (v) {
+        if (!done) { done = true; clearTimeout(t); resolve(v); }
+      }).catch(function () {
+        if (!done) { done = true; clearTimeout(t); resolve(null); }
+      });
     });
   }
+
+  async function wikiAnswer(q) {
+    var topic = String(q)
+      .replace(/^(что такое|кто такой|кто такая|what is|who is)\s+/i, "")
+      .replace(/\?+$/g, "")
+      .trim() || q;
+    try {
+      var url = "https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(topic.replace(/\s+/g, "_"));
+      var r = await withTimeout(fetch(url, { mode: "cors" }).then(function (res) {
+        if (!res.ok) throw new Error("wiki");
+        return res.json();
+      }), 3500);
+      if (r && r.extract && r.type !== "disambiguation") {
+        var text = r.extract;
+        if (text.length > 900) text = text.slice(0, 897) + "…";
+        var out = text;
+        if (r.content_urls && r.content_urls.desktop) out += "\n\n→ " + r.content_urls.desktop.page;
+        out += "\n\n(Источник: Wikipedia · " + r.title + ")";
+        return out;
+      }
+    } catch (e) {}
+    try {
+      var sUrl = "https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
+        encodeURIComponent(topic) + "&srlimit=1&format=json&origin=*";
+      var s = await withTimeout(fetch(sUrl, { mode: "cors" }).then(function (res) { return res.json(); }), 3500);
+      var hit = s && s.query && s.query.search && s.query.search[0];
+      if (!hit) return null;
+      var url2 = "https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(hit.title.replace(/ /g, "_"));
+      var r2 = await withTimeout(fetch(url2, { mode: "cors" }).then(function (res) {
+        if (!res.ok) throw new Error("wiki");
+        return res.json();
+      }), 3500);
+      if (r2 && r2.extract) {
+        var t2 = r2.extract;
+        if (t2.length > 900) t2 = t2.slice(0, 897) + "…";
+        return t2 + "\n\n(Источник: Wikipedia · " + r2.title + ")";
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function learn(q) {
+    if (!/^запомни\s*[:：]/i.test(q)) return null;
+    var fact = q.replace(/^запомни\s*[:：]\s*/i, "").trim();
+    try {
+      var mem = JSON.parse(localStorage.getItem("aksi_core_mem") || "[]");
+      mem.push({ t: Date.now(), text: fact.slice(0, 500) });
+      localStorage.setItem("aksi_core_mem", JSON.stringify(mem.slice(-300)));
+    } catch (e) {}
+    return "Запомнила: «" + fact.slice(0, 200) + "».";
+  }
+
+  function memHit(q) {
+    try {
+      var mem = JSON.parse(localStorage.getItem("aksi_core_mem") || "[]");
+      var words = norm(q).split(" ").filter(function (w) { return w.length > 3; });
+      var hits = [];
+      for (var i = mem.length - 1; i >= 0 && hits.length < 3; i--) {
+        var t = norm(mem[i].text);
+        for (var w = 0; w < words.length; w++) {
+          if (t.indexOf(words[w]) !== -1) { hits.push(mem[i].text); break; }
+        }
+      }
+      if (hits.length) return "Из вашей памяти:\n• " + hits.join("\n• ");
+    } catch (e) {}
+    return null;
+  }
+
+  async function answer(q, useWeb) {
+    q = String(q || "").trim();
+    if (!q) return { text: "", source: "" };
+
+    var learned = learn(q);
+    if (learned) return { text: learned, source: "память" };
+
+    var seed = seedAnswer(q);
+    if (seed) return { text: seed, source: "ядро" };
+
+    var mem = memHit(q);
+    if (mem) return { text: mem, source: "память" };
+
+    if (useWeb) {
+      status("Ищу в Wikipedia…");
+      var w = await wikiAnswer(q);
+      status("");
+      if (w) return { text: w, source: "wikipedia" };
+    }
+
+    return {
+      text:
+        "По запросу «" + q + "» в ядре нет готового ответа" +
+        (useWeb ? ", и Wikipedia не дала статью (сеть, лимит или нет страницы)." : ".") +
+        "\n\nПопробуйте:\n• короче: «что такое X»;\n• включить «Искать в Wikipedia»;\n• «запомни: …» — сохраню локально.\n\naksilove@internet.ru",
+      source: "пробел"
+    };
+  }
+
+  async function ask(raw) {
+    var q = String(raw != null ? raw : ($("q") && $("q").value) || "").trim();
+    if (!q) return;
+    if ($("q")) $("q").value = q;
+    if ($("go")) $("go").disabled = true;
+    if ($("out")) $("out").textContent = "…";
+    if ($("meta")) $("meta").textContent = "";
+    try {
+      var useWeb = !!($("useWeb") && $("useWeb").checked);
+      var r = await answer(q, useWeb);
+      if ($("out")) $("out").textContent = r.text || "—";
+      if ($("meta")) $("meta").textContent = (r.source || "") + " · " + VER;
+    } catch (e) {
+      if ($("out")) $("out").textContent = "Ошибка: " + (e && e.message ? e.message : e);
+    } finally {
+      if ($("go")) $("go").disabled = false;
+      status("");
+    }
+  }
+
+  function boot() {
+    var go = $("go");
+    var q = $("q");
+    if (go) go.onclick = function () { ask(); };
+    if (q) q.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") ask();
+    });
+    var chips = document.querySelectorAll("[data-q]");
+    for (var i = 0; i < chips.length; i++) {
+      (function (btn) {
+        btn.onclick = function () { ask(btn.getAttribute("data-q")); };
+      })(chips[i]);
+    }
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+
+  window.AKSI_CORE_ASK = { version: VER, answer: answer, ask: ask };
 })();
 </script>
 </body>
