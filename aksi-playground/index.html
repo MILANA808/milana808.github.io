@@ -102,7 +102,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
     <label class="sl">Контрфактический вес: <span class="v" id="vCf">25%</span>
       <input type="range" id="sCf" min="0" max="100" value="25">
     </label>
-    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. Ползунок λ меняет P_q через кросс-термы.</p>
+    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. Ползунок λ меняет P_q. «Запустить» = argmax; «Сэмпл Born» = случайный коллапс.</p>
     <div class="xt mono" id="crossBox">cross-terms —</div>
   </section>
   <section class="zone">
@@ -121,7 +121,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
   <div class="row">
     <button type="button" class="g" id="btnVerify">Проверить подпись</button>
     <button type="button" class="g" id="btnDl">Скачать Decision Receipt</button>
-    <button type="button" class="g" id="btnRecollapse">Коллапс снова</button>
+    <button type="button" class="g" id="btnRecollapse">Сэмпл Born</button>
     <span class="mono" id="aksiScore">AKSI score —</span>
     <span class="hint mono" id="sealCount">Sealed: 0</span>
   </div>
@@ -129,7 +129,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
   <div class="kv mono"><span>SHA-256 ans</span><code id="ansHash">—</code></div>
   <div class="kv mono"><span>Public key</span><code id="pub">—</code></div>
   <div class="kv mono"><span>prev hash</span><code id="prevH">null</code></div>
-  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.4.1 · domain-aware relevance + quantum gate</p>
+  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.5 · argmax primary + Born sample + relevance gate</p>
 </footer>
 <div class="toast" id="toast"></div>
 <script type="module">
@@ -555,7 +555,8 @@ function renderResult() {
     : "Смешанные фазы — умеренный сдвиг.";
   if (state.cfW > 0.35) exp += " Контрфакт сильнее тянет слабо согласованные кандидаты.";
   document.getElementById("explain").textContent = exp;
-  state.decision = pq >= 0.40 ? "ALLOWED" : "DEFERRED";
+  const topEqs = ch.eqs;
+  state.decision = (pq >= 0.38 || (pc >= 0.45 && topEqs >= 0.75)) ? "ALLOWED" : "DEFERRED";
   const dec = document.getElementById("decision");
   if (state.decision === "ALLOWED") {
     dec.className = "decision ok";
@@ -649,7 +650,7 @@ async function run() {
     state.cands = built.cands;
     state.mode = built.mode;
     document.getElementById("modeBadge").textContent = built.mode;
-    recompute(true);
+    recompute(false);
     animateCollapse();
     await seal();
   } catch (e) {
@@ -673,7 +674,7 @@ document.getElementById("run").onclick = run;
 document.getElementById("btnRecollapse").onclick = async () => {
   if (!state.analysis) return;
   recompute(true); animateCollapse(); await seal();
-  toast("Новый коллапс");
+  toast("Стохастический коллапс (Born sampling)");
 };
 document.querySelectorAll("[data-q]").forEach(b => {
   b.onclick = () => { document.getElementById("q").value = b.getAttribute("data-q"); run(); };
