@@ -1,2 +1,2 @@
-/* AKSI Recursive v1.4 — see repo; loaded by ask.html */
-console.error('PLACEHOLDER');
+/* deprecated: use aksi-rec-core.js + aksi-rec-ui.js (v1.4) */
+console.info('AKSI: load aksi-rec-core.js then aksi-rec-ui.js');
