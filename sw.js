@@ -1,5 +1,5 @@
-/* AKSI SW v303 — network-first product surface */
-var CACHE = "aksi-shell-v303";
+/* AKSI SW v304 — network-first product surface */
+var CACHE = "aksi-shell-v304";
 var PRE = [
   "/",
   "/index.html",
