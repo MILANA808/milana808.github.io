@@ -46,7 +46,7 @@ code{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all}
 </head>
 <body>
 <header>
-  <div class="brand"><h1>АКСИ</h1><span class="sub">спросить · v1.2 · offline-first</span></div>
+  <div class="brand"><h1>АКСИ</h1><span class="sub">спросить · v1.2.1 · offline-first</span></div>
   <nav class="nav"><a href="/aksi-playground/">Playground</a><a href="/">Home</a></nav>
 </header>
 <main>
@@ -89,7 +89,7 @@ code{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all}
 </aside>
 </main>
 <footer>
-  <span>АКСИ Ask v1.2 · aksilove@internet.ru</span>
+  <span>АКСИ Ask v1.2.1 · aksilove@internet.ru</span>
   <span id="memN">memory: 0</span>
 </footer>
 <script type="module">
@@ -119,7 +119,7 @@ const KB=[
   {k:["доверие к ии","доверять нейро","доверие"],a:"Доверие к ИИ — это проверяемость, а не вера: откуда ответ, как выбран, можно ли воспроизвести и отказать при слабых данных. Красивый текст ≠ доказательство."},
   {k:["войн и мир","войну и мир","толст"],a:"Роман «Война и мир» написал Лев Николаевич Толстой в 1863–1869 годах."},
   {k:["планет","солнечн систем"],a:"В Солнечной системе 8 планет: Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун. Плутон с 2006 года — карликовая планета."},
-  {k:["небо голуб","почему небо"],a:"Небо кажется голубым из‑за рассеяния Рэлея: молекулы воздуха сильнее рассеивают коротковолновый (синий) свет Солнца, чем красный. На закате путь лучей длиннее — доминирует красный."},
+  {k:["небо","голуб","рэлея","почему небо"],a:"Небо кажется голубым из‑за рассеяния Рэлея: молекулы воздуха сильнее рассеивают коротковолновый (синий) свет Солнца, чем красный. На закате путь лучей длиннее — доминирует красный."},
   {k:["блокчейн","blockchain"],a:"Блокчейн — цепочка блоков данных, связанных криптографическими хешами. Каждый блок ссылается на предыдущий; менять историю дорого. Используют в криптовалютах и реестрах, где нужна общая неизменяемая запись."},
   {k:["нейронн","нейросет"],a:"Нейронная сеть — модель из слоёв связанных «нейронов» (вычислительных узлов). Обучается на примерах, подстраивая веса. Современные LLM — очень большие сети, предсказывающие следующий токен текста."},
   {k:["борщ","приготовить борщ"],a:"Классический борщ: свёкла, капуста, картофель, морковь, лук, томат/паста, бульон (или вода), чеснок, зелень. Овощи обжаривают/тушат, свёклу часто отдельно, затем соединяют с бульоном и варят до мягкости. Подают со сметаной."},
@@ -135,7 +135,22 @@ const KB=[
   {k:["крипт"],a:"В браузере Web Crypto даёт SHA-256 и Ed25519. АКСИ использует их для целостности и подписи решений."},
   {k:["формул акси","aksi ="],a:"AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity, S — sovereignty, n — число seals."}
 ];
-function localAnswer(q){const s=q.toLowerCase().replace(/ё/g,"е");let best=null,score=0;for(const row of KB){let sc=0;for(const k of row.k){const kk=k.toLowerCase();if(s.includes(kk))sc+=kk.length*(kk.includes(" ")?2:1.2);}if(/акси/.test(s)&&row.k.some(k=>k.includes("акси")))sc+=20;if(sc>score){score=sc;best=row;}}if(best&&score>=5)return{text:best.a,score:Math.min(0.98,0.62+score/50)};return null;}
+function localAnswer(q){
+  const s=q.toLowerCase().replace(/ё/g,"е");
+  let best=null,score=0;
+  for(const row of KB){
+    let sc=0;
+    for(const k of row.k){
+      const kk=k.toLowerCase();
+      if(s.includes(kk)) sc+=kk.length*(kk.includes(" ")?2.5:1.3);
+      else if(kk.length>=4 && s.split(/\s+/).some(w=>w.startsWith(kk.slice(0,4)))) sc+=kk.length*0.6;
+    }
+    if(/акси/.test(s) && row.k.some(k=>/акси/.test(k))) sc+=25;
+    if(sc>score){score=sc;best=row;}
+  }
+  if(best&&score>=4) return {text:best.a, score:Math.min(0.98,0.65+score/45)};
+  return null;
+}
 function memHit(q){const s=q.toLowerCase();const words=s.split(/\s+/).filter(w=>w.length>3);let best=null,sc=0;for(const m of memories){const t=(m.q+" "+m.a).toLowerCase();let h=0;for(const w of words)if(t.includes(w))h++;if(h>sc&&h>=2){sc=h;best=m;}}if(!best)return null;return{text:best.a,score:Math.min(0.88,0.5+sc*0.08)};}
 function relevance(text,q){const stop=new Set(["что","такое","это","как","для","или","the","a","an","is","of","to","and","кто","почему","зачем","какие"]);const words=q.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>2&&!stop.has(w));if(!words.length)return 0.4;const t=text.toLowerCase();let hit=0;for(const w of words)if(t.includes(w))hit++;let r=hit/words.length;if(/акси/.test(q.toLowerCase())&&/аксиом/.test(t)&&!/runtime|browser|offline|подпис/.test(t))r*=0.1;return r;}
 function searchSeed(q){let s=q.replace(/[?!.]+$/g,"").trim();s=s.replace(/^(что такое|что значит|кто такой|кто такая|кто написал|объясни|расскажи про|расскажи о|почему|зачем|как|сколько|where|what is|who)\s+/i,"");return s.slice(0,80)||q.slice(0,60);}
@@ -148,14 +163,14 @@ function add(role,text,meta=""){const d=document.createElement("div");d.classNam
 function pipe(n,st){document.querySelectorAll("#pipe .s").forEach(el=>{if(el.dataset.s===String(n)){el.classList.remove("on","done");el.classList.add(st);}});}
 function pipeReset(){document.querySelectorAll("#pipe .s").forEach(el=>el.classList.remove("on","done"));}
 let abort=null;
-async function ask(){if(busy)return;const q=document.getElementById("q").value.trim();if(!q)return;busy=true;document.getElementById("send").disabled=true;document.getElementById("q").value="";add("user",q);pipeReset();if(abort)abort.abort();abort=new AbortController();const signal=abort.signal;try{pipe(1,"on");document.getElementById("mode").textContent="поиск…";const loc=localAnswer(q);const mem=memHit(q);let wiki=null,ddg=null;if(navigator.onLine!==false){const pair=await Promise.all([fetchWiki(q,signal),fetchDDG(q,signal)]);wiki=pair[0];ddg=pair[1];}pipe(1,"done");pipe(2,"on");let cands=[];if(loc)cands.push({engine:"Local KB",text:loc.text,src:0.96,mem:0.92,spe:0.9});if(mem)cands.push({engine:"Memory",text:mem.text,src:0.72,mem:0.95,spe:0.7});if(wiki)cands.push({engine:"Wikipedia/"+wiki.lang,text:wiki.text,src:0.9,mem:0.45,spe:0.75});if(ddg)cands.push({engine:"DDG",text:ddg,src:0.8,mem:0.4,spe:0.7});if(!cands.length){cands.push({engine:"Guide",text:"По запросу «"+q.slice(0,80)+"» локальных фактов нет, а сеть не дала релевантной статьи. Уточните формулировку или проверьте источник вручную. АКСИ не выдумывает уверенный ответ без данных.",src:0.4,mem:0.3,spe:0.4});}while(cands.length<3){cands.push({engine:"Conservative",text:"Если источники слабые или конфликтуют, лучше DEFERRED: не выдавать непроверяемое за факт.",src:0.4,mem:0.3,spe:0.35});}cands=cands.slice(0,3).map(c=>adia(c,q)).sort((a,b)=>b.eqs-a.eqs);const mode=(wiki||ddg||mem)?"hybrid":"local";document.getElementById("mode").textContent=mode+(navigator.onLine!==false?" · online":" · offline");document.getElementById("cands").innerHTML=cands.map((c,i)=>`<div class="cand" style="border-color:${['#2d6dff','#4ade80','#fb923c'][i]}"><b>${c.engine}</b> EQS ${c.eqs.toFixed(2)} · rel ${c.rel.toFixed(2)}<br>${c.text.slice(0,110)}…</div>`).join("");pipe(2,"done");pipe(3,"on");const cal=calibrate(cands,q);pipe(3,"done");pipe(4,"on");let choice=cal.best;if(loc&&cands[0].engine==="Local KB"&&cands[0].eqs>=0.75){const idx=cal.prep.findIndex(p=>p.c.engine==="Local KB");if(idx>=0)choice=idx;}const chosen=cal.prep[choice];const pq2=cal.pQ[choice];const decision=(pq2>=0.34||(chosen.Pc>=0.4&&chosen.eqs>=0.7))?"ALLOWED":"DEFERRED";document.getElementById("dec").textContent=decision+" · "+pq2.toFixed(3);document.getElementById("dec").style.color=decision==="ALLOWED"?"var(--green)":"var(--red)";const body={query:q,decision,final_answer:chosen.c.text,confidence:+pq2.toFixed(6),engine:chosen.c.engine,eqs:chosen.eqs,mode,candidates:cal.prep.map((p,i)=>({engine:p.c.engine,eqs:p.eqs,p_q:+cal.pQ[i].toFixed(4)})),prev_receipt_hash:prev,public_key:pub,timestamp:new Date().toISOString()};lastC=JSON.stringify(body);body.signature=await sign(new TextEncoder().encode(lastC));lastR=body;prev=await sha256(JSON.stringify(body));sealed++;document.getElementById("sig").textContent=(body.signature||"").slice(0,40)+"…";if(decision==="ALLOWED"){await memAdd({q,a:chosen.c.text,engine:chosen.c.engine,ts:Date.now()});memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;}pipe(4,"done");const meta=`<span class="badge ${decision==="ALLOWED"?"ok":"no"}">${decision}</span><span class="badge">${chosen.c.engine}</span>P_q ${pq2.toFixed(3)}`;add("bot",chosen.c.text,meta);}catch(e){if(e.name!=="AbortError")add("bot","Ошибка: "+(e.message||e));}busy=false;document.getElementById("send").disabled=false;document.getElementById("q").focus();}
+async function ask(){if(busy)return;const q=document.getElementById("q").value.trim();if(!q)return;busy=true;document.getElementById("send").disabled=true;document.getElementById("q").value="";add("user",q);pipeReset();if(abort)abort.abort();abort=new AbortController();const signal=abort.signal;try{pipe(1,"on");document.getElementById("mode").textContent="поиск…";const loc=localAnswer(q);const mem=memHit(q);let wiki=null,ddg=null;const isSelf=/акси|aksi|кто ты|что ты/.test(q.toLowerCase());if(navigator.onLine!==false&&!isSelf){const pair=await Promise.all([fetchWiki(q,signal),fetchDDG(q,signal)]);wiki=pair[0];ddg=pair[1];}pipe(1,"done");pipe(2,"on");let cands=[];if(loc)cands.push({engine:"Local KB",text:loc.text,src:0.96,mem:0.92,spe:0.9});if(mem)cands.push({engine:"Memory",text:mem.text,src:0.72,mem:0.95,spe:0.7});if(wiki)cands.push({engine:"Wikipedia/"+wiki.lang,text:wiki.text,src:0.9,mem:0.45,spe:0.75});if(ddg)cands.push({engine:"DDG",text:ddg,src:0.8,mem:0.4,spe:0.7});if(!cands.length){cands.push({engine:"Guide",text:"По запросу «"+q.slice(0,80)+"» локальных фактов нет, а сеть не дала релевантной статьи. Уточните формулировку или проверьте источник вручную. АКСИ не выдумывает уверенный ответ без данных.",src:0.4,mem:0.3,spe:0.4});}while(cands.length<3){cands.push({engine:"Conservative",text:"Если источники слабые или конфликтуют, лучше DEFERRED: не выдавать непроверяемое за факт.",src:0.4,mem:0.3,spe:0.35});}cands=cands.slice(0,3).map(c=>adia(c,q)).sort((a,b)=>b.eqs-a.eqs);const mode=(wiki||ddg||mem)?"hybrid":"local";document.getElementById("mode").textContent=mode+(navigator.onLine!==false?" · online":" · offline");document.getElementById("cands").innerHTML=cands.map((c,i)=>`<div class="cand" style="border-color:${['#2d6dff','#4ade80','#fb923c'][i]}"><b>${c.engine}</b> EQS ${c.eqs.toFixed(2)} · rel ${c.rel.toFixed(2)}<br>${c.text.slice(0,110)}…</div>`).join("");pipe(2,"done");pipe(3,"on");const cal=calibrate(cands,q);pipe(3,"done");pipe(4,"on");let choice=cal.best;if(loc&&cands[0].engine==="Local KB"&&cands[0].eqs>=0.75){const idx=cal.prep.findIndex(p=>p.c.engine==="Local KB");if(idx>=0)choice=idx;}const chosen=cal.prep[choice];const pq2=cal.pQ[choice];const decision=(pq2>=0.34||(chosen.Pc>=0.4&&chosen.eqs>=0.7))?"ALLOWED":"DEFERRED";document.getElementById("dec").textContent=decision+" · "+pq2.toFixed(3);document.getElementById("dec").style.color=decision==="ALLOWED"?"var(--green)":"var(--red)";const body={query:q,decision,final_answer:chosen.c.text,confidence:+pq2.toFixed(6),engine:chosen.c.engine,eqs:chosen.eqs,mode,candidates:cal.prep.map((p,i)=>({engine:p.c.engine,eqs:p.eqs,p_q:+cal.pQ[i].toFixed(4)})),prev_receipt_hash:prev,public_key:pub,timestamp:new Date().toISOString()};lastC=JSON.stringify(body);body.signature=await sign(new TextEncoder().encode(lastC));lastR=body;prev=await sha256(JSON.stringify(body));sealed++;document.getElementById("sig").textContent=(body.signature||"").slice(0,40)+"…";if(decision==="ALLOWED"){await memAdd({q,a:chosen.c.text,engine:chosen.c.engine,ts:Date.now()});memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;}pipe(4,"done");const meta=`<span class="badge ${decision==="ALLOWED"?"ok":"no"}">${decision}</span><span class="badge">${chosen.c.engine}</span>P_q ${pq2.toFixed(3)}`;add("bot",chosen.c.text,meta);}catch(e){if(e.name!=="AbortError")add("bot","Ошибка: "+(e.message||e));}busy=false;document.getElementById("send").disabled=false;document.getElementById("q").focus();}
 document.getElementById("send").onclick=ask;
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")ask();});
 document.querySelectorAll("#presets [data-q]").forEach(b=>b.onclick=()=>{document.getElementById("q").value=b.getAttribute("data-q");ask();});
 document.getElementById("btnV").onclick=async()=>{if(!lastR||!lastC)return alert("Нет receipt");alert((await verify(lastR.signature,new TextEncoder().encode(lastC)))?"VALID ✓":"INVALID");};
 document.getElementById("btnD").onclick=()=>{if(!lastR)return;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(lastR,null,2)],{type:"application/json"}));a.download="aksi-receipt.json";a.click();};
 document.getElementById("btnM").onclick=async()=>{if(confirm("Очистить память?")){await memClr();memories=[];document.getElementById("memN").textContent="memory: 0";}};
-(async()=>{await keys();memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;add("bot","АКСИ Ask v1.2\n\nГотов к вопросам. Сначала локальная база и память, затем Wikipedia. Ответ подписывается. Не AGI — проверяемый выбор.");})();
+(async()=>{await keys();memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;add("bot","АКСИ Ask v1.2.1\n\nГотов. Локальная база + Wikipedia. Ответ подписывается. Не AGI.");})();
 </script>
 </body>
 </html>
