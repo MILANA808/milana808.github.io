@@ -66,7 +66,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
 <header>
   <div class="brand">
     <h1>AKSI Quantum Playground</h1>
-    <span class="sub">вопрос → факты → релевантность → интерференция → коллапс · не quantum advantage</span>
+    <span class="sub">вопрос → факты → π-seed фазы → интерференция → argmax · не quantum advantage</span>
   </div>
   <div class="row">
     <input type="text" id="q" placeholder="Спроси что угодно…" value="Что такое доверие к ИИ?">
@@ -87,7 +87,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
     <h2>Кандидаты <span id="modeBadge" class="badge">—</span></h2>
     <div id="cands"></div>
     <div class="formula mono">
-      φᵢ = π·(1−alignᵢ)·λ<br>
+      φᵢ = π·(1−alignᵢ)·λ + π·seed(q)·0.08·λ<br>
       aᵢ = √Pᵢ e^{iφᵢ} + √(Pᵢ·cf)·e^{i(φᵢ+π/2)}<br>
       Mᵢ = |aᵢ|² + λ·Σ 2 Re(aᵢāⱼ) → P_q<br>
       λ=0: классика · λ>0: интерференция меняет ранг
@@ -102,7 +102,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
     <label class="sl">Контрфактический вес: <span class="v" id="vCf">25%</span>
       <input type="range" id="sCf" min="0" max="100" value="25">
     </label>
-    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. Ползунок λ меняет P_q. «Запустить» = argmax; «Сэмпл Born» = случайный коллапс.</p>
+    <p class="hint">Цветные стрелки — кандидаты. Белая — Σ aᵢ. «Запустить» = argmax; «Сэмпл Born» = случайный коллапс. π-seed делает геометрию воспроизводимой.</p>
     <div class="xt mono" id="crossBox">cross-terms —</div>
   </section>
   <section class="zone">
@@ -115,6 +115,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
     <div class="divg neu" id="divg">Quantum divergence —</div>
     <p class="explain" id="explain"></p>
     <div class="decision ok" id="decision">—</div>
+    <p class="explain" id="whyBox"></p>
   </section>
 </div>
 <footer>
@@ -129,7 +130,7 @@ footer .kv code{word-break:break-all;color:#b8c0ff}
   <div class="kv mono"><span>SHA-256 ans</span><code id="ansHash">—</code></div>
   <div class="kv mono"><span>Public key</span><code id="pub">—</code></div>
   <div class="kv mono"><span>prev hash</span><code id="prevH">null</code></div>
-  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.5.1 · argmax + Born sample · pages-bust</p>
+  <p class="hint">АКСИ · aksilove@internet.ru · playground v2.6 · race-fix · π-seed · expanded KB</p>
 </footer>
 <div class="toast" id="toast"></div>
 <script type="module">
@@ -197,19 +198,30 @@ async function verifySig(hex, bytes) {
 }
 
 const KB = [
-  {k:["акси","aksi","кто ты","что ты"], a:"Я АКСИ — локальный offline-first ИИ-слой. Работаю в браузере: кандидаты ответов, квантовая калибровка (Born + интерференция), Ed25519 decision receipts. Контакт: aksilove@internet.ru. Не претендую на AGI и quantum advantage."},
+  {k:["акси","aksi","кто ты","что ты"], a:"Я АКСИ — локальный offline-first ИИ-слой. Кандидаты ответов, квантовая калибровка (Born + интерференция), Ed25519 decision receipts. Контакт: aksilove@internet.ru. Не AGI и не quantum advantage."},
   {k:["доверие к ии","доверие","trust","нейросет"], a:"Доверие к ИИ — не вера в «разум», а проверяемость: откуда ответ, по какому правилу выбран, можно ли воспроизвести и отказать при низкой согласованности. Fluency ≠ evidence."},
-  {k:["искусственн","artificial intelligence","machine learning"], a:"Искусственный интеллект — системы, выполняющие задачи, обычно требующие человеческого интеллекта: распознавание, язык, планирование. Современные LLM — статистические модели текста, не «разум»."},
-  {k:["суперпозиц","superposition","квант"], a:"Суперпозиция — линейная комбинация базисных состояний. Измерение даёт исход с вероятностью |a|² (правило Борна). Интерференция возможна, потому что складываются амплитуды, а не вероятности."},
-  {k:["born","борн","вероятност"], a:"Правило Борна: вероятность исхода = квадрат модуля амплитуды. В этом playground при λ>0 добавляется интерференционный вес кросс-термов — это калибровка, не физический quantum advantage."},
-  {k:["планет","солнечн"], a:"В Солнечной системе 8 планет: Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун. Плутон с 2006 года классифицируется как карликовая планета."},
+  {k:["искусственн","artificial intelligence","machine learning","машинн"], a:"Искусственный интеллект — системы, выполняющие задачи, обычно требующие человеческого интеллекта: распознавание, язык, планирование. Современные LLM — статистические модели текста, не «разум»."},
+  {k:["суперпозиц","superposition"], a:"Суперпозиция — линейная комбинация базисных состояний. Измерение даёт исход с вероятностью |a|² (правило Борна). Интерференция возможна, потому что складываются амплитуды, а не вероятности."},
+  {k:["born","борн","правило борн"], a:"Правило Борна: вероятность исхода = квадрат модуля амплитуды. В playground при λ>0 добавляется интерференционный вес кросс-термов — калибровка выбора, не физический quantum advantage."},
+  {k:["планет","солнечн"], a:"В Солнечной системе 8 планет: Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун. Плутон с 2006 — карликовая планета."},
   {k:["войн","мир","толст"], a:"Роман «Война и мир» написал Лев Николаевич Толстой (1863–1869)."},
-  {k:["земл","планет зем"], a:"Земля — третья планета от Солнца, оборот ~365 суток, сутки ~24 часа. Единственная известная планета с устойчивой жизнью."},
-  {k:["формул","aksi ="], a:"Формула АКСИ: AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity, S — sovereignty, n — накопленный опыт (seals)."},
-  {k:["интерферен","interference"], a:"Интерференция: конструктивная усиливает, деструктивная ослабляет. В playground Mᵢ = |aᵢ|² + λ·Σ 2 Re(aᵢāⱼ). При λ=0 система сводится к классическим вероятностям."},
-  {k:["привет","hello","здравств"], a:"Привет. Я АКСИ Quantum Playground. Задайте любой вопрос — соберу кандидаты, прогоню через калибровку и подпишу decision receipt."},
-  {k:["памят","memory","indexeddb"], a:"Ключи Ed25519 и seals хранятся локально (IndexedDB / localStorage). Данные не уходят на сервер АКСИ."},
-  {k:["wifi","интернет","онлайн"], a:"При наличии сети playground запрашивает краткие факты (Wikipedia REST). Offline всегда доступен локальный слой."}
+  {k:["земл"], a:"Земля — третья планета от Солнца, оборот ~365 суток, сутки ~24 часа. Единственная известная планета с устойчивой жизнью."},
+  {k:["формул","aksi ="], a:"Формула АКСИ: AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity, S — sovereignty, n — seals."},
+  {k:["интерферен","interference"], a:"Интерференция: конструктивная усиливает, деструктивная ослабляет. Mᵢ = |aᵢ|² + λ·Σ 2 Re(aᵢāⱼ). При λ=0 — классические вероятности."},
+  {k:["привет","hello","здравств"], a:"Привет. Я АКСИ Quantum Playground. Задайте вопрос — соберу кандидаты, прогоню калибровку и подпишу decision receipt."},
+  {k:["памят","memory","indexeddb"], a:"Ключи Ed25519 и seals хранятся локально (IndexedDB). Данные не уходят на сервер АКСИ."},
+  {k:["wifi","интернет","онлайн"], a:"При наличии сети playground запрашивает краткие факты (Wikipedia REST). Offline всегда доступен локальный слой."},
+  {k:["пи","число пи","math.pi","контур"], a:"Число π используется как детерминированный seed фазы: φ получает малый сдвиг π·frac(hash), чтобы одинаковый вопрос давал воспроизводимую геометрию амплитуд. Это геометрия калибровки, не мистика."},
+  {k:["крипт","ed25519","подпись","receipt"], a:"Decision receipt подписывается Ed25519 (Web Crypto). Можно проверить в браузере и скачать JSON. Hash-chain связывает seals."},
+  {k:["квант","quantum"], a:"В АКСИ «квант» — state-vector симуляция и калибровка выбора ответа через амплитуды и Born rule. Это инженерная модель, не претензия на quantum computer advantage."},
+  {k:["оффлайн","offline","локальн"], a:"АКСИ offline-first: ядро работает в браузере без сервера. Сеть опциональна для фактов (Wikipedia), не обязательна для калибровки и подписи."},
+  {k:["eqs","оценка","score"], a:"EQS — эвристическая оценка кандидата (согласованность, источник, специфичность). Не «истина», а сигнал для ранжирования перед калибровкой."},
+  {k:["кто написал","автор"], a:"Уточните произведение. Например: «Война и мир» — Лев Толстой. Для других текстов лучше сверить с первичным источником."},
+  {k:["что такое акси","что такое aks"], a:"АКСИ — суверенный browser-first ИИ-слой: локальная память, калибровка ответов, криптографические receipts. Контакт: aksilove@internet.ru."},
+  {k:["llm","языков","gpt","claude"], a:"LLM генерируют текст по статистике токенов. АКСИ Playground не заменяет LLM: он показывает, как выбрать и подписать ответ среди кандидатов."},
+  {k:["безопасн","privacy","приват"], a:"Ключи и seals только в вашем браузере. Нет обязательного бэкенда АКСИ. Online-fetch — только публичные факты Wikipedia/DDG."},
+  {k:["коллапс","collapse"], a:"«Коллапс» здесь — выбор исхода по калиброванным вероятностям P_q. Кнопка «Запустить» берёт argmax; «Сэмпл Born» — случайный исход."},
+  {k:["граф","canvas","плоскост"], a:"Комплексная плоскость: Re/Im амплитуд кандидатов. Белая стрелка — сумма. Ползунок λ меняет фазы и кросс-термы live."}
 ];
 
 function localAnswer(q) {
@@ -402,7 +414,11 @@ function analyze(cands, lambda, cfW) {
     const eqs = +c.eqs;
     const align = (c.mem + c.src + c.coh + c.spe) / 4;
     const P = Math.max(1e-12, eqs);
-    const phi = Math.PI * (1 - align) * lambda;
+    // Pi-seed: deterministic phase geometry from query (reproducible, not mystical)
+    const piSeed = (typeof state.query === "string" && state.query)
+      ? (Array.from(state.query).reduce((h, ch) => ((h * 31 + ch.charCodeAt(0)) >>> 0), 0) % 1000) / 1000
+      : 0;
+    const phi = Math.PI * (1 - align) * lambda + Math.PI * piSeed * 0.08 * lambda;
     const cfScale = cfW * (0.35 + 0.65 * (1 - align));
     const amp = fromPolar(Math.sqrt(P), phi);
     const ampCf = cfScale > 1e-9 ? fromPolar(Math.sqrt(P * cfScale), phi + Math.PI / 2) : C(0, 0);
@@ -565,6 +581,12 @@ function renderResult() {
     dec.className = "decision no";
     dec.textContent = "DEFERRED · масса размыта (" + pq.toFixed(3) + ")";
   }
+  const why = document.getElementById("whyBox");
+  if (why) {
+    why.textContent = "Выбрано: " + ch.c.engine + " · EQS " + ch.eqs.toFixed(2) +
+      " · P_c " + (pc * 100).toFixed(1) + "% → P_q " + (pq * 100).toFixed(1) + "%" +
+      " · φ=" + ch.phi.toFixed(3) + " (π-seed)";
+  }
 }
 
 async function seal() {
@@ -639,14 +661,17 @@ function animateCollapse() {
   requestAnimationFrame(tick);
 }
 
+let runGen = 0;
 async function run() {
   const q = document.getElementById("q").value.trim();
   if (!q) return;
+  const gen = ++runGen;
   state.query = q;
   document.getElementById("run").disabled = true;
   document.getElementById("final").textContent = "Сбор кандидатов…";
   try {
     const built = await buildCandidates(q);
+    if (gen !== runGen) return;
     state.cands = built.cands;
     state.mode = built.mode;
     document.getElementById("modeBadge").textContent = built.mode;
@@ -654,10 +679,11 @@ async function run() {
     animateCollapse();
     await seal();
   } catch (e) {
+    if (gen !== runGen) return;
     document.getElementById("final").textContent = "Ошибка: " + (e.message || e);
     toast("Ошибка генерации");
   }
-  document.getElementById("run").disabled = false;
+  if (gen === runGen) document.getElementById("run").disabled = false;
 }
 
 document.getElementById("sInt").oninput = e => {
