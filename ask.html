@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>АКСИ · Спросить</title>
-<meta name="description" content="АКСИ: вопрос → факты → выбор → подпись. Offline-first runtime.">
+<title>АКСИ · Универсальный runtime</title>
+<meta name="description" content="АКСИ: KB + память + Wikipedia → синтез → ADIA → seal. Offline-first.">
 <link rel="canonical" href="https://milana808.github.io/ask.html">
 <style>
 :root{--bg:#0b0b10;--ink:#e8e8f0;--muted:#8b8b9a;--line:#1c1c28;--blue:#2d6dff;--green:#4ade80;--red:#f87171;--card:#12121a;--panel:#0e0e16}
@@ -18,7 +18,7 @@ header{border-bottom:1px solid var(--line);padding:12px 16px;display:flex;justif
 main{flex:1;display:grid;grid-template-columns:1fr 300px;max-width:1100px;width:100%;margin:0 auto}
 @media(max-width:860px){main{grid-template-columns:1fr}}
 .chat{display:flex;flex-direction:column;border-right:1px solid var(--line)}
-.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:calc(100vh - 200px)}
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;min-height:280px;max-height:calc(100vh - 210px)}
 .msg{max-width:95%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);white-space:pre-wrap;word-break:break-word}
 .msg.user{align-self:flex-end;background:#151528}
 .msg.bot{align-self:flex-start}
@@ -39,14 +39,14 @@ main{flex:1;display:grid;grid-template-columns:1fr 300px;max-width:1100px;width:
 .pipe .s.done{color:var(--green);border-color:#2a4a2a}
 .pipe .s.on{color:var(--ink);border-color:var(--blue)}
 .cand{font-size:11px;padding:6px;border-left:3px solid #456;margin:4px 0;background:var(--panel)}
-.hint{font-size:11px;color:var(--muted)}
+.hint{font-size:11px;color:var(--muted);line-height:1.4}
 footer{border-top:1px solid var(--line);padding:8px 16px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 code{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><h1>АКСИ</h1><span class="sub">спросить · v1.2.2 · offline-first</span></div>
+  <div class="brand"><h1>АКСИ</h1><span class="sub">universal · v1.3 · offline-first</span></div>
   <nav class="nav"><a href="/aksi-playground/">Playground</a><a href="/">Home</a></nav>
 </header>
 <main>
@@ -54,29 +54,29 @@ code{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all}
   <div class="msgs" id="msgs"></div>
   <div class="presets" id="presets">
     <button type="button" data-q="Что такое АКСИ?">АКСИ</button>
-    <button type="button" data-q="Что такое доверие к ИИ?">Доверие к ИИ</button>
-    <button type="button" data-q="Кто написал Войну и мир?">Война и мир</button>
     <button type="button" data-q="Почему небо голубое?">Небо</button>
+    <button type="button" data-q="Кто написал Войну и мир?">Толстой</button>
     <button type="button" data-q="Что такое блокчейн?">Блокчейн</button>
-    <button type="button" data-q="Сколько планет в Солнечной системе?">Планеты</button>
+    <button type="button" data-q="Что такое нейронная сеть?">Нейросеть</button>
+    <button type="button" data-q="запомни: АКСИ контакт aksilove@internet.ru">Запомни</button>
   </div>
   <div class="composer">
-    <input id="q" type="text" placeholder="Спроси что угодно…" autocomplete="off">
+    <input id="q" type="text" placeholder="Вопрос или: запомни: факт…" autocomplete="off">
     <button type="button" id="send">Спросить</button>
   </div>
 </section>
 <aside class="side">
-  <h2>Pipeline</h2>
+  <h2>Единый pipeline</h2>
   <div class="pipe" id="pipe">
     <div class="s" data-s="1">1 Источники</div>
-    <div class="s" data-s="2">2 Ранжирование</div>
-    <div class="s" data-s="3">3 Калибровка</div>
-    <div class="s" data-s="4">4 Gate + Seal</div>
+    <div class="s" data-s="2">2 Синтез</div>
+    <div class="s" data-s="3">3 ADIA + калибровка</div>
+    <div class="s" data-s="4">4 Gate + Seal + Memory</div>
   </div>
   <h2>Статус</h2>
   <div class="card"><div class="hint">Режим</div><div id="mode">—</div></div>
   <div class="card"><div class="hint">Decision</div><div class="n" id="dec">—</div></div>
-  <h2>Кандидаты</h2>
+  <h2>Фрагменты</h2>
   <div id="cands">—</div>
   <h2>Proof</h2>
   <div class="card hint">sig <code id="sig">—</code></div>
@@ -85,11 +85,11 @@ code{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all}
     <button type="button" id="btnD">Receipt</button>
     <button type="button" id="btnM">Очистить память</button>
   </div>
-  <p class="hint" style="margin-top:10px">Память и ключи только в браузере. Не AGI.</p>
+  <p class="hint" style="margin-top:10px">Команда <b>запомни: …</b> пишет в локальную память. Не AGI.</p>
 </aside>
 </main>
 <footer>
-  <span>АКСИ Ask v1.2.2 · aksilove@internet.ru</span>
+  <span>АКСИ Unified v1.3 · aksilove@internet.ru</span>
   <span id="memN">memory: 0</span>
 </footer>
 <script type="module">
@@ -102,146 +102,58 @@ const fromPolar=(r,p)=>C(r*Math.cos(p),r*Math.sin(p));
 async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");}
 function toHex(buf){return[...new Uint8Array(buf)].map(x=>x.toString(16).padStart(2,"0")).join("");}
 function fromHex(h){const a=new Uint8Array(h.length/2);for(let i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a.buffer;}
-const DB="aksi-ask-v12";
+const DB="aksi-ask-v13";
 function idb(mode,fn){return new Promise((res,rej)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("s"))d.createObjectStore("s");if(!d.objectStoreNames.contains("mem"))d.createObjectStore("mem",{keyPath:"id",autoIncrement:true});};r.onsuccess=()=>fn(r.result,res,rej);r.onerror=()=>rej(r.error);});}
 const storeGet=k=>idb("readonly",(d,res,rej)=>{const q=d.transaction("s").objectStore("s").get(k);q.onsuccess=()=>res(q.result??null);q.onerror=()=>rej(q.error);});
 const storeSet=(k,v)=>idb("readwrite",(d,res,rej)=>{const q=d.transaction("s","readwrite").objectStore("s").put(v,k);q.onsuccess=()=>res();q.onerror=()=>rej(q.error);});
 const memAdd=e=>idb("readwrite",(d,res,rej)=>{const q=d.transaction("mem","readwrite").objectStore("mem").add(e);q.onsuccess=()=>res();q.onerror=()=>rej(q.error);});
 const memAll=()=>idb("readonly",(d,res,rej)=>{const q=d.transaction("mem").objectStore("mem").getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);});
 const memClr=()=>idb("readwrite",(d,res,rej)=>{const q=d.transaction("mem","readwrite").objectStore("mem").clear();q.onsuccess=()=>res();q.onerror=()=>rej(q.error);});
-let kp=null,pub="—",prev=null,lastR=null,lastC="",sealed=0,busy=false,memories=[];
+let kp=null,pub="—",prev=null,lastR=null,lastC="",busy=false,memories=[];
 async function keys(){try{const st=await storeGet("ed");if(st?.p&&st?.s){kp={publicKey:await crypto.subtle.importKey("raw",fromHex(st.p),{name:"Ed25519"},true,["verify"]),privateKey:await crypto.subtle.importKey("pkcs8",fromHex(st.s),{name:"Ed25519"},true,["sign"])};pub=st.p;return;}}catch(e){}try{kp=await crypto.subtle.generateKey({name:"Ed25519"},true,["sign","verify"]);pub=toHex(await crypto.subtle.exportKey("raw",kp.publicKey));await storeSet("ed",{p:pub,s:toHex(await crypto.subtle.exportKey("pkcs8",kp.privateKey))});}catch(e){pub="n/a";kp=null;}}
 async function sign(bytes){if(!kp)return"no-key";return toHex(await crypto.subtle.sign({name:"Ed25519"},kp.privateKey,bytes));}
 async function verify(hex,bytes){if(!kp||hex==="no-key")return false;try{return await crypto.subtle.verify({name:"Ed25519"},kp.publicKey,fromHex(hex),bytes);}catch(e){return false;}}
 const KB=[
-  {k:["что такое акси","кто ты","что ты","акси?","я акси"],a:"АКСИ — локальный offline-first runtime в браузере. Собирает кандидаты ответа (своя база, память, Wikipedia), ранжирует, калибрует выбор и подписывает decision receipt (Ed25519). Не облачный чат и не AGI. Контакт: aksilove@internet.ru"},
-  {k:["акси"],a:"АКСИ — суверенный browser-first слой: вопрос → факты → выбор → подпись. Работает без обязательного сервера. aksilove@internet.ru"},
-  {k:["доверие к ии","доверять нейро","доверие"],a:"Доверие к ИИ — это проверяемость, а не вера: откуда ответ, как выбран, можно ли воспроизвести и отказать при слабых данных. Красивый текст ≠ доказательство."},
+  {k:["что такое акси","кто ты","что ты","я акси"],a:"АКСИ — локальный offline-first runtime: источники (KB, память, Wikipedia) → синтез ответа → ADIA/калибровка → Ed25519 seal. Не облачный чат и не AGI. Контакт: aksilove@internet.ru"},
+  {k:["акси"],a:"АКСИ — browser-first слой решения: вопрос → факты → синтез → подпись. Без обязательного сервера. aksilove@internet.ru"},
+  {k:["доверие к ии","доверие"],a:"Доверие к ИИ — проверяемость: источник, правило выбора, воспроизводимость, право отказать. Fluency ≠ evidence."},
   {k:["войн","толст","войну и мир","война и мир"],a:"Роман «Война и мир» написал Лев Николаевич Толстой в 1863–1869 годах."},
-  {k:["планет","солнечн систем"],a:"В Солнечной системе 8 планет: Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун. Плутон с 2006 года — карликовая планета."},
-  {k:["небо","голуб","рэлея","почему небо"],a:"Небо кажется голубым из‑за рассеяния Рэлея: молекулы воздуха сильнее рассеивают коротковолновый (синий) свет Солнца, чем красный. На закате путь лучей длиннее — доминирует красный."},
-  {k:["блокчейн","blockchain"],a:"Блокчейн — цепочка блоков данных, связанных криптографическими хешами. Каждый блок ссылается на предыдущий; менять историю дорого. Используют в криптовалютах и реестрах, где нужна общая неизменяемая запись."},
-  {k:["нейронн","нейросет"],a:"Нейронная сеть — модель из слоёв связанных «нейронов» (вычислительных узлов). Обучается на примерах, подстраивая веса. Современные LLM — очень большие сети, предсказывающие следующий токен текста."},
-  {k:["борщ","приготовить борщ"],a:"Классический борщ: свёкла, капуста, картофель, морковь, лук, томат/паста, бульон (или вода), чеснок, зелень. Овощи обжаривают/тушат, свёклу часто отдельно, затем соединяют с бульоном и варят до мягкости. Подают со сметаной."},
-  {k:["искусственн интеллект","что такое ии"],a:"Искусственный интеллект — системы, которые выполняют задачи, обычно требующие человеческого интеллекта: язык, зрение, планирование. Сегодня чаще всего это статистические модели на данных, а не «сознание»."},
-  {k:["правило борн","борн"],a:"Правило Борна: вероятность исхода = квадрат модуля амплитуды (|a|²). В АКСИ это используют для калибровки выбора между кандидатами ответа — это модель, не квантовый компьютер."},
-  {k:["суперпозиц"],a:"Суперпозиция — состояние как сумма возможных исходов с амплитудами. При «измерении» получается один исход с вероятностью |a|²."},
-  {k:["привет","здравств","hello"],a:"Привет. Я АКСИ. Задайте вопрос — отвечу из локальной базы, памяти или Wikipedia и при необходимости подпишу ответ."},
-  {k:["оффлайн","offline"],a:"Ядро АКСИ работает offline. Интернет нужен только чтобы подтянуть внешние факты (Wikipedia)."},
-  {k:["памят"],a:"Память хранится в IndexedDB этого браузера. Успешные (ALLOWED) ответы можно использовать как резонанс позже."},
-  {k:["подпись","ed25519","receipt"],a:"Каждый ответ может получить Ed25519-подпись и receipt JSON. Это фиксирует, что именно было выбрано — не «истину мира»."},
-  {k:["земл"],a:"Земля — третья планета от Солнца. Оборот вокруг Солнца ≈ 365 суток, вокруг оси ≈ 24 часа."},
-  {k:["интернет"],a:"Интернет — сеть сетей на протоколах TCP/IP. Браузер получает HTML/JS по HTTP(S); АКСИ использует это опционально для фактов."},
-  {k:["крипт"],a:"В браузере Web Crypto даёт SHA-256 и Ed25519. АКСИ использует их для целостности и подписи решений."},
-  {k:["формул акси","aksi ="],a:"AKSI = (A × I × S) × (1 + 0.4√n), где A — agency, I — integrity, S — sovereignty, n — число seals."}
+  {k:["планет","солнечн"],a:"В Солнечной системе 8 планет: Меркурий, Венера, Земля, Марс, Юпитер, Сатурн, Уран, Нептун. Плутон с 2006 — карликовая планета."},
+  {k:["небо","голуб","рэлея"],a:"Небо кажется голубым из‑за рассеяния Рэлея: воздух сильнее рассеивает синий свет Солнца. На закате путь длиннее — виден красный."},
+  {k:["блокчейн","blockchain"],a:"Блокчейн — цепочка блоков, связанных криптографическими хешами. Изменение истории требует пересчёта цепочки. Основа криптовалют и распределённых реестров."},
+  {k:["нейронн","нейросет"],a:"Нейронная сеть — модель из слоёв связанных узлов. Обучается на данных, подстраивая веса. LLM предсказывают следующий токен текста."},
+  {k:["борщ"],a:"Борщ: свёкла, капуста, картофель, морковь, лук, томат, бульон, чеснок, зелень. Подают со сметаной."},
+  {k:["искусственн интеллект","что такое ии"],a:"ИИ — системы для задач, обычно требующих интеллекта. Современные LLM — статистические модели текста, не сознание."},
+  {k:["борн","суперпозиц"],a:"Правило Борна: P = |a|². Суперпозиция — сумма амплитуд. В АКСИ это калибровка выбора кандидатов, не quantum computer."},
+  {k:["привет","здравств","hello"],a:"Привет. Я АКСИ. Спросите что угодно — отвечу из базы, памяти или Wikipedia; можно «запомни: факт»."},
+  {k:["оффлайн","offline"],a:"Ядро offline. Сеть нужна только для внешних фактов."},
+  {k:["памят","запомни"],a:"Память — IndexedDB. Команда «запомни: …» сохраняет факт локально."},
+  {k:["подпись","ed25519","receipt"],a:"Decision receipt: Ed25519 + JSON. Фиксирует выбранный ответ, не «истину мира»."},
+  {k:["земл"],a:"Земля — третья от Солнца, ~365 суток год, ~24 часа сутки."},
+  {k:["формул"],a:"AKSI = (A × I × S) × (1 + 0.4√n)."}
 ];
-function localAnswer(q){
-  const s=q.toLowerCase().replace(/ё/g,"е");
-  let best=null,score=0;
-  for(const row of KB){
-    let sc=0;
-    for(const k of row.k){
-      const kk=k.toLowerCase();
-      if(s.includes(kk)) sc+=kk.length*(kk.includes(" ")?2.5:1.3);
-      else if(kk.length>=4 && s.split(/\s+/).some(w=>w.startsWith(kk.slice(0,4)))) sc+=kk.length*0.6;
-    }
-    if(/акси/.test(s) && row.k.some(k=>/акси/.test(k))) sc+=25;
-    if(sc>score){score=sc;best=row;}
-  }
-  if(best&&score>=4) return {text:best.a, score:Math.min(0.98,0.65+score/45)};
-  return null;
-}
-function memHit(q){const s=q.toLowerCase();const words=s.split(/\s+/).filter(w=>w.length>3);let best=null,sc=0;for(const m of memories){const t=(m.q+" "+m.a).toLowerCase();let h=0;for(const w of words)if(t.includes(w))h++;if(h>sc&&h>=2){sc=h;best=m;}}if(!best)return null;return{text:best.a,score:Math.min(0.88,0.5+sc*0.08)};}
-function relevance(text,q){const stop=new Set(["что","такое","это","как","для","или","the","a","an","is","of","to","and","кто","почему","зачем","какие"]);const words=q.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>2&&!stop.has(w));if(!words.length)return 0.4;const t=text.toLowerCase();let hit=0;for(const w of words)if(t.includes(w))hit++;let r=hit/words.length;if(/акси/.test(q.toLowerCase())&&/аксиом/.test(t)&&!/runtime|browser|offline|подпис/.test(t))r*=0.1;return r;}
-function searchSeed(q){let s=q.replace(/[?!.]+$/g,"").trim();s=s.replace(/^(что такое|что значит|кто такой|кто такая|кто написал|объясни|расскажи про|расскажи о|почему|зачем|как|сколько|where|what is|who)\s+/i,"");return s.slice(0,80)||q.slice(0,60);}
-async function fetchWiki(q,signal){const seed=searchSeed(q);for(const lang of["ru","en"]){try{const os=`https://${lang}.wikipedia.org/w/api.php?action=opensearch&limit=5&namespace=0&format=json&origin=*&search=${encodeURIComponent(seed)}`;const r=await fetch(os,{signal});if(!r.ok)continue;const data=await r.json();const titles=data?.[1]||[];let best=null,bestR=0;for(const title of titles.slice(0,5)){try{const sr=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,{signal});if(!sr.ok)continue;const j=await sr.json();if(!j.extract)continue;const rel=relevance(j.extract+" "+title,q);if(rel>bestR){bestR=rel;best={text:j.extract.slice(0,520),title,lang,rel};}}catch(e){if(e.name==="AbortError")throw e;}}if(best&&best.rel>=0.28)return best;}catch(e){if(e.name==="AbortError")throw e;}}return null;}
-async function fetchDDG(q,signal){try{const url=`https://api.duckduckgo.com/?q=${encodeURIComponent(q)}&format=json&no_html=1&skip_disambig=1`;const r=await fetch(url,{signal});if(!r.ok)return null;const j=await r.json();const t=j.AbstractText||j.Answer||"";if(t&&relevance(t,q)>=0.25)return t.slice(0,450);}catch(e){if(e.name==="AbortError")throw e;}return null;}
-function adia(c,q){const rel=relevance(c.text,q);const src=c.src||0.5;const coh=Math.min(1,c.text.length/180);const eqs=Math.min(0.98,0.40*rel+0.28*src+0.18*coh+0.14*(c.mem||0.4));return{...c,eqs,rel,coh};}
-function calibrate(cands,q){const lambda=0.4,cfW=0.15;const seed=Array.from(q).reduce((h,c)=>((h*31+c.charCodeAt(0))>>>0),0)%1000/1000;const prep=cands.map((c,i)=>{const align=((c.mem||0.5)+(c.src||0.5)+c.coh+(c.spe||0.6))/4;const P=Math.max(1e-12,c.eqs);const phi=Math.PI*(1-align)*lambda+Math.PI*seed*0.06*lambda;const a=cadd(fromPolar(Math.sqrt(P),phi),fromPolar(Math.sqrt(P*cfW*(0.4+0.6*(1-align))),phi+Math.PI/2));return{i,c,eqs:c.eqs,P,phi,a,align};});const sumP=prep.reduce((s,x)=>s+x.P,0);prep.forEach(x=>x.Pc=x.P/sumP);const raw=prep.map(xi=>{let s=cabs2(xi.a);for(const xj of prep)if(xj.i!==xi.i)s+=lambda*2*cmul(xi.a,cconj(xj.a)).re;return Math.max(1e-12,s);});const S=raw.reduce((a,b)=>a+b,0);const pQ=raw.map(v=>v/S);let best=0;for(let i=1;i<pQ.length;i++)if(pQ[i]>pQ[best])best=i;return{prep,pQ,best};}
+function localAnswer(q){const s=q.toLowerCase().replace(/ё/g,"е");let best=null,score=0;for(const row of KB){let sc=0;for(const k of row.k){if(s.includes(k))sc+=k.length*(k.includes(" ")?2.5:1.3);}if(/акси/.test(s)&&row.k.some(k=>/акси/.test(k)))sc+=25;if(sc>score){score=sc;best=row;}}if(best&&score>=4)return{text:best.a,score:Math.min(0.98,0.65+score/45)};return null;}
+function memHits(q,limit=3){const s=q.toLowerCase();const words=s.split(/\s+/).filter(w=>w.length>3);const scored=[];for(const m of memories){const t=(m.q+" "+m.a).toLowerCase();let h=0;for(const w of words)if(t.includes(w))h++;if(h>=1&&(m.a||"").length>8)scored.push({text:m.a,score:h,q:m.q});}scored.sort((a,b)=>b.score-a.score);return scored.slice(0,limit);}
+function relevance(text,q){const stop=new Set(["что","такое","это","как","для","или","the","a","an","is","of","to","and","кто","почему","зачем"]);const words=q.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>2&&!stop.has(w));if(!words.length)return 0.4;const t=text.toLowerCase();let hit=0;for(const w of words)if(t.includes(w))hit++;let r=hit/words.length;if(/акси/.test(q.toLowerCase())&&/аксиом/.test(t)&&!/runtime|offline|подпис/.test(t))r*=0.08;return r;}
+function searchSeed(q){let s=q.replace(/[?!.]+$/g,"").trim();s=s.replace(/^(что такое|что значит|кто такой|кто написал|объясни|расскажи про|расскажи о|почему|зачем|как|сколько|what is|who)\s+/i,"");return s.slice(0,80)||q.slice(0,60);}
+async function fetchWikiMulti(q,signal){const seed=searchSeed(q);const out=[];for(const lang of["ru","en"]){try{const os=`https://${lang}.wikipedia.org/w/api.php?action=opensearch&limit=4&namespace=0&format=json&origin=*&search=${encodeURIComponent(seed)}`;const r=await fetch(os,{signal});if(!r.ok)continue;const data=await r.json();for(const title of(data?.[1]||[]).slice(0,4)){try{const sr=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`,{signal});if(!sr.ok)continue;const j=await sr.json();if(!j.extract)continue;const rel=relevance(j.extract+" "+title,q);if(rel>=0.25)out.push({text:j.extract.slice(0,420),title,lang,rel,engine:"Wikipedia/"+lang});}catch(e){if(e.name==="AbortError")throw e;}}}catch(e){if(e.name==="AbortError")throw e;}}out.sort((a,b)=>b.rel-a.rel);const uniq=[];for(const x of out){if(uniq.some(u=>u.text.slice(0,60)===x.text.slice(0,60)))continue;uniq.push(x);if(uniq.length>=4)break;}return uniq;}
+function synthesize(q,parts){if(!parts.length)return{text:"По запросу «"+q.slice(0,90)+"» пока нет надёжных фрагментов. Уточните вопрос или добавьте факт: запомни: …",engine:"Guide",eqs:0.35};const local=parts.find(p=>p.engine==="Local KB");const web=parts.filter(p=>p.engine.startsWith("Wikipedia")||p.engine==="DDG");const mem=parts.filter(p=>p.engine==="Memory");if(local&&local.score>=0.75&&(!web.length||web[0].rel<0.55))return{text:local.text,engine:"Local KB",eqs:local.score||0.9,sources:["Local KB"]};const chunks=[];const sources=[];if(local){chunks.push(local.text);sources.push("Local KB");}for(const m of mem.slice(0,1)){if(!chunks.some(c=>c.includes(m.text.slice(0,40)))){chunks.push(m.text);sources.push("Memory");}}for(const w of web.slice(0,2)){const t=w.text.replace(/\s+/g," ").trim();if(t.length<40)continue;if(chunks.some(c=>c.slice(0,50)===t.slice(0,50)))continue;chunks.push(t);sources.push(w.engine);}if(!chunks.length)chunks.push(parts[0].text);let text;if(chunks.length===1)text=chunks[0];else{text=chunks[0];if(chunks[1]&&chunks[1].length>40&&!text.includes(chunks[1].slice(0,30)))text=text+"\n\n"+chunks[1];if(chunks[2]&&chunks[2].length>40&&text.length<500&&!text.includes(chunks[2].slice(0,30)))text=text+"\n\n"+chunks[2];}text=text.slice(0,900);const eqs=Math.min(0.95,0.45+0.15*Math.min(chunks.length,3)+0.2*(local?1:0)+0.1*(web[0]?.rel||0));return{text,engine:sources.length>1?"Synthesis":(sources[0]||"Guide"),eqs,sources};}
+function adia(c,q){const rel=relevance(c.text,q);const src=c.src||0.5;const coh=Math.min(1,c.text.length/180);return{...c,eqs:Math.min(0.98,0.38*rel+0.28*src+0.2*coh+0.14*(c.mem||0.4)),rel,coh};}
+function calibrate(cands,q){const lambda=0.35,cfW=0.12;const seed=Array.from(q).reduce((h,c)=>((h*31+c.charCodeAt(0))>>>0),0)%1000/1000;const prep=cands.map((c,i)=>{const align=((c.mem||0.5)+(c.src||0.5)+(c.coh||0.5)+(c.spe||0.6))/4;const P=Math.max(1e-12,c.eqs);const phi=Math.PI*(1-align)*lambda+Math.PI*seed*0.05*lambda;const a=cadd(fromPolar(Math.sqrt(P),phi),fromPolar(Math.sqrt(P*cfW*(0.4+0.6*(1-align))),phi+Math.PI/2));return{i,c,eqs:c.eqs,P,phi,a};});const sumP=prep.reduce((s,x)=>s+x.P,0);prep.forEach(x=>x.Pc=x.P/sumP);const raw=prep.map(xi=>{let s=cabs2(xi.a);for(const xj of prep)if(xj.i!==xi.i)s+=lambda*2*cmul(xi.a,cconj(xj.a)).re;return Math.max(1e-12,s);});const S=raw.reduce((a,b)=>a+b,0);const pQ=raw.map(v=>v/S);let best=0;for(let i=1;i<pQ.length;i++)if(pQ[i]>pQ[best])best=i;return{prep,pQ,best};}
 const msgs=document.getElementById("msgs");
 function add(role,text,meta=""){const d=document.createElement("div");d.className="msg "+role;d.appendChild(document.createTextNode(text));if(meta){const m=document.createElement("div");m.className="meta";m.innerHTML=meta;d.appendChild(m);}msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;}
 function pipe(n,st){document.querySelectorAll("#pipe .s").forEach(el=>{if(el.dataset.s===String(n)){el.classList.remove("on","done");el.classList.add(st);}});}
 function pipeReset(){document.querySelectorAll("#pipe .s").forEach(el=>el.classList.remove("on","done"));}
 let abort=null;
-async function ask(){
-  if(busy)return;
-  const q=document.getElementById("q").value.trim();
-  if(!q)return;
-  busy=true;
-  document.getElementById("send").disabled=true;
-  document.getElementById("q").value="";
-  add("user",q);
-  pipeReset();
-  if(abort)abort.abort();
-  abort=new AbortController();
-  const signal=abort.signal;
-  try{
-    pipe(1,"on");
-    document.getElementById("mode").textContent="поиск…";
-    const loc=localAnswer(q);
-    const mem=memHit(q);
-    let wiki=null,ddg=null;
-    const isSelf=/акси|aksi|кто ты|что ты/.test(q.toLowerCase());
-    if(navigator.onLine!==false && !isSelf){
-      const pair=await Promise.all([fetchWiki(q,signal),fetchDDG(q,signal)]);
-      wiki=pair[0]; ddg=pair[1];
-    }
-    pipe(1,"done"); pipe(2,"on");
-    let cands=[];
-    if(loc) cands.push({engine:"Local KB",text:loc.text,src:0.96,mem:0.92,spe:0.9});
-    if(mem) cands.push({engine:"Memory",text:mem.text,src:0.72,mem:0.95,spe:0.7});
-    if(wiki) cands.push({engine:"Wikipedia/"+wiki.lang,text:wiki.text,src:0.9,mem:0.45,spe:0.75});
-    if(ddg) cands.push({engine:"DDG",text:ddg,src:0.8,mem:0.4,spe:0.7});
-    if(!cands.length){
-      cands.push({engine:"Guide",text:"По запросу «"+q.slice(0,80)+"» локальных фактов нет, а сеть не дала релевантной статьи. Уточните формулировку или проверьте источник вручную. АКСИ не выдумывает уверенный ответ без данных.",src:0.4,mem:0.3,spe:0.4});
-    }
-    while(cands.length<3){
-      cands.push({engine:"Conservative",text:"Если источники слабые или конфликтуют, лучше DEFERRED: не выдавать непроверяемое за факт.",src:0.4,mem:0.3,spe:0.35});
-    }
-    cands=cands.slice(0,3).map(c=>adia(c,q)).sort((a,b)=>b.eqs-a.eqs);
-    const mode=(wiki||ddg||mem)?"hybrid":"local";
-    document.getElementById("mode").textContent=mode+(navigator.onLine!==false?" · online":" · offline");
-    document.getElementById("cands").innerHTML=cands.map((c,i)=>`<div class="cand" style="border-color:${['#2d6dff','#4ade80','#fb923c'][i]}"><b>${c.engine}</b> EQS ${c.eqs.toFixed(2)} · rel ${c.rel.toFixed(2)}<br>${c.text.slice(0,110)}…</div>`).join("");
-    pipe(2,"done"); pipe(3,"on");
-    const cal=calibrate(cands,q);
-    pipe(3,"done"); pipe(4,"on");
-    let choice=cal.best;
-    const locIdx=cal.prep.findIndex(p=>p.c.engine==="Local KB");
-    if(locIdx>=0 && cal.prep[locIdx].eqs>=0.68) choice=locIdx;
-    const chosen=cal.prep[choice];
-    const pq2=cal.pQ[choice];
-    const decision=(pq2>=0.34||(chosen.Pc>=0.4&&chosen.eqs>=0.7))?"ALLOWED":"DEFERRED";
-    document.getElementById("dec").textContent=decision+" · "+pq2.toFixed(3);
-    document.getElementById("dec").style.color=decision==="ALLOWED"?"var(--green)":"var(--red)";
-    const body={query:q,decision,final_answer:chosen.c.text,confidence:+pq2.toFixed(6),engine:chosen.c.engine,eqs:chosen.eqs,mode,candidates:cal.prep.map((p,i)=>({engine:p.c.engine,eqs:p.eqs,p_q:+cal.pQ[i].toFixed(4)})),prev_receipt_hash:prev,public_key:pub,timestamp:new Date().toISOString()};
-    lastC=JSON.stringify(body);
-    body.signature=await sign(new TextEncoder().encode(lastC));
-    lastR=body;
-    prev=await sha256(JSON.stringify(body));
-    sealed++;
-    document.getElementById("sig").textContent=(body.signature||"").slice(0,40)+"…";
-    if(decision==="ALLOWED"){
-      await memAdd({q,a:chosen.c.text,engine:chosen.c.engine,ts:Date.now()});
-      memories=await memAll();
-      document.getElementById("memN").textContent="memory: "+memories.length;
-    }
-    pipe(4,"done");
-    const meta=`<span class="badge ${decision==="ALLOWED"?"ok":"no"}">${decision}</span><span class="badge">${chosen.c.engine}</span>P_q ${pq2.toFixed(3)}`;
-    add("bot",chosen.c.text,meta);
-  }catch(e){
-    if(e.name!=="AbortError") add("bot","Ошибка: "+(e.message||e));
-  }
-  busy=false;
-  document.getElementById("send").disabled=false;
-  document.getElementById("q").focus();
-}
+async function teach(fact){const text=fact.trim();if(text.length<3){add("bot","Пустой факт.");return;}await memAdd({q:"teach",a:text,engine:"Teach",ts:Date.now()});memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;add("bot","Запомнила локально:\n"+text,`<span class="badge ok">MEMORY</span>`);}
+async function ask(){if(busy)return;const raw=document.getElementById("q").value.trim();if(!raw)return;const teachM=raw.match(/^\s*запомни\s*:\s*(.+)$/i);if(teachM){document.getElementById("q").value="";add("user",raw);await teach(teachM[1]);return;}busy=true;document.getElementById("send").disabled=true;document.getElementById("q").value="";add("user",raw);pipeReset();if(abort)abort.abort();abort=new AbortController();const signal=abort.signal;const q=raw;try{pipe(1,"on");document.getElementById("mode").textContent="источники…";const loc=localAnswer(q);const mems=memHits(q,2);let wiki=[];const isSelf=/акси|aksi|кто ты|что ты/.test(q.toLowerCase());if(navigator.onLine!==false&&!isSelf){wiki=await fetchWikiMulti(q,signal);}pipe(1,"done");pipe(2,"on");document.getElementById("mode").textContent="синтез…";const parts=[];if(loc)parts.push({engine:"Local KB",text:loc.text,score:loc.score,src:0.96,mem:0.9,spe:0.9});for(const m of mems)parts.push({engine:"Memory",text:m.text,score:0.7+m.score*0.05,src:0.7,mem:0.95,spe:0.7});for(const w of wiki)parts.push({engine:w.engine,text:w.text,score:0.5+w.rel*0.4,rel:w.rel,src:0.88,mem:0.4,spe:0.75});const syn=synthesize(q,parts.map(p=>({...p,rel:p.rel||relevance(p.text,q)})));let cands=[{engine:syn.engine,text:syn.text,src:0.9,mem:0.7,spe:0.8,eqs:syn.eqs}];if(loc&&loc.text!==syn.text)cands.push({engine:"Local KB",text:loc.text,src:0.96,mem:0.9,spe:0.9});if(wiki[0]&&wiki[0].text!==syn.text)cands.push({engine:wiki[0].engine,text:wiki[0].text,src:0.88,mem:0.4,spe:0.75});while(cands.length<3)cands.push({engine:"Conservative",text:"При слабых данных АКСИ предпочитает не выдавать непроверяемое за факт (DEFERRED).",src:0.4,mem:0.3,spe:0.35});cands=cands.slice(0,3).map(c=>adia(c,q));document.getElementById("cands").innerHTML=cands.map((c,i)=>`<div class="cand" style="border-color:${['#2d6dff','#4ade80','#fb923c'][i]}"><b>${c.engine}</b> EQS ${c.eqs.toFixed(2)}<br>${c.text.slice(0,100)}…</div>`).join("");const mode=parts.some(p=>p.engine.startsWith("Wikipedia"))?"hybrid":"local";document.getElementById("mode").textContent=mode+(navigator.onLine!==false?" · online":" · offline");pipe(2,"done");pipe(3,"on");const cal=calibrate(cands,q);let choice=cal.best;const synIdx=cal.prep.findIndex(p=>p.c.engine==="Synthesis"||p.c.engine==="Local KB");if(synIdx>=0&&cal.prep[synIdx].eqs>=0.65)choice=synIdx;pipe(3,"done");pipe(4,"on");const chosen=cal.prep[choice];const pq=cal.pQ[choice];const decision=(pq>=0.34||(chosen.Pc>=0.4&&chosen.eqs>=0.68))?"ALLOWED":"DEFERRED";document.getElementById("dec").textContent=decision+" · "+pq.toFixed(3);document.getElementById("dec").style.color=decision==="ALLOWED"?"var(--green)":"var(--red)";const body={query:q,decision,final_answer:chosen.c.text,confidence:+pq.toFixed(6),engine:chosen.c.engine,eqs:chosen.eqs,mode,sources:syn.sources||[chosen.c.engine],prev_receipt_hash:prev,public_key:pub,timestamp:new Date().toISOString()};lastC=JSON.stringify(body);body.signature=await sign(new TextEncoder().encode(lastC));lastR=body;prev=await sha256(JSON.stringify(body));document.getElementById("sig").textContent=(body.signature||"").slice(0,40)+"…";if(decision==="ALLOWED"){await memAdd({q,a:chosen.c.text,engine:chosen.c.engine,ts:Date.now()});memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;}pipe(4,"done");const meta=`<span class="badge ${decision==="ALLOWED"?"ok":"no"}">${decision}</span><span class="badge">${chosen.c.engine}</span>P_q ${pq.toFixed(3)}`;add("bot",chosen.c.text,meta);}catch(e){if(e.name!=="AbortError")add("bot","Ошибка: "+(e.message||e));}busy=false;document.getElementById("send").disabled=false;document.getElementById("q").focus();}
 document.getElementById("send").onclick=ask;
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")ask();});
 document.querySelectorAll("#presets [data-q]").forEach(b=>b.onclick=()=>{document.getElementById("q").value=b.getAttribute("data-q");ask();});
 document.getElementById("btnV").onclick=async()=>{if(!lastR||!lastC)return alert("Нет receipt");alert((await verify(lastR.signature,new TextEncoder().encode(lastC)))?"VALID ✓":"INVALID");};
 document.getElementById("btnD").onclick=()=>{if(!lastR)return;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(lastR,null,2)],{type:"application/json"}));a.download="aksi-receipt.json";a.click();};
 document.getElementById("btnM").onclick=async()=>{if(confirm("Очистить память?")){await memClr();memories=[];document.getElementById("memN").textContent="memory: 0";}};
-(async()=>{await keys();memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;add("bot","АКСИ Ask v1.2.2\n\nГотов. Локальная база + Wikipedia. Ответ подписывается. Не AGI.");})();
+(async()=>{await keys();memories=await memAll();document.getElementById("memN").textContent="memory: "+memories.length;add("bot","АКСИ Unified v1.3\n\nСоединено: KB + память + Wikipedia (несколько) → синтез → ADIA → калибровка → seal.\n\nКоманда: запомни: ваш факт\nНе AGI — проверяемый слой ответа.");})();
 </script>
 </body>
 </html>
