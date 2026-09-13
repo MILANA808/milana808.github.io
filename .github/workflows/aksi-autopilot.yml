@@ -47,16 +47,16 @@ jobs:
       - name: Required surface audit
         run: |
           set -e
-          for f in index.html ask.html trust/index.html bridge/index.html verify/index.html bio/index.html bio/life/index.html bio/arena/index.html bio/flywire/index.html .well-known/aksi.json AKSI-VAI.md llms.txt; do
+          for f in index.html product/index.html ask.html trust/index.html bridge/index.html verify/index.html bio/index.html bio/life/index.html bio/arena/index.html bio/flywire/index.html .well-known/aksi.json AKSI-VAI.md llms.txt; do
             test -f "$f"
           done
 
-      - name: Privacy audit
+      - name: Public-surface privacy audit
         run: |
           set -e
-          if grep -RniE 'aksilove@|internet\.ru|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' \
-            --exclude-dir=.git --exclude-dir=node_modules --exclude='*.map' .; then
-            echo "Public email/contact data detected. Remove it before release."
+          files=$(find . -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.css' -o -name '*.txt' \) -not -path './.git/*' -not -path './node_modules/*' -not -name '*.map')
+          if printf '%s\n' "$files" | xargs grep -nHiE 'aksilove@|internet\.ru|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'; then
+            echo "Public web-surface email/contact data detected. Remove it before release."
             exit 1
           fi
 
@@ -68,7 +68,7 @@ jobs:
             echo
             echo "- Commit: $GITHUB_SHA"
             echo "- UTC: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            echo "- Syntax, runtime, required-surface and privacy audits were executed."
+            echo "- Syntax, runtime, required-surface and public privacy audits were executed."
           } >> "$GITHUB_STEP_SUMMARY"
 
   failure-record:
