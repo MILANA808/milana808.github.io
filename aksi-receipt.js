@@ -1,5 +1,5 @@
 /**
- * AKSI Decision Receipt Protocol v0.1
+ * AKSI Decision Receipt Protocol v0.2
  * seal · verify · chain — offline, Ed25519, no server
  * Spec: DECISION-RECEIPT.md
  */
@@ -10,7 +10,7 @@
   "use strict";
 
   const PROTOCOL = "aksi-decision-receipt";
-  const VERSION = "0.1";
+  const VERSION = "0.2";
 
   function toHex(buf) {
     return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, "0")).join("");
@@ -84,6 +84,13 @@
       aksi_score: +(+fields.aksi_score || 0).toFixed(4),
       sources: Array.isArray(fields.sources) ? fields.sources.slice(0, 12) : [],
       policy: String(fields.policy || "companion"),
+      gate_trace: fields.gate_trace && typeof fields.gate_trace === "object"
+        ? {
+            veto: !!fields.gate_trace.veto,
+            reason: fields.gate_trace.reason || null,
+            motif: fields.gate_trace.motif || "none",
+          }
+        : { veto: false, reason: null, motif: "none" },
       prev_receipt_hash: fields.prev_receipt_hash || null,
       public_key: pubHex,
       timestamp: fields.timestamp || new Date().toISOString(),
