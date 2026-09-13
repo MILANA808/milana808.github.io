@@ -1,43 +1,41 @@
-# AKSI Decision Receipt Protocol · v0.1
+# AKSI Decision Receipt Protocol · v0.2
 
-**Not a chatbot. A signed decision record.**
+**Not a chatbot. Not a model. A signed decision record.**
 
-Any answer or agent action can emit a receipt that a third party verifies offline — without trusting the producer, the host, or AKSI servers.
+> Decision without receipt didn’t happen.
 
 ```
 query + candidates
   → score (EQS / policy)
+  → FLY-GATE (optional bio-inspired veto)
   → ALLOWED | DEFERRED
   → Decision Receipt (Ed25519 + prev-hash)
   → offline verify
 ```
 
-## Why this exists
+## Jackpot layer
 
-Models produce fluent text. Agents take actions.
-Most systems leave no independent proof of *what was decided, under what gate, from which sources*.
+| Primitive | Meaning |
+|-----------|---------|
+| **Gate** | ALLOWED or DEFERRED — right to refuse |
+| **Seal** | Ed25519 over canonical JSON |
+| **Chain** | prev_receipt_hash — tamper-evident |
+| **Verify** | Offline: public key + file, no network |
 
-AKSI Decision Receipt fixes that layer only:
+Does **not** claim world-truth. Claims: this decision was made under this policy, linked to the previous seal.
 
-- **Gate** — ALLOWED or DEFERRED (right to refuse)
-- **Seal** — Ed25519 over canonical payload
-- **Chain** — `prev_receipt_hash` detects insertion/deletion
-- **Offline verify** — public key + receipt file, no network required
+## Fly-Gate (honest)
 
-This does **not** claim truth of the world.
-It claims: *this decision was made, under this policy, at this time, linked to the previous sealed decision*.
+Open science: adult Drosophila connectome ~140k neurons (FlyWire / MaleCNS). Full simulation is research (neuPrint, Codex, flybrain) — **not** claimed in browser.
 
-## Receipt schema (JSON)
+AKSI borrows **one motif**: bitter veto — strong negative evidence suppresses a go-command. Maps to DEFERRED + gate_trace.
 
-See live demo: https://milana808.github.io/ask.html
-Verify: https://milana808.github.io/verify.html
+Module: aksi-fly-gate.js
 
-Fields: protocol, version, receipt_id, query, decision, final_answer, confidence, engine, eqs, mode, n, aksi_score, sources, policy, prev_receipt_hash, public_key, timestamp, signature.
+## Live
 
-Canonical bytes: stable sorted-key JSON without signature/receipt_id → Ed25519 sign → receipt_id = SHA-256(canonical).
+- Demo: https://milana808.github.io/ask.html
+- Verify: https://milana808.github.io/verify.html
+- Contact: aksilove@internet.ru
 
-## Contact
-
-aksilove@internet.ru · https://milana808.github.io/ask.html
-
-*AKSI Decision Receipt Protocol v0.1 — 2026-09-13*
+*AKSI Decision Receipt Protocol v0.2 — 2026-09-13*
