@@ -50,18 +50,18 @@ async function teach(fact){
   await memAdd({q:key, a:text, engine:"Teach", kind:"teach", w:2.5, ts:Date.now()});
   memories=await memAll();
   refreshXP();
-  add("bot","Усвоено локально (teach):\n"+text+"\n\nКлюч поиска: «"+key+"»",`<span class="badge learn">LEARN</span>`);
+  add("bot","Усвоено локально:\n"+text,`<span class="badge learn">LEARN</span>`);
 }
 
 async function feedback(ok){
-  if(!lastQA){ add("bot","Нет предыдущего ответа для оценки."); return; }
+  if(!lastQA){ add("bot","Сначала задайте вопрос."); return; }
   if(ok){
     const w=(lastQA.w||1)+1.5;
     await memAdd({q:lastQA.q, a:lastQA.a, engine:lastQA.engine||"Feedback", kind:"correct", w, ts:Date.now()});
     memories=await memAll();
     lastQA={...lastQA, w};
     refreshXP();
-    add("bot","Принято: ответ усилен (w↑).",`<span class="badge ok">+LEARN</span>`);
+    add("bot","Принято: ответ усилен.",`<span class="badge ok">+LEARN</span>`);
   }else{
     await memAdd({q:lastQA.q, a:lastQA.a, engine:"Feedback", kind:"wrong", w:0.15, ts:Date.now()});
     memories=await memAll();
@@ -197,8 +197,8 @@ document.getElementById("btnV").onclick=async()=>{
   if(!lastR) return alert("Нет receipt");
   if(typeof AKSI_RECEIPT!=="undefined"){
     const v=await AKSI_RECEIPT.verify(lastR);
-    alert(v.ok?"VALID ✓ (Decision Receipt v0.2)":"INVALID: "+(v.reason||""));
-  }else alert("Нет AKSI_RECEIPT");
+    alert(v.ok?"VALID ✓":"INVALID: "+(v.reason||""));
+  }else alert("Нет модуля проверки");
 };
 document.getElementById("btnD").onclick=()=>{
   if(!lastR) return;
@@ -210,5 +210,5 @@ document.getElementById("btnM").onclick=async()=>{if(confirm("Очистить �
   await keys();
   memories=await memAll();
   refreshXP();
-  add("bot","АКСИ Recursive v1.7 · Decision Receipt + Fly-Gate\n\nGate → ALLOWED/DEFERRED → Ed25519 receipt → offline verify.\nFly-Gate: bio-inspired veto (не коннектом 140k нейронов).\nНе AGI — signed decision layer.\naksilove@internet.ru");
+  add("bot","Здравствуйте. Я АКСИ — локальный полезный интеллект.\n\n• Задайте вопрос\n• «запомни: факт» — сохранится у вас\n• «верно» / «неверно» / «исправь: …»\n• Receipt — проверяемый след решения\n\nНе AGI. Не замена врачу или юристу.\naksilove@internet.ru");
 })();
