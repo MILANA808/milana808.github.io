@@ -8,7 +8,7 @@ on:
     - cron: "17 3 * * *"
 
 permissions:
-  contents: write
+  contents: read
   issues: write
 
 concurrency:
@@ -60,30 +60,16 @@ jobs:
             exit 1
           fi
 
-      - name: Build automation report
+      - name: Write audit summary
         if: always()
         run: |
-          mkdir -p .aksi/reports
           {
-            echo "# AKSI Autopilot Report"
+            echo "## AKSI Autopilot"
             echo
             echo "- Commit: $GITHUB_SHA"
             echo "- UTC: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            echo "- Runner: $RUNNER_OS"
-            echo "- Status: see workflow checks"
-          } > .aksi/reports/latest.md
-
-      - name: Commit report when changed
-        if: success()
-        run: |
-          if git diff --quiet -- .aksi/reports/latest.md; then
-            exit 0
-          fi
-          git config user.name "AKSI Autopilot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .aksi/reports/latest.md
-          git commit -m "chore: refresh AKSI autopilot report"
-          git push
+            echo "- Syntax, runtime, required-surface and privacy audits were executed."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   failure-record:
     if: failure()
@@ -102,20 +88,18 @@ jobs:
               `Workflow: ${context.workflow}`,
               `Run: ${context.runId}`,
               '',
-              'Inspect the failed job, fix the root cause, and push a new commit.'
+              'Inspect the failed job and fix the root cause.'
             ].join('\n');
             const existing = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'open',
-              labels: 'automation-failure'
+              state: 'open'
             });
             if (!existing.data.some(i => i.title === title)) {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title,
-                body,
-                labels: ['automation-failure']
+                body
               });
             }
