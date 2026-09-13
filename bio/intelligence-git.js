@@ -1,7 +1,7 @@
 /* AKSI Intelligence Git — causal branches for digital agents. */
 (function(global){
   'use strict';
-  const VERSION='0.1.0', PROTOCOL='AKSI-IGIT/0.1';
+  const VERSION='0.1.1', PROTOCOL='AKSI-IGIT/0.1';
   function stable(v){
     if(v===null||typeof v!=='object') return v;
     if(Array.isArray(v)) return v.map(stable);
@@ -44,7 +44,10 @@
       const n=Math.min(left.events.length,right.events.length); let divergence=-1;
       for(let i=0;i<n;i++) if(left.events[i].transition_hash!==right.events[i].transition_hash){divergence=i;break;}
       if(divergence<0 && left.events.length!==right.events.length) divergence=n;
-      return {protocol:PROTOCOL,left:left.branch,right:right.branch,common_parent:left.parent_state_hash===right.parent_state_hash,divergence_index:divergence,left_events:left.events.length,right_events:right.events.length,left_state_hash:left.state_hash,right_state_hash:right.state_hash};
+      const ancestry = left.parent_state_hash===right.parent_state_hash ||
+        left.parent_state_hash===right.state_hash || right.parent_state_hash===left.state_hash ||
+        (left.parent_state_hash && right.parent_state_hash && left.parent_state_hash===right.parent_state_hash);
+      return {protocol:PROTOCOL,left:left.branch,right:right.branch,common_parent:Boolean(ancestry),divergence_index:divergence,left_events:left.events.length,right_events:right.events.length,left_state_hash:left.state_hash,right_state_hash:right.state_hash};
     }
     async export(){
       return {protocol:PROTOCOL,version:VERSION,agent:{id:this.agent_id,version:this.agent_version},world_seed:this.world_seed,branches:this.branches};
