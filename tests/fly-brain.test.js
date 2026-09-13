@@ -1,0 +1,4 @@
+const fs=require('fs');const vm=require('vm');const nodeCrypto=require('crypto');
+const source=fs.readFileSync('bio/flywire/fly-brain.js','utf8');
+const ctx={TextEncoder,crypto:{subtle:{digest:(a,b)=>nodeCrypto.webcrypto.subtle.digest(a,b)}}};vm.createContext(ctx);vm.runInContext(source,ctx);
+(async()=>{const F=ctx.AKSIFlyBrain; if(F.DATASET.neurons!==139255)throw Error('dataset neuron count mismatch'); const b=new F.FlyBrainStudy(); b.registerNeuron({id:'n1',type:'sensory'}); b.addProbe({target:'visual'}); const e=await b.recordExperiment({stimulus:{light:1},model:{kind:'reference'},action:{turn:1},outcome:{reward:1},measured:false}); if(!e.evidence_id||b.summary().probes!==1)throw Error('fly experiment contract failed'); console.log('AKSI Fly Brain contract: OK');})().catch(e=>{console.error(e);process.exit(1)});
