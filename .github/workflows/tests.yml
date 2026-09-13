@@ -1,4 +1,4 @@
-name: AKSI browser-smoke
+name: AKSI runtime-smoke
 on:
   push:
     branches: [main]
@@ -15,17 +15,22 @@ jobs:
       - name: JS syntax check
         run: |
           set -e
-          for f in aksi-*.js app-runtime.js sw.js; do
+          for f in aksi-*.js app-runtime.js sw.js bio/*.js; do
             [ -f "$f" ] || continue
             node --check "$f"
             echo "OK $f"
           done
       - name: Runtime contract tests
-        run: node tests/aksi-runtime.test.js
+        run: |
+          node tests/aksi-runtime.test.js
+          node tests/intelligence-git.test.js
       - name: Required files
         run: |
           test -f index.html
           test -f aksi-security.js
           test -f aksi-runtime.js
+          test -f bio/aksi-reality-engine.js
+          test -f bio/intelligence-git.js
           test -f tests/aksi-runtime.test.js
+          test -f tests/intelligence-git.test.js
           echo MVP files present
