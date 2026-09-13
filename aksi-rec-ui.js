@@ -50,34 +50,23 @@ async function teach(fact){
   await memAdd({q:key, a:text, engine:"Teach", kind:"teach", w:2.5, ts:Date.now()});
   memories=await memAll();
   refreshXP();
-  add("bot","Усвоено локально (teach):\n"+text+"\n\nКлюч поиска: «"+key+"»",
-    `<span class="badge learn">LEARN</span>`);
+  add("bot","Усвоено локально (teach):\n"+text+"\n\nКлюч поиска: «"+key+"»",`<span class="badge learn">LEARN</span>`);
 }
 
 async function feedback(ok){
-  if(!lastQA){ add("bot","Нет предыдущего ответа для оценки. Сначала задайте вопрос."); return; }
+  if(!lastQA){ add("bot","Нет предыдущего ответа для оценки."); return; }
   if(ok){
     const w=(lastQA.w||1)+1.5;
     await memAdd({q:lastQA.q, a:lastQA.a, engine:lastQA.engine||"Feedback", kind:"correct", w, ts:Date.now()});
-    for(const m of memories){
-      if(m.kind==="wrong") continue;
-      if((m.a||"")===lastQA.a || ((m.q||"")===lastQA.q && (m.a||"").slice(0,40)===(lastQA.a||"").slice(0,40))){
-        m.w=Math.min(5, +(m.w||1)+1);
-        m.kind=m.kind==="teach"?"teach":"correct";
-        try{ await memPut(m); }catch(e){}
-      }
-    }
     memories=await memAll();
     lastQA={...lastQA, w};
     refreshXP();
-    add("bot","Принято: ответ усилен (w↑). Похожие вопросы будут приоритетнее брать этот факт.",
-      `<span class="badge ok">+LEARN</span>`);
+    add("bot","Принято: ответ усилен (w↑).",`<span class="badge ok">+LEARN</span>`);
   }else{
     await memAdd({q:lastQA.q, a:lastQA.a, engine:"Feedback", kind:"wrong", w:0.15, ts:Date.now()});
     memories=await memAll();
     refreshXP();
-    add("bot","Отмечено как неверно (w↓). Сразу можно: исправь: правильный текст",
-      `<span class="badge no">−LEARN</span>`);
+    add("bot","Отмечено как неверно. Можно: исправь: текст",`<span class="badge no">−LEARN</span>`);
   }
 }
 
@@ -90,8 +79,7 @@ async function correct(text){
   memories=await memAll();
   lastQA={q:lastQA.q, a:t, engine:"Correct", w:3.5};
   refreshXP();
-  add("bot","Исправление записано. Рекурсия: этот ответ будет сильнее при похожих вопросах.\n\n"+t,
-    `<span class="badge learn">CORRECT</span>`);
+  add("bot","Исправление записано.\n\n"+t,`<span class="badge learn">CORRECT</span>`);
 }
 
 let abort=null;
@@ -100,20 +88,16 @@ async function ask(){
   if(busy) return;
   const raw=document.getElementById("q").value.trim();
   if(!raw) return;
-
   const teachM=raw.match(/^\s*запомни\s*:\s*(.+)$/i);
   const corrM=raw.match(/^\s*исправь\s*:\s*(.+)$/i);
   const okM=/^\s*(верно|правильно|ок|ok|\+1|👍)\s*$/i.test(raw);
   const badM=/^\s*(неверно|неправильно|ошибка|\-1|👎)\s*$/i.test(raw);
-
   document.getElementById("q").value="";
   add("user",raw);
-
   if(teachM){ await teach(teachM[1]); return; }
   if(corrM){ await correct(corrM[1]); return; }
   if(okM){ await feedback(true); return; }
   if(badM){ await feedback(false); return; }
-
   busy=true;
   document.getElementById("send").disabled=true;
   pipeReset();
@@ -121,7 +105,6 @@ async function ask(){
   abort=new AbortController();
   const signal=abort.signal;
   const q=raw;
-
   try{
     pipe(1,"on");
     document.getElementById("mode").textContent="источники + memory…";
@@ -129,17 +112,13 @@ async function ask(){
     const mems=memHits(q,5);
     let wiki=[];
     const isSelf=/акси|aksi|кто ты|что ты/.test(q.toLowerCase());
-    if(navigator.onLine!==false && !isSelf){
-      wiki=await fetchWikiMulti(q, signal);
-    }
+    if(navigator.onLine!==false && !isSelf) wiki=await fetchWikiMulti(q, signal);
     pipe(1,"done"); pipe(2,"on");
     document.getElementById("mode").textContent="синтез…";
-
     const parts=[];
     if(loc) parts.push({engine:"Local KB", text:loc.text, score:loc.score, src:0.96, mem:0.9, spe:0.9});
     for(const m of mems) parts.push({engine:"Memory", text:m.text, score:m.score, w:m.w, src:0.78, mem:0.98, spe:0.85});
     for(const w of wiki) parts.push({engine:w.engine, text:w.text, score:0.5+w.rel*0.4, rel:w.rel, src:0.88, mem:0.4, spe:0.75});
-
     const syn=synthesize(q, parts.map(p=>({...p, rel:p.rel||relevance(p.text,q)})));
     let cands=[{engine:syn.engine, text:syn.text, src:0.9, mem:0.75, spe:0.85, eqs:syn.eqs}];
     if(loc && loc.text!==syn.text) cands.push({engine:"Local KB", text:loc.text, src:0.96, mem:0.9, spe:0.9});
@@ -147,11 +126,9 @@ async function ask(){
     else if(wiki[0] && wiki[0].text!==syn.text) cands.push({engine:wiki[0].engine, text:wiki[0].text, src:0.88, mem:0.4, spe:0.75});
     while(cands.length<3) cands.push({engine:"Conservative", text:"При слабых данных АКСИ не выдаёт непроверяемое за факт (DEFERRED).", src:0.4, mem:0.3, spe:0.35});
     cands=cands.slice(0,3).map(c=>adia(c,q));
-
     document.getElementById("cands").innerHTML=cands.map((c,i)=>`<div class="cand" style="border-color:${['#2d6dff','#4ade80','#fb923c'][i]}"><b>${c.engine}</b> EQS ${c.eqs.toFixed(2)}<br>${c.text.slice(0,100)}…</div>`).join("");
     const mode=parts.some(p=>String(p.engine).startsWith("Wikipedia"))?"hybrid":(mems.length?"memory-first":"local");
     document.getElementById("mode").textContent=mode+(navigator.onLine!==false?" · online":" · offline");
-
     pipe(2,"done"); pipe(3,"on");
     const cal=calibrate(cands,q);
     let choice=cal.best;
@@ -160,13 +137,22 @@ async function ask(){
     const memIdx=cal.prep.findIndex(p=>p.c.engine==="Memory");
     if(memIdx>=0 && mems[0] && mems[0].score>=3.2 && cal.prep[memIdx].eqs>=0.7) choice=memIdx;
     pipe(3,"done"); pipe(4,"on");
-
     const chosen=cal.prep[choice];
     const pq=cal.pQ[choice];
-    const decision=(pq>=0.34||(chosen.Pc>=0.4&&chosen.eqs>=0.68))?"ALLOWED":"DEFERRED";
-    document.getElementById("dec").textContent=decision+" · "+pq.toFixed(3);
+    let decision=(pq>=0.34||(chosen.Pc>=0.4&&chosen.eqs>=0.68))?"ALLOWED":"DEFERRED";
+    let gateTrace={veto:false,reason:null,motif:"none"};
+    if(typeof AKSI_FLY_GATE!=="undefined"){
+      const g=AKSI_FLY_GATE.evaluate({
+        confidence:pq, eqs:chosen.eqs, policy:"companion",
+        sourceConflict:cands.length>=2 && Math.abs((cands[0].eqs||0)-(cands[1].eqs||0))>0.25,
+        lowEvidence:(syn.sources||[]).length<2 && chosen.eqs<0.7,
+        text:chosen.c.text
+      });
+      decision=g.decision;
+      gateTrace=AKSI_FLY_GATE.toGateTrace(g);
+    }
+    document.getElementById("dec").textContent=decision+(gateTrace.veto?" · veto":"")+" · "+pq.toFixed(3);
     document.getElementById("dec").style.color=decision==="ALLOWED"?"var(--green)":"var(--red)";
-
     const n=sealedCount();
     const aksiVal=aksiScore(0.9, chosen.eqs, 0.9, n);
     let body;
@@ -175,35 +161,26 @@ async function ask(){
         query:q, decision, final_answer:chosen.c.text, confidence:pq,
         engine:chosen.c.engine, eqs:chosen.eqs, mode, n, aksi_score:aksiVal,
         sources:syn.sources||[chosen.c.engine], policy:"companion",
-        prev_receipt_hash:prev
+        gate_trace:gateTrace, prev_receipt_hash:prev
       }, kp.privateKey, pub);
       prev=await AKSI_RECEIPT.receiptHash(body);
     }else{
-      body={
-        protocol:"aksi-decision-receipt", version:"0.1",
-        query:q, decision, final_answer:chosen.c.text, confidence:+pq.toFixed(6),
-        engine:chosen.c.engine, eqs:chosen.eqs, mode, n, aksi_score:aksiVal,
-        sources:syn.sources||[chosen.c.engine], policy:"companion",
-        prev_receipt_hash:prev, public_key:pub, timestamp:new Date().toISOString()
-      };
+      body={protocol:"aksi-decision-receipt", version:"0.2", query:q, decision, final_answer:chosen.c.text, confidence:+pq.toFixed(6), engine:chosen.c.engine, eqs:chosen.eqs, mode, n, aksi_score:aksiVal, sources:syn.sources||[chosen.c.engine], policy:"companion", gate_trace:gateTrace, prev_receipt_hash:prev, public_key:pub, timestamp:new Date().toISOString()};
       lastC=JSON.stringify(body);
       body.signature=await sign(new TextEncoder().encode(lastC));
       prev=await sha256(JSON.stringify(body));
     }
-    lastR=body;
-    lastC=JSON.stringify(body);
+    lastR=body; lastC=JSON.stringify(body);
     document.getElementById("sig").textContent=(body.signature||"").slice(0,40)+"…";
     document.getElementById("aksiScore").textContent=aksiVal;
-
     lastQA={q, a:chosen.c.text, engine:chosen.c.engine, w:1};
-
     if(decision==="ALLOWED"){
       await memAdd({q, a:chosen.c.text, engine:chosen.c.engine, kind:"seal", w:1, ts:Date.now()});
       memories=await memAll();
       refreshXP();
     }
     pipe(4,"done");
-    const meta=`<span class="badge ${decision==="ALLOWED"?"ok":"no"}">${decision}</span><span class="badge">${chosen.c.engine}</span>P_q ${pq.toFixed(3)} · n=${n}`;
+    const meta=`<span class="badge ${decision==="ALLOWED"?"ok":"no"}">${decision}</span><span class="badge">${chosen.c.engine}</span>P_q ${pq.toFixed(3)} · n=${n}`+(gateTrace.veto?" · veto":"");
     add("bot",chosen.c.text,meta);
   }catch(e){
     if(e.name!=="AbortError") add("bot","Ошибка: "+(e.message||e));
@@ -220,20 +197,12 @@ document.getElementById("btnV").onclick=async()=>{
   if(!lastR) return alert("Нет receipt");
   if(typeof AKSI_RECEIPT!=="undefined"){
     const v=await AKSI_RECEIPT.verify(lastR);
-    alert(v.ok?"VALID ✓ (Decision Receipt v0.1)":"INVALID: "+(v.reason||""));
-  }else{
-    alert((await verify(lastR.signature,new TextEncoder().encode(lastC)))?"VALID ✓":"INVALID");
-  }
+    alert(v.ok?"VALID ✓ (Decision Receipt v0.2)":"INVALID: "+(v.reason||""));
+  }else alert("Нет AKSI_RECEIPT");
 };
 document.getElementById("btnD").onclick=()=>{
   if(!lastR) return;
   if(typeof AKSI_RECEIPT!=="undefined") AKSI_RECEIPT.download(lastR,"aksi-decision-receipt.json");
-  else{
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(lastR,null,2)],{type:"application/json"}));
-    a.download="aksi-decision-receipt.json";
-    a.click();
-  }
 };
 document.getElementById("btnM").onclick=async()=>{if(confirm("Очистить память?")){await memClr();memories=[];lastQA=null;refreshXP();}};
 
@@ -241,5 +210,5 @@ document.getElementById("btnM").onclick=async()=>{if(confirm("Очистить �
   await keys();
   memories=await memAll();
   refreshXP();
-  add("bot","АКСИ Recursive v1.6 · Decision Receipt Protocol\n\nЦикл:\nвопрос → источники+память → синтез → ADIA → gate\n→ ALLOWED/DEFERRED → Ed25519 receipt → память\n→ «верно»/«неверно»/«исправь:»\n\nReceipt: кнопка Receipt → JSON → /verify.html (offline).\nФормула: AKSI=(A×I×S)×(1+0.4√n)\nНе AGI — signed decision layer.\naksilove@internet.ru");
+  add("bot","АКСИ Recursive v1.7 · Decision Receipt + Fly-Gate\n\nGate → ALLOWED/DEFERRED → Ed25519 receipt → offline verify.\nFly-Gate: bio-inspired veto (не коннектом 140k нейронов).\nНе AGI — signed decision layer.\naksilove@internet.ru");
 })();
