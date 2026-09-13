@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ · Симуляция мухи (Drosophila lab)</title>
+<meta name="description" content="Интерактивная LIF-симуляция упрощённого контура Drosophila + veto. Полный коннектом ~140k — у FlyWire/Codex.">
+<link rel="canonical" href="https://milana808.github.io/fly.html">
+<style>
+:root{--bg:#0a0a0f;--ink:#eef0f6;--muted:#8b8b9a;--line:#1c1c28;--blue:#3b82f6;--green:#4ade80;--red:#f87171;--amber:#fbbf24;--card:#12121a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin-bottom:6px}
+.disc{background:#1a1210;border:1px solid #4a3020;border-radius:10px;padding:12px;font-size:12px;color:#e8c4a0;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:10px}
+canvas{width:100%;height:280px;background:#08080c;border-radius:8px;display:block}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:#15151f;color:var(--ink);font-weight:700;cursor:pointer;font-size:13px}
+button.p{background:var(--blue);border-color:var(--blue);color:#fff}
+button.d{background:#3a1515;border-color:#5a2020}
+button.g{background:#153a20;border-color:#2a5a30}
+.log{font:12px/1.4 ui-monospace,monospace;max-height:160px;overflow:auto;background:#08080c;padding:10px;border-radius:8px;white-space:pre-wrap}
+.bar{height:8px;background:#1a1a24;border-radius:4px;overflow:hidden;margin:4px 0 10px}
+.bar>i{display:block;height:100%;background:var(--green);width:0%;transition:width .08s}
+.n{font-size:11px;color:var(--muted)}
+a.ext{color:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <strong>АКСИ · Fly Lab</strong>
+  <nav>
+    <a href="/">Главная</a>
+    <a href="/ask.html">Спросить</a>
+    <a href="/product/">Все системы</a>
+    <a href="/verify.html">Verify</a>
+  </nav>
+</header>
+<div class="wrap">
+  <h1>Симуляция контура мухи</h1>
+  <p class="n">Интерактивный LIF-контур (sensor → inter → motor + bitter veto). Учебная модель АКСИ, не загрузка 139255 нейронов FlyWire в эту вкладку.</p>
+  <div class="disc">
+    <b>Честно:</b> полный мозг Drosophila (~140k нейронов) опубликован FlyWire Consortium.
+    Здесь — <b>сжатый контур</b>: «горький» сигнал может <b>veto</b> команду approach.
+    Полные данные: <a class="ext" href="https://codex.flywire.ai/" target="_blank" rel="noopener">codex.flywire.ai</a>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h2>Активность сети</h2>
+      <canvas id="cv" width="640" height="280"></canvas>
+      <div class="row">
+        <button class="p" id="btnFood" type="button">Food (attract)</button>
+        <button class="d" id="btnBitter" type="button">Bitter (veto)</button>
+        <button class="g" id="btnTouch" type="button">Touch</button>
+        <button type="button" id="btnReset">Reset</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Состояние</h2>
+      <div class="n">Hunger drive</div>
+      <div class="bar"><i id="bHung"></i></div>
+      <div class="n">Approach motor</div>
+      <div class="bar"><i id="bMot"></i></div>
+      <div class="n">Veto / inhibition</div>
+      <div class="bar"><i id="bVeto" style="background:var(--red)"></i></div>
+      <div class="n">Decision</div>
+      <p id="dec" style="font-size:18px;font-weight:800;margin:6px 0">—</p>
+      <div class="n">Журнал</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>Связь с АКСИ</h2>
+    <p style="font-size:13px;color:var(--muted)">В мухе горький стимул может подавить кормление. В АКСИ Fly-Gate: ALLOWED или DEFERRED. Полный коннектом — открытая наука; наш продукт — проверяемый слой решения.</p>
+    <div class="row" style="margin-top:8px">
+      <a class="ext" href="/ask.html">Ask + Fly-Gate</a>
+      <a class="ext" href="/DECISION-RECEIPT.md">Decision Receipt</a>
+      <a class="ext" href="https://codex.flywire.ai/" target="_blank" rel="noopener">FlyWire Codex</a>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const names=['ORN_sweet','ORN_bitter','AN_hunger','LN_veto','MN_approach','MN_freeze'];
+  const N=names.length;
+  const W=[
+    [0,0,0,0,0,0],[0,0,0,0,0,0],
+    [0.45,0,0.05,-0.15,0,0],[0,0.9,0.1,0.05,0,0],
+    [0.25,0,0.55,-0.95,0.08,0],[0,0.35,0,0.4,0,0.05]
+  ];
+  let V=new Float64Array(N), spikes=new Uint8Array(N);
+  let hung=0.55,mot=0,veto=0,t=0;
+  let inp={sweet:0,bitter:0,touch:0};
+  const logEl=document.getElementById('log'), decEl=document.getElementById('dec');
+  function log(s){logEl.textContent=(s+'\n'+logEl.textContent).slice(0,1200);}
+  function step(){
+    t++;
+    V[0]+=inp.sweet; V[1]+=inp.bitter;
+    if(inp.touch){V[5]+=0.8;V[4]-=0.3;}
+    const next=new Float64Array(N);
+    for(let i=0;i<N;i++){
+      let x=V[i]*0.86;
+      for(let j=0;j<N;j++) x+=W[i][j]*(spikes[j]?1:0)*0.55;
+      if(i===2) x+=hung*0.04;
+      next[i]=x;
+    }
+    V=next; spikes=new Uint8Array(N);
+    for(let i=0;i<N;i++){ if(V[i]>1.0){spikes[i]=1;V[i]=0;} }
+    hung=Math.max(0,Math.min(1,hung+0.0015-(spikes[4]?0.04:0)));
+    mot=Math.max(0,Math.min(1,mot*0.9+(spikes[4]?0.35:0)-(spikes[5]?0.25:0)));
+    veto=Math.max(0,Math.min(1,veto*0.88+(spikes[3]?0.4:0)+(spikes[1]?0.2:0)));
+    const decision=(veto>0.45||spikes[3])?'DEFERRED / FREEZE':(mot>0.35?'ALLOWED / APPROACH':'IDLE');
+    decEl.textContent=decision;
+    decEl.style.color=decision.startsWith('DEFERRED')?'var(--red)':decision.startsWith('ALLOWED')?'var(--green)':'var(--muted)';
+    document.getElementById('bHung').style.width=(hung*100)+'%';
+    document.getElementById('bMot').style.width=(mot*100)+'%';
+    document.getElementById('bVeto').style.width=(veto*100)+'%';
+    inp.sweet*=0.85; inp.bitter*=0.8; inp.touch*=0.5;
+    draw();
+  }
+  const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+  const pos=[[80,60],[80,140],[240,100],[400,60],[560,100],[400,180]];
+  function draw(){
+    ctx.fillStyle='#08080c'; ctx.fillRect(0,0,cv.width,cv.height);
+    for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+      if(Math.abs(W[i][j])<0.05) continue;
+      ctx.strokeStyle=W[i][j]>0?'rgba(74,222,128,0.25)':'rgba(248,113,113,0.35)';
+      ctx.beginPath(); ctx.moveTo(pos[j][0],pos[j][1]); ctx.lineTo(pos[i][0],pos[i][1]); ctx.stroke();
+    }
+    for(let i=0;i<N;i++){
+      const r=16+Math.min(20,Math.max(0,V[i])*12);
+      ctx.beginPath(); ctx.arc(pos[i][0],pos[i][1],r,0,Math.PI*2);
+      ctx.fillStyle=spikes[i]?'#fbbf24':'#2d6dff'; ctx.fill();
+      ctx.fillStyle='#e8e8f0'; ctx.font='11px system-ui';
+      ctx.fillText(names[i],pos[i][0]-28,pos[i][1]+32);
+    }
+  }
+  document.getElementById('btnFood').onclick=()=>{inp.sweet=1.2;hung=Math.min(1,hung+0.05);log('t='+t+' FOOD → ORN_sweet');};
+  document.getElementById('btnBitter').onclick=()=>{inp.bitter=1.4;log('t='+t+' BITTER → veto');};
+  document.getElementById('btnTouch').onclick=()=>{inp.touch=1;log('t='+t+' TOUCH → freeze');};
+  document.getElementById('btnReset').onclick=()=>{V=new Float64Array(N);spikes=new Uint8Array(N);hung=0.55;mot=0;veto=0;inp={sweet:0,bitter:0,touch:0};t=0;log('RESET');};
+  setInterval(step,50);
+  log('LIF circuit online · 6 nodes · bitter veto');
+})();
+</script>
+</body>
+</html>
