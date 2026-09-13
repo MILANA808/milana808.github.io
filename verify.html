@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI · Verify Decision Receipt</title>
+<meta name="description" content="Offline verification of AKSI Decision Receipts. No server. Ed25519 + chain.">
+<link rel="canonical" href="https://milana808.github.io/verify.html">
+<style>
+:root{--bg:#0b0b10;--ink:#e8e8f0;--muted:#8b8b9a;--line:#1c1c28;--blue:#2d6dff;--green:#4ade80;--red:#f87171;--card:#12121a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding:24px}
+.wrap{max-width:640px;margin:0 auto}
+h1{font-size:18px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--muted);font-size:12px;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px}
+textarea,input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:#0e0e16;color:var(--ink);font:12px/1.4 ui-monospace,monospace}
+textarea{min-height:160px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{padding:10px 16px;border-radius:8px;border:0;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;font-size:13px}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+#out{margin-top:12px;padding:12px;border-radius:8px;border:1px solid var(--line);font-size:13px;white-space:pre-wrap;word-break:break-word}
+#out.ok{border-color:#2a4a2a;color:var(--green)}
+#out.bad{border-color:#5a2a2a;color:var(--red)}
+.hint{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4}
+a{color:var(--blue)}
+footer{margin-top:24px;font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AKSI · Verify Receipt</h1>
+  <p class="sub">Offline · Ed25519 · Decision Receipt Protocol v0.1 · no server</p>
+  <div class="card">
+    <label>Receipt JSON</label>
+    <textarea id="json" placeholder="Paste aksi-decision-receipt.json here…"></textarea>
+    <div class="row">
+      <button type="button" id="btnFile">Load file</button>
+      <input type="file" id="file" accept="application/json,.json" hidden>
+      <button type="button" id="btnV">Verify</button>
+      <button type="button" class="ghost" id="btnC">Verify chain (array)</button>
+    </div>
+    <p class="hint">Single receipt object, or JSON array of receipts (oldest first) for chain check.</p>
+  </div>
+  <div class="card">
+    <label>Result</label>
+    <div id="out">—</div>
+  </div>
+  <p class="hint">
+    Spec: <a href="/DECISION-RECEIPT.md">DECISION-RECEIPT.md</a> ·
+    Demo: <a href="/ask.html">ask.html</a> ·
+    Contact: aksilove@internet.ru
+  </p>
+  <footer>Does not prove world-truth. Proves: this decision was sealed under this key, linked to previous seals.</footer>
+</div>
+<script src="/aksi-receipt.js?v=1"></script>
+<script>
+const out = document.getElementById("out");
+function show(ok, text) {
+  out.className = ok ? "ok" : "bad";
+  out.textContent = text;
+}
+document.getElementById("btnFile").onclick = () => document.getElementById("file").click();
+document.getElementById("file").onchange = (e) => {
+  const f = e.target.files?.[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { document.getElementById("json").value = r.result; };
+  r.readAsText(f);
+};
+document.getElementById("btnV").onclick = async () => {
+  try {
+    const data = JSON.parse(document.getElementById("json").value);
+    if (Array.isArray(data)) {
+      show(false, "Array detected — use «Verify chain»");
+      return;
+    }
+    const v = await AKSI_RECEIPT.verify(data);
+    if (v.ok) {
+      show(true, "VALID ✓\n\nreceipt_id: " + (v.receipt_id || data.receipt_id) +
+        "\ndecision: " + data.decision +
+        "\nengine: " + data.engine +
+        "\nts: " + data.timestamp +
+        "\nquery: " + String(data.query || "").slice(0, 120));
+    } else {
+      show(false, "INVALID\n\n" + (v.reason || "unknown"));
+    }
+  } catch (e) {
+    show(false, "Parse/error: " + (e.message || e));
+  }
+};
+document.getElementById("btnC").onclick = async () => {
+  try {
+    let data = JSON.parse(document.getElementById("json").value);
+    if (!Array.isArray(data)) data = [data];
+    const v = await AKSI_RECEIPT.verifyChain(data);
+    if (v.ok) show(true, "CHAIN VALID ✓\n\nlength: " + v.length);
+    else show(false, "CHAIN INVALID\n\n" + (v.reason || "") + (v.index != null ? "\nindex: " + v.index : ""));
+  } catch (e) {
+    show(false, "Parse/error: " + (e.message || e));
+  }
+};
+</script>
+</body>
+</html>
