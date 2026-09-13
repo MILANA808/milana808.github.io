@@ -1,0 +1,23 @@
+const fs=require('fs');
+const vm=require('vm');
+const crypto=require('crypto');
+const source=fs.readFileSync('bio/intelligence-git.js','utf8');
+const ctx={console,TextEncoder,crypto:{subtle:{digest:async(a,b)=>crypto.webcrypto.subtle.digest(a,b)}}};
+vm.createContext(ctx);vm.runInContext(source,ctx);
+(async()=>{
+  const G=ctx.AKSIIntelligenceGit;
+  const g=new G.IntelligenceGit({agent_id:'test-agent',world_seed:'seed-1'});
+  const main=await g.init({x:0});
+  if(!main.state_hash||g.branches.length!==1) throw Error('init contract failed');
+  const e1=await g.record({action:{move:'right'},outcome:{reward:1}});
+  if(!e1.transition_hash) throw Error('record hash missing');
+  const parent=g.current.state_hash;
+  const child=await g.fork('counterfactual');
+  if(child.parent_state_hash!==parent) throw Error('fork parent mismatch');
+  await g.record({action:{move:'left'},outcome:{reward:2}});
+  const cmp=g.compare('main',child.branch);
+  if(!cmp||!cmp.common_parent||cmp.divergence_index<0) throw Error('compare contract failed');
+  const exported=await g.export();
+  if(exported.protocol!=='AKSI-IGIT/0.1'||exported.branches.length!==2) throw Error('export contract failed');
+  console.log('AKSI Intelligence Git contract: OK');
+})().catch(err=>{console.error(err);process.exit(1)});
