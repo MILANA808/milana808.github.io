@@ -19,7 +19,6 @@ function refreshXP(){
   renderMemPanel();
 }
 
-/** Visible memory — last learned / sealed items */
 function renderMemPanel(){
   const el=document.getElementById("memList");
   if(!el) return;
@@ -38,14 +37,12 @@ function renderMemPanel(){
   }).join("");
 }
 
-/** Extract searchable key from a taught fact */
 function factKey(text){
   const stop=new Set(["это","для","или","как","что","the","a","an","is","of","to","and","является","называется"]);
   const words=text.toLowerCase().replace(/ё/g,"е").split(/[^\p{L}\p{N}]+/u).filter(w=>w.length>2&&!stop.has(w));
   return words.slice(0,6).join(" ")||text.slice(0,40);
 }
 
-/* ── recursive learn ops ── */
 async function teach(fact){
   const text=fact.trim();
   if(text.length<3){ add("bot","Пустой факт."); return; }
@@ -62,7 +59,6 @@ async function feedback(ok){
   if(ok){
     const w=(lastQA.w||1)+1.5;
     await memAdd({q:lastQA.q, a:lastQA.a, engine:lastQA.engine||"Feedback", kind:"correct", w, ts:Date.now()});
-    // also boost any existing similar teach/seal entries
     for(const m of memories){
       if(m.kind==="wrong") continue;
       if((m.a||"")===lastQA.a || ((m.q||"")===lastQA.q && (m.a||"").slice(0,40)===(lastQA.a||"").slice(0,40))){
@@ -161,7 +157,6 @@ async function ask(){
     let choice=cal.best;
     const synIdx=cal.prep.findIndex(p=>/Synthesis|Local KB|Memory/.test(p.c.engine));
     if(synIdx>=0 && cal.prep[synIdx].eqs>=0.65) choice=synIdx;
-    // Prefer strong Memory hit if score is high
     const memIdx=cal.prep.findIndex(p=>p.c.engine==="Memory");
     if(memIdx>=0 && mems[0] && mems[0].score>=3.2 && cal.prep[memIdx].eqs>=0.7) choice=memIdx;
     pipe(3,"done"); pipe(4,"on");
@@ -173,19 +168,32 @@ async function ask(){
     document.getElementById("dec").style.color=decision==="ALLOWED"?"var(--green)":"var(--red)";
 
     const n=sealedCount();
-    const body={
-      query:q, decision, final_answer:chosen.c.text, confidence:+pq.toFixed(6),
-      engine:chosen.c.engine, eqs:chosen.eqs, mode, n,
-      aksi:aksiScore(0.9, chosen.eqs, 0.9, n),
-      sources:syn.sources||[chosen.c.engine],
-      prev_receipt_hash:prev, public_key:pub, timestamp:new Date().toISOString()
-    };
-    lastC=JSON.stringify(body);
-    body.signature=await sign(new TextEncoder().encode(lastC));
+    const aksiVal=aksiScore(0.9, chosen.eqs, 0.9, n);
+    let body;
+    if(typeof AKSI_RECEIPT!=="undefined" && kp){
+      body=await AKSI_RECEIPT.seal({
+        query:q, decision, final_answer:chosen.c.text, confidence:pq,
+        engine:chosen.c.engine, eqs:chosen.eqs, mode, n, aksi_score:aksiVal,
+        sources:syn.sources||[chosen.c.engine], policy:"companion",
+        prev_receipt_hash:prev
+      }, kp.privateKey, pub);
+      prev=await AKSI_RECEIPT.receiptHash(body);
+    }else{
+      body={
+        protocol:"aksi-decision-receipt", version:"0.1",
+        query:q, decision, final_answer:chosen.c.text, confidence:+pq.toFixed(6),
+        engine:chosen.c.engine, eqs:chosen.eqs, mode, n, aksi_score:aksiVal,
+        sources:syn.sources||[chosen.c.engine], policy:"companion",
+        prev_receipt_hash:prev, public_key:pub, timestamp:new Date().toISOString()
+      };
+      lastC=JSON.stringify(body);
+      body.signature=await sign(new TextEncoder().encode(lastC));
+      prev=await sha256(JSON.stringify(body));
+    }
     lastR=body;
-    prev=await sha256(JSON.stringify(body));
+    lastC=JSON.stringify(body);
     document.getElementById("sig").textContent=(body.signature||"").slice(0,40)+"…";
-    document.getElementById("aksiScore").textContent=body.aksi;
+    document.getElementById("aksiScore").textContent=aksiVal;
 
     lastQA={q, a:chosen.c.text, engine:chosen.c.engine, w:1};
 
@@ -208,13 +216,30 @@ async function ask(){
 document.getElementById("send").onclick=ask;
 document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")ask();});
 document.querySelectorAll("#presets [data-q]").forEach(b=>b.onclick=()=>{document.getElementById("q").value=b.getAttribute("data-q");ask();});
-document.getElementById("btnV").onclick=async()=>{if(!lastR||!lastC)return alert("Нет receipt");alert((await verify(lastR.signature,new TextEncoder().encode(lastC)))?"VALID ✓":"INVALID");};
-document.getElementById("btnD").onclick=()=>{if(!lastR)return;const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(lastR,null,2)],{type:"application/json"}));a.download="aksi-receipt.json";a.click();};
+document.getElementById("btnV").onclick=async()=>{
+  if(!lastR) return alert("Нет receipt");
+  if(typeof AKSI_RECEIPT!=="undefined"){
+    const v=await AKSI_RECEIPT.verify(lastR);
+    alert(v.ok?"VALID ✓ (Decision Receipt v0.1)":"INVALID: "+(v.reason||""));
+  }else{
+    alert((await verify(lastR.signature,new TextEncoder().encode(lastC)))?"VALID ✓":"INVALID");
+  }
+};
+document.getElementById("btnD").onclick=()=>{
+  if(!lastR) return;
+  if(typeof AKSI_RECEIPT!=="undefined") AKSI_RECEIPT.download(lastR,"aksi-decision-receipt.json");
+  else{
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(lastR,null,2)],{type:"application/json"}));
+    a.download="aksi-decision-receipt.json";
+    a.click();
+  }
+};
 document.getElementById("btnM").onclick=async()=>{if(confirm("Очистить память?")){await memClr();memories=[];lastQA=null;refreshXP();}};
 
 (async()=>{
   await keys();
   memories=await memAll();
   refreshXP();
-  add("bot","АКСИ Recursive v1.5\n\nЦикл:\nвопрос → источники+память → синтез → ADIA → seal\n→ (ALLOWED) память\n→ «верно»/«неверно»/«исправь:» усиливают или правят\n→ следующие ответы используют усиленное\n\nПанель «Память» справа показывает усвоенное.\nФормула: AKSI=(A×I×S)×(1+0.4√n)\nНе AGI — проверяемый bounded self-learning.\naksilove@internet.ru");
+  add("bot","АКСИ Recursive v1.6 · Decision Receipt Protocol\n\nЦикл:\nвопрос → источники+память → синтез → ADIA → gate\n→ ALLOWED/DEFERRED → Ed25519 receipt → память\n→ «верно»/«неверно»/«исправь:»\n\nReceipt: кнопка Receipt → JSON → /verify.html (offline).\nФормула: AKSI=(A×I×S)×(1+0.4√n)\nНе AGI — signed decision layer.\naksilove@internet.ru");
 })();
