@@ -1,0 +1,121 @@
+name: AKSI Autopilot
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: aksi-autopilot-main
+  cancel-in-progress: true
+
+jobs:
+  audit-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Syntax audit
+        run: |
+          set -e
+          for f in aksi-*.js app-runtime.js sw.js bio/*.js; do
+            [ -f "$f" ] || continue
+            node --check "$f"
+          done
+
+      - name: Runtime contracts
+        run: |
+          set -e
+          node tests/aksi-runtime.test.js
+          node tests/intelligence-git.test.js
+          node tests/fly-brain.test.js
+          node tests/digital-life.test.js
+
+      - name: Required surface audit
+        run: |
+          set -e
+          for f in index.html ask.html trust/index.html bridge/index.html verify/index.html bio/index.html bio/life/index.html bio/arena/index.html bio/flywire/index.html .well-known/aksi.json AKSI-VAI.md llms.txt; do
+            test -f "$f"
+          done
+
+      - name: Privacy audit
+        run: |
+          set -e
+          if grep -RniE 'aksilove@|internet\.ru|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' \
+            --exclude-dir=.git --exclude-dir=node_modules --exclude='*.map' .; then
+            echo "Public email/contact data detected. Remove it before release."
+            exit 1
+          fi
+
+      - name: Build automation report
+        if: always()
+        run: |
+          mkdir -p .aksi/reports
+          {
+            echo "# AKSI Autopilot Report"
+            echo
+            echo "- Commit: $GITHUB_SHA"
+            echo "- UTC: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "- Runner: $RUNNER_OS"
+            echo "- Status: see workflow checks"
+          } > .aksi/reports/latest.md
+
+      - name: Commit report when changed
+        if: success()
+        run: |
+          if git diff --quiet -- .aksi/reports/latest.md; then
+            exit 0
+          fi
+          git config user.name "AKSI Autopilot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .aksi/reports/latest.md
+          git commit -m "chore: refresh AKSI autopilot report"
+          git push
+
+  failure-record:
+    if: failure()
+    needs: audit-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `AKSI Autopilot failure: ${context.sha.slice(0,7)}`;
+            const body = [
+              'Automated AKSI audit/test pipeline failed.',
+              '',
+              `Commit: ${context.sha}`,
+              `Workflow: ${context.workflow}`,
+              `Run: ${context.runId}`,
+              '',
+              'Inspect the failed job, fix the root cause, and push a new commit.'
+            ].join('\n');
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'automation-failure'
+            });
+            if (!existing.data.some(i => i.title === title)) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['automation-failure']
+              });
+            }
