@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ Autopilot — самоизменение → GitHub</title>
+<meta name="description" content="АКСИ пишет изменения в GitHub с сайта. Token только в браузере.">
+<link rel="canonical" href="https://milana808.github.io/autopilot.html">
+<style>
+:root{--bg:#07070c;--ink:#eef0f6;--muted:#8b8b9a;--line:#1c1c28;--violet:#a78bfa;--green:#4ade80;--red:#f87171;--card:#0e0e16}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center}
+header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px}
+.logo{font-weight:900}.logo span{color:var(--violet)}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:22px;margin-bottom:8px}
+.lead{color:var(--muted);margin-bottom:18px;font-size:13px;line-height:1.5}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.card h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
+input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0a0a12;color:var(--ink);font:inherit}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#15151f;color:var(--ink);font-weight:700;cursor:pointer;font-size:13px}
+button.p{background:var(--violet);border-color:var(--violet);color:#fff}
+button.d{background:#3a1515}
+.log{font:11px ui-monospace,monospace;background:#050508;padding:10px;border-radius:10px;max-height:180px;overflow:auto;white-space:pre-wrap;margin-top:10px}
+.ok{color:var(--green)}.err{color:var(--red)}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#1a1a28;font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">АКСИ <span>Autopilot</span></div>
+  <nav>
+    <a href="/organism.html">Organism</a>
+    <a href="/ask.html">Ask</a>
+    <a href="/">Главная</a>
+  </nav>
+</header>
+<main>
+  <h1>Самоизменение → GitHub</h1>
+  <p class="lead">
+    Запись факта в <b>data/self-taught.json</b> → коммит в main → Pages.
+    Token (PAT <code>repo</code>) только в <b>sessionStorage</b>.
+  </p>
+  <div class="card">
+    <h2>1 · GitHub token</h2>
+    <label>Personal Access Token</label>
+    <input id="tok" type="password" placeholder="ghp_…" autocomplete="off">
+    <div class="row">
+      <button type="button" class="p" id="saveTok">Сохранить в сессии</button>
+      <button type="button" id="testTok">Проверить</button>
+      <button type="button" class="d" id="clrTok">Забыть</button>
+    </div>
+    <p id="who" class="lead" style="margin:10px 0 0"></p>
+  </div>
+  <div class="card">
+    <h2>2 · Научить → git</h2>
+    <label>Факт</label>
+    <textarea id="fact" placeholder="Факт для seed…"></textarea>
+    <div class="row">
+      <button type="button" class="p" id="push">Commit → GitHub</button>
+      <button type="button" id="load">Прочитать seed</button>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+  <div class="card">
+    <h2>3 · Безопасность</h2>
+    <p class="lead" style="margin:0">Allowlist: <span class="pill">data/self-taught.json</span>. Без вашего PAT сайт не пишет в git.</p>
+  </div>
+</main>
+<script src="/aksi-self-github.js?v=1"></script>
+<script>
+(function(){
+  var S=window.AKSI_SELF_GITHUB;
+  if(!S){document.getElementById('log').textContent='module missing';return;}
+  var logEl=document.getElementById('log');
+  function log(msg,cls){var line=document.createElement('div');if(cls)line.className=cls;line.textContent=msg;logEl.insertBefore(line,logEl.firstChild);}
+  document.getElementById('saveTok').onclick=function(){
+    if(S.setToken(document.getElementById('tok').value)){log('Token в sessionStorage','ok');document.getElementById('tok').value='';}
+    else log('Не сохранено','err');
+  };
+  document.getElementById('clrTok').onclick=function(){S.clearToken();log('Token удалён','ok');document.getElementById('who').textContent='';};
+  document.getElementById('testTok').onclick=async function(){
+    try{var u=await S.whoami();document.getElementById('who').innerHTML='OK: <b>'+u.login+'</b>';log('Auth OK '+u.login,'ok');}
+    catch(e){log('Auth fail: '+e.message,'err');}
+  };
+  document.getElementById('load').onclick=async function(){
+    try{var f=await S.getFile('data/self-taught.json');var data=JSON.parse(f.content);log('items '+(data.items&&data.items.length||0)+' sha '+f.sha.slice(0,7),'ok');}
+    catch(e){log(e.message,'err');}
+  };
+  document.getElementById('push').onclick=async function(){
+    var fact=document.getElementById('fact').value.trim();
+    if(!fact){log('Введите факт','err');return;}
+    try{
+      log('Пишу…');
+      var r=await S.teachToGitHub(fact,{via:'autopilot.html'});
+      log('COMMIT '+(r.commit||'').slice(0,7),'ok');
+      if(r.html_url)log(r.html_url,'ok');
+      document.getElementById('fact').value='';
+    }catch(e){log('Ошибка: '+e.message,'err');}
+  };
+})();
+</script>
+</body>
+</html>
