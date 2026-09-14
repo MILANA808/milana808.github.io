@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ · Full Brain — полноценный контур Drosophila</title>
+<meta name="description" content="Полноценный мозг мухи: full-scale WebGPU connectome + offline AKSI LIF gate + Decision Receipt.">
+<link rel="canonical" href="https://milana808.github.io/brain.html">
+<style>
+:root{--bg:#050508;--ink:#eef0f6;--muted:#8b8b9a;--line:#1c1c28;--blue:#3b82f6;--green:#4ade80;--red:#f87171;--card:#0e0e16}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--line);background:#0a0a10}
+.tabs button{flex:1;padding:12px;background:transparent;border:0;border-bottom:2px solid transparent;color:var(--muted);font-weight:700;cursor:pointer;font-size:13px}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--blue)}
+.pane{display:none;flex:1;min-height:0;flex-direction:column}
+.pane.on{display:flex}
+iframe{flex:1;width:100%;border:0;min-height:70vh;background:#000}
+.local{padding:14px;max-width:1000px;margin:0 auto;width:100%}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.card h2{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+canvas{width:100%;background:#050508;border-radius:8px;display:block}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button.act{padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:#15151f;color:var(--ink);font-weight:700;cursor:pointer;font-size:12px}
+button.p{background:var(--blue);border-color:var(--blue);color:#fff}
+button.d{background:#3a1515}
+.bar{height:7px;background:#1a1a24;border-radius:4px;overflow:hidden;margin:3px 0 8px}
+.bar>i{display:block;height:100%;width:0;background:var(--green)}
+.n{font-size:11px;color:var(--muted)}
+#dec{font-size:18px;font-weight:800;margin:6px 0}
+.log{font:11px ui-monospace,monospace;max-height:100px;overflow:auto;background:#050508;padding:8px;border-radius:8px;white-space:pre-wrap}
+.banner{background:#12101a;border:1px solid #2a2540;border-radius:10px;padding:10px 12px;font-size:12px;color:#c8c0e0;margin:10px 14px 0}
+.banner b{color:#a78bfa}
+.chip{display:inline-block;padding:2px 6px;border-radius:6px;background:#1a1a28;font-size:10px;margin:2px}
+a.act{text-decoration:none;display:inline-block}
+</style>
+</head>
+<body>
+<header>
+  <strong>АКСИ · Full Brain</strong>
+  <nav>
+    <a href="/">Главная</a>
+    <a href="/ask.html">Ask</a>
+    <a href="/aksi-neuro-lab.html">Lab</a>
+    <a href="/verify.html">Verify</a>
+  </nav>
+</header>
+<div class="tabs">
+  <button type="button" class="on" data-tab="full">1 Полный масштаб (SOTA)</button>
+  <button type="button" data-tab="local">2 Offline мозг + Receipt</button>
+  <button type="button" data-tab="how">3 Как устроено</button>
+</div>
+<section class="pane on" id="tab-full">
+  <div class="banner"><b>Решение:</b> ~140k нейронов FlyWire в SOTA WebGPU-движке
+    (<a href="https://webgpu-fly.pages.dev/" target="_blank" rel="noopener" style="color:#a78bfa">webgpu-fly</a>). Chrome/Edge, первый заход — большой кэш.
+    Если iframe пустой — открой ссылку напрямую.</div>
+  <iframe id="ff" title="Full-scale Drosophila" src="https://webgpu-fly.pages.dev/" allow="fullscreen" loading="lazy"></iframe>
+</section>
+<section class="pane" id="tab-local">
+  <div class="local">
+    <div class="banner" style="margin:0 0 12px">Offline LIF АКСИ + Seal в Decision Receipt. Gate для Ask.</div>
+    <div class="grid">
+      <div class="card">
+        <h2>Сеть + арена</h2>
+        <canvas id="world" width="640" height="240"></canvas>
+        <canvas id="net" width="640" height="180" style="margin-top:8px"></canvas>
+        <div class="row">
+          <button class="act p" id="food" type="button">Food</button>
+          <button class="act d" id="bitter" type="button">Bitter</button>
+          <button class="act" id="loom" type="button">Loom</button>
+          <button class="act" id="touch" type="button">Touch</button>
+          <button class="act" id="reset" type="button">Reset</button>
+          <button class="act p" id="seal" type="button">Seal</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Состояние</h2>
+        <div class="n">Hunger</div><div class="bar"><i id="bH"></i></div>
+        <div class="n">Approach</div><div class="bar"><i id="bA"></i></div>
+        <div class="n">Veto</div><div class="bar"><i id="bV" style="background:var(--red)"></i></div>
+        <div id="dec">—</div>
+        <div id="sp"></div>
+        <div class="log" id="log" style="margin-top:8px"></div>
+        <p class="n">N=<span id="nn">—</span> t=<span id="tt">0</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="pane" id="tab-how">
+  <div class="local" style="max-width:720px">
+    <div class="card">
+      <h2>Полноценная схема (решение за тебя)</h2>
+      <p class="n" style="margin:8px 0;line-height:1.65">
+        <b>Полный мозг</b> = FlyWire + WebGPU LIF (вкладка 1 / webgpu-fly).<br>
+        <b>Offline АКСИ</b> = behavioral LIF + Receipt (вкладка 2) + gate в Ask.<br>
+        <b>Продукт</b> = не копия 289MB в git, а связка full-scale + доказуемый слой решения.
+      </p>
+      <div class="row">
+        <a class="act p" href="/ask.html">Ask</a>
+        <a class="act" href="/aksi-neuro-lab.html">Neuro Lab</a>
+        <a class="act" href="/CONNECTOMICS.md">CONNECTOMICS</a>
+        <a class="act" href="/verify.html">Verify</a>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="/aksi-fly-brain.js?v=1"></script>
+<script src="/aksi-receipt.js?v=2"></script>
+<script>
+(function(){
+  document.querySelectorAll('.tabs button').forEach(function(btn){
+    btn.onclick=function(){
+      document.querySelectorAll('.tabs button').forEach(function(b){b.classList.remove('on');});
+      document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on');});
+      btn.classList.add('on');
+      document.getElementById('tab-'+btn.getAttribute('data-tab')).classList.add('on');
+    };
+  });
+  if(!window.AKSI_FLY_BRAIN)return;
+  var B=AKSI_FLY_BRAIN,st=B.createState();
+  var logEl=document.getElementById('log');
+  function log(s){if(logEl)logEl.textContent=(s+'\n'+logEl.textContent).slice(0,1500);}
+  document.getElementById('nn').textContent=B.N;
+  document.getElementById('food').onclick=function(){B.inject(st,'food',1.3);log('FOOD');};
+  document.getElementById('bitter').onclick=function(){B.inject(st,'bitter',1.5);log('BITTER');};
+  document.getElementById('loom').onclick=function(){B.inject(st,'loom',1.2);log('LOOM');};
+  document.getElementById('touch').onclick=function(){B.inject(st,'touch',1.1);log('TOUCH');};
+  document.getElementById('reset').onclick=function(){var n=B.createState();Object.keys(n).forEach(function(k){st[k]=n[k];});log('RESET');};
+  document.getElementById('seal').onclick=async function(){
+    if(!window.AKSI_RECEIPT){log('no receipt');return;}
+    try{
+      var kp=await AKSI_RECEIPT.generateKeyPair();
+      var body=await AKSI_RECEIPT.seal({
+        query:'full-brain t='+st.t,decision:st.lastDecision==='ALLOWED'?'ALLOWED':'DEFERRED',
+        final_answer:'Fly-Brain '+st.lastDecision,confidence:Math.max(0,st.approachTrace),eqs:0.9,mode:'lab',n:st.t,
+        sources:['AKSI_FLY_BRAIN'],policy:'lab',
+        gate_trace:{veto:st.vetoTrace>0.4,motif:'bitter_veto',brain:{t:st.t,neurons:B.N}}
+      },kp.privateKey,kp.pubHex);
+      AKSI_RECEIPT.download(body,'aksi-full-brain-experiment.json');
+      log('SEALED '+body.receipt_id.slice(0,14)+'…');
+    }catch(e){log('err '+e.message);}
+  };
+  var world=document.getElementById('world'),wctx=world.getContext('2d');
+  var net=document.getElementById('net'),nctx=net.getContext('2d');
+  var pos=[],order=[['sensory',0],['drive',1],['central',2],['descending',3],['motor',4]];
+  order.forEach(function(pair){B.GROUPS[pair[0]].forEach(function(name,i){pos[B.IDX[name]]={x:60+pair[1]*115,y:28+i*38,name:name};});});
+  function draw(){
+    wctx.fillStyle='#050508';wctx.fillRect(0,0,world.width,world.height);
+    wctx.strokeStyle='#222';wctx.strokeRect(30,30,world.width-60,world.height-60);
+    var cx=world.width/2+st.x*36,cy=world.height/2+st.y*36;
+    wctx.save();wctx.translate(cx,cy);wctx.rotate(st.heading);
+    wctx.fillStyle=st.lastDecision==='DEFERRED'?'#f87171':'#4ade80';
+    wctx.beginPath();wctx.ellipse(0,0,12,7,0,0,Math.PI*2);wctx.fill();
+    wctx.fillStyle='#fbbf24';wctx.beginPath();wctx.arc(10,0,3,0,Math.PI*2);wctx.fill();wctx.restore();
+    nctx.fillStyle='#050508';nctx.fillRect(0,0,net.width,net.height);
+    for(var i=0;i<B.N;i++)for(var j=0;j<B.N;j++){var w=B.W[i][j];if(!w)continue;nctx.strokeStyle=w>0?'rgba(74,222,128,0.2)':'rgba(248,113,113,0.28)';nctx.beginPath();nctx.moveTo(pos[j].x,pos[j].y);nctx.lineTo(pos[i].x,pos[i].y);nctx.stroke();}
+    for(var i=0;i<B.N;i++){var p=pos[i],r=9+Math.min(11,Math.max(0,st.V[i])*8);nctx.beginPath();nctx.arc(p.x,p.y,r,0,Math.PI*2);nctx.fillStyle=st.spikes[i]?'#fbbf24':'#2d6dff';nctx.fill();nctx.fillStyle='#aaa';nctx.font='8px system-ui';nctx.fillText(p.name,p.x-18,p.y+20);}
+  }
+  setInterval(function(){
+    var out=B.step(st);
+    document.getElementById('bH').style.width=(st.hung*100)+'%';
+    document.getElementById('bA').style.width=(Math.max(0,st.approachTrace)*100)+'%';
+    document.getElementById('bV').style.width=(Math.max(0,st.vetoTrace)*100)+'%';
+    var d=document.getElementById('dec');d.textContent=out.decision;d.style.color=out.decision==='DEFERRED'?'var(--red)':out.decision==='ALLOWED'?'var(--green)':'var(--muted)';
+    document.getElementById('sp').innerHTML=(out.spikes||[]).map(function(s){return '<span class="chip">'+s+'</span>';}).join(' ');
+    document.getElementById('tt').textContent=st.t;draw();
+  },40);
+  log('Full Brain · local N='+B.N);
+})();
+</script>
+</body>
+</html>
