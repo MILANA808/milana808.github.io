@@ -1,13 +1,13 @@
 /**
- * AKSI Bot v1.1 — unified product facade
- * Agent + Organism + Fly-Gate + Cortex (AES-GCM + quantum resonance) + self-taught
+ * AKSI Bot v1.2 — Agent + Organism + Gate + Cortex resonance + self-taught
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.1.0-bot-cortex";
+  var VER = "1.2.0-bot-cortex";
   var seed = [];
   var DEFAULT_CORTEX_PW = "aksi";
+  var CORTEX_MIN_SCORE = 0.002;
 
   function cortexPw() {
     try {
@@ -39,6 +39,14 @@
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (d) {
         if (d && Array.isArray(d.items)) seed = d.items;
+        try {
+          var local = JSON.parse(localStorage.getItem("aksi_bot_mem_v1") || "[]");
+          if (Array.isArray(local)) {
+            for (var i = 0; i < local.length; i++) {
+              if (local[i] && local[i].text) seed.push({ t: local[i].t, text: local[i].text, source: "local" });
+            }
+          }
+        } catch (e) {}
         return seed.length;
       })
       .catch(function () { return 0; });
@@ -47,14 +55,39 @@
   function matchSeed(q) {
     var low = String(q || "").toLowerCase();
     var words = low.split(/\s+/).filter(function (w) { return w.length > 3; });
+    var best = null;
+    var bestHit = 0;
     for (var i = seed.length - 1; i >= 0; i--) {
       var t = String(seed[i].text || "");
       var tl = t.toLowerCase();
       var hit = 0;
       for (var j = 0; j < words.length; j++) if (tl.indexOf(words[j]) >= 0) hit++;
-      if (hit >= 1 || (low.length > 5 && tl.indexOf(low.slice(0, 24)) >= 0))
-        return { text: t, source: "self-taught", offline: true };
+      if (low.length > 8 && tl.indexOf(low.slice(0, 32)) >= 0) hit += 2;
+      if (hit > bestHit) {
+        bestHit = hit;
+        best = { text: t, source: "self-taught", offline: true, hit: hit };
+      }
     }
+    if (best && bestHit >= 2) return best;
+    if (best && bestHit >= 1 && words.length <= 1) return best;
+    return null;
+  }
+
+  async function cortexHit(q) {
+    var cx = ensureCortexSession();
+    if (!cx || !cx.resonantQuery || !cx.size) return null;
+    try {
+      var hit = await cx.resonantQuery(q);
+      if (hit && hit.text && hit.score >= CORTEX_MIN_SCORE) {
+        return {
+          text: hit.text,
+          source: "cortex",
+          offline: true,
+          score: hit.score,
+          cortexId: hit.id
+        };
+      }
+    } catch (e) {}
     return null;
   }
 
@@ -110,23 +143,14 @@
     }
 
     var s = matchSeed(q);
-    if (s) return s;
-
-    var cx2 = ensureCortexSession();
-    if (cx2 && cx2.resonantQuery && cx2.size > 0) {
-      try {
-        var hit = await cx2.resonantQuery(q);
-        if (hit && hit.text) {
-          return {
-            text: hit.text,
-            source: "cortex",
-            offline: true,
-            score: hit.score,
-            cortexId: hit.id
-          };
-        }
-      } catch (e) {}
+    var c = await cortexHit(q);
+    if (c && s) {
+      if ((c.score || 0) >= CORTEX_MIN_SCORE && (s.hit || 0) < 2) return c;
+      if ((c.score || 0) > 0.01) return c;
+      return s;
     }
+    if (c) return c;
+    if (s) return s;
 
     if (G.AKSI_ORGANISM && G.AKSI_ORGANISM.decide) {
       try {
@@ -153,7 +177,7 @@
     }
 
     return {
-      text: "АКСИ Bot v" + VER + ".\nСпросите: кто ты · статус · организм.\n«запомни: факт» → seed + Cortex (AES-GCM).\n«кортекс пароль: …» — сменить ключ vault.",
+      text: "АКСИ Bot v" + VER + ".\nСпросите: кто ты · статус · организм.\n«запомни: факт» → seed + Cortex (AES-GCM + резонанс).\n«кортекс пароль: …» — ключ vault.",
       source: "bot-fallback",
       offline: true
     };
@@ -177,6 +201,7 @@
   }
 
   try { ensureCortexSession(); } catch (e) {}
+  try { loadSeed(); } catch (e) {}
 
   G.AKSI_BOT = {
     version: VER,
