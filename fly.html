@@ -3,150 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>АКСИ · Симуляция мухи (Drosophila lab)</title>
-<meta name="description" content="Интерактивная LIF-симуляция упрощённого контура Drosophila + veto. Полный коннектом ~140k — у FlyWire/Codex.">
+<title>АКСИ · Fly Brain — муха в мозге</title>
+<meta name="description" content="LIF behavioral brain Drosophila inside AKSI. 16 neurons sensor→veto→motor.">
 <link rel="canonical" href="https://milana808.github.io/fly.html">
 <style>
-:root{--bg:#0a0a0f;--ink:#eef0f6;--muted:#8b8b9a;--line:#1c1c28;--blue:#3b82f6;--green:#4ade80;--red:#f87171;--amber:#fbbf24;--card:#12121a}
+:root{--bg:#07070c;--ink:#eef0f6;--muted:#8b8b9a;--line:#1c1c28;--blue:#3b82f6;--green:#4ade80;--red:#f87171;--card:#101018}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:14px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center}
 header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px}
-.wrap{max-width:960px;margin:0 auto;padding:16px}
-h1{font-size:20px;margin-bottom:6px}
-.disc{background:#1a1210;border:1px solid #4a3020;border-radius:10px;padding:12px;font-size:12px;color:#e8c4a0;margin:12px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:720px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
-.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:10px}
-canvas{width:100%;height:280px;background:#08080c;border-radius:8px;display:block}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-button{padding:10px 14px;border-radius:8px;border:1px solid var(--line);background:#15151f;color:var(--ink);font-weight:700;cursor:pointer;font-size:13px}
+.wrap{max-width:1000px;margin:0 auto;padding:14px}
+h1{font-size:20px}
+.sub{color:var(--muted);font-size:12px;margin:4px 0 12px}
+.disc{background:#1a1410;border:1px solid #4a3520;border-radius:10px;padding:10px 12px;font-size:12px;color:#e8c4a0;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.card h2{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+canvas{width:100%;background:#050508;border-radius:8px;display:block}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+button{padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:#15151f;color:var(--ink);font-weight:700;cursor:pointer;font-size:12px}
 button.p{background:var(--blue);border-color:var(--blue);color:#fff}
 button.d{background:#3a1515;border-color:#5a2020}
 button.g{background:#153a20;border-color:#2a5a30}
-.log{font:12px/1.4 ui-monospace,monospace;max-height:160px;overflow:auto;background:#08080c;padding:10px;border-radius:8px;white-space:pre-wrap}
-.bar{height:8px;background:#1a1a24;border-radius:4px;overflow:hidden;margin:4px 0 10px}
-.bar>i{display:block;height:100%;background:var(--green);width:0%;transition:width .08s}
+.bar{height:7px;background:#1a1a24;border-radius:4px;overflow:hidden;margin:3px 0 8px}
+.bar>i{display:block;height:100%;width:0%;background:var(--green)}
 .n{font-size:11px;color:var(--muted)}
+.log{font:11px/1.35 ui-monospace,monospace;max-height:140px;overflow:auto;background:#050508;padding:8px;border-radius:8px;white-space:pre-wrap}
+#dec{font-size:20px;font-weight:800;margin:6px 0}
+.chip{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;background:#1a1a28;margin:2px}
 a.ext{color:var(--blue)}
 </style>
 </head>
 <body>
 <header>
-  <strong>АКСИ · Fly Lab</strong>
+  <strong>АКСИ · Fly Brain</strong>
   <nav>
     <a href="/">Главная</a>
-    <a href="/ask.html">Спросить</a>
-    <a href="/product/">Все системы</a>
+    <a href="/ask.html">Спросить (gate=муха)</a>
+    <a href="/product/">Системы</a>
     <a href="/verify.html">Verify</a>
   </nav>
 </header>
 <div class="wrap">
-  <h1>Симуляция контура мухи</h1>
-  <p class="n">Интерактивный LIF-контур (sensor → inter → motor + bitter veto). Учебная модель АКСИ, не загрузка 139255 нейронов FlyWire в эту вкладку.</p>
-  <div class="disc">
-    <b>Честно:</b> полный мозг Drosophila (~140k нейронов) опубликован FlyWire Consortium.
-    Здесь — <b>сжатый контур</b>: «горький» сигнал может <b>veto</b> команду approach.
-    Полные данные: <a class="ext" href="https://codex.flywire.ai/" target="_blank" rel="noopener">codex.flywire.ai</a>
-  </div>
+  <h1>Муха внутри мозга АКСИ</h1>
+  <p class="sub">16 LIF · sensor → drive → veto → motor · ALLOWED/DEFERRED. Behavioral brain АКСИ, не FlyWire 139k.</p>
+  <div class="disc"><b>Встроено в Ask:</b> <code>AKSI_FLY_BRAIN</code> гоняет gate перед Receipt. Полный коннектом: <a class="ext" href="https://codex.flywire.ai/" target="_blank" rel="noopener">codex.flywire.ai</a></div>
   <div class="grid">
     <div class="card">
-      <h2>Активность сети</h2>
-      <canvas id="cv" width="640" height="280"></canvas>
+      <h2>Мир + сеть</h2>
+      <canvas id="world" width="640" height="320"></canvas>
+      <canvas id="net" width="640" height="200" style="margin-top:8px"></canvas>
       <div class="row">
-        <button class="p" id="btnFood" type="button">Food (attract)</button>
-        <button class="d" id="btnBitter" type="button">Bitter (veto)</button>
-        <button class="g" id="btnTouch" type="button">Touch</button>
-        <button type="button" id="btnReset">Reset</button>
+        <button class="p" id="food" type="button">Food</button>
+        <button class="d" id="bitter" type="button">Bitter veto</button>
+        <button type="button" id="loom">Loom</button>
+        <button class="g" id="touch" type="button">Touch</button>
+        <button type="button" id="reset">Reset</button>
       </div>
     </div>
     <div class="card">
-      <h2>Состояние</h2>
-      <div class="n">Hunger drive</div>
-      <div class="bar"><i id="bHung"></i></div>
-      <div class="n">Approach motor</div>
-      <div class="bar"><i id="bMot"></i></div>
-      <div class="n">Veto / inhibition</div>
-      <div class="bar"><i id="bVeto" style="background:var(--red)"></i></div>
+      <h2>Состояние мозга</h2>
+      <div class="n">Hunger</div><div class="bar"><i id="bH"></i></div>
+      <div class="n">Energy</div><div class="bar"><i id="bE"></i></div>
+      <div class="n">Approach</div><div class="bar"><i id="bA"></i></div>
+      <div class="n">Veto</div><div class="bar"><i id="bV" style="background:var(--red)"></i></div>
       <div class="n">Decision</div>
-      <p id="dec" style="font-size:18px;font-weight:800;margin:6px 0">—</p>
-      <div class="n">Журнал</div>
+      <div id="dec">—</div>
+      <div class="n">Spikes</div>
+      <div id="sp"></div>
+      <div class="n" style="margin-top:8px">Log</div>
       <div class="log" id="log"></div>
-    </div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h2>Связь с АКСИ</h2>
-    <p style="font-size:13px;color:var(--muted)">В мухе горький стимул может подавить кормление. В АКСИ Fly-Gate: ALLOWED или DEFERRED. Полный коннектом — открытая наука; наш продукт — проверяемый слой решения.</p>
-    <div class="row" style="margin-top:8px">
-      <a class="ext" href="/ask.html">Ask + Fly-Gate</a>
-      <a class="ext" href="/DECISION-RECEIPT.md">Decision Receipt</a>
-      <a class="ext" href="https://codex.flywire.ai/" target="_blank" rel="noopener">FlyWire Codex</a>
+      <p class="n" style="margin-top:10px">N=<span id="nn">—</span> · t=<span id="tt">0</span></p>
     </div>
   </div>
 </div>
+<script src="/aksi-fly-brain.js?v=1"></script>
 <script>
 (function(){
-  const names=['ORN_sweet','ORN_bitter','AN_hunger','LN_veto','MN_approach','MN_freeze'];
-  const N=names.length;
-  const W=[
-    [0,0,0,0,0,0],[0,0,0,0,0,0],
-    [0.45,0,0.05,-0.15,0,0],[0,0.9,0.1,0.05,0,0],
-    [0.25,0,0.55,-0.95,0.08,0],[0,0.35,0,0.4,0,0.05]
-  ];
-  let V=new Float64Array(N), spikes=new Uint8Array(N);
-  let hung=0.55,mot=0,veto=0,t=0;
-  let inp={sweet:0,bitter:0,touch:0};
-  const logEl=document.getElementById('log'), decEl=document.getElementById('dec');
-  function log(s){logEl.textContent=(s+'\n'+logEl.textContent).slice(0,1200);}
-  function step(){
-    t++;
-    V[0]+=inp.sweet; V[1]+=inp.bitter;
-    if(inp.touch){V[5]+=0.8;V[4]-=0.3;}
-    const next=new Float64Array(N);
-    for(let i=0;i<N;i++){
-      let x=V[i]*0.86;
-      for(let j=0;j<N;j++) x+=W[i][j]*(spikes[j]?1:0)*0.55;
-      if(i===2) x+=hung*0.04;
-      next[i]=x;
-    }
-    V=next; spikes=new Uint8Array(N);
-    for(let i=0;i<N;i++){ if(V[i]>1.0){spikes[i]=1;V[i]=0;} }
-    hung=Math.max(0,Math.min(1,hung+0.0015-(spikes[4]?0.04:0)));
-    mot=Math.max(0,Math.min(1,mot*0.9+(spikes[4]?0.35:0)-(spikes[5]?0.25:0)));
-    veto=Math.max(0,Math.min(1,veto*0.88+(spikes[3]?0.4:0)+(spikes[1]?0.2:0)));
-    const decision=(veto>0.45||spikes[3])?'DEFERRED / FREEZE':(mot>0.35?'ALLOWED / APPROACH':'IDLE');
-    decEl.textContent=decision;
-    decEl.style.color=decision.startsWith('DEFERRED')?'var(--red)':decision.startsWith('ALLOWED')?'var(--green)':'var(--muted)';
-    document.getElementById('bHung').style.width=(hung*100)+'%';
-    document.getElementById('bMot').style.width=(mot*100)+'%';
-    document.getElementById('bVeto').style.width=(veto*100)+'%';
-    inp.sweet*=0.85; inp.bitter*=0.8; inp.touch*=0.5;
-    draw();
-  }
-  const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
-  const pos=[[80,60],[80,140],[240,100],[400,60],[560,100],[400,180]];
+  if(!window.AKSI_FLY_BRAIN){document.body.innerHTML+='<p style="padding:20px;color:#f87171">brain missing</p>';return;}
+  const B=AKSI_FLY_BRAIN, st=B.createState();
+  const logEl=document.getElementById('log');
+  function log(s){logEl.textContent=(s+'\n'+logEl.textContent).slice(0,1500);}
+  document.getElementById('nn').textContent=B.N;
+  document.getElementById('food').onclick=function(){B.inject(st,'food',1.3);log('FOOD');};
+  document.getElementById('bitter').onclick=function(){B.inject(st,'bitter',1.5);log('BITTER');};
+  document.getElementById('loom').onclick=function(){B.inject(st,'loom',1.2);log('LOOM');};
+  document.getElementById('touch').onclick=function(){B.inject(st,'touch',1.1);log('TOUCH');};
+  document.getElementById('reset').onclick=function(){var n=B.createState();Object.keys(n).forEach(function(k){st[k]=n[k];});log('RESET');};
+  var world=document.getElementById('world'), wctx=world.getContext('2d');
+  var net=document.getElementById('net'), nctx=net.getContext('2d');
+  var pos=[], order=[['sensory',0],['drive',1],['central',2],['descending',3],['motor',4]];
+  order.forEach(function(pair){var g=pair[0],col=pair[1];B.GROUPS[g].forEach(function(name,i){pos[B.IDX[name]]={x:70+col*120,y:40+i*40,name:name};});});
   function draw(){
-    ctx.fillStyle='#08080c'; ctx.fillRect(0,0,cv.width,cv.height);
-    for(let i=0;i<N;i++) for(let j=0;j<N;j++){
-      if(Math.abs(W[i][j])<0.05) continue;
-      ctx.strokeStyle=W[i][j]>0?'rgba(74,222,128,0.25)':'rgba(248,113,113,0.35)';
-      ctx.beginPath(); ctx.moveTo(pos[j][0],pos[j][1]); ctx.lineTo(pos[i][0],pos[i][1]); ctx.stroke();
-    }
-    for(let i=0;i<N;i++){
-      const r=16+Math.min(20,Math.max(0,V[i])*12);
-      ctx.beginPath(); ctx.arc(pos[i][0],pos[i][1],r,0,Math.PI*2);
-      ctx.fillStyle=spikes[i]?'#fbbf24':'#2d6dff'; ctx.fill();
-      ctx.fillStyle='#e8e8f0'; ctx.font='11px system-ui';
-      ctx.fillText(names[i],pos[i][0]-28,pos[i][1]+32);
-    }
+    wctx.fillStyle='#050508';wctx.fillRect(0,0,world.width,world.height);
+    wctx.strokeStyle='#222';wctx.strokeRect(40,40,world.width-80,world.height-80);
+    var cx=world.width/2+st.x*40, cy=world.height/2+st.y*40;
+    wctx.save();wctx.translate(cx,cy);wctx.rotate(st.heading);
+    wctx.fillStyle=st.lastDecision==='DEFERRED'?'#f87171':'#4ade80';
+    wctx.beginPath();wctx.ellipse(0,0,14,8,0,0,Math.PI*2);wctx.fill();
+    wctx.fillStyle='#fbbf24';wctx.beginPath();wctx.arc(12,0,4,0,Math.PI*2);wctx.fill();wctx.restore();
+    nctx.fillStyle='#050508';nctx.fillRect(0,0,net.width,net.height);
+    for(var i=0;i<B.N;i++) for(var j=0;j<B.N;j++){var w=B.W[i][j];if(!w)continue;nctx.strokeStyle=w>0?'rgba(74,222,128,0.2)':'rgba(248,113,113,0.3)';nctx.beginPath();nctx.moveTo(pos[j].x,pos[j].y);nctx.lineTo(pos[i].x,pos[i].y);nctx.stroke();}
+    for(var i=0;i<B.N;i++){var p=pos[i],r=10+Math.min(14,Math.max(0,st.V[i])*10);nctx.beginPath();nctx.arc(p.x,p.y,r,0,Math.PI*2);nctx.fillStyle=st.spikes[i]?'#fbbf24':'#2d6dff';nctx.fill();nctx.fillStyle='#ccc';nctx.font='9px system-ui';nctx.fillText(p.name,p.x-20,p.y+22);}
   }
-  document.getElementById('btnFood').onclick=()=>{inp.sweet=1.2;hung=Math.min(1,hung+0.05);log('t='+t+' FOOD → ORN_sweet');};
-  document.getElementById('btnBitter').onclick=()=>{inp.bitter=1.4;log('t='+t+' BITTER → veto');};
-  document.getElementById('btnTouch').onclick=()=>{inp.touch=1;log('t='+t+' TOUCH → freeze');};
-  document.getElementById('btnReset').onclick=()=>{V=new Float64Array(N);spikes=new Uint8Array(N);hung=0.55;mot=0;veto=0;inp={sweet:0,bitter:0,touch:0};t=0;log('RESET');};
-  setInterval(step,50);
-  log('LIF circuit online · 6 nodes · bitter veto');
+  function tick(){
+    var out=B.step(st);
+    document.getElementById('bH').style.width=(st.hung*100)+'%';
+    document.getElementById('bE').style.width=(st.energy*100)+'%';
+    document.getElementById('bA').style.width=(Math.max(0,st.approachTrace)*100)+'%';
+    document.getElementById('bV').style.width=(Math.max(0,st.vetoTrace)*100)+'%';
+    var d=document.getElementById('dec');d.textContent=out.decision;d.style.color=out.decision==='DEFERRED'?'var(--red)':out.decision==='ALLOWED'?'var(--green)':'var(--muted)';
+    document.getElementById('sp').innerHTML=(out.spikes||[]).map(function(s){return '<span class="chip">'+s+'</span>';}).join(' ')||'—';
+    document.getElementById('tt').textContent=st.t;draw();
+  }
+  setInterval(tick,40);
+  log('Fly-Brain v'+B.VERSION+' in AKSI · '+B.N+' neurons');
 })();
 </script>
 </body>
