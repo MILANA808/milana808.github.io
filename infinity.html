@@ -1,1 +1,197 @@
-PLACEHOLDER_TOO_LARGE
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Infinity</title>
+<meta name="theme-color" content="#05060a">
+<style>
+:root{--bg:#05060a;--fg:#f5f7ff;--muted:#8f99ad;--line:#202838;--accent:#a78bfa;--good:#61e7a3;--bad:#ff7185}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#211d40,#05060a 48%);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
+.wrap{max-width:960px;margin:auto;padding:16px 14px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.brand{font-weight:950;letter-spacing:.1em}.brand b{color:var(--accent)}a{color:inherit;text-decoration:none}
+.hero{text-align:center;padding:28px 0 18px}
+.hero h1{font-size:clamp(32px,8vw,56px);margin:10px 0;background:linear-gradient(90deg,#fff,#c7bbff);-webkit-background-clip:text;color:transparent}
+.hero p{color:var(--muted);max-width:640px;margin:0 auto 12px}
+.pill{display:inline-block;color:var(--good);background:#0a1511;border:1px solid #1a3a2a;border-radius:999px;padding:8px 12px;font-size:11px}
+.panel{background:#0b0f17e8;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:12px}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:8px}
+.goal{width:100%;min-height:110px;background:#070a10;border:1px solid var(--line);color:var(--fg);border-radius:12px;padding:12px;font:inherit}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+@media(max-width:520px){.checks{grid-template-columns:1fr}}
+.check{display:flex;gap:8px;align-items:center;background:#080c13;border:1px solid var(--line);border-radius:11px;padding:10px;font-size:13px}
+.check input{accent-color:var(--accent);width:18px;height:18px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{border-radius:12px;padding:12px 14px;font-weight:900;cursor:pointer;font:inherit}
+.primary{background:var(--accent);color:#fff;border:0}.secondary{background:#151b28;color:var(--fg);border:1px solid var(--line)}
+.danger{background:#2b1117;color:#ff9aa5;border:1px solid #5b202b}button:disabled{opacity:.45}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.metric{background:#080c13;border:1px solid var(--line);border-radius:11px;padding:10px}
+.metric span{display:block;font-size:11px;color:var(--muted)}.metric b{font-size:14px}
+.event{border-left:2px solid var(--accent);padding:6px 0 6px 10px;margin:8px 0;font-size:13px}
+.event small{display:block;color:var(--muted);font-size:11px}
+.source{border:1px solid var(--line);border-radius:11px;padding:10px;margin:8px 0;background:#080c13;font-size:13px}
+.source a{color:var(--accent);word-break:break-all}
+#reportText{white-space:pre-wrap;font-size:13px;background:#070a10;border:1px solid var(--line);border-radius:12px;padding:12px;max-height:380px;overflow:auto}
+#journal{max-height:240px;overflow:auto}
+.apirow{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.apirow input{flex:1;min-width:160px;background:#070a10;border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px;font:inherit}
+#connection{font-size:12px;color:var(--muted)}.footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
+.taskitem{display:flex;justify-content:space-between;gap:8px;padding:10px;border:1px solid var(--line);border-radius:11px;margin:6px 0;cursor:pointer;background:#080c13}
+</style></head><body>
+<div class="wrap">
+<div class="top"><div class="brand">AKSI <b>Infinity</b></div><div style="display:flex;gap:12px;font-size:13px"><span id="connection">● …</span><a href="/bot.html">Bot</a><a href="/">Home</a></div></div>
+<div class="hero"><h1>Просто вперёд.</h1>
+<p>Поставь цель. Если backend offline — локальный research в браузере: Wikipedia + отчёт + источники.</p>
+<div class="pill">LOCAL FALLBACK · WEB · MEMORY · EVIDENCE</div></div>
+<section class="panel">
+<div class="label">Новая задача</div>
+<textarea id="goal" class="goal">Исследуй ИИ</textarea>
+<div class="checks">
+<label class="check"><input type="checkbox" id="internet" checked> Интернет</label>
+<label class="check"><input type="checkbox" id="read" checked> Читать страницы</label>
+<label class="check"><input type="checkbox" id="browser"> Browser computer-use</label>
+<label class="check"><input type="checkbox" id="downloads"> Загрузки</label>
+<label class="check"><input type="checkbox" id="memory" checked> Сохранение памяти</label>
+<label class="check"><input type="checkbox" id="external"> Внешние действия</label>
+</div>
+<div class="apirow"><input id="api" placeholder="Backend API (optional)"><button type="button" class="secondary" id="ping">Проверить API</button></div>
+<div class="actions">
+<button type="button" class="primary" id="start">▶ Запустить AKSI</button>
+<button type="button" class="danger" id="stop" disabled>Стоп</button>
+<button type="button" class="secondary" id="refresh">Обновить</button>
+</div>
+<div class="metrics">
+<div class="metric"><span>Статус</span><b id="state">—</b></div>
+<div class="metric"><span>Task ID</span><b id="taskid">—</b></div>
+<div class="metric"><span>Источники</span><b id="sourcesCount">0</b></div>
+<div class="metric"><span>Evidence</span><b id="evidenceState">—</b></div>
+</div>
+</section>
+<section class="panel"><div class="label">Журнал</div><div id="journal"><div style="color:var(--muted)">Ожидание…</div></div></section>
+<section class="panel" id="reportPanel" style="display:none">
+<div class="label">Отчёт</div><div id="reportText"></div>
+<div class="label" style="margin-top:12px">Источники</div><div id="sources"></div>
+<div class="actions"><button type="button" class="secondary" id="copy">Копировать</button><button type="button" class="secondary" id="save">JSON</button></div>
+</section>
+<section class="panel"><div class="label">Последние задачи</div><div id="tasks"></div></section>
+<div class="footer">AKSI Infinity local-first · aksilove@internet.ru</div>
+</div>
+<script>
+(function(){
+var $=function(id){return document.getElementById(id)};
+var current=null,mode="local";
+var LS_TASKS="aksi.infinity.tasks.v1",LS_API="aksi.infinity.api";
+$("api").value=localStorage.getItem(LS_API)||"https://milana-backend.onrender.com";
+function base(){return ($("api").value||"").trim().replace(/\/$/,"")}
+function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':'&quot;',"'":"&#39;"})[c]})}
+function safe(s){try{var u=new URL(s);return (u.protocol==="http:"||u.protocol==="https:")?u.href:"#"}catch(e){return "#"}}
+function uid(){return "t_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7)}
+function loadLocal(){try{var a=JSON.parse(localStorage.getItem(LS_TASKS)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
+function saveLocal(list){try{localStorage.setItem(LS_TASKS,JSON.stringify(list.slice(0,30)))}catch(e){}}
+function upsert(t){var list=loadLocal().filter(function(x){return x.id!==t.id});list.unshift(t);saveLocal(list)}
+function j(t,m){t.journal=t.journal||[];t.journal.push({at:Date.now(),message:m})}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+async function wiki(q,lang){
+  lang=lang||(/[а-яё]/i.test(q)?"ru":"en");
+  var a=await fetch("https://"+lang+".wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(q)+"&limit=5&namespace=0&format=json&origin=*",{cache:"no-store"}).then(function(r){return r.json()});
+  var titles=a[1]||[],urls=a[3]||[],out=[];
+  for(var i=0;i<titles.length;i++){
+    try{
+      var p=await fetch("https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(titles[i]),{cache:"no-store"}).then(function(r){return r.json()});
+      if(p&&(p.extract||p.description)) out.push({url:urls[i]||(p.content_urls&&p.content_urls.desktop&&p.content_urls.desktop.page),title:p.title||titles[i],text:p.extract||p.description||"",provider:"wikipedia-"+lang});
+    }catch(e){}
+  }
+  return out;
+}
+async function ddg(q){
+  try{
+    var d=await fetch("https://api.duckduckgo.com/?q="+encodeURIComponent(q)+"&format=json&no_redirect=1&no_html=1",{cache:"no-store"}).then(function(r){return r.json()});
+    var out=[];
+    if(d.AbstractText) out.push({url:d.AbstractURL||("https://duckduckgo.com/?q="+encodeURIComponent(q)),title:d.Heading||"DuckDuckGo",text:d.AbstractText,provider:"duckduckgo"});
+    (d.RelatedTopics||[]).slice(0,4).forEach(function(t){
+      if(t.Text&&t.FirstURL) out.push({url:t.FirstURL,title:t.Text.slice(0,80),text:t.Text,provider:"duckduckgo"});
+      else if(t.Topics) t.Topics.slice(0,2).forEach(function(x){if(x.Text&&x.FirstURL) out.push({url:x.FirstURL,title:x.Text.slice(0,80),text:x.Text,provider:"duckduckgo"})});
+    });
+    return out;
+  }catch(e){return []}
+}
+function synth(goal,sources){
+  var L=["Отчёт AKSI Infinity (local)","Цель: "+goal,"Источников: "+sources.length,""];
+  if(!sources.length){L.push("Нет внешних источников (сеть/CORS/permissions).");return L.join("\n")}
+  L.push("Краткий разбор:");
+  sources.slice(0,6).forEach(function(s,i){L.push((i+1)+". "+(s.title||"Источник")+" — "+(s.text||"").slice(0,260))});
+  L.push("","Вывод: собраны открытые источники. Это evidence, не финальная истина.");
+  return L.join("\n");
+}
+function render(t){
+  current=t;
+  $("state").textContent=t.status||"—";
+  $("taskid").textContent=t.id||"—";
+  $("sourcesCount").textContent=(t.sources||[]).length;
+  $("evidenceState").textContent=(t.verification&&t.verification.status)||"—";
+  $("stop").disabled=["CREATED","PLANNING","RESEARCHING","ANALYZING"].indexOf(t.status)<0;
+  $("journal").innerHTML=(t.journal||[]).map(function(e){return '<div class="event"><small>'+new Date(e.at).toLocaleTimeString()+"</small>"+esc(e.message)+"</div>"}).join("")||"";
+  $("journal").scrollTop=$("journal").scrollHeight;
+  if(t.report){
+    $("reportPanel").style.display="block";
+    $("reportText").textContent=t.report.analysis||"";
+    $("sources").innerHTML=(t.sources||[]).map(function(s){return '<div class="source"><b>'+esc(s.title||s.url)+'</b><br><a href="'+safe(s.url)+'" target="_blank" rel="noopener">'+esc(s.url)+"</a><div>"+esc((s.text||"").slice(0,320))+"</div></div>"}).join("")||"";
+  }
+}
+async function runLocal(goal,perm){
+  var task={id:uid(),goal:goal,status:"CREATED",sources:[],journal:[],permissions:perm,verification:{status:"pending"},report:null,runtime:"local",createdAt:Date.now()};
+  j(task,"Задача создана (local runtime)");task.status="PLANNING";render(task);await sleep(150);
+  j(task,"План: search → synthesize");task.status="RESEARCHING";render(task);
+  var sources=[];
+  if(perm.internet){
+    j(task,"Wikipedia RU…");render(task);
+    try{var w1=await wiki(goal,"ru");sources=sources.concat(w1);j(task,"Wikipedia RU: "+w1.length)}catch(e){j(task,"Wiki RU: "+(e.message||e))}
+    try{var w2=await wiki(goal,"en");sources=sources.concat(w2);j(task,"Wikipedia EN: "+w2.length)}catch(e){j(task,"Wiki EN: "+(e.message||e))}
+    if(perm.read_pages){try{var d=await ddg(goal);sources=sources.concat(d);j(task,"DuckDuckGo: "+d.length)}catch(e){}}
+  }else j(task,"Интернет выключен");
+  var seen={};sources=sources.filter(function(s){var k=(s.url||s.title||"").toLowerCase();if(!k||seen[k])return false;seen[k]=1;return true});
+  task.sources=sources;task.status="ANALYZING";j(task,"Анализ "+sources.length+" источников");render(task);await sleep(200);
+  task.report={analysis:synth(goal,sources),generatedAt:new Date().toISOString()};
+  task.verification={status:sources.length?"collected":"empty",sourceCount:sources.length,runtime:"local-browser"};
+  task.status="COMPLETED";j(task,"Готово · COMPLETED");
+  if(perm.save_memory){try{var mem=JSON.parse(localStorage.getItem("aksi_bot_mem_v1")||"[]");mem.push({t:Date.now(),text:"Infinity: "+goal+" → "+sources.length+" sources"});localStorage.setItem("aksi_bot_mem_v1",JSON.stringify(mem.slice(-200)));j(task,"Сохранено в память")}catch(e){}}
+  upsert(task);return task;
+}
+async function start(){
+  var goal=$("goal").value.trim();if(goal.length<3)return alert("Опиши задачу.");
+  $("start").disabled=true;$("reportPanel").style.display="none";
+  var perm={internet:$("internet").checked,read_pages:$("read").checked,browser_actions:$("browser").checked,downloads:$("downloads").checked,external_actions:$("external").checked,save_memory:$("memory").checked};
+  try{
+    var remoteOk=false;
+    if(base()){
+      try{
+        var ctrl=typeof AbortController!=="undefined"?new AbortController():null;
+        var to=setTimeout(function(){if(ctrl)ctrl.abort()},3500);
+        var r=await fetch(base()+"/api/agent/tasks",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({goal:goal,permissions:perm,max_sources:20}),signal:ctrl&&ctrl.signal});
+        clearTimeout(to);
+        if(r.ok){var d=await r.json();mode="remote";current=d.task;render(current);$("connection").textContent="● backend online";remoteOk=true;
+          (function poll(){if(!current||mode!=="remote")return;fetch(base()+"/api/agent/tasks/"+encodeURIComponent(current.id)).then(function(x){return x.json()}).then(function(z){render(z.task);if(["COMPLETED","FAILED","STOPPED"].indexOf(z.task.status)<0)setTimeout(poll,1500);else loadTasks()}).catch(function(){})})();
+        }
+      }catch(e){remoteOk=false}
+    }
+    if(!remoteOk){mode="local";$("connection").textContent="● local runtime";render(await runLocal(goal,perm));loadTasks()}
+  }catch(e){alert("Ошибка: "+(e.message||e))}
+  finally{$("start").disabled=false}
+}
+function stop(){if(!current)return;current.status="STOPPED";j(current,"Stopped");upsert(current);render(current)}
+function loadTasks(){
+  var local=loadLocal();
+  $("tasks").innerHTML=local.slice(0,12).map(function(t){return '<div class="taskitem" data-id="'+esc(t.id)+'"><b>'+esc((t.goal||"").slice(0,90))+"</b><span>"+esc(t.status)+"</span></div>"}).join("")||'<div style="color:var(--muted)">Нет задач</div>';
+  document.querySelectorAll(".taskitem").forEach(function(x){x.onclick=function(){var t=loadLocal().find(function(z){return z.id===x.getAttribute("data-id")});if(t)render(t)}});
+}
+async function ping(){
+  $("connection").textContent="● checking…";
+  try{var r=await fetch(base()+"/api/agent/tasks?limit=1");$("connection").textContent=r.ok?"● backend online":"● local (HTTP "+r.status+")";mode=r.ok?"remote":"local"}
+  catch(e){$("connection").textContent="● local runtime";mode="local"}
+}
+$("start").onclick=start;$("stop").onclick=stop;$("refresh").onclick=loadTasks;$("ping").onclick=ping;
+$("copy").onclick=function(){if(navigator.clipboard)navigator.clipboard.writeText($("reportText").textContent||"")};
+$("save").onclick=function(){if(!current)return;var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(current,null,2)],{type:"application/json"}));a.download=(current.id||"task")+".json";a.click()};
+ping();loadTasks();
+})();
+</script></body></html>
