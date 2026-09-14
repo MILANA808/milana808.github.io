@@ -1,10 +1,10 @@
 /**
- * AKSI Bot v1.2 — Agent + Organism + Gate + Cortex resonance + self-taught
+ * AKSI Bot v1.2.1 — Agent + Organism + Gate + Cortex resonance + self-taught
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.2.0-bot-cortex";
+  var VER = "1.2.1-bot-cortex";
   var seed = [];
   var DEFAULT_CORTEX_PW = "aksi";
   var CORTEX_MIN_SCORE = 0.002;
@@ -54,22 +54,23 @@
 
   function matchSeed(q) {
     var low = String(q || "").toLowerCase();
-    var words = low.split(/\s+/).filter(function (w) { return w.length > 3; });
+    var words = low.split(/\s+/).filter(function (w) {
+      return w.length > 2 && !/^(что|как|это|для|или|the|what|who|how|and)$/i.test(w);
+    });
     var best = null;
     var bestHit = 0;
     for (var i = seed.length - 1; i >= 0; i--) {
       var t = String(seed[i].text || "");
       var tl = t.toLowerCase();
       var hit = 0;
-      for (var j = 0; j < words.length; j++) if (tl.indexOf(words[j]) >= 0) hit++;
+      for (var j = 0; j < words.length; j++) if (tl.indexOf(words[j]) >= 0) hit += (words[j].length >= 5 ? 2 : 1);
       if (low.length > 8 && tl.indexOf(low.slice(0, 32)) >= 0) hit += 2;
       if (hit > bestHit) {
         bestHit = hit;
         best = { text: t, source: "self-taught", offline: true, hit: hit };
       }
     }
-    if (best && bestHit >= 2) return best;
-    if (best && bestHit >= 1 && words.length <= 1) return best;
+    if (best && bestHit >= 1) return best;
     return null;
   }
 
@@ -78,14 +79,24 @@
     if (!cx || !cx.resonantQuery || !cx.size) return null;
     try {
       var hit = await cx.resonantQuery(q);
-      if (hit && hit.text && hit.score >= CORTEX_MIN_SCORE) {
-        return {
-          text: hit.text,
-          source: "cortex",
-          offline: true,
-          score: hit.score,
-          cortexId: hit.id
-        };
+      if (hit && hit.text) {
+        var low = String(q || "").toLowerCase();
+        var words = low.split(/\s+/).filter(function (w) { return w.length > 3; });
+        var lex = 0;
+        var tl = String(hit.text).toLowerCase();
+        for (var i = 0; i < words.length; i++) if (tl.indexOf(words[i]) >= 0) lex++;
+        var score = hit.score || 0;
+        if (lex > 0) score += 0.01 * lex;
+        if (score >= CORTEX_MIN_SCORE || lex > 0) {
+          return {
+            text: hit.text,
+            source: "cortex",
+            offline: true,
+            score: score,
+            cortexId: hit.id,
+            lex: lex
+          };
+        }
       }
     } catch (e) {}
     return null;
@@ -144,9 +155,9 @@
 
     var s = matchSeed(q);
     var c = await cortexHit(q);
+    // Prefer memory: Cortex resonance, then self-taught seed, then organism
     if (c && s) {
-      if ((c.score || 0) >= CORTEX_MIN_SCORE && (s.hit || 0) < 2) return c;
-      if ((c.score || 0) > 0.01) return c;
+      if ((c.score || 0) >= (s.hit || 0) * 0.001) return c;
       return s;
     }
     if (c) return c;
