@@ -1,61 +1,56 @@
 <!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AKSI Infinity — личный слой управления ИИ</title>
-<meta name="description" content="AKSI Infinity — identity, memory, models, policy, evidence and verifiable decisions in one personal AI layer.">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AKSI Infinity — Autonomous Agent</title>
+<meta name="description" content="AKSI Infinity — personal web agent with browser, memory, evidence and verifiable task execution.">
 <style>
-:root{--bg:#06070b;--fg:#f5f7ff;--muted:#9299aa;--line:#202532;--card:#0d111a;--accent:#a78bfa;--good:#62e6a5;--warn:#ffd166}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 0,#17152c 0,#06070b 42%);color:var(--fg);font:15px/1.5 system-ui,-apple-system,sans-serif}a{color:inherit;text-decoration:none}.wrap{max-width:1080px;margin:auto;padding:28px 18px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px}.brand{font-weight:900;letter-spacing:.08em}.brand b{color:var(--accent)}.back{color:var(--muted);font-size:13px}.hero{text-align:center;padding:70px 0 45px}.eyebrow{color:var(--accent);font-weight:800;letter-spacing:.15em;text-transform:uppercase;font-size:11px}.hero h1{font-size:clamp(42px,9vw,86px);line-height:.95;margin:15px 0;background:linear-gradient(90deg,#fff,#b7a8ff,#fff);-webkit-background-clip:text;color:transparent}.hero p{max-width:720px;margin:20px auto;color:var(--muted);font-size:18px}.pill{display:inline-block;padding:11px 16px;border:1px solid var(--line);border-radius:999px;color:var(--good);background:#0b1713}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.card{background:rgba(13,17,26,.86);border:1px solid var(--line);border-radius:18px;padding:20px;min-height:120px}.card .n{font-size:11px;color:var(--accent);font-weight:900}.card h3{margin:7px 0}.card p{color:var(--muted);margin:0;font-size:13px}.flow{margin:32px 0;padding:22px;border:1px solid var(--line);border-radius:20px;background:#090c12;overflow:auto}.flow pre{margin:0;color:#dfe4f3;font:13px/1.7 ui-monospace,SFMono-Regular,monospace;white-space:pre}.demo{margin-top:32px;border:1px solid var(--line);border-radius:20px;padding:22px;background:rgba(13,17,26,.9)}.demo h2{margin-top:0}.row{display:flex;gap:8px}.row input{flex:1;min-width:0;background:#070a10;color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:14px;font:inherit}.row button{border:0;border-radius:12px;padding:0 18px;background:var(--accent);color:#fff;font-weight:900}.result{margin-top:14px;display:none}.receipt{background:#070a10;border:1px solid var(--line);border-radius:12px;padding:14px;font:12px/1.6 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word;color:#cbd2e4}.status{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.tag{padding:5px 9px;border-radius:999px;background:#111722;border:1px solid var(--line);font-size:11px;color:var(--muted)}.tag.good{color:var(--good)}footer{margin-top:40px;color:var(--muted);font-size:12px;text-align:center}@media(max-width:720px){.grid{grid-template-columns:1fr}.hero{padding-top:45px}.row{flex-direction:column}.row button{padding:13px}}
+:root{--bg:#05060a;--panel:#0b0f17;--panel2:#101522;--line:#202838;--fg:#f5f7ff;--muted:#8f99ad;--accent:#a78bfa;--good:#61e7a3;--warn:#ffd166;--bad:#ff6b7a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#211d40 0,#07080d 38%,#05060a 100%);color:var(--fg);font:15px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.wrap{max-width:1180px;margin:auto;padding:18px 16px 70px}.top{display:flex;justify-content:space-between;align-items:center}.brand{font-weight:950;letter-spacing:.12em}.brand b{color:var(--accent)}.back{font-size:13px;color:var(--muted)}.hero{text-align:center;padding:45px 0 28px}.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--accent);font-weight:900}.hero h1{font-size:clamp(44px,9vw,86px);line-height:.9;margin:14px 0;background:linear-gradient(90deg,#fff,#c7bbff,#fff);-webkit-background-clip:text;color:transparent}.hero p{max-width:760px;margin:20px auto;color:var(--muted);font-size:17px}.pill{display:inline-block;border:1px solid var(--line);background:#0a1511;color:var(--good);padding:9px 14px;border-radius:999px;font-size:11px;font-weight:800}.console{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.panel{background:rgba(11,15,23,.9);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 16px 50px #0005}.panel h2,.panel h3{margin:0 0 10px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900}.goal{width:100%;min-height:130px;resize:vertical;background:#070a10;border:1px solid var(--line);color:var(--fg);border-radius:14px;padding:14px;outline:none}.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.primary,.secondary,.danger{border:0;border-radius:12px;padding:11px 15px;font-weight:900}.primary{background:var(--accent);color:#fff}.secondary{background:#151b28;color:var(--fg);border:1px solid var(--line)}.danger{background:#2b1117;color:#ff9aa5;border:1px solid #5b202b}.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.check{display:flex;align-items:center;gap:8px;background:#080c13;border:1px solid var(--line);border-radius:11px;padding:9px;color:#cbd2e1;font-size:12px}.check input{accent-color:var(--accent)}.statusbar{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.tag{border:1px solid var(--line);background:#101621;color:var(--muted);border-radius:999px;padding:5px 9px;font-size:11px}.tag.good{color:var(--good)}.tag.warn{color:var(--warn)}.tag.bad{color:var(--bad)}.metric{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #161d2a;font-size:13px}.metric:last-child{border-bottom:0}.journal{height:370px;overflow:auto;background:#070a10;border:1px solid var(--line);border-radius:13px;padding:12px;font:12px/1.6 ui-monospace,SFMono-Regular,monospace}.event{padding:6px 0;border-bottom:1px solid #111722}.event small{color:#69748a;margin-right:7px}.event.completed{color:var(--good)}.event.error{color:var(--bad)}.event.warning{color:var(--warn)}.report{margin-top:14px;display:none}.reportbox{white-space:pre-wrap;word-break:break-word;background:#070a10;border:1px solid var(--line);border-radius:13px;padding:14px;max-height:520px;overflow:auto}.sources{display:grid;gap:8px;margin-top:10px}.source{background:#080c13;border:1px solid var(--line);border-radius:11px;padding:10px}.source a{color:#bcaeff;font-size:12px}.source div{font-size:12px;color:var(--muted);margin-top:4px}.empty{color:var(--muted);padding:30px 5px;text-align:center}.api{margin-top:14px}.api input{width:100%;background:#070a10;border:1px solid var(--line);color:var(--fg);border-radius:10px;padding:10px}.tasks{margin-top:14px}.taskitem{padding:10px;border:1px solid var(--line);border-radius:11px;background:#080c13;margin-top:7px;cursor:pointer}.taskitem b{font-size:12px}.taskitem span{float:right;color:var(--muted);font-size:11px}.footer{margin-top:30px;text-align:center;color:var(--muted);font-size:11px}.hide{display:none}@media(max-width:800px){.console{grid-template-columns:1fr}.checks{grid-template-columns:1fr}.hero{padding-top:30px}.panel{padding:14px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="top"><a class="brand" href="/">AKSI <b>∞</b></a><a class="back" href="/">← AKSI Home</a></header>
-<section class="hero">
-<div class="eyebrow">AKSI INFINITY / PRODUCT SEED</div>
-<h1>Просто вперёд.</h1>
-<p>Не ещё один чат. Личный слой управления искусственным интеллектом: идентичность, память, модели, политика, доказательства и проверяемые решения — вместе с человеком.</p>
-<span class="pill">LOCAL-FIRST · MODEL-INDEPENDENT · VERIFIABLE</span>
+<section class="hero"><div class="eyebrow">AKSI INFINITY / AGENT RUNTIME</div><h1>Просто вперёд.</h1><p>Поставь цель. AKSI сама планирует задачу, выходит в интернет, собирает источники, при разрешении использует настоящий браузер, анализирует результат и возвращает отчёт.</p><span class="pill">WEB · BROWSER · MEMORY · EVIDENCE · RECEIPT</span></section>
+<div class="console">
+<section class="panel">
+<div class="label">Новая задача</div>
+<textarea id="goal" class="goal" placeholder="Например: Исследуй рынок персональных AI-агентов. Найди 30 сильных конкурентов, изучи их сайты, продукты, цены и технологии. Сравни с AKSI и подготовь стратегический отчёт."></textarea>
+<div class="checks">
+<label class="check"><input id="internet" type="checkbox" checked> Интернет</label>
+<label class="check"><input id="read" type="checkbox" checked> Читать страницы</label>
+<label class="check"><input id="browser" type="checkbox" checked> Browser computer-use</label>
+<label class="check"><input id="downloads" type="checkbox" checked> Загрузки</label>
+<label class="check"><input id="memory" type="checkbox" checked> Сохранение памяти</label>
+<label class="check"><input id="external" type="checkbox"> Внешние действия</label>
+</div>
+<div class="actions"><button id="start" class="primary">▶ Запустить AKSI</button><button id="stop" class="danger" disabled>■ Остановить</button><button id="refresh" class="secondary">↻ Обновить</button></div>
+<div class="api"><div class="label">Backend URL</div><input id="api" placeholder="https://...replit.app"></div>
+<div class="statusbar"><span id="connection" class="tag">● не подключено</span><span class="tag good">POLICY ON</span><span class="tag">AKSI-VAI/1</span><span class="tag">MODEL-INDEPENDENT</span></div>
 </section>
-<section class="grid">
-<article class="card"><div class="n">01 / IDENTITY</div><h3>Твой агент</h3><p>Портируемая идентичность, которая не исчезает при смене модели или приложения.</p></article>
-<article class="card"><div class="n">02 / MEMORY</div><h3>Твоя память</h3><p>Локальное состояние и знания, которыми можно управлять, экспортировать и защищать.</p></article>
-<article class="card"><div class="n">03 / MODEL GATEWAY</div><h3>Любой интеллект</h3><p>Локальная модель, WebGPU, внешний API или будущий runtime — модель становится сменным мотором.</p></article>
-<article class="card"><div class="n">04 / POLICY</div><h3>Твои правила</h3><p>Сначала намерение и политика, затем действие. Сеть и внешние действия — только по разрешению.</p></article>
-<article class="card"><div class="n">05 / EVIDENCE</div><h3>След решения</h3><p>Контекст, источники, результат и неопределённость остаются частью события, а не исчезают в чате.</p></article>
-<article class="card"><div class="n">06 / RECEIPT</div><h3>Проверяемость</h3><p>Хэш события создаётся прямо в браузере. Это демонстрация целостности, а не доказательство истины.</p></article>
+<section class="panel">
+<h2>Runtime</h2><div class="metric"><span>Status</span><b id="state">IDLE</b></div><div class="metric"><span>Task</span><span id="taskid">—</span></div><div class="metric"><span>Sources</span><b id="sourcesCount">0</b></div><div class="metric"><span>Domains</span><b id="domainsCount">0</b></div><div class="metric"><span>Evidence</span><b id="evidenceState">—</b></div>
+<h3 style="margin-top:18px">Execution journal</h3><div id="journal" class="journal"><div class="empty">Здесь появится реальный журнал работы агента.</div></div>
 </section>
-<div class="flow"><pre>USER
-  ↓
-AKSI IDENTITY
-  ↓
-INTENT → MEMORY → MODEL GATEWAY
-  ↓              ↓
-POLICY ← EVIDENCE / SOURCES
-  ↓
-DECISION
-  ↓
-RECEIPT / SEAL
-  ↓
-MEMORY → PORTABLE AGENT
-  ↓
-[ optional ] TOOLS · DEVICES · OTHER AGENTS</pre></div>
-<section class="demo">
-<h2>Живое ядро</h2>
-<p style="color:var(--muted)">Введи намерение. Страница создаст локальное событие и SHA-256 receipt без отправки текста в сеть.</p>
-<div class="row"><input id="intent" placeholder="Например: исследовать новую идею и сохранить результат"><button id="run">Создать receipt</button></div>
-<div class="status"><span class="tag good">● LOCAL</span><span class="tag">NO ACCOUNT</span><span class="tag">NO NETWORK</span><span class="tag">SHA-256</span></div>
-<div id="result" class="result"><div class="receipt" id="receipt"></div></div>
-</section>
-<footer>AKSI Infinity — направление продукта. Криптография здесь подтверждает целостность события, не истинность утверждения.</footer>
+</div>
+<section class="panel report" id="reportPanel"><h2>Итог задачи</h2><div id="reportText" class="reportbox"></div><h3 style="margin-top:16px">Источники</h3><div id="sources" class="sources"></div><div class="actions"><button id="copy" class="secondary">Копировать отчёт</button><button id="save" class="secondary">Сохранить в браузере</button></div></section>
+<section class="panel tasks"><h3>Последние задачи</h3><div id="tasks"><div class="empty">Пока нет загруженных задач.</div></div></section>
+<div class="footer">AKSI Infinity — агентный runtime. Криптографическая квитанция подтверждает целостность события, а не истинность утверждения. Внешние необратимые действия должны быть явно разрешены.</div>
 </div>
 <script>
-const enc=new TextEncoder();
-async function sha256(s){const b=await crypto.subtle.digest('SHA-256',enc.encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
-async function run(){const intent=document.getElementById('intent').value.trim();if(!intent)return;const ts=new Date().toISOString();const id=await sha256('AKSI-INFINITY|'+intent+'|'+ts);const r={protocol:'AKSI-VAI/1',id:'sha256:'+id,intent,intent_hash:'sha256:'+await sha256(intent),status:'OBSERVATION',runtime:'browser-local',network:false,timestamp:ts,signature:null};document.getElementById('receipt').textContent=JSON.stringify(r,null,2);document.getElementById('result').style.display='block';localStorage.setItem('aksi.infinity.lastReceipt',JSON.stringify(r))}
-document.getElementById('run').onclick=run;document.getElementById('intent').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+const $=id=>document.getElementById(id);let current=null,timer=null;
+const DEFAULT_API='https://milana-backend.replit.app';
+$('api').value=localStorage.getItem('aksi.infinity.api')||DEFAULT_API;
+function apiBase(){return $('api').value.trim().replace(/\/$/,'')}
+async function call(path,opt={}){localStorage.setItem('aksi.infinity.api',apiBase());const r=await fetch(apiBase()+path,{...opt,headers:{'Content-Type':'application/json',...(opt.headers||{})}});const data=await r.json().catch(()=>({detail:r.statusText}));if(!r.ok)throw new Error(data.detail||('HTTP '+r.status));return data}
+function setState(s){$('state').textContent=s||'—';$('state').style.color=s==='COMPLETED'? 'var(--good)':s==='FAILED'||s==='STOPPED'?'var(--bad)':'var(--fg)'}
+function render(t){current=t;setState(t.status);$('taskid').textContent=t.id||'—';$('sourcesCount').textContent=(t.sources||[]).length;$('domainsCount').textContent=new Set((t.sources||[]).map(x=>{try{return new URL(x.url).hostname}catch{return x.url}})).size;$('evidenceState').textContent=t.verification?.status||'—';$('stop').disabled=!['CREATED','PLANNING','RESEARCHING','ANALYZING','VERIFYING'].includes(t.status);const j=$('journal');j.innerHTML=(t.journal||[]).map(e=>`<div class="event ${e.status||''}"><small>${new Date(e.at).toLocaleTimeString()}</small>${escapeHtml(e.message)}</div>`).join('')||'<div class="empty">Ожидание...</div>';j.scrollTop=j.scrollHeight;if(t.report){$('reportPanel').style.display='block';$('reportText').textContent=t.report.analysis||JSON.stringify(t.report,null,2);$('sources').innerHTML=(t.sources||[]).map(s=>`<div class="source"><b>${escapeHtml(s.title||s.url)}</b><br><a href="${safeUrl(s.url)}" target="_blank" rel="noopener">${escapeHtml(s.url)}</a><div>${escapeHtml((s.text||'').slice(0,350))}</div></div>`).join('')||'<div class="empty">Нет источников.</div>'}}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function safeUrl(s){try{let u=new URL(s);return ['http:','https:'].includes(u.protocol)?u.href:'#'}catch{return '#'}}
+async function poll(){if(!current)return;try{const d=await call('/api/agent/tasks/'+encodeURIComponent(current.id));render(d.task);if(!['COMPLETED','FAILED','STOPPED','NEEDS_PERMISSION'].includes(d.task.status))timer=setTimeout(poll,1500);else{$('stop').disabled=true;loadTasks()}}catch(e){setState('CONNECTION ERROR');clearTimeout(timer)}}
+async function start(){const goal=$('goal').value.trim();if(goal.length<3)return alert('Опиши задачу.');$('start').disabled=true;$('reportPanel').style.display='none';$('journal').innerHTML='<div class="empty">Запускаю runtime...</div>';try{const d=await call('/api/agent/tasks',{method:'POST',body:JSON.stringify({goal,permissions:{internet:$('internet').checked,read_pages:$('read').checked,browser_actions:$('browser').checked,downloads:$('downloads').checked,external_actions:$('external').checked,save_memory:$('memory').checked},max_sources:20})});current=d.task;render(current);poll()}catch(e){alert('Не удалось запустить: '+e.message)}finally{$('start').disabled=false}}
+async function stop(){if(!current)return;try{const d=await call('/api/agent/tasks/'+encodeURIComponent(current.id)+'/stop',{method:'POST'});render(d.task)}catch(e){alert(e.message)}}
+async function loadTasks(){try{const d=await call('/api/agent/tasks?limit=10');$('tasks').innerHTML=(d.tasks||[]).map(t=>`<div class="taskitem" data-id="${escapeHtml(t.id)}"><b>${escapeHtml(t.goal.slice(0,100))}</b><span>${escapeHtml(t.status)}</span></div>`).join('')||'<div class="empty">Нет задач.</div>';document.querySelectorAll('.taskitem').forEach(x=>x.onclick=async()=>{try{const d=await call('/api/agent/tasks/'+encodeURIComponent(x.dataset.id));render(d.task)}catch(e){alert(e.message)}});$('connection').textContent='● backend online';$('connection').className='tag good'}catch(e){$('connection').textContent='● backend offline';$('connection').className='tag bad'}}
+$('start').onclick=start;$('stop').onclick=stop;$('refresh').onclick=loadTasks;$('copy').onclick=()=>navigator.clipboard?.writeText($('reportText').textContent);$('save').onclick=()=>{if(!current)return;const blob=new Blob([JSON.stringify(current,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(current.id||'aksi-task')+'.json';a.click()};$('api').addEventListener('change',loadTasks);loadTasks();
 </script>
-</body>
-</html>
+</body></html>
