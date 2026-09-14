@@ -55,10 +55,15 @@ jobs:
         run: |
           set -e
           files=$(find . -type f \( -name '*.html' -o -name '*.js' -o -name '*.json' -o -name '*.css' -o -name '*.txt' \) -not -path './.git/*' -not -path './node_modules/*' -not -name '*.map')
-          if printf '%s\n' "$files" | xargs grep -nHiE 'aksilove@|internet\.ru|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}'; then
-            echo "Public web-surface email/contact data detected. Remove it before release."
+          # Official public contact (CONTRIBUTING) is allowed. Fail on any other email.
+          hits=$(printf '%s\n' "$files" | xargs grep -nHiE '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}' || true)
+          bad=$(printf '%s\n' "$hits" | grep -viE 'aksilove@internet\.ru' || true)
+          if [ -n "$bad" ]; then
+            echo "$bad"
+            echo "Non-official email on public surface. Only aksilove@internet.ru is allowed."
             exit 1
           fi
+          echo "Privacy OK — only official contact aksilove@internet.ru"
 
       - name: Write audit summary
         if: always()
