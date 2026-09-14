@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>АКСИ Bot — единый продукт</title>
-<meta name="description" content="AKSI Bot: Agent + Organism + Gate + Autopilot seed.">
+<meta name="description" content="AKSI Bot: Agent + Organism + Gate + Cortex + Autopilot seed.">
 <link rel="canonical" href="https://milana808.github.io/bot.html">
 <meta name="theme-color" content="#0a0a12">
 <style>
@@ -44,6 +44,7 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
   <button type="button" data-q="статус">Статус</button>
   <button type="button" data-q="Что такое АКСИ Organism?">Organism</button>
   <button type="button" data-q="запомни: АКСИ Bot — единый продукт Agent+Organism+Gate">Научить</button>
+  <button type="button" data-q="запомни: Cortex хранит факты в AES-GCM и ищет резонансом">Cortex-факт</button>
 </div>
 <div class="msgs" id="msgs"></div>
 <div class="bar">
@@ -56,20 +57,21 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
 <script src="/aksi-organism.js?v=13"></script>
 <script src="/agent.js?v=4"></script>
 <script src="/aksi-self-github.js?v=1"></script>
-<script src="/aksi-bot.js?v=1"></script>
+<script src="/AKSICortexKernel.js?v=1"></script>
+<script src="/aksi-bot.js?v=2"></script>
 <script>
 (function(){
   var B=window.AKSI_BOT;
   if(!B){document.getElementById('st').textContent='Bot module missing';return;}
   B.status().then(function(s){
-    document.getElementById('st').textContent='v'+s.version+' · seed '+s.seed+' · organism='+s.organism+' · agent='+s.agent+' · gate='+s.flyGate+' · gh='+s.selfGithub;
+    document.getElementById('st').textContent='v'+s.version+' · seed '+s.seed+' · cortex='+s.cortex+'('+s.cortexDocs+') · organism='+s.organism+' · gate='+s.flyGate+' · gh='+s.selfGithub;
   });
   function add(role,text,meta){
     var d=document.createElement('div');d.className='msg '+role;d.textContent=text;
     if(meta){var m=document.createElement('div');m.className='meta';m.innerHTML=meta;d.appendChild(m);}
     document.getElementById('msgs').appendChild(d);d.scrollIntoView({block:'end'});
   }
-  add('bot','АКСИ Bot — один продукт.\nAgent + Organism + Fly-Gate + self-taught.\n«запомни: …» → локально; с PAT → GitHub.');
+  add('bot','АКСИ Bot + Cortex.\nAgent + Organism + Gate + AES-GCM Cortex (квантовый резонанс).\n«запомни: …» → vault; «кортекс пароль: …» → ключ.');
   async function send(){
     var q=document.getElementById('q').value.trim();if(!q)return;
     document.getElementById('q').value='';add('user',q);
@@ -80,11 +82,12 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
       if(out.decision)meta+='<span class="badge '+(out.decision==='ALLOWED'?'ok':'no')+'">'+out.decision+'</span>';
       if(out.receipt)meta+=' · sealed';
       if(out.github)meta+=' · git';
+      if(out.source==='cortex'&&out.score!=null)meta+=' · score '+Number(out.score).toFixed(3);
       add('bot',out.text||'—',meta);
     }catch(e){add('bot','Ошибка: '+e.message);}
     document.getElementById('go').disabled=false;
     B.status().then(function(s){
-      document.getElementById('st').textContent='v'+s.version+' · seed '+s.seed+' · organism='+s.organism+' · agent='+s.agent+' · gh='+s.selfGithub;
+      document.getElementById('st').textContent='v'+s.version+' · seed '+s.seed+' · cortex='+(s.cortexDocs||0)+' · gh='+s.selfGithub;
     });
   }
   document.getElementById('go').onclick=send;
