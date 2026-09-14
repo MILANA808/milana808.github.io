@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>АКСИ Organism — единый ИИ-организм</title>
-<meta name="description" content="АКСИ Organism: Cortex + Brainstem + Trust + Lab. Один пульс.">
+<meta name="description" content="АКСИ Organism: Cortex + Brainstem + Trust + Lab + self-taught.">
 <link rel="canonical" href="https://milana808.github.io/organism.html">
 <meta name="theme-color" content="#0a0a12">
 <style>
@@ -46,7 +46,7 @@ main{flex:1;display:grid;grid-template-columns:1fr 300px;max-width:1100px;width:
 <body>
 <header>
   <div class="logo"><span class="pulse-dot"></span>АКСИ <span>Organism</span></div>
-  <nav><a href="/ask.html">Ask</a><a href="/brain.html">Brain</a><a href="/verify.html">Verify</a><a href="/">Все</a></nav>
+  <nav><a href="/autopilot.html">Autopilot</a><a href="/ask.html">Ask</a><a href="/brain.html">Brain</a><a href="/">Все</a></nav>
 </header>
 <main>
 <section class="chat">
@@ -79,6 +79,14 @@ main{flex:1;display:grid;grid-template-columns:1fr 300px;max-width:1100px;width:
   var O=window.AKSI_ORGANISM;
   if(!O){document.getElementById('msgs').textContent='Organism missing';return;}
   document.getElementById('man').textContent=O.manifesto||('Organism '+O.version);
+  window.__AKSI_SELF_TAUGHT=[];
+  fetch('/data/self-taught.json?v='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(d){
+    if(d&&Array.isArray(d.items)){
+      window.__AKSI_SELF_TAUGHT=d.items;
+      var el=document.getElementById('live');
+      if(el)el.textContent=(el.textContent||'')+' · seed '+d.items.length;
+    }
+  }).catch(function(){});
   function render(){
     var snap=O.snapshot?O.snapshot():(O.ORGANS||{});
     var html='',k;
@@ -100,15 +108,33 @@ main{flex:1;display:grid;grid-template-columns:1fr 300px;max-width:1100px;width:
     if(meta){var m=document.createElement('div');m.className='meta';m.innerHTML=meta;d.appendChild(m);}
     document.getElementById('msgs').appendChild(d);d.scrollIntoView({block:'end'});
   }
-  add('bot','Я АКСИ Organism — один пульс всех систем.\nCortex думает, Brainstem может veto, Trust печатает след.');
+  add('bot','Я АКСИ Organism — один пульс всех систем.\nSelf-taught seed с GitHub подключается автоматически.\nAutopilot: /autopilot.html');
+  function matchSeed(q){
+    var items=window.__AKSI_SELF_TAUGHT||[];
+    var low=q.toLowerCase();
+    for(var i=items.length-1;i>=0;i--){
+      var t=String(items[i].text||'');
+      var words=low.split(/\s+/).filter(function(w){return w.length>3;});
+      var hit=0;
+      for(var j=0;j<words.length;j++){if(t.toLowerCase().indexOf(words[j])>=0)hit++;}
+      if(hit>=1||t.toLowerCase().indexOf(low.slice(0,20))>=0)return t;
+    }
+    return null;
+  }
   async function go(){
     var q=document.getElementById('q').value.trim();if(!q)return;
     document.getElementById('q').value='';add('user',q);
     document.getElementById('send').disabled=true;
     try{
-      var out=await O.decide(q);
+      var seed=matchSeed(q);
+      var out;
+      if(seed){
+        out={ok:true,decision:'ALLOWED',answer:seed,source:'self-taught',receipt:null};
+      }else{
+        out=await O.decide(q);
+      }
       var dec=out.decision||(out.ok?'ALLOWED':'DEFERRED');
-      var meta='<span class="badge '+(out.ok?'ok':'no')+'">'+dec+'</span><span class="badge">'+(out.source||'')+'</span>';
+      var meta='<span class="badge '+(out.ok!==false&&dec!=='DEFERRED'?'ok':'no')+'">'+dec+'</span><span class="badge">'+(out.source||'')+'</span>';
       if(out.receipt)meta+=' · sealed';
       add('bot',out.answer||out.text||'—',meta);
     }catch(e){add('bot','Ошибка: '+e.message);}
