@@ -83,7 +83,7 @@ var current=null,mode="local";
 var LS_TASKS="aksi.infinity.tasks.v1",LS_API="aksi.infinity.api";
 $("api").value=localStorage.getItem(LS_API)||"https://milana-backend.onrender.com";
 function base(){return ($("api").value||"").trim().replace(/\/$/,"")}
-function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return({"&":"&amp;","<":"&lt;",">":"&gt;",'"':'&quot;',"'":"&#39;"})[c]})}
+function esc(s){return String(s||"").replace(/[&<>"']/g,function(c){return({"&":"&","<":"<",">":">",'"':'"',"'":"&#39;"})[c]})}
 function safe(s){try{var u=new URL(s);return (u.protocol==="http:"||u.protocol==="https:")?u.href:"#"}catch(e){return "#"}}
 function uid(){return "t_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7)}
 function loadLocal(){try{var a=JSON.parse(localStorage.getItem(LS_TASKS)||"[]");return Array.isArray(a)?a:[]}catch(e){return []}}
@@ -91,7 +91,15 @@ function saveLocal(list){try{localStorage.setItem(LS_TASKS,JSON.stringify(list.s
 function upsert(t){var list=loadLocal().filter(function(x){return x.id!==t.id});list.unshift(t);saveLocal(list)}
 function j(t,m){t.journal=t.journal||[];t.journal.push({at:Date.now(),message:m})}
 function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function normalizeQuery(q){
+  var s=String(q||"").trim();
+  s=s.replace(/^(исследуй|изучи|найди|расскажи|проанализируй|search|research|explore)\s+/i,"");
+  s=s.replace(/(^|\s)(ии|ai)(\s|$)/gi, function(_,a,b,c){return a+"искусственный интеллект"+c});
+  if(s.length<3) s=String(q||"").trim();
+  return s;
+}
 async function wiki(q,lang){
+  q=normalizeQuery(q);
   lang=lang||(/[а-яё]/i.test(q)?"ru":"en");
   var a=await fetch("https://"+lang+".wikipedia.org/w/api.php?action=opensearch&search="+encodeURIComponent(q)+"&limit=5&namespace=0&format=json&origin=*",{cache:"no-store"}).then(function(r){return r.json()});
   var titles=a[1]||[],urls=a[3]||[],out=[];
@@ -105,6 +113,7 @@ async function wiki(q,lang){
 }
 async function ddg(q){
   try{
+    q=normalizeQuery(q);
     var d=await fetch("https://api.duckduckgo.com/?q="+encodeURIComponent(q)+"&format=json&no_redirect=1&no_html=1",{cache:"no-store"}).then(function(r){return r.json()});
     var out=[];
     if(d.AbstractText) out.push({url:d.AbstractURL||("https://duckduckgo.com/?q="+encodeURIComponent(q)),title:d.Heading||"DuckDuckGo",text:d.AbstractText,provider:"duckduckgo"});
