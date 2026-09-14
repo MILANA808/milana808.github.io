@@ -1,0 +1,59 @@
+name: AKSI Self-Apply
+
+on:
+  repository_dispatch:
+    types: [aksi-self-teach]
+  workflow_dispatch:
+    inputs:
+      fact:
+        description: Fact to append to data/self-taught.json
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: aksi-self-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Append self-taught fact
+        env:
+          FACT: ${{ github.event.client_payload.fact || inputs.fact }}
+        run: |
+          set -e
+          mkdir -p data
+          if [ ! -f data/self-taught.json ]; then
+            echo '{"version":1,"updated":null,"items":[]}' > data/self-taught.json
+          fi
+          node <<'NODE'
+          const fs = require('fs');
+          const fact = process.env.FACT || '';
+          if (!fact.trim()) { console.log('No fact'); process.exit(0); }
+          if (fact.length > 2000) { console.error('too long'); process.exit(1); }
+          const path = 'data/self-taught.json';
+          let data = { version: 1, items: [] };
+          try { data = JSON.parse(fs.readFileSync(path, 'utf8')); } catch (e) {}
+          if (!Array.isArray(data.items)) data.items = [];
+          data.items.push({ t: Date.now(), text: fact.trim(), source: 'workflow', meta: {} });
+          if (data.items.length > 500) data.items = data.items.slice(-500);
+          data.updated = new Date().toISOString();
+          fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
+          console.log('n=', data.items.length);
+          NODE
+      - name: Commit
+        run: |
+          git config user.name "AKSI Self-Apply"
+          git config user.email "aksi-bot@users.noreply.github.com"
+          git add data/self-taught.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            git commit -m "AKSI Self-Apply: teach from workflow"
+            git push
+          fi
