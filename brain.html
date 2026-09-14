@@ -56,7 +56,7 @@ button.d{background:#3a1515}
 </section>
 <section class="pane" id="tab-full">
   <div class="local">
-    <div class="banner" style="margin:0 0 10px"><b>4096</b> LIF offline, популяции FlyWire-scale. Не 15M реальных синапсов — полный масштаб динамики без GPU.</div>
+    <div class="banner" style="margin:0 0 10px"><b>4096</b> LIF offline v2 — Food→ALLOWED, Bitter→DEFERRED, Loom→ESCAPE.</div>
     <div class="metrics">
       <div><b id="fn">4096</b><span class="n">neurons</span></div>
       <div><b id="fe">—</b><span class="n">synapses</span></div>
@@ -121,7 +121,7 @@ button.d{background:#3a1515}
   });
   var worker=null, groups=[];
   try{
-    worker=new Worker('/aksi-fly-full-worker.js?v=1');
+    worker=new Worker('/aksi-fly-full-worker.js?v=2');
     worker.onmessage=function(ev){
       var m=ev.data; if(!m)return;
       if(m.type==='info'){
@@ -139,16 +139,16 @@ button.d{background:#3a1515}
       document.getElementById('fd').textContent=m.decision;
       document.getElementById('dec').textContent=m.decision;
       document.getElementById('dec').style.color=m.decision==='ALLOWED'?'var(--green)':m.decision==='ESCAPE'?'#fbbf24':m.decision==='DEFERRED'?'var(--red)':'var(--muted)';
-      if(m.rates) m.rates.forEach(function(r,i){ var el=document.getElementById('gr'+i); if(el) el.style.width=Math.min(100,r*400)+'%'; });
+      if(m.rates) m.rates.forEach(function(r,i){ var el=document.getElementById('gr'+i); if(el) el.style.width=Math.min(100,r*500)+'%'; });
       drawFull(m);
     };
     worker.postMessage({type:'info'});
   }catch(e){ document.getElementById('flog').textContent=String(e); }
   function flog(s){ var el=document.getElementById('flog'); el.textContent=(s+'\n'+el.textContent).slice(0,800); }
-  document.getElementById('fFood').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'food',strength:1.5});flog('FOOD');};
-  document.getElementById('fBit').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'bitter',strength:1.7});flog('BITTER');};
-  document.getElementById('fLoom').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'loom',strength:1.5});flog('LOOM');};
-  document.getElementById('fTouch').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'touch',strength:1.2});flog('TOUCH');};
+  document.getElementById('fFood').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'food',strength:2.2});flog('FOOD');};
+  document.getElementById('fBit').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'bitter',strength:2.4});flog('BITTER');};
+  document.getElementById('fLoom').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'loom',strength:2.2});flog('LOOM');};
+  document.getElementById('fTouch').onclick=function(){worker&&worker.postMessage({type:'inject',kind:'touch',strength:1.8});flog('TOUCH');};
   document.getElementById('fReset').onclick=function(){worker&&worker.postMessage({type:'reset'});flog('RESET');};
   var fc=document.getElementById('fc'), fctx=fc.getContext('2d');
   function drawFull(m){
