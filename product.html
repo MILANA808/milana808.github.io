@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>АКСИ — осознанные ответы</title>
-<meta name="description" content="АКСИ: личная сеть + интернет + LLM без пустых ответов">
+<meta name="description" content="АКСИ Mind: личная сеть + интернет + LLM. Аттестация 2026-09-17">
 <meta name="theme-color" content="#0c0c10">
 <link rel="canonical" href="https://milana808.github.io/product.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -39,11 +39,15 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 <body>
 <header>
   <div class="logo">АКСИ <span>Mind</span></div>
-  <nav><a href="/seal.html">О продукте</a><a href="/">Главная</a></nav>
+  <nav>
+    <a href="/AKSI-NET-ATTESTATION.md">Аттестация</a>
+    <a href="/seal.html">О продукте</a>
+    <a href="/">Главная</a>
+  </nav>
 </header>
 <div class="banner">
-  <h1>Осознанные ответы без пустоты</h1>
-  <p>Личная сеть → интернет (Wikipedia) → большая LLM если уже включена. Всегда есть запасной путь.</p>
+  <h1>Осознанные ответы · аттестация 2026-09-17</h1>
+  <p>Личная MLP-сеть → Wikipedia → LLM (опция). Математика и тесты: <a href="/AKSI-NET-ATTESTATION.md" style="color:#a79bff">AKSI-NET-ATTESTATION</a></p>
 </div>
 <div class="status" id="st">Статус: …</div>
 <div class="bar-top">
@@ -59,36 +63,31 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 </div>
 <div class="msgs" id="msgs" role="log" aria-live="polite"></div>
 <div class="composer">
-  <input id="q" type="text" placeholder="Вопрос — ответ с личной сетью и/или интернетом" enterkeyhint="send">
+  <input id="q" type="text" placeholder="Вопрос — личная сеть и/или интернет" enterkeyhint="send">
   <button type="button" id="go">Спросить</button>
 </div>
-<script src="/aksi-personal-net.js?v=2"></script>
+<script src="/aksi-personal-net.js?v=3"></script>
 <script src="/aksi-bot.js?v=11"></script>
 <script src="/aksi-webllm.js?v=3"></script>
-<script src="/aksi-mind.js?v=1"></script>
+<script src="/aksi-mind.js?v=2"></script>
 <script>
 (function () {
   var busy = false;
   function paint() {
     var p = window.AKSI_PERSONAL && AKSI_PERSONAL.status && AKSI_PERSONAL.status();
     var w = window.AKSI_WEBLLM && AKSI_WEBLLM.status && AKSI_WEBLLM.status();
-    var line = "Личная сеть: " + (p && p.ready ? "<b>on</b> · " + p.knowledge + " знаний" : "…");
-    if (w && w.ready) line += " · LLM: <b>on</b> · " + (w.model || "");
+    var line = "Личная сеть: " + (p && p.ready ? "<b>on</b> · " + p.knowledge + " знаний · v" + (p.version||"") : "…");
+    if (w && w.ready) line += " · LLM: <b>on</b>";
     else if (w && w.loading) line += " · LLM: " + (w.progress || 0) + "%";
-    else line += " · LLM: выкл (не обязательна)";
-    line += " · Интернет: Wikipedia при фактических вопросах";
+    else line += " · LLM: выкл";
+    line += " · Mind 1.1 · аттестация 2026-09-17";
     document.getElementById("st").innerHTML = line;
   }
   function add(role, text, meta) {
     var d = document.createElement("div");
     d.className = "msg " + role;
     d.textContent = text;
-    if (meta) {
-      var m = document.createElement("div");
-      m.className = "meta";
-      m.textContent = meta;
-      d.appendChild(m);
-    }
+    if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
     document.getElementById("msgs").appendChild(d);
     d.scrollIntoView({ block: "end" });
   }
@@ -96,75 +95,48 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     var t = document.getElementById("typing");
     if (!on) { if (t) t.remove(); return; }
     if (t) return;
-    var d = document.createElement("div");
-    d.id = "typing";
-    d.className = "msg typing";
-    d.textContent = "Собираю ответ (сеть / интернет)…";
-    document.getElementById("msgs").appendChild(d);
-    d.scrollIntoView({ block: "end" });
+    var d = document.createElement("div"); d.id = "typing"; d.className = "msg typing";
+    d.textContent = "Собираю ответ…"; document.getElementById("msgs").appendChild(d);
   }
   if (window.AKSI_PERSONAL && AKSI_PERSONAL.ensure) AKSI_PERSONAL.ensure();
   paint();
-  add("bot",
-    "Конвейер АКСИ Mind:\n1) Личная обученная сеть (сразу)\n2) Интернет Wikipedia, если вопрос фактический\n3) Большая LLM — только если вы её включили и она уже готова\n\nПустых ответов быть не должно. Можно: «исследуй: тема».",
-    "mind v1"
-  );
+  add("bot", "АКСИ Mind 1.1 (2026-09-17).\nЛичная сеть обучена; мусорный ввод отклоняется.\nИнтернет: Wikipedia. LLM — опция.\nАттестация: /AKSI-NET-ATTESTATION.md", "attested");
   async function send(q) {
-    q = String(q || "").trim();
-    if (!q || busy) return;
-    busy = true;
-    document.getElementById("go").disabled = true;
-    add("user", q);
-    typing(true);
+    q = String(q || "").trim(); if (!q || busy) return;
+    busy = true; document.getElementById("go").disabled = true;
+    add("user", q); typing(true);
     try {
-      if (!window.AKSI_MIND) throw new Error("Mind не загружен");
       var out = await AKSI_MIND.think(q, { useLlm: !!(window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready()) });
       typing(false);
       add("bot", out.text || "—", out.meta || out.source || "");
     } catch (e) {
       typing(false);
-      add("bot", "Сбой: " + (e.message || e) + "\nПопробуйте «исследуй: " + q.slice(0, 40) + "»", "ошибка");
+      add("bot", "Сбой: " + (e.message || e), "ошибка");
     }
-    busy = false;
-    document.getElementById("go").disabled = false;
-    document.getElementById("q").focus();
-    paint();
+    busy = false; document.getElementById("go").disabled = false; document.getElementById("q").focus(); paint();
   }
   document.getElementById("go").onclick = function () {
-    var q = document.getElementById("q").value;
-    document.getElementById("q").value = "";
-    send(q);
+    var q = document.getElementById("q").value; document.getElementById("q").value = ""; send(q);
   };
   document.getElementById("q").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      var q = document.getElementById("q").value;
-      document.getElementById("q").value = "";
-      send(q);
-    }
+    if (e.key === "Enter") { var q = document.getElementById("q").value; document.getElementById("q").value = ""; send(q); }
   });
   document.querySelectorAll(".chips button").forEach(function (b) {
     b.onclick = function () { send(b.getAttribute("data-q")); };
   });
   document.getElementById("btnNet").onclick = function () {
-    if (window.AKSI_PERSONAL) {
-      AKSI_PERSONAL.ensure();
-      add("bot", "Личная сеть: " + JSON.stringify(AKSI_PERSONAL.status()), "personal");
-      paint();
-    }
+    if (window.AKSI_PERSONAL) { AKSI_PERSONAL.ensure(); add("bot", JSON.stringify(AKSI_PERSONAL.status(), null, 0), "personal"); paint(); }
   };
   document.getElementById("btnLlm").onclick = function () {
-    if (!window.AKSI_WEBLLM) { add("bot", "WebLLM модуль не найден", ""); return; }
-    var btn = document.getElementById("btnLlm");
-    btn.disabled = true;
-    add("bot", "Загрузка большой LLM (может занять несколько минут)…\nПока можно пользоваться личной сетью и интернетом.", "WebLLM");
-    var p = AKSI_WEBLLM.autoLoad ? AKSI_WEBLLM.autoLoad() : AKSI_WEBLLM.load();
-    Promise.resolve(p).then(function () {
-      btn.disabled = false;
-      paint();
-      add("bot", AKSI_WEBLLM.ready() ? "Большая LLM готова. Следующие вопросы могут использовать её." : "LLM не стала ready — продолжайте с личной сетью + интернетом.", "LLM");
+    if (!window.AKSI_WEBLLM) return;
+    var btn = document.getElementById("btnLlm"); btn.disabled = true;
+    add("bot", "Загрузка LLM… Пока работают личная сеть и интернет.", "WebLLM");
+    Promise.resolve(AKSI_WEBLLM.autoLoad ? AKSI_WEBLLM.autoLoad() : AKSI_WEBLLM.load()).then(function () {
+      btn.disabled = false; paint();
+      add("bot", AKSI_WEBLLM.ready() ? "LLM готова." : "LLM не ready — используйте сеть + интернет.", "LLM");
     }).catch(function (e) {
       btn.disabled = false;
-      add("bot", "LLM не загрузилась: " + (e.message || e) + "\nЭто нормально — ответы идут через личную сеть и Wikipedia.", "fallback");
+      add("bot", "LLM ошибка: " + (e.message || e) + " — это не ломает личную сеть.", "fallback");
       paint();
     });
   };
