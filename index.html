@@ -1,72 +1,67 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AKSI — Private Research Agent</title>
-<meta name="description" content="AKSI Seal: evidence research + encrypted on-device memory. Local-first agent layer.">
+<meta name="description" content="AKSI Seal: evidence research + encrypted on-device memory. Local-first agent layer. No API keys for core.">
 <meta name="theme-color" content="#06060a">
 <link rel="canonical" href="https://milana808.github.io/">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://milana808.github.io/">
+<meta property="og:title" content="AKSI Seal — Private Research Agent">
+<meta property="og:description" content="Evidence research + encrypted on-device memory. Local-first. Not another chatbot.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AKSI Seal — Private Research Agent">
+<meta name="twitter:description" content="Evidence research + encrypted on-device memory. Local-first.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/aksi-motion.css">
 <style>
 :root{
-  --bg:#06060a;--elev:#0c0c12;--ink:#f3f1ec;--muted:#9a97a8;--dim:#6e6b7a;
+  --bg:#06060a;--elev:#0b0b11;--ink:#f2f0eb;--muted:#9b98a6;--dim:#6a6775;
   --line:rgba(255,255,255,.08);--accent:#8b7cf6;--signal:#5ee9a8;
   --font:"Instrument Sans",system-ui,sans-serif;--display:"Syne",system-ui,sans-serif;
-  --ease:cubic-bezier(.22,1,.36,1);
+  --ease:var(--ease-out,cubic-bezier(.22,1,.36,1));
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:var(--font);background:var(--bg);color:var(--ink);
-  min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased;
-}
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse 70% 45% at 50% -15%,rgba(139,124,246,.15),transparent 55%);
-}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(139,124,246,.35);color:#fff}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse 70% 45% at 50% -15%,rgba(139,124,246,.14),transparent 55%)}
 .wrap{width:min(100% - 40px,720px);margin:auto;padding:48px 0 72px;position:relative}
-.brand{font-family:var(--display);font-weight:800;letter-spacing:.06em;font-size:14px}
+.brand{font-family:var(--display);font-weight:800;letter-spacing:.08em;font-size:14px;text-transform:uppercase}
 .brand span{color:var(--accent)}
-.eyebrow{
-  margin-top:48px;font-size:12px;font-weight:600;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--signal);display:flex;align-items:center;gap:8px;
-}
-.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(94,233,168,.15)}
-h1{
-  font-family:var(--display);font-weight:800;margin-top:16px;
-  font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.06;letter-spacing:-.03em;
-}
+.eyebrow{margin-top:48px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(94,233,168,.12)}
+h1{font-family:var(--display);font-weight:800;margin-top:16px;font-size:clamp(2.3rem,6vw,3.4rem);line-height:1.04;letter-spacing:-.035em}
 h1 em{font-style:normal;color:var(--accent)}
-.lead{margin-top:18px;color:var(--muted);font-size:1.05rem;max-width:36ch}
+.lead{margin-top:18px;color:var(--muted);font-size:1.05rem;max-width:34ch;line-height:1.65}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.btn{
-  display:inline-flex;align-items:center;padding:14px 22px;border-radius:999px;
-  font-weight:600;font-size:14px;text-decoration:none;border:1px solid transparent;
-  transition:transform .25s var(--ease),box-shadow .25s;
-}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:999px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid transparent;transition:transform .25s var(--ease),box-shadow .25s}
 .btn:hover{transform:translateY(-2px)}
-.primary{background:var(--accent);color:#fff;box-shadow:0 8px 32px rgba(139,124,246,.28)}
+.btn:active{transform:none}
+.primary{background:var(--accent);color:#fff;box-shadow:0 8px 28px rgba(139,124,246,.28)}
 .ghost{border-color:var(--line);color:var(--ink)}
 .ghost:hover{border-color:rgba(255,255,255,.2)}
-.meta{margin-top:20px;font-size:13px;color:var(--dim)}
+.meta{margin-top:20px;font-size:12px;color:var(--dim)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:48px}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
-.card{
-  display:block;text-decoration:none;color:inherit;
-  background:var(--elev);border:1px solid var(--line);border-radius:16px;padding:18px;
-  transition:border-color .2s,transform .25s var(--ease);
-}
-.card:hover{border-color:rgba(255,255,255,.16);transform:translateY(-2px)}
+.card{display:block;text-decoration:none;color:inherit;background:var(--elev);border:1px solid var(--line);border-radius:16px;padding:18px;transition:border-color .2s,transform .25s var(--ease)}
+.card:hover{border-color:rgba(255,255,255,.14);transform:translateY(-2px)}
 .card strong{display:block;font-size:14px;margin-bottom:4px}
 .card span{font-size:12px;color:var(--muted)}
 footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
 footer a{color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--ink)}
+@media(prefers-reduced-motion:reduce){.btn:hover,.card:hover{transform:none}}
 </style>
 </head>
-<body>
-<div class="wrap">
+<body class="m-page">
+<a href="#main" style="position:absolute;left:-999px;top:0" class="skip">Skip to content</a>
+<div class="wrap" id="main">
   <div class="brand">AKSI <span>Seal</span></div>
   <div class="eyebrow">Private research agent</div>
   <h1>Find. Seal.<br><em>Recall.</em></h1>
@@ -77,7 +72,7 @@ footer a{color:var(--muted);text-decoration:none}
   </div>
   <p class="meta">Local-first · AES-GCM · not another chatbot</p>
   <div class="grid">
-    <a class="card" href="/seal.html"><strong>Seal</strong><span>Product story & positioning</span></a>
+    <a class="card" href="/seal.html"><strong>Seal</strong><span>Product story &amp; positioning</span></a>
     <a class="card" href="/product.html"><strong>Runtime</strong><span>Research · memory · gate</span></a>
     <a class="card" href="/infinity.html"><strong>Infinity</strong><span>Full research agent</span></a>
     <a class="card" href="/bot.html"><strong>Bot</strong><span>Cortex memory chat</span></a>
