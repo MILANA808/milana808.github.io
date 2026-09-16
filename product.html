@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ — нейросеть и генерация</title>
-<meta name="description" content="АКСИ: своя нейросеть, WebLLM, память, поиск.">
+<title>АКСИ — нейросеть отвечает</title>
+<meta name="description" content="АКСИ: ответы нейросети в браузере (WebLLM Qwen).">
 <meta name="theme-color" content="#0c0c10">
 <link rel="canonical" href="https://milana808.github.io/product.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -15,218 +15,171 @@ body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);mi
 header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
 .logo{font-weight:800}.logo span{color:var(--acc)}
 header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
-.intro{max-width:720px;margin:0 auto;padding:16px;width:100%}
-.intro h1{font-size:1.2rem;margin-bottom:6px}
-.intro p{color:var(--muted);font-size:14px}
-.llm-bar{max-width:720px;margin:0 auto;padding:0 16px 12px;width:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.llm-bar button{font:inherit;font-size:13px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-.llm-bar button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
-.llm-bar button:disabled{opacity:.5}
-#llmStatus{font-size:12px;color:var(--muted);flex:1;min-width:140px}
-.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:720px;margin:0 auto;padding:0 16px 8px;width:100%}
-@media(max-width:600px){.board{grid-template-columns:1fr 1fr}}
-.metric{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
-.metric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
-.metric b{font-size:13px}.ok{color:var(--ok)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto;padding:8px 16px;width:100%}
-.chips button{font:inherit;font-size:13px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-.msgs{flex:1;overflow:auto;max-width:720px;width:100%;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px;min-height:34vh}
+.banner{max-width:720px;margin:0 auto;padding:14px 16px;width:100%}
+.banner h1{font-size:1.15rem;margin-bottom:6px}
+.banner p{color:var(--muted);font-size:14px}
+.status{max-width:720px;margin:0 auto;padding:0 16px 10px;width:100%;font-size:13px;color:var(--muted)}
+.status b{color:var(--ok)}
+.bar-top{max-width:720px;margin:0 auto;padding:0 16px 12px;width:100%;display:flex;flex-wrap:wrap;gap:8px}
+.bar-top button{font:inherit;font-size:13px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.bar-top button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.bar-top button:disabled{opacity:.55}
+.chips{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto;padding:0 16px 10px;width:100%}
+.chips button{font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.msgs{flex:1;overflow:auto;max-width:720px;width:100%;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px;min-height:40vh}
 .msg{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;max-width:95%}
 .msg.user{align-self:flex-end;background:#1a1a24}
-.msg .how{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-.msg .how strong{color:var(--ink)}
-.bar{max-width:720px;width:100%;margin:0 auto;padding:12px 16px 20px;display:flex;gap:8px;border-top:1px solid var(--line)}
-.bar input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:var(--ink);font:inherit;font-size:16px}
-.bar button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
-.bar button:disabled{opacity:.5}
+.msg .meta{margin-top:8px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.msg.typing{color:var(--muted);font-style:italic}
+.composer{max-width:720px;width:100%;margin:0 auto;padding:12px 16px 20px;display:flex;gap:8px;border-top:1px solid var(--line)}
+.composer input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:var(--ink);font:inherit;font-size:16px}
+.composer button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
+.composer button:disabled{opacity:.5}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">АКСИ <span>Net</span></div>
+  <div class="logo">АКСИ <span>нейросеть</span></div>
   <nav>
-    <a href="/NET.md">О сети</a>
-    <a href="/seal.html">Продукт</a>
+    <a href="/seal.html">О продукте</a>
     <a href="/">Главная</a>
   </nav>
 </header>
-<div class="intro">
-  <h1>Своя нейросеть + LLM</h1>
-  <p><strong>AKSI Net v2</strong> — embedding + MLP, обучение backprop в браузере. WebLLM — большая модель.</p>
+<div class="banner">
+  <h1>Спросите — ответит нейросеть</h1>
+  <p>Ответы генерирует локальная LLM (WebLLM / Qwen) в браузере. Первый раз модель скачается, дальше работает у вас.</p>
 </div>
-<div class="llm-bar">
-  <button type="button" id="trainNet">Обучить нейросеть</button>
-  <button type="button" id="genNet">Сгенерировать (Net)</button>
-  <button type="button" class="primary" id="loadLlm">Загрузить LLM</button>
-  <span id="llmStatus">LLM не загружена</span>
-</div>
-<div class="board">
-  <div class="metric"><span>Bot</span><b id="m-bot">…</b></div>
-  <div class="metric"><span>Net</span><b id="m-net">…</b></div>
-  <div class="metric"><span>LLM</span><b id="m-llm">выкл</b></div>
-  <div class="metric"><span>Память</span><b id="m-cx">…</b></div>
+<div class="status" id="st">Статус: модель не загружена</div>
+<div class="bar-top">
+  <button type="button" class="primary" id="btnLoad">Включить нейросеть</button>
+  <button type="button" id="btnAsk">Спросить пример</button>
 </div>
 <div class="chips">
-  <button type="button" data-q="Объясни что такое нейронная сеть простыми словами">Вопрос LLM</button>
-  <button type="button" data-q="запомни: Нейросеть АКСИ учится на моих текстах">Запомнить</button>
-  <button type="button" data-q="статус">Статус</button>
+  <button type="button" data-q="Объясни простыми словами, что такое искусственный интеллект">Что такое ИИ?</button>
+  <button type="button" data-q="Напиши короткий дружеский совет, как не выгорать на работе">Совет</button>
+  <button type="button" data-q="Придумай 3 идеи для полезного offline-приложения">Идеи</button>
 </div>
 <div class="msgs" id="msgs" role="log" aria-live="polite"></div>
-<div class="bar">
-  <input id="q" type="text" placeholder="Вопрос или текст…" enterkeyhint="send" aria-label="Сообщение">
-  <button type="button" id="go">Отправить</button>
+<div class="composer">
+  <input id="q" type="text" placeholder="Напишите вопрос — получите ответ нейросети" enterkeyhint="send" aria-label="Вопрос">
+  <button type="button" id="go">Спросить</button>
 </div>
-<script src="/aksi-fly-gate.js?v=2"></script>
-<script src="/aksi-organism.js?v=13"></script>
-<script src="/agent.js?v=4"></script>
-<script src="/aksi-algorithm.js?v=3"></script>
-<script src="/aksi-cortex-kernel.js?v=3"></script>
-<script src="/aksi-clm.js?v=1"></script>
+<script src="/aksi-webllm.js?v=3"></script>
 <script src="/aksi-neuro.js?v=10"></script>
-<script src="/aksi-net.js?v=2"></script>
-<script src="/aksi-webllm.js?v=2"></script>
-<script src="/aksi-bot.js?v=10"></script>
 <script>
 (function () {
-  var B = window.AKSI_BOT;
-  if (!B) { document.getElementById("m-bot").textContent = "нет"; return; }
-  function paintNet() {
-    var mn = document.getElementById("m-net");
-    if (!window.AKSI_NET) { mn.textContent = "нет"; return; }
-    var s = AKSI_NET.status();
-    mn.textContent = s.ready ? ((s.hidden||0) + "h · " + (s.epochsDone || 0) + "ep") : "0";
-    mn.className = s.epochsDone > 0 ? "ok" : "";
-  }
-  function llmReady() {
-    return !!(window.AKSI_WEBLLM && AKSI_WEBLLM.status && AKSI_WEBLLM.status().ready);
-  }
-  function paintLlm() {
-    var el = document.getElementById("llmStatus");
-    var mb = document.getElementById("m-llm");
-    if (!window.AKSI_WEBLLM) { el.textContent = "WebLLM нет"; mb.textContent = "нет"; return; }
+  var busy = false;
+  function setStatus(t) { document.getElementById("st").innerHTML = t; }
+  function paintStatus() {
+    if (!window.AKSI_WEBLLM) { setStatus("Статус: модуль WebLLM не найден"); return; }
     var s = AKSI_WEBLLM.status();
-    if (s.loading) { el.textContent = "Загрузка LLM " + (s.progress || 0) + "%"; mb.textContent = (s.progress || 0) + "%"; }
-    else if (s.ready) { el.textContent = "LLM: " + (s.model || "ok"); mb.textContent = "on"; mb.className = "ok"; }
-    else { el.textContent = "LLM выкл — обучите Net"; mb.textContent = "выкл"; mb.className = ""; }
+    if (s.loading) setStatus("Статус: загрузка нейросети… <b>" + (s.progress || 0) + "%</b> — " + (s.message || ""));
+    else if (s.ready) setStatus("Статус: <b>нейросеть готова</b> · " + (s.model || "") + " · " + (s.backend || ""));
+    else if (s.error) setStatus("Статус: ошибка — " + s.error);
+    else setStatus("Статус: нажмите «Включить нейросеть» (один раз, несколько минут)");
   }
-  function paint(s) {
-    document.getElementById("m-bot").textContent = "v" + (s.version || "?");
-    document.getElementById("m-bot").className = "ok";
-    document.getElementById("m-cx").textContent = s.cortex ? "да · " + (s.cortexDocs || 0) : "нет";
-    paintNet(); paintLlm();
-  }
-  B.status().then(paint);
-  window.addEventListener("aksi-webllm-progress", paintLlm);
-  function add(role, text, how) {
+  function add(role, text, meta) {
     var d = document.createElement("div");
     d.className = "msg " + role;
     d.textContent = text;
-    if (how) {
-      var h = document.createElement("div");
-      h.className = "how";
-      h.innerHTML = "<strong>Результат:</strong> " + how;
-      d.appendChild(h);
-    }
+    if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
     document.getElementById("msgs").appendChild(d);
     d.scrollIntoView({ block: "end" });
   }
+  function addTyping() {
+    var d = document.createElement("div");
+    d.className = "msg typing"; d.id = "typing"; d.textContent = "Нейросеть думает…";
+    document.getElementById("msgs").appendChild(d);
+    d.scrollIntoView({ block: "end" });
+  }
+  function clearTyping() { var t = document.getElementById("typing"); if (t) t.remove(); }
   add("bot",
-    "Нейросеть АКСИ Net v2 (embedding + MLP):\n1) «Обучить нейросеть» — 25 эпох, backprop\n2) «Сгенерировать» — текст из весов\n\nУже обучена у нас до loss ≈ 0.08; у вас обучение займёт 15–40 сек.",
-    "реальные веса · SGD · генерация"
+    "Я отвечаю как обычная нейросеть: генерирую текст по вашему вопросу.\n\n1) Нажмите «Включить нейросеть»\n2) Дождитесь статуса «готова»\n3) Задайте вопрос\n\nЕсли спросить раньше — модель загрузится сама и потом ответит.",
+    "WebLLM · локальная LLM"
   );
-  document.getElementById("trainNet").onclick = function () {
-    if (!window.AKSI_NET) { add("bot", "aksi-net.js не загружен", "ошибка"); return; }
-    add("bot", "Обучение нейросети (15–40 сек, не закрывайте вкладку)…", "embed+MLP");
-    setTimeout(function () {
-      try {
-        var r = AKSI_NET.train({ epochs: 25, lr: 0.06 });
-        add("bot",
-          "Обучение готово.\nЭпох: " + r.epochs + "\nLoss: " + (r.loss != null ? r.loss.toFixed(3) : "—") +
-          "\nСловарь: " + r.vocab + "\nВесов: " + AKSI_NET.status().weights +
-          "\nHidden: " + r.hidden,
-          "нейросеть обучена · localStorage"
-        );
-        paintNet();
-      } catch (e) { add("bot", "Ошибка: " + e.message, "train"); }
-    }, 40);
-  };
-  document.getElementById("genNet").onclick = function () {
-    if (!window.AKSI_NET) return;
-    if (!(AKSI_NET.status().epochsDone > 0)) {
-      add("bot", "Сначала «Обучить нейросеть».", "net");
-      return;
-    }
-    var g = AKSI_NET.generate("АКСИ ", { n: 120, temperature: 0.45 });
-    add("bot", g.text || "—", "Net v2 · loss " + (g.loss != null ? Number(g.loss).toFixed(3) : "—"));
-  };
-  document.getElementById("loadLlm").onclick = function () {
-    if (!window.AKSI_WEBLLM) { document.getElementById("llmStatus").textContent = "WebLLM нет"; return; }
-    var btn = document.getElementById("loadLlm");
+  window.addEventListener("aksi-webllm-progress", paintStatus);
+  paintStatus();
+  function ensureModel() {
+    if (!window.AKSI_WEBLLM) return Promise.reject(new Error("WebLLM не загружен"));
+    if (AKSI_WEBLLM.ready()) return Promise.resolve(true);
+    var p = AKSI_WEBLLM.autoLoad ? AKSI_WEBLLM.autoLoad() : AKSI_WEBLLM.load();
+    return Promise.resolve(p).then(function () {
+      paintStatus();
+      if (!AKSI_WEBLLM.ready()) throw new Error("Модель не стала ready");
+      return true;
+    });
+  }
+  document.getElementById("btnLoad").onclick = function () {
+    var btn = document.getElementById("btnLoad");
     btn.disabled = true;
-    var p = AKSI_WEBLLM.ensure ? AKSI_WEBLLM.ensure() : AKSI_WEBLLM.load();
-    Promise.resolve(p).then(function () {
-      btn.disabled = false; paintLlm();
-      add("bot", "LLM загружена — задайте вопрос.", "webllm");
+    add("bot", "Включаю нейросеть (скачивание в браузер). Подождите…", "загрузка");
+    ensureModel().then(function () {
+      btn.disabled = false;
+      add("bot", "Нейросеть готова. Задайте любой вопрос.", "модель on");
     }).catch(function (e) {
       btn.disabled = false;
-      document.getElementById("llmStatus").textContent = "Ошибка: " + (e.message || e);
+      add("bot", "Не удалось загрузить: " + (e.message || e) + "\nНужны Chrome/Edge, лучше с WebGPU.", "ошибка");
+      paintStatus();
     });
   };
-  function howLine(out) {
-    var map = {
-      "aksi-net": "Своя нейросеть АКСИ",
-      webllm: "Большая LLM",
-      neuro: "Neuro",
-      research: "Поиск",
-      teach: "Память",
-      "bot-fallback": "Нет ответа"
-    };
-    return "Откуда: " + (map[out.source] || out.source || "—") + (out.generated ? " · генерация" : "");
-  }
-  async function clientGenerate(q) {
-    if (window.AKSI_WEBLLM && llmReady()) {
+  async function answerWithNN(q) {
+    if (window.AKSI_WEBLLM && AKSI_WEBLLM.ready()) {
       var r = await AKSI_WEBLLM.complete(q, {
-        system: "Ты АКСИ. Отвечай по-русски, ясно.", max_tokens: 280, temperature: 0.7
+        system: "Ты полезный русскоязычный ассистент АКСИ. Отвечай только по-русски, ясно, полными предложениями, по делу.",
+        max_tokens: 400,
+        temperature: 0.5
       });
-      if (r && r.text) return { text: r.text, source: "webllm", generated: true, model: r.model };
-    }
-    if (window.AKSI_NET && AKSI_NET.status().epochsDone > 0) {
-      var g = AKSI_NET.generate(String(q).slice(0, 48) + " ", { n: 100, temperature: 0.5 });
-      if (g && g.text) return { text: g.text, source: "aksi-net", generated: true, loss: g.loss };
+      if (r && r.text) return { text: r.text, meta: "нейросеть · " + (r.model || "WebLLM") + " · " + (r.backend || "local") };
+      if (r && r.error) throw new Error(r.error);
     }
     if (window.AKSI_NEURO && AKSI_NEURO.think) {
       var n = AKSI_NEURO.think(q);
-      if (n && n.text && n.text.length > 10) return { text: n.text, source: "neuro", generated: true };
+      if (n && n.text && n.text.length > 20) return { text: n.text, meta: "Neuro (слабее) · offline" };
     }
-    return null;
+    throw new Error("Нет готовой модели. Нажмите «Включить нейросеть».");
   }
-  async function send() {
-    var q = document.getElementById("q").value.trim();
-    if (!q) return;
-    document.getElementById("q").value = "";
-    add("user", q);
+  async function sendQuestion(q) {
+    q = String(q || "").trim();
+    if (!q || busy) return;
+    busy = true;
     document.getElementById("go").disabled = true;
+    add("user", q);
     try {
-      var out = await B.think(q);
-      if (out && (out.source === "bot-fallback" || !out.text || out.text.length < 5)) {
-        var g = await clientGenerate(q);
-        if (g) out = g;
+      if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready()) {
+        add("bot", "Модель не включена — загружаю, затем отвечу…", "автозагрузка");
+        await ensureModel();
+        add("bot", "Модель загружена. Генерирую ответ…", "ok");
       }
-      add("bot", out.text || "—", howLine(out || {}));
+      addTyping();
+      var out = await answerWithNN(q);
+      clearTyping();
+      add("bot", out.text, out.meta);
     } catch (e) {
-      add("bot", "Ошибка: " + e.message, "сбой");
+      clearTyping();
+      add("bot", "Ошибка: " + (e.message || e), "сбой");
     }
+    busy = false;
     document.getElementById("go").disabled = false;
     document.getElementById("q").focus();
-    B.status().then(paint);
+    paintStatus();
   }
-  document.getElementById("go").onclick = send;
-  document.getElementById("q").addEventListener("keydown", function (e) { if (e.key === "Enter") send(); });
+  document.getElementById("go").onclick = function () {
+    var q = document.getElementById("q").value;
+    document.getElementById("q").value = "";
+    sendQuestion(q);
+  };
+  document.getElementById("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      var q = document.getElementById("q").value;
+      document.getElementById("q").value = "";
+      sendQuestion(q);
+    }
+  });
+  document.getElementById("btnAsk").onclick = function () {
+    sendQuestion("Объясни простыми словами, зачем людям искусственный интеллект");
+  };
   document.querySelectorAll(".chips button").forEach(function (b) {
-    b.onclick = function () {
-      document.getElementById("q").value = b.getAttribute("data-q");
-      send();
-    };
+    b.onclick = function () { sendQuestion(b.getAttribute("data-q")); };
   });
 })();
 </script>
