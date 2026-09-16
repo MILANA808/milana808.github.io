@@ -1,10 +1,10 @@
 /**
- * AKSI Bot v1.3.0 — unified: Agent + Organism + Cortex + Fly-Gate + Research
+ * AKSI Bot v1.4.0 Whole — Agent + Organism + Cortex + Fly-Gate + Research + ADIA
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.3.0-unified";
+  var VER = "1.4.0-whole";
   var seed = [];
   var DEFAULT_CORTEX_PW = "aksi";
   var CORTEX_MIN_SCORE = 0.002;
@@ -102,7 +102,22 @@
     return null;
   }
 
+  function applyAdia(out, q) {
+    try {
+      if (!out || !G.AKSI_ALGORITHM || !G.AKSI_ALGORITHM.evaluate) return out;
+      var r = G.AKSI_ALGORITHM.evaluate(q || "", { text: out.text, source: out.source }, { policy: "companion" });
+      if (r) {
+        out.adia = r;
+        out.eqs = r.EQS != null ? r.EQS : (r.metrics && r.metrics.EQS);
+        out.aksiScore = r.AKSI != null ? r.AKSI : (r.metrics && r.metrics.AKSI);
+        if (r.metrics) out.metrics = r.metrics;
+      }
+    } catch (e) {}
+    return out;
+  }
+
   function applyGate(out, q) {
+    out = applyAdia(out, q);
     try {
       if (!G.AKSI_FLY_GATE || !G.AKSI_FLY_GATE.evaluate || !out) return out;
       var conf = 0.55;
@@ -111,6 +126,7 @@
       if (out.source === "organism") conf = 0.5;
       if (out.source === "bot-fallback") conf = 0.35;
       if (out.score) conf = Math.min(0.95, 0.5 + Number(out.score) * 10);
+      if (out.eqs != null) conf = Math.min(0.95, Math.max(conf, Number(out.eqs) / 100));
       var g = G.AKSI_FLY_GATE.evaluate({
         confidence: conf,
         eqs: conf,
@@ -284,11 +300,13 @@
       organism: !!(G.AKSI_ORGANISM && G.AKSI_ORGANISM.decide),
       agent: !!(G.AKSIAgent && G.AKSIAgent.ask),
       flyGate: !!G.AKSI_FLY_GATE,
+      flyBrain: !!G.AKSI_FLY_BRAIN,
       receipt: !!G.AKSI_RECEIPT,
       cortex: !!(cx && cx.resonantQuery),
       cortexDocs: cx ? cx.size : 0,
+      adia: !!(G.AKSI_ALGORITHM && G.AKSI_ALGORITHM.evaluate),
       selfGithub: !!(G.AKSI_SELF_GITHUB && G.AKSI_SELF_GITHUB.token && G.AKSI_SELF_GITHUB.token()),
-      product: "AKSI Unified"
+      product: "AKSI Whole"
     };
   }
 
