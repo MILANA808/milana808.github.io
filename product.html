@@ -3,10 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ Resonance Net</title>
-<meta name="description" content="ARIN — комплексная resonance-сеть АКСИ">
+<title>АКСИ ARIN v2 FULL</title>
+<meta name="description" content="ARIN v2 FULL — полная комплексная resonance-нейросеть АКСИ">
 <meta name="theme-color" content="#0c0c10">
-<link rel="canonical" href="https://milana808.github.io/product.html">
 <style>
 :root{--bg:#0c0c10;--card:#14141a;--ink:#f0efe9;--muted:#9a97a3;--line:#2a2a33;--acc:#7c6cf0;--ok:#3ecf8e}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -32,41 +31,37 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 </head>
 <body>
 <header>
-  <div class="logo">АКСИ <span>ARIN</span></div>
-  <nav>
-    <a href="/ARIN.md">Спека</a>
-    <a href="/AKSI-NET-ATTESTATION.md">Аттестация</a>
-    <a href="/">Главная</a>
-  </nav>
+  <div class="logo">АКСИ <span>ARIN v2</span></div>
+  <nav><a href="/ARIN.md">Спека</a><a href="/">Главная</a></nav>
 </header>
 <div class="banner">
-  <h1>Resonance Net — свой вид сети АКСИ</h1>
-  <p>Комплексные амплитуды · интерференция · Born-like отбор · gate. Обучена 2026-09-17.</p>
+  <h1>ARIN v2 FULL — полная Resonance-нейросеть</h1>
+  <p>Complex embed · CReLU dense · interference memory · Born readout · gate. 2026-09-17 · 20/20 acc</p>
 </div>
-<div class="status" id="st">Статус: …</div>
+<div class="status" id="st">…</div>
 <div class="chips">
-  <button type="button" data-q="что такое resonance net">Что такое Resonance Net?</button>
-  <button type="button" data-q="чем акси отличается">Чем АКСИ отличается?</button>
+  <button type="button" data-q="что такое arin">Что такое ARIN?</button>
+  <button type="button" data-q="как работает арин">Как работает?</button>
   <button type="button" data-q="born rule">Born rule</button>
+  <button type="button" data-q="crelu">CReLU</button>
   <button type="button" data-q="контакт">Контакт</button>
-  <button type="button" data-q="исследуй: нейронная сеть">Интернет</button>
 </div>
 <div class="msgs" id="msgs"></div>
 <div class="composer">
-  <input id="q" type="text" placeholder="Вопрос к ARIN / Mind…" enterkeyhint="send">
+  <input id="q" placeholder="Вопрос к ARIN v2…" enterkeyhint="send">
   <button type="button" id="go">Спросить</button>
 </div>
-<script src="/aksi-resonance-net.js?v=1"></script>
+<script src="/aksi-resonance-net.js?v=2"></script>
 <script src="/aksi-personal-net.js?v=3"></script>
 <script src="/aksi-bot.js?v=11"></script>
-<script src="/aksi-webllm.js?v=3"></script>
 <script src="/aksi-mind.js?v=3"></script>
 <script>
 (function(){
   function paint(){
     var r=window.AKSI_RESONANCE&&AKSI_RESONANCE.status&&AKSI_RESONANCE.status();
-    var t=r&&r.ready?("<b>ARIN on</b> · D="+r.complexDim+" · loss "+(r.lastLoss!=null?r.lastLoss.toFixed(3):"—")):"ARIN…";
-    document.getElementById("st").innerHTML=t+" · Mind 1.2 · 2026-09-17";
+    document.getElementById("st").innerHTML=r&&r.ready
+      ?("<b>"+r.architecture+"</b> · params "+r.parameters+" · loss "+(r.lastLoss!=null?r.lastLoss.toFixed(3):"—")+" · "+r.classes+" classes")
+      :"загрузка…";
   }
   function add(role,text,meta){
     var d=document.createElement("div");d.className="msg "+role;d.textContent=text;
@@ -75,18 +70,15 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
   }
   if(window.AKSI_RESONANCE)AKSI_RESONANCE.ensure();
   paint();
-  add("bot","ARIN (AKSI Resonance Integrity Network) — свой вид сети в АКСИ:\n• комплексные признаки\n• интерференция с памятью\n• Born-like уверенность\n• отказ при слабом резонансе\n\nСпека: /ARIN.md","ARIN v1");
+  add("bot","ARIN v2 FULL онлайн.\nСлои: complex-embed → CReLU dense → interference memory → Born readout → gate.\nСпека: /ARIN.md","v2.0.0-arin-full");
   async function send(q){
     q=String(q||"").trim();if(!q)return;
     add("user",q);
-    try{
-      var out=await AKSI_MIND.think(q,{});
-      var meta=(out.meta||out.source||"");
-      if(out.parts&&out.parts.personal&&out.parts.personal.architecture)meta+=" · "+out.parts.personal.architecture;
-      if(out.parts&&out.parts.personal&&out.parts.personal.born!=null)meta+=" · born "+Number(out.parts.personal.born).toFixed(3);
-      add("bot",out.text||"—",meta);
-    }catch(e){add("bot","Ошибка: "+e.message,"err");}
-    paint();
+    var out=window.AKSI_MIND?await AKSI_MIND.think(q,{}):(AKSI_RESONANCE.ask(q));
+    var meta=(out.meta||out.source||"")+(out.architecture?" · "+out.architecture:"");
+    if(out.born!=null)meta+=" · born "+Number(out.born).toFixed(3);
+    if(out.parts&&out.parts.personal&&out.parts.personal.born!=null)meta+=" · born "+Number(out.parts.personal.born).toFixed(3);
+    add("bot",out.text||"—",meta);paint();
   }
   document.getElementById("go").onclick=function(){var q=document.getElementById("q").value;document.getElementById("q").value="";send(q);};
   document.getElementById("q").addEventListener("keydown",function(e){if(e.key==="Enter"){var q=document.getElementById("q").value;document.getElementById("q").value="";send(q);}});
