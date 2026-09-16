@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>АКСИ — нейросеть и генерация</title>
-<meta name="description" content="АКСИ: своя RNN, WebLLM, память, поиск.">
+<meta name="description" content="АКСИ: своя нейросеть, WebLLM, память, поиск.">
 <meta name="theme-color" content="#0c0c10">
 <link rel="canonical" href="https://milana808.github.io/product.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -52,7 +52,7 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 </header>
 <div class="intro">
   <h1>Своя нейросеть + LLM</h1>
-  <p><strong>AKSI Net</strong> — настоящая RNN (обучение и генерация в браузере). WebLLM — большая модель. Память и поиск — как раньше.</p>
+  <p><strong>AKSI Net v2</strong> — embedding + MLP, обучение backprop в браузере. WebLLM — большая модель.</p>
 </div>
 <div class="llm-bar">
   <button type="button" id="trainNet">Обучить нейросеть</button>
@@ -83,19 +83,18 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 <script src="/aksi-cortex-kernel.js?v=3"></script>
 <script src="/aksi-clm.js?v=1"></script>
 <script src="/aksi-neuro.js?v=10"></script>
-<script src="/aksi-net.js?v=1"></script>
+<script src="/aksi-net.js?v=2"></script>
 <script src="/aksi-webllm.js?v=2"></script>
 <script src="/aksi-bot.js?v=10"></script>
 <script>
 (function () {
   var B = window.AKSI_BOT;
   if (!B) { document.getElementById("m-bot").textContent = "нет"; return; }
-
   function paintNet() {
     var mn = document.getElementById("m-net");
     if (!window.AKSI_NET) { mn.textContent = "нет"; return; }
     var s = AKSI_NET.status();
-    mn.textContent = s.ready ? (s.hidden + "h · " + (s.epochsDone || 0) + "ep") : "0";
+    mn.textContent = s.ready ? ((s.hidden||0) + "h · " + (s.epochsDone || 0) + "ep") : "0";
     mn.className = s.epochsDone > 0 ? "ok" : "";
   }
   function llmReady() {
@@ -108,7 +107,7 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     var s = AKSI_WEBLLM.status();
     if (s.loading) { el.textContent = "Загрузка LLM " + (s.progress || 0) + "%"; mb.textContent = (s.progress || 0) + "%"; }
     else if (s.ready) { el.textContent = "LLM: " + (s.model || "ok"); mb.textContent = "on"; mb.className = "ok"; }
-    else { el.textContent = "LLM выкл — можно обучить свою Net"; mb.textContent = "выкл"; mb.className = ""; }
+    else { el.textContent = "LLM выкл — обучите Net"; mb.textContent = "выкл"; mb.className = ""; }
   }
   function paint(s) {
     document.getElementById("m-bot").textContent = "v" + (s.version || "?");
@@ -118,7 +117,6 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
   }
   B.status().then(paint);
   window.addEventListener("aksi-webllm-progress", paintLlm);
-
   function add(role, text, how) {
     var d = document.createElement("div");
     d.className = "msg " + role;
@@ -132,39 +130,35 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     document.getElementById("msgs").appendChild(d);
     d.scrollIntoView({ block: "end" });
   }
-
   add("bot",
-    "Полноценная нейросеть АКСИ (char-RNN):\n1) «Обучить нейросеть» — SGD + BPTT на ваших текстах\n2) «Сгенерировать (Net)» — текст из обученных весов\n\nИли «Загрузить LLM» для большой модели.",
-    "AKSI Net = реальные веса, обучение, генерация"
+    "Нейросеть АКСИ Net v2 (embedding + MLP):\n1) «Обучить нейросеть» — 25 эпох, backprop\n2) «Сгенерировать» — текст из весов\n\nУже обучена у нас до loss ≈ 0.08; у вас обучение займёт 15–40 сек.",
+    "реальные веса · SGD · генерация"
   );
-
   document.getElementById("trainNet").onclick = function () {
-    if (!window.AKSI_NET) { add("bot", "Модуль aksi-net.js не загружен", "ошибка"); return; }
-    add("bot", "Обучение… (несколько секунд)", "char-RNN");
+    if (!window.AKSI_NET) { add("bot", "aksi-net.js не загружен", "ошибка"); return; }
+    add("bot", "Обучение нейросети (15–40 сек, не закрывайте вкладку)…", "embed+MLP");
     setTimeout(function () {
       try {
-        var r = AKSI_NET.train({ epochs: 12, seqLen: 20, lr: 0.1, hidden: 64 });
+        var r = AKSI_NET.train({ epochs: 25, lr: 0.06 });
         add("bot",
           "Обучение готово.\nЭпох: " + r.epochs + "\nLoss: " + (r.loss != null ? r.loss.toFixed(3) : "—") +
-          "\nСловарь: " + r.vocab + " символов\nВесов: " + AKSI_NET.status().weights +
-          "\nСкрытый слой: " + r.hidden,
-          "нейросеть обучена · веса в localStorage"
+          "\nСловарь: " + r.vocab + "\nВесов: " + AKSI_NET.status().weights +
+          "\nHidden: " + r.hidden,
+          "нейросеть обучена · localStorage"
         );
         paintNet();
       } catch (e) { add("bot", "Ошибка: " + e.message, "train"); }
-    }, 30);
+    }, 40);
   };
-
   document.getElementById("genNet").onclick = function () {
     if (!window.AKSI_NET) return;
     if (!(AKSI_NET.status().epochsDone > 0)) {
-      add("bot", "Сначала нажмите «Обучить нейросеть».", "net");
+      add("bot", "Сначала «Обучить нейросеть».", "net");
       return;
     }
-    var g = AKSI_NET.generate("АКСИ ", { n: 180, temperature: 0.75 });
-    add("bot", g.text || "—", "своя RNN · loss " + (g.loss != null ? Number(g.loss).toFixed(3) : "—"));
+    var g = AKSI_NET.generate("АКСИ ", { n: 120, temperature: 0.45 });
+    add("bot", g.text || "—", "Net v2 · loss " + (g.loss != null ? Number(g.loss).toFixed(3) : "—"));
   };
-
   document.getElementById("loadLlm").onclick = function () {
     if (!window.AKSI_WEBLLM) { document.getElementById("llmStatus").textContent = "WebLLM нет"; return; }
     var btn = document.getElementById("loadLlm");
@@ -178,11 +172,10 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
       document.getElementById("llmStatus").textContent = "Ошибка: " + (e.message || e);
     });
   };
-
   function howLine(out) {
     var map = {
-      "aksi-net": "Своя нейросеть АКСИ (char-RNN)",
-      webllm: "Большая LLM в браузере",
+      "aksi-net": "Своя нейросеть АКСИ",
+      webllm: "Большая LLM",
       neuro: "Neuro",
       research: "Поиск",
       teach: "Память",
@@ -190,7 +183,6 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     };
     return "Откуда: " + (map[out.source] || out.source || "—") + (out.generated ? " · генерация" : "");
   }
-
   async function clientGenerate(q) {
     if (window.AKSI_WEBLLM && llmReady()) {
       var r = await AKSI_WEBLLM.complete(q, {
@@ -199,7 +191,7 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
       if (r && r.text) return { text: r.text, source: "webllm", generated: true, model: r.model };
     }
     if (window.AKSI_NET && AKSI_NET.status().epochsDone > 0) {
-      var g = AKSI_NET.generate(String(q).slice(0, 48) + " ", { n: 140, temperature: 0.8 });
+      var g = AKSI_NET.generate(String(q).slice(0, 48) + " ", { n: 100, temperature: 0.5 });
       if (g && g.text) return { text: g.text, source: "aksi-net", generated: true, loss: g.loss };
     }
     if (window.AKSI_NEURO && AKSI_NEURO.think) {
@@ -208,7 +200,6 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     }
     return null;
   }
-
   async function send() {
     var q = document.getElementById("q").value.trim();
     if (!q) return;
