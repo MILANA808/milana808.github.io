@@ -1,11 +1,11 @@
 /**
- * AKSI Personal Net v1.0 — bag-of-char trigrams → MLP → answer
- * Real backprop. Auto-trains on load. Offline.
- * © AKSI · aksilove@internet.ru
+ * AKSI Personal Net v1.0.1 — bag-of-char trigrams → MLP → answer
+ * conf≥0.35 and margin≥0.08 or LOW reject. Real backprop. Auto-train.
+ * Attested 2026-09-17 · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VERSION = "1.0.0-personal";
+  var VERSION = "1.0.1-personal";
   var STORE = "aksi_personal_net_v1";
   var FEAT = 256;
   var KB = [
@@ -101,8 +101,8 @@
   function ask(q) {
     q = String(q || "").trim(); if (!q) return { text: "Задайте вопрос.", source: "personal-net" };
     var out = predict(q);
-    if (out.confidence < 0.12 && out.margin < 0.03)
-      return { text: "Не уверена. Спросите про АКСИ, память, WebLLM, контакт aksilove@internet.ru или включите большую LLM.", source: "personal-net", low: true, confidence: out.confidence };
+    if (out.confidence < 0.35 || out.margin < 0.08)
+      return { text: "Не уверена в ответе по личной базе. Спросите про АКСИ, память, WebLLM, контакт aksilove@internet.ru — или «исследуй: тема» для интернета.", source: "personal-net", low: true, confidence: out.confidence, margin: out.margin };
     return out;
   }
   function save() {
