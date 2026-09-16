@@ -3,67 +3,88 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>АКСИ — Sovereign Offline Agent</title>
-<meta name="description" content="AKSI: offline-first agent runtime — encrypted memory, evidence research, no cloud API keys required for core.">
-<meta name="theme-color" content="#0b0b10">
+<title>AKSI — Private Research Agent</title>
+<meta name="description" content="AKSI Seal: evidence research + encrypted on-device memory. Local-first agent layer.">
+<meta name="theme-color" content="#06060a">
 <link rel="canonical" href="https://milana808.github.io/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080910;--ink:#f5f5fa;--muted:#9899aa;--violet:#a78bfa;--green:#4ade80;--line:#20232e;--card:#11131c}
-*{box-sizing:border-box}body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(circle at 50% -10%,#211d40,#080910 45%);color:var(--ink);min-height:100vh;margin:0}
-.wrap{max-width:820px;margin:auto;padding:28px 18px 56px}
-.logo{font-weight:950;letter-spacing:.1em}.logo span{color:var(--violet)}
-h1{font-size:clamp(30px,7vw,50px);line-height:1.08;margin:28px 0 12px}
-.lead{color:var(--muted);font-size:16px;max-width:640px}
-.pill{display:inline-block;margin-top:12px;padding:7px 12px;border-radius:999px;font-size:11px;font-weight:700;color:var(--green);background:#0a1511;border:1px solid #1a3a2a}
-.cta{display:flex;gap:10px;flex-wrap:wrap;margin:22px 0}
-.btn{padding:14px 18px;border-radius:13px;font-weight:900;text-decoration:none;display:inline-block}
-.primary{background:var(--violet);color:#fff}.ghost{border:1px solid var(--line);color:var(--ink)}
-h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:28px 0 10px;font-weight:900}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;text-decoration:none;color:inherit}
-.card:hover{border-color:var(--violet)}.card strong{display:block;margin-bottom:4px}.card span{font-size:12px;color:var(--muted)}
-.steps{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px}
-.steps ol{margin:8px 0 0;padding-left:18px;color:var(--muted)}.steps li{margin:6px 0}
-.truth{font-size:13px;color:var(--muted);margin-top:14px;padding:12px;border-left:3px solid var(--violet);background:#0c0e16;border-radius:0 10px 10px 0}
-footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+:root{
+  --bg:#06060a;--elev:#0c0c12;--ink:#f3f1ec;--muted:#9a97a8;--dim:#6e6b7a;
+  --line:rgba(255,255,255,.08);--accent:#8b7cf6;--signal:#5ee9a8;
+  --font:"Instrument Sans",system-ui,sans-serif;--display:"Syne",system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--ink);
+  min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 45% at 50% -15%,rgba(139,124,246,.15),transparent 55%);
+}
+.wrap{width:min(100% - 40px,720px);margin:auto;padding:48px 0 72px;position:relative}
+.brand{font-family:var(--display);font-weight:800;letter-spacing:.06em;font-size:14px}
+.brand span{color:var(--accent)}
+.eyebrow{
+  margin-top:48px;font-size:12px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--signal);display:flex;align-items:center;gap:8px;
+}
+.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(94,233,168,.15)}
+h1{
+  font-family:var(--display);font-weight:800;margin-top:16px;
+  font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.06;letter-spacing:-.03em;
+}
+h1 em{font-style:normal;color:var(--accent)}
+.lead{margin-top:18px;color:var(--muted);font-size:1.05rem;max-width:36ch}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{
+  display:inline-flex;align-items:center;padding:14px 22px;border-radius:999px;
+  font-weight:600;font-size:14px;text-decoration:none;border:1px solid transparent;
+  transition:transform .25s var(--ease),box-shadow .25s;
+}
+.btn:hover{transform:translateY(-2px)}
+.primary{background:var(--accent);color:#fff;box-shadow:0 8px 32px rgba(139,124,246,.28)}
+.ghost{border-color:var(--line);color:var(--ink)}
+.ghost:hover{border-color:rgba(255,255,255,.2)}
+.meta{margin-top:20px;font-size:13px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:48px}
 @media(max-width:520px){.grid{grid-template-columns:1fr}}
+.card{
+  display:block;text-decoration:none;color:inherit;
+  background:var(--elev);border:1px solid var(--line);border-radius:16px;padding:18px;
+  transition:border-color .2s,transform .25s var(--ease);
+}
+.card:hover{border-color:rgba(255,255,255,.16);transform:translateY(-2px)}
+.card strong{display:block;font-size:14px;margin-bottom:4px}
+.card span{font-size:12px;color:var(--muted)}
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+footer a{color:var(--muted);text-decoration:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">АКСИ <span>Sovereign</span></div>
-  <h1>Агент в браузере.<br>Память зашифрована.<br>Источники — на виду.</h1>
-  <p class="lead">Offline-first runtime: research с evidence, AES-GCM Cortex, Fly-Gate, без обязательных API-ключей для ядра.</p>
-  <div class="pill">LOCAL-FIRST · EVIDENCE · FLY-GATE · NO CLOUD KEYS FOR CORE</div>
-
+  <div class="brand">AKSI <span>Seal</span></div>
+  <div class="eyebrow">Private research agent</div>
+  <h1>Find. Seal.<br><em>Recall.</em></h1>
+  <p class="lead">Evidence research. Encrypted memory on device. Gate before weak answers. Core without API keys.</p>
   <div class="cta">
-    <a class="btn primary" href="/product.html">▶ Product Runtime</a>
-    <a class="btn ghost" href="/infinity.html">Infinity</a>
-    <a class="btn ghost" href="/bot.html">Bot</a>
+    <a class="btn primary" href="/seal.html">View product</a>
+    <a class="btn ghost" href="/product.html">Open runtime</a>
   </div>
-
-  <h2>60-секундный demo</h2>
-  <div class="steps">
-    <ol>
-      <li><strong>Product</strong> — /product.html: статус модулей + чат</li>
-      <li><strong>запомни:</strong> / <strong>исследуй:</strong> — память и research в одном окне</li>
-      <li><strong>Infinity</strong> — полный research-агент с журналом</li>
-    </ol>
-  </div>
-
-  <h2>Поверхности</h2>
+  <p class="meta">Local-first · AES-GCM · not another chatbot</p>
   <div class="grid">
-    <a class="card" href="/product.html"><strong>Product</strong><span>Unified Bot+Cortex+Gate+Research</span></a>
-    <a class="card" href="/infinity.html"><strong>Infinity</strong><span>Цель → источники → evidence report</span></a>
-    <a class="card" href="/bot.html"><strong>Bot + Cortex</strong><span>AES-GCM · resonance · self-taught</span></a>
-    <a class="card" href="/matrix/"><strong>MATRIX</strong><span>Lab · WebLLM opt-in · trust path</span></a>
+    <a class="card" href="/seal.html"><strong>Seal</strong><span>Product story & positioning</span></a>
+    <a class="card" href="/product.html"><strong>Runtime</strong><span>Research · memory · gate</span></a>
+    <a class="card" href="/infinity.html"><strong>Infinity</strong><span>Full research agent</span></a>
+    <a class="card" href="/bot.html"><strong>Bot</strong><span>Cortex memory chat</span></a>
   </div>
-
-  <div class="truth">
-    <strong>Честно:</strong> это не AGI. Это sovereign layer — локальная память, явные источники, fly-gate, policy-границы. Backend computer-use опционален.
-  </div>
-
-  <footer>AKSI · aksilove@internet.ru · X @AKSILOVE</footer>
+  <footer>
+    <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a> · <a href="https://x.com/AKSILOVE">@AKSILOVE</a>
+  </footer>
 </div>
 </body>
 </html>
