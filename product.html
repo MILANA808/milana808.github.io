@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ — локальный помощник</title>
-<meta name="description" content="АКСИ: спросить, исследовать с источниками, запомнить на устройстве. Без обязательных API-ключей.">
+<title>АКСИ — Closed-Loop Memory</title>
+<meta name="description" content="АКСИ CLM: запомнил → проверил воспроизведением → отвечает с уровнем доверия.">
 <meta name="theme-color" content="#0c0c10">
 <link rel="canonical" href="https://milana808.github.io/product.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -12,28 +12,26 @@
 :root{--bg:#0c0c10;--card:#14141a;--ink:#f0efe9;--muted:#9a97a3;--line:#2a2a33;--acc:#7c6cf0;--ok:#3ecf8e}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
-header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{font-weight:800;font-size:17px}.logo span{color:var(--acc)}
+header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.logo{font-weight:800}.logo span{color:var(--acc)}
 header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
-.intro{max-width:720px;margin:0 auto;padding:16px 16px 8px;width:100%}
-.intro h1{font-size:1.25rem;font-weight:700;margin-bottom:6px}
+.intro{max-width:720px;margin:0 auto;padding:16px;width:100%}
+.intro h1{font-size:1.2rem;margin-bottom:6px}
 .intro p{color:var(--muted);font-size:14px}
-.steps{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.step{font-size:12px;padding:6px 10px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
-.step.on{border-color:var(--acc);color:var(--ink)}
-.step.done{border-color:var(--ok);color:var(--ok)}
-.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:720px;margin:8px auto;padding:0 16px;width:100%}
+.algo{margin-top:12px;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--muted)}
+.algo strong{color:var(--ink)}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:720px;margin:0 auto;padding:0 16px 8px;width:100%}
 @media(max-width:600px){.board{grid-template-columns:1fr 1fr}}
 .metric{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
 .metric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
 .metric b{font-size:13px}.ok{color:var(--ok)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto;padding:8px 16px;width:100%}
 .chips button{font:inherit;font-size:13px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-.msgs{flex:1;overflow:auto;max-width:720px;width:100%;margin:0 auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:12px;min-height:40vh}
+.msgs{flex:1;overflow:auto;max-width:720px;width:100%;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px;min-height:36vh}
 .msg{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;max-width:95%}
 .msg.user{align-self:flex-end;background:#1a1a24}
 .msg .how{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-.msg .how strong{color:var(--ink);font-weight:600}
+.msg .how strong{color:var(--ink)}
 .bar{max-width:720px;width:100%;margin:0 auto;padding:12px 16px 20px;display:flex;gap:8px;border-top:1px solid var(--line)}
 .bar input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:var(--ink);font:inherit;font-size:16px}
 .bar button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
@@ -42,86 +40,63 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 </head>
 <body>
 <header>
-  <div class="logo">АКСИ <span>помощник</span></div>
+  <div class="logo">АКСИ <span>CLM</span></div>
   <nav>
-    <a href="/seal.html">О продукте</a>
-    <a href="/infinity.html">Поиск</a>
+    <a href="/CLM.md">О технологии</a>
+    <a href="/seal.html">Продукт</a>
     <a href="/">Главная</a>
   </nav>
 </header>
 <div class="intro">
-  <h1>Спросить. Найти источники. Запомнить у себя.</h1>
-  <p>Работает в браузере. Память на вашем устройстве. Без обязательных ключей к облачным API.</p>
-  <div class="steps" id="pipe">
-    <div class="step" data-s="1">1. Запрос</div>
-    <div class="step" data-s="2">2. Поиск / память</div>
-    <div class="step" data-s="3">3. Ответ</div>
-    <div class="step" data-s="4">4. Откуда взялось</div>
-  </div>
+  <h1>Память с проверкой воспроизведения</h1>
+  <p>Не просто «сохранил текст». После записи система сама пытается факт вспомнить — и ставит уровень доверия.</p>
+  <div class="algo"><strong>Алгоритм CLM:</strong> записать → зонды-вопросы → оценка → sealed / provisional / weak → при ответе сначала надёжное.</div>
 </div>
 <div class="board">
-  <div class="metric"><span>Система</span><b id="m-bot">…</b></div>
+  <div class="metric"><span>Bot</span><b id="m-bot">…</b></div>
+  <div class="metric"><span>CLM</span><b id="m-clm">…</b></div>
   <div class="metric"><span>Память</span><b id="m-cx">…</b></div>
-  <div class="metric"><span>Проверка</span><b id="m-gate">…</b></div>
-  <div class="metric"><span>Записей</span><b id="m-seed">…</b></div>
+  <div class="metric"><span>Sealed</span><b id="m-sealed">…</b></div>
 </div>
 <div class="chips">
-  <button type="button" data-q="кто ты">Кто ты?</button>
-  <button type="button" data-q="статус">Что работает</button>
-  <button type="button" data-q="запомни: Столица Франции — Париж">Запомнить пример</button>
-  <button type="button" data-q="Столица Франции">Спросить из памяти</button>
-  <button type="button" data-q="исследуй: искусственный интеллект">Найти с источниками</button>
+  <button type="button" data-q="запомни: Столица Франции — Париж">1. Запомнить</button>
+  <button type="button" data-q="Столица Франции">2. Спросить</button>
+  <button type="button" data-q="запомни: AKSI CLM проверяет память воспроизведением">3. Ещё факт</button>
+  <button type="button" data-q="что такое AKSI CLM">4. Из памяти</button>
+  <button type="button" data-q="статус">Статус</button>
 </div>
 <div class="msgs" id="msgs" role="log" aria-live="polite"></div>
 <div class="bar">
-  <input id="q" type="text" placeholder="Вопрос, или: запомни: … / исследуй: …" enterkeyhint="send" aria-label="Сообщение">
+  <input id="q" type="text" placeholder="запомни: … или вопрос" enterkeyhint="send" aria-label="Сообщение">
   <button type="button" id="go">Отправить</button>
 </div>
 <script src="/aksi-fly-gate.js?v=2"></script>
-<script src="/aksi-receipt.js?v=2"></script>
 <script src="/aksi-organism.js?v=13"></script>
 <script src="/agent.js?v=4"></script>
 <script src="/aksi-algorithm.js?v=3"></script>
 <script src="/aksi-cortex-kernel.js?v=3"></script>
-<script src="/aksi-bot.js?v=8"></script>
+<script src="/aksi-clm.js?v=1"></script>
+<script src="/aksi-bot.js?v=9"></script>
 <script>
 (function () {
   var B = window.AKSI_BOT;
-  if (!B) { document.getElementById("m-bot").textContent = "не загрузился"; return; }
-  function pipe(n) {
-    document.querySelectorAll("#pipe .step").forEach(function (el) {
-      var s = +el.getAttribute("data-s");
-      el.classList.remove("on", "done");
-      if (s < n) el.classList.add("done");
-      if (s === n) el.classList.add("on");
-    });
-  }
+  if (!B) { document.getElementById("m-bot").textContent = "нет"; return; }
   function paint(s) {
     document.getElementById("m-bot").textContent = "v" + (s.version || "?");
     document.getElementById("m-bot").className = "ok";
-    document.getElementById("m-cx").textContent = s.cortex ? "да, " + (s.cortexDocs || 0) : "нет";
-    document.getElementById("m-cx").className = s.cortex ? "ok" : "";
-    document.getElementById("m-gate").textContent = s.flyGate ? "да" : "нет";
-    document.getElementById("m-gate").className = s.flyGate ? "ok" : "";
-    document.getElementById("m-seed").textContent = String(s.seed || 0);
+    document.getElementById("m-clm").textContent = window.AKSI_CLM ? "v" + AKSI_CLM.version : "нет";
+    document.getElementById("m-clm").className = window.AKSI_CLM ? "ok" : "";
+    document.getElementById("m-cx").textContent = s.cortex ? "да · " + (s.cortexDocs || 0) : "нет";
+    var st = (window.AKSI_CLM && AKSI_CLM.stats) ? AKSI_CLM.stats() : {};
+    document.getElementById("m-sealed").textContent = String(st.sealed || 0) + " / " + String(st.total || 0);
   }
   B.status().then(paint);
   function howLine(out) {
-    var src = out.source || "—";
-    var map = {
-      research: "Интернет (Wikipedia) + список источников",
-      cortex: "Ваша зашифрованная память на этом устройстве",
-      "self-taught": "Ранее сохранённые факты",
-      teach: "Только что сохранено у вас локально",
-      status: "Служебный отчёт модулей",
-      identity: "Встроенное описание АКСИ",
-      organism: "Локальный решатель Organism",
-      "bot-fallback": "Подсказка по командам (нет готового ответа в памяти)"
-    };
-    var parts = ["Откуда ответ: " + (map[src] || src)];
-    if (out.sources && out.sources.length) parts.push("Источников: " + out.sources.length);
-    if (out.gate && out.gate.decision) parts.push("Проверка: " + out.gate.decision);
-    if (out.cortex || out.cortexId) parts.push("Память Cortex задействована");
+    var parts = [];
+    if (out.clm && out.clm.label) parts.push("CLM: " + out.clm.label);
+    if (out.tier && out.label) parts.push("Уровень: " + out.label);
+    var map = { clm: "проверенная память", research: "поиск", cortex: "Cortex", teach: "запись + CLM", status: "статус", "bot-fallback": "нет в памяти", "self-taught": "seed" };
+    parts.push("Источник: " + (map[out.source] || out.source || "—"));
     return parts.join(" · ");
   }
   function add(role, text, how) {
@@ -131,36 +106,36 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     if (how) {
       var h = document.createElement("div");
       h.className = "how";
-      h.innerHTML = "<strong>Результат для вас:</strong> " + how;
+      h.innerHTML = "<strong>Результат:</strong> " + how;
       d.appendChild(h);
     }
     document.getElementById("msgs").appendChild(d);
     d.scrollIntoView({ block: "end" });
   }
-  add("bot", "Привет. Я АКСИ — помощник в этом окне.\n\n1) «запомни: …» — сохраню у вас на устройстве\n2) «исследуй: …» — найду и покажу источники\n3) Обычный вопрос — отвечу из памяти, если уже учили", "Нажмите кнопку ниже или напишите свой вопрос");
+  add("bot", "Технология: Closed-Loop Memory.\n\n1. Запомнить — сохранит и само проверит\n2. Спросить — ответит из проверенной памяти", "write → probe → tier → answer");
   async function send() {
     var q = document.getElementById("q").value.trim();
     if (!q) return;
     document.getElementById("q").value = "";
     add("user", q);
-    pipe(1);
     document.getElementById("go").disabled = true;
-    pipe(2);
     try {
       var out = await B.think(q);
-      // status/who even on older bot if missing handlers — soft fallback
-      if ((!out || out.source === "bot-fallback") && /^(статус|status)$/i.test(q)) {
-        var st = await B.status();
-        out = { text: ["Статус АКСИ:", "· v" + st.version, "· Cortex: " + (st.cortex ? "да (" + (st.cortexDocs||0) + ")" : "нет"), "· Gate: " + (st.flyGate ? "да" : "нет"), "· Записей: " + (st.seed||0)].join("\n"), source: "status" };
+      // If old bot without CLM wire, run seal on teach client-side
+      if (out && out.source === "teach" && window.AKSI_CLM && !out.clm) {
+        try {
+          var fact = (out.taught || q.replace(/^запомни\s*[:：]\s*/i, "")).trim();
+          out.clm = await AKSI_CLM.seal(fact, { cortex: window.AKSI_CORTEX_KERNEL });
+          if (out.clm.human) out.text += "\n\n" + out.clm.human + "\nУровень: " + out.clm.tier;
+        } catch (e) {}
       }
-      if ((!out || out.source === "bot-fallback") && /^кто\s*ты/i.test(q)) {
-        out = { text: "Я АКСИ — локальный помощник в браузере.\nМогу искать с источниками и запоминать на вашем устройстве.", source: "identity" };
+      if (out && (!out.source || out.source === "bot-fallback" || out.source === "self-taught") && window.AKSI_CLM) {
+        var cl = AKSI_CLM.lookup(q);
+        if (cl && (cl.tier === "sealed" || (cl.hit || 0) >= 2)) out = cl;
       }
-      pipe(3);
       add("bot", out.text || "—", howLine(out));
-      pipe(4);
     } catch (e) {
-      add("bot", "Ошибка: " + e.message, "Сбой — попробуйте ещё раз");
+      add("bot", "Ошибка: " + e.message, "сбой");
     }
     document.getElementById("go").disabled = false;
     document.getElementById("q").focus();
