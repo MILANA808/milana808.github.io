@@ -7,11 +7,10 @@
 <meta name="description" content="Private research agent. Encrypted memory on device. Explicit sources. Experience the Seal Loop.">
 <meta name="theme-color" content="#06060a">
 <link rel="canonical" href="https://milana808.github.io/seal.html">
-<meta property="og:title" content="AKSI Seal — Private Research Agent">
-<meta property="og:description" content="Find. Seal. Recall. — interactive private research agent.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/aksi-motion.css">
 <style>
 :root{
   --bg:#06060a;--bg-elev:#0c0c12;--bg-soft:#101018;
@@ -19,171 +18,75 @@
   --line:rgba(255,255,255,.08);--line-strong:rgba(255,255,255,.14);
   --accent:#8b7cf6;--accent-soft:rgba(139,124,246,.14);
   --signal:#5ee9a8;--radius:18px;--max:1120px;
-  --ease:cubic-bezier(.22,1,.36,1);
+  --ease:var(--ease-out,cubic-bezier(.22,1,.36,1));
   --font:"Instrument Sans",system-ui,sans-serif;
   --display:"Syne",system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  font-family:var(--font);background:var(--bg);color:var(--ink);
-  line-height:1.55;font-size:16px;-webkit-font-smoothing:antialiased;
-}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);line-height:1.55;font-size:16px;-webkit-font-smoothing:antialiased}
 body.has-cursor{cursor:none}
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(139,124,246,.16),transparent 55%),
-    radial-gradient(ellipse 40% 30% at 90% 20%,rgba(94,233,168,.04),transparent 50%);
-}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(139,124,246,.16),transparent 55%),radial-gradient(ellipse 40% 30% at 90% 20%,rgba(94,233,168,.04),transparent 50%)}
 a{color:inherit}
 .wrap{width:min(100% - 40px,var(--max));margin-inline:auto;position:relative;z-index:1}
-
-/* Custom cursor */
-.cursor{
-  position:fixed;width:18px;height:18px;margin:-9px 0 0 -9px;
-  border:1.5px solid rgba(139,124,246,.7);border-radius:50%;
-  pointer-events:none;z-index:100;left:0;top:0;
-  transition:width .25s var(--ease),height .25s var(--ease),margin .25s var(--ease),background .25s,border-color .25s;
-  mix-blend-mode:difference;
-}
-.cursor.hot{
-  width:42px;height:42px;margin:-21px 0 0 -21px;
-  background:rgba(139,124,246,.12);border-color:var(--accent);
-}
-.cursor.seal{
-  width:52px;height:52px;margin:-26px 0 0 -26px;
-  border-color:var(--signal);background:rgba(94,233,168,.08);
-}
-.cursor-dot{
-  position:fixed;width:4px;height:4px;margin:-2px 0 0 -2px;
-  background:var(--ink);border-radius:50%;pointer-events:none;z-index:101;left:0;top:0;
-}
+.cursor{position:fixed;width:18px;height:18px;margin:-9px 0 0 -9px;border:1.5px solid rgba(139,124,246,.7);border-radius:50%;pointer-events:none;z-index:100;left:0;top:0;transition:width var(--m-base,240ms) var(--ease),height var(--m-base,240ms) var(--ease),margin var(--m-base,240ms) var(--ease),background var(--m-fast,160ms),border-color var(--m-fast,160ms);mix-blend-mode:difference}
+.cursor.hot{width:42px;height:42px;margin:-21px 0 0 -21px;background:rgba(139,124,246,.12);border-color:var(--accent)}
+.cursor.seal{width:52px;height:52px;margin:-26px 0 0 -26px;border-color:var(--signal);background:rgba(94,233,168,.08)}
+.cursor-dot{position:fixed;width:4px;height:4px;margin:-2px 0 0 -2px;background:var(--ink);border-radius:50%;pointer-events:none;z-index:101;left:0;top:0}
 @media(pointer:coarse){.cursor,.cursor-dot{display:none!important}body.has-cursor{cursor:auto}}
-
-.nav{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:22px 0;position:sticky;top:0;z-index:20;
-  background:rgba(6,6,10,.72);backdrop-filter:blur(16px);
-  border-bottom:1px solid transparent;transition:border-color .3s var(--ease);
-}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;position:sticky;top:0;z-index:20;background:rgba(6,6,10,.72);backdrop-filter:blur(16px);border-bottom:1px solid transparent;transition:border-color var(--m-base,240ms) var(--ease)}
 .nav.scrolled{border-bottom-color:var(--line)}
 .brand{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.06em;text-decoration:none}
 .brand i{font-style:normal;color:var(--accent)}
 .nav-links{display:flex;gap:22px;align-items:center}
-.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color var(--m-fast,160ms) var(--ease-soft,ease)}
 .nav-links a:hover{color:var(--ink)}
-.nav-cta{
-  font-size:13px!important;font-weight:600;color:var(--ink)!important;
-  padding:8px 14px;border-radius:999px;border:1px solid var(--line-strong);
-}
+.nav-cta{font-size:13px!important;font-weight:600;color:var(--ink)!important;padding:8px 14px;border-radius:999px;border:1px solid var(--line-strong);transition:border-color var(--m-fast,160ms),background var(--m-fast,160ms)!important}
 .nav-cta:hover{border-color:var(--accent)!important;background:var(--bg-soft)}
-
 .hero{padding:64px 0 40px;max-width:640px}
-.eyebrow{
-  display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:18px;
-}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--signal);margin-bottom:18px}
 .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(94,233,168,.15)}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,5.2vw,3.6rem);line-height:1.05;letter-spacing:-.03em;margin-bottom:16px}
 h1 em{font-style:normal;color:var(--accent)}
 .lead{font-size:1.1rem;color:var(--muted);max-width:36ch;margin-bottom:24px}
 .cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px}
-.btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  padding:14px 22px;border-radius:999px;font-weight:600;font-size:14px;
-  text-decoration:none;border:1px solid transparent;cursor:pointer;
-  transition:transform .25s var(--ease),box-shadow .25s,background .2s,border-color .2s;
-  font-family:inherit;color:inherit;background:transparent;
-}
-.btn:hover{transform:translateY(-2px)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 22px;border-radius:999px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid transparent;cursor:pointer;font-family:inherit;color:inherit;background:transparent;transition:transform var(--m-base,240ms) var(--ease),box-shadow var(--m-base,240ms) var(--ease),background var(--m-fast,160ms),border-color var(--m-fast,160ms)}
+.btn:hover{transform:translateY(var(--lift,-2px))}
+.btn:active{transform:translateY(0);transition-duration:var(--m-instant,90ms)}
 .btn-primary{background:var(--accent);color:#fff;box-shadow:0 8px 32px rgba(139,124,246,.28)}
 .btn-ghost{border-color:var(--line-strong)}
 .btn-ghost:hover{border-color:var(--muted);background:var(--bg-elev)}
 .trust-line{font-size:13px;color:var(--dim)}
-
-/* ===== SEAL LOOP — branded experience ===== */
 .loop-section{padding:24px 0 72px}
-.loop{
-  position:relative;
-  border:1px solid var(--line);
-  border-radius:28px;
-  background:var(--bg-elev);
-  overflow:hidden;
-  perspective:1200px;
-  transform-style:preserve-3d;
-}
-.loop-glow{
-  position:absolute;inset:-40%;pointer-events:none;
-  background:radial-gradient(circle at 50% 40%,rgba(139,124,246,.18),transparent 55%);
-  transition:opacity .6s var(--ease);
-}
+.loop{position:relative;border:1px solid var(--line);border-radius:28px;background:var(--bg-elev);overflow:hidden;perspective:1200px;transform-style:preserve-3d}
+.loop-glow{position:absolute;inset:-40%;pointer-events:none;background:radial-gradient(circle at 50% 40%,rgba(139,124,246,.18),transparent 55%);transition:opacity var(--m-slow,420ms) var(--ease)}
 .loop[data-phase="seal"] .loop-glow{opacity:1;background:radial-gradient(circle at 50% 45%,rgba(139,124,246,.28),transparent 50%)}
 .loop[data-phase="recall"] .loop-glow{background:radial-gradient(circle at 50% 45%,rgba(94,233,168,.2),transparent 50%)}
 .loop-inner{position:relative;padding:28px 24px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center}
 @media(max-width:860px){.loop-inner{grid-template-columns:1fr;padding:22px 18px}}
-
 .loop-copy .sec-label{margin-bottom:10px}
-.loop-copy h2{
-  font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.8vw,1.85rem);
-  letter-spacing:-.02em;margin-bottom:8px;
-}
+.loop-copy h2{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,2.8vw,1.85rem);letter-spacing:-.02em;margin-bottom:8px}
 .loop-copy p{font-size:14px;color:var(--muted);max-width:36ch;margin-bottom:18px}
-
 .loop-input-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.loop-input{
-  flex:1;min-width:180px;padding:12px 14px;border-radius:12px;
-  border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);
-  font:inherit;font-size:14px;outline:none;
-  transition:border-color .2s,box-shadow .2s;
-}
+.loop-input{flex:1;min-width:180px;padding:12px 14px;border-radius:12px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font:inherit;font-size:14px;outline:none;transition:border-color var(--m-fast,160ms),box-shadow var(--m-fast,160ms)}
 .loop-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-.loop-run{
-  padding:12px 18px;border-radius:12px;border:0;background:var(--accent);color:#fff;
-  font:inherit;font-weight:600;font-size:14px;cursor:pointer;
-  transition:transform .2s var(--ease),box-shadow .2s;
-}
+.loop-run{padding:12px 18px;border-radius:12px;border:0;background:var(--accent);color:#fff;font:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:transform var(--m-base,240ms) var(--ease),box-shadow var(--m-base,240ms)}
 .loop-run:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(139,124,246,.35)}
 .loop-run:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.chip{
-  border:1px solid var(--line);background:var(--bg-soft);color:var(--muted);
-  padding:7px 12px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit;
-  transition:border-color .2s,color .2s,background .2s;
-}
+.chip{border:1px solid var(--line);background:var(--bg-soft);color:var(--muted);padding:7px 12px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit;transition:border-color var(--m-fast,160ms),color var(--m-fast,160ms),background var(--m-fast,160ms)}
 .chip:hover,.chip.on{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
-
 .phase-rail{display:flex;gap:6px;margin-top:8px}
-.phase-dot{
-  flex:1;height:3px;border-radius:2px;background:var(--line);
-  transition:background .4s var(--ease),box-shadow .4s;
-}
+.phase-dot{flex:1;height:3px;border-radius:2px;background:var(--line);transition:background var(--m-slow,420ms) var(--ease),box-shadow var(--m-slow,420ms)}
 .phase-dot.on{background:var(--accent);box-shadow:0 0 12px rgba(139,124,246,.5)}
 .phase-dot.done{background:var(--signal)}
 .phase-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
 .phase-labels span.on{color:var(--accent)}
-
-/* Stage — 3D capsule */
-.stage{
-  position:relative;min-height:280px;
-  display:flex;align-items:center;justify-content:center;
-  transform-style:preserve-3d;
-}
-.orb{
-  position:relative;width:min(100%,280px);aspect-ratio:1;
-  transform-style:preserve-3d;
-  transition:transform .7s var(--ease);
-}
+.stage{position:relative;min-height:280px;display:flex;align-items:center;justify-content:center;transform-style:preserve-3d}
+.orb{position:relative;width:min(100%,280px);aspect-ratio:1;transform-style:preserve-3d;transition:transform var(--m-enter,640ms) var(--ease)}
 .loop:hover .orb{transform:rotateX(6deg) rotateY(-8deg)}
 @media(pointer:coarse){.loop:hover .orb{transform:none}}
-
-.orb-ring{
-  position:absolute;inset:8%;border-radius:50%;
-  border:1px solid rgba(139,124,246,.25);
-  transform:translateZ(0);
-  transition:border-color .5s,box-shadow .5s,transform .8s var(--ease),opacity .5s;
-}
+.orb-ring{position:absolute;inset:8%;border-radius:50%;border:1px solid rgba(139,124,246,.25);transform:translateZ(0);transition:border-color var(--m-slow,420ms),box-shadow var(--m-slow,420ms),transform var(--m-enter,640ms) var(--ease),opacity var(--m-slow,420ms)}
 .orb-ring.r2{inset:0;border-color:rgba(255,255,255,.06);transform:translateZ(-24px) scale(.92)}
 .orb-ring.r3{inset:16%;border-color:rgba(94,233,168,.15);transform:translateZ(20px) scale(1.02)}
 .loop[data-phase="evidence"] .orb-ring{border-color:rgba(139,124,246,.55);box-shadow:0 0 40px rgba(139,124,246,.15)}
@@ -191,65 +94,27 @@ h1 em{font-style:normal;color:var(--accent)}
 .loop[data-phase="seal"] .orb-ring.r2{transform:translateZ(-40px) scale(.88)}
 .loop[data-phase="seal"] .orb-ring.r3{transform:translateZ(36px) scale(1.06)}
 .loop[data-phase="recall"] .orb-ring{border-color:rgba(94,233,168,.55);box-shadow:0 0 50px rgba(94,233,168,.2)}
-.loop[data-phase="recall"] .orb-ring.r3{
-  animation:pulse-ring 1.4s var(--ease) infinite;
-}
-@keyframes pulse-ring{
-  0%,100%{transform:translateZ(36px) scale(1.06);opacity:1}
-  50%{transform:translateZ(48px) scale(1.12);opacity:.7}
-}
-
-.orb-core{
-  position:absolute;inset:22%;border-radius:50%;
-  background:
-    radial-gradient(circle at 35% 30%,rgba(255,255,255,.12),transparent 45%),
-    linear-gradient(160deg,#161622, #0a0a10);
-  border:1px solid var(--line-strong);
-  display:flex;align-items:center;justify-content:center;text-align:center;
-  padding:20px;transform:translateZ(40px);
-  box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
-  transition:border-color .4s,box-shadow .4s;
-}
-.loop[data-phase="seal"] .orb-core{
-  border-color:rgba(139,124,246,.5);
-  box-shadow:0 20px 60px rgba(139,124,246,.2), inset 0 1px 0 rgba(255,255,255,.08);
-}
-.loop[data-phase="recall"] .orb-core{
-  border-color:rgba(94,233,168,.4);
-  box-shadow:0 20px 60px rgba(94,233,168,.15), inset 0 1px 0 rgba(255,255,255,.08);
-}
-
-.orb-text{
-  font-size:13px;line-height:1.4;color:var(--ink);
-  word-break:break-word;max-width:16ch;
-  transition:opacity .35s,filter .35s,letter-spacing .5s,color .4s;
-}
-.orb-text.cipher{
-  color:var(--accent);letter-spacing:.12em;filter:blur(.3px);
-  font-family:ui-monospace,monospace;font-size:11px;
-}
+.loop[data-phase="recall"] .orb-ring.r3{animation:pulse-ring 1.4s var(--ease) infinite}
+@keyframes pulse-ring{0%,100%{transform:translateZ(36px) scale(1.06);opacity:1}50%{transform:translateZ(48px) scale(1.12);opacity:.7}}
+.orb-core{position:absolute;inset:22%;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.12),transparent 45%),linear-gradient(160deg,#161622,#0a0a10);border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;transform:translateZ(40px);box-shadow:0 20px 50px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);transition:border-color var(--m-slow,420ms),box-shadow var(--m-slow,420ms)}
+.loop[data-phase="seal"] .orb-core{border-color:rgba(139,124,246,.5);box-shadow:0 20px 60px rgba(139,124,246,.2),inset 0 1px 0 rgba(255,255,255,.08)}
+.loop[data-phase="recall"] .orb-core{border-color:rgba(94,233,168,.4);box-shadow:0 20px 60px rgba(94,233,168,.15),inset 0 1px 0 rgba(255,255,255,.08)}
+.orb-text{font-size:13px;line-height:1.4;color:var(--ink);word-break:break-word;max-width:16ch;transition:opacity var(--m-base,240ms),filter var(--m-base,240ms),letter-spacing var(--m-slow,420ms),color var(--m-base,240ms)}
+.orb-text.cipher{color:var(--accent);letter-spacing:.12em;filter:blur(.3px);font-family:ui-monospace,monospace;font-size:11px}
 .orb-text.hidden{opacity:0}
-.orb-status{
-  position:absolute;bottom:14%;left:50%;transform:translateX(-50%) translateZ(50px);
-  font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--dim);white-space:nowrap;transition:color .3s;
-}
-.loop[data-phase="evidence"] .orb-status{color:var(--accent)}
-.loop[data-phase="seal"] .orb-status{color:var(--accent)}
+.orb-status{position:absolute;bottom:14%;left:50%;transform:translateX(-50%) translateZ(50px);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);white-space:nowrap;transition:color var(--m-base,240ms)}
+.loop[data-phase="evidence"] .orb-status,.loop[data-phase="seal"] .orb-status{color:var(--accent)}
 .loop[data-phase="recall"] .orb-status{color:var(--signal)}
-
 .loop-note{margin-top:14px;font-size:12px;color:var(--dim)}
 .loop-note a{color:var(--muted);text-decoration:underline;text-underline-offset:3px}
-
-/* rest of page */
 section{padding:72px 0}
 .sec-label{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
 .sec-title{font-family:var(--display);font-weight:700;font-size:clamp(1.6rem,3vw,2.25rem);letter-spacing:-.02em;margin-bottom:12px;max-width:18ch}
 .sec-lead{color:var(--muted);max-width:48ch;margin-bottom:36px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 @media(max-width:800px){.grid-3{grid-template-columns:1fr}}
-.card{background:var(--bg-elev);border:1px solid var(--line);border-radius:var(--radius);padding:24px;transition:border-color .25s,transform .25s var(--ease)}
-.card:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+.card{background:var(--bg-elev);border:1px solid var(--line);border-radius:var(--radius);padding:24px;transition:border-color var(--m-base,240ms),transform var(--m-base,240ms) var(--ease)}
+.card:hover{border-color:var(--line-strong);transform:translateY(var(--lift,-2px))}
 .card-icon{width:40px;height:40px;border-radius:12px;margin-bottom:16px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-family:var(--display);font-weight:700;font-size:14px}
 .card h3{font-size:16px;font-weight:600;margin-bottom:8px}
 .card p{font-size:14px;color:var(--muted)}
@@ -268,310 +133,131 @@ section{padding:72px 0}
 .demo-card h3{font-size:15px;margin-bottom:8px}
 .demo-card p{font-size:13px;color:var(--muted)}
 .demo-card code{display:inline-block;margin-top:12px;font-size:12px;padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-family:ui-monospace,monospace}
-.pills{display:flex;flex-wrap:wrap;gap:10px}
-.pill{padding:10px 16px;border-radius:999px;border:1px solid var(--line);font-size:13px;color:var(--muted);background:var(--bg-elev)}
-.pill strong{color:var(--ink);font-weight:600}
 .final{text-align:center;padding:80px 24px;border:1px solid var(--line);border-radius:28px;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(139,124,246,.12),transparent),var(--bg-elev)}
 .final h2{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);letter-spacing:-.03em;margin-bottom:14px}
 .final p{color:var(--muted);max-width:36ch;margin:0 auto 28px}
 footer{padding:40px 0 56px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;border-top:1px solid var(--line);margin-top:24px;font-size:13px;color:var(--dim)}
-footer a{color:var(--muted);text-decoration:none}
+footer a{color:var(--muted);text-decoration:none;transition:color var(--m-fast,160ms)}
 footer a:hover{color:var(--ink)}
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal{opacity:0;transform:translateY(var(--rise,16px));transition:opacity var(--m-enter,640ms) var(--ease),transform var(--m-enter,640ms) var(--ease)}
 .reveal.in{opacity:1;transform:none}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
-  .reveal{opacity:1;transform:none}
-  .loop:hover .orb{transform:none}
-}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.reveal{opacity:1;transform:none}.loop:hover .orb{transform:none}.loop[data-phase="recall"] .orb-ring.r3{animation:none}}
 </style>
 </head>
-<body>
+<body class="m-page">
 <div class="cursor" id="cursor" hidden></div>
 <div class="cursor-dot" id="cursorDot" hidden></div>
-
 <div class="wrap">
-  <header class="nav" id="nav">
-    <a class="brand" href="/seal.html">AKSI <i>Seal</i></a>
-    <div class="nav-links">
-      <a href="#loop">Loop</a>
-      <a href="#product">Product</a>
-      <a href="#how">How</a>
-      <a class="nav-cta" href="/product.html">Open runtime</a>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="eyebrow">Private research agent</div>
-    <h1>Find. Seal.<br><em>Recall.</em></h1>
-    <p class="lead">Research with sources. Memory encrypted on your device. A gate before weak answers.</p>
-    <div class="cta-row">
-      <a class="btn btn-primary" href="#loop">Experience the loop</a>
-      <a class="btn btn-ghost" href="/product.html">Open runtime</a>
-    </div>
-    <p class="trust-line">Local-first · AES-GCM · not another chatbot</p>
-  </section>
-
-  <!-- FIRMEN EXPERIENCE -->
-  <section class="loop-section" id="loop">
-    <div class="loop" id="sealLoop" data-phase="idle">
-      <div class="loop-glow"></div>
-      <div class="loop-inner">
-        <div class="loop-copy">
-          <div class="sec-label">Branded experience</div>
-          <h2>The Seal Loop</h2>
-          <p>Type a fact. Watch it become evidence, seal under AES metaphor, then return through resonance. This is the product story — interactive.</p>
-
-          <div class="chips" id="chips">
-            <button type="button" class="chip" data-text="Sources must stay visible">Sources visible</button>
-            <button type="button" class="chip" data-text="Memory stays on device">On device</button>
-            <button type="button" class="chip" data-text="Weak answers can wait">Gate defers</button>
-          </div>
-
-          <div class="loop-input-row">
-            <input class="loop-input" id="loopInput" type="text" maxlength="80" placeholder="A fact worth sealing…" autocomplete="off">
-            <button type="button" class="loop-run" id="loopRun">Run loop</button>
-          </div>
-
-          <div class="phase-rail" aria-hidden="true">
-            <div class="phase-dot" data-p="input"></div>
-            <div class="phase-dot" data-p="evidence"></div>
-            <div class="phase-dot" data-p="seal"></div>
-            <div class="phase-dot" data-p="recall"></div>
-          </div>
-          <div class="phase-labels">
-            <span data-l="input">Input</span>
-            <span data-l="evidence">Evidence</span>
-            <span data-l="seal">Seal</span>
-            <span data-l="recall">Recall</span>
-          </div>
-
-          <p class="loop-note">Metaphor of the real path — full agent: <a href="/product.html">/product.html</a></p>
-        </div>
-
-        <div class="stage">
-          <div class="orb" id="orb">
-            <div class="orb-ring r2"></div>
-            <div class="orb-ring"></div>
-            <div class="orb-ring r3"></div>
-            <div class="orb-core">
-              <div class="orb-text" id="orbText">Your fact appears here</div>
-            </div>
-            <div class="orb-status" id="orbStatus">idle</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="reveal" id="why">
-    <div class="problem">
-      <div>
-        <div class="sec-label">The gap</div>
-        <h3>Cloud agents are powerful — and porous.</h3>
-        <p>Prompts and notes leave the device. Chat answers without sources. Seal sits in the gap: evidence, sealed memory, visible gate.</p>
-      </div>
-      <ul>
-        <li>Context on device by default</li>
-        <li>Answers with explicit sources</li>
-        <li>Weak claims can be deferred</li>
-        <li>No API key for the core path</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="reveal" id="product">
-    <div class="sec-label">Product</div>
-    <h2 class="sec-title">Three moves. One agent.</h2>
-    <p class="sec-lead">The loop you just ran is the product — not a lab of twenty tabs.</p>
-    <div class="grid-3">
-      <article class="card">
-        <div class="card-icon">R</div>
-        <h3>Research</h3>
-        <p>Evidence-oriented report with sources you can open — not a floating claim.</p>
-      </article>
-      <article class="card">
-        <div class="card-icon">S</div>
-        <h3>Seal</h3>
-        <p>AES-GCM vault on device. Recall by meaning without shipping plaintext to a cloud brain.</p>
-      </article>
-      <article class="card">
-        <div class="card-icon">G</div>
-        <h3>Gate</h3>
-        <p>ALLOWED or DEFERRED — policy before confidence theatre.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="reveal" id="how">
-    <div class="sec-label">60 seconds</div>
-    <h2 class="sec-title">Prove it in runtime.</h2>
-    <p class="sec-lead">The loop is a metaphor. The agent is live.</p>
-    <div class="demo-steps">
-      <div class="demo-card">
-        <h3>Open runtime</h3>
-        <p>Bot · Cortex · Gate · Organism on one board.</p>
-        <code>/product.html</code>
-      </div>
-      <div class="demo-card">
-        <h3>Research</h3>
-        <p>Grounded query with sources in the answer.</p>
-        <code>исследуй: ИИ</code>
-      </div>
-      <div class="demo-card">
-        <h3>Remember</h3>
-        <p>Seal a fact, ask in your own words.</p>
-        <code>запомни: …</code>
-      </div>
-    </div>
-    <div class="cta-row" style="margin-top:28px">
-      <a class="btn btn-primary" href="/product.html">Launch runtime</a>
-    </div>
-  </section>
-
-  <section class="reveal">
-    <div class="final">
-      <h2>Your context.<br>Your device.</h2>
-      <p>AKSI Seal — private research layer. Evidence + memory without giving the cloud your notes.</p>
-      <div class="cta-row" style="justify-content:center">
-        <a class="btn btn-primary" href="/product.html">Open Seal runtime</a>
-        <a class="btn btn-ghost" href="mailto:aksilove@internet.ru">Contact</a>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <div>AKSI Seal · private research agent</div>
-    <div>
-      <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a> ·
-      <a href="https://x.com/AKSILOVE" rel="noopener">@AKSILOVE</a> ·
-      <a href="/">Home</a>
-    </div>
-  </footer>
+<header class="nav" id="nav">
+<a class="brand" href="/seal.html">AKSI <i>Seal</i></a>
+<div class="nav-links">
+<a href="#loop">Loop</a>
+<a href="#product">Product</a>
+<a href="#how">How</a>
+<a class="nav-cta" href="/product.html">Open runtime</a>
 </div>
-
+</header>
+<section class="hero m-load">
+<div class="eyebrow">Private research agent</div>
+<h1>Find. Seal.<br><em>Recall.</em></h1>
+<p class="lead">Research with sources. Memory encrypted on your device. A gate before weak answers.</p>
+<div class="cta-row">
+<a class="btn btn-primary" href="#loop">Experience the loop</a>
+<a class="btn btn-ghost" href="/product.html">Open runtime</a>
+</div>
+<p class="trust-line">Local-first · AES-GCM · not another chatbot</p>
+</section>
+<section class="loop-section" id="loop">
+<div class="loop" id="sealLoop" data-phase="idle">
+<div class="loop-glow"></div>
+<div class="loop-inner">
+<div class="loop-copy">
+<div class="sec-label">Branded experience</div>
+<h2>The Seal Loop</h2>
+<p>Type a fact. Watch it become evidence, seal under AES metaphor, then return through resonance.</p>
+<div class="chips">
+<button type="button" class="chip" data-text="Sources must stay visible">Sources visible</button>
+<button type="button" class="chip" data-text="Memory stays on device">On device</button>
+<button type="button" class="chip" data-text="Weak answers can wait">Gate defers</button>
+</div>
+<div class="loop-input-row">
+<input class="loop-input" id="loopInput" type="text" maxlength="80" placeholder="A fact worth sealing…" autocomplete="off">
+<button type="button" class="loop-run" id="loopRun">Run loop</button>
+</div>
+<div class="phase-rail" aria-hidden="true">
+<div class="phase-dot" data-p="input"></div>
+<div class="phase-dot" data-p="evidence"></div>
+<div class="phase-dot" data-p="seal"></div>
+<div class="phase-dot" data-p="recall"></div>
+</div>
+<div class="phase-labels">
+<span data-l="input">Input</span><span data-l="evidence">Evidence</span><span data-l="seal">Seal</span><span data-l="recall">Recall</span>
+</div>
+<p class="loop-note">Metaphor — full agent: <a href="/product.html">/product.html</a></p>
+</div>
+<div class="stage">
+<div class="orb" id="orb">
+<div class="orb-ring r2"></div><div class="orb-ring"></div><div class="orb-ring r3"></div>
+<div class="orb-core"><div class="orb-text" id="orbText">Your fact appears here</div></div>
+<div class="orb-status" id="orbStatus">idle</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="reveal" id="why"><div class="problem"><div><div class="sec-label">The gap</div><h3>Cloud agents are powerful — and porous.</h3><p>Prompts and notes leave the device. Seal: evidence, sealed memory, visible gate.</p></div><ul><li>Context on device by default</li><li>Answers with explicit sources</li><li>Weak claims can be deferred</li><li>No API key for the core path</li></ul></div></section>
+<section class="reveal" id="product"><div class="sec-label">Product</div><h2 class="sec-title">Three moves. One agent.</h2><p class="sec-lead">The loop you ran is the product.</p><div class="grid-3"><article class="card"><div class="card-icon">R</div><h3>Research</h3><p>Evidence-oriented report with sources.</p></article><article class="card"><div class="card-icon">S</div><h3>Seal</h3><p>AES-GCM vault on device.</p></article><article class="card"><div class="card-icon">G</div><h3>Gate</h3><p>ALLOWED or DEFERRED — visible.</p></article></div></section>
+<section class="reveal" id="how"><div class="sec-label">60 seconds</div><h2 class="sec-title">Prove it in runtime.</h2><p class="sec-lead">The loop is a metaphor. The agent is live.</p><div class="demo-steps"><div class="demo-card"><h3>Open runtime</h3><p>Bot · Cortex · Gate on one board.</p><code>/product.html</code></div><div class="demo-card"><h3>Research</h3><p>Grounded query with sources.</p><code>исследуй: ИИ</code></div><div class="demo-card"><h3>Remember</h3><p>Seal a fact, ask in your words.</p><code>запомни: …</code></div></div><div class="cta-row" style="margin-top:28px"><a class="btn btn-primary" href="/product.html">Launch runtime</a></div></section>
+<section class="reveal"><div class="final"><h2>Your context.<br>Your device.</h2><p>AKSI Seal — private research layer.</p><div class="cta-row" style="justify-content:center"><a class="btn btn-primary" href="/product.html">Open Seal runtime</a><a class="btn btn-ghost" href="mailto:aksilove@internet.ru">Contact</a></div></div></section>
+<footer><div>AKSI Seal · private research agent</div><div><a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a> · <a href="https://x.com/AKSILOVE" rel="noopener">@AKSILOVE</a> · <a href="/">Home</a></div></footer>
+</div>
 <script>
 (function(){
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var coarse = window.matchMedia('(pointer: coarse)').matches;
-
-  /* Cursor */
-  var cur = document.getElementById('cursor');
-  var dot = document.getElementById('cursorDot');
-  if (!coarse && cur && dot) {
-    document.body.classList.add('has-cursor');
-    cur.hidden = false; dot.hidden = false;
-    var x = 0, y = 0, cx = 0, cy = 0;
-    document.addEventListener('mousemove', function(e){
-      x = e.clientX; y = e.clientY;
-      dot.style.transform = 'translate('+x+'px,'+y+'px)';
-    }, {passive:true});
-    (function tick(){
-      cx += (x - cx) * 0.18; cy += (y - cy) * 0.18;
-      cur.style.transform = 'translate('+cx+'px,'+cy+'px)';
-      requestAnimationFrame(tick);
-    })();
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var coarse=window.matchMedia('(pointer: coarse)').matches;
+  var cur=document.getElementById('cursor'),dot=document.getElementById('cursorDot');
+  if(!coarse&&cur&&dot){
+    document.body.classList.add('has-cursor');cur.hidden=false;dot.hidden=false;
+    var x=0,y=0,cx=0,cy=0;
+    document.addEventListener('mousemove',function(e){x=e.clientX;y=e.clientY;dot.style.transform='translate('+x+'px,'+y+'px)';},{passive:true});
+    (function tick(){cx+=(x-cx)*0.18;cy+=(y-cy)*0.18;cur.style.transform='translate('+cx+'px,'+cy+'px)';requestAnimationFrame(tick);})();
     document.querySelectorAll('a,button,.chip,.loop-input,.loop-run').forEach(function(el){
-      el.addEventListener('mouseenter', function(){ cur.classList.add('hot'); });
-      el.addEventListener('mouseleave', function(){ cur.classList.remove('hot'); cur.classList.remove('seal'); });
+      el.addEventListener('mouseenter',function(){cur.classList.add('hot')});
+      el.addEventListener('mouseleave',function(){cur.classList.remove('hot');cur.classList.remove('seal')});
     });
-    var loopEl = document.getElementById('sealLoop');
-    if (loopEl) {
-      loopEl.addEventListener('mouseenter', function(){ cur.classList.add('seal'); });
-      loopEl.addEventListener('mouseleave', function(){ cur.classList.remove('seal'); });
-    }
+    var loopEl=document.getElementById('sealLoop');
+    if(loopEl){loopEl.addEventListener('mouseenter',function(){cur.classList.add('seal')});loopEl.addEventListener('mouseleave',function(){cur.classList.remove('seal')});}
   }
-
-  /* Nav */
-  var nav = document.getElementById('nav');
-  function onScroll(){ nav.classList.toggle('scrolled', window.scrollY > 8); }
-  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
-
-  /* Reveal */
-  var els = document.querySelectorAll('.reveal');
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
-    els.forEach(function(el){ io.observe(el); });
-  } else els.forEach(function(el){ el.classList.add('in'); });
-
-  /* Seal Loop */
-  var root = document.getElementById('sealLoop');
-  var input = document.getElementById('loopInput');
-  var runBtn = document.getElementById('loopRun');
-  var orbText = document.getElementById('orbText');
-  var orbStatus = document.getElementById('orbStatus');
-  var busy = false;
-
-  function setPhase(p) {
-    root.setAttribute('data-phase', p);
-    document.querySelectorAll('.phase-dot').forEach(function(d){
-      var id = d.getAttribute('data-p');
-      d.classList.remove('on','done');
-      var order = ['input','evidence','seal','recall'];
-      var i = order.indexOf(id), j = order.indexOf(p);
-      if (id === p) d.classList.add('on');
-      else if (i < j) d.classList.add('done');
-    });
-    document.querySelectorAll('.phase-labels span').forEach(function(s){
-      s.classList.toggle('on', s.getAttribute('data-l') === p);
-    });
-    orbStatus.textContent = p;
+  var nav=document.getElementById('nav');
+  function onScroll(){nav.classList.toggle('scrolled',window.scrollY>8)}
+  onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+  var els=document.querySelectorAll('.reveal');
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:0.12,rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(el){io.observe(el)});
+  }else els.forEach(function(el){el.classList.add('in')});
+  var root=document.getElementById('sealLoop'),input=document.getElementById('loopInput'),runBtn=document.getElementById('loopRun'),orbText=document.getElementById('orbText'),orbStatus=document.getElementById('orbStatus'),busy=false;
+  function setPhase(p){
+    root.setAttribute('data-phase',p);
+    var order=['input','evidence','seal','recall'],j=order.indexOf(p);
+    document.querySelectorAll('.phase-dot').forEach(function(d){var i=order.indexOf(d.getAttribute('data-p'));d.classList.remove('on','done');if(d.getAttribute('data-p')===p)d.classList.add('on');else if(i<j)d.classList.add('done')});
+    document.querySelectorAll('.phase-labels span').forEach(function(s){s.classList.toggle('on',s.getAttribute('data-l')===p)});
+    orbStatus.textContent=p;
   }
-
-  function toCipher(s) {
-    var hex = '';
-    for (var i = 0; i < Math.min(s.length, 18); i++) {
-      hex += s.charCodeAt(i).toString(16).padStart(2,'0');
-    }
-    return (hex + '·aes').slice(0, 28);
+  function toCipher(s){var hex='';for(var i=0;i<Math.min(s.length,18);i++)hex+=s.charCodeAt(i).toString(16).padStart(2,'0');return(hex+'·aes').slice(0,28)}
+  function wait(ms){return new Promise(function(r){setTimeout(r,reduce?0:ms)})}
+  async function runLoop(text){
+    if(busy)return;text=String(text||'').trim();if(!text){input.focus();return}
+    busy=true;runBtn.disabled=true;
+    setPhase('input');orbText.className='orb-text';orbText.textContent=text;await wait(480);
+    setPhase('evidence');await wait(640);
+    setPhase('seal');orbText.className='orb-text cipher';orbText.textContent=toCipher(text);await wait(820);
+    setPhase('recall');orbText.className='orb-text hidden';await wait(240);orbText.className='orb-text';orbText.textContent=text;await wait(520);
+    busy=false;runBtn.disabled=false;
   }
-
-  function wait(ms){ return new Promise(function(r){ setTimeout(r, reduce ? 0 : ms); }); }
-
-  async function runLoop(text) {
-    if (busy) return;
-    text = String(text || '').trim();
-    if (!text) { input.focus(); return; }
-    busy = true; runBtn.disabled = true;
-
-    setPhase('input');
-    orbText.className = 'orb-text';
-    orbText.textContent = text;
-    await wait(500);
-
-    setPhase('evidence');
-    orbText.textContent = text;
-    await wait(700);
-
-    setPhase('seal');
-    orbText.className = 'orb-text cipher';
-    orbText.textContent = toCipher(text);
-    await wait(900);
-
-    setPhase('recall');
-    orbText.className = 'orb-text hidden';
-    await wait(280);
-    orbText.className = 'orb-text';
-    orbText.textContent = text;
-    await wait(600);
-
-    busy = false; runBtn.disabled = false;
-  }
-
-  runBtn.addEventListener('click', function(){ runLoop(input.value); });
-  input.addEventListener('keydown', function(e){
-    if (e.key === 'Enter') runLoop(input.value);
-  });
-  document.querySelectorAll('.chip').forEach(function(c){
-    c.addEventListener('click', function(){
-      document.querySelectorAll('.chip').forEach(function(x){ x.classList.remove('on'); });
-      c.classList.add('on');
-      input.value = c.getAttribute('data-text') || '';
-      runLoop(input.value);
-    });
-  });
+  runBtn.addEventListener('click',function(){runLoop(input.value)});
+  input.addEventListener('keydown',function(e){if(e.key==='Enter')runLoop(input.value)});
+  document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){document.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on')});c.classList.add('on');input.value=c.getAttribute('data-text')||'';runLoop(input.value)})});
 })();
 </script>
 </body>
