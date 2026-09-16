@@ -1,151 +1,126 @@
 /**
- * AKSI Net v1.0 — real neural network in the browser
- * Char-level Elman RNN: forward, BPTT, SGD, generate, localStorage weights
+ * AKSI Net v2.0 — embedding + MLP next-char neural network
+ * Trainable embeddings, ReLU hidden, softmax, full backprop, SGD
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VERSION = "1.0.0";
-  var STORE = "aksi_net_v1";
-
+  var VERSION = "2.0.0";
+  var STORE = "aksi_net_v2";
   function randn() {
     var u = 1 - Math.random(), v = Math.random();
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
   }
   function zeros(n) { return new Float64Array(n); }
-  function randMat(rows, cols, scale) {
-    scale = scale || 0.1;
-    var m = new Float64Array(rows * cols);
+  function randMat(r, c, scale) {
+    var m = new Float64Array(r * c);
     for (var i = 0; i < m.length; i++) m[i] = randn() * scale;
-    return { r: rows, c: cols, d: m };
+    return m;
   }
-  function zeroMat(rows, cols) { return { r: rows, c: cols, d: new Float64Array(rows * cols) }; }
-  function get(m, i, j) { return m.d[i * m.c + j]; }
-  function add(m, i, j, v) { m.d[i * m.c + j] += v; }
-  function tanh(x) {
-    if (x > 20) return 1; if (x < -20) return -1;
-    var e = Math.exp(2 * x); return (e - 1) / (e + 1);
-  }
-  function dtanh(y) { return 1 - y * y; }
-  function softmax(arr) {
-    var max = -Infinity, i, sum = 0, out = new Float64Array(arr.length);
-    for (i = 0; i < arr.length; i++) if (arr[i] > max) max = arr[i];
-    for (i = 0; i < arr.length; i++) { out[i] = Math.exp(arr[i] - max); sum += out[i]; }
-    for (i = 0; i < arr.length; i++) out[i] /= sum || 1;
-    return out;
-  }
-
   function buildVocab(text) {
-    var set = {}, i, chars, stoi = {}, itos = {};
+    var set = {}, i;
     for (i = 0; i < text.length; i++) set[text[i]] = 1;
-    chars = Object.keys(set).sort();
-    if (chars.length < 2)
-      chars = " абвгдеёжзийклмнопрстуфхцчшщъыьэюяabcdefghijklmnopqrstuvwxyz0123456789.,!?\n".split("");
+    var chars = Object.keys(set).sort();
+    if (chars.length < 4) {
+      chars = " абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯabcdefghijklmnopqrstuvwxyz0123456789.,—-\n".split("");
+    }
+    var stoi = {}, itos = {};
     for (i = 0; i < chars.length; i++) { stoi[chars[i]] = i; itos[i] = chars[i]; }
     return { chars: chars, stoi: stoi, itos: itos, size: chars.length };
   }
-
-  function createModel(vocabSize, hidden) {
-    hidden = hidden || 64;
-    var s = 0.08;
+  function createModel(V, opts) {
+    opts = opts || {};
+    var E = opts.E || 24, H = opts.H || 64, CTX = opts.CTX || 8;
     return {
-      vocabSize: vocabSize, hidden: hidden,
-      Wxh: randMat(hidden, vocabSize, s), Whh: randMat(hidden, hidden, s),
-      Why: randMat(vocabSize, hidden, s), bh: zeros(hidden), by: zeros(vocabSize)
+      V: V, E: E, H: H, CTX: CTX,
+      embed: randMat(V, E, 0.08),
+      W1: randMat(H, CTX * E, Math.sqrt(2 / (CTX * E))),
+      b1: zeros(H),
+      W2: randMat(V, H, Math.sqrt(2 / H)),
+      b2: zeros(V)
     };
   }
-  function oneHot(V, ix) {
-    var x = zeros(V); if (ix >= 0 && ix < V) x[ix] = 1; return x;
-  }
-  function forwardStep(model, x, hPrev) {
-    var H = model.hidden, V = model.vocabSize, h = zeros(H), y = zeros(V), i, j, s;
-    for (i = 0; i < H; i++) {
-      s = model.bh[i];
-      for (j = 0; j < V; j++) s += get(model.Wxh, i, j) * x[j];
-      for (j = 0; j < H; j++) s += get(model.Whh, i, j) * hPrev[j];
-      h[i] = tanh(s);
+  function embedCtx(model, ids) {
+    var CTX = model.CTX, E = model.E, x = zeros(CTX * E);
+    for (var t = 0; t < CTX; t++) {
+      var id = ids[t] || 0, off = t * E;
+      for (var j = 0; j < E; j++) x[off + j] = model.embed[id * E + j];
     }
+    return x;
+  }
+  function forward(model, ids) {
+    var x = embedCtx(model, ids), H = model.H, V = model.V, CE = model.CTX * model.E;
+    var h = zeros(H), i, j, s;
+    for (i = 0; i < H; i++) {
+      s = model.b1[i];
+      for (j = 0; j < CE; j++) s += model.W1[i * CE + j] * x[j];
+      h[i] = s > 0 ? s : 0;
+    }
+    var y = zeros(V);
     for (i = 0; i < V; i++) {
-      s = model.by[i];
-      for (j = 0; j < H; j++) s += get(model.Why, i, j) * h[j];
+      s = model.b2[i];
+      for (j = 0; j < H; j++) s += model.W2[i * H + j] * h[j];
       y[i] = s;
     }
-    return { h: h, y: y, p: softmax(y) };
+    var max = -Infinity;
+    for (i = 0; i < V; i++) if (y[i] > max) max = y[i];
+    var p = zeros(V), sum = 0;
+    for (i = 0; i < V; i++) { p[i] = Math.exp(y[i] - max); sum += p[i]; }
+    for (i = 0; i < V; i++) p[i] /= sum || 1;
+    return { x: x, h: h, y: y, p: p };
   }
-
-  function trainSequence(model, inputs, targets, lr, h0) {
-    var H = model.hidden, V = model.vocabSize, n = inputs.length;
-    var xs = [], hs = [], ps = [], hPrev = h0 || zeros(H), t, i, j, loss = 0;
-    hs.push(hPrev);
-    for (t = 0; t < n; t++) {
-      var x = oneHot(V, inputs[t]); xs.push(x);
-      var step = forwardStep(model, x, hPrev);
-      hs.push(step.h); ps.push(step.p); hPrev = step.h;
-      loss += -Math.log(step.p[targets[t]] || 1e-12);
-    }
-    var dWxh = zeroMat(H, V), dWhh = zeroMat(H, H), dWhy = zeroMat(V, H);
-    var dbh = zeros(H), dby = zeros(V), dhNext = zeros(H);
-    for (t = n - 1; t >= 0; t--) {
-      var dy = new Float64Array(ps[t]); dy[targets[t]] -= 1;
-      for (i = 0; i < V; i++) {
-        dby[i] += dy[i];
-        for (j = 0; j < H; j++) add(dWhy, i, j, dy[i] * hs[t + 1][j]);
-      }
-      var dh = zeros(H);
+  function trainStep(model, ids, target, lr) {
+    var out = forward(model, ids);
+    var H = model.H, V = model.V, E = model.E, CTX = model.CTX, CE = CTX * E;
+    var loss = -Math.log(Math.max(out.p[target], 1e-12));
+    var dy = new Float64Array(out.p); dy[target] -= 1;
+    var dW2 = zeros(V * H), db2 = zeros(V), dh = zeros(H), i, j;
+    for (i = 0; i < V; i++) {
+      db2[i] = dy[i];
       for (j = 0; j < H; j++) {
-        var s = dhNext[j];
-        for (i = 0; i < V; i++) s += get(model.Why, i, j) * dy[i];
-        dh[j] = s;
-      }
-      var dhRaw = zeros(H);
-      for (j = 0; j < H; j++) dhRaw[j] = dtanh(hs[t + 1][j]) * dh[j];
-      for (j = 0; j < H; j++) {
-        dbh[j] += dhRaw[j];
-        for (i = 0; i < V; i++) add(dWxh, j, i, dhRaw[j] * xs[t][i]);
-        for (i = 0; i < H; i++) add(dWhh, j, i, dhRaw[j] * hs[t][i]);
-      }
-      dhNext = zeros(H);
-      for (i = 0; i < H; i++) {
-        var s2 = 0;
-        for (j = 0; j < H; j++) s2 += get(model.Whh, j, i) * dhRaw[j];
-        dhNext[i] = s2;
+        dW2[i * H + j] = dy[i] * out.h[j];
+        dh[j] += dy[i] * model.W2[i * H + j];
       }
     }
-    function clip(m) { for (var k = 0; k < m.d.length; k++) { if (m.d[k] > 5) m.d[k] = 5; if (m.d[k] < -5) m.d[k] = -5; } }
-    clip(dWxh); clip(dWhh); clip(dWhy);
-    function am(w, dw) { for (var k = 0; k < w.d.length; k++) w.d[k] -= lr * dw.d[k]; }
-    function av(w, dw) { for (var k = 0; k < w.length; k++) w[k] -= lr * dw[k]; }
-    am(model.Wxh, dWxh); am(model.Whh, dWhh); am(model.Why, dWhy); av(model.bh, dbh); av(model.by, dby);
-    return { loss: loss / n, h: hPrev };
-  }
-
-  function sample(model, seedIx, n, temperature, h0) {
-    temperature = temperature || 0.8;
-    var H = model.hidden, V = model.vocabSize, h = h0 || zeros(H), ix = seedIx, out = [ix], t, i;
-    for (t = 0; t < n; t++) {
-      var step = forwardStep(model, oneHot(V, ix), h);
-      h = step.h;
-      var logits = step.y, max = -Infinity, sum = 0, p = new Float64Array(V);
-      for (i = 0; i < V; i++) { logits[i] /= temperature; if (logits[i] > max) max = logits[i]; }
-      for (i = 0; i < V; i++) { p[i] = Math.exp(logits[i] - max); sum += p[i]; }
-      var r = Math.random() * sum, acc = 0; ix = V - 1;
-      for (i = 0; i < V; i++) { acc += p[i]; if (r <= acc) { ix = i; break; } }
-      out.push(ix);
+    for (j = 0; j < H; j++) if (out.h[j] <= 0) dh[j] = 0;
+    var dW1 = zeros(H * CE), db1 = zeros(H), dx = zeros(CE);
+    for (i = 0; i < H; i++) {
+      db1[i] = dh[i];
+      for (j = 0; j < CE; j++) {
+        dW1[i * CE + j] = dh[i] * out.x[j];
+        dx[j] += dh[i] * model.W1[i * CE + j];
+      }
     }
-    return out;
+    for (var t = 0; t < CTX; t++) {
+      var id = ids[t] || 0, off = t * E;
+      for (j = 0; j < E; j++) model.embed[id * E + j] -= lr * dx[off + j];
+    }
+    for (i = 0; i < model.W1.length; i++) model.W1[i] -= lr * dW1[i];
+    for (i = 0; i < H; i++) model.b1[i] -= lr * db1[i];
+    for (i = 0; i < model.W2.length; i++) model.W2[i] -= lr * dW2[i];
+    for (i = 0; i < V; i++) model.b2[i] -= lr * db2[i];
+    return loss;
   }
-
+  function sampleNext(model, ids, temp) {
+    temp = temp || 0.7;
+    var out = forward(model, ids), V = model.V, max = -Infinity, i, sum = 0;
+    var logits = new Float64Array(V);
+    for (i = 0; i < V; i++) { logits[i] = out.y[i] / temp; if (logits[i] > max) max = logits[i]; }
+    var p = new Float64Array(V);
+    for (i = 0; i < V; i++) { p[i] = Math.exp(logits[i] - max); sum += p[i]; }
+    var r = Math.random() * sum, acc = 0, ix = V - 1;
+    for (i = 0; i < V; i++) { acc += p[i]; if (r <= acc) { ix = i; break; } }
+    return ix;
+  }
   var vocab = null, model = null, trainedChars = 0, lastLoss = null, epochsDone = 0;
-
   function serialize() {
     if (!model || !vocab) return null;
-    function matToArr(m) { return { r: m.r, c: m.c, d: Array.from(m.d) }; }
     return {
       version: VERSION, vocab: { chars: vocab.chars },
       model: {
-        vocabSize: model.vocabSize, hidden: model.hidden,
-        Wxh: matToArr(model.Wxh), Whh: matToArr(model.Whh), Why: matToArr(model.Why),
-        bh: Array.from(model.bh), by: Array.from(model.by)
+        V: model.V, E: model.E, H: model.H, CTX: model.CTX,
+        embed: Array.from(model.embed), W1: Array.from(model.W1), b1: Array.from(model.b1),
+        W2: Array.from(model.W2), b2: Array.from(model.b2)
       },
       trainedChars: trainedChars, lastLoss: lastLoss, epochsDone: epochsDone
     };
@@ -153,107 +128,133 @@
   function deserialize(data) {
     if (!data || !data.model || !data.vocab) return false;
     vocab = { chars: data.vocab.chars.slice(), stoi: {}, itos: {}, size: data.vocab.chars.length };
-    for (var i = 0; i < vocab.chars.length; i++) { vocab.stoi[vocab.chars[i]] = i; vocab.itos[i] = vocab.chars[i]; }
-    function arrToMat(o) { return { r: o.r, c: o.c, d: Float64Array.from(o.d) }; }
+    for (var i = 0; i < vocab.chars.length; i++) {
+      vocab.stoi[vocab.chars[i]] = i; vocab.itos[i] = vocab.chars[i];
+    }
     var m = data.model;
     model = {
-      vocabSize: m.vocabSize, hidden: m.hidden,
-      Wxh: arrToMat(m.Wxh), Whh: arrToMat(m.Whh), Why: arrToMat(m.Why),
-      bh: Float64Array.from(m.bh), by: Float64Array.from(m.by)
+      V: m.V, E: m.E, H: m.H, CTX: m.CTX,
+      embed: Float64Array.from(m.embed), W1: Float64Array.from(m.W1), b1: Float64Array.from(m.b1),
+      W2: Float64Array.from(m.W2), b2: Float64Array.from(m.b2)
     };
     trainedChars = data.trainedChars || 0; lastLoss = data.lastLoss; epochsDone = data.epochsDone || 0;
     return true;
   }
-  function save() { try { localStorage.setItem(STORE, JSON.stringify(serialize())); return true; } catch (e) { return false; } }
-  function load() { try { var raw = localStorage.getItem(STORE); return raw ? deserialize(JSON.parse(raw)) : false; } catch (e) { return false; } }
-
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(serialize())); return true; } catch (e) { return false; }
+  }
+  function load() {
+    try { var raw = localStorage.getItem(STORE); return raw ? deserialize(JSON.parse(raw)) : false; }
+    catch (e) { return false; }
+  }
+  function seedCorpus() {
+    return [
+      "АКСИ это локальный помощник в браузере.",
+      "Нейронная сеть учится на тексте и генерирует продолжение.",
+      "Память хранится на устройстве пользователя.",
+      "Искусственный интеллект помогает отвечать на вопросы.",
+      "Обучение сети идёт градиентным спуском.",
+      "Скрытый слой хранит контекст последовательности.",
+      "Генерация текста выбирает следующий символ.",
+      "АКСИ объединяет память поиск и генерацию.",
+      "Веса нейросети обновляются при обучении.",
+      "Пользователь может обучить свою модель."
+    ].join("\n");
+  }
   function collectCorpus() {
-    var parts = [];
+    var parts = [seedCorpus()];
     try {
       var mem = JSON.parse(localStorage.getItem("aksi_bot_mem_v1") || "[]");
       if (Array.isArray(mem)) for (var i = 0; i < mem.length; i++) if (mem[i] && mem[i].text) parts.push(String(mem[i].text));
     } catch (e) {}
-    try {
-      var clm = JSON.parse(localStorage.getItem("aksi_clm_v1") || "{}");
-      if (clm.items) for (var i = 0; i < clm.items.length; i++) if (clm.items[i].fact) parts.push(String(clm.items[i].fact));
-    } catch (e) {}
-    parts.push(
-      "АКСИ это локальный помощник в браузере.",
-      "Нейронная сеть учится на тексте и генерирует продолжение.",
-      "Память хранится на устройстве пользователя.",
-      "Искусственный интеллект помогает отвечать на вопросы."
-    );
     return parts.join("\n");
   }
-
   function init(opts) {
     opts = opts || {};
     var text = opts.text || collectCorpus();
     vocab = buildVocab(text);
-    model = createModel(vocab.size, opts.hidden || 64);
+    model = createModel(vocab.size, { E: opts.E || 24, H: opts.H || 64, CTX: opts.CTX || 8 });
     trainedChars = 0; lastLoss = null; epochsDone = 0;
     return status();
   }
-
   function train(opts) {
     opts = opts || {};
     var text = opts.text || collectCorpus();
-    if (!text || text.length < 10) text = collectCorpus();
-    if (!model || !vocab) init({ text: text, hidden: opts.hidden || 64 });
-    var needRebuild = false, i;
-    for (i = 0; i < text.length; i++) if (vocab.stoi[text[i]] == null) { needRebuild = true; break; }
-    if (needRebuild) init({ text: text + vocab.chars.join(""), hidden: model.hidden });
-    var seqLen = opts.seqLen || 24, lr = opts.lr || 0.08, epochs = opts.epochs || 8;
-    var h = zeros(model.hidden), totalLoss = 0, steps = 0, ep, pos, t;
-    for (ep = 0; ep < epochs; ep++) {
-      for (pos = 0; pos + seqLen + 1 < text.length; pos += seqLen) {
-        var inputs = [], targets = [];
-        for (t = 0; t < seqLen; t++) {
-          inputs.push(vocab.stoi[text[pos + t]] != null ? vocab.stoi[text[pos + t]] : 0);
-          targets.push(vocab.stoi[text[pos + t + 1]] != null ? vocab.stoi[text[pos + t + 1]] : 0);
-        }
-        var r = trainSequence(model, inputs, targets, lr, h);
-        h = r.h; totalLoss += r.loss; steps++; trainedChars += seqLen;
+    if (text.length < 30) text = seedCorpus().repeat(5);
+    if (!model || !vocab) init({ text: text, H: opts.H || 64 });
+    for (var i = 0; i < text.length; i++) {
+      if (vocab.stoi[text[i]] == null) {
+        init({ text: text + vocab.chars.join(""), H: model.H, E: model.E, CTX: model.CTX });
+        break;
+      }
+    }
+    var CTX = model.CTX, lr = opts.lr != null ? opts.lr : 0.05, epochs = opts.epochs || 15;
+    var total = 0, steps = 0;
+    for (var ep = 0; ep < epochs; ep++) {
+      for (var pos = CTX; pos < text.length; pos++) {
+        var ids = [];
+        for (var t = 0; t < CTX; t++) ids.push(vocab.stoi[text[pos - CTX + t]] || 0);
+        var target = vocab.stoi[text[pos]];
+        if (target == null) continue;
+        total += trainStep(model, ids, target, lr);
+        steps++; trainedChars++;
       }
       epochsDone++;
     }
-    lastLoss = steps ? totalLoss / steps : null;
+    lastLoss = steps ? total / steps : null;
     save();
-    return { ok: true, epochs: epochs, steps: steps, loss: lastLoss, vocab: vocab.size, hidden: model.hidden, trainedChars: trainedChars };
+    return { ok: true, epochs: epochs, steps: steps, loss: lastLoss, vocab: vocab.size, hidden: model.H, trainedChars: trainedChars };
   }
-
   function generate(prompt, opts) {
     opts = opts || {};
-    if (!model || !vocab) { if (!load()) init({}); }
-    if (!model) return { text: "", error: "no model" };
-    var n = opts.n || 120, temperature = opts.temperature || 0.85;
-    var p = String(prompt || ""), h = zeros(model.hidden), ix = 0, i;
-    for (i = 0; i < p.length; i++) {
-      var cix = vocab.stoi[p[i]]; if (cix == null) continue;
-      var step = forwardStep(model, oneHot(model.vocabSize, cix), h);
-      h = step.h; ix = cix;
+    if (!model || !vocab) {
+      if (!load()) { init({}); train({ epochs: 20, lr: 0.06 }); }
     }
-    if (!p.length) ix = vocab.stoi["А"] != null ? vocab.stoi["А"] : 0;
-    var ids = sample(model, ix, n, temperature, h), out = p;
-    for (i = 1; i < ids.length; i++) out += vocab.itos[ids[i]] || "";
-    return { text: out, source: "aksi-net", generated: true, offline: true, loss: lastLoss, vocab: vocab.size, hidden: model.hidden };
+    var p = String(prompt || "АКСИ "), CTX = model.CTX, ids = [], i;
+    for (i = 0; i < p.length; i++) {
+      var c = vocab.stoi[p[i]]; if (c != null) ids.push(c);
+    }
+    while (ids.length < CTX) ids.unshift(0);
+    if (ids.length > CTX) ids = ids.slice(-CTX);
+    var n = opts.n || 120, temp = opts.temperature || 0.6, out = p;
+    for (i = 0; i < n; i++) {
+      var nx = sampleNext(model, ids, temp);
+      out += vocab.itos[nx] || "";
+      ids.push(nx); if (ids.length > CTX) ids.shift();
+    }
+    return { text: out, source: "aksi-net", generated: true, offline: true, loss: lastLoss, vocab: vocab.size, hidden: model.H };
   }
-
   function status() {
     return {
       version: VERSION, ready: !!(model && vocab),
-      vocab: vocab ? vocab.size : 0, hidden: model ? model.hidden : 0,
+      vocab: vocab ? vocab.size : 0, hidden: model ? model.H : 0,
+      embed: model ? model.E : 0, ctx: model ? model.CTX : 0,
       trainedChars: trainedChars, epochsDone: epochsDone, lastLoss: lastLoss,
-      type: "char-RNN (Elman)",
-      weights: model ? model.Wxh.d.length + model.Whh.d.length + model.Why.d.length + model.bh.length + model.by.length : 0
+      type: "embed+MLP next-char",
+      weights: model ? model.embed.length + model.W1.length + model.W2.length + model.b1.length + model.b2.length : 0
     };
   }
-
+  function autoPretrain() {
+    if (load() && epochsDone > 5) return status();
+    init({});
+    return train({ epochs: 25, lr: 0.06, text: seedCorpus().repeat(8) });
+  }
+  function loadPretrained(url) {
+    url = url || "/aksi-net-weights.json";
+    return fetch(url, { cache: "force-cache" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data && deserialize(data)) { save(); return status(); }
+        return autoPretrain();
+      })
+      .catch(function () { return autoPretrain(); });
+  }
   try { load(); } catch (e) {}
-
   G.AKSI_NET = {
     version: VERSION, init: init, train: train, generate: generate,
     complete: function (q, opts) { return generate(String(q || "") + " ", opts || {}); },
-    status: status, save: save, load: load, collectCorpus: collectCorpus
+    status: status, save: save, load: load,
+    autoPretrain: autoPretrain, loadPretrained: loadPretrained,
+    collectCorpus: collectCorpus, serialize: serialize, deserialize: deserialize
   };
 })(typeof window !== "undefined" ? window : globalThis);
