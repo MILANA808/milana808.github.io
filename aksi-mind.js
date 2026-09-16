@@ -1,65 +1,216 @@
 /**
- * AKSI Mind v1.2 — leaf reasoner (NO calls to AKSI API / Brain)
- * Layers: Crystal → Neuro → KB only
+ * AKSI Mind v1 — conscious answer pipeline
+ * Personal Net → Internet (Wikipedia) → WebLLM (optional, timeout) → never empty
  * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.2.0-mind-leaf";
-  var KB = [
-    { k: ["кто ты", "who are you", "привет", "hello"], a: "Я АКСИ — локальный Decision Integrity runtime. Offline: ответ · Gate · seal. Контакт: aksilove@internet.ru" },
-    { k: ["формул", "formula"], a: "AKSI = (A × I × S) × (1 + 0.4√n)\nA — agency · I — integrity · S — structure · n — sealed history" },
-    { k: ["контур", "π", "pi", "пи"], a: "π-Contour: запрос → SHA-256 → θ ∈ [0, 2π) → sin/cos → FNV seal. Тот же текст → тот же θ." },
-    { k: ["crystal", "кристал", "памят", "memory", "hrr"], a: "Crystal: Neuro + RAG IndexedDB + HRR. «запомни: факт» вписывает след." },
-    { k: ["swarm", "p2p"], a: "Swarm: WebRTC DataChannel, manual SDP, без своего signaling-сервера." },
-    { k: ["reality", "реальн"], a: "Reality Layer: opt-in наблюдения → RealityEvent (observe-only). /reality/" },
-    { k: ["gate", "гейт", "eqs"], a: "Gate τ ≈ 0.55. EQS — инженерный score целостности ответа." },
-    { k: ["vault", "шифр", "crypto"], a: "Vault / PiFractal: локальный AES-GCM. Данные по умолчанию не уходят в облако." },
-    { k: ["offline", "автоном", "без сети", "sovereign"], a: "Service Worker кэширует shell. Contour/Sovereign работают offline после установки SW." },
-    { k: ["как пользоваться", "с чего начать", "help", "помощ"], a: "1) Contour → Decision\n2) Sovereign → Mind / Crystal / Swarm\n3) Reality — opt-in сенсоры\nWebLLM — опция (Qwen). Основной путь — Brain RU offline." },
-    { k: ["статус", "status", "что умеешь"], a: "Умею: decide/think, π-seal, Crystal, Swarm, Reality, offline SW.\nНе умею: всезнание; критические решения — за человеком." },
-    { k: ["brain", "браин", "мозг"], a: "Brain RU — маршрутизатор: Mind → Crystal → Neuro → (WebLLM только если ответ по-русски) → KB." }
-  ];
-  function kbAnswer(q) {
-    var s = String(q || "").toLowerCase();
-    for (var i = 0; i < KB.length; i++) {
-      for (var j = 0; j < KB[i].k.length; j++) {
-        if (s.indexOf(KB[i].k[j]) !== -1) return KB[i].a;
-      }
-    }
-    return null;
+  var VER = "1.0.0";
+
+  function looksFactual(q) {
+    q = String(q || "").toLowerCase();
+    return /^(что|кто|где|когда|как|почему|зачем|сколько|какой|какая|какие|whose|what|who|where|when|how|why)\b/i.test(q) ||
+      /что такое|кто такой|расскажи|объясни|исследуй|найди|новост|today|сейчас/i.test(q);
   }
-  async function reason(query, opts) {
-    opts = opts || {};
-    query = String(query || "").trim();
-    if (!query) return { ok: false, answer: "", source: "empty" };
-    var layers = [];
-    var answer = null;
-    var source = "mind";
-    if (G.AKSI_CRYSTAL && typeof G.AKSI_CRYSTAL.associate === "function" && opts.crystal !== false) {
+
+  function needsInternet(q) {
+    q = String(q || "").toLowerCase();
+    return looksFactual(q) || /вики|wikipedia|факт|определен|столиц|президент|год |в \d{4}/i.test(q);
+  }
+
+  async function research(topic) {
+    if (G.AKSI_BOT && G.AKSI_BOT.research) {
+      return G.AKSI_BOT.research(topic);
+    }
+    topic = String(topic || "").trim().replace(/^(исследуй|изучи|найди|research)\s*[:：]?\s*/i, "");
+    var lang = /[а-яё]/i.test(topic) ? "ru" : "en";
+    var api = "https://" + lang + ".wikipedia.org/w/api.php?action=opensearch&search=" +
+      encodeURIComponent(topic) + "&limit=4&namespace=0&format=json&origin=*";
+    var a = await fetch(api, { cache: "no-store" }).then(function (r) { return r.json(); });
+    var titles = a[1] || [], urls = a[3] || [], sources = [];
+    for (var i = 0; i < Math.min(titles.length, 3); i++) {
       try {
-        var cr = await G.AKSI_CRYSTAL.associate(query, { k: 4 });
-        if (cr && cr.associations && cr.associations.length) {
-          layers.push({ layer: "crystal", n: cr.associations.length });
-          if (cr.associations[0].score >= 1) { answer = cr.associations[0].text; source = "crystal"; }
+        var p = await fetch(
+          "https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(titles[i]),
+          { cache: "no-store" }
+        ).then(function (r) { return r.json(); });
+        if (p && (p.extract || p.description))
+          sources.push({ title: p.title || titles[i], url: urls[i], text: p.extract || p.description });
+      } catch (e) {}
+    }
+    if (!sources.length && lang === "ru") {
+      try {
+        var en = await fetch(
+          "https://en.wikipedia.org/w/api.php?action=opensearch&search=" + encodeURIComponent(topic) + "&limit=3&format=json&origin=*"
+        ).then(function (r) { return r.json(); });
+        var t2 = en[1] || [], u2 = en[3] || [];
+        for (var j = 0; j < Math.min(t2.length, 2); j++) {
+          var p2 = await fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(t2[j]), { cache: "no-store" }).then(function (r) { return r.json(); });
+          if (p2 && p2.extract) sources.push({ title: p2.title, url: u2[j], text: p2.extract });
         }
       } catch (e) {}
     }
-    if (!answer && G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") {
-      try {
-        var n = await Promise.resolve(G.AKSI_NEURO.think(query));
-        if (n && (n.text || n.answer)) { answer = n.text || n.answer; source = "neuro"; layers.push({ layer: "neuro", score: n.score }); }
-      } catch (e) {}
-    }
-    if (!answer) {
-      var kb = kbAnswer(query);
-      if (kb) { answer = kb; source = "mind-kb"; layers.push({ layer: "kb" }); }
-    }
-    if (!answer) {
-      answer = "АКСИ Mind v" + VER + ".\nСпросите: кто ты, формула, контур, crystal, swarm, reality, как пользоваться.\nИли «запомни: …»\nКонтакт: aksilove@internet.ru";
-      source = "mind-fallback";
-    }
-    return { ok: true, answer: answer, text: answer, source: source, layers: layers, version: VER, scores: { aksi: 0.76, eqs: 76, phi: 0.6, qcli: 0.55 }, gate: { ok: true, reason: "mind-pass" }, seal: { kind: "mind", v: VER, t: Date.now() } };
+    var lines = [];
+    sources.forEach(function (s, i) {
+      lines.push((i + 1) + ". " + s.title + " — " + String(s.text || "").slice(0, 280));
+      if (s.url) lines.push("   " + s.url);
+    });
+    return { text: lines.join("\n"), sources: sources, topic: topic };
   }
-  G.AKSI_MIND = { version: VER, reason: reason, think: reason, decide: reason, kb: KB };
+
+  function personal(q) {
+    if (!G.AKSI_PERSONAL) return null;
+    try {
+      if (G.AKSI_PERSONAL.ensure) G.AKSI_PERSONAL.ensure();
+      var r = G.AKSI_PERSONAL.ask(q);
+      if (!r || !r.text || r.low) return null;
+      if ((r.confidence || 0) < 0.18) return null;
+      return r;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function withTimeout(promise, ms, label) {
+    return new Promise(function (resolve) {
+      var done = false;
+      var t = setTimeout(function () {
+        if (done) return;
+        done = true;
+        resolve({ text: null, error: "timeout " + (label || ""), source: "timeout" });
+      }, ms);
+      Promise.resolve(promise).then(function (v) {
+        if (done) return;
+        done = true;
+        clearTimeout(t);
+        resolve(v);
+      }).catch(function (e) {
+        if (done) return;
+        done = true;
+        clearTimeout(t);
+        resolve({ text: null, error: String(e && e.message || e), source: "error" });
+      });
+    });
+  }
+
+  async function llm(q, context) {
+    if (!G.AKSI_WEBLLM || !G.AKSI_WEBLLM.ready || !G.AKSI_WEBLLM.ready()) {
+      return null;
+    }
+    var system =
+      "Ты АКСИ — спокойный русскоязычный помощник. Отвечай только по-русски, ясно, по делу, полными предложениями. " +
+      "Не выдумывай факты. Если дан контекст из источников — опирайся на него. Если не знаешь — скажи прямо.";
+    var prompt = q;
+    if (context) {
+      prompt = "Контекст из открытых источников:\n" + String(context).slice(0, 1800) + "\n\nВопрос пользователя: " + q + "\n\nКраткий связный ответ на русском:";
+    }
+    var r = await withTimeout(
+      G.AKSI_WEBLLM.complete(prompt, { system: system, max_tokens: 360, temperature: 0.35 }),
+      55000,
+      "webllm"
+    );
+    if (r && r.text && String(r.text).trim().length > 8) {
+      return {
+        text: String(r.text).trim(),
+        source: r.source || "webllm",
+        model: r.model,
+        backend: r.backend
+      };
+    }
+    return null;
+  }
+
+  function compose(q, parts) {
+    if (parts.llm && parts.llm.text) {
+      var meta = "большая LLM";
+      if (parts.research && parts.research.sources && parts.research.sources.length)
+        meta += " + интернет (" + parts.research.sources.length + " ист.)";
+      return { text: parts.llm.text, source: "mind-llm", meta: meta, parts: parts };
+    }
+    if (parts.personal && parts.personal.text && parts.research && parts.research.sources && parts.research.sources.length) {
+      var body =
+        parts.personal.text +
+        "\n\n— Из интернета (Wikipedia) —\n" +
+        parts.research.text +
+        "\n\nЭто выдержки из открытых источников; проверяйте важное.";
+      return {
+        text: body,
+        source: "mind-hybrid",
+        meta: "личная сеть + интернет",
+        parts: parts
+      };
+    }
+    if (parts.research && parts.research.sources && parts.research.sources.length) {
+      return {
+        text:
+          "По открытым источникам по запросу «" + (parts.research.topic || q) + "»:\n\n" +
+          parts.research.text +
+          "\n\nЭто не окончательная истина — сверяйте важное.",
+        source: "mind-web",
+        meta: "интернет · " + parts.research.sources.length + " источников",
+        parts: parts
+      };
+    }
+    if (parts.personal && parts.personal.text) {
+      return {
+        text: parts.personal.text,
+        source: "mind-personal",
+        meta: "личная нейросеть" +
+          (parts.personal.confidence != null
+            ? " · " + Math.round(parts.personal.confidence * 100) + "%"
+            : ""),
+        parts: parts
+      };
+    }
+    return {
+      text:
+        "Пока не собрала уверенный ответ.\n" +
+        "• Уточните вопрос\n" +
+        "• Или: исследуй: тема — принудительный поиск\n" +
+        "• Или включите большую LLM (Chrome/Edge)\n" +
+        "Контакт: aksilove@internet.ru",
+      source: "mind-empty",
+      meta: "нет данных",
+      parts: parts
+    };
+  }
+
+  async function think(q, opts) {
+    opts = opts || {};
+    q = String(q || "").trim();
+    if (!q) return { text: "Напишите вопрос.", source: "empty", meta: "" };
+
+    if (/^(исследуй|изучи|research)\s*[:：]?\s*/i.test(q)) {
+      q = q.replace(/^(исследуй|изучи|research)\s*[:：]?\s*/i, "").trim() || q;
+      opts.forceWeb = true;
+    }
+
+    var parts = { personal: null, research: null, llm: null };
+    parts.personal = personal(q);
+
+    var doWeb = opts.forceWeb || needsInternet(q) || !parts.personal || (parts.personal.confidence || 0) < 0.45;
+    if (doWeb) {
+      try {
+        parts.research = await withTimeout(research(q), 12000, "wiki");
+        if (parts.research && parts.research.error) parts.research = { sources: [], text: "", topic: q };
+      } catch (e) {
+        parts.research = { sources: [], text: "", topic: q };
+      }
+    }
+
+    if (opts.useLlm || (G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready())) {
+      var ctx = parts.research && parts.research.text ? parts.research.text : "";
+      parts.llm = await llm(q, ctx);
+    }
+
+    return compose(q, parts);
+  }
+
+  G.AKSI_MIND = {
+    version: VER,
+    think: think,
+    ask: think,
+    research: research,
+    needsInternet: needsInternet
+  };
 })(typeof window !== "undefined" ? window : globalThis);
