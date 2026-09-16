@@ -1,0 +1,177 @@
+/**
+ * AKSI Motion System v1
+ * Restrained · meaningful · accessible
+ * Use: <link rel="stylesheet" href="/aksi-motion.css">
+ */
+
+:root {
+  /* Duration scale */
+  --m-instant: 90ms;
+  --m-fast: 160ms;
+  --m-base: 240ms;
+  --m-slow: 420ms;
+  --m-enter: 640ms;
+  --m-loop: 900ms;
+
+  /* Easing */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-snap: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* Motion distances */
+  --rise: 16px;
+  --rise-sm: 8px;
+  --lift: -2px;
+
+  /* Stagger */
+  --stagger: 70ms;
+}
+
+/* ---------- Page load choreography ---------- */
+.m-page {
+  opacity: 0;
+  animation: m-page-in var(--m-enter) var(--ease-out) forwards;
+}
+@keyframes m-page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.m-load > * {
+  opacity: 0;
+  transform: translateY(var(--rise));
+  animation: m-rise var(--m-enter) var(--ease-out) forwards;
+}
+.m-load > *:nth-child(1) { animation-delay: calc(var(--stagger) * 0); }
+.m-load > *:nth-child(2) { animation-delay: calc(var(--stagger) * 1); }
+.m-load > *:nth-child(3) { animation-delay: calc(var(--stagger) * 2); }
+.m-load > *:nth-child(4) { animation-delay: calc(var(--stagger) * 3); }
+.m-load > *:nth-child(5) { animation-delay: calc(var(--stagger) * 4); }
+.m-load > *:nth-child(6) { animation-delay: calc(var(--stagger) * 5); }
+
+@keyframes m-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Scroll reveal ---------- */
+.m-reveal {
+  opacity: 0;
+  transform: translateY(var(--rise));
+  transition:
+    opacity var(--m-enter) var(--ease-out),
+    transform var(--m-enter) var(--ease-out);
+  transition-delay: var(--m-delay, 0ms);
+}
+.m-reveal.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.m-reveal-left {
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity var(--m-enter) var(--ease-out), transform var(--m-enter) var(--ease-out);
+}
+.m-reveal-left.is-in { opacity: 1; transform: none; }
+
+/* Stagger children when parent is in */
+.m-stagger.is-in > * {
+  opacity: 0;
+  transform: translateY(var(--rise-sm));
+  animation: m-rise var(--m-slow) var(--ease-out) forwards;
+}
+.m-stagger.is-in > *:nth-child(1) { animation-delay: calc(var(--stagger) * 0); }
+.m-stagger.is-in > *:nth-child(2) { animation-delay: calc(var(--stagger) * 1); }
+.m-stagger.is-in > *:nth-child(3) { animation-delay: calc(var(--stagger) * 2); }
+.m-stagger.is-in > *:nth-child(4) { animation-delay: calc(var(--stagger) * 3); }
+
+/* ---------- Hover / focus (micro) ---------- */
+.m-lift {
+  transition:
+    transform var(--m-base) var(--ease-out),
+    box-shadow var(--m-base) var(--ease-out),
+    border-color var(--m-fast) var(--ease-soft),
+    background var(--m-fast) var(--ease-soft),
+    color var(--m-fast) var(--ease-soft);
+}
+.m-lift:hover {
+  transform: translateY(var(--lift));
+}
+.m-lift:active {
+  transform: translateY(0);
+  transition-duration: var(--m-instant);
+}
+
+.m-fade-link {
+  transition: color var(--m-fast) var(--ease-soft);
+}
+.m-fade-link:hover { color: var(--ink, #f3f1ec); }
+
+/* Focus ring — accessible, not decorative */
+.m-focus:focus-visible {
+  outline: 2px solid var(--accent, #8b7cf6);
+  outline-offset: 3px;
+}
+
+/* ---------- Text transitions ---------- */
+.m-text {
+  transition:
+    opacity var(--m-base) var(--ease-soft),
+    filter var(--m-base) var(--ease-soft),
+    letter-spacing var(--m-slow) var(--ease-out),
+    color var(--m-base) var(--ease-soft);
+}
+.m-text.is-cipher {
+  letter-spacing: 0.1em;
+  filter: blur(0.35px);
+}
+.m-text.is-hide {
+  opacity: 0;
+}
+
+/* ---------- Parallax (subtle, opt-in) ---------- */
+.m-parallax {
+  will-change: transform;
+  transition: transform var(--m-slow) var(--ease-out);
+}
+
+/* ---------- Page transitions (View Transitions API) ---------- */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--m-slow);
+    animation-timing-function: var(--ease-out);
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --m-instant: 0ms;
+    --m-fast: 0ms;
+    --m-base: 0ms;
+    --m-slow: 0ms;
+    --m-enter: 0ms;
+    --m-loop: 0ms;
+    --stagger: 0ms;
+    --rise: 0px;
+    --rise-sm: 0px;
+    --lift: 0px;
+  }
+  .m-page,
+  .m-load > *,
+  .m-reveal,
+  .m-reveal-left,
+  .m-stagger.is-in > * {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+@media (pointer: coarse) {
+  .m-parallax { transform: none !important; }
+}
