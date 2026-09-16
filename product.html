@@ -3,149 +3,174 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>AKSI Bond — Evidence-Bound Runtime</title>
-<meta name="description" content="AKSI Bond Protocol: evidence hash → sealed memory → decision receipt. Client-side technology.">
-<meta name="theme-color" content="#06060a">
+<title>АКСИ — локальный помощник</title>
+<meta name="description" content="АКСИ: спросить, исследовать с источниками, запомнить на устройстве. Без обязательных API-ключей.">
+<meta name="theme-color" content="#0c0c10">
 <link rel="canonical" href="https://milana808.github.io/product.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta property="og:title" content="AKSI Bond Protocol">
-<meta property="og:description" content="Evidence-bound sealed memory. SHA-256 receipts. Offline verify.">
 <style>
-:root{--bg:#06060a;--ink:#f2f0eb;--muted:#9b98a6;--accent:#8b7cf6;--green:#5ee9a8;--red:#f87171;--line:rgba(255,255,255,.08);--card:#0b0b11}
+:root{--bg:#0c0c10;--card:#14141a;--ink:#f0efe9;--muted:#9a97a3;--line:#2a2a33;--acc:#7c6cf0;--ok:#3ecf8e}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:15px/1.5 system-ui,sans-serif;background:radial-gradient(circle at 40% -20%,rgba(139,124,246,.12),#06060a 52%);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.logo{font-weight:800}.logo span{color:var(--accent)}
-header nav{display:flex;flex-wrap:wrap;gap:4px 12px}
-header a{color:var(--muted);text-decoration:none;font-size:13px;min-height:40px;display:inline-flex;align-items:center}
-header a:hover{color:var(--ink)}
-h1{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
-#board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 18px;max-width:920px;margin:0 auto;width:100%}
-@media(max-width:700px){#board{grid-template-columns:1fr 1fr}}
-.metric{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
-.metric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
-.metric b{font-size:13px;font-weight:600}
-.ok{color:var(--green)}.no{color:var(--red)}
-.hint{max-width:920px;margin:0 auto;padding:0 18px 10px;font-size:13px;color:var(--muted);width:100%}
-.chips{display:flex;flex-wrap:wrap;gap:8px;max-width:920px;margin:0 auto;padding:0 18px 10px;width:100%}
-.chips button{font-size:12px;padding:0 14px;min-height:36px;border-radius:999px;border:1px solid var(--line);background:#0f0f16;color:var(--ink);cursor:pointer;font-family:inherit}
-.msgs{flex:1;overflow-y:auto;padding:12px 18px;max-width:920px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:10px;min-height:38vh}
-.msg{max-width:92%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);white-space:pre-wrap;word-break:break-word}
-.msg.user{align-self:flex-end;background:#12121a}
-.msg .meta{font-size:11px;color:var(--muted);margin-top:8px}
-.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;background:#15151f;margin-right:4px}
-.badge.ok{color:var(--green)}.badge.no{color:var(--red)}
-.bar{max-width:920px;width:100%;margin:0 auto;padding:12px 18px 20px;display:flex;gap:8px;border-top:1px solid var(--line)}
-.bar input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#0a0a10;color:var(--ink);font:inherit;font-size:16px}
-.bar input:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(139,124,246,.15)}
-.bar button{min-height:48px;min-width:52px;background:var(--accent);color:#fff;border:0;border-radius:12px;font-weight:700;cursor:pointer;padding:0 16px}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:17px}.logo span{color:var(--acc)}
+header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
+.intro{max-width:720px;margin:0 auto;padding:16px 16px 8px;width:100%}
+.intro h1{font-size:1.25rem;font-weight:700;margin-bottom:6px}
+.intro p{color:var(--muted);font-size:14px}
+.steps{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.step{font-size:12px;padding:6px 10px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+.step.on{border-color:var(--acc);color:var(--ink)}
+.step.done{border-color:var(--ok);color:var(--ok)}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:720px;margin:8px auto;padding:0 16px;width:100%}
+@media(max-width:600px){.board{grid-template-columns:1fr 1fr}}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.metric span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
+.metric b{font-size:13px}.ok{color:var(--ok)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto;padding:8px 16px;width:100%}
+.chips button{font:inherit;font-size:13px;padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.msgs{flex:1;overflow:auto;max-width:720px;width:100%;margin:0 auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:12px;min-height:40vh}
+.msg{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;max-width:95%}
+.msg.user{align-self:flex-end;background:#1a1a24}
+.msg .how{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.msg .how strong{color:var(--ink);font-weight:600}
+.bar{max-width:720px;width:100%;margin:0 auto;padding:12px 16px 20px;display:flex;gap:8px;border-top:1px solid var(--line)}
+.bar input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:var(--ink);font:inherit;font-size:16px}
+.bar button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
 .bar button:disabled{opacity:.5}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">AKSI <span>Bond</span></div>
-  <nav aria-label="Primary">
-    <a href="/seal.html">Seal</a>
-    <a href="/TECHNOLOGY.md">Tech</a>
-    <a href="/infinity.html">Infinity</a>
-    <a href="/bot.html">Bot</a>
-    <a href="/">Home</a>
+  <div class="logo">АКСИ <span>помощник</span></div>
+  <nav>
+    <a href="/seal.html">О продукте</a>
+    <a href="/infinity.html">Поиск</a>
+    <a href="/">Главная</a>
   </nav>
 </header>
-<h1>AKSI Bond Protocol Runtime</h1>
-<div id="board">
-  <div class="metric"><span>Bot</span><b id="m-bot">…</b></div>
-  <div class="metric"><span>Cortex</span><b id="m-cx">…</b></div>
-  <div class="metric"><span>Gate</span><b id="m-gate">…</b></div>
-  <div class="metric"><span>ADIA</span><b id="m-adia">…</b></div>
-  <div class="metric"><span>Bond</span><b id="m-bond">…</b></div>
-  <div class="metric"><span>Organism</span><b id="m-org">…</b></div>
+<div class="intro">
+  <h1>Спросить. Найти источники. Запомнить у себя.</h1>
+  <p>Работает в браузере. Память на вашем устройстве. Без обязательных ключей к облачным API.</p>
+  <div class="steps" id="pipe">
+    <div class="step" data-s="1">1. Запрос</div>
+    <div class="step" data-s="2">2. Поиск / память</div>
+    <div class="step" data-s="3">3. Ответ</div>
+    <div class="step" data-s="4">4. Откуда взялось</div>
+  </div>
 </div>
-<p class="hint">Новая технология: <strong>AKSI Bond</strong> — SHA-256 evidence → root → decision receipt. Проверка offline. Команды: <code>запомни:</code> · <code>исследуй:</code></p>
+<div class="board">
+  <div class="metric"><span>Система</span><b id="m-bot">…</b></div>
+  <div class="metric"><span>Память</span><b id="m-cx">…</b></div>
+  <div class="metric"><span>Проверка</span><b id="m-gate">…</b></div>
+  <div class="metric"><span>Записей</span><b id="m-seed">…</b></div>
+</div>
 <div class="chips">
-  <button type="button" data-q="исследуй: искусственный интеллект">Research + Bond</button>
-  <button type="button" data-q="запомни: Bond связывает evidence и ответ">Научить</button>
-  <button type="button" data-q="статус">Статус</button>
+  <button type="button" data-q="кто ты">Кто ты?</button>
+  <button type="button" data-q="статус">Что работает</button>
+  <button type="button" data-q="запомни: Столица Франции — Париж">Запомнить пример</button>
+  <button type="button" data-q="Столица Франции">Спросить из памяти</button>
+  <button type="button" data-q="исследуй: искусственный интеллект">Найти с источниками</button>
 </div>
 <div class="msgs" id="msgs" role="log" aria-live="polite"></div>
 <div class="bar">
-  <input id="q" type="text" placeholder="исследуй: … · запомни: … · вопрос" enterkeyhint="send" aria-label="Сообщение">
-  <button type="button" id="go">▶</button>
+  <input id="q" type="text" placeholder="Вопрос, или: запомни: … / исследуй: …" enterkeyhint="send" aria-label="Сообщение">
+  <button type="button" id="go">Отправить</button>
 </div>
-<script src="/aksi-fly-brain.js?v=2"></script>
 <script src="/aksi-fly-gate.js?v=2"></script>
 <script src="/aksi-receipt.js?v=2"></script>
 <script src="/aksi-organism.js?v=13"></script>
 <script src="/agent.js?v=4"></script>
 <script src="/aksi-algorithm.js?v=3"></script>
 <script src="/aksi-cortex-kernel.js?v=3"></script>
-<script src="/aksi-bond.js?v=1"></script>
-<script src="/aksi-bot.js?v=6"></script>
+<script src="/aksi-bot.js?v=8"></script>
 <script>
-(function(){
+(function () {
   var B = window.AKSI_BOT;
-  if (!B) { document.getElementById('m-bot').textContent = 'missing'; return; }
-  function set(id, text, on) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = text;
-    el.className = on ? 'ok' : 'no';
+  if (!B) { document.getElementById("m-bot").textContent = "не загрузился"; return; }
+  function pipe(n) {
+    document.querySelectorAll("#pipe .step").forEach(function (el) {
+      var s = +el.getAttribute("data-s");
+      el.classList.remove("on", "done");
+      if (s < n) el.classList.add("done");
+      if (s === n) el.classList.add("on");
+    });
   }
   function paint(s) {
-    set('m-bot', 'v' + (s.version || '?'), true);
-    set('m-cx', (s.cortex ? 'on' : 'off') + ' · ' + (s.cortexDocs || 0), !!s.cortex);
-    set('m-gate', s.flyGate ? 'on' : 'off', !!s.flyGate);
-    set('m-adia', s.adia ? 'on' : (window.AKSI_ALGORITHM ? 'on' : 'off'), !!(s.adia || window.AKSI_ALGORITHM));
-    set('m-bond', window.AKSI_BOND ? 'v' + (AKSI_BOND.version || '1') : 'off', !!window.AKSI_BOND);
-    set('m-org', s.organism ? 'on' : 'off', !!s.organism);
+    document.getElementById("m-bot").textContent = "v" + (s.version || "?");
+    document.getElementById("m-bot").className = "ok";
+    document.getElementById("m-cx").textContent = s.cortex ? "да, " + (s.cortexDocs || 0) : "нет";
+    document.getElementById("m-cx").className = s.cortex ? "ok" : "";
+    document.getElementById("m-gate").textContent = s.flyGate ? "да" : "нет";
+    document.getElementById("m-gate").className = s.flyGate ? "ok" : "";
+    document.getElementById("m-seed").textContent = String(s.seed || 0);
   }
   B.status().then(paint);
-  function add(role, text, meta) {
-    var d = document.createElement('div');
-    d.className = 'msg ' + role;
-    d.textContent = text;
-    if (meta) {
-      var m = document.createElement('div');
-      m.className = 'meta';
-      m.innerHTML = meta;
-      d.appendChild(m);
-    }
-    document.getElementById('msgs').appendChild(d);
-    d.scrollIntoView({ block: 'end' });
+  function howLine(out) {
+    var src = out.source || "—";
+    var map = {
+      research: "Интернет (Wikipedia) + список источников",
+      cortex: "Ваша зашифрованная память на этом устройстве",
+      "self-taught": "Ранее сохранённые факты",
+      teach: "Только что сохранено у вас локально",
+      status: "Служебный отчёт модулей",
+      identity: "Встроенное описание АКСИ",
+      organism: "Локальный решатель Organism",
+      "bot-fallback": "Подсказка по командам (нет готового ответа в памяти)"
+    };
+    var parts = ["Откуда ответ: " + (map[src] || src)];
+    if (out.sources && out.sources.length) parts.push("Источников: " + out.sources.length);
+    if (out.gate && out.gate.decision) parts.push("Проверка: " + out.gate.decision);
+    if (out.cortex || out.cortexId) parts.push("Память Cortex задействована");
+    return parts.join(" · ");
   }
-  add('bot', ['AKSI Bond Protocol v1.0', 'evidence SHA-256 → root → decision receipt', 'Не новая LLM — слой проверяемой связки. исслеудуй: / запомни:'].join('\n'));
+  function add(role, text, how) {
+    var d = document.createElement("div");
+    d.className = "msg " + role;
+    d.textContent = text;
+    if (how) {
+      var h = document.createElement("div");
+      h.className = "how";
+      h.innerHTML = "<strong>Результат для вас:</strong> " + how;
+      d.appendChild(h);
+    }
+    document.getElementById("msgs").appendChild(d);
+    d.scrollIntoView({ block: "end" });
+  }
+  add("bot", "Привет. Я АКСИ — помощник в этом окне.\n\n1) «запомни: …» — сохраню у вас на устройстве\n2) «исследуй: …» — найду и покажу источники\n3) Обычный вопрос — отвечу из памяти, если уже учили", "Нажмите кнопку ниже или напишите свой вопрос");
   async function send() {
-    var q = document.getElementById('q').value.trim();
+    var q = document.getElementById("q").value.trim();
     if (!q) return;
-    document.getElementById('q').value = '';
-    add('user', q);
-    document.getElementById('go').disabled = true;
+    document.getElementById("q").value = "";
+    add("user", q);
+    pipe(1);
+    document.getElementById("go").disabled = true;
+    pipe(2);
     try {
       var out = await B.think(q);
-      if (window.AKSI_BOND && AKSI_BOND.bondFromThink && !out.bond) {
-        try { out.bond = await AKSI_BOND.bondFromThink(q, out); } catch (e) {}
+      // status/who even on older bot if missing handlers — soft fallback
+      if ((!out || out.source === "bot-fallback") && /^(статус|status)$/i.test(q)) {
+        var st = await B.status();
+        out = { text: ["Статус АКСИ:", "· v" + st.version, "· Cortex: " + (st.cortex ? "да (" + (st.cortexDocs||0) + ")" : "нет"), "· Gate: " + (st.flyGate ? "да" : "нет"), "· Записей: " + (st.seed||0)].join("\n"), source: "status" };
       }
-      var meta = '<span class="badge">' + (out.source || '') + '</span>';
-      if (out.gate) meta += '<span class="badge ' + (out.gate.decision === 'ALLOWED' ? 'ok' : 'no') + '">gate ' + out.gate.decision + '</span>';
-      if (out.eqs != null) meta += '<span class="badge">EQS ' + Math.round(Number(out.eqs)) + '</span>';
-      if (out.sources) meta += ' · ' + out.sources.length + ' sources';
-      if (out.bond && out.bond.bond_id) meta += ' <span class="badge ok">bond ' + out.bond.bond_id.slice(0, 10) + '</span>';
-      if (out.bond && out.bond.evidence_root) meta += ' <span class="badge">root ' + String(out.bond.evidence_root).slice(0, 8) + '</span>';
-      add('bot', out.text || '—', meta);
+      if ((!out || out.source === "bot-fallback") && /^кто\s*ты/i.test(q)) {
+        out = { text: "Я АКСИ — локальный помощник в браузере.\nМогу искать с источниками и запоминать на вашем устройстве.", source: "identity" };
+      }
+      pipe(3);
+      add("bot", out.text || "—", howLine(out));
+      pipe(4);
     } catch (e) {
-      add('bot', 'Ошибка: ' + e.message);
+      add("bot", "Ошибка: " + e.message, "Сбой — попробуйте ещё раз");
     }
-    document.getElementById('go').disabled = false;
-    document.getElementById('q').focus();
+    document.getElementById("go").disabled = false;
+    document.getElementById("q").focus();
     B.status().then(paint);
   }
-  document.getElementById('go').onclick = send;
-  document.getElementById('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') send(); });
-  document.querySelectorAll('.chips button').forEach(function (b) {
+  document.getElementById("go").onclick = send;
+  document.getElementById("q").addEventListener("keydown", function (e) { if (e.key === "Enter") send(); });
+  document.querySelectorAll(".chips button").forEach(function (b) {
     b.onclick = function () {
-      document.getElementById('q').value = b.getAttribute('data-q');
+      document.getElementById("q").value = b.getAttribute("data-q");
       send();
     };
   });
