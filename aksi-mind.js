@@ -1,11 +1,10 @@
 /**
- * AKSI Mind v1.1 — conscious answer pipeline
- * Personal Net → Internet (Wikipedia) → WebLLM (optional, timeout) → never empty
+ * AKSI Mind v1.2 — ARIN Resonance first → Personal → Wikipedia → LLM
  * Attested 2026-09-17 · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.1.0";
+  var VER = "1.2.0";
   function looksFactual(q) {
     q = String(q || "").toLowerCase();
     return /^(что|кто|где|когда|как|почему|зачем|сколько|какой|какая|какие|what|who|where|when|how|why)\b/i.test(q) ||
@@ -38,6 +37,13 @@
     return { text: lines.join("\n"), sources: sources, topic: topic };
   }
   function personal(q) {
+    try {
+      if (G.AKSI_RESONANCE) {
+        if (G.AKSI_RESONANCE.ensure) G.AKSI_RESONANCE.ensure();
+        var r0 = G.AKSI_RESONANCE.ask(q);
+        if (r0 && r0.text && !r0.low && (r0.confidence || 0) >= 0.30) return r0;
+      }
+    } catch (e) {}
     if (!G.AKSI_PERSONAL) return null;
     try {
       if (G.AKSI_PERSONAL.ensure) G.AKSI_PERSONAL.ensure();
@@ -64,44 +70,41 @@
   }
   async function llm(q, context) {
     if (!G.AKSI_WEBLLM || !G.AKSI_WEBLLM.ready || !G.AKSI_WEBLLM.ready()) return null;
-    var system = "Ты АКСИ — спокойный русскоязычный помощник. Отвечай только по-русски, ясно, по делу. Не выдумывай факты. Если дан контекст — опирайся на него.";
-    var prompt = context
-      ? ("Контекст:\n" + String(context).slice(0, 1800) + "\n\nВопрос: " + q + "\n\nКраткий ответ на русском:")
-      : q;
+    var system = "Ты АКСИ. Отвечай по-русски, ясно. Не выдумывай факты.";
+    var prompt = context ? ("Контекст:\n" + String(context).slice(0, 1800) + "\n\nВопрос: " + q) : q;
     var r = await withTimeout(G.AKSI_WEBLLM.complete(prompt, { system: system, max_tokens: 360, temperature: 0.35 }), 55000, "webllm");
     if (r && r.text && String(r.text).trim().length > 8)
-      return { text: String(r.text).trim(), source: r.source || "webllm", model: r.model, backend: r.backend };
+      return { text: String(r.text).trim(), source: r.source || "webllm", model: r.model };
     return null;
   }
   function compose(q, parts) {
     if (parts.llm && parts.llm.text) {
       var meta = "большая LLM";
-      if (parts.research && parts.research.sources && parts.research.sources.length)
-        meta += " + интернет (" + parts.research.sources.length + " ист.)";
+      if (parts.research && parts.research.sources && parts.research.sources.length) meta += " + интернет";
       return { text: parts.llm.text, source: "mind-llm", meta: meta, parts: parts };
     }
     if (parts.personal && parts.personal.text && parts.research && parts.research.sources && parts.research.sources.length) {
       return {
-        text: parts.personal.text + "\n\n— Из интернета (Wikipedia) —\n" + parts.research.text + "\n\nЭто выдержки из открытых источников; проверяйте важное.",
-        source: "mind-hybrid", meta: "личная сеть + интернет", parts: parts
+        text: parts.personal.text + "\n\n— Из интернета —\n" + parts.research.text,
+        source: "mind-hybrid", meta: (parts.personal.architecture || "сеть") + " + интернет", parts: parts
       };
     }
     if (parts.research && parts.research.sources && parts.research.sources.length) {
       return {
-        text: "По открытым источникам по запросу «" + (parts.research.topic || q) + "»:\n\n" + parts.research.text + "\n\nЭто не окончательная истина — сверяйте важное.",
-        source: "mind-web", meta: "интернет · " + parts.research.sources.length + " источников", parts: parts
+        text: "По источникам «" + (parts.research.topic || q) + "»:\n\n" + parts.research.text,
+        source: "mind-web", meta: "интернет · " + parts.research.sources.length, parts: parts
       };
     }
     if (parts.personal && parts.personal.text) {
       return {
         text: parts.personal.text,
         source: "mind-personal",
-        meta: "личная нейросеть" + (parts.personal.confidence != null ? " · " + Math.round(parts.personal.confidence * 100) + "%" : ""),
+        meta: (parts.personal.architecture || "сеть") + (parts.personal.confidence != null ? " · " + Math.round(parts.personal.confidence * 100) + "%" : ""),
         parts: parts
       };
     }
     return {
-      text: "Пока не собрала уверенный ответ.\n• Уточните вопрос\n• Или: исследуй: тема\n• Контакт: aksilove@internet.ru",
+      text: "Нет уверенного ответа.\n• Уточните вопрос\n• исследуй: тема\n• aksilove@internet.ru",
       source: "mind-empty", meta: "нет данных", parts: parts
     };
   }
@@ -123,8 +126,7 @@
       } catch (e) { parts.research = { sources: [], text: "", topic: q }; }
     }
     if (opts.useLlm || (G.AKSI_WEBLLM && G.AKSI_WEBLLM.ready && G.AKSI_WEBLLM.ready())) {
-      var ctx = parts.research && parts.research.text ? parts.research.text : "";
-      parts.llm = await llm(q, ctx);
+      parts.llm = await llm(q, parts.research && parts.research.text ? parts.research.text : "");
     }
     return compose(q, parts);
   }
