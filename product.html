@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ — нейросеть отвечает</title>
-<meta name="description" content="АКСИ: ответы нейросети в браузере (WebLLM Qwen).">
+<title>АКСИ — личная нейросеть</title>
+<meta name="description" content="Личная обученная нейросеть АКСИ + опционально WebLLM.">
 <meta name="theme-color" content="#0c0c10">
 <link rel="canonical" href="https://milana808.github.io/product.html">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -23,14 +23,12 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 .bar-top{max-width:720px;margin:0 auto;padding:0 16px 12px;width:100%;display:flex;flex-wrap:wrap;gap:8px}
 .bar-top button{font:inherit;font-size:13px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 .bar-top button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
-.bar-top button:disabled{opacity:.55}
 .chips{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto;padding:0 16px 10px;width:100%}
 .chips button{font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
 .msgs{flex:1;overflow:auto;max-width:720px;width:100%;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px;min-height:40vh}
 .msg{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word;max-width:95%}
 .msg.user{align-self:flex-end;background:#1a1a24}
 .msg .meta{margin-top:8px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
-.msg.typing{color:var(--muted);font-style:italic}
 .composer{max-width:720px;width:100%;margin:0 auto;padding:12px 16px 20px;display:flex;gap:8px;border-top:1px solid var(--line)}
 .composer input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101014;color:var(--ink);font:inherit;font-size:16px}
 .composer button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:700;cursor:pointer}
@@ -39,44 +37,47 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
 </head>
 <body>
 <header>
-  <div class="logo">АКСИ <span>нейросеть</span></div>
-  <nav>
-    <a href="/seal.html">О продукте</a>
-    <a href="/">Главная</a>
-  </nav>
+  <div class="logo">АКСИ <span>личная сеть</span></div>
+  <nav><a href="/seal.html">О продукте</a><a href="/">Главная</a></nav>
 </header>
 <div class="banner">
-  <h1>Спросите — ответит нейросеть</h1>
-  <p>Ответы генерирует локальная LLM (WebLLM / Qwen) в браузере. Первый раз модель скачается, дальше работает у вас.</p>
+  <h1>Твоя личная нейросеть АКСИ</h1>
+  <p>Уже обучена на знаниях проекта. Отвечает сразу, без скачивания. Большую LLM можно включить отдельно.</p>
 </div>
-<div class="status" id="st">Статус: модель не загружена</div>
+<div class="status" id="st">Статус: …</div>
 <div class="bar-top">
-  <button type="button" class="primary" id="btnLoad">Включить нейросеть</button>
-  <button type="button" id="btnAsk">Спросить пример</button>
+  <button type="button" class="primary" id="btnAsk">Спросить «Что такое АКСИ?»</button>
+  <button type="button" id="btnLoad">Включить большую LLM</button>
 </div>
 <div class="chips">
-  <button type="button" data-q="Объясни простыми словами, что такое искусственный интеллект">Что такое ИИ?</button>
-  <button type="button" data-q="Напиши короткий дружеский совет, как не выгорать на работе">Совет</button>
-  <button type="button" data-q="Придумай 3 идеи для полезного offline-приложения">Идеи</button>
+  <button type="button" data-q="Что такое АКСИ?">Что такое АКСИ?</button>
+  <button type="button" data-q="Как запомнить факт?">Как запомнить?</button>
+  <button type="button" data-q="Где хранится память?">Память</button>
+  <button type="button" data-q="Как связаться?">Контакт</button>
+  <button type="button" data-q="Что такое WebLLM?">WebLLM</button>
+  <button type="button" data-q="Зачем локальный ИИ?">Локальный ИИ</button>
 </div>
 <div class="msgs" id="msgs" role="log" aria-live="polite"></div>
 <div class="composer">
-  <input id="q" type="text" placeholder="Напишите вопрос — получите ответ нейросети" enterkeyhint="send" aria-label="Вопрос">
+  <input id="q" type="text" placeholder="Вопрос к личной нейросети…" enterkeyhint="send">
   <button type="button" id="go">Спросить</button>
 </div>
+<script src="/aksi-personal-net.js?v=1"></script>
 <script src="/aksi-webllm.js?v=3"></script>
-<script src="/aksi-neuro.js?v=10"></script>
 <script>
 (function () {
   var busy = false;
   function setStatus(t) { document.getElementById("st").innerHTML = t; }
-  function paintStatus() {
-    if (!window.AKSI_WEBLLM) { setStatus("Статус: модуль WebLLM не найден"); return; }
-    var s = AKSI_WEBLLM.status();
-    if (s.loading) setStatus("Статус: загрузка нейросети… <b>" + (s.progress || 0) + "%</b> — " + (s.message || ""));
-    else if (s.ready) setStatus("Статус: <b>нейросеть готова</b> · " + (s.model || "") + " · " + (s.backend || ""));
-    else if (s.error) setStatus("Статус: ошибка — " + s.error);
-    else setStatus("Статус: нажмите «Включить нейросеть» (один раз, несколько минут)");
+  function paint() {
+    var p = window.AKSI_PERSONAL && AKSI_PERSONAL.status ? AKSI_PERSONAL.status() : null;
+    var w = window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : null;
+    var line = "Личная сеть: ";
+    if (p && p.ready) line += "<b>обучена</b> · " + p.classes + " знаний · loss " + (p.lastLoss != null ? p.lastLoss.toFixed(2) : "—");
+    else line += "загрузка…";
+    if (w && w.ready) line += " · Большая LLM: <b>on</b>";
+    else if (w && w.loading) line += " · LLM: " + (w.progress || 0) + "%";
+    else line += " · Большая LLM: выкл";
+    setStatus(line);
   }
   function add(role, text, meta) {
     var d = document.createElement("div");
@@ -86,101 +87,74 @@ header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px
     document.getElementById("msgs").appendChild(d);
     d.scrollIntoView({ block: "end" });
   }
-  function addTyping() {
-    var d = document.createElement("div");
-    d.className = "msg typing"; d.id = "typing"; d.textContent = "Нейросеть думает…";
-    document.getElementById("msgs").appendChild(d);
-    d.scrollIntoView({ block: "end" });
-  }
-  function clearTyping() { var t = document.getElementById("typing"); if (t) t.remove(); }
+  if (window.AKSI_PERSONAL && AKSI_PERSONAL.ensure) AKSI_PERSONAL.ensure();
+  paint();
   add("bot",
-    "Я отвечаю как обычная нейросеть: генерирую текст по вашему вопросу.\n\n1) Нажмите «Включить нейросеть»\n2) Дождитесь статуса «готова»\n3) Задайте вопрос\n\nЕсли спросить раньше — модель загрузится сама и потом ответит.",
-    "WebLLM · локальная LLM"
+    "Это твоя личная нейросеть АКСИ.\nОбучена на знаниях проекта (MLP + backprop).\nСпрашивай сразу — без ожидания загрузки большой модели.\n\nДля свободных длинных ответов на любые темы — «Включить большую LLM».",
+    "Personal Net · offline"
   );
-  window.addEventListener("aksi-webllm-progress", paintStatus);
-  paintStatus();
-  function ensureModel() {
-    if (!window.AKSI_WEBLLM) return Promise.reject(new Error("WebLLM не загружен"));
-    if (AKSI_WEBLLM.ready()) return Promise.resolve(true);
-    var p = AKSI_WEBLLM.autoLoad ? AKSI_WEBLLM.autoLoad() : AKSI_WEBLLM.load();
-    return Promise.resolve(p).then(function () {
-      paintStatus();
-      if (!AKSI_WEBLLM.ready()) throw new Error("Модель не стала ready");
-      return true;
-    });
-  }
-  document.getElementById("btnLoad").onclick = function () {
-    var btn = document.getElementById("btnLoad");
-    btn.disabled = true;
-    add("bot", "Включаю нейросеть (скачивание в браузер). Подождите…", "загрузка");
-    ensureModel().then(function () {
-      btn.disabled = false;
-      add("bot", "Нейросеть готова. Задайте любой вопрос.", "модель on");
-    }).catch(function (e) {
-      btn.disabled = false;
-      add("bot", "Не удалось загрузить: " + (e.message || e) + "\nНужны Chrome/Edge, лучше с WebGPU.", "ошибка");
-      paintStatus();
-    });
-  };
-  async function answerWithNN(q) {
+  async function answer(q) {
+    // 1) big LLM if ready
     if (window.AKSI_WEBLLM && AKSI_WEBLLM.ready()) {
       var r = await AKSI_WEBLLM.complete(q, {
-        system: "Ты полезный русскоязычный ассистент АКСИ. Отвечай только по-русски, ясно, полными предложениями, по делу.",
-        max_tokens: 400,
-        temperature: 0.5
+        system: "Ты АКСИ. Отвечай по-русски, ясно, по делу.",
+        max_tokens: 350, temperature: 0.5
       });
-      if (r && r.text) return { text: r.text, meta: "нейросеть · " + (r.model || "WebLLM") + " · " + (r.backend || "local") };
-      if (r && r.error) throw new Error(r.error);
+      if (r && r.text) return { text: r.text, meta: "большая LLM · " + (r.model || "WebLLM") };
     }
-    if (window.AKSI_NEURO && AKSI_NEURO.think) {
-      var n = AKSI_NEURO.think(q);
-      if (n && n.text && n.text.length > 20) return { text: n.text, meta: "Neuro (слабее) · offline" };
+    // 2) personal net
+    if (window.AKSI_PERSONAL) {
+      AKSI_PERSONAL.ensure();
+      var p = AKSI_PERSONAL.ask(q);
+      if (p && p.text) {
+        var conf = p.confidence != null ? " · conf " + (p.confidence * 100).toFixed(0) + "%" : "";
+        return { text: p.text, meta: "личная нейросеть АКСИ" + conf };
+      }
     }
-    throw new Error("Нет готовой модели. Нажмите «Включить нейросеть».");
+    return { text: "Нет ответа. Попробуйте другой вопрос про АКСИ.", meta: "пусто" };
   }
-  async function sendQuestion(q) {
+  async function send(q) {
     q = String(q || "").trim();
     if (!q || busy) return;
     busy = true;
     document.getElementById("go").disabled = true;
     add("user", q);
     try {
-      if (!window.AKSI_WEBLLM || !AKSI_WEBLLM.ready()) {
-        add("bot", "Модель не включена — загружаю, затем отвечу…", "автозагрузка");
-        await ensureModel();
-        add("bot", "Модель загружена. Генерирую ответ…", "ok");
-      }
-      addTyping();
-      var out = await answerWithNN(q);
-      clearTyping();
+      var out = await answer(q);
       add("bot", out.text, out.meta);
     } catch (e) {
-      clearTyping();
-      add("bot", "Ошибка: " + (e.message || e), "сбой");
+      add("bot", "Ошибка: " + e.message, "сбой");
     }
     busy = false;
     document.getElementById("go").disabled = false;
     document.getElementById("q").focus();
-    paintStatus();
+    paint();
   }
   document.getElementById("go").onclick = function () {
-    var q = document.getElementById("q").value;
-    document.getElementById("q").value = "";
-    sendQuestion(q);
+    var q = document.getElementById("q").value; document.getElementById("q").value = ""; send(q);
   };
   document.getElementById("q").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      var q = document.getElementById("q").value;
-      document.getElementById("q").value = "";
-      sendQuestion(q);
-    }
+    if (e.key === "Enter") { var q = document.getElementById("q").value; document.getElementById("q").value = ""; send(q); }
   });
-  document.getElementById("btnAsk").onclick = function () {
-    sendQuestion("Объясни простыми словами, зачем людям искусственный интеллект");
-  };
+  document.getElementById("btnAsk").onclick = function () { send("Что такое АКСИ?"); };
   document.querySelectorAll(".chips button").forEach(function (b) {
-    b.onclick = function () { sendQuestion(b.getAttribute("data-q")); };
+    b.onclick = function () { send(b.getAttribute("data-q")); };
   });
+  document.getElementById("btnLoad").onclick = function () {
+    if (!window.AKSI_WEBLLM) { add("bot", "WebLLM не найден", ""); return; }
+    var btn = document.getElementById("btnLoad"); btn.disabled = true;
+    add("bot", "Загружаю большую LLM…", "WebLLM");
+    var p = AKSI_WEBLLM.autoLoad ? AKSI_WEBLLM.autoLoad() : AKSI_WEBLLM.load();
+    Promise.resolve(p).then(function () {
+      btn.disabled = false; paint();
+      add("bot", "Большая LLM готова — можно задавать любые свободные вопросы.", "LLM on");
+    }).catch(function (e) {
+      btn.disabled = false;
+      add("bot", "Ошибка LLM: " + (e.message || e), "");
+      paint();
+    });
+  };
+  window.addEventListener("aksi-webllm-progress", paint);
 })();
 </script>
 </body>
