@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ Lab — до честного разбора</title>
+<meta name="theme-color" content="#0b0b0f">
+<style>
+:root{--bg:#0a0a0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#a78bfa;--ok:#3ecf8e;--warn:#e6b84d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:720px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:1.2rem;margin:8px 0}
+.note{font-size:13px;color:var(--warn);background:#1a1810;border:1px solid #3d3520;padding:10px 12px;border-radius:12px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.card h2{font-size:14px;color:var(--acc);margin-bottom:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#1a1a24;color:var(--ink);cursor:pointer}
+button.p{background:var(--acc);border-color:var(--acc);color:#0b0b0f;font-weight:700}
+pre{background:#0e0e14;padding:10px;border-radius:10px;font-size:12px;overflow:auto;max-height:200px;margin-top:8px;color:var(--muted);white-space:pre-wrap}
+input{flex:1;min-width:160px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit}
+a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div style="font-weight:800">АКСИ <span style="color:var(--acc)">Lab · prior</span></div>
+<h1>Блок «до честного» из переписки</h1>
+<p style="color:var(--muted);font-size:14px">Quantum · answerGate · CHSH · HRR · ARIN · Superpose — как в первой части. <b>Классические симуляции</b>, не QPU.</p>
+<div class="note">Продукт: <a href="/capsule.html">Капсула</a> · <a href="/demo.html">Демо</a> · <a href="/HONEST.md">HONEST</a>. Здесь — lab «до этого».</div>
+<div class="card"><h2>1. answerGate + CHSH + Bell</h2>
+<div class="row"><button type="button" class="p" id="btnGate">answerGate</button><button type="button" id="btnBell">Bell</button><button type="button" id="btnChsh">CHSH</button></div>
+<pre id="qOut">—</pre></div>
+<div class="card"><h2>2. HRR</h2>
+<div class="row"><input id="hrrIn" placeholder="Текст…"><button type="button" class="p" id="btnHrrAdd">add</button><button type="button" id="btnHrrQ">resonance</button></div>
+<pre id="hrrOut">—</pre></div>
+<div class="card"><h2>3. ARIN</h2>
+<div class="row"><button type="button" class="p" id="btnArinTrain">train</button><input id="arinQ" placeholder="Вопрос…"><button type="button" id="btnArinAsk">ask</button></div>
+<pre id="arinOut">—</pre></div>
+<div class="card"><h2>4. Superpose Born</h2>
+<div class="row"><input id="supQ" value="что такое акси"><button type="button" class="p" id="btnSup">collapse</button></div>
+<pre id="supOut">—</pre></div>
+<div class="card"><h2>5. gate + капсула</h2>
+<div class="row"><button type="button" class="p" id="btnCombo">Запомнить → ask → gate → seal</button></div>
+<pre id="comboOut">—</pre></div>
+<p style="font-size:13px;color:var(--muted)"><a href="/quantum.html">quantum</a> · <a href="/">главная</a></p>
+<script src="/aksi-quantum.js"></script>
+<script src="/aksi-hrr.js"></script>
+<script src="/aksi-resonance-net.js"></script>
+<script src="/aksi-superpose.js"></script>
+<script src="/aksi-capsule.js?v=12"></script>
+<script>
+(function () {
+  function j(x){ try{return JSON.stringify(x,null,2);}catch(e){return String(x);} }
+  function el(id){ return document.getElementById(id); }
+  el("btnGate").onclick=function(){
+    if(!window.AKSI_QUANTUM){el("qOut").textContent="нет quantum";return;}
+    var r=AKSI_QUANTUM.answerGate("Кто ты?","Я АКСИ");
+    el("qOut").textContent=j({QCLI:r.QCLI,entropy:r.entropy,purity:r.purity,resonance:r.resonance,outcome:r.outcome,circuit:r.circuit,note:"классический симулятор"});
+  };
+  el("btnBell").onclick=function(){ el("qOut").textContent=window.AKSI_QUANTUM&&AKSI_QUANTUM.bell?j(AKSI_QUANTUM.bell("phi+")):"нет bell"; };
+  el("btnChsh").onclick=function(){ el("qOut").textContent=window.AKSI_QUANTUM&&AKSI_QUANTUM.chsh?j(AKSI_QUANTUM.chsh(512)):"нет chsh"; };
+  el("btnHrrAdd").onclick=function(){
+    if(!window.AKSI_HRR){el("hrrOut").textContent="нет HRR";return;}
+    var m=AKSI_HRR.get(),t=el("hrrIn").value.trim()||"АКСИ локальная память"; m.add(t);
+    el("hrrOut").textContent="traces "+m.traces.length+"\n"+t;
+  };
+  el("btnHrrQ").onclick=function(){
+    if(!window.AKSI_HRR)return;
+    el("hrrOut").textContent=j(AKSI_HRR.get().resonance(el("hrrIn").value.trim()||"АКСИ"));
+  };
+  el("btnArinTrain").onclick=function(){
+    if(!window.AKSI_RESONANCE){el("arinOut").textContent="нет ARIN";return;}
+    el("arinOut").textContent="training…";
+    setTimeout(function(){ el("arinOut").textContent=j(AKSI_RESONANCE.train({epochs:24})); },20);
+  };
+  el("btnArinAsk").onclick=function(){
+    if(!window.AKSI_RESONANCE)return; AKSI_RESONANCE.ensure();
+    el("arinOut").textContent=j(AKSI_RESONANCE.ask(el("arinQ").value.trim()||"что такое акси"));
+  };
+  el("btnSup").onclick=async function(){
+    if(!window.AKSI_SUPERPOSE){el("supOut").textContent="нет superpose";return;}
+    el("supOut").textContent="…";
+    try{ el("supOut").textContent=j(await AKSI_SUPERPOSE.think(el("supQ").value.trim()||"что такое акси",{mode:"born"})); }
+    catch(e){ el("supOut").textContent=String(e.message||e); }
+  };
+  el("btnCombo").onclick=async function(){
+    var out=el("comboOut"); out.textContent="…";
+    try{
+      await AKSI_CAPSULE.ensureKeys();
+      AKSI_CAPSULE.remember("Lab prior: факт из переписки до честного");
+      var a=await AKSI_CAPSULE.ask("переписки");
+      var gate=window.AKSI_QUANTUM?AKSI_QUANTUM.answerGate(a.lastAnswer.q,a.text):null;
+      var seal=await AKSI_CAPSULE.sealLast();
+      out.textContent=j({answer:a.text,gate:gate?{QCLI:gate.QCLI,purity:gate.purity}:null,seal:{hash:seal.seal.hash.slice(0,32)}});
+    }catch(e){ out.textContent=String(e.message||e); }
+  };
+})();
+</script>
+</body>
+</html>
