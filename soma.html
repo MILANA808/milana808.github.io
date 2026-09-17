@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>АКСИ Soma — нейроны</title>
+<title>АКСИ Soma — open data</title>
 <meta name="theme-color" content="#0c0c10">
 <style>
 :root{--bg:#0b0b0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#6ecf9a}
@@ -33,33 +33,35 @@ a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
 <body>
 <header>
   <div class="logo">АКСИ <span>Soma</span></div>
-  <nav><a href="/neural.html">Neural</a><a href="/">Главная</a></nav>
+  <nav><a href="/SOMA.md">Спека</a><a href="/neural.html">Neural</a><a href="/">Главная</a></nav>
 </header>
 <div class="banner">
-  <h1>Сеть из нейронов</h1>
-  <p>Потенциал → активация → синапсы → конкуренция выходов. Упрощённая rate-модель — но нейроны реальные в коде.</p>
+  <h1>Soma на открытых данных + АКСИ</h1>
+  <p>Обучена на кратких открытых энциклопедических фактах (Википедия) и знаниях АКСИ. Нейроны + синапсы.</p>
 </div>
 <div class="status" id="st">…</div>
 <div class="viz"><canvas id="cv" width="640" height="56"></canvas></div>
 <div class="chips">
-  <button type="button" data-q="что такое акси">АКСИ</button>
+  <button type="button" data-q="искусственный интеллект">ИИ</button>
   <button type="button" data-q="нейрон">Нейрон</button>
-  <button type="button" data-q="soma">Soma</button>
-  <button type="button" data-q="привет">Привет</button>
-  <button type="button" data-q="контакт">Контакт</button>
+  <button type="button" data-q="синапс">Синапс</button>
+  <button type="button" data-q="мозг">Мозг</button>
+  <button type="button" data-q="машинное обучение">ML</button>
+  <button type="button" data-q="что такое акси">АКСИ</button>
+  <button type="button" data-q="открытые данные">Open data</button>
   <button type="button" id="btnTrain">Обучить</button>
 </div>
 <div class="msgs" id="msgs"></div>
 <div class="composer">
-  <input id="q" placeholder="Стимул для нейронов…" enterkeyhint="send">
+  <input id="q" placeholder="Стимул…" enterkeyhint="send">
   <button type="button" id="go">Спросить</button>
 </div>
-<script src="/aksi-soma.js?v=11"></script>
+<script src="/aksi-soma.js?v=12"></script>
 <script>
 (function(){
   function paint(){
     var s=AKSI_SOMA.status();
-    document.getElementById("st").innerHTML="<b>"+s.architecture+"</b> · neurons "+s.neurons+" · loss "+(s.loss!=null?s.loss.toFixed(3):"—");
+    document.getElementById("st").innerHTML="<b>"+s.architecture+"</b> · n="+s.neurons+" · loss "+(s.loss!=null?s.loss.toFixed(3):"—")+" · "+(s.data||"");
   }
   function bars(act){
     var c=document.getElementById("cv"),x=c.getContext("2d"),w=c.width,h=c.height;
@@ -78,8 +80,8 @@ a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
     document.getElementById("msgs").appendChild(d);
   }
   AKSI_SOMA.ensure();paint();
-  add("bot","Soma: "+AKSI_SOMA.status().neurons+" нейронов. Ответ = победивший выходной нейрон.","soma");
-  bars(new Array(12).fill(0.05));
+  add("bot","Soma v1.2 open-data. Спросите про ИИ, нейрон, синапс, мозг, ML, АКСИ.","soma");
+  bars(new Array(20).fill(0.05));
   function send(q){
     q=String(q||"").trim();if(!q)return;
     add("user",q);
@@ -93,8 +95,8 @@ a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
   document.getElementById("q").onkeydown=function(e){if(e.key==="Enter"){var q=e.target.value;e.target.value="";send(q);}};
   document.querySelectorAll(".chips button[data-q]").forEach(function(b){b.onclick=function(){send(b.getAttribute("data-q"));};});
   document.getElementById("btnTrain").onclick=function(){
-    add("bot","Обучение…","train");
-    setTimeout(function(){var r=AKSI_SOMA.train({epochs:80,lr:0.35});add("bot","loss "+(r.loss&&r.loss.toFixed(3)),"train");paint();},20);
+    add("bot","Обучение на open+AKSI…","train");
+    setTimeout(function(){var r=AKSI_SOMA.train({epochs:120,lr:0.35});add("bot","loss "+(r.loss&&r.loss.toFixed(3))+" · "+r.data,"train");paint();},20);
   };
 })();
 </script>
