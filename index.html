@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AKSI — Private Research Agent</title>
-<meta name="description" content="AKSI Seal: evidence research + encrypted on-device memory. Local-first agent layer. No API keys for core.">
+<title>AKSI Capsule — portable local intelligence</title>
+<meta name="description" content="Portable local intelligence: memory, ECDSA seal, .aksi export. Not another chatbot.">
 <meta name="theme-color" content="#06060a">
 <link rel="canonical" href="https://milana808.github.io/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://milana808.github.io/">
-<meta property="og:title" content="AKSI Seal — Private Research Agent">
-<meta property="og:description" content="Evidence research + encrypted on-device memory. Local-first. Not another chatbot.">
+<meta property="og:title" content="AKSI Capsule — portable local intelligence">
+<meta property="og:description" content="Portable local intelligence: memory, ECDSA seal, .aksi export. Not another chatbot.">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="AKSI Seal — Private Research Agent">
-<meta name="twitter:description" content="Evidence research + encrypted on-device memory. Local-first.">
+<meta name="twitter:title" content="AKSI Capsule — portable local intelligence">
+<meta name="twitter:description" content="Portable local intelligence: memory, ECDSA seal, .aksi export. Not another chatbot.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -35,46 +35,42 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;background:ra
 .brand{font-family:var(--display);font-weight:800;letter-spacing:.08em;font-size:14px;text-transform:uppercase}
 .brand span{color:var(--accent)}
 .eyebrow{margin-top:48px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);display:flex;align-items:center;gap:8px}
-.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--signal);box-shadow:0 0 0 4px rgba(94,233,168,.12)}
-h1{font-family:var(--display);font-weight:800;margin-top:16px;font-size:clamp(2.3rem,6vw,3.4rem);line-height:1.04;letter-spacing:-.035em}
+.eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--signal);box-shadow:0 0 12px var(--signal)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.05;letter-spacing:-.03em;margin-top:16px}
 h1 em{font-style:normal;color:var(--accent)}
-.lead{margin-top:18px;color:var(--muted);font-size:1.05rem;max-width:34ch;line-height:1.65}
+.lead{margin-top:18px;font-size:1.05rem;color:var(--muted);max-width:36em}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:999px;font-weight:600;font-size:14px;text-decoration:none;border:1px solid transparent;transition:transform .25s var(--ease),box-shadow .25s}
-.btn:hover{transform:translateY(-2px)}
-.btn:active{transform:none}
-.primary{background:var(--accent);color:#fff;box-shadow:0 8px 28px rgba(139,124,246,.28)}
-.ghost{border-color:var(--line);color:var(--ink)}
-.ghost:hover{border-color:rgba(255,255,255,.2)}
-.meta{margin-top:20px;font-size:12px;color:var(--dim)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:48px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:600;text-decoration:none;transition:transform .2s var(--ease),opacity .2s}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.ghost{border:1px solid var(--line);color:var(--ink)}
+.btn:hover{transform:translateY(-1px)}
+.meta{margin-top:16px;font-size:13px;color:var(--dim)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:40px}
 .card{display:block;text-decoration:none;color:inherit;background:var(--elev);border:1px solid var(--line);border-radius:16px;padding:18px;transition:border-color .2s,transform .25s var(--ease)}
 .card:hover{border-color:rgba(255,255,255,.14);transform:translateY(-2px)}
 .card strong{display:block;font-size:14px;margin-bottom:4px}
 .card span{font-size:12px;color:var(--muted)}
-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
-footer a{color:var(--muted);text-decoration:none}
-footer a:hover{color:var(--ink)}
+footer{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--dim)}
+footer a{color:var(--muted)}
 @media(prefers-reduced-motion:reduce){.btn:hover,.card:hover{transform:none}}
 </style>
 </head>
-<body class="m-page">
-<a href="#main" style="position:absolute;left:-999px;top:0" class="skip">Skip to content</a>
+<body>
+<a href="#main" style="position:absolute;left:-999px;top:0">Skip</a>
 <div class="wrap" id="main">
-  <div class="brand">AKSI <span>Seal</span></div>
-  <div class="eyebrow">Private research agent</div>
-  <h1>Find. Seal.<br><em>Recall.</em></h1>
-  <p class="lead">Evidence research. Encrypted memory on device. Gate before weak answers. Core without API keys.</p>
+  <div class="brand">AKSI <span>Capsule</span></div>
+  <div class="eyebrow">Portable local intelligence</div>
+  <h1>Your mind<br><em>as a file.</em></h1>
+  <p class="lead">Local memory. ECDSA seal on answers. Export <b>.aksi</b> — open on another device. Optional AES vault. No cloud account required.</p>
   <div class="cta">
-    <a class="btn primary" href="/seal.html">View product</a>
-    <a class="btn ghost" href="/product.html">Open runtime</a>
+    <a class="btn primary" href="/capsule.html">Open Capsule</a>
+    <a class="btn ghost" href="/CAPSULE.md">Spec</a>
   </div>
-  <p class="meta">Local-first · AES-GCM · not another chatbot</p>
+  <p class="meta">Capsule v1.1 · ECDSA · AES-GCM · Wikipedia fallback · local-first</p>
   <div class="grid">
-    <a class="card" href="/seal.html"><strong>Seal</strong><span>Product story &amp; positioning</span></a>
+    <a class="card" href="/capsule.html"><strong>Capsule</strong><span>Memory · seal · .aksi file</span></a>
     <a class="card" href="/product.html"><strong>Runtime</strong><span>Research · memory · gate</span></a>
-    <a class="card" href="/infinity.html"><strong>Infinity</strong><span>Full research agent</span></a>
+    <a class="card" href="/seal.html"><strong>Seal story</strong><span>Product positioning</span></a>
     <a class="card" href="/bot.html"><strong>Bot</strong><span>Cortex memory chat</span></a>
   </div>
   <footer>
