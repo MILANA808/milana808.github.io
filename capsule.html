@@ -3,101 +3,99 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ Капсула — полный контур</title>
-<meta name="description" content="Память, ECDSA, AES-vault, Wikipedia, экспорт .aksi">
+<title>АКСИ Капсула</title>
 <meta name="theme-color" content="#0b0b0f">
 <link rel="canonical" href="https://milana808.github.io/capsule.html">
 <style>
-:root{--bg:#0b0b0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
+:root{--bg:#0b0b0f;--card:#16161f;--ink:#f2f1eb;--muted:#9a97a3;--line:#2c2c38;--acc:#8b7cf7;--ok:#3ecf8e;--bad:#f07178}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;max-width:680px;margin:0 auto}
-header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:640px;margin:0 auto;display:flex;flex-direction:column}
+header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 .logo{font-weight:800}.logo span{color:var(--acc)}
-header a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:10px}
-.hero{padding:14px 16px;border-bottom:1px solid var(--line)}
-.hero h1{font-size:1.15rem;margin-bottom:6px}
-.hero p{color:var(--muted);font-size:14px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px}
-.chips button{font:inherit;font-size:12px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-.panel{padding:8px 16px 12px;display:flex;flex-direction:column;gap:8px;flex:1}
-.msgs{flex:1;overflow:auto;min-height:200px;max-height:40vh;display:flex;flex-direction:column;gap:10px}
-.msg{padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
-.msg.user{align-self:flex-end;background:#1a1a26;max-width:92%}
-.msg .meta{margin-top:8px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;font-family:ui-monospace,monospace}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-input[type=text],input[type=password]{flex:1;min-width:120px;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
-button,label.file{font:inherit;font-size:13px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:46px}
+header a{color:var(--muted);font-size:13px;text-decoration:none}
+.how{margin:12px 16px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-size:14px;color:var(--muted)}
+.how b{color:var(--ink)}
+.how ol{margin:8px 0 0 18px}
+.panel{padding:8px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.msgs{min-height:140px;max-height:36vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.msg{padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
+.msg.user{align-self:flex-end;background:#1a1a26;max-width:90%}
+.msg .meta{margin-top:6px;font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text],input[type=password]{flex:1;min-width:140px;min-height:48px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
+button,label.filebtn{font:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:48px}
 button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
 button:disabled{opacity:.4}
-label.file input{display:none}
-.seal-box{font-size:12px;color:var(--muted);padding:12px;border:1px dashed var(--line);border-radius:12px;font-family:ui-monospace,monospace;word-break:break-all;min-height:64px}
-.facts{padding:0 16px 8px;max-height:120px;overflow:auto}
-.facts div{font-size:13px;padding:6px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
-.facts button{min-height:auto;padding:4px 8px;font-size:11px}
-.status{padding:8px 16px 12px;font-size:12px;color:var(--muted)}
+label.filebtn input{position:absolute;opacity:0;width:0;height:0}
+.drop{border:2px dashed var(--line);border-radius:14px;padding:18px;text-align:center;color:var(--muted);font-size:14px;background:#101018}
+.drop.over{border-color:var(--acc);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{min-height:36px;padding:8px 12px;font-size:12px;border-radius:999px}
+.facts{max-height:100px;overflow:auto;font-size:13px;color:var(--muted)}
+.facts div{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.facts button{min-height:auto;padding:2px 8px;font-size:11px}
+.status{padding:8px 16px;font-size:12px;color:var(--muted)}
 .status b{color:var(--ok)}
 footer{padding:12px 16px 20px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
-.toggle{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
 <header>
   <div class="logo">АКСИ <span>Капсула</span></div>
-  <nav><a href="/CAPSULE.md">Спека</a><a href="/">Главная</a></nav>
+  <a href="/">Главная</a>
 </header>
-<div class="hero">
-  <h1>Память · печать · файл · vault</h1>
-  <p>ECDSA + SHA-256 · AES-GCM vault · Wikipedia · .aksi. На устройстве.</p>
+<div class="how">
+  <b>Как перенести данные</b>
+  <ol>
+    <li>Запомните факты → нажмите <b>«Скачать файл»</b></li>
+    <li>Сохранятся <b>.json</b> и <b>.aksi</b> (одно содержимое)</li>
+    <li>На другом устройстве откройте <b>эту страницу</b> → <b>«Загрузить файл»</b> или перетащите файл сюда</li>
+  </ol>
+  Файл <b>не открывается сам</b> как приложение — его загружают здесь.
 </div>
-<div class="chips" id="tpl"></div>
 <div class="panel">
+  <div class="chips" id="tpl"></div>
   <div class="msgs" id="msgs"></div>
   <div class="facts" id="facts"></div>
   <div class="row">
-    <input type="text" id="fact" placeholder="Запомнить факт…" autocomplete="off">
+    <input type="text" id="fact" placeholder="Запомнить…" autocomplete="off">
     <button type="button" class="primary" id="btnMem">Запомнить</button>
   </div>
   <div class="row">
-    <input type="text" id="q" placeholder="Спросить (память или Wikipedia)…" autocomplete="off">
+    <input type="text" id="q" placeholder="Спросить…" autocomplete="off">
     <button type="button" id="btnAsk">Спросить</button>
   </div>
   <div class="row">
     <button type="button" class="primary" id="btnSeal" disabled>Запечатать</button>
-    <button type="button" id="btnReceipt" disabled>Квитанция</button>
-    <button type="button" id="btnExport" disabled>Скачать .aksi</button>
-    <label class="file"><input type="file" id="file" accept=".aksi,application/json,.json">Импорт</label>
+    <button type="button" id="btnExport" disabled>Скачать файл</button>
+    <label class="filebtn"><input type="file" id="file" accept=".json,.aksi,application/json,text/plain,*/*">Загрузить файл</label>
   </div>
   <div class="row">
-    <input type="password" id="pw" placeholder="Пароль vault" autocomplete="new-password">
-    <button type="button" id="btnVault">Vault .aksi</button>
-    <button type="button" id="btnVerify">Проверить печати</button>
+    <input type="password" id="pw" placeholder="Пароль (vault)" autocomplete="new-password">
+    <button type="button" id="btnVault">Vault</button>
+    <button type="button" id="btnVerify">Проверить</button>
     <button type="button" id="btnClear">Сброс</button>
   </div>
-  <div class="row">
-    <label class="toggle"><input type="checkbox" id="chkResearch" checked> Research Wikipedia</label>
-    <label class="toggle"><input type="checkbox" id="chkMerge"> Merge при импорте</label>
-  </div>
-  <div class="seal-box" id="sealBox">Печать / верификация</div>
+  <div class="drop" id="drop">Перетащите сюда .json или .aksi</div>
+  <label style="font-size:13px;color:var(--muted)"><input type="checkbox" id="chkMerge"> Добавить к текущим (merge)</label>
 </div>
 <div class="status" id="st">…</div>
-<footer>v1.1 · aksi-capsule · aksilove@internet.ru</footer>
-<script src="/aksi-capsule.js?v=11"></script>
+<footer>aksilove@internet.ru · файл = JSON-состояние</footer>
+<script src="/aksi-capsule.js?v=12"></script>
 <script>
 (function () {
   var C = window.AKSI_CAPSULE;
-  if (!C) { document.getElementById("st").textContent = "Модуль не загрузился"; return; }
+  if (!C) { document.getElementById("st").textContent = "Модуль не загрузился — обновите страницу"; return; }
   C.ensureKeys().catch(function () {});
   function paint() {
     var s = C.status();
-    document.getElementById("st").innerHTML = "Фактов <b>" + s.facts + "</b> · печатей <b>" + s.seals + "</b> · " + s.crypto + "<br>" + s.did;
+    document.getElementById("st").innerHTML = "Фактов <b>" + s.facts + "</b> · печатей <b>" + s.seals + "</b> · " + s.version + "<br>" + s.did;
     document.getElementById("btnSeal").disabled = !s.hasLast;
-    document.getElementById("btnReceipt").disabled = s.seals === 0;
     document.getElementById("btnExport").disabled = s.facts === 0 && s.seals === 0;
-    document.getElementById("chkResearch").checked = s.research;
     var box = document.getElementById("facts"); box.innerHTML = "";
-    C.listFacts().slice(0, 12).forEach(function (f) {
+    C.listFacts().slice(0, 8).forEach(function (f) {
       var row = document.createElement("div");
-      var t = document.createElement("span"); t.textContent = f.t.length > 80 ? f.t.slice(0, 80) + "…" : f.t;
+      var t = document.createElement("span"); t.textContent = f.t.length > 70 ? f.t.slice(0, 70) + "…" : f.t;
       var del = document.createElement("button"); del.type = "button"; del.textContent = "✕";
       del.onclick = function () { C.forget(f.id); paint(); };
       row.appendChild(t); row.appendChild(del); box.appendChild(row);
@@ -113,71 +111,67 @@ footer{padding:12px 16px 20px;font-size:12px;color:var(--muted);border-top:1px s
     b.onclick = function () { document.getElementById("fact").value = t.prompt; document.getElementById("fact").focus(); };
     document.getElementById("tpl").appendChild(b);
   });
-  document.getElementById("chkResearch").onchange = function () { C.setSetting("research", this.checked); };
-  document.getElementById("chkMerge").onchange = function () { C.setSetting("mergeImport", this.checked); };
   document.getElementById("btnMem").onclick = function () {
     var t = document.getElementById("fact").value.trim(); if (!t) return;
     document.getElementById("fact").value = "";
-    var r = C.remember(t); add("bot", "Запомнено:\n«" + r.fact.t + "»", r.fact.id); paint();
+    var r = C.remember(t); add("bot", "Запомнено: «" + r.fact.t + "»", "ok"); paint();
   };
   document.getElementById("btnAsk").onclick = async function () {
     var q = document.getElementById("q").value.trim(); if (!q) return;
-    document.getElementById("q").value = ""; add("user", q); add("bot", "…", "thinking");
-    var r = await C.ask(q);
-    var last = document.getElementById("msgs").lastChild; if (last) last.remove();
-    add("bot", r.text, r.source + " · hits " + r.hits); paint();
+    document.getElementById("q").value = ""; add("user", q);
+    var r = await C.ask(q); add("bot", r.text, r.source); paint();
   };
   document.getElementById("q").onkeydown = function (e) { if (e.key === "Enter") document.getElementById("btnAsk").click(); };
   document.getElementById("fact").onkeydown = function (e) { if (e.key === "Enter") document.getElementById("btnMem").click(); };
   document.getElementById("btnSeal").onclick = async function () {
     var r = await C.sealLast(); if (!r.ok) return;
-    document.getElementById("sealBox").textContent = "ПЕЧАТЬ ECDSA\nhash: " + r.seal.hash.slice(0, 48) + "…\nsig: " + r.seal.signature.slice(0, 48) + "…";
-    add("bot", "Запечатано\n" + r.seal.hash.slice(0, 28) + "…", "ECDSA"); paint();
+    add("bot", "Печать OK\n" + r.seal.hash.slice(0, 32) + "…", "ECDSA"); paint();
   };
-  document.getElementById("btnReceipt").onclick = function () { C.downloadReceipt(); add("bot", "Квитанция скачана", "receipt"); };
-  document.getElementById("btnExport").onclick = function () { C.downloadCapsule(); add("bot", ".aksi скачан", "export"); };
+  document.getElementById("btnExport").onclick = function () {
+    C.downloadCapsule({ alsoAksi: true });
+    add("bot", "Скачано:\n• .json (удобно выбирать)\n• .aksi (то же самое)\n\nЗагрузка: «Загрузить файл» на этой странице.", "export");
+  };
+  async function doImport(file) {
+    if (!file) return;
+    add("bot", "Читаю «" + file.name + "»…", "import");
+    var merge = document.getElementById("chkMerge").checked;
+    try {
+      var r = await C.importFile(file, { merge: merge });
+      if (r.vault) {
+        var pw = document.getElementById("pw").value || prompt("Пароль vault:");
+        if (!pw) { add("bot", "Нужен пароль", "err"); return; }
+        r = await C.importVault(r.data, pw, { merge: merge });
+      }
+      if (!r.ok) { add("bot", "Не загрузилось: " + (r.error || "ошибка"), "err"); return; }
+      add("bot", "Готово. Фактов: " + r.facts + ", печатей: " + r.seals + ", проверка: " + (r.allSealsOk ? "OK" : "FAIL"), "import ok");
+      paint();
+    } catch (e) { add("bot", "Ошибка: " + (e.message || e), "err"); }
+  }
+  document.getElementById("file").onchange = function (e) { doImport(e.target.files && e.target.files[0]); e.target.value = ""; };
+  var drop = document.getElementById("drop");
+  drop.addEventListener("dragover", function (e) { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", function () { drop.classList.remove("over"); });
+  drop.addEventListener("drop", function (e) { e.preventDefault(); drop.classList.remove("over"); doImport(e.dataTransfer.files && e.dataTransfer.files[0]); });
   document.getElementById("btnVault").onclick = async function () {
     var pw = document.getElementById("pw").value;
-    if (!pw || pw.length < 4) { add("bot", "Пароль ≥4 для vault", "vault"); return; }
-    try {
-      var v = await C.encryptVault(pw);
-      var blob = new Blob([JSON.stringify(v, null, 2)], { type: "application/json" });
-      var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "aksi-vault.aksi"; a.click();
-      add("bot", "Vault AES-GCM скачан", "vault");
-    } catch (e) { add("bot", String(e.message || e), "error"); }
-  };
-  document.getElementById("file").onchange = async function (e) {
-    var f = e.target.files && e.target.files[0]; if (!f) return;
-    try {
-      var data = JSON.parse(await f.text());
-      if (data.format === "aksi-vault") {
-        var pw = document.getElementById("pw").value || prompt("Пароль vault:");
-        if (!pw) return;
-        var r = await C.importVault(data, pw, { merge: document.getElementById("chkMerge").checked });
-        add("bot", "Vault: фактов " + r.facts + ", " + (r.allSealsOk ? "OK" : "FAIL"), "import");
-      } else {
-        var r2 = await C.importCapsule(data, { merge: document.getElementById("chkMerge").checked });
-        if (!r2.ok) { add("bot", r2.error, "error"); return; }
-        add("bot", "Импорт: " + r2.facts + " фактов, печати " + (r2.allSealsOk ? "OK" : "FAIL"), "import");
-      }
-      paint();
-    } catch (err) { add("bot", String(err.message || err), "error"); }
-    e.target.value = "";
+    if (!pw || pw.length < 4) { add("bot", "Пароль от 4 символов", "err"); return; }
+    var v = await C.encryptVault(pw);
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(v, null, 2)], { type: "application/json" }));
+    a.download = "aksi-vault.json"; a.click();
+    add("bot", "Vault: aksi-vault.json", "vault");
   };
   document.getElementById("btnVerify").onclick = async function () {
     var list = await C.verifyAll();
-    if (!list.length) { add("bot", "Печатей нет", "verify"); return; }
-    var lines = list.map(function (v, i) { return (i + 1) + ". " + (v.ok ? "OK" : "FAIL") + " hash=" + v.hashOk + " sig=" + v.sigOk; });
-    document.getElementById("sealBox").textContent = lines.join("\n");
-    add("bot", lines.join("\n"), "verify");
+    if (!list.length) { add("bot", "Печатей нет", ""); return; }
+    add("bot", list.map(function (v, i) { return (i + 1) + ". " + (v.ok ? "OK" : "FAIL"); }).join("\n"), "verify");
   };
   document.getElementById("btnClear").onclick = function () {
-    if (!confirm("Сбросить?")) return;
+    if (!confirm("Очистить?")) return;
     C.clearAll(); document.getElementById("msgs").innerHTML = "";
-    document.getElementById("sealBox").textContent = "Печать / верификация";
     add("bot", "Очищено", "reset"); paint();
   };
-  add("bot", "v1.1: память · Wikipedia · ECDSA · vault · .aksi · квитанции", C.version);
+  add("bot", "1) Запомнить  2) Скачать файл  3) Загрузить файл здесь", C.version);
   paint();
 })();
 </script>
