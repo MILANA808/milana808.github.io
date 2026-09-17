@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ Soma — нейроны</title>
+<meta name="theme-color" content="#0c0c10">
+<style>
+:root{--bg:#0b0b0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#6ecf9a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800}.logo span{color:var(--acc)}
+a{color:var(--muted);text-decoration:none;font-size:13px;margin-left:12px}
+.banner{max-width:720px;margin:0 auto;padding:14px 16px}
+.banner h1{font-size:1.15rem;margin-bottom:6px}
+.banner p{color:var(--muted);font-size:14px}
+.status{max-width:720px;margin:0 auto;padding:0 16px 10px;font-size:13px;color:var(--muted)}
+.status b{color:var(--acc)}
+.viz{max-width:720px;margin:0 auto;padding:0 16px 12px;width:100%}
+.viz canvas{width:100%;height:56px;background:#101018;border-radius:10px;border:1px solid var(--line)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;max-width:720px;margin:0 auto;padding:0 16px 10px}
+.chips button{font:inherit;font-size:13px;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.msgs{flex:1;overflow:auto;max-width:720px;margin:0 auto;padding:8px 16px;display:flex;flex-direction:column;gap:12px;min-height:40vh;width:100%}
+.msg{padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;max-width:95%}
+.msg.user{align-self:flex-end;background:#1a1a26}
+.msg .meta{margin-top:8px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.composer{max-width:720px;margin:0 auto;padding:12px 16px 20px;display:flex;gap:8px;border-top:1px solid var(--line);width:100%}
+.composer input{flex:1;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
+.composer button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--acc);color:#0b0b0f;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">АКСИ <span>Soma</span></div>
+  <nav><a href="/neural.html">Neural</a><a href="/">Главная</a></nav>
+</header>
+<div class="banner">
+  <h1>Сеть из нейронов</h1>
+  <p>Потенциал → активация → синапсы → конкуренция выходов. Упрощённая rate-модель — но нейроны реальные в коде.</p>
+</div>
+<div class="status" id="st">…</div>
+<div class="viz"><canvas id="cv" width="640" height="56"></canvas></div>
+<div class="chips">
+  <button type="button" data-q="что такое акси">АКСИ</button>
+  <button type="button" data-q="нейрон">Нейрон</button>
+  <button type="button" data-q="soma">Soma</button>
+  <button type="button" data-q="привет">Привет</button>
+  <button type="button" data-q="контакт">Контакт</button>
+  <button type="button" id="btnTrain">Обучить</button>
+</div>
+<div class="msgs" id="msgs"></div>
+<div class="composer">
+  <input id="q" placeholder="Стимул для нейронов…" enterkeyhint="send">
+  <button type="button" id="go">Спросить</button>
+</div>
+<script src="/aksi-soma.js?v=11"></script>
+<script>
+(function(){
+  function paint(){
+    var s=AKSI_SOMA.status();
+    document.getElementById("st").innerHTML="<b>"+s.architecture+"</b> · neurons "+s.neurons+" · loss "+(s.loss!=null?s.loss.toFixed(3):"—");
+  }
+  function bars(act){
+    var c=document.getElementById("cv"),x=c.getContext("2d"),w=c.width,h=c.height;
+    x.fillStyle="#101018";x.fillRect(0,0,w,h);
+    if(!act||!act.length)return;
+    var bw=w/act.length;
+    for(var i=0;i<act.length;i++){
+      var v=Math.max(0,Math.min(1,act[i]));
+      x.fillStyle="rgba(110,207,154,"+(0.25+0.75*v)+")";
+      x.fillRect(i*bw,h-v*h,Math.max(1,bw-1),v*h);
+    }
+  }
+  function add(role,t,m){
+    var d=document.createElement("div");d.className="msg "+role;d.textContent=t;
+    if(m){var x=document.createElement("div");x.className="meta";x.textContent=m;d.appendChild(x);}
+    document.getElementById("msgs").appendChild(d);
+  }
+  AKSI_SOMA.ensure();paint();
+  add("bot","Soma: "+AKSI_SOMA.status().neurons+" нейронов. Ответ = победивший выходной нейрон.","soma");
+  bars(new Array(12).fill(0.05));
+  function send(q){
+    q=String(q||"").trim();if(!q)return;
+    add("user",q);
+    var a=AKSI_SOMA.ask(q);
+    var p=AKSI_SOMA.predict(q);
+    bars(p.scores||[]);
+    add("bot",a.text,(a.low?"LOW · ":"")+"act "+(a.activation!=null?a.activation.toFixed(2):"—")+" · "+(a.answerId||""));
+    paint();
+  }
+  document.getElementById("go").onclick=function(){var q=document.getElementById("q").value;document.getElementById("q").value="";send(q);};
+  document.getElementById("q").onkeydown=function(e){if(e.key==="Enter"){var q=e.target.value;e.target.value="";send(q);}};
+  document.querySelectorAll(".chips button[data-q]").forEach(function(b){b.onclick=function(){send(b.getAttribute("data-q"));};});
+  document.getElementById("btnTrain").onclick=function(){
+    add("bot","Обучение…","train");
+    setTimeout(function(){var r=AKSI_SOMA.train({epochs:80,lr:0.35});add("bot","loss "+(r.loss&&r.loss.toFixed(3)),"train");paint();},20);
+  };
+})();
+</script>
+</body>
+</html>
