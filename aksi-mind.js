@@ -1,10 +1,10 @@
 /**
- * AKSI Mind v1.2 — ARIN Resonance first → Personal → Wikipedia → LLM
+ * AKSI Mind v1.3 — ARIN → Episteme → Personal → Wikipedia → LLM
  * Attested 2026-09-17 · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.2.0";
+  var VER = "1.3.0";
   function looksFactual(q) {
     q = String(q || "").toLowerCase();
     return /^(что|кто|где|когда|как|почему|зачем|сколько|какой|какая|какие|what|who|where|when|how|why)\b/i.test(q) ||
@@ -42,6 +42,16 @@
         if (G.AKSI_RESONANCE.ensure) G.AKSI_RESONANCE.ensure();
         var r0 = G.AKSI_RESONANCE.ask(q);
         if (r0 && r0.text && !r0.low && (r0.confidence || 0) >= 0.30) return r0;
+      }
+    } catch (e) {}
+    try {
+      if (G.AKSI_EPISTEME && G.AKSI_EPISTEME.ask) {
+        var re = G.AKSI_EPISTEME.ask(q);
+        if (re && re.text && !re.low) {
+          re.architecture = "Episteme";
+          re.confidence = re.confidence || 0.55;
+          return re;
+        }
       }
     } catch (e) {}
     if (!G.AKSI_PERSONAL) return null;
@@ -104,7 +114,7 @@
       };
     }
     return {
-      text: "Нет уверенного ответа.\n• Уточните вопрос\n• исследуй: тема\n• aksilove@internet.ru",
+      text: "Нет уверенного ответа.\n• Уточните вопрос\n• знание: A | связь | B\n• исследуй: тема\n• aksilove@internet.ru",
       source: "mind-empty", meta: "нет данных", parts: parts
     };
   }
