@@ -3,225 +3,134 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ — личная память с печатью</title>
-<meta name="description" content="Запомните факт, спросите, поставьте печать, скачайте файл. Всё на устройстве.">
+<title>АКСИ — связанный контур</title>
+<meta name="description" content="Память, vault, HRR, gate, печать — один связанный продукт">
 <meta name="theme-color" content="#0b0b0f">
 <link rel="canonical" href="https://milana808.github.io/">
 <style>
 :root{--bg:#0b0b0f;--card:#15151e;--ink:#f3f2ed;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:16px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:680px;margin:0 auto;display:flex;flex-direction:column}
-header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+body{font:16px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:700px;margin:0 auto;display:flex;flex-direction:column}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 .logo{font-weight:800}.logo span{color:var(--acc)}
-header nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
-.explain{padding:14px 16px;border-bottom:1px solid var(--line);background:#101018}
-.explain h1{font-size:1.15rem;margin-bottom:8px}
-.explain p{color:var(--muted);font-size:14px;margin-bottom:8px}
-.explain ol{margin:0 0 0 18px;color:var(--muted);font-size:14px}
-.explain li{margin:4px 0}
+header a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:8px}
+.explain{padding:12px 16px;background:#101018;border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
 .explain b{color:var(--ink)}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px}
-.board div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
-.board b{display:block;font-size:1.15rem;color:var(--ok)}
-.board span{font-size:11px;color:var(--muted)}
-.msgs{flex:1;overflow:auto;padding:8px 16px 12px;display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:40vh}
-.msg{padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px}
+.board div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.board b{display:block;font-size:1rem;color:var(--ok)}
+.board span{font-size:10px;color:var(--muted)}
+.mods{padding:0 16px 8px;font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
+.msgs{flex:1;overflow:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:38vh}
+.msg{padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
 .msg.user{align-self:flex-end;background:#1a1a26;max-width:92%}
-.msg .meta{margin-top:8px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;font-family:ui-monospace,monospace}
-.bar{padding:12px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.msg .meta{margin-top:6px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:6px;font-family:ui-monospace,monospace}
+.bar{padding:10px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 .row{display:flex;gap:8px;flex-wrap:wrap}
-input[type=text]{flex:1;min-width:140px;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
-button,label.file{font:inherit;font-size:13px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:48px}
-button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+input{flex:1;min-width:100px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
+button,label.f{font:inherit;font-size:13px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:46px}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
 button:disabled{opacity:.4}
-label.file input{display:none}
-.drop{margin:0 16px 10px;border:2px dashed var(--line);border-radius:12px;padding:12px;text-align:center;color:var(--muted);font-size:13px}
-.drop.over{border-color:var(--acc);color:var(--ink)}
-.links{padding:8px 16px 16px;font-size:12px;color:var(--muted);line-height:1.8}
-.links a{color:var(--muted)}
-footer{padding:10px 16px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
-@media(max-width:480px){.board{grid-template-columns:1fr 1fr}}
+label.f input{display:none}
+.drop{margin:0 16px 8px;border:2px dashed var(--line);border-radius:12px;padding:12px;text-align:center;font-size:13px;color:var(--muted)}
+.drop.over{border-color:var(--acc)}
+footer{padding:10px 16px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+footer a{color:var(--muted)}
+@media(max-width:520px){.board{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo">АКСИ</div>
-  <nav>
-    <a href="/HONEST.md">Честно</a>
-    <a href="/capsule.html">Капсула</a>
-    <a href="/bot.html">Бот</a>
-  </nav>
+  <div class="logo">АКСИ <span>LIVE</span></div>
+  <nav><a href="/organism.html">Lab</a> <a href="/HONEST.md">Честно</a></nav>
 </header>
-<section class="explain">
-  <h1>Личная память на вашем устройстве</h1>
-  <p>Не облачный чат-бот. Вы записываете важное → спрашиваете → при необходимости ставите печать → уносите всё файлом на другой телефон или компьютер.</p>
-  <ol>
-    <li>Напишите <b>запомни: …</b> или просто вопрос</li>
-    <li>Нажмите <b>Запечатать</b>, если ответ важен</li>
-    <li><b>Скачать файл</b> → на другом устройстве откройте этот сайт → <b>Загрузить</b></li>
-  </ol>
-</section>
-<div class="board">
-  <div><b id="nFacts">0</b><span>записей</span></div>
-  <div><b id="nSeals">0</b><span>печатей</span></div>
-  <div><b id="nGate">—</b><span>метка ответа</span></div>
+<div class="explain">
+  <b>Всё связано:</b> запись → память + HRR + vault → поиск по слоям → gate → печать ECDSA → organism-файл. Пароль vault: <b>aksi</b>.
 </div>
+<div class="board">
+  <div><b id="nF">0</b><span>память</span></div>
+  <div><b id="nV">0</b><span>vault</span></div>
+  <div><b id="nS">0</b><span>печати</span></div>
+  <div><b id="nG">—</b><span>QCLI</span></div>
+</div>
+<div class="mods" id="mods">…</div>
 <div class="msgs" id="msgs"></div>
 <div class="bar">
   <div class="row">
-    <input type="text" id="q" placeholder="запомни: …  или вопрос" autocomplete="off" enterkeyhint="send">
-    <button type="button" class="primary" id="btnSend">Отправить</button>
+    <input type="password" id="pw" value="aksi" style="max-width:120px">
+    <input type="text" id="q" placeholder="запомни: факт  или  вопрос" autocomplete="off">
+    <button type="button" class="p" id="go">Отправить</button>
   </div>
   <div class="row">
-    <button type="button" id="btnSeal" disabled>Запечатать</button>
-    <button type="button" id="btnFile" disabled>Скачать файл</button>
-    <label class="file"><input type="file" id="file" accept=".json,.aksi,application/json,text/plain,*/*">Загрузить файл</label>
-    <button type="button" id="btnCheck">Проверить печати</button>
-    <button type="button" id="btnClear">Очистить</button>
+    <button type="button" id="seal" disabled>Запечатать</button>
+    <button type="button" id="exp" disabled>Скачать organism</button>
+    <label class="f"><input type="file" id="file" accept=".json,.aksi,*/*">Загрузить</label>
+    <button type="button" id="chk">Проверить</button>
+    <button type="button" id="clr">Сброс</button>
   </div>
 </div>
-<div class="drop" id="drop">Можно перетащить файл .json / .aksi сюда</div>
-<div class="links">
-  Другие рабочие страницы (ничего не удаляли):
-  <a href="/one.html">ONE</a> ·
-  <a href="/capsule.html">Капсула</a> ·
-  <a href="/bot.html">Бот</a> ·
-  <a href="/product.html">Runtime</a> ·
-  <a href="/demo.html">Демо 60с</a> ·
-  <a href="/lab-prior.html">Lab</a>
-</div>
-<footer>aksilove@internet.ru · данные в браузере · <span id="ver"></span></footer>
+<div class="drop" id="drop">Перетащите organism .json</div>
+<footer>aksilove@internet.ru · <a href="/capsule.html">капсула</a> · <a href="/organism.html">lab</a> · <a href="/bot.html">бот</a> · <span id="ver"></span></footer>
 <script src="/aksi-capsule.js?v=12"></script>
+<script src="/aksi-cortex-kernel.js"></script>
 <script src="/aksi-quantum.js"></script>
 <script src="/aksi-hrr.js"></script>
+<script src="/aksi-resonance-net.js"></script>
+<script src="/aksi-organism.js?v=4"></script>
+<script src="/aksi-live.js?v=1"></script>
 <script>
-(function () {
-  var C = window.AKSI_CAPSULE;
-  var Q = window.AKSI_QUANTUM;
-  var H = window.AKSI_HRR;
-  var lastGate = null;
-  if (!C) {
-    document.getElementById("msgs").textContent = "Не загрузился модуль. Обновите страницу.";
-    return;
-  }
-  function add(role, text, meta) {
-    var d = document.createElement("div");
-    d.className = "msg " + role;
-    d.textContent = text;
-    if (meta) {
-      var m = document.createElement("div");
-      m.className = "meta";
-      m.textContent = meta;
-      d.appendChild(m);
-    }
-    document.getElementById("msgs").appendChild(d);
-    d.scrollIntoView({ block: "end" });
-  }
-  function paint() {
-    var s = C.status();
-    document.getElementById("nFacts").textContent = s.facts;
-    document.getElementById("nSeals").textContent = s.seals;
-    document.getElementById("nGate").textContent = lastGate && lastGate.QCLI != null ? Number(lastGate.QCLI).toFixed(2) : "—";
-    document.getElementById("btnSeal").disabled = !s.hasLast;
-    document.getElementById("btnFile").disabled = s.facts === 0 && s.seals === 0;
-    document.getElementById("ver").textContent = s.version + (Q ? " · gate" : "") + (H ? " · hrr" : "");
-  }
-  function hrrAdd(t) { if (H && H.get) try { H.get().add(t); } catch (e) {} }
-  function hrrHelp(q) { if (!H || !H.get) return null; try { return H.get().resonance(q); } catch (e) { return null; } }
-  async function send() {
-    var raw = document.getElementById("q").value.trim();
-    if (!raw) return;
-    document.getElementById("q").value = "";
-    add("user", raw);
-    var teach = raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
-    if (teach) {
-      var fact = teach[1].trim();
-      C.remember(fact);
-      hrrAdd(fact);
-      add("bot", "Записала у вас на устройстве:\n«" + fact + "»", "память");
-      paint();
-      return;
-    }
-    var ans = await C.ask(raw, { research: true });
-    var text = ans.text;
-    var meta = [];
-    if (ans.source === "memory") meta.push("из вашей памяти");
-    else if (ans.source === "wikipedia") meta.push("краткая справка (нет в памяти)");
-    else meta.push("в памяти пусто — добавьте через «запомни:»");
-    var hr = hrrHelp(raw);
-    if (hr && hr.score > 0.2 && hr.fact && ans.source === "empty") {
-      text = hr.fact;
-      meta = ["подсказка из поля памяти"];
-    }
-    if (Q && Q.answerGate) {
-      try {
-        lastGate = Q.answerGate(raw, text);
-        meta.push("метка " + Number(lastGate.QCLI).toFixed(2));
-      } catch (e) { lastGate = null; }
-    }
-    add("bot", text, meta.join(" · "));
-    paint();
-  }
-  document.getElementById("btnSend").onclick = send;
-  document.getElementById("q").onkeydown = function (e) { if (e.key === "Enter") send(); };
-  document.getElementById("btnSeal").onclick = async function () {
-    var r = await C.sealLast();
-    if (!r.ok) { add("bot", "Сначала получите ответ, потом печать.", ""); return; }
-    add("bot", "Печать поставлена.\nМожно скачать файл и проверить печать позже.\n" + r.seal.hash.slice(0, 36) + "…", "ECDSA");
-    paint();
-  };
-  document.getElementById("btnFile").onclick = function () {
-    C.downloadCapsule({ alsoAksi: true });
-    add("bot", "Скачала два файла с одним содержимым:\n• .json — удобно выбрать в телефоне\n• .aksi — то же самое\n\nНа другом устройстве: этот сайт → «Загрузить файл».\nФайл сам по себе программой не открывается.", "файл");
-  };
-  async function loadFile(file) {
-    if (!file) return;
-    add("bot", "Читаю «" + file.name + "»…", "");
-    var r = await C.importFile(file, { merge: false });
-    if (r.vault) {
-      var pw = prompt("Пароль от защищённого файла:");
-      if (!pw) return;
-      r = await C.importVault(r.data, pw);
-    }
-    if (!r.ok) { add("bot", "Не получилось: " + (r.error || "ошибка файла"), "ошибка"); return; }
-    if (H && H.get) {
-      try {
-        var mem = H.get();
-        mem.clear();
-        C.listFacts().forEach(function (f) { mem.add(f.t); });
-      } catch (e) {}
-    }
-    add("bot", "Готово. Записей: " + r.facts + ", печатей: " + r.seals + (r.allSealsOk ? ", печати в порядке" : ", есть проблемы с печатями"), "загрузка");
-    paint();
-  }
-  document.getElementById("file").onchange = function (e) {
-    loadFile(e.target.files && e.target.files[0]);
-    e.target.value = "";
-  };
-  var drop = document.getElementById("drop");
-  drop.addEventListener("dragover", function (e) { e.preventDefault(); drop.classList.add("over"); });
-  drop.addEventListener("dragleave", function () { drop.classList.remove("over"); });
-  drop.addEventListener("drop", function (e) {
-    e.preventDefault();
-    drop.classList.remove("over");
-    loadFile(e.dataTransfer.files && e.dataTransfer.files[0]);
-  });
-  document.getElementById("btnCheck").onclick = async function () {
-    var list = await C.verifyAll();
-    if (!list.length) { add("bot", "Печатей пока нет.", ""); return; }
-    add("bot", list.map(function (v, i) { return (i + 1) + ". " + (v.ok ? "в порядке" : "ошибка"); }).join("\n"), "проверка");
-  };
-  document.getElementById("btnClear").onclick = function () {
-    if (!confirm("Удалить локальные записи на этом устройстве?")) return;
-    C.clearAll();
-    lastGate = null;
-    document.getElementById("msgs").innerHTML = "";
-    if (H && H.get) try { H.get().clear(); } catch (e) {}
-    add("bot", "Очистила память на этом устройстве.", "");
-    paint();
-  };
-  C.ensureKeys().catch(function () {});
-  add("bot", "Здравствуйте. Я АКСИ — ваша локальная память.\n\nПример:\nзапомни: встреча с Марией в пятницу в 15:00\n\nПотом спросите: когда Мария?", "старт");
+(function(){
+  var L=window.AKSI_LIVE;
+  if(!L){document.getElementById("msgs").textContent="AKSI_LIVE не загрузился";return;}
+  function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}document.getElementById("msgs").appendChild(d);d.scrollIntoView({block:"end"});}
+  function paint(){var s=L.status(),cap=s.capsule||{},last=L.getLast();
+    document.getElementById("nF").textContent=cap.facts||0;
+    document.getElementById("nV").textContent=(s.cortex&&s.cortex.size)||0;
+    document.getElementById("nS").textContent=cap.seals||0;
+    document.getElementById("nG").textContent=last&&last.gate&&last.gate.QCLI!=null?Number(last.gate.QCLI).toFixed(2):"—";
+    document.getElementById("seal").disabled=!s.hasLast;
+    document.getElementById("exp").disabled=!(cap.facts||cap.seals);
+    var m=s.modules||{};
+    document.getElementById("mods").textContent="модули: "+["capsule","cortex","quantum","hrr","arin","stack"].map(function(k){return k+(m[k]?"✓":"✗");}).join(" ");
+    document.getElementById("ver").textContent=L.version;}
+  function applyPw(){L.setPassword(document.getElementById("pw").value||"aksi");}
+  async function send(){applyPw();var raw=document.getElementById("q").value.trim();if(!raw)return;
+    document.getElementById("q").value="";add("user",raw);
+    var teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
+    if(teach){var r=await L.remember(teach[1].trim());
+      add("bot","Записано в:\n• капсула\n• HRR\n"+(r.cortex&&!r.cortex.error?"• vault\n":"• vault — пароль?\n")+"\n«"+teach[1].trim()+"»","remember");paint();return;}
+    var a=await L.ask(raw,{research:true});
+    if(!a.ok){add("bot",a.text||a.error||"ошибка",a.source||"");paint();return;}
+    var meta=[a.engine||""].concat(a.sources||[]);if(a.gate)meta.push("QCLI "+Number(a.gate.QCLI).toFixed(2));
+    add("bot",a.text,meta.filter(Boolean).join(" · "));paint();}
+  document.getElementById("go").onclick=send;
+  document.getElementById("q").onkeydown=function(e){if(e.key==="Enter")send();};
+  document.getElementById("pw").onchange=applyPw;
+  document.getElementById("seal").onclick=async function(){applyPw();var r=await L.seal();
+    if(!r.ok){add("bot",r.error||"нечего","");return;}
+    var lines=["Связанная печать:"];
+    if(r.capsule&&r.capsule.seal)lines.push("• ECDSA "+String(r.capsule.seal.hash||"").slice(0,28)+"…");
+    if(r.quantum)lines.push("• gate QCLI "+Number(r.quantum.QCLI).toFixed(3));
+    add("bot",lines.join("\n"),"seal");paint();};
+  document.getElementById("exp").onclick=async function(){applyPw();await L.exportAll();add("bot","Скачан organism. На другом устройстве — Загрузить.","export");};
+  async function loadFile(file){if(!file)return;add("bot","Импорт «"+file.name+"»…","");var r=await L.importAll(file);add("bot",r.ok?"Импорт OK":"Ошибка: "+(r.error||""),"import");paint();}
+  document.getElementById("file").onchange=function(e){loadFile(e.target.files&&e.target.files[0]);e.target.value="";};
+  var drop=document.getElementById("drop");
+  drop.ondragover=function(e){e.preventDefault();drop.classList.add("over");};
+  drop.ondragleave=function(){drop.classList.remove("over");};
+  drop.ondrop=function(e){e.preventDefault();drop.classList.remove("over");loadFile(e.dataTransfer.files&&e.dataTransfer.files[0]);};
+  document.getElementById("chk").onclick=async function(){
+    if(!window.AKSI_CAPSULE||!AKSI_CAPSULE.verifyAll){add("bot","Нет проверки","");return;}
+    var list=await AKSI_CAPSULE.verifyAll();
+    if(!list.length){add("bot","Печатей нет","");return;}
+    add("bot",list.map(function(v,i){return (i+1)+". "+(v.ok?"OK":"FAIL");}).join("\n"),"verify");};
+  document.getElementById("clr").onclick=function(){
+    if(!confirm("Сбросить?"))return;
+    if(window.AKSI_CAPSULE)AKSI_CAPSULE.clearAll();
+    if(window.AKSI_HRR&&AKSI_HRR.get)try{AKSI_HRR.get().clear();}catch(e){}
+    document.getElementById("msgs").innerHTML="";add("bot","Очищено","");paint();};
+  applyPw();
+  add("bot","АКСИ LIVE — слои связаны.\n\nзапомни: встреча пятница 15:00\nпотом: пятница\nЗапечатать → Скачать → Загрузить","start");
   paint();
 })();
 </script>
