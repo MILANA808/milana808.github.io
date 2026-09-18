@@ -24,8 +24,8 @@ a{color:var(--muted)}
 <body>
 <div style="font-weight:800">АКСИ <span style="color:var(--acc)">Organism</span></div>
 <h1>Единый стек из переписки</h1>
-<p style="color:var(--muted);font-size:14px">Cortex fidelity · HRR · answerGate · ARIN · Zeno · Walk · Entangle · sealed capsule</p>
-<div class="note">Честно: <b>классические quantum-inspired</b> алгоритмы в браузере. Не QPU и не «нигде в мире».</div>
+<p style="color:var(--muted);font-size:14px">Cortex · HRR · gate · ARIN · Zeno · Walk · Entangle · sealed capsule</p>
+<div class="note">Честно: classical <b>quantum-inspired</b> stack в браузере. Не QPU. Не «нигде в мире» как научный факт.</div>
 <div class="card"><h2>0. Статус</h2><pre id="st">…</pre></div>
 <div class="card"><h2>1. Cortex vault + fidelity search</h2>
 <div class="row"><input id="pw" type="password" value="aksi"><input id="doc" placeholder="текст" style="flex:1"><button class="p" id="btnIn">ingest</button></div>
@@ -34,7 +34,7 @@ a{color:var(--muted)}
 <div class="card"><h2>2. Think</h2>
 <div class="row"><input id="tq" value="что в памяти" style="flex:1"><button class="p" id="btnThink">think</button></div>
 <pre id="tOut">—</pre></div>
-<div class="card"><h2>3. Zeno · Entangle · HRR fragment · CHSH · ZK</h2>
+<div class="card"><h2>3. Zeno · Entangle · HRR · CHSH · ZK</h2>
 <div class="row">
 <button id="btnZenoOn">Zeno 3s</button><button id="btnZenoOff">Zeno off</button>
 <button id="btnEnt">Entangle</button><button id="btnFrag">HRR 30%</button>
@@ -51,12 +51,16 @@ a{color:var(--muted)}
 <script src="/aksi-hrr.js"></script>
 <script src="/aksi-resonance-net.js"></script>
 <script src="/aksi-superpose.js"></script>
-<script src="/aksi-organism.js?v=1"></script>
+<script src="/aksi-organism.js?v=3"></script>
 <script>
 (function(){
   function j(x){try{return JSON.stringify(x,null,2);}catch(e){return String(x);}}
   function el(id){return document.getElementById(id);}
-  var O=window.AKSI_ORGANISM; if(!O){el("st").textContent="no module";return;}
+  var O=window.AKSI_ORGANISM;
+  if(!O||typeof O.vaultIngest!=="function"){
+    el("st").textContent="Organism stack не загрузился (обновите без кэша). Legacy AKSI_ORGANISM conflict?";
+    return;
+  }
   function paint(){el("st").textContent=j(O.status());} paint();
   if(window.AKSI_CAPSULE) AKSI_CAPSULE.remember("Organism stack online");
   if(window.AKSI_HRR) AKSI_HRR.get().add("Organism holographic trace");
