@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>АКСИ — один контур</title>
+<meta name="description" content="Память, ответ, печать, файл — один продукт АКСИ">
+<meta name="theme-color" content="#0b0b0f">
+<link rel="canonical" href="https://milana808.github.io/one.html">
+<style>
+:root{--bg:#0b0b0f;--card:#14141c;--ink:#f3f2ed;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;max-width:720px;margin:0 auto}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800}.logo span{color:var(--acc)}
+header a{color:var(--muted);font-size:13px;text-decoration:none}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.board div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.board b{display:block;font-size:1.1rem;color:var(--ok)}
+.board span{font-size:11px;color:var(--muted)}
+.msgs{flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;min-height:220px;max-height:42vh}
+.msg{padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
+.msg.user{align-self:flex-end;background:#1a1a26;max-width:92%}
+.msg .meta{margin-top:8px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;font-family:ui-monospace,monospace}
+.composer{padding:12px 16px 8px;border-top:1px solid var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:120px;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
+button,label.file{font:inherit;font-size:13px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:48px}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+button:disabled{opacity:.4}
+label.file input{display:none}
+.tools{padding:0 16px 12px;display:flex;flex-wrap:wrap;gap:8px}
+.hint{padding:0 16px 14px;font-size:12px;color:var(--muted)}
+.hint b{color:var(--ink)}
+.drop{margin:0 16px 12px;border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted);font-size:13px}
+.drop.over{border-color:var(--acc);color:var(--ink)}
+footer{padding:10px 16px 18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+@media(max-width:520px){.board{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">АКСИ <span>ONE</span></div>
+  <a href="/HONEST.md">Честно</a>
+</header>
+<div class="board">
+  <div><b id="nFacts">0</b><span>фактов</span></div>
+  <div><b id="nSeals">0</b><span>печатей</span></div>
+  <div><b id="nGate">—</b><span>QCLI gate</span></div>
+  <div><b id="nHrr">—</b><span>HRR score</span></div>
+</div>
+<div class="hint"><b>Один контур:</b> вопрос → память/HRR → печать ECDSA + gate → файл. Не AGI.</div>
+<div class="msgs" id="msgs"></div>
+<div class="composer">
+  <div class="row">
+    <input type="text" id="q" placeholder="Спросить или «запомни: факт»…" autocomplete="off">
+    <button type="button" class="primary" id="btnSend">Отправить</button>
+  </div>
+</div>
+<div class="tools">
+  <button type="button" id="btnSeal" disabled>Запечатать</button>
+  <button type="button" id="btnFile" disabled>Скачать файл</button>
+  <label class="file"><input type="file" id="file" accept=".json,.aksi,application/json,text/plain,*/*">Загрузить</label>
+  <button type="button" id="btnVerify">Проверить</button>
+  <button type="button" id="btnClear">Сброс</button>
+</div>
+<div class="drop" id="drop">Перетащите .json / .aksi</div>
+<footer>aksilove@internet.ru · <span id="ver">…</span></footer>
+<script src="/aksi-capsule.js?v=12"></script>
+<script src="/aksi-quantum.js"></script>
+<script src="/aksi-hrr.js"></script>
+<script>
+(function(){
+  var C=window.AKSI_CAPSULE,Q=window.AKSI_QUANTUM,H=window.AKSI_HRR,lastGate=null,lastHrr=null;
+  if(!C){document.getElementById("msgs").textContent="Модуль не загрузился";return;}
+  function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}document.getElementById("msgs").appendChild(d);d.scrollIntoView({block:"end"});}
+  function paint(){var s=C.status();document.getElementById("nFacts").textContent=s.facts;document.getElementById("nSeals").textContent=s.seals;document.getElementById("nGate").textContent=lastGate&&lastGate.QCLI!=null?Number(lastGate.QCLI).toFixed(2):"—";document.getElementById("nHrr").textContent=lastHrr&&lastHrr.score!=null?Number(lastHrr.score).toFixed(2):"—";document.getElementById("btnSeal").disabled=!s.hasLast;document.getElementById("btnFile").disabled=s.facts===0&&s.seals===0;document.getElementById("ver").textContent="capsule "+s.version+(Q?" · quantum":"")+(H?" · hrr":"");}
+  function hrrAdd(t){if(H&&H.get)try{H.get().add(t);}catch(e){}}
+  function hrrQuery(q){if(!H||!H.get)return null;try{return H.get().resonance(q);}catch(e){return null;}}
+  async function send(){
+    var raw=document.getElementById("q").value.trim();if(!raw)return;document.getElementById("q").value="";add("user",raw);
+    var m=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
+    if(m){var fact=m[1].trim();C.remember(fact);hrrAdd(fact);add("bot","Запомнено:\n«"+fact+"»","memory");paint();return;}
+    var ans=await C.ask(raw,{research:true});lastHrr=hrrQuery(raw);
+    var text=ans.text,meta=[ans.source];
+    if(lastHrr&&lastHrr.score>0.15){meta.push("HRR "+lastHrr.score.toFixed(2));if(lastHrr.fact&&ans.source==="empty")text=lastHrr.fact+"\n\n(HRR)";}
+    if(Q&&Q.answerGate){try{lastGate=Q.answerGate(raw,text);meta.push("QCLI "+Number(lastGate.QCLI).toFixed(2));}catch(e){lastGate=null;}}
+    add("bot",text,meta.join(" · "));paint();
+  }
+  document.getElementById("btnSend").onclick=send;
+  document.getElementById("q").onkeydown=function(e){if(e.key==="Enter")send();};
+  document.getElementById("btnSeal").onclick=async function(){
+    var r=await C.sealLast();if(!r.ok){add("bot","Сначала ответ","err");return;}
+    add("bot","Печать OK\n"+r.seal.hash.slice(0,40)+"…"+(lastGate?"\nQCLI "+Number(lastGate.QCLI).toFixed(3):""),"seal");paint();
+  };
+  document.getElementById("btnFile").onclick=function(){C.downloadCapsule({alsoAksi:true});add("bot","Скачаны .json и .aksi","export");};
+  async function importFile(file){
+    if(!file)return;add("bot","Читаю «"+file.name+"»…","import");
+    var r=await C.importFile(file,{merge:false});
+    if(r.vault){var pw=prompt("Пароль vault:");if(!pw)return;r=await C.importVault(r.data,pw);}
+    if(!r.ok){add("bot","Ошибка: "+(r.error||""),"err");return;}
+    if(H&&H.get){try{var mem=H.get();mem.clear();C.listFacts().forEach(function(f){mem.add(f.t);});}catch(e){}}
+    add("bot","Импорт OK · "+r.facts+" фактов · печати "+(r.allSealsOk?"OK":"FAIL"),"import");paint();
+  }
+  document.getElementById("file").onchange=function(e){importFile(e.target.files&&e.target.files[0]);e.target.value="";};
+  var drop=document.getElementById("drop");
+  drop.addEventListener("dragover",function(e){e.preventDefault();drop.classList.add("over");});
+  drop.addEventListener("dragleave",function(){drop.classList.remove("over");});
+  drop.addEventListener("drop",function(e){e.preventDefault();drop.classList.remove("over");importFile(e.dataTransfer.files&&e.dataTransfer.files[0]);});
+  document.getElementById("btnVerify").onclick=async function(){
+    var list=await C.verifyAll();if(!list.length){add("bot","Печатей нет","");return;}
+    add("bot",list.map(function(v,i){return (i+1)+". "+(v.ok?"OK":"FAIL");}).join("\n"),"verify");
+  };
+  document.getElementById("btnClear").onclick=function(){
+    if(!confirm("Сбросить?"))return;C.clearAll();lastGate=lastHrr=null;document.getElementById("msgs").innerHTML="";
+    if(H&&H.get)try{H.get().clear();}catch(e){}add("bot","Очищено","reset");paint();
+  };
+  C.ensureKeys().catch(function(){});
+  add("bot","АКСИ ONE\n• вопрос или «запомни: …»\n• Запечатать → Скачать → Загрузить на другом устройстве\n\nКапсула + gate + HRR.","ready");
+  paint();
+})();
+</script>
+</body>
+</html>
