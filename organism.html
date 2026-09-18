@@ -2,148 +2,75 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ Organism — единый ИИ-организм</title>
-<meta name="description" content="АКСИ Organism: Cortex + Brainstem + Trust + Lab + self-taught.">
-<link rel="canonical" href="https://milana808.github.io/organism.html">
-<meta name="theme-color" content="#0a0a12">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>АКСИ Organism — единый стек</title>
+<meta name="theme-color" content="#0b0b0f">
 <style>
-:root{--bg:#07070c;--ink:#eef0f6;--muted:#8b8b9a;--line:#1c1c28;--blue:#3b82f6;--green:#4ade80;--red:#f87171;--violet:#a78bfa;--card:#0e0e16}
+:root{--bg:#0b0b0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#a78bfa;--warn:#e6b84d}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
-header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.logo{font-weight:900}.logo span{color:var(--violet)}
-header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:12px}
-.pulse-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px;animation:hb 1.6s infinite}
-@keyframes hb{0%,100%{opacity:1}50%{opacity:.4}}
-main{flex:1;display:grid;grid-template-columns:1fr 300px;max-width:1100px;width:100%;margin:0 auto}
-@media(max-width:860px){main{grid-template-columns:1fr}}
-.chat{display:flex;flex-direction:column;border-right:1px solid var(--line);min-height:60vh}
-.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:92%;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--card);white-space:pre-wrap;word-break:break-word}
-.msg.user{align-self:flex-end;background:#151528}
-.msg .meta{font-size:11px;color:var(--muted);margin-top:6px}
-.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:6px;background:#1a1a28;margin-right:4px}
-.badge.ok{color:var(--green)}.badge.no{color:var(--red)}
-.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
-.composer input{flex:1;padding:14px;border-radius:12px;border:1px solid var(--line);background:#0a0a12;color:var(--ink);font:inherit;font-size:16px}
-.composer button{background:var(--violet);color:#fff;border:0;border-radius:12px;padding:14px 18px;font-weight:800;cursor:pointer}
-.side{padding:14px;overflow-y:auto}
-.side h2{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 8px}
-.organ{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--card);text-decoration:none;color:inherit}
-.organ .dot{width:10px;height:10px;border-radius:50%;background:#475569;flex-shrink:0}
-.organ .dot.alive,.organ .dot.pass,.organ .dot.allowed,.organ .dot.sealed{background:var(--green)}
-.organ .dot.thinking,.organ .dot.active{background:var(--blue)}
-.organ .dot.veto,.organ .dot.deferred{background:var(--red)}
-.organ strong{display:block;font-size:13px}
-.organ span{font-size:11px;color:var(--muted)}
-.manifest{font-size:12px;color:var(--muted);line-height:1.55;padding:10px;border:1px solid var(--line);border-radius:12px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
-.chips button{font-size:12px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:#15151f;color:var(--ink);cursor:pointer}
-#live{font-size:11px;color:var(--muted);margin-top:8px}
+body{font:15px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:760px;margin:0 auto;padding:16px 16px 48px}
+h1{font-size:1.25rem;margin:8px 0}
+.note{background:#1a1810;border:1px solid #3d3520;color:var(--warn);padding:12px;border-radius:12px;font-size:13px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.card h2{font-size:13px;color:var(--acc);margin-bottom:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+input,button{font:inherit;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#101018;color:var(--ink)}
+button{cursor:pointer;background:#1a1a24}
+button.p{background:var(--acc);border-color:var(--acc);color:#0b0b0f;font-weight:700}
+pre{background:#0e0e14;padding:10px;border-radius:10px;font-size:11px;overflow:auto;max-height:180px;margin-top:8px;color:var(--muted);white-space:pre-wrap}
+a{color:var(--muted)}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo"><span class="pulse-dot"></span>АКСИ <span>Organism</span></div>
-  <nav><a href="/autopilot.html">Autopilot</a><a href="/ask.html">Ask</a><a href="/brain.html">Brain</a><a href="/">Все</a></nav>
-</header>
-<main>
-<section class="chat">
-  <div class="msgs" id="msgs"></div>
-  <div class="chips">
-    <button type="button" data-q="Что такое АКСИ Organism?">Organism</button>
-    <button type="button" data-q="Как пользоваться?">Как пользоваться</button>
-    <button type="button" data-q="Расскажи про мозг мухи">Мозг</button>
-    <button type="button" data-q="статус">Статус</button>
-  </div>
-  <div class="composer">
-    <input id="q" type="text" placeholder="Спросите организм…" enterkeyhint="send">
-    <button type="button" id="send">Пульс</button>
-  </div>
-</section>
-<aside class="side">
-  <h2>Органы</h2>
-  <div id="organs"></div>
-  <h2>Манифест</h2>
-  <div class="manifest" id="man"></div>
-  <p id="live">…</p>
-</aside>
-</main>
-<script src="/aksi-fly-brain.js?v=2"></script>
-<script src="/aksi-fly-gate.js?v=2"></script>
-<script src="/aksi-receipt.js?v=2"></script>
-<script src="/aksi-organism.js?v=13"></script>
+<div style="font-weight:800">АКСИ <span style="color:var(--acc)">Organism</span></div>
+<h1>Единый стек из переписки</h1>
+<p style="color:var(--muted);font-size:14px">Cortex fidelity · HRR · answerGate · ARIN · Zeno · Walk · Entangle · sealed capsule</p>
+<div class="note">Честно: <b>классические quantum-inspired</b> алгоритмы в браузере. Не QPU и не «нигде в мире».</div>
+<div class="card"><h2>0. Статус</h2><pre id="st">…</pre></div>
+<div class="card"><h2>1. Cortex vault + fidelity search</h2>
+<div class="row"><input id="pw" type="password" value="aksi"><input id="doc" placeholder="текст" style="flex:1"><button class="p" id="btnIn">ingest</button></div>
+<div class="row"><input id="vq" placeholder="поиск" style="flex:1"><button id="btnVq">search</button></div>
+<pre id="vOut">—</pre></div>
+<div class="card"><h2>2. Think</h2>
+<div class="row"><input id="tq" value="что в памяти" style="flex:1"><button class="p" id="btnThink">think</button></div>
+<pre id="tOut">—</pre></div>
+<div class="card"><h2>3. Zeno · Entangle · HRR fragment · CHSH · ZK</h2>
+<div class="row">
+<button id="btnZenoOn">Zeno 3s</button><button id="btnZenoOff">Zeno off</button>
+<button id="btnEnt">Entangle</button><button id="btnFrag">HRR 30%</button>
+<button id="btnChsh">CHSH</button><button id="btnZk">ZK</button>
+</div><pre id="xOut">—</pre></div>
+<div class="card"><h2>4. Organism capsule</h2>
+<div class="row"><button class="p" id="btnExp">Export</button>
+<label style="font-size:13px;color:var(--muted)"><input type="file" id="imp"> import</label></div>
+<pre id="cOut">—</pre></div>
+<p style="font-size:13px;color:var(--muted)"><a href="/">Главный продукт</a> · <a href="/HONEST.md">HONEST</a></p>
+<script src="/aksi-capsule.js?v=12"></script>
+<script src="/aksi-cortex-kernel.js"></script>
+<script src="/aksi-quantum.js"></script>
+<script src="/aksi-hrr.js"></script>
+<script src="/aksi-resonance-net.js"></script>
+<script src="/aksi-superpose.js"></script>
+<script src="/aksi-organism.js?v=1"></script>
 <script>
 (function(){
-  var O=window.AKSI_ORGANISM;
-  if(!O){document.getElementById('msgs').textContent='Organism missing';return;}
-  document.getElementById('man').textContent=O.manifesto||('Organism '+O.version);
-  window.__AKSI_SELF_TAUGHT=[];
-  fetch('/data/self-taught.json?v='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(d){
-    if(d&&Array.isArray(d.items)){
-      window.__AKSI_SELF_TAUGHT=d.items;
-      var el=document.getElementById('live');
-      if(el)el.textContent=(el.textContent||'')+' · seed '+d.items.length;
-    }
-  }).catch(function(){});
-  function render(){
-    var snap=O.snapshot?O.snapshot():(O.ORGANS||{});
-    var html='',k;
-    for(k in snap){
-      if(!Object.prototype.hasOwnProperty.call(snap,k))continue;
-      var o=snap[k];
-      html+='<a class="organ" href="'+(o.href||'#')+'"><i class="dot '+(o.pulse||'')+'"></i><div><strong>'+o.name+'</strong><span>'+o.role+' · '+(o.pulse||'')+'</span></div></a>';
-    }
-    document.getElementById('organs').innerHTML=html;
-  }
-  if(O.on)O.on(function(m){if(m.type==='pulse'||m.type==='heartbeat')render();});
-  O.pulse().then(function(p){
-    document.getElementById('live').textContent='v'+p.version+' · health '+p.health+'/'+p.total+
-      ' · fly='+!!(p.modules&&p.modules.flyBrain)+' gate='+!!(p.modules&&p.modules.flyGate);
-    render();
-  });
-  function add(role,text,meta){
-    var d=document.createElement('div');d.className='msg '+role;d.textContent=text;
-    if(meta){var m=document.createElement('div');m.className='meta';m.innerHTML=meta;d.appendChild(m);}
-    document.getElementById('msgs').appendChild(d);d.scrollIntoView({block:'end'});
-  }
-  add('bot','Я АКСИ Organism — один пульс всех систем.\nSelf-taught seed с GitHub подключается автоматически.\nAutopilot: /autopilot.html');
-  function matchSeed(q){
-    var items=window.__AKSI_SELF_TAUGHT||[];
-    var low=q.toLowerCase();
-    for(var i=items.length-1;i>=0;i--){
-      var t=String(items[i].text||'');
-      var words=low.split(/\s+/).filter(function(w){return w.length>3;});
-      var hit=0;
-      for(var j=0;j<words.length;j++){if(t.toLowerCase().indexOf(words[j])>=0)hit++;}
-      if(hit>=1||t.toLowerCase().indexOf(low.slice(0,20))>=0)return t;
-    }
-    return null;
-  }
-  async function go(){
-    var q=document.getElementById('q').value.trim();if(!q)return;
-    document.getElementById('q').value='';add('user',q);
-    document.getElementById('send').disabled=true;
-    try{
-      var seed=matchSeed(q);
-      var out;
-      if(seed){
-        out={ok:true,decision:'ALLOWED',answer:seed,source:'self-taught',receipt:null};
-      }else{
-        out=await O.decide(q);
-      }
-      var dec=out.decision||(out.ok?'ALLOWED':'DEFERRED');
-      var meta='<span class="badge '+(out.ok!==false&&dec!=='DEFERRED'?'ok':'no')+'">'+dec+'</span><span class="badge">'+(out.source||'')+'</span>';
-      if(out.receipt)meta+=' · sealed';
-      add('bot',out.answer||out.text||'—',meta);
-    }catch(e){add('bot','Ошибка: '+e.message);}
-    document.getElementById('send').disabled=false;render();
-  }
-  document.getElementById('send').onclick=go;
-  document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')go();});
-  document.querySelectorAll('.chips button').forEach(function(b){b.onclick=function(){document.getElementById('q').value=b.getAttribute('data-q');go();};});
-  setInterval(function(){O.pulse();},10000);
+  function j(x){try{return JSON.stringify(x,null,2);}catch(e){return String(x);}}
+  function el(id){return document.getElementById(id);}
+  var O=window.AKSI_ORGANISM; if(!O){el("st").textContent="no module";return;}
+  function paint(){el("st").textContent=j(O.status());} paint();
+  if(window.AKSI_CAPSULE) AKSI_CAPSULE.remember("Organism stack online");
+  if(window.AKSI_HRR) AKSI_HRR.get().add("Organism holographic trace");
+  el("btnIn").onclick=async function(){el("vOut").textContent=j(await O.vaultIngest(el("doc").value||"secret doc",el("pw").value||"aksi"));paint();};
+  el("btnVq").onclick=async function(){el("vOut").textContent=j(await O.vaultSearch(el("vq").value||"doc",el("pw").value||"aksi"));};
+  el("btnThink").onclick=async function(){el("tOut").textContent=j(await O.think(el("tq").value,{password:el("pw").value}));};
+  el("btnZenoOn").onclick=function(){el("xOut").textContent=j(O.zenoConfigure(3000));};
+  el("btnZenoOff").onclick=function(){el("xOut").textContent=j(O.zenoConfigure(0));};
+  el("btnEnt").onclick=function(){el("xOut").textContent=j({seed:O.entangleSeed("A","B"),touch:O.entangleTouch("a","u","v")});};
+  el("btnFrag").onclick=function(){el("xOut").textContent=j(O.hrrFragmentRestore(0.3));};
+  el("btnChsh").onclick=function(){el("xOut").textContent=window.AKSI_QUANTUM&&AKSI_QUANTUM.chsh?j(AKSI_QUANTUM.chsh(256)):"no";};
+  el("btnZk").onclick=function(){el("xOut").textContent=j(O.zkProve("secret","challenge"));};
+  el("btnExp").onclick=async function(){var r=await O.exportOrganismCapsule({download:true});el("cOut").textContent=j({format:r.format,quantumSeal:r.quantumSeal,note:r.note});};
+  el("imp").onchange=async function(e){var f=e.target.files&&e.target.files[0];if(!f)return;el("cOut").textContent=j(await O.importOrganismCapsule(await f.text()));paint();e.target.value="";};
 })();
 </script>
 </body>
