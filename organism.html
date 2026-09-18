@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>АКСИ Organism — единый стек</title>
+<title>АКСИ Organism</title>
 <meta name="theme-color" content="#0b0b0f">
 <style>
 :root{--bg:#0b0b0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#a78bfa;--warn:#e6b84d}
@@ -23,26 +23,24 @@ a{color:var(--muted)}
 </head>
 <body>
 <div style="font-weight:800">АКСИ <span style="color:var(--acc)">Organism</span></div>
-<h1>Единый стек из переписки</h1>
-<p style="color:var(--muted);font-size:14px">Cortex · HRR · gate · ARIN · Zeno · Walk · Entangle · sealed capsule</p>
-<div class="note">Честно: classical <b>quantum-inspired</b> stack в браузере. Не QPU. Не «нигде в мире» как научный факт.</div>
-<div class="card"><h2>0. Статус</h2><pre id="st">…</pre></div>
-<div class="card"><h2>1. Cortex vault + fidelity search</h2>
-<div class="row"><input id="pw" type="password" value="aksi"><input id="doc" placeholder="текст" style="flex:1"><button class="p" id="btnIn">ingest</button></div>
-<div class="row"><input id="vq" placeholder="поиск" style="flex:1"><button id="btnVq">search</button></div>
+<h1>Стек из переписки — собран</h1>
+<div class="note">Classical <b>quantum-inspired</b> browser stack. Не QPU. Не научный «first in world».</div>
+<div class="card"><h2>Статус</h2><pre id="st">…</pre></div>
+<div class="card"><h2>1. Cortex fidelity vault</h2>
+<div class="row"><input id="pw" type="password" value="aksi"><input id="doc" style="flex:1" placeholder="текст"><button class="p" id="btnIn">ingest</button></div>
+<div class="row"><input id="vq" style="flex:1" placeholder="поиск"><button id="btnVq">search</button></div>
 <pre id="vOut">—</pre></div>
 <div class="card"><h2>2. Think</h2>
-<div class="row"><input id="tq" value="что в памяти" style="flex:1"><button class="p" id="btnThink">think</button></div>
+<div class="row"><input id="tq" style="flex:1" value="что в памяти"><button class="p" id="btnThink">think</button></div>
 <pre id="tOut">—</pre></div>
-<div class="card"><h2>3. Zeno · Entangle · HRR · CHSH · ZK</h2>
+<div class="card"><h2>3. Labs</h2>
 <div class="row">
-<button id="btnZenoOn">Zeno 3s</button><button id="btnZenoOff">Zeno off</button>
+<button id="btnZenoOn">Zeno on</button><button id="btnZenoOff">Zeno off</button>
 <button id="btnEnt">Entangle</button><button id="btnFrag">HRR 30%</button>
 <button id="btnChsh">CHSH</button><button id="btnZk">ZK</button>
 </div><pre id="xOut">—</pre></div>
-<div class="card"><h2>4. Organism capsule</h2>
-<div class="row"><button class="p" id="btnExp">Export</button>
-<label style="font-size:13px;color:var(--muted)"><input type="file" id="imp"> import</label></div>
+<div class="card"><h2>4. Sealed capsule</h2>
+<div class="row"><button class="p" id="btnExp">Export</button><label style="font-size:13px;color:var(--muted)"><input type="file" id="imp">import</label></div>
 <pre id="cOut">—</pre></div>
 <p style="font-size:13px;color:var(--muted)"><a href="/">Главный продукт</a> · <a href="/HONEST.md">HONEST</a></p>
 <script src="/aksi-capsule.js?v=12"></script>
@@ -50,22 +48,18 @@ a{color:var(--muted)}
 <script src="/aksi-quantum.js"></script>
 <script src="/aksi-hrr.js"></script>
 <script src="/aksi-resonance-net.js"></script>
-<script src="/aksi-superpose.js"></script>
-<script src="/aksi-organism.js?v=3"></script>
+<script src="/aksi-organism.js?v=4"></script>
 <script>
 (function(){
   function j(x){try{return JSON.stringify(x,null,2);}catch(e){return String(x);}}
   function el(id){return document.getElementById(id);}
-  var O=window.AKSI_ORGANISM;
-  if(!O||typeof O.vaultIngest!=="function"){
-    el("st").textContent="Organism stack не загрузился (обновите без кэша). Legacy AKSI_ORGANISM conflict?";
-    return;
-  }
+  var O=window.AKSI_STACK||window.AKSI_ORGANISM;
+  if(!O||!O.vaultIngest){el("st").textContent="Stack not loaded";return;}
   function paint(){el("st").textContent=j(O.status());} paint();
-  if(window.AKSI_CAPSULE) AKSI_CAPSULE.remember("Organism stack online");
-  if(window.AKSI_HRR) AKSI_HRR.get().add("Organism holographic trace");
-  el("btnIn").onclick=async function(){el("vOut").textContent=j(await O.vaultIngest(el("doc").value||"secret doc",el("pw").value||"aksi"));paint();};
-  el("btnVq").onclick=async function(){el("vOut").textContent=j(await O.vaultSearch(el("vq").value||"doc",el("pw").value||"aksi"));};
+  if(window.AKSI_CAPSULE)AKSI_CAPSULE.remember("Organism online");
+  if(window.AKSI_HRR)AKSI_HRR.get().add("hrr trace");
+  el("btnIn").onclick=async function(){el("vOut").textContent=j(await O.vaultIngest(el("doc").value||"secret",el("pw").value||"aksi"));paint();};
+  el("btnVq").onclick=async function(){el("vOut").textContent=j(await O.vaultSearch(el("vq").value||"secret",el("pw").value||"aksi"));};
   el("btnThink").onclick=async function(){el("tOut").textContent=j(await O.think(el("tq").value,{password:el("pw").value}));};
   el("btnZenoOn").onclick=function(){el("xOut").textContent=j(O.zenoConfigure(3000));};
   el("btnZenoOff").onclick=function(){el("xOut").textContent=j(O.zenoConfigure(0));};
