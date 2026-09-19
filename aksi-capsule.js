@@ -1,10 +1,10 @@
 /**
- * AKSI Capsule Runtime v1.2 — reliable .aksi / .json export-import
- * © AKSI · aksilove@internet.ru · 2026-09-18
+ * AKSI Capsule Runtime v1.2.1 — search stems + reliable export-import
+ * © AKSI · aksilove@internet.ru · 2026-09-19
  */
 (function (G) {
   "use strict";
-  var VERSION = "1.2.0-capsule";
+  var VERSION = "1.2.1-capsule";
   var STORE = "aksi_capsule_runtime_v1";
   var KEY_STORE = "aksi_capsule_ecdsa_v1";
   var TEMPLATES = [
@@ -104,7 +104,7 @@
   }
   async function decryptVault(vaultObj, password) {
     var key = await deriveKey(password, fromB64(vaultObj.salt));
-    var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(vaultObj.iv) }, key, fromB64(vaultObj.ciphertext));
+    var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(vaultObj.iv), key, fromB64(vaultObj.ciphertext));
     return JSON.parse(new TextDecoder().decode(plain));
   }
   function remember(text, meta) {
@@ -119,6 +119,11 @@
     return { ok: true, removed: n - state.facts.length };
   }
   function listFacts() { return state.facts.slice().reverse(); }
+  function stem(w) {
+    w = String(w || "").toLowerCase();
+    if (w.length <= 4) return w;
+    return w.slice(0, Math.min(5, w.length - 1));
+  }
   function search(q) {
     q = String(q || "").trim().toLowerCase();
     if (!q) return state.facts.slice();
@@ -126,8 +131,17 @@
     return state.facts.filter(function (f) {
       var t = f.t.toLowerCase();
       if (t.indexOf(q) >= 0) return true;
-      var hit = 0; for (var i = 0; i < words.length; i++) if (t.indexOf(words[i]) >= 0) hit++;
-      return words.length && hit >= Math.ceil(words.length * 0.5);
+      var hit = 0, i, w, s;
+      for (i = 0; i < words.length; i++) {
+        w = words[i];
+        if (t.indexOf(w) >= 0) { hit++; continue; }
+        s = stem(w);
+        if (s.length >= 3 && t.indexOf(s) >= 0) hit++;
+        else if (s.length >= 3 && t.split(/\s+/).some(function (tw) {
+          return stem(tw).indexOf(s) === 0 || s.indexOf(stem(tw)) === 0;
+        })) hit++;
+      }
+      return words.length && hit >= Math.max(1, Math.ceil(words.length * 0.4));
     });
   }
   async function researchWiki(q) {
@@ -152,8 +166,8 @@
       if (wiki && wiki.extract) {
         answer = wiki.title + "\n\n" + wiki.extract + (wiki.url ? "\n\nИсточник: " + wiki.url : "");
         source = "wikipedia";
-      } else answer = "В капсуле нет совпадений. Нажмите «Запомнить» и добавьте факт.";
-    } else answer = "В капсуле нет совпадений. Нажмите «Запомнить».";
+      } else answer = "В капсуле нет совпадений. Напишите: запомни: ваш факт";
+    } else answer = "В капсуле нет совпадений. Напишите: запомни: ваш факт";
     var rec = { q: q, a: answer, at: now(), source: source, n: hits.length };
     state.lastAnswer = rec;
     state.chat.push({ role: "user", text: q, at: rec.at });
@@ -188,7 +202,7 @@
       format: "aksi-capsule", version: VERSION, product: "AKSI Capsule", contact: "aksilove@internet.ru",
       exportedAt: now(), did: state.did, createdAt: state.createdAt, facts: state.facts, seals: state.seals,
       chat: state.chat.slice(-50), settings: state.settings,
-      note: "Open on https://milana808.github.io/capsule.html via Load button. Not a standalone app."
+      note: "Open on https://milana808.github.io/ via Load. Not a standalone app."
     };
   }
   function triggerDownload(blob, filename) {
@@ -226,9 +240,9 @@
       var i = text.indexOf("{"), j = text.lastIndexOf("}");
       if (i >= 0 && j > i) {
         try { return JSON.parse(text.slice(i, j + 1)); }
-        catch (e2) { throw new Error("Файл не JSON. Нужен экспорт с этой страницы (.json или .aksi)"); }
+        catch (e2) { throw new Error("Файл не JSON. Нужен экспорт с этой страницы"); }
       }
-      throw new Error("Файл не JSON. Нужен экспорт с этой страницы (.json или .aksi)");
+      throw new Error("Файл не JSON. Нужен экспорт с этой страницы");
     }
   }
   async function importCapsule(data, opts) {
@@ -239,8 +253,10 @@
     }
     if (!data || typeof data !== "object") return { ok: false, error: "Пустые данные" };
     if (data.format === "aksi-vault") return { ok: false, error: "Это vault — нужен пароль", vault: true };
-    var looksLike = data.format === "aksi-capsule" || Array.isArray(data.facts) || Array.isArray(data.seals);
-    if (!looksLike) return { ok: false, error: "Это не капсула АКСИ. Скачайте файл кнопкой «Скачать файл» на этой странице." };
+    var looksLike = data.format === "aksi-capsule" || data.format === "aksi-organism" || Array.isArray(data.facts) || Array.isArray(data.seals);
+    if (data.capsule && data.format === "aksi-organism") data = data.capsule;
+    looksLike = data.format === "aksi-capsule" || Array.isArray(data.facts) || Array.isArray(data.seals);
+    if (!looksLike) return { ok: false, error: "Это не капсула АКСИ. Скачайте файл кнопкой на сайте." };
     var merge = !!(opts.merge || state.settings.mergeImport);
     if (merge) {
       var ids = {}; state.facts.forEach(function (f) { ids[f.id] = true; });
