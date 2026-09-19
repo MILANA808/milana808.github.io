@@ -1,11 +1,11 @@
 /**
- * AKSI MATRIX — Core Kernel
- * Central event hub, hardware probe, IndexedDB vault, lifecycle orchestrator.
+ * AKSI MATRIX — Core Kernel v1.2
  */
 import { QuantumRouter } from '../quantum/router.js';
 import { Exocortex } from '../exocortex/hrr.js';
 import { TrustVault } from '../crypto/vault.js';
 import { WebLLMBridge } from '../llm/webllm-bridge.js';
+import { BonsaiBridge } from '../llm/bonsai-bridge.js';
 
 const DB_NAME = 'aksi_matrix_vault';
 const DB_VERSION = 1;
@@ -13,7 +13,7 @@ const STORES = ['memory_chunks', 'secure_state', 'event_log'];
 
 export class AksiKernel {
   constructor() {
-    this.version = '1.1.0-matrix';
+    this.version = '1.2.0-matrix';
     this.ready = false;
     this.capabilities = {
       webgpu: false,
@@ -29,6 +29,8 @@ export class AksiKernel {
     this.vault = null;
     this.llm = null;
     this.llmPrefer = false;
+    this.llmProvider = 'webllm';
+    this.bonsai = null;
   }
 
   subscribe(fn) {
@@ -86,8 +88,7 @@ export class AksiKernel {
   idbPut(storeName, record) {
     return new Promise((resolve, reject) => {
       if (!this._db) { reject(new Error('DB not open')); return; }
-      const tx = this._db.transaction(storeName, 'readwrite');
-      const r = tx.objectStore(storeName).put(record);
+      const r = this._db.transaction(storeName, 'readwrite').objectStore(storeName).put(record);
       r.onsuccess = () => resolve(r.result);
       r.onerror = () => reject(r.error);
     });
@@ -129,6 +130,7 @@ export class AksiKernel {
     this.exocortex = new Exocortex(this);
     this.vault = new TrustVault(this);
     this.llm = new WebLLMBridge();
+    this.bonsai = new BonsaiBridge();
     await this.exocortex.init();
     this.state.memoryCount = await this.exocortex.count();
     this.ready = true;
@@ -137,12 +139,33 @@ export class AksiKernel {
     return this;
   }
 
+  setLLMProvider(provider) {
+    this.llmProvider = provider === 'bonsai' ? 'bonsai' : 'webllm';
+    this.emit('llm:provider', { provider: this.llmProvider });
+  }
+
+  async prepareBonsai(onProgress) {
+    if (!this.bonsai) this.bonsai = new BonsaiBridge();
+    this.emit('bonsai:prepare_start', null);
+    try {
+      const st = await this.bonsai.prepare(onProgress);
+      this.llmProvider = 'bonsai';
+      this.llmPrefer = true;
+      this.emit('bonsai:prepare_done', st);
+      return st;
+    } catch (e) {
+      this.emit('bonsai:prepare_error', { error: String(e.message || e) });
+      throw e;
+    }
+  }
+
   async loadLocalLLM(onProgress) {
     if (!this.llm) this.llm = new WebLLMBridge();
     this.emit('llm:load_start', { model: this.llm.model });
     try {
       await this.llm.load(onProgress);
       this.llmPrefer = true;
+      this.llmProvider = 'webllm';
       this.emit('llm:load_done', this.llm.status());
       return this.llm.status();
     } catch (e) {
@@ -180,19 +203,28 @@ export class AksiKernel {
       text = hits.length > 0 ? hits.map((h) => h.text).join('\n') : 'Локальный контур не нашёл ассоциаций. Напишите: запомни: ваш факт';
       source = hits.length ? 'hrr_low' : 'empty_memory';
     }
-    if (this.llm && this.llm.isLoaded && (this.llmPrefer || gate.weights.Deep_LLM_Weight >= 0.35)) {
+    if (this.llmPrefer && this.llmProvider === 'bonsai' && this.bonsai && this.bonsai.ready) {
       try {
-        this.emit('ask:llm_start', null);
+        this.emit('ask:llm_start', { provider: 'bonsai' });
+        const gen = await this.bonsai.generate(q, hits);
+        if (gen) { text = gen; source = 'bonsai-external'; }
+        this.emit('ask:llm_done', { chars: (gen || '').length, provider: 'bonsai' });
+      } catch (e) {
+        this.emit('ask:llm_error', { error: String(e.message || e) });
+      }
+    } else if (this.llm && this.llm.isLoaded && (this.llmPrefer || gate.weights.Deep_LLM_Weight >= 0.35)) {
+      try {
+        this.emit('ask:llm_start', { provider: 'webllm' });
         const context = hits.length ? hits.map((h) => h.text).join('\n').slice(0, 1200) : '';
-        const prompt = context ? ('Контекст из локальной памяти:\n' + context + '\n\nВопрос: ' + q) : q;
+        const prompt = context ? ('Контекст из локальной памяти HRR:\n' + context + '\n\nВопрос: ' + q) : q;
         const gen = await this.llm.generate(prompt);
         if (gen) { text = gen; source = 'webllm'; }
-        this.emit('ask:llm_done', { chars: (gen || '').length });
+        this.emit('ask:llm_done', { chars: (gen || '').length, provider: 'webllm' });
       } catch (e) {
         this.emit('ask:llm_error', { error: String(e.message || e) });
       }
     } else if (gate.weights.Deep_LLM_Weight > 0.45 && this.capabilities.webgpu && !(this.llm && this.llm.isLoaded)) {
-      this.emit('ask:deep_hook', { note: 'WebGPU present — load Local LLM for on-device generation' });
+      this.emit('ask:deep_hook', { note: 'WebGPU present — load Local LLM or Prepare Bonsai' });
     }
     const result = { text, source, gate, hits: hits.map((h) => ({ id: h.id, score: h.score, text: h.text.slice(0, 120) })), at: new Date().toISOString() };
     this.emit('ask:done', result);
@@ -233,7 +265,9 @@ export class AksiKernel {
       memoryCount: this.state.memoryCount,
       capabilities: this.capabilities,
       lastEvent: this.state.lastEvent,
-      llm: this.llm ? this.llm.status() : null
+      llm: this.llm ? this.llm.status() : null,
+      bonsai: this.bonsai ? this.bonsai.status() : null,
+      llmProvider: this.llmProvider
     };
   }
 }
