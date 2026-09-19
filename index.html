@@ -45,7 +45,8 @@ footer a{color:var(--muted)}
   <nav><a href="/organism.html">Lab</a> <a href="/HONEST.md">Честно</a></nav>
 </header>
 <div class="explain">
-  <b>Всё связано:</b> запись → память + HRR + vault → поиск по слоям → gate → печать ECDSA → organism-файл. Пароль vault: <b>aksi</b>.
+  <b>Как пользоваться:</b> напишите <b>запомни: факт</b> → задайте вопрос → <b>Запечатать</b> → <b>Скачать</b>.
+  Пароль vault: <b>aksi</b>. Обновите страницу, если что-то странное.
 </div>
 <div class="board">
   <div><b id="nF">0</b><span>память</span></div>
@@ -63,25 +64,25 @@ footer a{color:var(--muted)}
   </div>
   <div class="row">
     <button type="button" id="seal" disabled>Запечатать</button>
-    <button type="button" id="exp" disabled>Скачать organism</button>
+    <button type="button" id="exp" disabled>Скачать</button>
     <label class="f"><input type="file" id="file" accept=".json,.aksi,*/*">Загрузить</label>
     <button type="button" id="chk">Проверить</button>
     <button type="button" id="clr">Сброс</button>
   </div>
 </div>
-<div class="drop" id="drop">Перетащите organism .json</div>
-<footer>aksilove@internet.ru · <a href="/capsule.html">капсула</a> · <a href="/organism.html">lab</a> · <a href="/bot.html">бот</a> · <span id="ver"></span></footer>
-<script src="/aksi-capsule.js?v=12"></script>
+<div class="drop" id="drop">Перетащите .json сюда</div>
+<footer>aksilove@internet.ru · <a href="/capsule.html">капсула</a> · <span id="ver"></span></footer>
+<script src="/aksi-capsule.js?v=13"></script>
 <script src="/aksi-cortex-kernel.js"></script>
 <script src="/aksi-quantum.js"></script>
 <script src="/aksi-hrr.js"></script>
 <script src="/aksi-resonance-net.js"></script>
 <script src="/aksi-organism.js?v=4"></script>
-<script src="/aksi-live.js?v=1"></script>
+<script src="/aksi-live.js?v=2"></script>
 <script>
 (function(){
   var L=window.AKSI_LIVE;
-  if(!L){document.getElementById("msgs").textContent="AKSI_LIVE не загрузился";return;}
+  if(!L){document.getElementById("msgs").textContent="Модуль не загрузился. Обновите страницу (Ctrl+Shift+R).";return;}
   function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}document.getElementById("msgs").appendChild(d);d.scrollIntoView({block:"end"});}
   function paint(){var s=L.status(),cap=s.capsule||{},last=L.getLast();
     document.getElementById("nF").textContent=cap.facts||0;
@@ -92,13 +93,13 @@ footer a{color:var(--muted)}
     document.getElementById("exp").disabled=!(cap.facts||cap.seals);
     var m=s.modules||{};
     document.getElementById("mods").textContent="модули: "+["capsule","cortex","quantum","hrr","arin","stack"].map(function(k){return k+(m[k]?"✓":"✗");}).join(" ");
-    document.getElementById("ver").textContent=L.version;}
+    document.getElementById("ver").textContent=L.version+(cap.version?" · "+cap.version:"");}
   function applyPw(){L.setPassword(document.getElementById("pw").value||"aksi");}
   async function send(){applyPw();var raw=document.getElementById("q").value.trim();if(!raw)return;
     document.getElementById("q").value="";add("user",raw);
     var teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
     if(teach){var r=await L.remember(teach[1].trim());
-      add("bot","Записано в:\n• капсула\n• HRR\n"+(r.cortex&&!r.cortex.error?"• vault\n":"• vault — пароль?\n")+"\n«"+teach[1].trim()+"»","remember");paint();return;}
+      add("bot","Сохранено.\n«"+teach[1].trim()+"»","ok");paint();return;}
     var a=await L.ask(raw,{research:true});
     if(!a.ok){add("bot",a.text||a.error||"ошибка",a.source||"");paint();return;}
     var meta=[a.engine||""].concat(a.sources||[]);if(a.gate)meta.push("QCLI "+Number(a.gate.QCLI).toFixed(2));
@@ -107,20 +108,20 @@ footer a{color:var(--muted)}
   document.getElementById("q").onkeydown=function(e){if(e.key==="Enter")send();};
   document.getElementById("pw").onchange=applyPw;
   document.getElementById("seal").onclick=async function(){applyPw();var r=await L.seal();
-    if(!r.ok){add("bot",r.error||"нечего","");return;}
-    var lines=["Связанная печать:"];
-    if(r.capsule&&r.capsule.seal)lines.push("• ECDSA "+String(r.capsule.seal.hash||"").slice(0,28)+"…");
-    if(r.quantum)lines.push("• gate QCLI "+Number(r.quantum.QCLI).toFixed(3));
+    if(!r.ok){add("bot",r.error||"сначала ответ","");return;}
+    var lines=["Печать поставлена."];
+    if(r.capsule&&r.capsule.seal)lines.push("ECDSA "+String(r.capsule.seal.hash||"").slice(0,28)+"…");
+    if(r.quantum)lines.push("QCLI "+Number(r.quantum.QCLI).toFixed(3));
     add("bot",lines.join("\n"),"seal");paint();};
-  document.getElementById("exp").onclick=async function(){applyPw();await L.exportAll();add("bot","Скачан organism. На другом устройстве — Загрузить.","export");};
-  async function loadFile(file){if(!file)return;add("bot","Импорт «"+file.name+"»…","");var r=await L.importAll(file);add("bot",r.ok?"Импорт OK":"Ошибка: "+(r.error||""),"import");paint();}
+  document.getElementById("exp").onclick=async function(){applyPw();await L.exportAll();add("bot","Файл скачан. На другом устройстве: Загрузить.","export");};
+  async function loadFile(file){if(!file)return;add("bot","Читаю «"+file.name+"»…","");var r=await L.importAll(file);add("bot",r.ok?"Загружено":"Ошибка: "+(r.error||""),"import");paint();}
   document.getElementById("file").onchange=function(e){loadFile(e.target.files&&e.target.files[0]);e.target.value="";};
   var drop=document.getElementById("drop");
   drop.ondragover=function(e){e.preventDefault();drop.classList.add("over");};
   drop.ondragleave=function(){drop.classList.remove("over");};
   drop.ondrop=function(e){e.preventDefault();drop.classList.remove("over");loadFile(e.dataTransfer.files&&e.dataTransfer.files[0]);};
   document.getElementById("chk").onclick=async function(){
-    if(!window.AKSI_CAPSULE||!AKSI_CAPSULE.verifyAll){add("bot","Нет проверки","");return;}
+    if(!window.AKSI_CAPSULE||!AKSI_CAPSULE.verifyAll){add("bot","Нет модуля","");return;}
     var list=await AKSI_CAPSULE.verifyAll();
     if(!list.length){add("bot","Печатей нет","");return;}
     add("bot",list.map(function(v,i){return (i+1)+". "+(v.ok?"OK":"FAIL");}).join("\n"),"verify");};
@@ -130,7 +131,7 @@ footer a{color:var(--muted)}
     if(window.AKSI_HRR&&AKSI_HRR.get)try{AKSI_HRR.get().clear();}catch(e){}
     document.getElementById("msgs").innerHTML="";add("bot","Очищено","");paint();};
   applyPw();
-  add("bot","АКСИ LIVE — слои связаны.\n\nзапомни: встреча пятница 15:00\nпотом: пятница\nЗапечатать → Скачать → Загрузить","start");
+  add("bot","Пример:\nзапомни: встреча в пятницу 15:00\nпотом спросите: пятница","start");
   paint();
 })();
 </script>
