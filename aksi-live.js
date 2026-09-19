@@ -1,14 +1,12 @@
 /**
- * AKSI Live v1 — fully wired product brain
- * remember → capsule + HRR + cortex vault
- * ask → cortex + capsule + HRR + ARIN → walk → answerGate
- * seal → ECDSA + quantum gate
- * export/import → organism
- * © AKSI · aksilove@internet.ru · 2026-09-18
+ * AKSI Live v1.0.1 — wired brain, memory-first
+ * remember → capsule + HRR + cortex
+ * ask → prefer capsule/cortex over ARIN noise
+ * © AKSI · aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VERSION = "1.0.0-live";
+  var VERSION = "1.0.1-live";
   var sessionPw = null;
   var last = null;
   function now() { return new Date().toISOString(); }
@@ -44,21 +42,32 @@
     if (G.AKSI_CAPSULE && AKSI_CAPSULE.ask) {
       try {
         var ca = await AKSI_CAPSULE.ask(q, { research: opts.research !== false });
-        if (ca && ca.text && ca.source === "memory") { candidates.push({ text: ca.text, engine: "capsule", w: 1 }); sources.push("capsule"); }
-        else if (ca && ca.source === "wikipedia" && ca.text) { candidates.push({ text: ca.text, engine: "wiki", w: 0.35 }); sources.push("wiki"); }
+        if (ca && ca.text && ca.source === "memory") {
+          candidates.push({ text: ca.text, engine: "capsule", w: 1 });
+          sources.push("capsule");
+        } else if (ca && ca.source === "wikipedia" && ca.text) {
+          candidates.push({ text: ca.text, engine: "wiki", w: 0.35 });
+          sources.push("wiki");
+        }
       } catch (e) {}
     }
     if (sessionPw && G.AKSI_CORTEX_KERNEL && AKSI_CORTEX_KERNEL.resonantQuery) {
       try {
         AKSI_CORTEX_KERNEL.setSessionPassword(sessionPw);
         var hit = await AKSI_CORTEX_KERNEL.resonantQuery(q);
-        if (hit && hit.text) { candidates.push({ text: hit.text, engine: "cortex-fidelity", w: 0.9 + Math.min(0.2, hit.score || 0), score: hit.score }); sources.push("cortex"); }
+        if (hit && hit.text) {
+          candidates.push({ text: hit.text, engine: "cortex-fidelity", w: 0.95, score: hit.score });
+          sources.push("cortex");
+        }
       } catch (e) {}
     }
     if (G.AKSI_HRR && AKSI_HRR.get) {
       try {
         var hr = AKSI_HRR.get().resonance(q);
-        if (hr && hr.fact && hr.score > 0.18) { candidates.push({ text: hr.fact, engine: "hrr", w: hr.score, score: hr.score }); sources.push("hrr"); }
+        if (hr && hr.fact && hr.score > 0.18) {
+          candidates.push({ text: hr.fact, engine: "hrr", w: hr.score * 0.8, score: hr.score });
+          sources.push("hrr");
+        }
       } catch (e) {}
     }
     if (G.AKSI_RESONANCE) {
@@ -66,24 +75,30 @@
         if (AKSI_RESONANCE.ensure) AKSI_RESONANCE.ensure();
         var ar = AKSI_RESONANCE.ask(q);
         var at = ar && (ar.text || ar.answer || (ar.top && ar.top.text));
-        if (at) { candidates.push({ text: String(at), engine: "arin", w: 0.5 }); sources.push("arin"); }
+        at = at ? String(at) : "";
+        if (at && !/резонанс слабый|не выдаёт|уточните вопрос|нет данных/i.test(at)) {
+          candidates.push({ text: at, engine: "arin", w: 0.3 });
+          sources.push("arin");
+        }
       } catch (e) {}
     }
-    if (!candidates.length) { candidates.push({ text: "Пока пусто. Напишите: запомни: ваш факт", engine: "empty", w: 0.1 }); sources.push("empty"); }
-    var pick = candidates[0];
-    if (G.AKSI_STACK && AKSI_STACK.quantumWalkPick && candidates.length > 1) {
-      var w = AKSI_STACK.quantumWalkPick(candidates.map(function (c) { return { text: c.text }; }));
-      if (w && w.ok && w.pick) {
-        pick = { text: w.pick, engine: "walk", w: 0.7 };
-        for (var i = 0; i < candidates.length; i++) if (candidates[i].text === w.pick) { pick = candidates[i]; break; }
-      }
-    } else {
-      candidates.sort(function (a, b) { return (b.w || 0) - (a.w || 0); });
-      pick = candidates[0];
+    if (!candidates.length) {
+      candidates.push({ text: "Пока пусто. Напишите: запомни: ваш факт", engine: "empty", w: 0.1 });
+      sources.push("empty");
     }
+    candidates.sort(function (a, b) { return (b.w || 0) - (a.w || 0); });
+    var pick = candidates[0], i, mem = null;
+    for (i = 0; i < candidates.length; i++) {
+      if (candidates[i].engine === "capsule" || candidates[i].engine === "cortex-fidelity") {
+        mem = candidates[i]; break;
+      }
+    }
+    if (mem) pick = mem;
     var text = pick.text;
     var gate = null;
-    if (G.AKSI_QUANTUM && AKSI_QUANTUM.answerGate) { try { gate = AKSI_QUANTUM.answerGate(q, text); } catch (e) {} }
+    if (G.AKSI_QUANTUM && AKSI_QUANTUM.answerGate) {
+      try { gate = AKSI_QUANTUM.answerGate(q, text); } catch (e) {}
+    }
     last = { q: q, text: text, gate: gate, sources: sources, candidates: candidates, engine: pick.engine, at: now() };
     if (G.AKSI_STACK && AKSI_STACK.zenoAudit) AKSI_STACK.zenoAudit("ask");
     return {
@@ -102,7 +117,7 @@
     var quantum = last.gate || (G.AKSI_QUANTUM && AKSI_QUANTUM.answerGate ? AKSI_QUANTUM.answerGate(last.q, last.text) : null);
     return {
       ok: true, capsule: capsuleSeal,
-      quantum: quantum && { alg: "answerGate-3q", QCLI: quantum.QCLI, entropy: quantum.entropy, purity: quantum.purity, resonance: quantum.resonance, outcome: quantum.outcome },
+      quantum: quantum && { alg: "answerGate-3q", QCLI: quantum.QCLI, entropy: quantum.entropy, purity: quantum.purity },
       text: last.text, q: last.q
     };
   }
