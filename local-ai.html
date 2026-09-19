@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>АКСИ Local AI + Quantum Sim</title>
+<meta name="description" content="Локальный ИИ в браузере + классический квантовый симулятор">
+<meta name="theme-color" content="#0b0b0f">
+<style>
+:root{--bg:#0b0b0f;--card:#14141c;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--cyan:#5eead4}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:720px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800}.logo span{color:var(--acc)}
+header a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
+.note{padding:10px 16px;background:#12121a;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.note b{color:var(--cyan)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;padding:12px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--acc)}
+.panel{display:none;flex:1;flex-direction:column;min-height:0}
+.panel.on{display:flex}
+.msgs{flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;max-height:42vh}
+.msg{padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
+.msg.user{align-self:flex-end;background:#1a1a26;max-width:92%}
+.msg .meta{margin-top:6px;font-size:11px;color:var(--muted);font-family:ui-monospace,monospace;border-top:1px solid var(--line);padding-top:6px}
+.bar{padding:10px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap}
+input,textarea{flex:1;min-width:120px;font:inherit;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink)}
+button{font:inherit;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:46px}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.qgrid{padding:12px 16px;display:grid;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.card h3{font-size:13px;color:var(--acc);margin-bottom:8px}
+.qbtns{display:flex;flex-wrap:wrap;gap:8px}
+pre{background:#0e0e14;padding:10px;border-radius:10px;font-size:11px;overflow:auto;max-height:200px;color:var(--muted);white-space:pre-wrap;margin-top:8px}
+.bloch{width:100%;max-width:220px;height:220px;margin:8px auto;display:block;background:#0e0e14;border-radius:12px}
+footer{padding:10px 16px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">АКСИ <span>Local+Q</span></div>
+  <nav><a href="/">След</a> <a href="/HONEST.md">Честно</a></nav>
+</header>
+<div class="note"><b>Local AI</b> = память на устройстве. <b>Quantum</b> = state-vector симулятор (не QPU).</div>
+<div class="tabs">
+  <button type="button" class="on" data-tab="ai">Local AI</button>
+  <button type="button" data-tab="q">Quantum Sim</button>
+  <button type="button" data-tab="gate">AI → Gate</button>
+</div>
+<div class="panel on" id="p-ai">
+  <div class="msgs" id="msgs"></div>
+  <div class="bar">
+    <input type="text" id="qin" placeholder="запомни: факт  или  вопрос" autocomplete="off">
+    <button type="button" class="p" id="send">Отправить</button>
+  </div>
+  <div class="bar" style="border-top:0;padding-top:0">
+    <button type="button" id="seal">Запечатать ответ</button>
+    <button type="button" id="clr">Сброс памяти</button>
+  </div>
+</div>
+<div class="panel" id="p-q">
+  <div class="qgrid">
+    <div class="card">
+      <h3>Симулятор</h3>
+      <div class="qbtns">
+        <button type="button" class="p" data-q="bell">Bell Φ+</button>
+        <button type="button" data-q="chsh">CHSH</button>
+        <button type="button" data-q="gate">answerGate</button>
+        <button type="button" data-q="shot">shot</button>
+      </div>
+      <canvas class="bloch" id="bloch" width="220" height="220"></canvas>
+      <pre id="qout">Bell / CHSH / answerGate</pre>
+    </div>
+  </div>
+</div>
+<div class="panel" id="p-gate">
+  <div class="qgrid">
+    <div class="card">
+      <h3>Ответ → answerGate</h3>
+      <input type="text" id="gq" value="Кто ты?" style="width:100%;margin-bottom:8px">
+      <textarea id="ga" rows="3" style="width:100%;margin-bottom:8px">Я локальный контур АКСИ.</textarea>
+      <button type="button" class="p" id="rungate">Считать Gate</button>
+      <pre id="gout">—</pre>
+    </div>
+  </div>
+</div>
+<footer>aksilove@internet.ru · classical sim · offline memory</footer>
+<script src="/aksi-capsule.js?v=13"></script>
+<script src="/aksi-quantum.js"></script>
+<script>
+(function(){
+  var C=window.AKSI_CAPSULE,Q=window.AKSI_QUANTUM;
+  document.querySelectorAll(".tabs button").forEach(function(btn){
+    btn.onclick=function(){
+      document.querySelectorAll(".tabs button").forEach(function(b){b.classList.remove("on");});
+      document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
+      btn.classList.add("on");
+      document.getElementById("p-"+btn.getAttribute("data-tab")).classList.add("on");
+    };
+  });
+  function j(x){try{return JSON.stringify(x,null,2);}catch(e){return String(x);}}
+  var msgs=document.getElementById("msgs");
+  function add(role,text,meta){
+    var d=document.createElement("div");d.className="msg "+role;d.textContent=text;
+    if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}
+    msgs.appendChild(d);d.scrollIntoView({block:"end"});
+  }
+  if(!C)add("bot","Капсула не загрузилась","");
+  else{C.ensureKeys().catch(function(){});add("bot","Local AI: «запомни: …» или вопрос. Данные в браузере.","ready");}
+  async function send(){
+    if(!C)return;
+    var raw=document.getElementById("qin").value.trim();if(!raw)return;
+    document.getElementById("qin").value="";add("user",raw);
+    var teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
+    if(teach){C.remember(teach[1].trim());add("bot","Запомнила:\n«"+teach[1].trim()+"»","memory");return;}
+    var a=await C.ask(raw,{research:true});
+    var meta=a.source||"";
+    if(Q&&Q.answerGate&&a.text){try{var g=Q.answerGate(raw,a.text);meta+=(meta?" · ":"")+"QCLI "+Number(g.QCLI).toFixed(2);}catch(e){}}
+    add("bot",a.text,meta);
+  }
+  document.getElementById("send").onclick=send;
+  document.getElementById("qin").onkeydown=function(e){if(e.key==="Enter")send();};
+  document.getElementById("seal").onclick=async function(){
+    if(!C)return;var r=await C.sealLast();
+    if(!r.ok){add("bot","Сначала ответ","");return;}
+    add("bot","Печать\n"+r.seal.hash.slice(0,40)+"…","seal");
+  };
+  document.getElementById("clr").onclick=function(){
+    if(!C||!confirm("Очистить?"))return;C.clearAll();msgs.innerHTML="";add("bot","Очищено","reset");
+  };
+  var qout=document.getElementById("qout"),bloch=document.getElementById("bloch");
+  function drawBloch(b){
+    if(!b)return;var ctx=bloch.getContext("2d");if(!ctx)return;
+    var w=bloch.width,h=bloch.height,cx=w/2,cy=h/2,R=Math.min(w,h)*0.38;
+    ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(139,124,247,.4)";
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
+    var px=cx+(b.x||0)*R,py=cy-(b.z||0)*R;
+    ctx.strokeStyle="#c4b5fd";ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();
+    ctx.fillStyle="#a78bfa";ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill();
+  }
+  function runQ(kind){
+    if(!Q){qout.textContent="нет quantum";return;}
+    var r;
+    if(kind==="bell")r=Q.bell?Q.bell("phi+"):{error:"no bell"};
+    else if(kind==="chsh")r=Q.chsh?Q.chsh(256):{error:"no chsh"};
+    else if(kind==="gate")r=Q.answerGate("demo","local quantum-inspired gate");
+    else if(kind==="shot")r=Q.shot?Q.shot("aksi"):{error:"no shot"};
+    else r={error:"unknown"};
+    qout.textContent=j(r);
+    if(r&&r.bloch0)drawBloch(r.bloch0);
+  }
+  document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){runQ(b.getAttribute("data-q"));};});
+  document.getElementById("rungate").onclick=function(){
+    if(!Q||!Q.answerGate){document.getElementById("gout").textContent="нет quantum";return;}
+    var g=Q.answerGate(document.getElementById("gq").value,document.getElementById("ga").value);
+    document.getElementById("gout").textContent=j({QCLI:g.QCLI,entropy:g.entropy,purity:g.purity,resonance:g.resonance,outcome:g.outcome,circuit:g.circuit,note:"classical sim fingerprint"});
+    if(g.bloch0)drawBloch(g.bloch0);
+  };
+})();
+</script>
+</body>
+</html>
