@@ -104,7 +104,7 @@
   }
   async function decryptVault(vaultObj, password) {
     var key = await deriveKey(password, fromB64(vaultObj.salt));
-    var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(vaultObj.iv), key, fromB64(vaultObj.ciphertext));
+    var plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(vaultObj.iv) }, key, fromB64(vaultObj.ciphertext));
     return JSON.parse(new TextDecoder().decode(plain));
   }
   function remember(text, meta) {
@@ -253,9 +253,8 @@
     }
     if (!data || typeof data !== "object") return { ok: false, error: "Пустые данные" };
     if (data.format === "aksi-vault") return { ok: false, error: "Это vault — нужен пароль", vault: true };
-    var looksLike = data.format === "aksi-capsule" || data.format === "aksi-organism" || Array.isArray(data.facts) || Array.isArray(data.seals);
-    if (data.capsule && data.format === "aksi-organism") data = data.capsule;
-    looksLike = data.format === "aksi-capsule" || Array.isArray(data.facts) || Array.isArray(data.seals);
+    if (data.format === "aksi-organism" && data.capsule) data = data.capsule;
+    var looksLike = data.format === "aksi-capsule" || Array.isArray(data.facts) || Array.isArray(data.seals);
     if (!looksLike) return { ok: false, error: "Это не капсула АКСИ. Скачайте файл кнопкой на сайте." };
     var merge = !!(opts.merge || state.settings.mergeImport);
     if (merge) {
