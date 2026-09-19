@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>АКСИ След — проверяемый ответ</title>
+<meta name="description" content="Запечатайте ответ: SHA-256 + ECDSA. Квитанция. Проверка.">
+<meta name="theme-color" content="#0b0b0f">
+<link rel="canonical" href="https://milana808.github.io/trail.html">
+<style>
+:root{--bg:#0b0b0f;--card:#14141c;--ink:#f3f2ed;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:560px;margin:0 auto;padding:20px 16px 40px}
+.logo{font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.logo span{color:var(--acc)}
+h1{font-size:1.55rem;margin:14px 0 8px;line-height:1.2}
+.lead{color:var(--muted);font-size:15px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+textarea,input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);margin-bottom:10px}
+textarea{min-height:110px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#1a1a24;color:var(--ink);cursor:pointer;min-height:48px}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700;flex:1}
+button:disabled{opacity:.4}
+.out{font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);white-space:pre-wrap;word-break:break-all;max-height:180px;overflow:auto}
+.ok{color:var(--ok)}
+.steps{font-size:13px;color:var(--muted);margin:0 0 16px;padding-left:18px}
+.steps b{color:var(--ink)}
+footer{margin-top:18px;font-size:12px;color:var(--muted)}
+footer a{color:var(--muted)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="logo">АКСИ <span>СЛЕД</span></div>
+<h1>Проверяемый след ответа</h1>
+<p class="lead">Зафиксировать ответ → печать на устройстве → квитанция → проверка. Без облачного аккаунта.</p>
+<ol class="steps">
+  <li>Вставьте <b>вопрос</b> и <b>ответ</b></li>
+  <li><b>Запечатать</b></li>
+  <li><b>Скачать квитанцию</b> → <b>Проверить</b></li>
+</ol>
+<div class="card">
+  <label>Вопрос</label>
+  <input type="text" id="q" placeholder="Какой срок по договору?">
+  <label>Ответ</label>
+  <textarea id="a" placeholder="Текст ответа…"></textarea>
+  <div class="row">
+    <button type="button" class="p" id="seal">Запечатать</button>
+    <button type="button" id="dl" disabled>Скачать квитанцию</button>
+  </div>
+  <p class="note">SHA-256 + ECDSA P-256 · локально</p>
+</div>
+<div class="card"><label>Статус</label><div class="out" id="out">—</div></div>
+<div class="card">
+  <label>Проверить квитанцию</label>
+  <div class="row">
+    <input type="file" id="file" accept=".json,*/*" style="flex:1;font-size:13px;color:var(--muted)">
+    <button type="button" id="chk">Проверить</button>
+  </div>
+  <div class="out" id="vres" style="margin-top:10px">—</div>
+</div>
+<footer>aksilove@internet.ru · <a href="/">главная</a> · <a href="/HONEST.md">честно</a></footer>
+<script src="/aksi-capsule.js?v=13"></script>
+<script>
+(function(){
+  var C=window.AKSI_CAPSULE,lastSeal=null,out=document.getElementById("out"),vres=document.getElementById("vres"),dl=document.getElementById("dl");
+  if(!C){out.textContent="Модуль не загрузился. Ctrl+Shift+R";return;}
+  C.ensureKeys().catch(function(){});
+  async function sealPair(q,a){
+    var token="sled-"+Date.now().toString(36);
+    C.remember(token+" | Q: "+q+" | A: "+a);
+    await C.ask(token,{research:false});
+    var r=await C.sealLast();
+    if(!r.ok)return r;
+    r.seal.display={q:q,a:a};
+    if(!r.seal.body)r.seal.body={};
+    r.seal.body.q=q;r.seal.body.a=a;
+    return r;
+  }
+  document.getElementById("seal").onclick=async function(){
+    var q=document.getElementById("q").value.trim()||"(без вопроса)";
+    var a=document.getElementById("a").value.trim();
+    if(!a){out.textContent="Введите ответ.";return;}
+    out.className="out";out.textContent="Печатаю…";
+    try{
+      var r=await sealPair(q,a);
+      if(!r.ok){out.textContent="Ошибка: "+(r.error||"");return;}
+      lastSeal=r.seal;out.className="out ok";
+      out.textContent="Печать готова\nhash: "+r.seal.hash.slice(0,42)+"…\nalg: "+r.seal.alg+"\n"+r.seal.sealedAt;
+      dl.disabled=false;
+    }catch(e){out.textContent=String(e.message||e);}
+  };
+  dl.onclick=function(){
+    if(!lastSeal)return;
+    var receipt={format:"aksi-receipt",product:"AKSI Trail",version:"1.0",contact:"aksilove@internet.ru",seal:lastSeal,display:lastSeal.display||null};
+    var blob=new Blob([JSON.stringify(receipt,null,2)],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-sled-"+Date.now()+".json";a.click();
+  };
+  document.getElementById("chk").onclick=async function(){
+    var f=document.getElementById("file").files&&document.getElementById("file").files[0];
+    if(!f){vres.textContent="Выберите файл.";return;}
+    try{
+      var data=JSON.parse((await f.text()).replace(/^\uFEFF/,""));
+      var seal=data.seal||data;
+      var r=await C.verifySeal(seal);
+      vres.className="out "+(r.ok?"ok":"");
+      var disp=data.display||seal.display||seal.body||{};
+      vres.textContent=(r.ok?"ПРОВЕРКА OK\n":"НЕ ПРОШЛА\n")+"hash: "+(r.hashOk?"ok":"fail")+" · подпись: "+(r.sigOk?"ok":"fail")+"\nQ: "+String(disp.q||"").slice(0,80)+"\nA: "+String(disp.a||"").slice(0,120);
+    }catch(e){vres.textContent="Ошибка: "+(e.message||e);}
+  };
+})();
+</script>
+</body>
+</html>
