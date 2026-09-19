@@ -1,174 +1,245 @@
 <!DOCTYPE html>
-<html lang="ru" data-aksi-autoload="1">
+<html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<script src="/aksi-purge.js?v=210"></script>
-<meta name="theme-color" content="#05040a">
-<meta name="description" content="АКСИ MATRIX — локальный ИИ → квант → ADIA → ECDSA">
-<title>АКСИ MATRIX</title>
-<link rel="manifest" href="/manifest.json">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>АКСИ MATRIX — Sovereign Runtime</title>
+<meta name="description" content="Client-side sovereign AI runtime: Kernel, QuantumRouter, HRR, TrustVault">
+<meta name="theme-color" content="#ebe4d7">
 <style>
-:root{--bg:#05040a;--elev:#12101c;--card:rgba(18,16,28,.88);--line:rgba(167,139,250,.22);--t:#f5f3ff;--m:#9b93b0;--dim:#6b647c;--a:#a78bfa;--a2:#7c3aed;--ok:#34d399;--font:system-ui,-apple-system,sans-serif;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;height:100dvh;overflow:hidden}
-body{font:15px/1.45 var(--font);color:var(--t);background:var(--bg);touch-action:manipulation;background-image:radial-gradient(ellipse 100% 50% at 50% -15%,rgba(124,58,237,.38),transparent 55%)}
-button,input,textarea{font:inherit;color:inherit;border:0;background:0;outline:0}button{cursor:pointer}
-.app{display:flex;flex-direction:column;height:100%;max-width:720px;margin:0 auto;padding-top:var(--safe-t)}
-#boot{position:fixed;inset:0;z-index:100;background:#05040a;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
-#boot.hide{opacity:0;pointer-events:none;transition:opacity .4s}
-#boot h1{font-size:28px;font-weight:800;margin-bottom:8px}#boot p{color:var(--m);font-size:14px;margin-bottom:18px;max-width:300px}
-.bar{width:min(280px,80vw);height:7px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7c3aed,#22d3ee);border-radius:99px;transition:width .2s}
-#bootMsg{margin-top:14px;font-size:12px;color:var(--dim);max-width:300px;min-height:2.5em}
-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(5,4,10,.92);backdrop-filter:blur(16px);flex-shrink:0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
-.brand h1{font-size:16px;font-weight:750}.brand .sub{font-size:11px;color:var(--m)}
-.hdr-btns{margin-left:auto;display:flex;gap:6px}.hdr-btns button{padding:8px 12px;border-radius:999px;font-size:12px;font-weight:600;border:1px solid var(--line);color:var(--m)}
-.tabs{display:flex;gap:4px;padding:8px 10px;overflow-x:auto;border-bottom:1px solid var(--line);flex-shrink:0}
-.tabs button{padding:8px 12px;border-radius:999px;font-size:12px;font-weight:600;color:var(--m);white-space:nowrap}
-.tabs button.on{background:rgba(167,139,250,.2);color:var(--t)}
-.main{flex:1;overflow:auto;padding:12px 14px calc(88px + var(--safe-b))}
-.panel{display:none}.panel.on{display:block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
-.card h3{font-size:13px;font-weight:700;margin-bottom:8px}
-.muted{color:var(--m);font-size:13px}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.btn{padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;border:1px solid var(--line);color:var(--t);background:rgba(255,255,255,.04)}
-.btn.p{background:linear-gradient(135deg,#7c3aed,#a78bfa);border:0}
-#thread{display:flex;flex-direction:column;gap:10px;min-height:120px}
-.bub{max-width:92%;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line);white-space:pre-wrap;font-size:14px}
-.bub.me{align-self:flex-end;background:rgba(124,58,237,.35)}
-.bub .m{font-size:10px;color:var(--dim);margin-top:6px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.chip{padding:8px 12px;border-radius:999px;font-size:12px;border:1px solid var(--line);color:var(--m)}
-.composer{position:fixed;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;padding:10px 12px calc(10px + var(--safe-b));display:flex;gap:8px;background:rgba(5,4,10,.95);border-top:1px solid var(--line)}
-.composer input{flex:1;min-height:44px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:16px}
-.composer .send{width:48px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#a78bfa);font-weight:800}
-.out{font-size:11px;background:#0a0812;border-radius:10px;padding:10px;overflow:auto;max-height:180px;color:#c4b5fd;margin-top:8px}
-.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.kv .c{text-align:center;background:rgba(255,255,255,.04);border-radius:12px;padding:10px}.kv b{display:block;font-size:14px}.kv span{font-size:10px;color:var(--m)}
-canvas{display:block;margin:10px auto;background:rgba(0,0,0,.25);border-radius:12px}
-.arch{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:12px;font-size:11px;color:var(--m)}
-.arch .box{padding:6px 12px;border:1px solid var(--line);border-radius:8px}
-.arch .arr{opacity:.5}
-.row-boxes{display:flex;gap:8px}
-.field{width:100%;min-height:64px;margin-top:8px;padding:10px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
-.pub{font-size:11px;word-break:break-all;color:var(--dim);margin-top:8px}
+:root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.shell{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+.logo{font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
+.logo span{opacity:.55}
+header nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:12px}
+h1{font-size:clamp(1.35rem,3vw,1.75rem);font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+.lead{color:var(--muted);font-size:14px;max-width:54ch;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+.panel h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
+.status-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:var(--bg2);border:1px solid var(--line);padding:8px 10px;border-radius:3px}
+.stat b{display:block;font-family:var(--mono);font-size:13px}
+.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.stat.ok b{color:var(--ok)}
+canvas#wave{width:100%;height:120px;display:block;background:#1a1814;border-radius:3px;border:1px solid var(--line)}
+.chat{min-height:180px;max-height:280px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+input[type=text],input[type=password]{flex:1;min-width:140px;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:3px}
+button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:600}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:160px;overflow:auto;line-height:1.5}
+.log .e{color:var(--ink)}
+footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.badge{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);padding:3px 8px;margin-right:6px;color:var(--muted)}
 </style>
 </head>
-<body data-aksi-autoload="1">
-<div id="boot"><h1>АКСИ MATRIX</h1><p>Локальный ИИ → квантовый симулятор → ADIA → ECDSA</p><div class="bar"><i id="bootBar"></i></div><div id="bootMsg">очистка кэша / загрузка…</div></div>
-<div class="app" id="app" hidden>
+<body>
+<div class="shell">
 <header>
-  <div class="dot"></div>
-  <div class="brand"><h1>MATRIX</h1><div class="sub" id="statusLine">v15 · purge</div></div>
-  <div class="hdr-btns"><button type="button" id="btnTrust">Crypto</button><button type="button" id="btnPro">Info</button></div>
+  <div class="logo">AKSI <span>MATRIX</span></div>
+  <nav>
+    <a href="/">След</a>
+    <a href="/local-ai.html">Local AI</a>
+    <a href="/quantum-chip.html">Q-Chip</a>
+  </nav>
 </header>
-<nav class="tabs">
-  <button type="button" class="on" data-tab="chat">Чат</button>
-  <button type="button" data-tab="crypto">Crypto</button>
-  <button type="button" data-tab="bloch">Quantum</button>
-  <button type="button" data-tab="ui">Статус</button>
-  <button type="button" data-tab="q2">Lab</button>
-</nav>
-<div class="main">
-<section class="panel on" id="tab-chat">
-  <div class="card">
-    <h3>Контур ответа</h3>
-    <p class="muted">Каждый ответ: локальный ИИ → QPIPE → ADIA → ECDSA</p>
+<h1>Sovereign browser runtime</h1>
+<p class="lead">Kernel · QuantumRouter · HRR Exocortex · TrustVault — полностью на устройстве. Без облачных LLM API по умолчанию.</p>
+<div>
+  <span class="badge" id="badgeStatus">cold</span>
+  <span class="badge" id="badgeGpu">webgpu ?</span>
+  <span class="badge" id="badgeCrypto">crypto ?</span>
+</div>
+<div class="grid" style="margin-top:16px">
+  <div class="panel">
+    <h2>System monitor</h2>
+    <div class="status-grid">
+      <div class="stat ok"><b id="stReady">—</b><span>ready</span></div>
+      <div class="stat"><b id="stMem">0</b><span>memory</span></div>
+      <div class="stat"><b id="stRoute">—</b><span>route</span></div>
+      <div class="stat"><b id="stQcli">—</b><span>QCLI</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>State-vector amplitudes</h2>
+    <canvas id="wave" width="640" height="120"></canvas>
+  </div>
+</div>
+<div class="grid" style="margin-top:12px">
+  <div class="panel">
+    <h2>Prompt</h2>
+    <div class="chat" id="chat">boot…</div>
     <div class="row">
-      <button type="button" class="btn p" id="btnModel">WebLLM</button>
-      <button type="button" class="btn" id="btnVoice">Голос</button>
-      <button type="button" class="btn" id="btnRag">Файлы RAG</button>
-      <button type="button" class="btn" id="btnClear">Очистить</button>
-      <input type="file" id="ragFile" accept=".txt,.md,.json,.csv,text/plain" multiple hidden>
+      <input type="text" id="qin" placeholder="вопрос или  запомни: факт" autocomplete="off">
+      <button type="button" id="send" disabled>Send</button>
     </div>
-    <div class="arch">
-      <div class="box">Запрос</div><div class="arr">↓</div>
-      <div class="row-boxes"><div class="box">Zero/Neuro/LLM</div><div class="box">QPIPE</div></div>
-      <div class="arr">↓</div><div class="box">ADIA · ECDSA · DID</div>
-    </div>
-  </div>
-  <div id="thread"></div>
-  <div class="chips">
-    <button type="button" class="chip" data-ask="Кто ты?">Кто ты?</button>
-    <button type="button" class="chip" data-ask="статус">Статус</button>
-    <button type="button" class="chip" data-ask="что такое кубит?">Кубит</button>
-  </div>
-</section>
-<section class="panel" id="tab-crypto">
-  <div class="card">
-    <h3>ECDSA P-256 · DID</h3>
-    <p class="muted" id="didLine">did:aksi:ed25519:sovereign-2026</p>
-    <div class="row" style="margin-top:10px">
-      <button type="button" class="btn p" data-crypto="keys">Ключи</button>
-      <button type="button" class="btn" data-crypto="json">JSON</button>
-      <button type="button" class="btn" data-crypto="did">DID</button>
-    </div>
-    <div class="pub" id="pubOut">—</div>
-    <textarea class="field" id="signMsg" placeholder="Сообщение"></textarea>
     <div class="row">
-      <button type="button" class="btn p" id="btnSign">Подписать</button>
-      <button type="button" class="btn" id="btnVerify">Проверить</button>
-      <button type="button" class="btn" id="btnDl">Скачать .json</button>
+      <input type="password" id="pw" placeholder="пароль vault" autocomplete="new-password">
+      <button type="button" class="ghost" id="exp" disabled>Export .aksi</button>
+      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;border:1px solid var(--line);padding:8px 10px;border-radius:3px">
+        Import <input type="file" id="imp" accept=".aksi,.json,application/json" style="display:none">
+      </label>
     </div>
-    <pre class="out" id="cryptoOut">—</pre>
   </div>
-</section>
-<section class="panel" id="tab-bloch">
-  <div class="card">
-    <h3>Квантовый симулятор</h3>
-    <canvas id="bloch" width="220" height="220"></canvas>
-    <div class="row" style="justify-content:center">
-      <button type="button" class="btn p" id="btnBell">Белл Φ+</button>
-      <button type="button" class="btn" id="btnShot">Измерение</button>
-      <button type="button" class="btn" id="btnGate">Печать ответа</button>
-      <button type="button" class="btn" id="btnChsh">CHSH</button>
-    </div>
-    <pre class="out" id="qOut">—</pre>
+  <div class="panel">
+    <h2>Event stream</h2>
+    <div class="log" id="log"></div>
   </div>
-</section>
-<section class="panel" id="tab-ui">
-  <div class="card">
-    <h3>Статус контура</h3>
-    <div class="kv">
-      <div class="c"><b id="kvModel">local</b><span>модель</span></div>
-      <div class="c"><b id="kvQ">—</b><span>QCLI</span></div>
-      <div class="c"><b id="kvRag">0</b><span>RAG</span></div>
-      <div class="c"><b id="kvDid">local</b><span>DID</span></div>
-    </div>
-    <p class="muted" style="margin-top:12px">v15 · aksilove@internet.ru</p>
-    <div class="row" style="margin-top:10px"><a class="btn" href="/">← Home</a><a class="btn" href="/superpose/">Superpose</a></div>
-  </div>
-</section>
-<section class="panel" id="tab-q2">
-  <div class="card">
-    <h3>2-qubit lab</h3>
-    <div class="row"><button type="button" class="btn p" id="btnQ2Bell">Белл</button><button type="button" class="btn" id="btnQ2Sample">1024 shots</button></div>
-    <pre class="out" id="q2Out">—</pre>
-  </div>
-</section>
 </div>
-<div class="composer">
-  <input id="inp" type="text" placeholder="Спросите · ответ через квант + подпись" enterkeyhint="send" autocomplete="off">
-  <button type="button" class="send" id="send">↑</button>
+<footer>aksilove@internet.ru · offline-first · ES modules · IndexedDB · Web Crypto</footer>
 </div>
-</div>
-<script src="/aksi-knowledge.js?v=3"></script>
-<script src="/aksi-neuro.js?v=10"></script>
-<script src="/aksi-zero.js?v=1"></script>
-<script src="/aksi-compose.js?v=3"></script>
-<script src="/aksi-quantum.js?v=5"></script>
-<script src="/aksi-qpipe.js?v=4"></script>
-<script src="/aksi-algorithm.js?v=4"></script>
-<script src="/aksi-decision.js?v=1"></script>
-<script src="/aksi-webllm.js?v=16"></script>
-<script src="/aksi-mind.js?v=15"></script>
-<script src="/matrix/app.js?v=15"></script>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js?v=210').catch(function () {});
+<script type="module">
+import { AksiKernel } from './kernel/kernel.js';
+
+const chat = document.getElementById('chat');
+const logEl = document.getElementById('log');
+const canvas = document.getElementById('wave');
+const ctx = canvas.getContext('2d');
+
+function appendChat(line) {
+  chat.textContent += (chat.textContent && !chat.textContent.endsWith('\n') ? '\n' : '') + line;
+  chat.scrollTop = chat.scrollHeight;
 }
+
+function logLine(type, payload) {
+  const div = document.createElement('div');
+  div.className = 'e';
+  const t = new Date().toISOString().slice(11, 19);
+  let extra = '';
+  try {
+    if (payload && typeof payload === 'object') {
+      if (payload.route) extra = ' ' + payload.route;
+      else if (payload.msg) extra = ' ' + payload.msg;
+      else if (payload.version) extra = ' v' + payload.version;
+      else if (payload.hits != null) extra = ' hits=' + payload.hits;
+      else if (payload.dim) extra = ' dim=' + payload.dim;
+    }
+  } catch (e) {}
+  div.textContent = t + '  ' + type + extra;
+  logEl.insertBefore(div, logEl.firstChild);
+  while (logEl.children.length > 80) logEl.removeChild(logEl.lastChild);
+}
+
+function drawWave(amps) {
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#1a1814';
+  ctx.fillRect(0, 0, w, h);
+  if (!amps || !amps.length) return;
+  const n = amps.length;
+  ctx.strokeStyle = '#ebe4d7';
+  ctx.lineWidth = 1.25;
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * (w - 8) + 4;
+    const y = h / 2 - amps[i] * (h * 0.42);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(235,228,215,0.25)';
+  ctx.beginPath();
+  ctx.moveTo(0, h / 2);
+  ctx.lineTo(w, h / 2);
+  ctx.stroke();
+}
+
+const kernel = new AksiKernel();
+
+kernel.subscribe((evt) => {
+  logLine(evt.type, evt.payload);
+  if (evt.type === 'ask:vector' || evt.type === 'ask:circuit') {
+    drawWave(kernel.router.getAmplitudes());
+  }
+  if (evt.type === 'ask:gate' && evt.payload) {
+    document.getElementById('stRoute').textContent = evt.payload.route || '—';
+    document.getElementById('stQcli').textContent =
+      evt.payload.QCLI != null ? Number(evt.payload.QCLI).toFixed(3) : '—';
+  }
+  if (evt.type === 'memory:store' || evt.type === 'vault:import' || evt.type === 'boot:ready') {
+    document.getElementById('stMem').textContent = String(kernel.state.memoryCount || 0);
+  }
+});
+
+document.getElementById('qin').addEventListener('input', (e) => {
+  if (!kernel.ready || !kernel.router) return;
+  const v = kernel.router.textToState(e.target.value || '');
+  drawWave(kernel.router.applyCircuit(v, e.target.value || ''));
+});
+
+async function boot() {
+  try {
+    await kernel.boot();
+    document.getElementById('badgeStatus').textContent = 'ready';
+    document.getElementById('stReady').textContent = 'yes';
+    document.getElementById('stMem').textContent = String(kernel.state.memoryCount);
+    document.getElementById('badgeGpu').textContent = 'webgpu ' + (kernel.capabilities.webgpu ? 'yes' : 'no');
+    document.getElementById('badgeCrypto').textContent = 'crypto ' + (kernel.capabilities.webCrypto ? 'yes' : 'no');
+    document.getElementById('send').disabled = false;
+    document.getElementById('exp').disabled = false;
+    chat.textContent = '';
+    appendChat('MATRIX ' + kernel.version + ' online');
+    appendChat('memory chunks: ' + kernel.state.memoryCount);
+    appendChat('—');
+    drawWave(kernel.router.textToState('aksi matrix'));
+  } catch (e) {
+    document.getElementById('badgeStatus').textContent = 'error';
+    appendChat('BOOT ERROR: ' + (e.message || e));
+  }
+}
+
+async function send() {
+  const raw = document.getElementById('qin').value.trim();
+  if (!raw || !kernel.ready) return;
+  document.getElementById('qin').value = '';
+  appendChat('> ' + raw);
+  const teach = raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
+  if (teach) {
+    await kernel.remember(teach[1].trim());
+    appendChat('stored.');
+    return;
+  }
+  const res = await kernel.ask(raw);
+  appendChat(res.text);
+  appendChat('[' + res.source + ' · route ' + (res.gate && res.gate.route) + ' · QCLI ' + (res.gate ? Number(res.gate.QCLI).toFixed(3) : '—') + ']');
+  appendChat('—');
+}
+
+document.getElementById('send').onclick = send;
+document.getElementById('qin').addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+
+document.getElementById('exp').onclick = async () => {
+  const pw = document.getElementById('pw').value;
+  if (!pw) { appendChat('задайте пароль vault'); return; }
+  try {
+    const blob = await kernel.exportCapsule(pw);
+    kernel.vault.downloadBlob(blob, 'matrix-capsule.aksi');
+    appendChat('exported .aksi (' + blob.size + ' bytes)');
+  } catch (e) {
+    appendChat('export error: ' + (e.message || e));
+  }
+};
+
+document.getElementById('imp').onchange = async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const pw = document.getElementById('pw').value;
+  if (!pw) { appendChat('задайте пароль vault'); e.target.value = ''; return; }
+  try {
+    const n = await kernel.importCapsule(f, pw);
+    appendChat('imported chunks: ' + n);
+  } catch (err) {
+    appendChat('import error: ' + (err.message || err));
+  }
+  e.target.value = '';
+};
+
+boot();
 </script>
 </body>
 </html>
