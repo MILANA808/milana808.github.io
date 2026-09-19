@@ -3,96 +3,121 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ MATRIX — Sovereign Runtime</title>
-<meta name="description" content="Kernel, HRR, TrustVault, optional WebLLM, Lorenz visual">
+<title>АКСИ MATRIX ONE — единый runtime</title>
+<meta name="description" content="Единый offline-first runtime: Kernel, HRR, Quantum gate, TrustVault, Lorenz, optional WebLLM">
 <meta name="theme-color" content="#ebe4d7">
+<link rel="canonical" href="https://milana808.github.io/matrix/">
 <style>
 :root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
-.shell{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
-header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
-.logo{font-weight:700;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
-.logo span{opacity:.55}
-header nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:12px}
-h1{font-size:clamp(1.35rem,3vw,1.75rem);font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
-.lead{color:var(--muted);font-size:14px;max-width:54ch;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:800px){.grid{grid-template-columns:1fr}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
-.panel h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:600}
-.status-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.stat{background:var(--bg2);border:1px solid var(--line);padding:8px 10px;border-radius:3px}
-.stat b{display:block;font-family:var(--mono);font-size:13px}
-.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.stat.ok b{color:var(--ok)}
-canvas#wave,canvas#chaos{width:100%;height:120px;display:block;border-radius:3px;border:1px solid var(--line)}
+.shell{max-width:1100px;margin:0 auto;padding:18px 16px 56px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap}
+.logo{font-weight:800;letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+.logo b{opacity:.5;font-weight:600}
+nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
+h1{font-size:clamp(1.35rem,3vw,1.8rem);font-weight:650;letter-spacing:-.02em;margin-bottom:6px}
+.lead{color:var(--muted);font-size:14px;max-width:58ch;margin-bottom:12px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);padding:4px 9px;color:var(--muted)}
+.badge.on{border-color:var(--ok);color:var(--ok)}
+.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px;margin-bottom:12px}
+.panel h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:650}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:520px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.m{background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px;text-align:center}
+.m b{display:block;font-family:var(--mono);font-size:13px}
+.m span{font-size:10px;color:var(--muted);text-transform:uppercase}
+.m.ok b{color:var(--ok)}
+canvas#wave,canvas#chaos{width:100%;height:110px;display:block;border-radius:3px;border:1px solid var(--line)}
 canvas#wave{background:#1a1814}
 canvas#chaos{background:#f0ebe0;margin-top:8px}
-.chat{min-height:180px;max-height:280px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-input[type=text],input[type=password]{flex:1;min-width:120px;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:3px}
-button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:600}
+.chat{min-height:200px;max-height:320px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+input[type=text],input[type=password]{flex:1;min-width:140px;font:inherit;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:3px;color:var(--ink)}
+button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 button:disabled{opacity:.4;cursor:not-allowed}
-.log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:160px;overflow:auto;line-height:1.5}
+.log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:200px;overflow:auto;line-height:1.5}
 .log .e{color:var(--ink)}
-footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
-.badge{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);padding:3px 8px;margin-right:6px;color:var(--muted)}
+.links{display:flex;flex-wrap:wrap;gap:8px}
+.links a{font-size:12px;color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:3px;background:var(--bg2)}
+footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
 <div class="shell">
 <header>
-  <div class="logo">AKSI <span>MATRIX</span></div>
-  <nav><a href="/">След</a><a href="/local-ai.html">Local AI</a><a href="/quantum-chip.html">Q-Chip</a></nav>
+  <div class="logo">AKSI <b>MATRIX ONE</b></div>
+  <nav>
+    <a href="/">След</a>
+    <a href="/local-ai.html">Local AI</a>
+    <a href="/quantum-chip.html">Q-Chip</a>
+    <a href="/capsule.html">Capsule</a>
+  </nav>
 </header>
-<h1>Sovereign browser runtime</h1>
-<p class="lead">Kernel · QuantumRouter · HRR · TrustVault · optional WebLLM · Lorenz visual. Offline by default.</p>
-<div>
-  <span class="badge" id="badgeStatus">cold</span>
-  <span class="badge" id="badgeGpu">webgpu ?</span>
-  <span class="badge" id="badgeCrypto">crypto ?</span>
+<h1>Единый суверенный runtime</h1>
+<p class="lead">Один контур: Kernel · QuantumRouter · HRR · TrustVault · Lorenz · optional WebLLM. Без обязательного сервера.</p>
+<div class="badges">
+  <span class="badge" id="bStatus">cold</span>
+  <span class="badge" id="bGpu">webgpu ?</span>
+  <span class="badge" id="bCrypto">crypto ?</span>
+  <span class="badge" id="bLlm">llm off</span>
 </div>
-<div class="grid" style="margin-top:16px">
+<div class="grid">
+<div>
   <div class="panel">
-    <h2>System monitor</h2>
-    <div class="status-grid">
-      <div class="stat ok"><b id="stReady">—</b><span>ready</span></div>
-      <div class="stat"><b id="stMem">0</b><span>memory</span></div>
-      <div class="stat"><b id="stRoute">—</b><span>route</span></div>
-      <div class="stat"><b id="stQcli">—</b><span>QCLI</span></div>
+    <h2>Monitor</h2>
+    <div class="metrics">
+      <div class="m ok"><b id="stReady">—</b><span>ready</span></div>
+      <div class="m"><b id="stMem">0</b><span>memory</span></div>
+      <div class="m"><b id="stRoute">—</b><span>route</span></div>
+      <div class="m"><b id="stQcli">—</b><span>QCLI</span></div>
     </div>
   </div>
   <div class="panel">
-    <h2>State-vector · Lorenz</h2>
-    <canvas id="wave" width="640" height="120"></canvas>
-    <canvas id="chaos" width="640" height="120"></canvas>
-  </div>
-</div>
-<div class="grid" style="margin-top:12px">
-  <div class="panel">
-    <h2>Prompt</h2>
+    <h2>Prompt · единый вход</h2>
     <div class="chat" id="chat">boot…</div>
     <div class="row">
-      <input type="text" id="qin" placeholder="вопрос или  запомни: факт" autocomplete="off">
+      <input type="text" id="qin" placeholder="вопрос · или  запомни: факт" autocomplete="off">
       <button type="button" id="send" disabled>Send</button>
     </div>
     <div class="row">
       <input type="password" id="pw" placeholder="пароль vault" autocomplete="new-password">
-      <button type="button" class="ghost" id="llm" disabled>Load Local LLM</button>
+      <button type="button" class="ghost" id="llm" disabled>Load LLM</button>
       <button type="button" class="ghost" id="exp" disabled>Export .aksi</button>
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;border:1px solid var(--line);padding:8px 10px;border-radius:3px">
         Import <input type="file" id="imp" accept=".aksi,.json,application/json" style="display:none">
       </label>
     </div>
+    <p class="hint">запомни: текст → HRR · Send → gate + recall · Load LLM → WebGPU (opt-in)</p>
+  </div>
+</div>
+<div>
+  <div class="panel">
+    <h2>State-vector · Lorenz</h2>
+    <canvas id="wave" width="640" height="110"></canvas>
+    <canvas id="chaos" width="640" height="110"></canvas>
   </div>
   <div class="panel">
     <h2>Event stream</h2>
     <div class="log" id="log"></div>
   </div>
+  <div class="panel">
+    <h2>Связанные поверхности</h2>
+    <div class="links">
+      <a href="/quantum-chip.html">Q-Chip simulator</a>
+      <a href="/local-ai.html">Local AI contour</a>
+      <a href="/capsule.html">Living Capsule</a>
+      <a href="/">Product home</a>
+    </div>
+  </div>
 </div>
-<footer>aksilove@internet.ru · Lorenz = visual only · not a crypto primitive</footer>
+</div>
+<footer>aksilove@internet.ru · classical sim + HRR + AES-GCM · Lorenz visual · WebLLM opt-in</footer>
 </div>
 <script type="module">
 import { AksiKernel } from './kernel/kernel.js';
@@ -100,8 +125,8 @@ import { mountLorenz } from './chaos/lorenz.js';
 
 const chat = document.getElementById('chat');
 const logEl = document.getElementById('log');
-const canvas = document.getElementById('wave');
-const ctx = canvas.getContext('2d');
+const wave = document.getElementById('wave');
+const wctx = wave.getContext('2d');
 
 function appendChat(line) {
   chat.textContent += (chat.textContent && !chat.textContent.endsWith('\n') ? '\n' : '') + line;
@@ -120,42 +145,47 @@ function logLine(type, payload) {
       else if (payload.version) extra = ' v' + payload.version;
       else if (payload.hits != null) extra = ' hits=' + payload.hits;
       else if (payload.dim) extra = ' dim=' + payload.dim;
-      else if (payload.error) extra = ' ' + String(payload.error).slice(0, 60);
+      else if (payload.error) extra = ' ' + String(payload.error).slice(0, 70);
+      else if (payload.chars != null) extra = ' chars=' + payload.chars;
     }
   } catch (e) {}
   div.textContent = t + '  ' + type + extra;
   logEl.insertBefore(div, logEl.firstChild);
-  while (logEl.children.length > 80) logEl.removeChild(logEl.lastChild);
+  while (logEl.children.length > 100) logEl.removeChild(logEl.lastChild);
 }
 
 function drawWave(amps) {
-  const w = canvas.width, h = canvas.height;
-  ctx.fillStyle = '#1a1814';
-  ctx.fillRect(0, 0, w, h);
+  const w = wave.width, h = wave.height;
+  wctx.fillStyle = '#1a1814';
+  wctx.fillRect(0, 0, w, h);
   if (!amps || !amps.length) return;
   const n = amps.length;
-  ctx.strokeStyle = '#ebe4d7';
-  ctx.lineWidth = 1.25;
-  ctx.beginPath();
+  wctx.strokeStyle = '#ebe4d7';
+  wctx.lineWidth = 1.25;
+  wctx.beginPath();
   for (let i = 0; i < n; i++) {
     const x = (i / (n - 1)) * (w - 8) + 4;
     const y = h / 2 - amps[i] * (h * 0.42);
-    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    if (i === 0) wctx.moveTo(x, y); else wctx.lineTo(x, y);
   }
-  ctx.stroke();
+  wctx.stroke();
 }
 
 const kernel = new AksiKernel();
 
 kernel.subscribe((evt) => {
   logLine(evt.type, evt.payload);
-  if (evt.type === 'ask:vector' || evt.type === 'ask:circuit') drawWave(kernel.router.getAmplitudes());
+  if ((evt.type === 'ask:vector' || evt.type === 'ask:circuit') && kernel.router) drawWave(kernel.router.getAmplitudes());
   if (evt.type === 'ask:gate' && evt.payload) {
     document.getElementById('stRoute').textContent = evt.payload.route || '—';
     document.getElementById('stQcli').textContent = evt.payload.QCLI != null ? Number(evt.payload.QCLI).toFixed(3) : '—';
   }
   if (evt.type === 'memory:store' || evt.type === 'vault:import' || evt.type === 'boot:ready') {
     document.getElementById('stMem').textContent = String(kernel.state.memoryCount || 0);
+  }
+  if (evt.type === 'llm:load_done') {
+    document.getElementById('bLlm').textContent = 'llm on';
+    document.getElementById('bLlm').classList.add('on');
   }
 });
 
@@ -168,22 +198,26 @@ document.getElementById('qin').addEventListener('input', (e) => {
 async function boot() {
   try {
     await kernel.boot();
-    document.getElementById('badgeStatus').textContent = 'ready';
+    document.getElementById('bStatus').textContent = 'ready';
+    document.getElementById('bStatus').classList.add('on');
     document.getElementById('stReady').textContent = 'yes';
     document.getElementById('stMem').textContent = String(kernel.state.memoryCount);
-    document.getElementById('badgeGpu').textContent = 'webgpu ' + (kernel.capabilities.webgpu ? 'yes' : 'no');
-    document.getElementById('badgeCrypto').textContent = 'crypto ' + (kernel.capabilities.webCrypto ? 'yes' : 'no');
+    document.getElementById('bGpu').textContent = 'webgpu ' + (kernel.capabilities.webgpu ? 'yes' : 'no');
+    if (kernel.capabilities.webgpu) document.getElementById('bGpu').classList.add('on');
+    document.getElementById('bCrypto').textContent = 'crypto ' + (kernel.capabilities.webCrypto ? 'yes' : 'no');
+    if (kernel.capabilities.webCrypto) document.getElementById('bCrypto').classList.add('on');
     document.getElementById('send').disabled = false;
     document.getElementById('exp').disabled = false;
     document.getElementById('llm').disabled = false;
     chat.textContent = '';
-    appendChat('MATRIX ' + kernel.version + ' online');
-    appendChat('memory: ' + kernel.state.memoryCount + ' · Lorenz visual on');
+    appendChat('MATRIX ONE ' + kernel.version);
+    appendChat('модули: Kernel · Router · HRR · Vault · Lorenz' + (kernel.capabilities.webgpu ? ' · WebLLM ready' : ''));
+    appendChat('memory: ' + kernel.state.memoryCount);
     appendChat('—');
-    drawWave(kernel.router.textToState('aksi matrix'));
+    drawWave(kernel.router.textToState('aksi matrix one'));
     window.__aksiChaos = mountLorenz(document.getElementById('chaos'), document.getElementById('qin'), document.getElementById('stRoute'));
   } catch (e) {
-    document.getElementById('badgeStatus').textContent = 'error';
+    document.getElementById('bStatus').textContent = 'error';
     appendChat('BOOT ERROR: ' + (e.message || e));
   }
 }
@@ -197,11 +231,12 @@ async function send() {
   const teach = raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
   if (teach) {
     await kernel.remember(teach[1].trim());
-    appendChat('stored.');
+    appendChat('✓ stored in HRR + IndexedDB');
+    appendChat('—');
     return;
   }
   const res = await kernel.ask(raw);
-  appendChat(res.text);
+  appendChat(res.text || '(пусто)');
   appendChat('[' + res.source + ' · ' + (res.gate && res.gate.route) + ' · QCLI ' + (res.gate ? Number(res.gate.QCLI).toFixed(3) : '—') + ']');
   appendChat('—');
 }
@@ -212,29 +247,29 @@ document.getElementById('qin').addEventListener('keydown', (e) => { if (e.key ==
 document.getElementById('llm').onclick = async () => {
   const btn = document.getElementById('llm');
   btn.disabled = true;
-  appendChat('loading local LLM…');
+  appendChat('loading WebLLM (Qwen2.5-0.5B)…');
   try {
     await kernel.loadLocalLLM(({ progress, text }) => {
-      document.getElementById('badgeStatus').textContent = 'llm ' + Math.round((progress || 0) * 100) + '%';
+      document.getElementById('bStatus').textContent = 'llm ' + Math.round((progress || 0) * 100) + '%';
       if (text) logLine('llm:progress', { msg: String(text).slice(0, 80) });
     });
-    appendChat('Local LLM ready');
-    document.getElementById('badgeStatus').textContent = 'llm ready';
+    appendChat('✓ Local LLM on GPU cache');
+    document.getElementById('bStatus').textContent = 'ready';
     btn.textContent = 'LLM ON';
   } catch (e) {
     appendChat('LLM error: ' + (e.message || e));
-    document.getElementById('badgeStatus').textContent = 'llm error';
+    document.getElementById('bStatus').textContent = 'llm error';
     btn.disabled = false;
   }
 };
 
 document.getElementById('exp').onclick = async () => {
   const pw = document.getElementById('pw').value;
-  if (!pw) { appendChat('задайте пароль vault'); return; }
+  if (!pw) { appendChat('нужен пароль vault'); return; }
   try {
     const blob = await kernel.exportCapsule(pw);
-    kernel.vault.downloadBlob(blob, 'matrix-capsule.aksi');
-    appendChat('exported .aksi (' + blob.size + ' bytes)');
+    kernel.vault.downloadBlob(blob, 'matrix-one.aksi');
+    appendChat('✓ exported matrix-one.aksi (' + blob.size + ' bytes)');
   } catch (e) {
     appendChat('export error: ' + (e.message || e));
   }
@@ -244,10 +279,10 @@ document.getElementById('imp').onchange = async (e) => {
   const f = e.target.files && e.target.files[0];
   if (!f) return;
   const pw = document.getElementById('pw').value;
-  if (!pw) { appendChat('задайте пароль vault'); e.target.value = ''; return; }
+  if (!pw) { appendChat('нужен пароль vault'); e.target.value = ''; return; }
   try {
     const n = await kernel.importCapsule(f, pw);
-    appendChat('imported chunks: ' + n);
+    appendChat('✓ imported chunks: ' + n);
   } catch (err) {
     appendChat('import error: ' + (err.message || err));
   }
