@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ MATRIX ONE — единый runtime</title>
-<meta name="description" content="Kernel, HRR, TrustVault, Lorenz, optional WebLLM">
+<title>АКСИ MATRIX ONE</title>
+<meta name="description" content="Kernel · HRR · WebLLM micro · Bonsai 2 27B path · OPFS">
 <meta name="theme-color" content="#ebe4d7">
 <style>
 :root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
 .shell{max-width:1100px;margin:0 auto;padding:18px 16px 56px}
-header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap}
-.logo{font-weight:800;letter-spacing:.14em;font-size:12px;text-transform:uppercase}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+.logo{font-weight:800;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
 .logo b{opacity:.5;font-weight:600}
 nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
-h1{font-size:clamp(1.35rem,3vw,1.8rem);font-weight:650;margin-bottom:6px}
-.lead{color:var(--muted);font-size:14px;max-width:58ch;margin-bottom:12px}
-.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+h1{font-size:clamp(1.3rem,3vw,1.7rem);font-weight:650;margin-bottom:6px}
+.lead{color:var(--muted);font-size:14px;max-width:60ch;margin-bottom:12px}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);padding:4px 9px;color:var(--muted)}
 .badge.on{border-color:var(--ok);color:var(--ok)}
 .grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
@@ -29,21 +29,23 @@ h1{font-size:clamp(1.35rem,3vw,1.8rem);font-weight:650;margin-bottom:6px}
 .m b{display:block;font-family:var(--mono);font-size:13px}
 .m span{font-size:10px;color:var(--muted);text-transform:uppercase}
 .m.ok b{color:var(--ok)}
-canvas#wave,canvas#chaos{width:100%;height:110px;display:block;border-radius:3px;border:1px solid var(--line)}
+canvas#wave,canvas#chaos{width:100%;height:100px;display:block;border-radius:3px;border:1px solid var(--line)}
 canvas#wave{background:#1a1814}
 canvas#chaos{background:#f0ebe0;margin-top:8px}
-.chat{min-height:200px;max-height:320px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
+.chat{min-height:180px;max-height:300px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
-input[type=text],input[type=password]{flex:1;min-width:140px;font:inherit;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:3px}
+input[type=text],input[type=password],select{flex:1;min-width:120px;font:inherit;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:3px}
 button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 button:disabled{opacity:.4;cursor:not-allowed}
-.log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:200px;overflow:auto;line-height:1.5}
+.bar{height:8px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+.barlabel{font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
+.log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:180px;overflow:auto;line-height:1.5}
 .log .e{color:var(--ink)}
-.links{display:flex;flex-wrap:wrap;gap:8px}
-.links a{font-size:12px;color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:3px;background:var(--bg2)}
-footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.links a{font-size:12px;color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:3px;background:var(--bg2);display:inline-block;margin:4px 4px 0 0}
 .hint{font-size:12px;color:var(--muted);margin-top:8px}
+footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -52,8 +54,8 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
   <div class="logo">AKSI <b>MATRIX ONE</b></div>
   <nav><a href="/">След</a><a href="/local-ai.html">Local AI</a><a href="/quantum-chip.html">Q-Chip</a><a href="/capsule.html">Capsule</a></nav>
 </header>
-<h1>Единый суверенный runtime</h1>
-<p class="lead">Kernel · HRR · TrustVault · Lorenz · optional WebLLM (Chrome/Edge + GPU).</p>
+<h1>Единый runtime</h1>
+<p class="lead">HRR · Quantum gate · WebLLM micro · Bonsai 2 27B (PrismML ternary path) · OPFS.</p>
 <div class="badges">
   <span class="badge" id="bStatus">cold</span>
   <span class="badge" id="bGpu">webgpu ?</span>
@@ -62,8 +64,7 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
 </div>
 <div class="grid">
 <div>
-  <div class="panel">
-    <h2>Monitor</h2>
+  <div class="panel"><h2>Monitor</h2>
     <div class="metrics">
       <div class="m ok"><b id="stReady">—</b><span>ready</span></div>
       <div class="m"><b id="stMem">0</b><span>memory</span></div>
@@ -71,8 +72,19 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
       <div class="m"><b id="stQcli">—</b><span>QCLI</span></div>
     </div>
   </div>
-  <div class="panel">
-    <h2>Prompt</h2>
+  <div class="panel"><h2>Model</h2>
+    <div class="row">
+      <select id="modelSel" disabled>
+        <option value="webllm">Micro · WebLLM Qwen ~0.5B (~0.3GB)</option>
+        <option value="bonsai">Bonsai 2 27B Ternary (~5.9GB · PrismML kernels)</option>
+      </select>
+      <button type="button" class="ghost" id="loadModel" disabled>Load / Prepare</button>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlabel" id="ptext">idle</div>
+    <p class="hint" id="modelHint">Bonsai 2 27B не грузится через WebLLM: нужны ядра PrismML. Prepare = OPFS; инференс = WebGPU Space.</p>
+  </div>
+  <div class="panel"><h2>Prompt</h2>
     <div class="chat" id="chat">boot…</div>
     <div class="row">
       <input type="text" id="qin" placeholder="вопрос · или  запомни: факт" autocomplete="off">
@@ -80,192 +92,47 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
     </div>
     <div class="row">
       <input type="password" id="pw" placeholder="пароль vault" autocomplete="new-password">
-      <button type="button" class="ghost" id="llm" disabled>Load LLM</button>
       <button type="button" class="ghost" id="exp" disabled>Export .aksi</button>
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;border:1px solid var(--line);padding:8px 10px;border-radius:3px">Import <input type="file" id="imp" accept=".aksi,.json" style="display:none"></label>
     </div>
-    <p class="hint">Load LLM: Chrome/Edge + WebGPU + интернет 1 раз (~300MB). Без LLM offline HRR работает.</p>
   </div>
 </div>
 <div>
-  <div class="panel">
-    <h2>State-vector · Lorenz</h2>
-    <canvas id="wave" width="640" height="110"></canvas>
-    <canvas id="chaos" width="640" height="110"></canvas>
+  <div class="panel"><h2>State-vector · Lorenz</h2>
+    <canvas id="wave" width="640" height="100"></canvas>
+    <canvas id="chaos" width="640" height="100"></canvas>
   </div>
   <div class="panel"><h2>Event stream</h2><div class="log" id="log"></div></div>
-  <div class="panel"><h2>Связанные</h2>
+  <div class="panel"><h2>Bonsai links</h2>
     <div class="links">
-      <a href="/quantum-chip.html">Q-Chip</a>
-      <a href="/local-ai.html">Local AI</a>
-      <a href="/capsule.html">Capsule</a>
+      <a href="https://huggingface.co/spaces/webml-community/bonsai-webgpu-kernels" target="_blank" rel="noopener">WebGPU Space</a>
+      <a href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf" target="_blank" rel="noopener">HF weights</a>
+      <a href="https://docs.prismml.com/bonsai-2-27b" target="_blank" rel="noopener">Docs</a>
     </div>
   </div>
 </div>
 </div>
-<footer>aksilove@internet.ru</footer>
+<footer>aksilove@internet.ru · Bonsai ≠ WebLLM · OPFS plumbing</footer>
 </div>
 <script type="module">
 import { AksiKernel } from './kernel/kernel.js';
 import { mountLorenz } from './chaos/lorenz.js';
-
-const chat = document.getElementById('chat');
-const logEl = document.getElementById('log');
-const wave = document.getElementById('wave');
-const wctx = wave.getContext('2d');
-
-function appendChat(line) {
-  chat.textContent += (chat.textContent && !chat.textContent.endsWith('\n') ? '\n' : '') + line;
-  chat.scrollTop = chat.scrollHeight;
-}
-function logLine(type, payload) {
-  const div = document.createElement('div');
-  div.className = 'e';
-  const t = new Date().toISOString().slice(11, 19);
-  let extra = '';
-  try {
-    if (payload && typeof payload === 'object') {
-      if (payload.route) extra = ' ' + payload.route;
-      else if (payload.msg) extra = ' ' + payload.msg;
-      else if (payload.version) extra = ' v' + payload.version;
-      else if (payload.hits != null) extra = ' hits=' + payload.hits;
-      else if (payload.error) extra = ' ' + String(payload.error).slice(0, 80);
-      else if (payload.chars != null) extra = ' chars=' + payload.chars;
-    }
-  } catch (e) {}
-  div.textContent = t + '  ' + type + extra;
-  logEl.insertBefore(div, logEl.firstChild);
-  while (logEl.children.length > 100) logEl.removeChild(logEl.lastChild);
-}
-function drawWave(amps) {
-  const w = wave.width, h = wave.height;
-  wctx.fillStyle = '#1a1814';
-  wctx.fillRect(0, 0, w, h);
-  if (!amps || !amps.length) return;
-  wctx.strokeStyle = '#ebe4d7';
-  wctx.lineWidth = 1.25;
-  wctx.beginPath();
-  for (let i = 0; i < amps.length; i++) {
-    const x = (i / (amps.length - 1)) * (w - 8) + 4;
-    const y = h / 2 - amps[i] * (h * 0.42);
-    if (i === 0) wctx.moveTo(x, y); else wctx.lineTo(x, y);
-  }
-  wctx.stroke();
-}
-
-const kernel = new AksiKernel();
-kernel.subscribe((evt) => {
-  logLine(evt.type, evt.payload);
-  if ((evt.type === 'ask:vector' || evt.type === 'ask:circuit') && kernel.router) drawWave(kernel.router.getAmplitudes());
-  if (evt.type === 'ask:gate' && evt.payload) {
-    document.getElementById('stRoute').textContent = evt.payload.route || '—';
-    document.getElementById('stQcli').textContent = evt.payload.QCLI != null ? Number(evt.payload.QCLI).toFixed(3) : '—';
-  }
-  if (evt.type === 'memory:store' || evt.type === 'vault:import' || evt.type === 'boot:ready') {
-    document.getElementById('stMem').textContent = String(kernel.state.memoryCount || 0);
-  }
-  if (evt.type === 'llm:load_done') {
-    document.getElementById('bLlm').textContent = 'llm on';
-    document.getElementById('bLlm').classList.add('on');
-  }
-});
-
-document.getElementById('qin').addEventListener('input', (e) => {
-  if (!kernel.ready || !kernel.router) return;
-  drawWave(kernel.router.applyCircuit(kernel.router.textToState(e.target.value || ''), e.target.value || ''));
-});
-
-async function boot() {
-  try {
-    await kernel.boot();
-    document.getElementById('bStatus').textContent = 'ready';
-    document.getElementById('bStatus').classList.add('on');
-    document.getElementById('stReady').textContent = 'yes';
-    document.getElementById('stMem').textContent = String(kernel.state.memoryCount);
-    document.getElementById('bGpu').textContent = 'webgpu ' + (kernel.capabilities.webgpu ? 'yes' : 'no');
-    if (kernel.capabilities.webgpu) document.getElementById('bGpu').classList.add('on');
-    document.getElementById('bCrypto').textContent = 'crypto ' + (kernel.capabilities.webCrypto ? 'yes' : 'no');
-    if (kernel.capabilities.webCrypto) document.getElementById('bCrypto').classList.add('on');
-    document.getElementById('send').disabled = false;
-    document.getElementById('exp').disabled = false;
-    document.getElementById('llm').disabled = false;
-    chat.textContent = '';
-    appendChat('MATRIX ONE ' + kernel.version);
-    appendChat('memory: ' + kernel.state.memoryCount);
-    if (!kernel.capabilities.webgpu) appendChat('WebGPU нет — LLM недоступен, HRR offline работает');
-    appendChat('—');
-    drawWave(kernel.router.textToState('aksi matrix one'));
-    window.__aksiChaos = mountLorenz(document.getElementById('chaos'), document.getElementById('qin'), document.getElementById('stRoute'));
-  } catch (e) {
-    document.getElementById('bStatus').textContent = 'error';
-    appendChat('BOOT ERROR: ' + (e.message || e));
-  }
-}
-
-async function send() {
-  const raw = document.getElementById('qin').value.trim();
-  if (!raw || !kernel.ready) return;
-  document.getElementById('qin').value = '';
-  appendChat('> ' + raw);
-  if (window.__aksiChaos) window.__aksiChaos.pulseRoute();
-  const teach = raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
-  if (teach) {
-    await kernel.remember(teach[1].trim());
-    appendChat('✓ stored');
-    appendChat('—');
-    return;
-  }
-  const res = await kernel.ask(raw);
-  appendChat(res.text || '(пусто)');
-  appendChat('[' + res.source + ' · ' + (res.gate && res.gate.route) + ' · QCLI ' + (res.gate ? Number(res.gate.QCLI).toFixed(3) : '—') + ']');
-  appendChat('—');
-}
-
-document.getElementById('send').onclick = send;
-document.getElementById('qin').addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
-
-document.getElementById('llm').onclick = async () => {
-  const btn = document.getElementById('llm');
-  btn.disabled = true;
-  appendChat('loading WebLLM…');
-  try {
-    await kernel.loadLocalLLM(({ progress, text }) => {
-      document.getElementById('bStatus').textContent = 'llm ' + Math.round((progress || 0) * 100) + '%';
-      if (text) logLine('llm:progress', { msg: String(text).slice(0, 100) });
-    });
-    appendChat('✓ Local LLM ready');
-    document.getElementById('bStatus').textContent = 'ready';
-    btn.textContent = 'LLM ON';
-  } catch (e) {
-    appendChat('LLM error: ' + (e.message || e));
-    appendChat('Нужны: Chrome/Edge + WebGPU + интернет на 1-ю загрузку (~300MB)');
-    document.getElementById('bStatus').textContent = 'llm error';
-    btn.disabled = false;
-  }
-};
-
-document.getElementById('exp').onclick = async () => {
-  const pw = document.getElementById('pw').value;
-  if (!pw) { appendChat('нужен пароль vault'); return; }
-  try {
-    const blob = await kernel.exportCapsule(pw);
-    kernel.vault.downloadBlob(blob, 'matrix-one.aksi');
-    appendChat('✓ exported (' + blob.size + ' bytes)');
-  } catch (e) { appendChat('export error: ' + (e.message || e)); }
-};
-
-document.getElementById('imp').onchange = async (e) => {
-  const f = e.target.files && e.target.files[0];
-  if (!f) return;
-  const pw = document.getElementById('pw').value;
-  if (!pw) { appendChat('нужен пароль vault'); e.target.value = ''; return; }
-  try {
-    const n = await kernel.importCapsule(f, pw);
-    appendChat('✓ imported: ' + n);
-  } catch (err) { appendChat('import error: ' + (err.message || err)); }
-  e.target.value = '';
-};
-
+const chat=document.getElementById('chat'),logEl=document.getElementById('log'),wave=document.getElementById('wave'),wctx=wave.getContext('2d');
+const pbar=document.getElementById('pbar'),ptext=document.getElementById('ptext');
+function appendChat(line){chat.textContent+=(chat.textContent&&!chat.textContent.endsWith('\n')?'\n':'')+line;chat.scrollTop=chat.scrollHeight;}
+function logLine(type,payload){const div=document.createElement('div');div.className='e';const t=new Date().toISOString().slice(11,19);let extra='';try{if(payload&&typeof payload==='object'){if(payload.route)extra=' '+payload.route;else if(payload.msg)extra=' '+payload.msg;else if(payload.version)extra=' v'+payload.version;else if(payload.hits!=null)extra=' hits='+payload.hits;else if(payload.error)extra=' '+String(payload.error).slice(0,90);else if(payload.provider)extra=' '+payload.provider;else if(payload.chars!=null)extra=' chars='+payload.chars;}}catch(e){}div.textContent=t+'  '+type+extra;logEl.insertBefore(div,logEl.firstChild);while(logEl.children.length>100)logEl.removeChild(logEl.lastChild);}
+function setProgress(pct,text){const p=Math.max(0,Math.min(1,Number(pct)||0));pbar.style.width=Math.round(p*100)+'%';ptext.textContent=text||Math.round(p*100)+'%';}
+function drawWave(amps){const w=wave.width,h=wave.height;wctx.fillStyle='#1a1814';wctx.fillRect(0,0,w,h);if(!amps||!amps.length)return;wctx.strokeStyle='#ebe4d7';wctx.lineWidth=1.25;wctx.beginPath();for(let i=0;i<amps.length;i++){const x=(i/(amps.length-1))*(w-8)+4,y=h/2-amps[i]*(h*0.42);if(i===0)wctx.moveTo(x,y);else wctx.lineTo(x,y);}wctx.stroke();}
+const kernel=new AksiKernel();
+kernel.subscribe((evt)=>{logLine(evt.type,evt.payload);if((evt.type==='ask:vector'||evt.type==='ask:circuit')&&kernel.router)drawWave(kernel.router.getAmplitudes());if(evt.type==='ask:gate'&&evt.payload){document.getElementById('stRoute').textContent=evt.payload.route||'—';document.getElementById('stQcli').textContent=evt.payload.QCLI!=null?Number(evt.payload.QCLI).toFixed(3):'—';}if(evt.type==='memory:store'||evt.type==='vault:import'||evt.type==='boot:ready')document.getElementById('stMem').textContent=String(kernel.state.memoryCount||0);if(evt.type==='llm:load_done'||evt.type==='bonsai:prepare_done'){document.getElementById('bLlm').textContent=evt.type==='bonsai:prepare_done'?'bonsai armed':'llm on';document.getElementById('bLlm').classList.add('on');}});
+document.getElementById('qin').addEventListener('input',(e)=>{if(!kernel.ready||!kernel.router)return;drawWave(kernel.router.applyCircuit(kernel.router.textToState(e.target.value||''),e.target.value||''));});
+document.getElementById('modelSel').onchange=()=>{const v=document.getElementById('modelSel').value;kernel.setLLMProvider(v);document.getElementById('modelHint').textContent=v==='bonsai'?'Bonsai 2 27B: OPFS prepare + WebGPU Space (не MLC). ~5.9GB.':'Micro WebLLM: Qwen-класс ~0.5B через MLC.';};
+async function boot(){try{await kernel.boot();document.getElementById('bStatus').textContent='ready';document.getElementById('bStatus').classList.add('on');document.getElementById('stReady').textContent='yes';document.getElementById('stMem').textContent=String(kernel.state.memoryCount);document.getElementById('bGpu').textContent='webgpu '+(kernel.capabilities.webgpu?'yes':'no');if(kernel.capabilities.webgpu)document.getElementById('bGpu').classList.add('on');document.getElementById('bCrypto').textContent='crypto '+(kernel.capabilities.webCrypto?'yes':'no');if(kernel.capabilities.webCrypto)document.getElementById('bCrypto').classList.add('on');document.getElementById('send').disabled=false;document.getElementById('exp').disabled=false;document.getElementById('modelSel').disabled=false;document.getElementById('loadModel').disabled=false;chat.textContent='';appendChat('MATRIX ONE '+kernel.version);appendChat('memory: '+kernel.state.memoryCount);appendChat('—');drawWave(kernel.router.textToState('aksi matrix one'));window.__aksiChaos=mountLorenz(document.getElementById('chaos'),document.getElementById('qin'),document.getElementById('stRoute'));}catch(e){document.getElementById('bStatus').textContent='error';appendChat('BOOT ERROR: '+(e.message||e));}}
+document.getElementById('loadModel').onclick=async()=>{const btn=document.getElementById('loadModel'),mode=document.getElementById('modelSel').value;btn.disabled=true;kernel.setLLMProvider(mode);try{if(mode==='bonsai'){appendChat('Preparing Bonsai path (OPFS)…');await kernel.prepareBonsai(({progress,text})=>setProgress(progress,text));appendChat('✓ Bonsai armed — Send откроет WebGPU Space + HRR prompt');setProgress(1,'bonsai armed');}else{appendChat('Loading WebLLM micro…');await kernel.loadLocalLLM(({progress,text})=>setProgress(progress,text));appendChat('✓ WebLLM ready');setProgress(1,'webllm ready');}}catch(e){appendChat('Model error: '+(e.message||e));setProgress(0,'error');}btn.disabled=false;};
+async function send(){const raw=document.getElementById('qin').value.trim();if(!raw||!kernel.ready)return;document.getElementById('qin').value='';appendChat('> '+raw);if(window.__aksiChaos)window.__aksiChaos.pulseRoute();const teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);if(teach){await kernel.remember(teach[1].trim());appendChat('✓ stored');appendChat('—');return;}const res=await kernel.ask(raw);appendChat(res.text||'(пусто)');appendChat('['+res.source+' · '+(res.gate&&res.gate.route)+' · QCLI '+(res.gate?Number(res.gate.QCLI).toFixed(3):'—')+']');appendChat('—');}
+document.getElementById('send').onclick=send;document.getElementById('qin').addEventListener('keydown',(e)=>{if(e.key==='Enter')send();});
+document.getElementById('exp').onclick=async()=>{const pw=document.getElementById('pw').value;if(!pw){appendChat('нужен пароль vault');return;}try{const blob=await kernel.exportCapsule(pw);kernel.vault.downloadBlob(blob,'matrix-one.aksi');appendChat('✓ exported ('+blob.size+' bytes)');}catch(e){appendChat('export error: '+(e.message||e));}};
+document.getElementById('imp').onchange=async(e)=>{const f=e.target.files&&e.target.files[0];if(!f)return;const pw=document.getElementById('pw').value;if(!pw){appendChat('нужен пароль vault');e.target.value='';return;}try{const n=await kernel.importCapsule(f,pw);appendChat('✓ imported: '+n);}catch(err){appendChat('import error: '+(err.message||err));}e.target.value='';};
 boot();
 </script>
 </body>
