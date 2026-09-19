@@ -1,5 +1,7 @@
 /**
  * AKSI MATRIX — Core Kernel v1.2
+ * Central event hub, hardware probe, IndexedDB vault, dual LLM providers
+ * (WebLLM micro + Bonsai 2 27B ternary), HRR context → prompt.
  */
 import { QuantumRouter } from '../quantum/router.js';
 import { Exocortex } from '../exocortex/hrr.js';
@@ -21,16 +23,23 @@ export class AksiKernel {
       webCrypto: !!(globalThis.crypto && crypto.subtle),
       storageEstimate: null
     };
-    this.state = { bootAt: null, lastEvent: null, memoryCount: 0, sealed: false, status: 'cold' };
+    this.state = {
+      bootAt: null,
+      lastEvent: null,
+      memoryCount: 0,
+      sealed: false,
+      status: 'cold',
+      llmProvider: 'webllm'
+    };
     this._subs = new Set();
     this._db = null;
     this.router = null;
     this.exocortex = null;
     this.vault = null;
     this.llm = null;
-    this.llmPrefer = false;
-    this.llmProvider = 'webllm';
+    this.webllm = null;
     this.bonsai = null;
+    this.llmPrefer = false;
   }
 
   subscribe(fn) {
@@ -40,9 +49,15 @@ export class AksiKernel {
   }
 
   emit(type, payload) {
-    const evt = { type: String(type), payload: payload === undefined ? null : payload, at: new Date().toISOString() };
+    const evt = {
+      type: String(type),
+      payload: payload === undefined ? null : payload,
+      at: new Date().toISOString()
+    };
     this.state.lastEvent = evt;
-    this._subs.forEach((fn) => { try { fn(evt); } catch (e) {} });
+    this._subs.forEach((fn) => {
+      try { fn(evt); } catch (e) {}
+    });
     return evt;
   }
 
@@ -53,27 +68,37 @@ export class AksiKernel {
         const adapter = await navigator.gpu.requestAdapter();
         this.capabilities.webgpu = !!adapter;
       }
-    } catch (e) { this.capabilities.webgpu = false; }
+    } catch (e) {
+      this.capabilities.webgpu = false;
+    }
     try {
       if (navigator.storage && navigator.storage.estimate) {
         const est = await navigator.storage.estimate();
         this.capabilities.storageEstimate = { usage: est.usage || 0, quota: est.quota || 0 };
       }
-    } catch (e) { this.capabilities.storageEstimate = null; }
+    } catch (e) {
+      this.capabilities.storageEstimate = null;
+    }
     this.emit('probe:done', { ...this.capabilities });
     return this.capabilities;
   }
 
   openDB() {
     return new Promise((resolve, reject) => {
-      if (!this.capabilities.indexedDB) { reject(new Error('IndexedDB unavailable')); return; }
+      if (!this.capabilities.indexedDB) {
+        reject(new Error('IndexedDB unavailable'));
+        return;
+      }
       const req = indexedDB.open(DB_NAME, DB_VERSION);
       req.onerror = () => reject(req.error || new Error('IDB open failed'));
       req.onupgradeneeded = () => {
         const db = req.result;
         STORES.forEach((name) => {
           if (!db.objectStoreNames.contains(name)) {
-            const store = db.createObjectStore(name, { keyPath: 'id', autoIncrement: name === 'event_log' });
+            const store = db.createObjectStore(name, {
+              keyPath: 'id',
+              autoIncrement: name === 'event_log'
+            });
             if (name === 'memory_chunks') {
               store.createIndex('by_tag', 'tag', { unique: false });
               store.createIndex('by_ts', 'ts', { unique: false });
@@ -81,14 +106,19 @@ export class AksiKernel {
           }
         });
       };
-      req.onsuccess = () => { this._db = req.result; resolve(this._db); };
+      req.onsuccess = () => {
+        this._db = req.result;
+        resolve(this._db);
+      };
     });
   }
 
   idbPut(storeName, record) {
     return new Promise((resolve, reject) => {
       if (!this._db) { reject(new Error('DB not open')); return; }
-      const r = this._db.transaction(storeName, 'readwrite').objectStore(storeName).put(record);
+      const tx = this._db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const r = store.put(record);
       r.onsuccess = () => resolve(r.result);
       r.onerror = () => reject(r.error);
     });
@@ -97,7 +127,9 @@ export class AksiKernel {
   idbGetAll(storeName) {
     return new Promise((resolve, reject) => {
       if (!this._db) { reject(new Error('DB not open')); return; }
-      const r = this._db.transaction(storeName, 'readonly').objectStore(storeName).getAll();
+      const tx = this._db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const r = store.getAll();
       r.onsuccess = () => resolve(r.result || []);
       r.onerror = () => reject(r.error);
     });
@@ -106,7 +138,9 @@ export class AksiKernel {
   idbClear(storeName) {
     return new Promise((resolve, reject) => {
       if (!this._db) { reject(new Error('DB not open')); return; }
-      const r = this._db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
+      const tx = this._db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const r = store.clear();
       r.onsuccess = () => resolve(true);
       r.onerror = () => reject(r.error);
     });
@@ -117,7 +151,9 @@ export class AksiKernel {
     this.state.bootAt = new Date().toISOString();
     this.emit('boot:start', { version: this.version });
     await this.probeHardware();
-    if (!this.capabilities.webCrypto) this.emit('boot:warn', { msg: 'Web Crypto missing — vault limited' });
+    if (!this.capabilities.webCrypto) {
+      this.emit('boot:warn', { msg: 'Web Crypto missing — vault limited' });
+    }
     try {
       await this.openDB();
       this.emit('boot:db', { name: DB_NAME });
@@ -129,54 +165,36 @@ export class AksiKernel {
     this.router = new QuantumRouter();
     this.exocortex = new Exocortex(this);
     this.vault = new TrustVault(this);
-    this.llm = new WebLLMBridge();
+    this.webllm = new WebLLMBridge();
     this.bonsai = new BonsaiBridge();
+    this.llm = this.webllm;
+    this.state.llmProvider = 'webllm';
     await this.exocortex.init();
     this.state.memoryCount = await this.exocortex.count();
     this.ready = true;
     this.state.status = 'ready';
-    this.emit('boot:ready', { version: this.version, capabilities: this.capabilities, memoryCount: this.state.memoryCount });
+    this.emit('boot:ready', {
+      version: this.version,
+      capabilities: this.capabilities,
+      memoryCount: this.state.memoryCount,
+      providers: ['webllm', 'bonsai']
+    });
     return this;
   }
 
-  setLLMProvider(provider) {
-    this.llmProvider = provider === 'bonsai' ? 'bonsai' : 'webllm';
-    this.emit('llm:provider', { provider: this.llmProvider });
-  }
-
-  async prepareBonsai(onProgress) {
-    if (!this.bonsai) this.bonsai = new BonsaiBridge();
-    this.emit('bonsai:prepare_start', null);
-    try {
-      const st = await this.bonsai.prepare(onProgress);
-      this.llmProvider = 'bonsai';
-      this.llmPrefer = true;
-      this.emit('bonsai:prepare_done', st);
-      return st;
-    } catch (e) {
-      this.emit('bonsai:prepare_error', { error: String(e.message || e) });
-      throw e;
+  setLLMProvider(name) {
+    const n = String(name || '').toLowerCase();
+    if (n === 'bonsai') {
+      if (!this.bonsai) this.bonsai = new BonsaiBridge();
+      this.llm = this.bonsai;
+      this.state.llmProvider = 'bonsai';
+    } else {
+      if (!this.webllm) this.webllm = new WebLLMBridge();
+      this.llm = this.webllm;
+      this.state.llmProvider = 'webllm';
     }
-  }
-
-  async loadLocalLLM(onProgress) {
-    if (!this.llm) this.llm = new WebLLMBridge();
-    this.emit('llm:load_start', { model: this.llm.model });
-    try {
-      await this.llm.load(onProgress);
-      this.llmPrefer = true;
-      this.llmProvider = 'webllm';
-      this.emit('llm:load_done', this.llm.status());
-      return this.llm.status();
-    } catch (e) {
-      this.emit('llm:load_error', { error: String(e.message || e) });
-      throw e;
-    }
-  }
-
-  setLLMPrefer(on) {
-    this.llmPrefer = !!on;
-    this.emit('llm:prefer', { on: this.llmPrefer });
+    this.emit('llm:provider', { provider: this.state.llmProvider });
+    return this.state.llmProvider;
   }
 
   async ask(queryText) {
@@ -194,39 +212,66 @@ export class AksiKernel {
     this.emit('ask:recall', { hits: hits.length });
     let text, source;
     if (hits.length && gate.weights.Local_RAG_Weight >= 0.28) {
-      text = hits.map((h, i) => (i + 1) + '. ' + h.text).join('\n');
+      text = hits.map((h, i) => i + 1 + '. ' + h.text).join('\n');
       source = 'hrr';
     } else if (gate.weights.Safe_Gate_Weight > 0.55 && hits.length === 0) {
       text = 'Safe Gate: недостаточно локального знания. Добавьте факт: запомни: …';
       source = 'safe_gate';
     } else {
-      text = hits.length > 0 ? hits.map((h) => h.text).join('\n') : 'Локальный контур не нашёл ассоциаций. Напишите: запомни: ваш факт';
+      text = hits.length > 0
+        ? hits.map((h) => h.text).join('\n')
+        : 'Локальный контур не нашёл ассоциаций. Напишите: запомни: ваш факт';
       source = hits.length ? 'hrr_low' : 'empty_memory';
     }
-    if (this.llmPrefer && this.llmProvider === 'bonsai' && this.bonsai && this.bonsai.ready) {
+
+    const wantLLM =
+      this.llmPrefer ||
+      gate.weights.Deep_LLM_Weight >= 0.35 ||
+      (this.state.llmProvider === 'bonsai' && this.bonsai && this.bonsai.isLoaded);
+
+    if (wantLLM && this.llm && this.llm.isLoaded) {
       try {
-        this.emit('ask:llm_start', { provider: 'bonsai' });
-        const gen = await this.bonsai.generate(q, hits);
-        if (gen) { text = gen; source = 'bonsai-external'; }
-        this.emit('ask:llm_done', { chars: (gen || '').length, provider: 'bonsai' });
+        this.emit('ask:llm_start', { provider: this.state.llmProvider });
+        const context = hits.length ? hits.map((h) => h.text).join('\n').slice(0, 4000) : '';
+        let gen;
+        if (this.state.llmProvider === 'bonsai' && this.bonsai) {
+          gen = await this.bonsai.generate(q, { context, openSpace: true });
+          source = 'bonsai';
+        } else {
+          const prompt = context
+            ? 'Контекст из локальной памяти:\n' + context + '\n\nВопрос: ' + q
+            : q;
+          gen = await this.webllm.generate(prompt);
+          source = 'webllm';
+        }
+        if (gen) text = gen;
+        this.emit('ask:llm_done', {
+          chars: (gen || '').length,
+          provider: this.state.llmProvider
+        });
       } catch (e) {
-        this.emit('ask:llm_error', { error: String(e.message || e) });
+        this.emit('ask:llm_error', {
+          error: String(e.message || e),
+          provider: this.state.llmProvider
+        });
       }
-    } else if (this.llm && this.llm.isLoaded && (this.llmPrefer || gate.weights.Deep_LLM_Weight >= 0.35)) {
-      try {
-        this.emit('ask:llm_start', { provider: 'webllm' });
-        const context = hits.length ? hits.map((h) => h.text).join('\n').slice(0, 1200) : '';
-        const prompt = context ? ('Контекст из локальной памяти HRR:\n' + context + '\n\nВопрос: ' + q) : q;
-        const gen = await this.llm.generate(prompt);
-        if (gen) { text = gen; source = 'webllm'; }
-        this.emit('ask:llm_done', { chars: (gen || '').length, provider: 'webllm' });
-      } catch (e) {
-        this.emit('ask:llm_error', { error: String(e.message || e) });
-      }
-    } else if (gate.weights.Deep_LLM_Weight > 0.45 && this.capabilities.webgpu && !(this.llm && this.llm.isLoaded)) {
-      this.emit('ask:deep_hook', { note: 'WebGPU present — load Local LLM or Prepare Bonsai' });
+    } else if (gate.weights.Deep_LLM_Weight > 0.45 && this.capabilities.webgpu) {
+      this.emit('ask:deep_hook', {
+        note:
+          this.state.llmProvider === 'bonsai'
+            ? 'Prepare Bonsai 2 27B (OPFS + WebGPU Space)'
+            : 'Load Local LLM (micro WebLLM) for on-device generation'
+      });
     }
-    const result = { text, source, gate, hits: hits.map((h) => ({ id: h.id, score: h.score, text: h.text.slice(0, 120) })), at: new Date().toISOString() };
+
+    const result = {
+      text,
+      source,
+      gate,
+      hits: hits.map((h) => ({ id: h.id, score: h.score, text: h.text.slice(0, 120) })),
+      provider: this.state.llmProvider,
+      at: new Date().toISOString()
+    };
     this.emit('ask:done', result);
     return result;
   }
@@ -256,6 +301,43 @@ export class AksiKernel {
     return n;
   }
 
+  async loadLocalLLM(onProgress) {
+    this.setLLMProvider('webllm');
+    if (!this.webllm) this.webllm = new WebLLMBridge();
+    this.llm = this.webllm;
+    this.emit('llm:load_start', { model: this.webllm.model, provider: 'webllm' });
+    try {
+      await this.webllm.load(onProgress);
+      this.llmPrefer = true;
+      this.emit('llm:load_done', this.webllm.status());
+      return this.webllm.status();
+    } catch (e) {
+      this.emit('llm:load_error', { error: String(e.message || e), provider: 'webllm' });
+      throw e;
+    }
+  }
+
+  async prepareBonsai(onProgress) {
+    this.setLLMProvider('bonsai');
+    if (!this.bonsai) this.bonsai = new BonsaiBridge();
+    this.llm = this.bonsai;
+    this.emit('llm:load_start', { model: 'Ternary-Bonsai-2-27B', provider: 'bonsai' });
+    try {
+      const st = await this.bonsai.prepare(onProgress);
+      this.llmPrefer = true;
+      this.emit('llm:load_done', st);
+      return st;
+    } catch (e) {
+      this.emit('llm:load_error', { error: String(e.message || e), provider: 'bonsai' });
+      throw e;
+    }
+  }
+
+  setLLMPrefer(on) {
+    this.llmPrefer = !!on;
+    this.emit('llm:prefer', { on: this.llmPrefer });
+  }
+
   getStatus() {
     return {
       version: this.version,
@@ -265,9 +347,10 @@ export class AksiKernel {
       memoryCount: this.state.memoryCount,
       capabilities: this.capabilities,
       lastEvent: this.state.lastEvent,
+      llmProvider: this.state.llmProvider,
       llm: this.llm ? this.llm.status() : null,
-      bonsai: this.bonsai ? this.bonsai.status() : null,
-      llmProvider: this.llmProvider
+      webllm: this.webllm ? this.webllm.status() : null,
+      bonsai: this.bonsai ? this.bonsai.status() : null
     };
   }
 }
