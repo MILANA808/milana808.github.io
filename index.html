@@ -3,136 +3,154 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ — связанный контур</title>
-<meta name="description" content="Память, vault, HRR, gate, печать — один связанный продукт">
+<title>АКСИ След — проверяемый ответ</title>
+<meta name="description" content="Запечатайте ответ: SHA-256 + ECDSA на устройстве. Скачайте квитанцию. Проверьте позже.">
 <meta name="theme-color" content="#0b0b0f">
 <link rel="canonical" href="https://milana808.github.io/">
 <style>
-:root{--bg:#0b0b0f;--card:#15151e;--ink:#f3f2ed;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
+:root{--bg:#0b0b0f;--card:#14141c;--ink:#f3f2ed;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:16px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:700px;margin:0 auto;display:flex;flex-direction:column}
-header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-.logo{font-weight:800}.logo span{color:var(--acc)}
-header a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:8px}
-.explain{padding:12px 16px;background:#101018;border-bottom:1px solid var(--line);font-size:14px;color:var(--muted)}
-.explain b{color:var(--ink)}
-.board{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 16px}
-.board div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
-.board b{display:block;font-size:1rem;color:var(--ok)}
-.board span{font-size:10px;color:var(--muted)}
-.mods{padding:0 16px 8px;font-size:11px;color:var(--muted);font-family:ui-monospace,monospace}
-.msgs{flex:1;overflow:auto;padding:8px 16px;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:38vh}
-.msg{padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
-.msg.user{align-self:flex-end;background:#1a1a26;max-width:92%}
-.msg .meta{margin-top:6px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:6px;font-family:ui-monospace,monospace}
-.bar{padding:10px 16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:560px;margin:0 auto;padding:20px 16px 40px}
+.logo{font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.logo span{color:var(--acc)}
+h1{font-size:1.55rem;margin:14px 0 8px;line-height:1.2;letter-spacing:-.02em}
+.lead{color:var(--muted);font-size:15px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+textarea,input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);margin-bottom:10px}
+textarea{min-height:110px;resize:vertical}
 .row{display:flex;gap:8px;flex-wrap:wrap}
-input{flex:1;min-width:100px;min-height:46px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);font:inherit;font-size:16px}
-button,label.f{font:inherit;font-size:13px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:46px}
-button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+button{font:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#1a1a24;color:var(--ink);cursor:pointer;min-height:48px}
+button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700;flex:1}
 button:disabled{opacity:.4}
-label.f input{display:none}
-.drop{margin:0 16px 8px;border:2px dashed var(--line);border-radius:12px;padding:12px;text-align:center;font-size:13px;color:var(--muted)}
-.drop.over{border-color:var(--acc)}
-footer{padding:10px 16px 16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.out{font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);white-space:pre-wrap;word-break:break-all;max-height:180px;overflow:auto}
+.ok{color:var(--ok)}
+.steps{font-size:13px;color:var(--muted);margin:0 0 16px;padding-left:18px}
+.steps li{margin:4px 0}
+.steps b{color:var(--ink)}
+footer{margin-top:18px;font-size:12px;color:var(--muted)}
 footer a{color:var(--muted)}
-@media(max-width:520px){.board{grid-template-columns:repeat(2,1fr)}}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">АКСИ <span>LIVE</span></div>
-  <nav><a href="/organism.html">Lab</a> <a href="/HONEST.md">Честно</a></nav>
-</header>
-<div class="explain">
-  <b>Как пользоваться:</b> напишите <b>запомни: факт</b> → задайте вопрос → <b>Запечатать</b> → <b>Скачать</b>.
-  Пароль vault: <b>aksi</b>. Обновите страницу, если что-то странное.
-</div>
-<div class="board">
-  <div><b id="nF">0</b><span>память</span></div>
-  <div><b id="nV">0</b><span>vault</span></div>
-  <div><b id="nS">0</b><span>печати</span></div>
-  <div><b id="nG">—</b><span>QCLI</span></div>
-</div>
-<div class="mods" id="mods">…</div>
-<div class="msgs" id="msgs"></div>
-<div class="bar">
+<div class="logo">АКСИ <span>СЛЕД</span></div>
+<h1>Проверяемый след ответа</h1>
+<p class="lead">Один продукт: зафиксировать текст ответа, поставить печать на устройстве, скачать квитанцию и проверить её позже — без облачного аккаунта.</p>
+<ol class="steps">
+  <li>Вставьте <b>вопрос</b> и <b>ответ</b></li>
+  <li><b>Запечатать</b> (SHA-256 + ECDSA)</li>
+  <li><b>Скачать квитанцию</b> → на другом устройстве <b>Проверить</b></li>
+</ol>
+<div class="card">
+  <label for="q">Вопрос</label>
+  <input type="text" id="q" placeholder="Какой срок по договору?">
+  <label for="a">Ответ</label>
+  <textarea id="a" placeholder="Текст ответа (свой или от любого ИИ)…"></textarea>
   <div class="row">
-    <input type="password" id="pw" value="aksi" style="max-width:120px">
-    <input type="text" id="q" placeholder="запомни: факт  или  вопрос" autocomplete="off">
-    <button type="button" class="p" id="go">Отправить</button>
+    <button type="button" class="p" id="seal">Запечатать</button>
+    <button type="button" id="dl" disabled>Скачать квитанцию</button>
   </div>
+  <p class="note">Печать на вашем устройстве. Мы не получаем ваш текст на сервер.</p>
+</div>
+<div class="card">
+  <label>Статус</label>
+  <div class="out" id="out">—</div>
+</div>
+<div class="card">
+  <label>Проверить квитанцию (.json)</label>
   <div class="row">
-    <button type="button" id="seal" disabled>Запечатать</button>
-    <button type="button" id="exp" disabled>Скачать</button>
-    <label class="f"><input type="file" id="file" accept=".json,.aksi,*/*">Загрузить</label>
+    <input type="file" id="file" accept=".json,application/json,*/*" style="flex:1;color:var(--muted);font-size:13px">
     <button type="button" id="chk">Проверить</button>
-    <button type="button" id="clr">Сброс</button>
   </div>
+  <div class="out" id="vres" style="margin-top:10px">—</div>
 </div>
-<div class="drop" id="drop">Перетащите .json сюда</div>
-<footer>aksilove@internet.ru · <a href="/capsule.html">капсула</a> · <span id="ver"></span></footer>
+<footer>
+  aksilove@internet.ru ·
+  <a href="/HONEST.md">честно</a> ·
+  <a href="/capsule.html">память</a> ·
+  <a href="/organism.html">lab</a>
+</footer>
 <script src="/aksi-capsule.js?v=13"></script>
-<script src="/aksi-cortex-kernel.js"></script>
-<script src="/aksi-quantum.js"></script>
-<script src="/aksi-hrr.js"></script>
-<script src="/aksi-resonance-net.js"></script>
-<script src="/aksi-organism.js?v=4"></script>
-<script src="/aksi-live.js?v=2"></script>
 <script>
-(function(){
-  var L=window.AKSI_LIVE;
-  if(!L){document.getElementById("msgs").textContent="Модуль не загрузился. Обновите страницу (Ctrl+Shift+R).";return;}
-  function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}document.getElementById("msgs").appendChild(d);d.scrollIntoView({block:"end"});}
-  function paint(){var s=L.status(),cap=s.capsule||{},last=L.getLast();
-    document.getElementById("nF").textContent=cap.facts||0;
-    document.getElementById("nV").textContent=(s.cortex&&s.cortex.size)||0;
-    document.getElementById("nS").textContent=cap.seals||0;
-    document.getElementById("nG").textContent=last&&last.gate&&last.gate.QCLI!=null?Number(last.gate.QCLI).toFixed(2):"—";
-    document.getElementById("seal").disabled=!s.hasLast;
-    document.getElementById("exp").disabled=!(cap.facts||cap.seals);
-    var m=s.modules||{};
-    document.getElementById("mods").textContent="модули: "+["capsule","cortex","quantum","hrr","arin","stack"].map(function(k){return k+(m[k]?"✓":"✗");}).join(" ");
-    document.getElementById("ver").textContent=L.version+(cap.version?" · "+cap.version:"");}
-  function applyPw(){L.setPassword(document.getElementById("pw").value||"aksi");}
-  async function send(){applyPw();var raw=document.getElementById("q").value.trim();if(!raw)return;
-    document.getElementById("q").value="";add("user",raw);
-    var teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);
-    if(teach){var r=await L.remember(teach[1].trim());
-      add("bot","Сохранено.\n«"+teach[1].trim()+"»","ok");paint();return;}
-    var a=await L.ask(raw,{research:true});
-    if(!a.ok){add("bot",a.text||a.error||"ошибка",a.source||"");paint();return;}
-    var meta=[a.engine||""].concat(a.sources||[]);if(a.gate)meta.push("QCLI "+Number(a.gate.QCLI).toFixed(2));
-    add("bot",a.text,meta.filter(Boolean).join(" · "));paint();}
-  document.getElementById("go").onclick=send;
-  document.getElementById("q").onkeydown=function(e){if(e.key==="Enter")send();};
-  document.getElementById("pw").onchange=applyPw;
-  document.getElementById("seal").onclick=async function(){applyPw();var r=await L.seal();
-    if(!r.ok){add("bot",r.error||"сначала ответ","");return;}
-    var lines=["Печать поставлена."];
-    if(r.capsule&&r.capsule.seal)lines.push("ECDSA "+String(r.capsule.seal.hash||"").slice(0,28)+"…");
-    if(r.quantum)lines.push("QCLI "+Number(r.quantum.QCLI).toFixed(3));
-    add("bot",lines.join("\n"),"seal");paint();};
-  document.getElementById("exp").onclick=async function(){applyPw();await L.exportAll();add("bot","Файл скачан. На другом устройстве: Загрузить.","export");};
-  async function loadFile(file){if(!file)return;add("bot","Читаю «"+file.name+"»…","");var r=await L.importAll(file);add("bot",r.ok?"Загружено":"Ошибка: "+(r.error||""),"import");paint();}
-  document.getElementById("file").onchange=function(e){loadFile(e.target.files&&e.target.files[0]);e.target.value="";};
-  var drop=document.getElementById("drop");
-  drop.ondragover=function(e){e.preventDefault();drop.classList.add("over");};
-  drop.ondragleave=function(){drop.classList.remove("over");};
-  drop.ondrop=function(e){e.preventDefault();drop.classList.remove("over");loadFile(e.dataTransfer.files&&e.dataTransfer.files[0]);};
-  document.getElementById("chk").onclick=async function(){
-    if(!window.AKSI_CAPSULE||!AKSI_CAPSULE.verifyAll){add("bot","Нет модуля","");return;}
-    var list=await AKSI_CAPSULE.verifyAll();
-    if(!list.length){add("bot","Печатей нет","");return;}
-    add("bot",list.map(function(v,i){return (i+1)+". "+(v.ok?"OK":"FAIL");}).join("\n"),"verify");};
-  document.getElementById("clr").onclick=function(){
-    if(!confirm("Сбросить?"))return;
-    if(window.AKSI_CAPSULE)AKSI_CAPSULE.clearAll();
-    if(window.AKSI_HRR&&AKSI_HRR.get)try{AKSI_HRR.get().clear();}catch(e){}
-    document.getElementById("msgs").innerHTML="";add("bot","Очищено","");paint();};
-  applyPw();
-  add("bot","Пример:\nзапомни: встреча в пятницу 15:00\nпотом спросите: пятница","start");
-  paint();
+(function () {
+  var C = window.AKSI_CAPSULE;
+  var lastSeal = null;
+  var out = document.getElementById("out");
+  var vres = document.getElementById("vres");
+  var dl = document.getElementById("dl");
+  if (!C) {
+    out.textContent = "Модуль не загрузился. Обновите страницу (Ctrl+Shift+R).";
+    return;
+  }
+  C.ensureKeys().catch(function () {});
+
+  async function sealPair(q, a) {
+    var token = "sled-" + Date.now().toString(36);
+    C.remember(token + " | Q: " + q + " | A: " + a);
+    await C.ask(token, { research: false });
+    var r = await C.sealLast();
+    if (!r.ok) return r;
+    r.seal.display = { q: q, a: a };
+    if (!r.seal.body) r.seal.body = {};
+    r.seal.body.q = q;
+    r.seal.body.a = a;
+    return r;
+  }
+
+  document.getElementById("seal").onclick = async function () {
+    var q = document.getElementById("q").value.trim() || "(без вопроса)";
+    var a = document.getElementById("a").value.trim();
+    if (!a) { out.textContent = "Введите текст ответа."; return; }
+    out.className = "out";
+    out.textContent = "Печатаю…";
+    try {
+      var r = await sealPair(q, a);
+      if (!r.ok) { out.textContent = "Ошибка: " + (r.error || ""); return; }
+      lastSeal = r.seal;
+      out.className = "out ok";
+      out.textContent = "Печать готова\nhash: " + r.seal.hash.slice(0, 42) + "…\nalg: " + r.seal.alg + "\n" + r.seal.sealedAt;
+      dl.disabled = false;
+    } catch (e) {
+      out.textContent = String(e.message || e);
+    }
+  };
+
+  dl.onclick = function () {
+    if (!lastSeal) return;
+    var receipt = {
+      format: "aksi-receipt",
+      product: "AKSI Trail",
+      version: "1.0",
+      contact: "aksilove@internet.ru",
+      seal: lastSeal,
+      display: lastSeal.display || null,
+      note: "Verify at https://milana808.github.io/"
+    };
+    var blob = new Blob([JSON.stringify(receipt, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "aksi-sled-" + Date.now() + ".json";
+    a.click();
+  };
+
+  document.getElementById("chk").onclick = async function () {
+    var f = document.getElementById("file").files && document.getElementById("file").files[0];
+    if (!f) { vres.textContent = "Выберите файл квитанции."; return; }
+    try {
+      var data = JSON.parse((await f.text()).replace(/^\uFEFF/, ""));
+      var seal = data.seal || data;
+      var r = await C.verifySeal(seal);
+      vres.className = "out " + (r.ok ? "ok" : "");
+      var disp = data.display || seal.display || seal.body || {};
+      vres.textContent = (r.ok ? "ПРОВЕРКА OK\n" : "НЕ ПРОШЛА\n") +
+        "hash: " + (r.hashOk ? "ok" : "fail") + " · подпись: " + (r.sigOk ? "ok" : "fail") + "\n" +
+        "Q: " + String(disp.q || "").slice(0, 80) + "\n" +
+        "A: " + String(disp.a || "").slice(0, 120);
+    } catch (e) {
+      vres.textContent = "Ошибка: " + (e.message || e);
+    }
+  };
 })();
 </script>
 </body>
