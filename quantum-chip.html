@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>АКСИ Quantum Chip — виртуальный симулятор</title>
+<meta name="description" content="State-vector симулятор до 10 кубитов. Не физический чип.">
+<meta name="theme-color" content="#0b0b0f">
+<style>
+:root{--bg:#0a0a0f;--card:#12121a;--ink:#f2f1eb;--muted:#9a97a3;--line:#2a2a36;--acc:#a78bfa;--ok:#3ecf8e;--warn:#e6b84d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:900px;margin:0 auto;padding:12px 14px 40px}
+.logo{font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.logo span{color:var(--acc)}
+h1{font-size:1.35rem;margin:8px 0 6px}
+.warn{background:#1a1810;border:1px solid #3d3520;color:var(--warn);padding:10px 12px;border-radius:12px;font-size:12px;margin:10px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.card h2{font-size:12px;color:var(--acc);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+label{font-size:12px;color:var(--muted)}
+select,input[type=number]{background:#101018;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:8px 10px;font:inherit}
+button{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#1a1a24;color:var(--ink);cursor:pointer}
+button.p{background:var(--acc);border-color:var(--acc);color:#0b0b0f;font-weight:700}
+button.g{min-width:42px;font-family:ui-monospace,monospace;font-size:12px}
+pre{background:#0e0e14;padding:10px;border-radius:10px;font-size:11px;overflow:auto;max-height:180px;color:var(--muted);white-space:pre-wrap}
+.hist{display:flex;align-items:flex-end;gap:3px;height:100px;margin-top:8px}
+.hist div{flex:1;background:linear-gradient(180deg,#a78bfa,#5b21b6);border-radius:4px 4px 0 0;min-width:4px;position:relative}
+.hist span{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted)}
+canvas{display:block;margin:8px auto;background:#0e0e14;border-radius:12px;border:1px solid var(--line)}
+.log{font-size:11px;color:var(--muted);max-height:120px;overflow:auto}
+a{color:var(--muted)}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.stat div{background:#0e0e14;border-radius:8px;padding:8px;text-align:center}
+.stat b{display:block;color:var(--ok);font-size:14px}
+.stat span{font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="logo">АКСИ <span>Q-CHIP</span></div>
+<h1>Виртуальный квантовый чип</h1>
+<div class="warn">Это <b>не физический чип</b>. Классический <b>state-vector симулятор</b> до 10 кубитов в браузере. Настоящий QPU так не «собирается».</div>
+<div class="grid">
+<div class="card">
+<h2>Конфигурация</h2>
+<div class="row">
+<label>Кубиты n</label>
+<select id="nq"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option>10</option></select>
+<button type="button" class="p" id="reset">Reset |0…0⟩</button>
+</div>
+<div class="row">
+<label>target</label><input type="number" id="t" value="0" min="0" max="9" style="width:56px">
+<label>ctrl</label><input type="number" id="c" value="0" min="0" max="9" style="width:56px">
+<label>θ°</label><input type="number" id="th" value="90" step="15" style="width:64px">
+</div>
+<h2 style="margin-top:12px">Однокубитные</h2>
+<div class="row">
+<button type="button" class="g" data-g="h">H</button>
+<button type="button" class="g" data-g="x">X</button>
+<button type="button" class="g" data-g="y">Y</button>
+<button type="button" class="g" data-g="z">Z</button>
+<button type="button" class="g" data-g="s">S</button>
+<button type="button" class="g" data-g="t">T</button>
+<button type="button" class="g" data-g="rx">Rx</button>
+<button type="button" class="g" data-g="ry">Ry</button>
+<button type="button" class="g" data-g="rz">Rz</button>
+</div>
+<h2 style="margin-top:12px">Многокубитные</h2>
+<div class="row">
+<button type="button" class="g" data-g="cnot">CNOT</button>
+<button type="button" class="g" data-g="cz">CZ</button>
+<button type="button" class="g" data-g="swap">SWAP</button>
+<button type="button" class="g" data-g="ccx">Toffoli</button>
+</div>
+<h2 style="margin-top:12px">Пресеты</h2>
+<div class="row">
+<button type="button" data-p="bell">Bell Φ+</button>
+<button type="button" data-p="ghz">GHZ-3</button>
+<button type="button" data-p="qft">QFT</button>
+<button type="button" data-p="grover">Grover-2</button>
+<button type="button" data-p="chsh">CHSH</button>
+</div>
+<div class="row" style="margin-top:10px">
+<button type="button" class="p" id="measure">Measure</button>
+<button type="button" id="sample">Sample 256</button>
+<button type="button" id="run">Обновить</button>
+</div>
+</div>
+<div class="card">
+<h2>Состояние</h2>
+<div class="stat">
+<div><b id="sN">2</b><span>qubits</span></div>
+<div><b id="sE">—</b><span>entropy</span></div>
+<div><b id="sP">—</b><span>purity</span></div>
+</div>
+<canvas id="bloch" width="200" height="200"></canvas>
+<div class="hist" id="hist"></div>
+<pre id="probs" style="margin-top:20px">probs</pre>
+</div>
+</div>
+<div class="card" style="margin-top:12px">
+<h2>Circuit</h2>
+<pre id="circ">—</pre>
+<div class="log" id="log"></div>
+</div>
+<p style="margin-top:14px;font-size:12px;color:var(--muted)">aksilove@internet.ru · <a href="/local-ai.html">Local AI</a> · <a href="/">След</a></p>
+<script src="/aksi-quantum.js?v=2"></script>
+<script>
+(function(){
+  var Q=window.AKSI_QUANTUM;
+  if(!Q||!Q.create){document.getElementById("circ").textContent="aksi-quantum.js не загружен";return;}
+  var chip=null,history=[];
+  function nQ(){return +document.getElementById("nq").value||2;}
+  function tgt(){return Math.max(0,Math.min(nQ()-1,+document.getElementById("t").value||0));}
+  function ctrl(){return Math.max(0,Math.min(nQ()-1,+document.getElementById("c").value||0));}
+  function theta(){return ((+document.getElementById("th").value||0)*Math.PI)/180;}
+  function log(msg){var el=document.getElementById("log");el.textContent=msg+"\n"+el.textContent;}
+  function reset(){chip=Q.create(nQ());history=["|0…0⟩ n="+nQ()];refresh();log("reset n="+nQ());}
+  function drawBloch(b){
+    var canvas=document.getElementById("bloch");
+    if(Q.drawBloch&&b){try{Q.drawBloch(canvas,b);return;}catch(e){}}
+    var ctx=canvas.getContext("2d");if(!ctx)return;
+    var w=canvas.width,h=canvas.height,cx=w/2,cy=h/2,R=Math.min(w,h)*0.38;
+    ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(167,139,250,.35)";
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.stroke();
+    if(!b)return;
+    var px=cx+(b.x||0)*R,py=cy-(b.z||0)*R;
+    ctx.strokeStyle="#c4b5fd";ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(px,py);ctx.stroke();
+    ctx.fillStyle="#a78bfa";ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);ctx.fill();
+  }
+  function refresh(){
+    if(!chip)return;
+    var p=chip.probs(),ent=chip.entropy?chip.entropy():0,pur=chip.purity?chip.purity():0,i;
+    document.getElementById("sN").textContent=chip.n;
+    document.getElementById("sE").textContent=Number(ent).toFixed(3);
+    document.getElementById("sP").textContent=Number(pur).toFixed(3);
+    document.getElementById("circ").textContent=chip.circuitString?chip.circuitString():history.join(" → ");
+    var hist=document.getElementById("hist");hist.innerHTML="";
+    var max=0;for(i=0;i<p.length;i++)if(p[i]>max)max=p[i];
+    var show=p.length<=16?p.map(function(_,i){return i;}):p.map(function(v,i){return v>1e-6?i:-1;}).filter(function(i){return i>=0;}).slice(0,16);
+    if(!show.length)show=[0];
+    show.forEach(function(i){
+      var d=document.createElement("div");
+      d.style.height=(max>0?Math.max(2,(p[i]/max)*90):2)+"px";
+      var lab=document.createElement("span");lab.textContent=i.toString(2).padStart(chip.n,"0");d.appendChild(lab);hist.appendChild(d);
+    });
+    var lines=[];for(i=0;i<p.length;i++)if(p[i]>1e-4)lines.push("|"+i.toString(2).padStart(chip.n,"0")+"⟩  "+(p[i]*100).toFixed(2)+"%");
+    document.getElementById("probs").textContent=lines.join("\n")||"—";
+    try{drawBloch(chip.bloch?chip.bloch(0):null);}catch(e){}
+  }
+  function applyGate(name){
+    if(!chip)reset();
+    var t=tgt(),c=ctrl(),th=theta();
+    try{
+      if(name==="h")chip.h(t);else if(name==="x")chip.x(t);else if(name==="y")chip.y(t);else if(name==="z")chip.z(t);
+      else if(name==="s")chip.s(t);else if(name==="t")chip.t(t);
+      else if(name==="rx")chip.rx(t,th);else if(name==="ry")chip.ry(t,th);else if(name==="rz")chip.rz(t,th);
+      else if(name==="cnot")chip.cnot(c,t);else if(name==="cz")chip.cz(c,t);else if(name==="swap")chip.swap(c,t);
+      else if(name==="ccx"){if(chip.n<3){log("Toffoli n≥3");return;}var c1=(c+1)%chip.n;if(c1===t)c1=(c1+1)%chip.n;chip.ccx(c,c1,t);}
+      history.push(name);refresh();log(name+" ok");
+    }catch(e){log("error: "+(e.message||e));}
+  }
+  function preset(name){
+    try{
+      if(name==="bell"){document.getElementById("nq").value="2";chip=Q.bell("phi+");history=["Bell Φ+"];}
+      else if(name==="ghz"){document.getElementById("nq").value="3";chip=Q.create(3).h(0).cnot(0,1).cnot(0,2);history=["GHZ"];}
+      else if(name==="qft"){chip=Q.create(nQ());if(chip.x)chip.x(0);if(chip.qft)chip.qft();history=["QFT"];}
+      else if(name==="grover"){document.getElementById("nq").value="2";chip=Q.grover?Q.grover(2,1):Q.create(2);history=["Grover"];}
+      else if(name==="chsh"){var r=Q.chsh(512);document.getElementById("probs").textContent=JSON.stringify(r,null,2);log("CHSH S="+(r.S!=null?r.S:r.s));return;}
+      refresh();log("preset "+name);
+    }catch(e){log("preset: "+(e.message||e));}
+  }
+  document.getElementById("reset").onclick=reset;
+  document.getElementById("nq").onchange=reset;
+  document.getElementById("run").onclick=refresh;
+  document.querySelectorAll("[data-g]").forEach(function(b){b.onclick=function(){applyGate(b.getAttribute("data-g"));};});
+  document.querySelectorAll("[data-p]").forEach(function(b){b.onclick=function(){preset(b.getAttribute("data-p"));};});
+  document.getElementById("measure").onclick=function(){if(!chip)reset();var m=chip.measure?chip.measure():null;log("measure "+JSON.stringify(m));refresh();};
+  document.getElementById("sample").onclick=function(){if(!chip)reset();if(!chip.sample){log("no sample");return;}document.getElementById("probs").textContent=JSON.stringify(chip.sample(256),null,2);log("sample 256");};
+  reset();
+})();
+</script>
+</body>
+</html>
