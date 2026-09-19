@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>АКСИ MATRIX — Sovereign Runtime</title>
-<meta name="description" content="Client-side sovereign AI runtime: Kernel, QuantumRouter, HRR, TrustVault">
+<meta name="description" content="Client-side sovereign AI runtime: Kernel, HRR, TrustVault, optional WebLLM">
 <meta name="theme-color" content="#ebe4d7">
 <style>
 :root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
@@ -29,7 +29,7 @@ h1{font-size:clamp(1.35rem,3vw,1.75rem);font-weight:600;letter-spacing:-.02em;ma
 canvas#wave{width:100%;height:120px;display:block;background:#1a1814;border-radius:3px;border:1px solid var(--line)}
 .chat{min-height:180px;max-height:280px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-input[type=text],input[type=password]{flex:1;min-width:140px;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:3px}
+input[type=text],input[type=password]{flex:1;min-width:120px;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:3px}
 button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:600}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 button:disabled{opacity:.4;cursor:not-allowed}
@@ -43,14 +43,10 @@ footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-si
 <div class="shell">
 <header>
   <div class="logo">AKSI <span>MATRIX</span></div>
-  <nav>
-    <a href="/">След</a>
-    <a href="/local-ai.html">Local AI</a>
-    <a href="/quantum-chip.html">Q-Chip</a>
-  </nav>
+  <nav><a href="/">След</a><a href="/local-ai.html">Local AI</a><a href="/quantum-chip.html">Q-Chip</a></nav>
 </header>
 <h1>Sovereign browser runtime</h1>
-<p class="lead">Kernel · QuantumRouter · HRR Exocortex · TrustVault — полностью на устройстве. Без облачных LLM API по умолчанию.</p>
+<p class="lead">Kernel · QuantumRouter · HRR · TrustVault · optional WebLLM (WebGPU). Offline by default.</p>
 <div>
   <span class="badge" id="badgeStatus">cold</span>
   <span class="badge" id="badgeGpu">webgpu ?</span>
@@ -81,6 +77,7 @@ footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-si
     </div>
     <div class="row">
       <input type="password" id="pw" placeholder="пароль vault" autocomplete="new-password">
+      <button type="button" class="ghost" id="llm" disabled>Load Local LLM</button>
       <button type="button" class="ghost" id="exp" disabled>Export .aksi</button>
       <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;border:1px solid var(--line);padding:8px 10px;border-radius:3px">
         Import <input type="file" id="imp" accept=".aksi,.json,application/json" style="display:none">
@@ -92,7 +89,7 @@ footer{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-si
     <div class="log" id="log"></div>
   </div>
 </div>
-<footer>aksilove@internet.ru · offline-first · ES modules · IndexedDB · Web Crypto</footer>
+<footer>aksilove@internet.ru · offline-first · WebLLM opt-in · ES modules</footer>
 </div>
 <script type="module">
 import { AksiKernel } from './kernel/kernel.js';
@@ -119,6 +116,7 @@ function logLine(type, payload) {
       else if (payload.version) extra = ' v' + payload.version;
       else if (payload.hits != null) extra = ' hits=' + payload.hits;
       else if (payload.dim) extra = ' dim=' + payload.dim;
+      else if (payload.error) extra = ' ' + String(payload.error).slice(0, 60);
     }
   } catch (e) {}
   div.textContent = t + '  ' + type + extra;
@@ -138,28 +136,21 @@ function drawWave(amps) {
   for (let i = 0; i < n; i++) {
     const x = (i / (n - 1)) * (w - 8) + 4;
     const y = h / 2 - amps[i] * (h * 0.42);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
   ctx.strokeStyle = 'rgba(235,228,215,0.25)';
-  ctx.beginPath();
-  ctx.moveTo(0, h / 2);
-  ctx.lineTo(w, h / 2);
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
 }
 
 const kernel = new AksiKernel();
 
 kernel.subscribe((evt) => {
   logLine(evt.type, evt.payload);
-  if (evt.type === 'ask:vector' || evt.type === 'ask:circuit') {
-    drawWave(kernel.router.getAmplitudes());
-  }
+  if (evt.type === 'ask:vector' || evt.type === 'ask:circuit') drawWave(kernel.router.getAmplitudes());
   if (evt.type === 'ask:gate' && evt.payload) {
     document.getElementById('stRoute').textContent = evt.payload.route || '—';
-    document.getElementById('stQcli').textContent =
-      evt.payload.QCLI != null ? Number(evt.payload.QCLI).toFixed(3) : '—';
+    document.getElementById('stQcli').textContent = evt.payload.QCLI != null ? Number(evt.payload.QCLI).toFixed(3) : '—';
   }
   if (evt.type === 'memory:store' || evt.type === 'vault:import' || evt.type === 'boot:ready') {
     document.getElementById('stMem').textContent = String(kernel.state.memoryCount || 0);
@@ -182,9 +173,11 @@ async function boot() {
     document.getElementById('badgeCrypto').textContent = 'crypto ' + (kernel.capabilities.webCrypto ? 'yes' : 'no');
     document.getElementById('send').disabled = false;
     document.getElementById('exp').disabled = false;
+    document.getElementById('llm').disabled = false;
     chat.textContent = '';
     appendChat('MATRIX ' + kernel.version + ' online');
     appendChat('memory chunks: ' + kernel.state.memoryCount);
+    appendChat('LLM: opt-in via Load Local LLM (needs WebGPU)');
     appendChat('—');
     drawWave(kernel.router.textToState('aksi matrix'));
   } catch (e) {
@@ -212,6 +205,25 @@ async function send() {
 
 document.getElementById('send').onclick = send;
 document.getElementById('qin').addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+
+document.getElementById('llm').onclick = async () => {
+  const btn = document.getElementById('llm');
+  btn.disabled = true;
+  appendChat('loading local LLM (WebGPU / Qwen2.5-0.5B)…');
+  try {
+    await kernel.loadLocalLLM(({ progress, text }) => {
+      document.getElementById('badgeStatus').textContent = 'llm ' + Math.round((progress || 0) * 100) + '%';
+      if (text) logLine('llm:progress', { msg: String(text).slice(0, 80) });
+    });
+    appendChat('Local LLM ready');
+    document.getElementById('badgeStatus').textContent = 'llm ready';
+    btn.textContent = 'LLM ON';
+  } catch (e) {
+    appendChat('LLM error: ' + (e.message || e));
+    document.getElementById('badgeStatus').textContent = 'llm error';
+    btn.disabled = false;
+  }
+};
 
 document.getElementById('exp').onclick = async () => {
   const pw = document.getElementById('pw').value;
