@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>АКСИ WHOLE — единый runtime</title>
+<meta name="description" content="Offline FAQ · память · ADIA · gate · seal. Один контур АКСИ.">
+<meta name="theme-color" content="#ebe4d7">
+<style>
+:root{
+  --bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;
+  --panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--warn:#8a5a2b;
+  --mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+.shell{max-width:720px;margin:0 auto;padding:20px 16px 64px}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+.logo{font-weight:800;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
+.logo b{opacity:.45;font-weight:600}
+nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:12px}
+h1{font-size:clamp(1.35rem,3vw,1.75rem);font-weight:650;margin-bottom:6px}
+.lead{color:var(--muted);font-size:14px;margin-bottom:14px;max-width:52ch}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);padding:4px 9px;color:var(--muted)}
+.badge.on{border-color:var(--ok);color:var(--ok)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:12px}
+.panel h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:650}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.m{background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px;text-align:center}
+.m b{display:block;font-family:var(--mono);font-size:13px}
+.m span{font-size:10px;color:var(--muted);text-transform:uppercase}
+.pipeline{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7;margin-top:8px}
+.chat{min-height:220px;max-height:360px;overflow:auto;font-family:var(--mono);font-size:12.5px;background:var(--bg2);border:1px solid var(--line);padding:12px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+input[type=text]{flex:1;min-width:140px;font:inherit;padding:11px 12px;border:1px solid var(--line);background:#fff;border-radius:3px}
+button{font:inherit;font-size:13px;padding:11px 16px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;padding:6px 10px;border:1px solid var(--line);border-radius:99px;background:#fff;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:var(--acc)}
+.meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6}
+footer{margin-top:20px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.ok{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="logo">AKSI <b>WHOLE</b></div>
+    <nav>
+      <a href="/">След</a>
+      <a href="/matrix/">MATRIX</a>
+      <a href="/offer/">Offer</a>
+    </nav>
+  </header>
+
+  <h1>Единый контур</h1>
+  <p class="lead">FAQ · SEED · память · ADIA (EQS / QCLI / AKSI) · gate · seal. Offline без сервера. Без обещаний «квантовый чип» и «27B в вкладке».</p>
+
+  <div class="badges">
+    <span class="badge on" id="bReady">ready</span>
+    <span class="badge" id="bMem">mem 0</span>
+    <span class="badge" id="bLed">ledger 0</span>
+    <span class="badge on">offline</span>
+  </div>
+
+  <div class="panel">
+    <h2>Pipeline</h2>
+    <div class="metrics">
+      <div class="m"><b id="mEqs">—</b><span>EQS</span></div>
+      <div class="m"><b id="mAksi">—</b><span>AKSI</span></div>
+      <div class="m"><b id="mQcli">—</b><span>QCLI</span></div>
+      <div class="m"><b id="mGate">—</b><span>gate</span></div>
+    </div>
+    <div class="pipeline" id="pipe">input → FAQ/SEED/memory → ADIA rank → gate → seal</div>
+  </div>
+
+  <div class="panel">
+    <h2>Диалог</h2>
+    <div class="chat" id="chat">boot…</div>
+    <div class="row">
+      <input type="text" id="qin" placeholder="вопрос · помощь · запомни: факт" autocomplete="off">
+      <button type="button" id="send">Send</button>
+    </div>
+    <div class="chips">
+      <button type="button" class="chip" data-q="помощь">помощь</button>
+      <button type="button" class="chip" data-q="что такое АКСИ">что такое АКСИ</button>
+      <button type="button" class="chip" data-q="что такое ADIA">ADIA</button>
+      <button type="button" class="chip" data-q="привет">привет</button>
+      <button type="button" class="chip" data-q="запомни: тест факт WHOLE">запомни тест</button>
+    </div>
+    <div class="meta" id="meta"></div>
+    <div class="row">
+      <button type="button" class="ghost" id="exp">Export JSON</button>
+      <button type="button" class="ghost" id="clr">Очистить память</button>
+    </div>
+  </div>
+
+  <footer>
+    aksilove@internet.ru · WHOLE v1 — собранный контур АКСИ ·
+    <span id="ver"></span>
+  </footer>
+</div>
+
+<script src="./runtime.js?v=1"></script>
+<script>
+(function () {
+  var chat = document.getElementById('chat');
+  var meta = document.getElementById('meta');
+  var W = window.AKSI_WHOLE;
+  if (!W) {
+    chat.textContent = 'ERROR: runtime not loaded';
+    return;
+  }
+
+  function append(line) {
+    chat.textContent += (chat.textContent && !chat.textContent.endsWith('\n') ? '\n' : '') + line;
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function refreshBadges() {
+    var st = W.status();
+    document.getElementById('bMem').textContent = 'mem ' + st.memory;
+    document.getElementById('bLed').textContent = 'ledger ' + st.ledger;
+    document.getElementById('ver').textContent = st.version;
+  }
+
+  function showMetrics(res) {
+    var m = res.metrics;
+    document.getElementById('mEqs').textContent = m ? m.EQS : '—';
+    document.getElementById('mAksi').textContent = m ? m.AKSI : '—';
+    document.getElementById('mQcli').textContent = m ? m.QCLI : '—';
+    document.getElementById('mGate').textContent = res.gate ? res.gate.decision : '—';
+    document.getElementById('pipe').textContent =
+      'source=' + (res.source || '—') +
+      (res.seal ? ' · seal=' + res.seal.hash : '') +
+      ' · ' + (res.formula || '');
+  }
+
+  function send(raw) {
+    raw = String(raw || '').trim();
+    if (!raw) return;
+    document.getElementById('qin').value = '';
+    append('> ' + raw);
+    var res = W.ask(raw, { seal: true });
+    append(res.text || '(пусто)');
+    append('—');
+    showMetrics(res);
+    meta.textContent =
+      '[' + (res.source || '') + ']' +
+      (res.metrics ? ' EQS=' + res.metrics.EQS + ' AKSI=' + res.metrics.AKSI : '') +
+      (res.seal ? ' hash=' + res.seal.hash : '');
+    refreshBadges();
+  }
+
+  document.getElementById('send').onclick = function () {
+    send(document.getElementById('qin').value);
+  };
+  document.getElementById('qin').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') send(document.getElementById('qin').value);
+  });
+  document.querySelectorAll('.chip').forEach(function (el) {
+    el.onclick = function () { send(el.getAttribute('data-q')); };
+  });
+  document.getElementById('exp').onclick = function () {
+    var blob = W.exportMemory();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'aksi-whole-export.json';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    append('✓ exported');
+  };
+  document.getElementById('clr').onclick = function () {
+    if (confirm('Очистить локальную память WHOLE?')) {
+      W.clearMemory();
+      refreshBadges();
+      append('✓ memory cleared');
+    }
+  };
+
+  chat.textContent = '';
+  append('AKSI WHOLE ' + W.version);
+  append('modules: ' + W.status().modules.join(' · '));
+  append('Спроси: помощь · что такое АКСИ · ADIA');
+  append('—');
+  refreshBadges();
+})();
+</script>
+</body>
+</html>
