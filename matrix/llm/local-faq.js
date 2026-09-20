@@ -9,11 +9,11 @@ const FAQ = [
     a: 'Я AKSI MATRIX — суверенный offline runtime в браузере. Память HRR, quantum gate, TrustVault. Отвечаю локально; опционально WebLLM на твоём GPU.'
   },
   {
-    keys: ['aksi', 'акси', 'что такое aksi', 'что такое акси'],
+    keys: ['aksi', 'акси', 'что такое aksi', 'что такое акси', 'что это', 'расскажи про aksi', 'про акси'],
     a: 'АКСИ (AKSI) — суверенный агентный runtime: offline-first, память в IndexedDB (HRR), integrity gate, AES-GCM vault, опциональный on-device LLM. Сайт: milana808.github.io. Контакт: aksilove@internet.ru'
   },
   {
-    keys: ['как пользоваться', 'help', 'помощь', 'команды', 'что умеешь'],
+    keys: ['как пользоваться', 'help', 'помощь', 'команды', 'что умеешь', 'как работает', 'инструкция'],
     a: 'Команды:\n• вопрос — ответ из памяти / FAQ / WebLLM\n• запомни: факт — сохранить в локальную память\n• Загрузить ИИ (Load) — on-device WebLLM (нужен Chrome/Edge + WebGPU)\n• Export .aksi — зашифрованная капсула памяти\nРаботает offline без сервера.'
   },
   {
