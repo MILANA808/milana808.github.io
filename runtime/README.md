@@ -1,53 +1,40 @@
-# AKSI Autonomous Intelligence Runtime v1.1
+# AKSI Runtime v1.2 — technology serves the human
 
-**Live:** https://milana808.github.io/runtime/  
-**Contact:** aksilove@internet.ru
+**Live:** https://milana808.github.io/runtime/
 
-## What it is
+## Principle
+
+Not a cage for minds. Not model-worship.
 
 ```text
-GOAL → PLAN → RESEARCH → EXTRACT → MULTI-PATH → CONFLICT → FOLLOW-UP → SELF-CHECK → REPORT → MEMORY → PROOF
+Human goal
+  → gather FACTS from sources
+  → form HYPOTHESES only from facts
+  → bind every hypothesis to evidence ids
+  → label UNGROUNDED openly
+  → human keeps judgment
 ```
 
-Not a chatbot. Not AGI.
+## Types
 
-## Quick start
+| Type | Meaning |
+|------|--------|
+| FACT | Extract from a source |
+| SOURCE | Discovery hit |
+| HYPOTHESIS | Proposal that must link to facts |
+| CLAIM | Statement (grounded or not) |
+| UNGROUNDED | Visible, never sold as knowledge |
 
-1. Open https://milana808.github.io/runtime/
-2. demo1–demo4 or type a goal → **RUN**
-3. Export session JSON for reproducibility
+## Pipeline
 
-## Files
+interpret → research → extract → reason → **ground** → conflict → re_research → self_check → report → proof
 
-| Path | Role |
-|------|------|
-| `core/engine.js` | Orchestrator v1.1 |
-| `index.html` | Operator UI |
-| `backend/main.py` | Optional FastAPI |
-| `eval/benchmark.json` | 20-task suite defs |
-
-## Tools
-
-web_search (Wikipedia) · web_open (wiki REST) · github_read · memory · report · optional llm_complete
-
-## Browser API
+## API
 
 ```js
-await AKSI_RUNTIME.startGoal(goal, { onLive, llm_endpoint, approvals })
+AKSI_RUNTIME.startGoal(goal, { onLive })
 AKSI_RUNTIME.exportSession(session)
+AKSI_RUNTIME.PRINCIPLE // technology_serves_human
 ```
 
-## Server API
-
-```bash
-pip install fastapi uvicorn httpx
-uvicorn main:app --port 8787
-```
-
-POST /runtime/task · GET /runtime/task/{id} · /graph · /evidence · /proof · /memory · approve/reject
-
-## Limitations
-
-CORS on non-Wikipedia URLs · strategy multi-path without API keys · FNV chain (Ed25519 on server proof.py)
-
-Proprietary AKSI · aksilove@internet.ru
+Contact: aksilove@internet.ru
