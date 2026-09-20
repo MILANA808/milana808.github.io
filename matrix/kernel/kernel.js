@@ -8,6 +8,7 @@ import { Exocortex } from '../exocortex/hrr.js';
 import { TrustVault } from '../crypto/vault.js';
 import { WebLLMBridge } from '../llm/webllm-bridge.js';
 import { BonsaiBridge } from '../llm/bonsai-bridge.js';
+import { localFaqAnswer } from '../llm/local-faq.js';
 
 const DB_NAME = 'aksi_matrix_vault';
 const DB_VERSION = 1;
@@ -15,7 +16,7 @@ const STORES = ['memory_chunks', 'secure_state', 'event_log'];
 
 export class AksiKernel {
   constructor() {
-    this.version = '1.2.0-matrix';
+    this.version = '1.2.1-matrix';
     this.ready = false;
     this.capabilities = {
       webgpu: false,
@@ -56,7 +57,9 @@ export class AksiKernel {
     };
     this.state.lastEvent = evt;
     this._subs.forEach((fn) => {
-      try { fn(evt); } catch (e) {}
+      try {
+        fn(evt);
+      } catch (e) {}
     });
     return evt;
   }
@@ -115,7 +118,10 @@ export class AksiKernel {
 
   idbPut(storeName, record) {
     return new Promise((resolve, reject) => {
-      if (!this._db) { reject(new Error('DB not open')); return; }
+      if (!this._db) {
+        reject(new Error('DB not open'));
+        return;
+      }
       const tx = this._db.transaction(storeName, 'readwrite');
       const store = tx.objectStore(storeName);
       const r = store.put(record);
@@ -126,7 +132,10 @@ export class AksiKernel {
 
   idbGetAll(storeName) {
     return new Promise((resolve, reject) => {
-      if (!this._db) { reject(new Error('DB not open')); return; }
+      if (!this._db) {
+        reject(new Error('DB not open'));
+        return;
+      }
       const tx = this._db.transaction(storeName, 'readonly');
       const store = tx.objectStore(storeName);
       const r = store.getAll();
@@ -137,7 +146,10 @@ export class AksiKernel {
 
   idbClear(storeName) {
     return new Promise((resolve, reject) => {
-      if (!this._db) { reject(new Error('DB not open')); return; }
+      if (!this._db) {
+        reject(new Error('DB not open'));
+        return;
+      }
       const tx = this._db.transaction(storeName, 'readwrite');
       const store = tx.objectStore(storeName);
       const r = store.clear();
@@ -210,58 +222,57 @@ export class AksiKernel {
     this.emit('ask:gate', gate);
     const hits = await this.exocortex.recall(q, 5);
     this.emit('ask:recall', { hits: hits.length });
-    let text, source;
-    if (hits.length && gate.weights.Local_RAG_Weight >= 0.28) {
-      text = hits.map((h, i) => i + 1 + '. ' + h.text).join('\n');
+
+    const faq = localFaqAnswer(q);
+    const hrrText = hits.length
+      ? hits.map((h, i) => i + 1 + '. ' + h.text).join('\n')
+      : '';
+
+    let text;
+    let source;
+    // FAQ always wins for product/help — clear answers without GPU
+    if (faq) {
+      text = faq;
+      source = 'faq';
+    } else if (hits.length) {
+      text = hrrText;
       source = 'hrr';
-    } else if (gate.weights.Safe_Gate_Weight > 0.55 && hits.length === 0) {
-      text = 'Safe Gate: недостаточно локального знания. Добавьте факт: запомни: …';
+    } else if (gate.weights.Safe_Gate_Weight > 0.55) {
+      text =
+        'Пока мало знания по этому вопросу. Напиши: запомни: факт — или спроси «помощь».';
       source = 'safe_gate';
     } else {
-      text = hits.length > 0
-        ? hits.map((h) => h.text).join('\n')
-        : 'Локальный контур не нашёл ассоциаций. Напишите: запомни: ваш факт';
-      source = hits.length ? 'hrr_low' : 'empty_memory';
+      text =
+        'Нет ассоциаций в памяти. Попробуй «помощь» или: запомни: ваш факт';
+      source = 'empty_memory';
     }
 
-    const wantLLM =
-      this.llmPrefer ||
-      gate.weights.Deep_LLM_Weight >= 0.35 ||
-      (this.state.llmProvider === 'bonsai' && this.bonsai && this.bonsai.isLoaded);
-
-    if (wantLLM && this.llm && this.llm.isLoaded) {
+    const webllmReady = !!(this.webllm && this.webllm.isLoaded);
+    if (webllmReady && (this.llmPrefer || !faq)) {
       try {
-        this.emit('ask:llm_start', { provider: this.state.llmProvider });
-        const context = hits.length ? hits.map((h) => h.text).join('\n').slice(0, 4000) : '';
-        let gen;
-        if (this.state.llmProvider === 'bonsai' && this.bonsai) {
-          gen = await this.bonsai.generate(q, { context, openSpace: true });
-          source = 'bonsai';
-        } else {
-          const prompt = context
-            ? 'Контекст из локальной памяти:\n' + context + '\n\nВопрос: ' + q
-            : q;
-          gen = await this.webllm.generate(prompt);
+        this.emit('ask:llm_start', { provider: 'webllm', model: this.webllm.model });
+        const context = hits.length
+          ? hits.map((h) => h.text).join('\n').slice(0, 2500)
+          : faq || '';
+        const prompt = context
+          ? 'Контекст AKSI (локально):\n' + context + '\n\nВопрос: ' + q
+          : q;
+        const gen = await this.webllm.generate(prompt);
+        if (gen && gen.length > 2) {
+          text = gen;
           source = 'webllm';
         }
-        if (gen) text = gen;
         this.emit('ask:llm_done', {
           chars: (gen || '').length,
-          provider: this.state.llmProvider
+          provider: 'webllm',
+          model: this.webllm.model
         });
       } catch (e) {
         this.emit('ask:llm_error', {
           error: String(e.message || e),
-          provider: this.state.llmProvider
+          provider: 'webllm'
         });
       }
-    } else if (gate.weights.Deep_LLM_Weight > 0.45 && this.capabilities.webgpu) {
-      this.emit('ask:deep_hook', {
-        note:
-          this.state.llmProvider === 'bonsai'
-            ? 'Prepare Bonsai 2 27B (OPFS + WebGPU Space)'
-            : 'Load Local LLM (micro WebLLM) for on-device generation'
-      });
     }
 
     const result = {
@@ -317,13 +328,27 @@ export class AksiKernel {
     }
   }
 
-  async prepareBonsai(onProgress) {
+  setBonsaiHost(el) {
+    this._bonsaiHost = el || null;
+    if (this.bonsai && el) {
+      try {
+        this.bonsai.mountEmbed(el);
+      } catch (e) {}
+    }
+  }
+
+  async prepareBonsai(onProgress, hostEl) {
     this.setLLMProvider('bonsai');
     if (!this.bonsai) this.bonsai = new BonsaiBridge();
     this.llm = this.bonsai;
+    if (hostEl) this._bonsaiHost = hostEl;
     this.emit('llm:load_start', { model: 'Ternary-Bonsai-2-27B', provider: 'bonsai' });
     try {
       const st = await this.bonsai.prepare(onProgress);
+      if (this._bonsaiHost) {
+        this.bonsai.mountEmbed(this._bonsaiHost);
+        this.emit('bonsai:embed', { mounted: true });
+      }
       this.llmPrefer = true;
       this.emit('llm:load_done', st);
       return st;
