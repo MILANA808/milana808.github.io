@@ -1,38 +1,53 @@
-# AKSI Autonomous Intelligence Runtime v1.0
+# AKSI Autonomous Intelligence Runtime v1.1
 
-**Contact:** aksilove@internet.ru  
-**Live:** https://milana808.github.io/runtime/
+**Live:** https://milana808.github.io/runtime/  
+**Contact:** aksilove@internet.ru
 
 ## What it is
 
-Orchestration layer: GOAL → PLAN → RESEARCH → MULTI-PATH → CONFLICT → REPORT → MEMORY → HASH-CHAIN PROOF.
+```text
+GOAL → PLAN → RESEARCH → EXTRACT → MULTI-PATH → CONFLICT → FOLLOW-UP → SELF-CHECK → REPORT → MEMORY → PROOF
+```
 
-Not a chatbot. Not AGI. Not quantum consciousness.
+Not a chatbot. Not AGI.
 
-## Architecture
+## Quick start
 
-| Module | Role |
-|--------|------|
-| `core/engine.js` | Session, task graph, world state, evidence/claims/conflicts, tools, multi-path, proof chain, main loop |
+1. Open https://milana808.github.io/runtime/
+2. demo1–demo4 or type a goal → **RUN**
+3. Export session JSON for reproducibility
+
+## Files
+
+| Path | Role |
+|------|------|
+| `core/engine.js` | Orchestrator v1.1 |
 | `index.html` | Operator UI |
-| Tools | web_search (Wikipedia), web_open, github_read, memory, report |
+| `backend/main.py` | Optional FastAPI |
+| `eval/benchmark.json` | 20-task suite defs |
 
-Epistemic types: FACT, CLAIM, EVIDENCE, CONFLICT, UNCERTAINTY.
+## Tools
 
-Permission levels 0–3; level 2–3 require approval flags.
+web_search (Wikipedia) · web_open (wiki REST) · github_read · memory · report · optional llm_complete
 
-Limits: MAX_ITERATIONS, TIME_LIMIT_MS, ACTION_LIMIT, FAILURE_LIMIT.
+## Browser API
 
-Multi-path: A_conservative, B_synthesis, C_skeptical, AKSI_internal (optional llm_endpoint).
+```js
+await AKSI_RUNTIME.startGoal(goal, { onLive, llm_endpoint, approvals })
+AKSI_RUNTIME.exportSession(session)
+```
 
-Proof: FNV event hash-chain. Backend `proof.py` Ed25519 remains for server deployments.
+## Server API
+
+```bash
+pip install fastapi uvicorn httpx
+uvicorn main:app --port 8787
+```
+
+POST /runtime/task · GET /runtime/task/{id} · /graph · /evidence · /proof · /memory · approve/reject
 
 ## Limitations
 
-- Browser CORS blocks many URLs; Wikipedia + GitHub API work.
-- Without API keys, multi-path is strategy-based not multi-vendor LLM.
-- No headless Chromium in static Pages build.
-
-## License
+CORS on non-Wikipedia URLs · strategy multi-path without API keys · FNV chain (Ed25519 on server proof.py)
 
 Proprietary AKSI · aksilove@internet.ru
