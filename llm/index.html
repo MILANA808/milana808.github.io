@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI LLM — локальная модель</title>
+<meta name="theme-color" content="#ebe4d7">
+<style>
+:root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.shell{max-width:820px;margin:0 auto;padding:16px 14px 48px}
+header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+.logo{font-weight:800;letter-spacing:.1em;font-size:11px;text-transform:uppercase}
+.logo b{opacity:.45}
+nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
+h1{font-size:1.25rem;font-weight:650;margin-bottom:6px}
+.lead{color:var(--muted);font-size:13px;margin-bottom:12px;max-width:60ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px}
+.panel h2{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.bar{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;margin:8px 0}
+.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s}
+.meta{font-family:var(--mono);font-size:11px;color:var(--muted)}
+#log{font-family:var(--mono);font-size:12px;max-height:280px;overflow:auto;white-space:pre-wrap;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;min-height:120px}
+textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:3px;background:#fff;min-height:72px}
+button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650;margin-right:6px;margin-top:8px}
+button:disabled{opacity:.4}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:3px}
+.badge.on{border-color:var(--ok);color:var(--ok)}
+footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body data-aksi-autollm="1">
+<div class="shell">
+<header>
+  <div class="logo">AKSI <b>LLM</b></div>
+  <nav><a href="/">След</a><a href="/runtime/">Runtime</a><a href="/matrix/">MATRIX</a></nav>
+</header>
+<h1>Локальная модель AKSI</h1>
+<p class="lead">WebLLM в браузере. Автозагрузка при открытии. Не «знает всё» — веса модели + локальный SEED. Решение за вами.</p>
+<div class="panel">
+  <h2>Статус</h2>
+  <div class="row">
+    <span class="badge" id="bReady">idle</span>
+    <span class="badge" id="bGpu">gpu?</span>
+    <span class="badge" id="bModel">—</span>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="meta" id="msg">инициализация…</div>
+  <div class="row">
+    <button type="button" id="btnLoad">Загрузить</button>
+    <button type="button" class="ghost" id="btnSkip">Не грузить авто</button>
+  </div>
+  <p class="note">Chrome/Edge + WebGPU. Первый раз — скачивание модели в кэш браузера.</p>
+</div>
+<div class="panel">
+  <h2>Чат</h2>
+  <div id="log">—</div>
+  <textarea id="q" placeholder="Вопрос…"></textarea>
+  <button type="button" id="send" disabled>Спросить</button>
+</div>
+<footer>aksilove@internet.ru · WebLLM 0.2.85 · v3 · не AGI</footer>
+</div>
+<script src="/aksi-webllm.js?v=3"></script>
+<script src="/aksi-neuro.js?v=10"></script>
+<script>
+(function(){
+  var W=window.AKSI_WEBLLM;
+  if(!W){document.getElementById('msg').textContent='aksi-webllm.js missing';return;}
+  function paint(st){
+    st=st||W.status();
+    document.getElementById('bar').style.width=(st.progress||0)+'%';
+    document.getElementById('msg').textContent=st.message||'';
+    document.getElementById('bReady').textContent=st.ready?'ready':(st.loading?'loading':'idle');
+    document.getElementById('bReady').className='badge'+(st.ready?' on':'');
+    document.getElementById('bGpu').textContent=st.webgpu===true?'WebGPU':(st.webgpu===false?'no GPU':'gpu?');
+    document.getElementById('bModel').textContent=st.model?String(st.model).slice(0,28):'—';
+    document.getElementById('send').disabled=!st.ready;
+  }
+  function append(role,text){
+    var el=document.getElementById('log');
+    if(el.textContent==='—') el.textContent='';
+    el.textContent+=(role==='user'?'Вы: ':role==='system'?'· ':'AKSI: ')+text+'\n\n';
+    el.scrollTop=el.scrollHeight;
+  }
+  window.addEventListener('aksi-webllm-progress',function(e){paint(e.detail);});
+  window.addEventListener('aksi:webllm-ready',function(){paint();append('system','Модель готова: '+(W.status().model||''));});
+  document.getElementById('btnLoad').onclick=function(){
+    try{localStorage.removeItem('aksi_webllm_skip');}catch(e){}
+    W.load(null,paint).then(paint).catch(function(e){append('system',e.message||e);paint();});
+  };
+  document.getElementById('btnSkip').onclick=function(){
+    try{localStorage.setItem('aksi_webllm_skip','1');}catch(e){}
+    document.getElementById('msg').textContent='авто отключено';
+  };
+  document.getElementById('send').onclick=async function(){
+    var q=document.getElementById('q').value.trim();
+    if(!q||!W.ready())return;
+    document.getElementById('q').value='';
+    append('user',q);
+    document.getElementById('send').disabled=true;
+    try{
+      var r=await W.complete(q,{temperature:0.35,max_tokens:600});
+      if(r.error) append('system',r.error); else append('bot',r.text||'(пусто)');
+    }catch(e){append('system',String(e.message||e));}
+    document.getElementById('send').disabled=!W.ready();
+  };
+  paint();
+  setTimeout(function(){
+    if(!W.ready()&&!W.loading()){
+      W.autoLoad({onProgress:paint}).catch(function(e){
+        append('system','Авто: '+(e.message||e)+' — нажмите Загрузить');
+        paint();
+      });
+    }
+  },300);
+})();
+</script>
+</body>
+</html>
