@@ -3,60 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AKSI Runtime — Autonomous Intelligence</title>
-<meta name="description" content="GOAL → PLAN → RESEARCH → REASON → VERIFY → REPORT. Not a chatbot.">
+<title>AKSI Runtime v1.1 — Autonomous Intelligence</title>
+<meta name="description" content="GOAL → PLAN → RESEARCH → MULTI-PATH → CONFLICT → REPORT → PROOF">
 <meta name="theme-color" content="#ebe4d7">
 <style>
 :root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--bad:#8b3a3a;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font:14px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
-.shell{max-width:1100px;margin:0 auto;padding:16px 14px 48px}
+.shell{max-width:1120px;margin:0 auto;padding:16px 14px 48px}
 header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
 .logo{font-weight:800;letter-spacing:.1em;font-size:11px;text-transform:uppercase}
 .logo b{opacity:.45}
 nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
 h1{font-size:1.35rem;font-weight:650;margin-bottom:4px}
-.lead{color:var(--muted);font-size:13px;margin-bottom:12px;max-width:70ch}
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
-@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.lead{color:var(--muted);font-size:13px;margin-bottom:12px;max-width:72ch}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px}
-.panel h2{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:3px;background:#fff}
+.panel h2{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:650}
+textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:3px;background:#fff;resize:vertical}
 button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650}
 button:disabled{opacity:.4;cursor:not-allowed}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.live{font-family:var(--mono);font-size:11px;max-height:220px;overflow:auto;background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px}
-.live div{margin-bottom:2px}
-.live .t{color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center}
+.live{font-family:var(--mono);font-size:11px;max-height:240px;overflow:auto;background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px}
+.live div{margin-bottom:2px}.live .t{color:var(--muted)}
 .tree{font-family:var(--mono);font-size:11px;line-height:1.55}
 .badge{display:inline-block;font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:3px;margin-right:4px}
-.badge.ok{border-color:var(--ok);color:var(--ok)}
-.badge.bad{border-color:var(--bad);color:var(--bad)}
-.pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;max-height:280px;overflow:auto;background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px}
+.badge.ok{border-color:var(--ok);color:var(--ok)}.badge.bad{border-color:var(--bad);color:var(--bad)}
+.pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;max-height:300px;overflow:auto;background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px}
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .m{background:var(--bg2);border:1px solid var(--line);padding:6px;text-align:center;border-radius:3px}
-.m b{display:block;font-family:var(--mono);font-size:12px}
-.m span{font-size:9px;color:var(--muted);text-transform:uppercase}
+.m b{display:block;font-family:var(--mono);font-size:12px}.m span{font-size:9px;color:var(--muted);text-transform:uppercase}
 footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.demos button{margin:0 6px 6px 0}
 </style>
 </head>
 <body>
 <div class="shell">
 <header>
-  <div class="logo">AKSI <b>RUNTIME</b></div>
-  <nav><a href="/">След</a><a href="/whole/">WHOLE</a><a href="/matrix/">MATRIX</a></nav>
+  <div class="logo">AKSI <b>RUNTIME</b> v1.1</div>
+  <nav>
+    <a href="/">След</a>
+    <a href="/whole/">WHOLE</a>
+    <a href="/matrix/">MATRIX</a>
+  </nav>
 </header>
 <h1>Autonomous Intelligence Runtime</h1>
-<p class="lead">Не чат. GOAL → PLAN → RESEARCH → MULTI-PATH → CONFLICT → REPORT → PROOF. Не AGI. CORS ограничивает web_open; Wikipedia/GitHub API работают.</p>
+<p class="lead">Не чат. GOAL → PLAN → RESEARCH → MULTI-PATH → CONFLICT → SELF-CHECK → REPORT → PROOF. Wikipedia/GitHub API работают; CORS ограничивает прочий web_open.</p>
 <div class="grid">
 <div>
-  <div class="panel"><h2>Goal</h2>
+  <div class="panel">
+    <h2>Goal</h2>
     <textarea id="goal" rows="3" placeholder="Исследуй X…"></textarea>
-    <div class="row"><button type="button" id="run">RUN</button></div>
-    <div id="demos" style="margin-top:10px"></div>
+    <div class="row">
+      <button type="button" id="run">RUN</button>
+      <button type="button" class="ghost" id="exportBtn" disabled>Export session JSON</button>
+    </div>
+    <div class="demos" style="margin-top:10px"><h2>Demos</h2><div id="demos"></div></div>
   </div>
-  <div class="panel"><h2>Live</h2><div class="live" id="live">—</div></div>
+  <div class="panel"><h2>Live execution</h2><div class="live" id="live">—</div></div>
   <div class="panel"><h2>Report</h2><div class="pre" id="report">—</div></div>
 </div>
 <div>
@@ -71,39 +77,82 @@ footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid va
   <div class="panel"><h2>Task graph</h2><div class="tree" id="graph">—</div></div>
   <div class="panel"><h2>Multi-path</h2><div class="tree" id="paths">—</div></div>
   <div class="panel"><h2>Evidence</h2><div class="pre" id="evidence">—</div></div>
+  <div class="panel"><h2>Self-check</h2><div class="pre" id="selfcheck">—</div></div>
   <div class="panel"><h2>Proof chain</h2><div class="tree" id="proof">—</div></div>
 </div>
 </div>
-<footer>aksilove@internet.ru · Runtime v1 · integrity chain ≠ claim truth</footer>
+<footer>aksilove@internet.ru · Runtime v1.1 · integrity chain ≠ claim truth</footer>
 </div>
-<script src="./core/engine.js?v=3"></script>
+<script src="./core/engine.js?v=11"></script>
 <script>
 (function(){
-  var R=window.AKSI_RUNTIME;if(!R){document.getElementById('live').textContent='engine missing';return}
+  var R=window.AKSI_RUNTIME;
+  if(!R){document.getElementById('live').textContent='engine missing';return}
+  var lastSession=null;
   var demos=document.getElementById('demos');
-  R.DEMOS.forEach(function(d){var b=document.createElement('button');b.type='button';b.className='ghost';b.textContent=d.id;b.onclick=function(){document.getElementById('goal').value=d.goal};demos.appendChild(b)});
+  R.DEMOS.forEach(function(d){
+    var b=document.createElement('button');
+    b.type='button';b.className='ghost';b.textContent=d.id;b.title=d.title;
+    b.onclick=function(){document.getElementById('goal').value=d.goal};
+    demos.appendChild(b);
+  });
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
   function render(s){
     if(!s)return;
-    document.getElementById('sId').textContent=s.id.slice(0,12);
+    lastSession=s;
+    document.getElementById('exportBtn').disabled=false;
+    document.getElementById('sId').textContent=s.id.slice(0,14);
     document.getElementById('sSt').textContent=s.status;
     document.getElementById('sEv').textContent=String(s.evidence.length);
     document.getElementById('sCf').textContent=String(s.conflicts.length);
-    document.getElementById('graph').innerHTML=s.tasks.map(function(t){var st=t.status==='COMPLETED'?'ok':t.status==='FAILED'?'bad':'';return '<div><span class="badge '+st+'">'+t.status+'</span> '+esc(t.kind)+' — '+esc(t.description.slice(0,70))+'</div>'}).join('');
+    document.getElementById('graph').innerHTML=s.tasks.map(function(t){
+      var st=t.status==='COMPLETED'?'ok':t.status==='FAILED'?'bad':'';
+      return '<div><span class="badge '+st+'">'+t.status+'</span> '+esc(t.kind)+' — '+esc((t.description||'').slice(0,72))+'</div>';
+    }).join('');
     var paths=(s.multi_llm&&s.multi_llm.paths)||[];
-    document.getElementById('paths').innerHTML=paths.length?paths.map(function(p){return '<div><b>'+esc(p.path)+'</b>: '+esc((p.summary||'').slice(0,120))+'</div>'}).join(''):'—';
-    document.getElementById('evidence').textContent=s.evidence.slice(0,6).map(function(e,i){return (i+1)+'. ['+e.kind+'] '+(e.content||'').slice(0,160)+(e.url?'\n   '+e.url:'')}).join('\n\n')||'—';
-    document.getElementById('proof').innerHTML=(s.proof.chain||[]).slice(-8).map(function(c){return '<div>'+esc(c.at.slice(11,19))+' '+esc(c.type)+' <span class="badge">'+c.hash+'</span></div>'}).join('')||'—';
+    document.getElementById('paths').innerHTML=paths.length?paths.map(function(p){
+      return '<div><b>'+esc(p.path)+'</b>: '+esc((p.summary||'').slice(0,130))+'</div>';
+    }).join(''):'—';
+    document.getElementById('evidence').textContent=s.evidence.slice(0,8).map(function(e,i){
+      return (i+1)+'. ['+e.kind+'] '+(e.content||'').slice(0,180)+(e.url?'\n   '+e.url:'');
+    }).join('\n\n')||'—';
+    document.getElementById('selfcheck').textContent=(s.self_checks||[]).map(function(c){
+      return '• '+c.q+'\n  '+c.a;
+    }).join('\n')||'—';
+    document.getElementById('proof').innerHTML=(s.proof.chain||[]).slice(-10).map(function(c){
+      return '<div>'+esc(c.at.slice(11,19))+' '+esc(c.type)+' <span class="badge">'+c.hash+'</span></div>';
+    }).join('')||'—';
     document.getElementById('report').textContent=(s.report&&s.report.markdown)||'—';
   }
   document.getElementById('run').onclick=async function(){
-    var goal=document.getElementById('goal').value.trim();if(!goal)return;
-    var btn=document.getElementById('run');btn.disabled=true;document.getElementById('live').innerHTML='';
+    var goal=document.getElementById('goal').value.trim();
+    if(!goal)return;
+    var btn=document.getElementById('run');
+    btn.disabled=true;
+    document.getElementById('live').innerHTML='';
     try{
-      var session=await R.startGoal(goal,{onLive:function(line){var el=document.getElementById('live');el.innerHTML+='<div><span class="t">'+esc(line.t)+'</span> <b>'+esc(line.type)+'</b></div>';el.scrollTop=el.scrollHeight}});
+      var session=await R.startGoal(goal,{
+        onLive:function(line){
+          var el=document.getElementById('live');
+          el.innerHTML+='<div><span class="t">'+esc(line.t)+'</span> <b>'+esc(line.type)+'</b> '+esc(line.detail||'')+'</div>';
+          el.scrollTop=el.scrollHeight;
+        }
+      });
       render(session);
-    }catch(e){document.getElementById('live').textContent='ERROR: '+(e.message||e)}
+    }catch(e){
+      document.getElementById('live').textContent='ERROR: '+(e.message||e);
+    }
     btn.disabled=false;
+  };
+  document.getElementById('exportBtn').onclick=function(){
+    if(!lastSession||!R.exportSession)return;
+    var data=R.exportSession(lastSession);
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='aksi-runtime-'+lastSession.id+'.json';
+    a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},2000);
   };
 })();
 </script>
