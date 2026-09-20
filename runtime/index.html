@@ -79,51 +79,55 @@ footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid va
 </div>
 <footer>aksilove@internet.ru · principle: technology_serves_human · chain ≠ truth</footer>
 </div>
-<script src="./core/engine.js?v=12"></script>
-<script src="./core/engine-upgrade.js?v=2"></script>
+<script src="./core/engine.js?v=13"></script>
+<script src="./core/engine-upgrade.js?v=3"></script>
 <script>
 (function(){
   var R=window.AKSI_RUNTIME;
-  if(!R){document.getElementById('live').textContent='engine missing';return}
+  if(!R){document.getElementById('live').textContent='engine missing';return;}
   var last=null;
-  R.DEMOS.forEach(function(d){
+  (R.DEMOS||[]).forEach(function(d){
     var b=document.createElement('button');
-    b.type='button';b.className='ghost';b.textContent=d.id;
-    b.onclick=function(){document.getElementById('goal').value=d.goal};
+    b.type='button'; b.className='ghost'; b.textContent=d.id;
+    b.onclick=function(){ document.getElementById('goal').value=d.goal; };
     document.getElementById('demos').appendChild(b);
   });
-  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]})}
+  function esc(s){
+    return String(s||'').replace(/[&<>"']/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
   function render(s){
-    if(!s)return;
+    if(!s) return;
     last=s;
     document.getElementById('exportBtn').disabled=false;
     document.getElementById('sId').textContent=s.id.slice(0,14);
     document.getElementById('sSt').textContent=s.status;
-    var facts=s.evidence.filter(function(e){return e.kind==='FACT'});
-    var g=(s.claims||[]).filter(function(c){return c.grounded}).length;
-    var u=(s.claims||[]).filter(function(c){return !c.grounded}).length;
+    var facts=(s.evidence||[]).filter(function(e){ return e.kind==='FACT'; });
+    var g=(s.claims||[]).filter(function(c){ return c.grounded; }).length;
+    var u=(s.claims||[]).filter(function(c){ return !c.grounded; }).length;
     document.getElementById('sFact').textContent=String(facts.length);
     document.getElementById('sGr').textContent=g+'/'+(g+u);
-    document.getElementById('graph').innerHTML=s.tasks.map(function(t){
-      var st=t.status==='COMPLETED'?'ok':t.status==='FAILED'?'bad':'';
+    document.getElementById('graph').innerHTML=(s.tasks||[]).map(function(t){
+      var st=t.status==='COMPLETED'?'ok':(t.status==='FAILED'?'bad':'');
       return '<div><span class="badge '+st+'">'+t.status+'</span> '+esc(t.kind)+'</div>';
     }).join('');
-    var hyps=s.hypotheses||(s.claims||[]).filter(function(c){return c.kind==='HYPOTHESIS'||c.grounded});
+    var hyps=s.hypotheses||(s.claims||[]).filter(function(c){ return c.kind==='HYPOTHESIS'||c.grounded; });
     document.getElementById('hyp').textContent=hyps.length?hyps.map(function(h,i){
       return (i+1)+'. ['+(h.status||'?')+'] '+String(h.text).slice(0,140)+(h.based_on&&h.based_on.length?'\n   ← '+h.based_on.join(', '):'\n   ← UNGROUNDED');
     }).join('\n\n'):'—';
     document.getElementById('evidence').textContent=facts.slice(0,6).map(function(e,i){
       return (i+1)+'. '+(e.id||'')+'\n   '+String(e.content||'').slice(0,160)+(e.url?'\n   '+e.url:'');
     }).join('\n\n')||'—';
-    document.getElementById('selfcheck').textContent=(s.self_checks||[]).map(function(c){return '• '+c.q+'\n  '+c.a}).join('\n')||'—';
-    document.getElementById('proof').innerHTML=(s.proof.chain||[]).slice(-8).map(function(c){
+    document.getElementById('selfcheck').textContent=(s.self_checks||[]).map(function(c){ return '• '+c.q+'\n  '+c.a; }).join('\n')||'—';
+    document.getElementById('proof').innerHTML=((s.proof&&s.proof.chain)||[]).slice(-8).map(function(c){
       return '<div>'+esc(c.at.slice(11,19))+' '+esc(c.type)+' <span class="badge">'+c.hash+'</span></div>';
     }).join('')||'—';
     document.getElementById('report').textContent=(s.report&&s.report.markdown)||'—';
   }
   document.getElementById('run').onclick=async function(){
     var goal=document.getElementById('goal').value.trim();
-    if(!goal)return;
+    if(!goal) return;
     var btn=document.getElementById('run');
     btn.disabled=true;
     document.getElementById('live').innerHTML='';
@@ -136,11 +140,13 @@ footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid va
         }
       });
       render(session);
-    }catch(e){document.getElementById('live').textContent='ERROR: '+(e.message||e)}
+    }catch(e){
+      document.getElementById('live').textContent='ERROR: '+(e.message||e);
+    }
     btn.disabled=false;
   };
   document.getElementById('exportBtn').onclick=function(){
-    if(!last||!R.exportSession)return;
+    if(!last||!R.exportSession) return;
     var data=R.exportSession(last);
     var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     var a=document.createElement('a');
