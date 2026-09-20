@@ -1,7 +1,7 @@
-/** AKSI Runtime v1.0 compact for GH Pages. Full copy: engine.full.js in artifacts. Not AGI. aksilove@internet.ru */
+/** AKSI Autonomous Runtime v1.1 — GOAL→PLAN→RESEARCH→MULTI-PATH→SELF-CHECK→REPORT→PROOF. Not AGI. aksilove@internet.ru */
 (function(G){
 'use strict';
-var VERSION='1.0.0-runtime';
+var VERSION='1.1.0-runtime';
 function uid(p){return(p||'id')+'_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3)}
 function now(){return new Date().toISOString()}
 function fnv(s){var h=0x811c9dc5;s=String(s||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return('00000000'+(h>>>0).toString(16)).slice(-8)}
@@ -27,14 +27,15 @@ function planFromGoal(goal){
   var t4=makeTask({description:'Multi-path reasoning',kind:'reason',priority:4,dependencies:[t3.id]});
   var t5=makeTask({description:'Conflict check',kind:'conflict',priority:5,dependencies:[t4.id]});
   var t6=makeTask({description:'Follow-up research',kind:'re_research',priority:6,dependencies:[t5.id]});
-  var t7=makeTask({description:'Report + memory + proof',kind:'report',priority:7,dependencies:[t6.id]});
-  var tasks=[t1,t2,t3,t4,t5,t6,t7];
+  var t7=makeTask({description:'Self-check assumptions and gaps',kind:'self_check',priority:7,dependencies:[t6.id]});
+  var t8=makeTask({description:'Report + memory + proof',kind:'report',priority:8,dependencies:[t7.id]});
+  var tasks=[t1,t2,t3,t4,t5,t6,t7,t8];
   if(/github\.com\/[\w.-]+\/[\w.-]+/i.test(goal))tasks.splice(3,0,makeTask({description:'GitHub API read',kind:'github',priority:3,dependencies:[t2.id],required_tools:['github_read']}));
   return tasks;
 }
 function topicOf(goal){var m=String(goal).match(/(?:исследуй|research|explore)\s+(.+?)(?:\.|$)/i);return(m?m[1]:goal).trim().slice(0,100)}
 async function webSearch(q){
-  var results=[],headers={Accept:'application/json','User-Agent':'AKSI-Runtime/1.0 (aksilove@internet.ru)'};
+  var results=[],headers={Accept:'application/json','User-Agent':'AKSI-Runtime/1.1 (aksilove@internet.ru)'};
   try{
     var r=await fetch('https://en.wikipedia.org/w/api.php?action=opensearch&limit=5&namespace=0&format=json&origin=*&search='+encodeURIComponent(q),{headers:headers});
     if(r.ok){var d=await r.json();for(var i=0;i<(d[1]||[]).length;i++)results.push({title:d[1][i],snippet:(d[2]||[])[i]||'',url:(d[3]||[])[i],provider:'wikipedia_en'})}
@@ -55,7 +56,7 @@ async function webSearch(q){
   return{ok:!!results.length,results:results};
 }
 async function webOpen(url){
-  var headers={Accept:'application/json','User-Agent':'AKSI-Runtime/1.0 (aksilove@internet.ru)'};
+  var headers={Accept:'application/json','User-Agent':'AKSI-Runtime/1.1 (aksilove@internet.ru)'};
   var m=String(url).match(/wikipedia\.org\/wiki\/(.+)$/i);
   if(!m)return{ok:false,error:'CORS/capability_gap for non-Wikipedia URL',capability_gap:true};
   var lang=url.indexOf('ru.wikipedia')>=0?'ru':'en';
@@ -139,6 +140,16 @@ async function executeTask(s,task){
     else if(task.kind==='re_research'){
       var un=s.conflicts.filter(function(c){return c.resolution_status==='UNRESOLVED'});
       if(!un.length)task.result={skipped:true};else{var sr2=await webSearch(topicOf(s.goal)+' limitations');task.result={followup:sr2.ok?sr2.results.length:0};un.forEach(function(c){c.resolution_status='INVESTIGATED_UNRESOLVED'})}
+    }else if(task.kind==='self_check'){
+      var checks=[
+        {q:'What did I assume?',a:(s.world.assumptions||[]).slice(-2).map(function(x){return x.text||x}).join('; ')||'topic from goal'},
+        {q:'What do I actually know?',a:s.evidence.filter(function(e){return e.kind==='FACT'}).length+' FACT nodes'},
+        {q:'What could be wrong?',a:s.conflicts.length?s.conflicts.length+' conflicts':'encyclopedia bias / CORS gaps'},
+        {q:'What is missing?',a:s.evidence.length<3?'thin evidence':'cross-check primary literature'}
+      ];
+      s.self_checks=checks;
+      emit(s,'SELF_CHECK',{count:checks.length});
+      task.result={checks:checks.length};
     }else if(task.kind==='report'){s.report=buildReport(s);try{var key='aksi_runtime_memory_v1';var prev=JSON.parse(localStorage.getItem(key)||'[]');if(!Array.isArray(prev))prev=[];prev.push({memory_id:uid('mem'),content:'Goal: '+s.goal.slice(0,120),type:'EPISODIC',timestamp:now(),confidence:0.7});localStorage.setItem(key,JSON.stringify(prev.slice(-100)))}catch(e){}task.result={report_id:s.report.id};emit(s,'REPORT_READY',{id:s.report.id})}
     else task.result={skipped:true};
     task.status='COMPLETED';task.completed_at=now();emit(s,'TASK_COMPLETED',{id:task.id,kind:task.kind});
@@ -161,7 +172,7 @@ async function runSession(s){
 }
 async function startGoal(goal,opts){
   opts=opts||{};
-  var s={id:uid('sess'),goal:String(goal||'').trim(),created_at:now(),status:'PENDING',limits:LIMITS,iterations:0,actions:0,failures:0,events:[],tasks:[],evidence:[],claims:[],conflicts:[],memories:[],world:{known_facts:[],uncertainties:[],observations:[]},multi_llm:{paths:[],matrix:null},report:null,proof:{chain:[],valid:true},live:[],_onLive:opts.onLive||null};
+  var s={id:uid('sess'),goal:String(goal||'').trim(),created_at:now(),status:'PENDING',limits:LIMITS,iterations:0,actions:0,failures:0,events:[],tasks:[],evidence:[],claims:[],conflicts:[],memories:[],world:{known_facts:[],uncertainties:[],observations:[],assumptions:[]},multi_llm:{paths:[],matrix:null},self_checks:[],report:null,proof:{chain:[],valid:true},live:[],_onLive:opts.onLive||null};
   SESSIONS[s.id]=s;await runSession(s);return s;
 }
 var DEMOS=[
@@ -170,5 +181,13 @@ var DEMOS=[
   {id:'demo3',title:'HRR',goal:'Research holographic reduced representations HRR for AI memory. Primary sources and limitations.'},
   {id:'demo4',title:'Plan',goal:'Разбей задачу offline-first agent runtime с audit trail на подзадачи, исследуй аналоги, отчёт.'}
 ];
-G.AKSI_RUNTIME={VERSION:VERSION,startGoal:startGoal,getSession:function(id){return SESSIONS[id]||null},listTools:function(){return TOOLS},DEMOS:DEMOS,TOOLS:TOOLS,_sessions:SESSIONS};
+function exportSession(session){
+  return{format:'aksi-runtime-session',version:VERSION,exported_at:now(),id:session.id,goal:session.goal,status:session.status,
+    created_at:session.created_at,completed_at:session.completed_at,tasks:session.tasks,evidence:session.evidence,claims:session.claims,
+    conflicts:session.conflicts,multi_llm:session.multi_llm,memories:session.memories,world:session.world,events:session.events,
+    proof:session.proof,report:session.report,live:session.live};
+}
+function listSessions(){return Object.keys(SESSIONS).map(function(id){var s=SESSIONS[id];return{id:s.id,goal:s.goal,status:s.status,created_at:s.created_at}})}
+function setApproval(sessionId,toolName,allowed){var s=SESSIONS[sessionId];if(!s)return{ok:false};s._approvals=s._approvals||{};if(allowed)s._approvals[toolName]=true;else delete s._approvals[toolName];return{ok:true}}
+G.AKSI_RUNTIME={VERSION:VERSION,startGoal:startGoal,getSession:function(id){return SESSIONS[id]||null},listSessions:listSessions,exportSession:exportSession,setApproval:setApproval,listTools:function(){return TOOLS},DEMOS:DEMOS,TOOLS:TOOLS,_sessions:SESSIONS};
 })(typeof window!=='undefined'?window:globalThis);
