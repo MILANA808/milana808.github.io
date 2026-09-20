@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>АКСИ MATRIX ONE</title>
-<meta name="description" content="Kernel · HRR · WebLLM micro · Bonsai 2 27B path · OPFS">
+<meta name="description" content="Kernel · HRR · FAQ · WebLLM · offline">
 <meta name="theme-color" content="#ebe4d7">
 <style>
 :root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
@@ -43,7 +43,6 @@ button:disabled{opacity:.4;cursor:not-allowed}
 .barlabel{font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
 .log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:180px;overflow:auto;line-height:1.5}
 .log .e{color:var(--ink)}
-.links a{font-size:12px;color:var(--ink);text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:3px;background:var(--bg2);display:inline-block;margin:4px 4px 0 0}
 .hint{font-size:12px;color:var(--muted);margin-top:8px}
 footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 </style>
@@ -55,7 +54,7 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
   <nav><a href="/">След</a><a href="/local-ai.html">Local AI</a><a href="/quantum-chip.html">Q-Chip</a><a href="/capsule.html">Capsule</a></nav>
 </header>
 <h1>Единый runtime</h1>
-<p class="lead">HRR · Quantum gate · WebLLM micro · Bonsai 2 27B (PrismML ternary path) · OPFS.</p>
+<p class="lead">Offline FAQ · HRR память · WebLLM (опционально, нужен GPU) · TrustVault.</p>
 <div class="badges">
   <span class="badge" id="bStatus">cold</span>
   <span class="badge" id="bGpu">webgpu ?</span>
@@ -75,19 +74,19 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
   <div class="panel"><h2>Model</h2>
     <div class="row">
       <select id="modelSel" disabled>
-        <option value="webllm">Micro · WebLLM Qwen ~0.5B (~0.3GB)</option>
-        <option value="bonsai">Bonsai 2 27B Ternary (~5.9GB · PrismML kernels)</option>
+        <option value="webllm">WebLLM в чате (нужен GPU)</option>
+        <option value="bonsai">Bonsai 27B (embed)</option>
       </select>
-      <button type="button" class="ghost" id="loadModel" disabled>Load / Prepare</button>
+      <button type="button" id="loadModel" disabled>Загрузить ИИ</button>
     </div>
     <div class="bar"><i id="pbar"></i></div>
     <div class="barlabel" id="ptext">idle</div>
-    <p class="hint" id="modelHint">Bonsai 2 27B не грузится через WebLLM: нужны ядра PrismML. Prepare = OPFS; инференс = WebGPU Space.</p>
+    <p class="hint" id="modelHint">Чат работает без GPU (FAQ + память). WebLLM — если есть Chrome/Edge + GPU.</p>
   </div>
   <div class="panel"><h2>Prompt</h2>
     <div class="chat" id="chat">boot…</div>
     <div class="row">
-      <input type="text" id="qin" placeholder="вопрос · или  запомни: факт" autocomplete="off">
+      <input type="text" id="qin" placeholder="вопрос · помощь · запомни: факт" autocomplete="off">
       <button type="button" id="send" disabled>Send</button>
     </div>
     <div class="row">
@@ -103,20 +102,15 @@ footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-si
     <canvas id="chaos" width="640" height="100"></canvas>
   </div>
   <div class="panel"><h2>Event stream</h2><div class="log" id="log"></div></div>
-  <div class="panel"><h2>Bonsai links</h2>
-    <div class="links">
-      <a href="https://huggingface.co/spaces/webml-community/bonsai-webgpu-kernels" target="_blank" rel="noopener">WebGPU Space</a>
-      <a href="https://huggingface.co/prism-ml/Ternary-Bonsai-2-27B-gguf" target="_blank" rel="noopener">HF weights</a>
-      <a href="https://docs.prismml.com/bonsai-2-27b" target="_blank" rel="noopener">Docs</a>
-    </div>
-  </div>
 </div>
 </div>
-<footer>aksilove@internet.ru · Bonsai ≠ WebLLM · OPFS plumbing</footer>
+<footer>aksilove@internet.ru · offline FAQ всегда · WebLLM при наличии GPU</footer>
 </div>
 <script type="module">
-import { AksiKernel } from './kernel/kernel.js';
-import { mountLorenz } from './chaos/lorenz.js';
+import { AksiKernel } from './kernel/kernel.js?v=42';
+import { mountLorenz } from './chaos/lorenz.js?v=42';
+import { localFaqAnswer } from './llm/local-faq.js?v=42';
+
 const chat=document.getElementById('chat'),logEl=document.getElementById('log'),wave=document.getElementById('wave'),wctx=wave.getContext('2d');
 const pbar=document.getElementById('pbar'),ptext=document.getElementById('ptext');
 function appendChat(line){chat.textContent+=(chat.textContent&&!chat.textContent.endsWith('\n')?'\n':'')+line;chat.scrollTop=chat.scrollHeight;}
@@ -124,12 +118,12 @@ function logLine(type,payload){const div=document.createElement('div');div.class
 function setProgress(pct,text){const p=Math.max(0,Math.min(1,Number(pct)||0));pbar.style.width=Math.round(p*100)+'%';ptext.textContent=text||Math.round(p*100)+'%';}
 function drawWave(amps){const w=wave.width,h=wave.height;wctx.fillStyle='#1a1814';wctx.fillRect(0,0,w,h);if(!amps||!amps.length)return;wctx.strokeStyle='#ebe4d7';wctx.lineWidth=1.25;wctx.beginPath();for(let i=0;i<amps.length;i++){const x=(i/(amps.length-1))*(w-8)+4,y=h/2-amps[i]*(h*0.42);if(i===0)wctx.moveTo(x,y);else wctx.lineTo(x,y);}wctx.stroke();}
 const kernel=new AksiKernel();
-kernel.subscribe((evt)=>{logLine(evt.type,evt.payload);if((evt.type==='ask:vector'||evt.type==='ask:circuit')&&kernel.router)drawWave(kernel.router.getAmplitudes());if(evt.type==='ask:gate'&&evt.payload){document.getElementById('stRoute').textContent=evt.payload.route||'—';document.getElementById('stQcli').textContent=evt.payload.QCLI!=null?Number(evt.payload.QCLI).toFixed(3):'—';}if(evt.type==='memory:store'||evt.type==='vault:import'||evt.type==='boot:ready')document.getElementById('stMem').textContent=String(kernel.state.memoryCount||0);if(evt.type==='llm:load_done'||evt.type==='bonsai:prepare_done'){document.getElementById('bLlm').textContent=evt.type==='bonsai:prepare_done'?'bonsai armed':'llm on';document.getElementById('bLlm').classList.add('on');}});
+kernel.subscribe((evt)=>{logLine(evt.type,evt.payload);if((evt.type==='ask:vector'||evt.type==='ask:circuit')&&kernel.router)drawWave(kernel.router.getAmplitudes());if(evt.type==='ask:gate'&&evt.payload){document.getElementById('stRoute').textContent=evt.payload.route||'—';document.getElementById('stQcli').textContent=evt.payload.QCLI!=null?Number(evt.payload.QCLI).toFixed(3):'—';}if(evt.type==='memory:store'||evt.type==='vault:import'||evt.type==='boot:ready')document.getElementById('stMem').textContent=String(kernel.state.memoryCount||0);if(evt.type==='llm:load_done'){document.getElementById('bLlm').textContent='llm on';document.getElementById('bLlm').classList.add('on');}});
 document.getElementById('qin').addEventListener('input',(e)=>{if(!kernel.ready||!kernel.router)return;drawWave(kernel.router.applyCircuit(kernel.router.textToState(e.target.value||''),e.target.value||''));});
-document.getElementById('modelSel').onchange=()=>{const v=document.getElementById('modelSel').value;kernel.setLLMProvider(v);document.getElementById('modelHint').textContent=v==='bonsai'?'Bonsai 2 27B: OPFS prepare + WebGPU Space (не MLC). ~5.9GB.':'Micro WebLLM: Qwen-класс ~0.5B через MLC.';};
-async function boot(){try{await kernel.boot();document.getElementById('bStatus').textContent='ready';document.getElementById('bStatus').classList.add('on');document.getElementById('stReady').textContent='yes';document.getElementById('stMem').textContent=String(kernel.state.memoryCount);document.getElementById('bGpu').textContent='webgpu '+(kernel.capabilities.webgpu?'yes':'no');if(kernel.capabilities.webgpu)document.getElementById('bGpu').classList.add('on');document.getElementById('bCrypto').textContent='crypto '+(kernel.capabilities.webCrypto?'yes':'no');if(kernel.capabilities.webCrypto)document.getElementById('bCrypto').classList.add('on');document.getElementById('send').disabled=false;document.getElementById('exp').disabled=false;document.getElementById('modelSel').disabled=false;document.getElementById('loadModel').disabled=false;chat.textContent='';appendChat('MATRIX ONE '+kernel.version);appendChat('memory: '+kernel.state.memoryCount);appendChat('—');drawWave(kernel.router.textToState('aksi matrix one'));window.__aksiChaos=mountLorenz(document.getElementById('chaos'),document.getElementById('qin'),document.getElementById('stRoute'));}catch(e){document.getElementById('bStatus').textContent='error';appendChat('BOOT ERROR: '+(e.message||e));}}
-document.getElementById('loadModel').onclick=async()=>{const btn=document.getElementById('loadModel'),mode=document.getElementById('modelSel').value;btn.disabled=true;kernel.setLLMProvider(mode);try{if(mode==='bonsai'){appendChat('Preparing Bonsai path (OPFS)…');await kernel.prepareBonsai(({progress,text})=>setProgress(progress,text));appendChat('✓ Bonsai armed — Send откроет WebGPU Space + HRR prompt');setProgress(1,'bonsai armed');}else{appendChat('Loading WebLLM micro…');await kernel.loadLocalLLM(({progress,text})=>setProgress(progress,text));appendChat('✓ WebLLM ready');setProgress(1,'webllm ready');}}catch(e){appendChat('Model error: '+(e.message||e));setProgress(0,'error');}btn.disabled=false;};
-async function send(){const raw=document.getElementById('qin').value.trim();if(!raw||!kernel.ready)return;document.getElementById('qin').value='';appendChat('> '+raw);if(window.__aksiChaos)window.__aksiChaos.pulseRoute();const teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);if(teach){await kernel.remember(teach[1].trim());appendChat('✓ stored');appendChat('—');return;}const res=await kernel.ask(raw);appendChat(res.text||'(пусто)');appendChat('['+res.source+' · '+(res.gate&&res.gate.route)+' · QCLI '+(res.gate?Number(res.gate.QCLI).toFixed(3):'—')+']');appendChat('—');}
+document.getElementById('modelSel').onchange=()=>{const v=document.getElementById('modelSel').value;kernel.setLLMProvider(v);document.getElementById('modelHint').textContent=v==='bonsai'?'Bonsai 27B: отдельный runtime.':'WebLLM: ответ в этом чате при наличии GPU.';};
+async function boot(){try{await kernel.boot();document.getElementById('bStatus').textContent='ready';document.getElementById('bStatus').classList.add('on');document.getElementById('stReady').textContent='yes';document.getElementById('stMem').textContent=String(kernel.state.memoryCount);document.getElementById('bGpu').textContent='webgpu '+(kernel.capabilities.webgpu?'yes':'no');if(kernel.capabilities.webgpu)document.getElementById('bGpu').classList.add('on');document.getElementById('bCrypto').textContent='crypto '+(kernel.capabilities.webCrypto?'yes':'no');if(kernel.capabilities.webCrypto)document.getElementById('bCrypto').classList.add('on');document.getElementById('send').disabled=false;document.getElementById('exp').disabled=false;document.getElementById('modelSel').disabled=false;document.getElementById('loadModel').disabled=false;chat.textContent='';appendChat('MATRIX ONE '+kernel.version);appendChat('memory: '+kernel.state.memoryCount+' · FAQ online');appendChat('Спроси: помощь · что такое AKSI · привет');appendChat('—');drawWave(kernel.router.textToState('aksi matrix one'));window.__aksiChaos=mountLorenz(document.getElementById('chaos'),document.getElementById('qin'),document.getElementById('stRoute'));}catch(e){document.getElementById('bStatus').textContent='error';appendChat('BOOT ERROR: '+(e.message||e));}}
+document.getElementById('loadModel').onclick=async()=>{const btn=document.getElementById('loadModel'),mode=document.getElementById('modelSel').value;btn.disabled=true;kernel.setLLMProvider(mode);try{if(mode==='bonsai'){appendChat('Bonsai path…');await kernel.prepareBonsai(({progress,text})=>setProgress(progress,text));appendChat('✓ Bonsai prepared');setProgress(1,'bonsai');}else{appendChat('Загрузка WebLLM…');await kernel.loadLocalLLM(({progress,text})=>setProgress(progress,text));appendChat('✓ WebLLM ready · '+((kernel.webllm&&kernel.webllm.model)||''));setProgress(1,'webllm ready');document.getElementById('bLlm').textContent='llm on';document.getElementById('bLlm').classList.add('on');}}catch(e){appendChat('Model: '+(e.message||e));appendChat('Чат всё равно работает через FAQ + память.');setProgress(0,'error');}btn.disabled=false;};
+async function send(){const raw=document.getElementById('qin').value.trim();if(!raw||!kernel.ready)return;document.getElementById('qin').value='';appendChat('> '+raw);if(window.__aksiChaos)window.__aksiChaos.pulseRoute();const teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);if(teach){await kernel.remember(teach[1].trim());appendChat('✓ stored');appendChat('—');return;}const res=await kernel.ask(raw);let out=res.text||'';if((!out||/не нашёл|мало локального|Safe Gate|нет ассоциаций|недостаточно/i.test(out))){const faq=localFaqAnswer(raw);if(faq)out=faq;}appendChat(out||'(пусто)');appendChat('['+(res.source||'local')+' · '+(res.gate&&res.gate.route||'—')+']');appendChat('—');}
 document.getElementById('send').onclick=send;document.getElementById('qin').addEventListener('keydown',(e)=>{if(e.key==='Enter')send();});
 document.getElementById('exp').onclick=async()=>{const pw=document.getElementById('pw').value;if(!pw){appendChat('нужен пароль vault');return;}try{const blob=await kernel.exportCapsule(pw);kernel.vault.downloadBlob(blob,'matrix-one.aksi');appendChat('✓ exported ('+blob.size+' bytes)');}catch(e){appendChat('export error: '+(e.message||e));}};
 document.getElementById('imp').onchange=async(e)=>{const f=e.target.files&&e.target.files[0];if(!f)return;const pw=document.getElementById('pw').value;if(!pw){appendChat('нужен пароль vault');e.target.value='';return;}try{const n=await kernel.importCapsule(f,pw);appendChat('✓ imported: '+n);}catch(err){appendChat('import error: '+(err.message||err));}e.target.value='';};
