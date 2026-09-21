@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Decision Receipt — квитанция на каждое решение ИИ</title>
+<meta name="description" content="FACT / HYPOTHESIS / UNGROUNDED + evidence + gate ALLOW/BLOCK. Для аудита и CISO.">
+<meta name="theme-color" content="#ebe4d7">
+<style>
+:root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--bad:#8b3a3a;--hyp:#6b5a2f;--mono:ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.shell{max-width:880px;margin:0 auto;padding:18px 14px 48px}
+header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+.logo{font-weight:800;letter-spacing:.08em;font-size:11px;text-transform:uppercase}
+.logo b{opacity:.4}
+nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
+h1{font-size:1.45rem;font-weight:650;margin-bottom:8px}
+.sub{color:var(--muted);font-size:14px;max-width:58ch;margin-bottom:14px}
+.buy{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:14px}
+.price{font-family:var(--mono);font-size:13px;margin-top:8px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px}
+.panel h2{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.gate{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:4px 8px;border-radius:3px}
+.gate.ALLOW{background:#dce8e0;color:var(--ok)}
+.gate.BLOCK{background:#f0dede;color:var(--bad)}
+.cls{font-family:var(--mono);font-size:11px;font-weight:700}
+.cls.FACT{color:var(--ok)}.cls.HYPOTHESIS{color:var(--hyp)}.cls.CLAIM{color:#2f4a6b}.cls.UNGROUNDED{color:var(--bad)}
+.stmt{border-bottom:1px solid var(--line);padding:8px 0}
+.pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;max-height:320px;overflow:auto}
+footer{margin-top:18px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+.table{width:100%;border-collapse:collapse;font-size:13px}
+.table td,.table th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="logo">AKSI <b>RECEIPT</b></div>
+  <nav><a href="/runtime/">Runtime</a><a href="/registry/">Registry</a><a href="/agent/">Agent</a></nav>
+</header>
+<h1>Decision Receipt</h1>
+<p class="sub">Каждый ответ ИИ — с квитанцией: факт, гипотеза или без опоры. Gate <b>ALLOW / BLOCK</b>. Экспорт для аудита.</p>
+<div class="buy">
+  <strong>Зачем корпорации платят</strong>
+  Без квитанции ответ нельзя отдать регулятору или внутреннему аудиту. С квитанцией видно опору на evidence.
+  <div class="price">Пилот 60 дней: от 400 тыс. ₽ · год: ориентир 3–15 млн ₽ · on-prem: project</div>
+  <div class="row">
+    <button type="button" id="demoOk">Демо: ALLOW</button>
+    <button type="button" class="ghost" id="demoBlock">Демо: BLOCK</button>
+    <button type="button" class="ghost" id="dlJson">Скачать JSON</button>
+    <button type="button" class="ghost" id="dlTxt">Скачать audit.txt</button>
+  </div>
+</div>
+<div class="panel"><h2>Квитанция</h2><div id="meta">—</div><div id="stmts" style="margin-top:10px"></div></div>
+<div class="panel"><h2>Сырой receipt</h2><div class="pre" id="raw">—</div></div>
+<div class="panel">
+  <h2>Классы</h2>
+  <table class="table">
+    <tr><th>Класс</th><th>Смысл</th></tr>
+    <tr><td><span class="cls FACT">FACT</span></td><td>С опорой на evidence</td></tr>
+    <tr><td><span class="cls CLAIM">CLAIM</span></td><td>Утверждение с evidence</td></tr>
+    <tr><td><span class="cls HYPOTHESIS">HYPOTHESIS</span></td><td>Явная гипотеза</td></tr>
+    <tr><td><span class="cls UNGROUNDED">UNGROUNDED</span></td><td>Нет опоры → strict BLOCK</td></tr>
+  </table>
+</div>
+<footer>aksilove@internet.ru · aksi-decision-receipt/v1</footer>
+</div>
+<script src="/aksi-decision-receipt.js?v=1"></script>
+<script>
+(function(){
+  var R=window.AKSI_RECEIPT, current=null;
+  if(!R){document.getElementById('raw').textContent='module missing';return;}
+  function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
+  function show(rec){
+    current=rec;
+    document.getElementById('meta').innerHTML='<span class="gate '+rec.gate+'">'+rec.gate+'</span> · <span style="font-family:var(--mono);font-size:12px">'+esc(rec.id)+'</span><br><span style="color:var(--muted);font-size:13px">policy '+esc(rec.policy)+' · evidence '+rec.metrics.evidence_count+' · ungrounded '+rec.metrics.ungrounded_count+'</span><div style="margin-top:8px"><b>Goal:</b> '+esc(rec.goal)+'</div>';
+    document.getElementById('stmts').innerHTML=(rec.statements||[]).map(function(s){return '<div class="stmt"><span class="cls '+s.class+'">'+s.class+'</span> '+esc(s.text)+'<div style="font-size:11px;color:var(--muted);font-family:var(--mono)">based_on: '+(s.based_on||[]).join(', ')+'</div></div>';}).join('')+'<div style="margin-top:10px;font-size:12px;color:var(--muted)">proof: <code>'+esc(rec.proof&&rec.proof.chain_hash)+'</code></div>';
+    document.getElementById('raw').textContent=JSON.stringify(rec,null,2);
+  }
+  document.getElementById('demoOk').onclick=function(){show(R.demo('ok'));};
+  document.getElementById('demoBlock').onclick=function(){show(R.demo('block'));};
+  document.getElementById('dlJson').onclick=function(){if(!current)show(R.demo('ok'));var b=new Blob([JSON.stringify(current,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=current.id+'.json';a.click();};
+  document.getElementById('dlTxt').onclick=function(){if(!current)show(R.demo('ok'));var b=new Blob([R.toAuditText(current)],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=current.id+'-audit.txt';a.click();};
+  show(R.demo('ok'));
+})();
+</script>
+</body>
+</html>
