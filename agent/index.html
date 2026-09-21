@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Agent — отчёты и OpenClaw</title>
+<meta name="theme-color" content="#ebe4d7">
+<style>
+:root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--bad:#8b3a3a;--mono:ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.shell{max-width:900px;margin:0 auto;padding:16px 14px 48px}
+header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+.logo{font-weight:800;letter-spacing:.1em;font-size:11px;text-transform:uppercase}
+.logo b{opacity:.45}
+nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
+h1{font-size:1.25rem;font-weight:650;margin-bottom:6px}
+.lead{color:var(--muted);font-size:13px;margin-bottom:12px;max-width:62ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px}
+.panel h2{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.truth{border-left:3px solid var(--ok);padding:8px 12px;background:var(--bg2);font-size:13px;margin-bottom:12px}
+.badbox{border-left:3px solid var(--bad);padding:8px 12px;background:var(--bg2);font-size:13px;margin-bottom:12px}
+input,textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--line);border-radius:3px;background:#fff;margin:4px 0 8px}
+button{font:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650;margin-right:6px;margin-top:4px}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;max-height:360px;overflow:auto}
+.rpt{border-bottom:1px solid var(--line);padding:8px 0}
+.rpt b{display:block;font-size:13px}
+.rpt .meta{font-size:11px;color:var(--muted);font-family:var(--mono)}
+footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+code{font-family:var(--mono);font-size:12px;background:var(--bg2);padding:1px 4px;border-radius:2px}
+ol{margin:8px 0 8px 18px} li{margin:4px 0}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="logo">AKSI <b>AGENT</b></div>
+  <nav>
+    <a href="/">След</a>
+    <a href="/runtime/">Runtime</a>
+    <a href="/llm/">LLM</a>
+  </nav>
+</header>
+<h1>Агент: отчёты на сайт</h1>
+<p class="lead">Здесь AKSI пишет, что сделал. OpenClaw вы ставите и регистрируете сами — ключи и аккаунт принадлежат вам.</p>
+
+<div class="truth">
+  <b>Что можно:</b> локальные циклы, отчёты на эту страницу, сохранение URL Gateway OpenClaw, который вы сами создали.<br>
+  <b>Чего нет:</b> «обучить модель на всё знание мира» и «агент сам регистрируется на OpenClaw за вас».
+</div>
+
+<div class="panel">
+  <h2>1. OpenClaw — делает человек</h2>
+  <ol>
+    <li>Установка: <code>curl -fsSL https://openclaw.ai/install.sh | bash</code></li>
+    <li>Онбординг: <code>openclaw onboard --install-daemon</code></li>
+    <li>Свой API-ключ модели — только у вас</li>
+    <li>Проверка: <code>openclaw gateway status</code> (часто порт 18789)</li>
+    <li>Документация: <a href="https://docs.openclaw.ai/start/getting-started" rel="noopener">docs.openclaw.ai</a></li>
+  </ol>
+  <p style="font-size:13px;color:var(--muted)">Облачные зеркала (openclaw.ru и т.п.) — регистрация и оплата на их сайте вручную.</p>
+</div>
+
+<div class="panel">
+  <h2>2. Связь Gateway (после вашей установки)</h2>
+  <label>Gateway URL</label>
+  <input id="gw" placeholder="http://127.0.0.1:18789" autocomplete="off">
+  <label>Gateway token (не публикуйте)</label>
+  <input id="tok" type="password" placeholder="только локально в localStorage" autocomplete="off">
+  <button type="button" id="saveCfg">Сохранить локально</button>
+  <button type="button" class="ghost" id="ping">Проверить health</button>
+  <div class="pre" id="pingOut">—</div>
+</div>
+
+<div class="panel">
+  <h2>3. Цикл + отчёт на сайт</h2>
+  <input id="goal" placeholder="Цель, например: Самопроверка агента AKSI">
+  <button type="button" id="run">Запустить и записать отчёт</button>
+  <button type="button" class="ghost" id="export">Export JSON</button>
+  <button type="button" class="ghost" id="clear">Очистить отчёты</button>
+</div>
+
+<div class="panel">
+  <h2>Журнал отчётов</h2>
+  <div id="list">Пока пусто.</div>
+</div>
+
+<div class="badbox">
+  Секреты не коммитьте в GitHub и не присылайте в чат. Отчёты — в localStorage браузера.
+</div>
+
+<footer>aksilove@internet.ru · agent bridge v1</footer>
+</div>
+<script src="/aksi-agent-bridge.js?v=1"></script>
+<script src="/runtime/core/engine.js?v=13"></script>
+<script src="/runtime/core/engine-upgrade.js?v=3"></script>
+<script>
+(function(){
+  var A = window.AKSI_AGENT;
+  if(!A){ document.getElementById('list').textContent = 'bridge missing'; return; }
+  function esc(s){ return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}); }
+  function render(){
+    var rows = A.listReports(30);
+    var el = document.getElementById('list');
+    if(!rows.length){ el.textContent = 'Пока пусто.'; return; }
+    el.innerHTML = rows.map(function(r){
+      var steps = (r.steps||[]).map(function(s){ return '  - ' + (s.text||s); }).join('\n');
+      return '<div class="rpt"><b>'+esc(r.title)+'</b><div class="meta">'+esc(r.at)+' · '+esc(r.status)+' · '+esc(r.source)+'</div><div>'+esc(r.summary)+'</div><pre style="margin-top:6px;font-size:11px;white-space:pre-wrap">'+esc(steps)+'</pre></div>';
+    }).join('');
+  }
+  var cfg = A.getCfg();
+  if(cfg.gatewayUrl) document.getElementById('gw').value = cfg.gatewayUrl;
+  if(cfg.gatewayToken) document.getElementById('tok').value = cfg.gatewayToken;
+  document.getElementById('saveCfg').onclick = function(){
+    A.setCfg({ gatewayUrl: document.getElementById('gw').value.trim(), gatewayToken: document.getElementById('tok').value.trim() });
+    document.getElementById('pingOut').textContent = 'Сохранено локально.';
+  };
+  document.getElementById('ping').onclick = function(){
+    document.getElementById('pingOut').textContent = '…';
+    A.openclawStatus().then(function(r){
+      document.getElementById('pingOut').textContent = JSON.stringify(r, null, 2);
+      A.writeReport({ title: 'OpenClaw health check', status: r.ok ? 'ok' : 'fail', summary: r.ok ? 'Gateway ответил' : (r.reason || r.error || 'fail'), steps: [{ text: JSON.stringify(r) }], openclaw: true, source: 'openclaw-ping' });
+      render();
+    });
+  };
+  document.getElementById('run').onclick = function(){
+    var g = document.getElementById('goal').value.trim() || 'Самопроверка агента AKSI';
+    document.getElementById('run').disabled = true;
+    A.runLocalCycle(g).then(function(){ document.getElementById('run').disabled = false; render(); }).catch(function(e){
+      document.getElementById('run').disabled = false;
+      A.writeReport({ title: 'Cycle error', status: 'fail', summary: String(e.message||e) });
+      render();
+    });
+  };
+  document.getElementById('export').onclick = function(){
+    var blob = new Blob([JSON.stringify(A.listReports(100), null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'aksi-agent-reports.json';
+    a.click();
+  };
+  document.getElementById('clear').onclick = function(){
+    if(confirm('Очистить локальные отчёты?')){ A.clearReports(); render(); }
+  };
+  window.addEventListener('aksi-agent-report', render);
+  render();
+})();
+</script>
+</body>
+</html>
