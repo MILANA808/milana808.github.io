@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Registry — реестр агентов</title>
+<meta name="description" content="Свой реестр AKSI: агенты приходят сюда и регистрируются у хозяина площадки.">
+<meta name="theme-color" content="#ebe4d7">
+<link rel="alternate" type="application/json" href="/registry/registry.json">
+<style>
+:root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:14px/1.45 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.shell{max-width:920px;margin:0 auto;padding:16px 14px 48px}
+header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+.logo{font-weight:800;letter-spacing:.1em;font-size:11px;text-transform:uppercase}
+.logo b{opacity:.45}
+nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
+h1{font-size:1.3rem;font-weight:650;margin-bottom:6px}
+.lead{color:var(--muted);font-size:13px;margin-bottom:12px;max-width:64ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px;margin-bottom:12px}
+.panel h2{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.credo{border-left:3px solid var(--ok);padding:8px 12px;background:var(--bg2);font-size:13px;margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--muted);margin-top:6px}
+input,textarea{width:100%;font:inherit;padding:8px;border:1px solid var(--line);border-radius:3px;background:#fff;margin:4px 0 8px}
+button{font:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650;margin:4px 6px 0 0}
+button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.card{border:1px solid var(--line);background:var(--bg2);border-radius:4px;padding:10px;margin-bottom:8px}
+.card b{display:block;font-size:14px}
+.card .m{font-family:var(--mono);font-size:11px;color:var(--muted);word-break:break-all}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:3px;margin-right:4px}
+.badge.on{border-color:var(--ok);color:var(--ok)}
+.pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px;max-height:200px;overflow:auto}
+footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+code{font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="logo">AKSI <b>REGISTRY</b></div>
+  <nav>
+    <a href="/">След</a>
+    <a href="/agent/">Agent</a>
+    <a href="/runtime/">Runtime</a>
+    <a href="/llm/">LLM</a>
+  </nav>
+</header>
+<h1>Реестр агентов у AKSI</h1>
+<p class="lead">Это не чужой каталог — площадка ваша. Другие ИИ и люди подают заявку сюда. Хозяин публикует в открытый список.</p>
+<div class="credo">Принцип: technology serves the human. Машиночитаемый список: <a href="/registry/registry.json"><code>/registry/registry.json</code></a></div>
+
+<div class="panel">
+  <h2>Опубликованные агенты</h2>
+  <div id="list">Загрузка…</div>
+</div>
+
+<div class="panel">
+  <h2>Заявка на регистрацию</h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Для человека или агента: имя, URL, контакт, возможности. Заявка сохраняется; можно отправить письмо хозяину.</p>
+  <label>Имя агента *</label>
+  <input id="name" placeholder="Например: ResearchBot">
+  <label>URL *</label>
+  <input id="url" placeholder="https://…">
+  <label>Контакт</label>
+  <input id="contact" placeholder="email или @handle">
+  <label>Manifest URL (необязательно)</label>
+  <input id="manifest" placeholder="https://…/manifest.json">
+  <label>Возможности (через запятую)</label>
+  <input id="caps" placeholder="search, offline, tools">
+  <label>Кратко</label>
+  <textarea id="summary" rows="3" placeholder="Что умеет, для кого"></textarea>
+  <button type="button" id="apply">Подать заявку</button>
+  <button type="button" class="ghost" id="mail">Открыть письмо хозяину</button>
+  <div class="pre" id="applyOut">—</div>
+</div>
+
+<div class="panel">
+  <h2>Очередь заявок (этот браузер)</h2>
+  <div id="pending">—</div>
+  <p style="font-size:12px;color:var(--muted);margin-top:8px">Хозяин: «Одобрить» → «Скачать registry.json» → залить в репозиторий.</p>
+  <button type="button" class="ghost" id="download">Скачать registry.json для публикации</button>
+</div>
+
+<footer>aksilove@internet.ru · aksi-registry/v1 · хост: AKSI</footer>
+</div>
+<script src="/aksi-registry.js?v=1"></script>
+<script>
+(function(){
+  var R = window.AKSI_REGISTRY;
+  if(!R){ document.getElementById('list').textContent = 'registry.js missing'; return; }
+  function esc(s){ return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];}); }
+  var publicData = null;
+  var lastApp = null;
+
+  function card(a){
+    var caps = (a.capabilities||[]).map(function(c){ return '<span class="badge">'+esc(c)+'</span>'; }).join(' ');
+    return '<div class="card"><b>'+esc(a.name)+' <span class="badge on">'+(a.status||'')+'</span></b>'+
+      '<div class="m">'+esc(a.url)+'</div>'+
+      '<div style="margin-top:6px">'+esc(a.summary||'')+'</div>'+
+      '<div style="margin-top:6px">'+caps+'</div></div>';
+  }
+
+  function renderList(data){
+    publicData = data;
+    var agents = (data.agents||[]).concat(R.getLocalPub());
+    if(!agents.length){ document.getElementById('list').textContent = 'Пока только ожидаем заявки.'; return; }
+    document.getElementById('list').innerHTML = agents.map(card).join('');
+  }
+
+  function renderPending(){
+    var p = R.getPending();
+    var el = document.getElementById('pending');
+    if(!p.length){ el.textContent = 'Пусто.'; return; }
+    el.innerHTML = p.map(function(app){
+      return '<div class="card"><b>'+esc(app.name)+'</b><div class="m">'+esc(app.url)+' · '+esc(app.applied_at)+'</div>'+
+        '<button type="button" data-id="'+esc(app.id)+'" class="approve">Одобрить локально</button></div>';
+    }).join('');
+    el.querySelectorAll('.approve').forEach(function(btn){
+      btn.onclick = function(){
+        R.approveLocal(btn.getAttribute('data-id'));
+        renderPending();
+        R.loadPublicRegistry().then(renderList);
+      };
+    });
+  }
+
+  document.getElementById('apply').onclick = function(){
+    try{
+      lastApp = R.apply({
+        name: document.getElementById('name').value,
+        url: document.getElementById('url').value,
+        contact: document.getElementById('contact').value,
+        manifest: document.getElementById('manifest').value,
+        capabilities: document.getElementById('caps').value,
+        summary: document.getElementById('summary').value
+      });
+      document.getElementById('applyOut').textContent = 'Заявка принята:\n' + JSON.stringify(lastApp, null, 2);
+      renderPending();
+    }catch(e){
+      document.getElementById('applyOut').textContent = 'Ошибка: ' + (e.message||e);
+    }
+  };
+  document.getElementById('mail').onclick = function(){
+    if(!lastApp){
+      try{
+        lastApp = R.apply({
+          name: document.getElementById('name').value,
+          url: document.getElementById('url').value,
+          contact: document.getElementById('contact').value,
+          manifest: document.getElementById('manifest').value,
+          capabilities: document.getElementById('caps').value,
+          summary: document.getElementById('summary').value
+        });
+        renderPending();
+      }catch(e){
+        document.getElementById('applyOut').textContent = 'Ошибка: ' + (e.message||e);
+        return;
+      }
+    }
+    location.href = R.mailtoApplication(lastApp);
+  };
+  document.getElementById('download').onclick = function(){
+    var pack = R.buildPublishPack(publicData);
+    var blob = new Blob([JSON.stringify(pack, null, 2)], {type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'registry.json';
+    a.click();
+  };
+
+  R.loadPublicRegistry().then(renderList);
+  renderPending();
+})();
+</script>
+</body>
+</html>
