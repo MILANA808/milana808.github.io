@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI DIP — Decision Integrity Platform</title>
+<meta name="description" content="Готовый продукт: каждый ответ ИИ с квитанцией FACT/HYPOTHESIS и gate ALLOW/BLOCK. Для аудита, risk и CISO.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://milana808.github.io/dip/">
+<meta property="og:title" content="AKSI DIP — Decision Integrity Platform">
+<meta property="og:description" content="Квитанция на каждое решение ИИ. ALLOW/BLOCK. Экспорт для аудита.">
+<meta property="og:url" content="https://milana808.github.io/dip/">
+<meta name="theme-color" content="#1a1814">
+<style>
+:root{
+  --bg:#f4f0e8;--ink:#141210;--muted:#5c574f;--line:#d4cbba;--card:#fffcf7;
+  --acc:#1a1814;--ok:#1f6b45;--bad:#9b2c2c;--line2:#cfc4b0;
+  --sans:system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.5 var(--sans);background:var(--bg);color:var(--ink)}
+a{color:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:0 18px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:800;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
+.brand span{opacity:.45;font-weight:600}
+.top nav a{font-size:13px;text-decoration:none;margin-left:14px;color:var(--muted)}
+.hero{padding:48px 0 28px}
+.hero h1{font-size:clamp(1.75rem,4vw,2.35rem);line-height:1.15;font-weight:700;letter-spacing:-.03em;max-width:16ch;margin-bottom:14px}
+.hero .lead{font-size:1.05rem;color:var(--muted);max-width:42ch;margin-bottom:22px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{display:inline-block;padding:12px 18px;border-radius:4px;font-weight:650;font-size:14px;text-decoration:none;border:1px solid var(--acc);cursor:pointer;font-family:inherit}
+.btn.primary{background:var(--acc);color:var(--bg)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:28px 0}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px}
+.card h3{font-size:14px;margin-bottom:8px}
+.card p{font-size:14px;color:var(--muted)}
+.section{padding:10px 0 28px}
+.section h2{font-size:1.15rem;margin-bottom:12px;letter-spacing:-.02em}
+.pill{display:inline-block;font-size:11px;font-family:var(--mono);padding:3px 8px;border-radius:3px;border:1px solid var(--line);margin-right:6px;margin-bottom:6px}
+.demo{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:16px;margin:12px 0 24px}
+.demo-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.gate{font-family:var(--mono);font-weight:700;font-size:13px;padding:4px 10px;border-radius:3px}
+.gate.ALLOW{background:#d5ebe0;color:var(--ok)}
+.gate.BLOCK{background:#f3d6d6;color:var(--bad)}
+.stmt{padding:8px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.tag{font-family:var(--mono);font-size:11px;font-weight:700;margin-right:6px}
+.tag.FACT{color:var(--ok)}.tag.CLAIM{color:#2a4a6b}.tag.HYPOTHESIS{color:#6b5a28}.tag.UNGROUNDED{color:var(--bad)}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+@media(max-width:720px){.price-grid{grid-template-columns:1fr}}
+.price-card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:18px;display:flex;flex-direction:column}
+.price-card.feat{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.price-card h3{font-size:15px;margin-bottom:4px}
+.price-card .amt{font-size:1.35rem;font-weight:700;margin:8px 0}
+.price-card ul{list-style:none;font-size:13px;color:var(--muted);flex:1}
+.price-card li{margin:6px 0;padding-left:12px;position:relative}
+.price-card li:before{content:"–";position:absolute;left:0}
+.price-card .btn{margin-top:14px;text-align:center}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:12px 14px;margin-bottom:8px}
+.faq summary{cursor:pointer;font-weight:600;font-size:14px}
+.faq p{margin-top:8px;font-size:14px;color:var(--muted)}
+footer{border-top:1px solid var(--line);padding:20px 0 40px;font-size:13px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">AKSI <span>DIP</span></div>
+    <nav>
+      <a href="#demo">Демо</a>
+      <a href="#price">Цены</a>
+      <a href="#buy">Купить</a>
+    </nav>
+  </div>
+
+  <section class="hero">
+    <h1>Квитанция на каждое решение ИИ</h1>
+    <p class="lead">
+      Готовый продукт для корпораций: ответ модели без доказательной квитанции
+      не проходит gate. Аудит видит факт, гипотезу и дыру — до того, как ответ уйдёт в отчёт.
+    </p>
+    <div class="cta">
+      <a class="btn primary" href="#demo">Смотреть ALLOW / BLOCK</a>
+      <a class="btn ghost" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20пилот">Запросить пилот</a>
+    </div>
+    <p class="note">Не чат-бот. Слой Decision Integrity для risk, CISO и внутреннего аудита.</p>
+  </section>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Проблема</h3>
+      <p>Сотрудники уже используют ИИ. Ответы попадают в письма, справки и решения. Регулятор и суд спросят: на чём основано. Без следа — вы платите за чужую уверенность модели.</p>
+    </div>
+    <div class="card">
+      <h3>Продукт</h3>
+      <p><b>AKSI DIP</b> — Decision Integrity Platform. Каждый ответ получает машиночитаемую квитанцию: evidence, класс утверждения, gate ALLOW или BLOCK, hash-цепочку для журнала.</p>
+    </div>
+  </div>
+
+  <section class="section" id="demo">
+    <h2>Живое демо продукта</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:8px">Нажмите BLOCK — так система останавливает «уверенный» ответ без источников.</p>
+    <div class="demo">
+      <div class="demo-bar">
+        <button type="button" class="btn primary" id="btnAllow">Сценарий ALLOW</button>
+        <button type="button" class="btn ghost" id="btnBlock">Сценарий BLOCK</button>
+        <button type="button" class="btn ghost" id="btnDl">Скачать квитанцию JSON</button>
+      </div>
+      <div id="outMeta" class="mono" style="margin-bottom:10px">—</div>
+      <div id="outStmts"></div>
+    </div>
+    <div>
+      <span class="pill">FACT</span>
+      <span class="pill">HYPOTHESIS</span>
+      <span class="pill">CLAIM</span>
+      <span class="pill">UNGROUNDED → BLOCK</span>
+      <span class="pill">export JSON / audit</span>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Что входит в поставку</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>1. Decision Receipt Engine</h3>
+        <p>Классификация утверждений, policy strict/companion/lab, gate, proof-hash, экспорт JSON и audit-текста.</p>
+      </div>
+      <div class="card">
+        <h3>2. Встраивание</h3>
+        <p>Обёртка над вашим агентом / API чата: ответ + квитанция. Без замены вашей LLM.</p>
+      </div>
+      <div class="card">
+        <h3>3. Журнал для аудита</h3>
+        <p>Архив решений, фильтр UNGROUNDED, выгрузка под внутреннюю проверку.</p>
+      </div>
+      <div class="card">
+        <h3>4. Closed-loop опция</h3>
+        <p>Работа в контуре без обязательной отправки промптов во внешнее облако (по сценарию внедрения).</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="price">
+    <h2>Цены (публичные ориентиры)</h2>
+    <div class="price-grid">
+      <div class="price-card">
+        <h3>Pilot</h3>
+        <div class="amt">от 400 000 ₽</div>
+        <ul>
+          <li>60 дней</li>
+          <li>1 контур / отдел</li>
+          <li>Демо на ваших сценариях</li>
+          <li>10 квитанций-эталонов</li>
+        </ul>
+        <a class="btn ghost" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20Pilot">Запросить Pilot</a>
+      </div>
+      <div class="price-card feat">
+        <h3>Business</h3>
+        <div class="amt">3–15 млн ₽/год</div>
+        <ul>
+          <li>Лицензия на контур</li>
+          <li>Политики gate</li>
+          <li>Журнал + экспорт</li>
+          <li>Онбординг команды</li>
+        </ul>
+        <a class="btn primary" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20Business">Запросить Business</a>
+      </div>
+      <div class="price-card">
+        <h3>Enterprise</h3>
+        <div class="amt">project</div>
+        <ul>
+          <li>On-prem / air-gap</li>
+          <li>Интеграция с вашим стеком</li>
+          <li>Крипто-подпись (enterprise)</li>
+          <li>SLA по договору</li>
+        </ul>
+        <a class="btn ghost" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20Enterprise">Запросить Enterprise</a>
+      </div>
+    </div>
+    <p class="note">Окончательная сумма — после разбора контура. Публичные цифры — ориентир; оферта = счёт.</p>
+  </section>
+
+  <section class="section faq" id="buy">
+    <h2>Как купить</h2>
+    <details open>
+      <summary>1. Откройте демо BLOCK</summary>
+      <p>Покажите CISO или аудитору: система не пропускает ответ без evidence.</p>
+    </details>
+    <details>
+      <summary>2. Напишите на aksilove@internet.ru</summary>
+      <p>Тема: «AKSI DIP пилот». Отрасль, есть ли уже ИИ, нужен ли closed-loop.</p>
+    </details>
+    <details>
+      <summary>3. Пилот → счёт → лицензия</summary>
+      <p>5–10 типовых запросов и правила gate, затем договор.</p>
+    </details>
+    <p style="margin-top:14px">
+      <a class="btn primary" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20—%20хотим%20пилот&body=Организация%3A%0AКонтур%3A%0AЕсть%20ли%20уже%20ИИ%3A%0AClosed-loop%3A">Написать и запросить пилот</a>
+    </p>
+  </section>
+
+  <footer>
+    <div><b>AKSI DIP</b> · Decision Integrity Platform · milana808.github.io/dip/</div>
+    <div style="margin-top:6px">aksilove@internet.ru · Не AGI · Технология служит проверке решений человека</div>
+  </footer>
+</div>
+
+<script src="/aksi-decision-receipt.js?v=1"></script>
+<script>
+(function(){
+  var R = window.AKSI_RECEIPT;
+  var cur = null;
+  function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
+  function render(rec){
+    cur = rec;
+    document.getElementById('outMeta').innerHTML =
+      '<span class="gate '+rec.gate+'">'+rec.gate+'</span> &nbsp; '+esc(rec.id)+
+      ' · policy '+esc(rec.policy)+' · evidence '+rec.metrics.evidence_count+
+      ' · ungrounded '+rec.metrics.ungrounded_count;
+    document.getElementById('outStmts').innerHTML = (rec.statements||[]).map(function(s){
+      return '<div class="stmt"><span class="tag '+s.class+'">'+s.class+'</span>'+esc(s.text)+'</div>';
+    }).join('');
+  }
+  function run(kind){
+    if(!R){ document.getElementById('outMeta').textContent='Модуль квитанции не загрузился'; return; }
+    render(R.demo(kind));
+  }
+  document.getElementById('btnAllow').onclick=function(){run('ok');};
+  document.getElementById('btnBlock').onclick=function(){run('block');};
+  document.getElementById('btnDl').onclick=function(){
+    if(!cur) run('ok');
+    var b=new Blob([JSON.stringify(cur,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(cur&&cur.id||'receipt')+'.json';a.click();
+  };
+  run('ok');
+})();
+</script>
+</body>
+</html>
