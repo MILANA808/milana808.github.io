@@ -3,153 +3,129 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AKSI DIP — слой подотчётности решений ИИ</title>
-<meta name="description" content="Когда модели станут сколь угодно сильными, останется вопрос: на каком основании принят ответ. AKSI DIP — квитанция, gate, след.">
+<title>AKSI DIP — без квитанции ответ не выпускается</title>
+<meta name="description" content="Критическое правило: нет evidence — BLOCK. Нет квитанции — нельзя в отчёт. Decision Integrity.">
 <link rel="canonical" href="https://milana808.github.io/">
-<meta name="theme-color" content="#0c0b09">
+<meta name="theme-color" content="#0a0908">
 <style>
-:root{--bg:#0c0b09;--bg2:#141210;--card:#1a1814;--ink:#f4f0e8;--muted:#9c958c;--line:#2e2a24;--ok:#3d9a6a;--bad:#d45c5c;--warn:#c9a227;--acc:#ece6dc;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.55 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}a{color:var(--acc)}
-.w{max-width:760px;margin:0 auto;padding:22px 16px 56px}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
-.logo{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.logo i{font-style:normal;opacity:.4;font-weight:600}
-.top a{font-size:13px;color:var(--muted);text-decoration:none}
-.eyebrow{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:14px}
-h1{font-size:clamp(1.7rem,4.2vw,2.35rem);line-height:1.12;font-weight:700;letter-spacing:-.035em;margin-bottom:16px;max-width:18ch}
-.lead{color:var(--muted);font-size:1.05rem;max-width:42ch;margin-bottom:14px}
-.thesis{border-left:3px solid var(--acc);padding:10px 0 10px 14px;margin:18px 0 24px;font-size:15px;max-width:48ch}
-.btn{display:inline-block;border:1px solid var(--acc);background:var(--acc);color:var(--bg);font:inherit;font-weight:700;font-size:14px;padding:12px 16px;border-radius:8px;cursor:pointer;text-decoration:none}
-.btn.g{background:transparent;color:var(--ink);border-color:var(--line)}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}@media(max-width:640px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}.card h3{font-size:14px;margin-bottom:8px}.card p{font-size:13px;color:var(--muted)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:20px 0}
-.panel h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+:root{--bg:#0a0908;--bg2:#12100e;--card:#181612;--ink:#f5f1e9;--muted:#9a9288;--line:#2c2822;--ok:#3d9a6a;--bad:#e05555;--acc:#efe9df;--mono:ui-monospace,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.5 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}a{color:var(--acc)}
+.w{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+.logo{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:28px}.logo i{font-style:normal;opacity:.4}
+.rule{background:var(--card);border:1px solid var(--bad);border-radius:12px;padding:16px 18px;margin-bottom:22px}
+.rule b{display:block;font-size:15px;margin-bottom:6px;color:var(--bad)}.rule p{font-size:14px;color:var(--muted)}
+h1{font-size:clamp(1.55rem,4vw,2.1rem);line-height:1.15;font-weight:700;letter-spacing:-.03em;margin-bottom:12px;max-width:18ch}
+.lead{color:var(--muted);max-width:40ch;margin-bottom:20px}
+.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:22px}
+.chain span{border:1px solid var(--line);padding:5px 8px;border-radius:4px;background:var(--bg2)}
+.chain span.x{border-color:var(--bad);color:var(--bad)}.chain span.ok{border-color:var(--ok);color:var(--ok)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.panel h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
-textarea,input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;padding:10px 12px}
-textarea{min-height:84px;resize:vertical}
-.gate{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:5px 10px;border-radius:4px}
-.gate.ALLOW{background:rgba(61,154,106,.2);color:var(--ok);border:1px solid rgba(61,154,106,.45)}
-.gate.BLOCK{background:rgba(212,92,92,.15);color:var(--bad);border:1px solid rgba(212,92,92,.45)}
-.tag{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:6px}
-.tag.FACT{color:var(--ok)}.tag.CLAIM{color:#8ab4f8}.tag.HYPOTHESIS{color:var(--warn)}.tag.UNGROUNDED{color:var(--bad)}
+textarea,input,select{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;padding:10px 12px}
+textarea{min-height:88px;resize:vertical}
+.btn{border:1px solid var(--acc);background:var(--acc);color:var(--bg);font:inherit;font-weight:700;font-size:14px;padding:12px 16px;border-radius:8px;cursor:pointer}
+.btn:disabled{opacity:.35;cursor:not-allowed}.btn.g{background:transparent;color:var(--ink);border-color:var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.gate{font-family:var(--mono);font-weight:700;font-size:13px;padding:6px 12px;border-radius:4px}
+.gate.ALLOW{background:rgba(61,154,106,.2);color:var(--ok)}.gate.BLOCK{background:rgba(224,85,85,.15);color:var(--bad)}
+.tag{font-family:var(--mono);font-size:10px;font-weight:700;margin-right:6px}
+.tag.UNGROUNDED{color:var(--bad)}.tag.FACT,.tag.CLAIM{color:var(--ok)}.tag.HYPOTHESIS{color:#c9a227}
 .stmt{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
 .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
-.prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}@media(max-width:640px){.prices{grid-template-columns:1fr}}
-.price{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg2)}.price.hi{border-color:var(--acc)}
-.price h3{font-size:14px;margin-bottom:6px}.price .amt{font-weight:700;font-size:1.1rem;margin-bottom:8px}
-.price ul{list-style:none;font-size:12px;color:var(--muted)}.price li{margin:4px 0}
-.era{font-size:13px;color:var(--muted);margin:8px 0 0;max-width:52ch}
-footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.blockbox{margin-top:12px;padding:12px;border-radius:8px;border:1px dashed var(--bad);color:var(--bad);font-size:13px;display:none}.blockbox.on{display:block}
+.okbox{margin-top:12px;padding:12px;border-radius:8px;border:1px solid rgba(61,154,106,.4);color:var(--ok);font-size:13px;display:none}.okbox.on{display:block}
+.why{font-size:13px;color:var(--muted);margin-top:18px;line-height:1.5}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}footer a{color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="top">
-    <div class="logo">AKSI <i>DIP</i></div>
-    <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
+  <div class="logo">AKSI <i>DIP</i></div>
+  <div class="rule">
+    <b>Критическое правило контура</b>
+    <p>Ответ без квитанции <em>не существует</em> как корпоративный артефакт: его нельзя вложить в отчёт, письмо, тикет или API. UNGROUNDED → BLOCK → выпуск запрещён.</p>
   </div>
-  <div class="eyebrow">DECISION INTEGRITY PLATFORM</div>
-  <h1>Слой, который нужен и после AGI</h1>
-  <p class="lead">Модели будут сильнее. Вопрос не исчезнет: <em>на каком основании этот ответ допущен в решение?</em></p>
-  <div class="thesis"><strong>AKSI DIP не соревнуется с сингулярностью.</strong> Он ставит между любой моделью и человеком обязательную квитанцию: факт, гипотеза или пустота — и gate ALLOW / BLOCK.</div>
-  <div class="grid">
-    <div class="card"><h3>Сегодня</h3><p>Ответы ИИ уже в справках и письмах. Без следа — риск для аудита, суда, репутации.</p></div>
-    <div class="card"><h3>При любом будущем AGI</h3><p>Чем сильнее генерация, тем дороже ошибка доверия. Нужен не «ещё умнее чат», а правило допуска ответа.</p></div>
-    <div class="card"><h3>Что продаём</h3><p>Не личность модели. Слой Decision Integrity: evidence, класс утверждения, gate, квитанция.</p></div>
-    <div class="card"><h3>Для кого</h3><p>Risk, CISO, аудит, юристы, closed-loop — везде, где ответ должен быть объясним человеку.</p></div>
-  </div>
-  <div class="row">
-    <button type="button" class="btn" id="demoAllow">Демо ALLOW</button>
-    <button type="button" class="btn g" id="demoBlock">Демо BLOCK</button>
+  <h1>Без допуска нет решения</h1>
+  <p class="lead">Не «проверьте источники». Жёсткий gate: нет опоры — нет выхода из системы.</p>
+  <div class="chain">
+    <span>ответ ИИ</span>→<span>квитанция</span>→<span class="ok">ALLOW</span>→<span>выпуск</span>
+    &nbsp;|&nbsp;
+    <span>без опоры</span>→<span class="x">BLOCK</span>→<span class="x">выпуск закрыт</span>
   </div>
   <div class="panel">
-    <h2>Продукт в деле</h2>
-    <label>Цель / вопрос</label>
-    <input id="goal" placeholder="Сумма обязательства по договору">
-    <label>Ответ (любая модель, агент, человек)</label>
-    <textarea id="answer" placeholder="Текст, который хотят допустить в отчёт…"></textarea>
-    <label>Опора / источник (пусто = BLOCK)</label>
-    <input id="src" placeholder="Договор, п. 4.2 / акт / реестр…">
+    <h2>Контур выпуска</h2>
+    <label>Политика</label>
+    <select id="policy">
+      <option value="strict" selected>strict — UNGROUNDED = BLOCK (критический контур)</option>
+      <option value="companion">companion — мягче</option>
+      <option value="lab">lab — всё ALLOW (песочница)</option>
+    </select>
+    <label>Цель решения</label>
+    <input id="goal" placeholder="Что хотят утвердить / отправить">
+    <label>Текст ответа</label>
+    <textarea id="answer" placeholder="Текст, который пытаются выпустить…"></textarea>
+    <label>Опора (документ, пункт, URL)</label>
+    <input id="src" placeholder="Пусто = BLOCK в strict">
     <div class="row">
-      <button type="button" class="btn" id="run">Выдать квитанцию</button>
-      <button type="button" class="btn g" id="dl" disabled>Скачать JSON</button>
+      <button type="button" class="btn" id="run">Проверить допуск</button>
+      <button type="button" class="btn g" id="release" disabled>Выпустить (скачать квитанцию)</button>
     </div>
     <div id="out" style="margin-top:14px"></div>
-    <p class="era">Один контракт для GPT, локальной LLM и будущего AGI-агента: сначала квитанция — потом действие.</p>
+    <div class="blockbox" id="blocked">ВЫПУСК ЗАПРЕЩЁН. В strict BLOCK нельзя обойти кнопкой «всё равно отправить».</div>
+    <div class="okbox" id="allowed">ДОПУСК РАЗРЕШЁН. Квитанция + ответ = корпоративный артефакт.</div>
   </div>
-  <div class="panel">
-    <h2>Масштаб поставки</h2>
-    <div class="prices">
-      <div class="price"><h3>Pilot</h3><div class="amt">от 400 000 ₽</div><ul><li>60 дней</li><li>5–10 сценариев</li><li>policy strict</li></ul></div>
-      <div class="price hi"><h3>Business</h3><div class="amt">3–15 млн ₽/год</div><ul><li>контур организации</li><li>журнал квитанций</li><li>встройка в агентов</li></ul></div>
-      <div class="price"><h3>Infrastructure</h3><div class="amt">project</div><ul><li>on-prem / air-gap</li><li>стандарт receipt v1</li><li>SLA и интеграции</li></ul></div>
-    </div>
-    <div class="row" style="margin-top:14px">
-      <a class="btn" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20—%20слой%20на%20эпоху%20AGI">Запросить внедрение</a>
-    </div>
-  </div>
-  <footer>
-    <strong style="color:var(--ink)">AKSI DIP</strong> · Decision Integrity Platform<br>
-    Чем умнее машины, тем нужнее проверяемый допуск их выводов.<br>
-    aksilove@internet.ru
-  </footer>
+  <p class="why"><b style="color:var(--ink)">Зачем критично:</b> когда обход gate = нарушение политики (как файл без грифа). Правило: <b style="color:var(--ink)">нет ALLOW → нет легального выхода.</b></p>
+  <footer>AKSI DIP · no_receipt_no_release · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></footer>
 </div>
 <script>
 (function(){
   function fnv(s){var h=0x811c9dc5;s=String(s||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193);}return('00000000'+(h>>>0).toString(16)).slice(-8);}
   function uid(){return 'dr_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);}
   function build(opt){
-    opt=opt||{};
-    var ev=(opt.evidence||[]).map(function(e,i){return{id:e.id||('ev_'+(i+1)),source:e.source||'source',url:e.url||null,snippet:String(e.snippet||'').slice(0,400)};});
+    var policy=(opt.policy||'strict').toLowerCase();
+    var ev=(opt.evidence||[]).map(function(e,i){return{id:e.id||('ev_'+(i+1)),source:e.source||'source',snippet:String(e.snippet||'').slice(0,400)};});
     var ids=ev.map(function(e){return e.id;});
-    var stmts=(opt.statements||[]).map(function(s){
-      var based=s.based_on||[];if(!Array.isArray(based))based=based?[based]:[];
-      var has=based.some(function(id){return ids.indexOf(id)>=0;});
-      var cls=s.class||(!has||!based.length?'UNGROUNDED':(/^возможно|вероятно|кажется/i.test(s.text)?'HYPOTHESIS':'CLAIM'));
-      if(cls!=='UNGROUNDED'&&!based.length)cls='UNGROUNDED';
-      return{text:String(s.text||'').slice(0,2000),class:cls,based_on:based};
-    });
-    if(!stmts.length&&opt.answer){
-      stmts=[{text:String(opt.answer).slice(0,2000),class:ev.length?'CLAIM':'UNGROUNDED',based_on:ids.slice(0,3)}];
-    }
-    var ug=stmts.filter(function(s){return s.class==='UNGROUNDED';}).length;
-    var allow=ug===0&&stmts.length>0;
-    var body={schema:'aksi-decision-receipt/v1',version:'1.2.0',id:uid(),created_at:new Date().toISOString(),goal:String(opt.goal||'').slice(0,400),policy:opt.policy||'strict',gate:allow?'ALLOW':'BLOCK',evidence:ev,statements:stmts,metrics:{evidence_count:ev.length,ungrounded_count:ug,statement_count:stmts.length},principle:'technology_serves_human',era_note:'Model-agnostic integrity layer — remains relevant under stronger models including future AGI systems.'};
-    var prev='GENESIS';
-    var payload=JSON.stringify({id:body.id,gate:body.gate,statements:body.statements,evidence:body.evidence,prev:prev});
-    body.proof={alg:'fnv1a-32',content_hash:fnv(payload),chain_hash:fnv(prev+fnv(payload))};
+    var text=String(opt.answer||'').slice(0,2000);
+    var based=ids.slice(0,3);
+    var has=based.length>0;
+    var cls=!text?'UNGROUNDED':(!has?'UNGROUNDED':(/^возможно|вероятно|кажется/i.test(text)?'HYPOTHESIS':'CLAIM'));
+    var stmts=[{text:text,class:cls,based_on:based}];
+    var ug=cls==='UNGROUNDED'?1:0;
+    var allow=policy==='lab'?true:policy==='companion'?(ug===0||ev.length>0):(ug===0&&!!text);
+    var body={schema:'aksi-decision-receipt/v1',version:'1.3.0',id:uid(),created_at:new Date().toISOString(),goal:String(opt.goal||'').slice(0,400),policy:policy,gate:allow?'ALLOW':'BLOCK',critical:policy==='strict',evidence:ev,statements:stmts,metrics:{ungrounded_count:ug,evidence_count:ev.length},release:allow?'PERMITTED':'FORBIDDEN',principle:'no_receipt_no_release'};
+    var payload=JSON.stringify({id:body.id,gate:body.gate,release:body.release,statements:body.statements,evidence:body.evidence});
+    body.proof={alg:'fnv1a-32',chain_hash:fnv('GENESIS'+fnv(payload))};
     return body;
   }
   function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
   var cur=null;
   function paint(rec){
-    cur=rec;document.getElementById('dl').disabled=!rec;
-    var html='<span class="gate '+rec.gate+'">'+rec.gate+'</span>';
-    html+='<div class="meta">'+esc(rec.id)+' · evidence '+rec.metrics.evidence_count+' · ungrounded '+rec.metrics.ungrounded_count+' · '+esc(rec.proof.chain_hash)+'</div>';
+    cur=rec;
+    document.getElementById('release').disabled=rec.gate!=='ALLOW';
+    document.getElementById('blocked').className='blockbox'+(rec.gate==='BLOCK'?' on':'');
+    document.getElementById('allowed').className='okbox'+(rec.gate==='ALLOW'?' on':'');
+    var html='<span class="gate '+rec.gate+'">'+rec.gate+' · '+rec.release+'</span>';
+    html+='<div class="meta">'+esc(rec.id)+' · policy '+esc(rec.policy)+' · '+esc(rec.proof.chain_hash)+'</div>';
     html+=rec.statements.map(function(s){return '<div class="stmt"><span class="tag '+s.class+'">'+s.class+'</span>'+esc(s.text)+'</div>';}).join('');
     document.getElementById('out').innerHTML=html;
   }
-  document.getElementById('demoAllow').onclick=function(){
-    paint(build({goal:'Допустить вывод в корпоративный отчёт',evidence:[{id:'ev_1',source:'Политика DIP',snippet:'Без evidence — BLOCK'}],statements:[{text:'Любая модель, включая будущие AGI-агенты, может быть обёрнута в Decision Receipt.',class:'CLAIM',based_on:['ev_1']},{text:'Gate BLOCK означает: ответ не допущен в решение без опоры.',class:'FACT',based_on:['ev_1']}]}));
-  };
-  document.getElementById('demoBlock').onclick=function(){
-    paint(build({goal:'Утвердить цифру без первички',answer:'Обязательство составляет ровно 2.4 млн без документов',evidence:[]}));
-  };
   document.getElementById('run').onclick=function(){
-    var goal=document.getElementById('goal').value.trim();
     var answer=document.getElementById('answer').value.trim();
+    if(!answer){document.getElementById('out').innerHTML='<div class="meta">Нет текста</div>';document.getElementById('release').disabled=true;return;}
     var src=document.getElementById('src').value.trim();
-    if(!answer){document.getElementById('out').innerHTML='<div class="meta">Введите ответ</div>';return;}
-    paint(build({goal:goal,answer:answer,evidence:src?[{id:'ev_1',source:src,snippet:src}]:[]}));
+    paint(build({goal:document.getElementById('goal').value.trim(),answer:answer,policy:document.getElementById('policy').value,evidence:src?[{id:'ev_1',source:src,snippet:src}]:[]}));
   };
-  document.getElementById('dl').onclick=function(){
-    if(!cur)return;
+  document.getElementById('release').onclick=function(){
+    if(!cur||cur.gate!=='ALLOW')return;
+    var pack={product:'AKSI-DIP',rule:'no_receipt_no_release',receipt:cur,released_at:new Date().toISOString()};
     var a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(cur,null,2)],{type:'application/json'}));
-    a.download=cur.id+'.json';a.click();
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}));
+    a.download='release-'+cur.id+'.json';a.click();
   };
-  document.getElementById('demoBlock').click();
+  document.getElementById('answer').value='Обязательство 2.4 млн утверждено';
+  document.getElementById('goal').value='Выпуск цифры в отчёт';
+  document.getElementById('run').click();
 })();
 </script>
 </body>
