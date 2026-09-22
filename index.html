@@ -3,129 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AKSI DIP — без квитанции ответ не выпускается</title>
-<meta name="description" content="Критическое правило: нет evidence — BLOCK. Нет квитанции — нельзя в отчёт. Decision Integrity.">
+<title>АКСИ — offline-агент на вашем устройстве</title>
+<meta name="description" content="АКСИ: локальные ответы, память «запомни:». Без обязательного облака. Не AGI.">
 <link rel="canonical" href="https://milana808.github.io/">
-<meta name="theme-color" content="#0a0908">
+<meta name="theme-color" content="#11100e">
 <style>
-:root{--bg:#0a0908;--bg2:#12100e;--card:#181612;--ink:#f5f1e9;--muted:#9a9288;--line:#2c2822;--ok:#3d9a6a;--bad:#e05555;--acc:#efe9df;--mono:ui-monospace,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.5 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}a{color:var(--acc)}
-.w{max-width:720px;margin:0 auto;padding:20px 16px 48px}
-.logo{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:28px}.logo i{font-style:normal;opacity:.4}
-.rule{background:var(--card);border:1px solid var(--bad);border-radius:12px;padding:16px 18px;margin-bottom:22px}
-.rule b{display:block;font-size:15px;margin-bottom:6px;color:var(--bad)}.rule p{font-size:14px;color:var(--muted)}
-h1{font-size:clamp(1.55rem,4vw,2.1rem);line-height:1.15;font-weight:700;letter-spacing:-.03em;margin-bottom:12px;max-width:18ch}
-.lead{color:var(--muted);max-width:40ch;margin-bottom:20px}
-.chain{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:22px}
-.chain span{border:1px solid var(--line);padding:5px 8px;border-radius:4px;background:var(--bg2)}
-.chain span.x{border-color:var(--bad);color:var(--bad)}.chain span.ok{border-color:var(--ok);color:var(--ok)}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
-.panel h2{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
-label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
-textarea,input,select{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;padding:10px 12px}
-textarea{min-height:88px;resize:vertical}
-.btn{border:1px solid var(--acc);background:var(--acc);color:var(--bg);font:inherit;font-weight:700;font-size:14px;padding:12px 16px;border-radius:8px;cursor:pointer}
-.btn:disabled{opacity:.35;cursor:not-allowed}.btn.g{background:transparent;color:var(--ink);border-color:var(--line)}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.gate{font-family:var(--mono);font-weight:700;font-size:13px;padding:6px 12px;border-radius:4px}
-.gate.ALLOW{background:rgba(61,154,106,.2);color:var(--ok)}.gate.BLOCK{background:rgba(224,85,85,.15);color:var(--bad)}
-.tag{font-family:var(--mono);font-size:10px;font-weight:700;margin-right:6px}
-.tag.UNGROUNDED{color:var(--bad)}.tag.FACT,.tag.CLAIM{color:var(--ok)}.tag.HYPOTHESIS{color:#c9a227}
-.stmt{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
-.meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
-.blockbox{margin-top:12px;padding:12px;border-radius:8px;border:1px dashed var(--bad);color:var(--bad);font-size:13px;display:none}.blockbox.on{display:block}
-.okbox{margin-top:12px;padding:12px;border-radius:8px;border:1px solid rgba(61,154,106,.4);color:var(--ok);font-size:13px;display:none}.okbox.on{display:block}
-.why{font-size:13px;color:var(--muted);margin-top:18px;line-height:1.5}
-footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}footer a{color:var(--muted)}
+:root{--bg:#11100e;--panel:#1a1815;--ink:#f2ebe3;--muted:#9a9288;--line:#2f2c28;--acc:#e8e0d4;--ok:#4a9b6a;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);display:flex;flex-direction:column}
+header{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800;letter-spacing:.12em;font-size:12px;text-transform:uppercase}.logo span{opacity:.4;font-weight:600}
+header a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:12px}
+.shell{max-width:720px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column;min-height:0;padding:0 12px}
+.intro{padding:16px 0 8px}.intro h1{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;margin-bottom:6px}.intro p{color:var(--muted);font-size:14px;max-width:42ch}
+#st{font-family:var(--mono);font-size:11px;color:var(--muted);margin:8px 0}
+#feed{flex:1;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:280px}
+.msg{margin-bottom:14px}.msg .h{font-size:11px;font-family:var(--mono);color:var(--muted);margin-bottom:3px}.msg .h.bot{color:var(--ok)}.msg .b{white-space:pre-wrap;word-break:break-word}
+.composer{display:flex;gap:8px;padding:12px 0 18px}
+input{flex:1;background:#0c0b0a;border:1px solid var(--line);border-radius:10px;color:var(--ink);font:inherit;padding:12px 14px}
+button{background:var(--acc);color:var(--bg);border:0;border-radius:10px;font:inherit;font-weight:700;padding:12px 16px;cursor:pointer}button:disabled{opacity:.4}
+.hint{font-size:12px;color:var(--muted);padding-bottom:8px}
 </style>
 </head>
 <body>
-<div class="w">
-  <div class="logo">AKSI <i>DIP</i></div>
-  <div class="rule">
-    <b>Критическое правило контура</b>
-    <p>Ответ без квитанции <em>не существует</em> как корпоративный артефакт: его нельзя вложить в отчёт, письмо, тикет или API. UNGROUNDED → BLOCK → выпуск запрещён.</p>
+<header>
+  <div class="logo">АКСИ <span>OFFLINE</span></div>
+  <div><a href="/llm/">LLM</a><a href="/runtime/">Runtime</a><a href="mailto:aksilove@internet.ru">контакт</a></div>
+</header>
+<div class="shell">
+  <div class="intro">
+    <h1>Локальный агент на вашем устройстве</h1>
+    <p>Ответы из Neuro SEED и памяти. «запомни: факт» — без облака. Не AGI — offline-напарник.</p>
   </div>
-  <h1>Без допуска нет решения</h1>
-  <p class="lead">Не «проверьте источники». Жёсткий gate: нет опоры — нет выхода из системы.</p>
-  <div class="chain">
-    <span>ответ ИИ</span>→<span>квитанция</span>→<span class="ok">ALLOW</span>→<span>выпуск</span>
-    &nbsp;|&nbsp;
-    <span>без опоры</span>→<span class="x">BLOCK</span>→<span class="x">выпуск закрыт</span>
+  <div id="st">загрузка…</div>
+  <div class="hint">«кто ты?» · «что такое ADIA?» · «запомни: мой проект — закрытый контур»</div>
+  <div id="feed"></div>
+  <div class="composer">
+    <input id="q" placeholder="Спросите АКСИ…" maxlength="2000" autocomplete="off">
+    <button type="button" id="go">Спросить</button>
   </div>
-  <div class="panel">
-    <h2>Контур выпуска</h2>
-    <label>Политика</label>
-    <select id="policy">
-      <option value="strict" selected>strict — UNGROUNDED = BLOCK (критический контур)</option>
-      <option value="companion">companion — мягче</option>
-      <option value="lab">lab — всё ALLOW (песочница)</option>
-    </select>
-    <label>Цель решения</label>
-    <input id="goal" placeholder="Что хотят утвердить / отправить">
-    <label>Текст ответа</label>
-    <textarea id="answer" placeholder="Текст, который пытаются выпустить…"></textarea>
-    <label>Опора (документ, пункт, URL)</label>
-    <input id="src" placeholder="Пусто = BLOCK в strict">
-    <div class="row">
-      <button type="button" class="btn" id="run">Проверить допуск</button>
-      <button type="button" class="btn g" id="release" disabled>Выпустить (скачать квитанцию)</button>
-    </div>
-    <div id="out" style="margin-top:14px"></div>
-    <div class="blockbox" id="blocked">ВЫПУСК ЗАПРЕЩЁН. В strict BLOCK нельзя обойти кнопкой «всё равно отправить».</div>
-    <div class="okbox" id="allowed">ДОПУСК РАЗРЕШЁН. Квитанция + ответ = корпоративный артефакт.</div>
-  </div>
-  <p class="why"><b style="color:var(--ink)">Зачем критично:</b> когда обход gate = нарушение политики (как файл без грифа). Правило: <b style="color:var(--ink)">нет ALLOW → нет легального выхода.</b></p>
-  <footer>AKSI DIP · no_receipt_no_release · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a></footer>
 </div>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-knowledge.js?v=3"></script>
 <script>
 (function(){
-  function fnv(s){var h=0x811c9dc5;s=String(s||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193);}return('00000000'+(h>>>0).toString(16)).slice(-8);}
-  function uid(){return 'dr_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);}
-  function build(opt){
-    var policy=(opt.policy||'strict').toLowerCase();
-    var ev=(opt.evidence||[]).map(function(e,i){return{id:e.id||('ev_'+(i+1)),source:e.source||'source',snippet:String(e.snippet||'').slice(0,400)};});
-    var ids=ev.map(function(e){return e.id;});
-    var text=String(opt.answer||'').slice(0,2000);
-    var based=ids.slice(0,3);
-    var has=based.length>0;
-    var cls=!text?'UNGROUNDED':(!has?'UNGROUNDED':(/^возможно|вероятно|кажется/i.test(text)?'HYPOTHESIS':'CLAIM'));
-    var stmts=[{text:text,class:cls,based_on:based}];
-    var ug=cls==='UNGROUNDED'?1:0;
-    var allow=policy==='lab'?true:policy==='companion'?(ug===0||ev.length>0):(ug===0&&!!text);
-    var body={schema:'aksi-decision-receipt/v1',version:'1.3.0',id:uid(),created_at:new Date().toISOString(),goal:String(opt.goal||'').slice(0,400),policy:policy,gate:allow?'ALLOW':'BLOCK',critical:policy==='strict',evidence:ev,statements:stmts,metrics:{ungrounded_count:ug,evidence_count:ev.length},release:allow?'PERMITTED':'FORBIDDEN',principle:'no_receipt_no_release'};
-    var payload=JSON.stringify({id:body.id,gate:body.gate,release:body.release,statements:body.statements,evidence:body.evidence});
-    body.proof={alg:'fnv1a-32',chain_hash:fnv('GENESIS'+fnv(payload))};
-    return body;
-  }
+  var MEM='aksi_product_mem_v1';
+  var feed=document.getElementById('feed');
+  var st=document.getElementById('st');
   function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
-  var cur=null;
-  function paint(rec){
-    cur=rec;
-    document.getElementById('release').disabled=rec.gate!=='ALLOW';
-    document.getElementById('blocked').className='blockbox'+(rec.gate==='BLOCK'?' on':'');
-    document.getElementById('allowed').className='okbox'+(rec.gate==='ALLOW'?' on':'');
-    var html='<span class="gate '+rec.gate+'">'+rec.gate+' · '+rec.release+'</span>';
-    html+='<div class="meta">'+esc(rec.id)+' · policy '+esc(rec.policy)+' · '+esc(rec.proof.chain_hash)+'</div>';
-    html+=rec.statements.map(function(s){return '<div class="stmt"><span class="tag '+s.class+'">'+s.class+'</span>'+esc(s.text)+'</div>';}).join('');
-    document.getElementById('out').innerHTML=html;
+  function loadMem(){try{var a=JSON.parse(localStorage.getItem(MEM)||'[]');return Array.isArray(a)?a:[];}catch(e){return[];}}
+  function saveMem(a){try{localStorage.setItem(MEM,JSON.stringify(a.slice(0,200)));}catch(e){}}
+  function add(who,text,meta){
+    var d=document.createElement('div');d.className='msg';
+    d.innerHTML='<div class="h '+(who==='АКСИ'?'bot':'')+'">'+esc(who)+(meta?' · '+esc(meta):'')+'</div><div class="b">'+esc(text)+'</div>';
+    feed.appendChild(d);feed.scrollTop=feed.scrollHeight;
   }
-  document.getElementById('run').onclick=function(){
-    var answer=document.getElementById('answer').value.trim();
-    if(!answer){document.getElementById('out').innerHTML='<div class="meta">Нет текста</div>';document.getElementById('release').disabled=true;return;}
-    var src=document.getElementById('src').value.trim();
-    paint(build({goal:document.getElementById('goal').value.trim(),answer:answer,policy:document.getElementById('policy').value,evidence:src?[{id:'ev_1',source:src,snippet:src}]:[]}));
-  };
-  document.getElementById('release').onclick=function(){
-    if(!cur||cur.gate!=='ALLOW')return;
-    var pack={product:'AKSI-DIP',rule:'no_receipt_no_release',receipt:cur,released_at:new Date().toISOString()};
-    var a=document.createElement('a');
-    a.href=URL.createObjectURL(new Blob([JSON.stringify(pack,null,2)],{type:'application/json'}));
-    a.download='release-'+cur.id+'.json';a.click();
-  };
-  document.getElementById('answer').value='Обязательство 2.4 млн утверждено';
-  document.getElementById('goal').value='Выпуск цифры в отчёт';
-  document.getElementById('run').click();
+  function status(){
+    var n=!!(window.AKSI_NEURO&&(AKSI_NEURO.think||AKSI_NEURO.query));
+    st.textContent=(n?'Neuro on':'Neuro off')+' · память '+loadMem().length+' · offline';
+  }
+  function teach(q){
+    var m=q.match(/^(?:запомни|запомнить|remember)\s*[:：]\s*(.+)$/i);
+    if(!m)return null;
+    var fact=m[1].trim();if(!fact)return null;
+    var arr=loadMem();arr.unshift({t:fact,at:Date.now()});saveMem(arr);
+    if(window.AKSI_NEURO&&typeof AKSI_NEURO.learn==='function'){try{AKSI_NEURO.learn(fact);}catch(e){}}
+    return 'Запомнила локально: «'+fact.slice(0,180)+'». Память устройства, не облако.';
+  }
+  function fromMem(q){
+    var best=null,bs=0,ql=q.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
+    loadMem().forEach(function(m){
+      var t=String(m.t||''),tl=t.toLowerCase(),n=0;
+      ql.forEach(function(w){if(tl.indexOf(w)>=0)n++;});
+      var s=ql.length?n/ql.length:0;if(s>bs){bs=s;best=t;}
+    });
+    return bs>=0.3?best:null;
+  }
+  function neuro(q){
+    try{
+      if(window.AKSI_NEURO&&typeof AKSI_NEURO.think==='function'){
+        var r=AKSI_NEURO.think(q);
+        if(typeof r==='string'&&r.trim())return r;
+        if(r&&(r.text||r.answer))return String(r.text||r.answer);
+      }
+      if(window.AKSI_NEURO&&typeof AKSI_NEURO.query==='function'){
+        var r2=AKSI_NEURO.query(q);
+        if(r2&&(r2.answer||r2.text))return String(r2.answer||r2.text);
+      }
+    }catch(e){}
+    return null;
+  }
+  function fallback(q){
+    var ql=q.toLowerCase();
+    if(/кто ты|что ты|что такое акси/.test(ql))return 'Я АКСИ — offline-агент в браузере. Neuro + память. aksilove@internet.ru. Не AGI.';
+    if(/привет|здравств/.test(ql))return 'Привет. Спросите или напишите «запомни: …».';
+    if(/помощь|help/.test(ql))return 'Вопрос · запомни: факт · /llm/ при WebGPU.';
+    return 'Точного ответа в локальной базе нет. «запомни: …» или /llm/.';
+  }
+  function answer(q){
+    var t=teach(q);if(t)return{text:t,src:'память'};
+    var m=fromMem(q);if(m)return{text:m,src:'память'};
+    var n=neuro(q);if(n)return{text:n,src:'neuro'};
+    return{text:fallback(q),src:'ядро'};
+  }
+  function send(){
+    var q=document.getElementById('q').value.trim();if(!q)return;
+    document.getElementById('q').value='';add('Вы',q);
+    document.getElementById('go').disabled=true;
+    setTimeout(function(){
+      var r=answer(q);add('АКСИ',r.text,r.src);
+      document.getElementById('go').disabled=false;status();
+    },30);
+  }
+  document.getElementById('go').onclick=send;
+  document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();send();}});
+  status();
+  add('АКСИ','На связи offline. Локальный агент: спросить, запомнить, ответить с устройства.','система');
 })();
 </script>
 </body>
