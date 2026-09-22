@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Offline Full — локальный ИИ</title>
+<meta name="description" content="Offline-контур AKSI: Neuro, память, Receipt. Не сознание. Не AGI.">
+<meta name="theme-color" content="#0f0e0c">
+<style>
+:root{--bg:#0f0e0c;--card:#1c1915;--ink:#f2ebe3;--muted:#9a9288;--line:#33302b;--ok:#3d9a6a;--acc:#e8e0d4;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+.w{max-width:840px;margin:0 auto;padding:12px 14px;width:100%;flex:1;display:flex;flex-direction:column;min-height:0}
+header{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.logo{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.logo span{opacity:.45}
+nav a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:12px}
+.warn{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:12px 0;background:var(--card)}
+.warn b{color:var(--ink)}
+#st{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px}
+#feed{flex:1;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:240px}
+.msg{margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.msg .who{font-size:11px;font-family:var(--mono);color:var(--muted)}.msg .who.bot{color:var(--ok)}
+.msg .body{margin-top:4px;white-space:pre-wrap}
+.composer{display:flex;gap:8px;padding:12px 0 16px}
+input{flex:1;background:#12100e;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;padding:12px}
+button{background:var(--acc);color:var(--bg);border:0;border-radius:8px;font:inherit;font-weight:700;padding:12px 16px;cursor:pointer}
+button:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<div class="w">
+<header>
+  <div class="logo">AKSI <span>OFFLINE FULL</span></div>
+  <nav><a href="/dip/">DIP</a><a href="/llm/">WebLLM</a><a href="/runtime/">Runtime</a></nav>
+</header>
+<div class="warn">
+  <b>Честно:</b> это не «осознающий» ИИ и не foundation-модель, обученная с нуля здесь.
+  Offline = Neuro SEED + память («запомни:») + Decision Receipt + опционально WebLLM при WebGPU.
+</div>
+<div id="st">загрузка…</div>
+<div id="feed"></div>
+<div class="composer">
+  <input id="q" placeholder="Вопрос или «запомни: факт»" maxlength="2000" autocomplete="off">
+  <button type="button" id="go">Спросить</button>
+</div>
+</div>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-knowledge.js?v=3"></script>
+<script src="/aksi-decision-receipt.js?v=11"></script>
+<script src="/aksi-webllm.js?v=3"></script>
+<script src="/aksi-offline-full.js?v=1"></script>
+<script>
+(function(){
+  var O=window.AKSI_OFFLINE, feed=document.getElementById('feed');
+  function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
+  function add(who,text,meta){
+    var d=document.createElement('div');d.className='msg';
+    d.innerHTML='<div class="who '+(who==='AKSI'?'bot':'')+'">'+esc(who)+(meta?' · '+esc(meta):'')+'</div><div class="body">'+esc(text)+'</div>';
+    feed.appendChild(d);feed.scrollTop=feed.scrollHeight;
+  }
+  function paintStatus(){
+    if(!O){document.getElementById('st').textContent='offline-full.js missing';return;}
+    var s=O.status();
+    document.getElementById('st').textContent='v'+s.version+' · mem '+s.memory+' · neuro '+(s.neuro?'on':'off')+' · receipt '+(s.receipt?'on':'off')+' · webllm '+(s.webllm?'ready':'off');
+  }
+  async function send(){
+    var q=document.getElementById('q').value.trim();if(!q||!O)return;
+    document.getElementById('q').value='';add('Вы',q);
+    document.getElementById('go').disabled=true;
+    try{var r=await O.think(q);add('AKSI',r.text,(r.source||'')+(r.gate?' · '+r.gate:''));}
+    catch(e){add('AKSI',String(e.message||e),'error');}
+    document.getElementById('go').disabled=false;paintStatus();
+  }
+  document.getElementById('go').onclick=send;
+  document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();send();}});
+  paintStatus();
+  if(O)add('AKSI','Offline Full готов. «запомни: …» или вопрос. Сознания нет — есть локальный поиск и правила.','system');
+})();
+</script>
+</body>
+</html>
