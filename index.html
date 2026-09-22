@@ -2,155 +2,145 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ След — проверяемый ответ</title>
-<meta name="description" content="Запечатайте ответ: SHA-256 + ECDSA на устройстве. Скачайте квитанцию. Проверьте позже.">
-<meta name="theme-color" content="#0b0b0f">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI DIP — квитанция на решение ИИ</title>
+<meta name="description" content="Продукт: ответ ИИ с gate ALLOW/BLOCK. Факт, гипотеза или без опоры. Скачать квитанцию для аудита.">
 <link rel="canonical" href="https://milana808.github.io/">
+<meta name="theme-color" content="#0f0e0c">
 <style>
-:root{--bg:#0b0b0f;--card:#14141c;--ink:#f3f2ed;--muted:#9a97a3;--line:#2a2a36;--acc:#8b7cf7;--ok:#3ecf8e}
+:root{--bg:#0f0e0c;--bg2:#161410;--card:#1e1b16;--ink:#f3eee6;--muted:#9a9288;--line:#3a352e;--ok:#3d9a6a;--bad:#d45c5c;--warn:#c9a227;--acc:#e8e0d4;--mono:ui-monospace,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;max-width:560px;margin:0 auto;padding:20px 16px 40px}
-.logo{font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.logo span{color:var(--acc)}
-h1{font-size:1.55rem;margin:14px 0 8px;line-height:1.2;letter-spacing:-.02em}
-.lead{color:var(--muted);font-size:15px;margin-bottom:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-textarea,input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#101018;color:var(--ink);margin-bottom:10px}
-textarea{min-height:110px;resize:vertical}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-button{font:inherit;font-size:14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#1a1a24;color:var(--ink);cursor:pointer;min-height:48px}
-button.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700;flex:1}
-button:disabled{opacity:.4}
-.out{font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);white-space:pre-wrap;word-break:break-all;max-height:180px;overflow:auto}
-.ok{color:var(--ok)}
-.steps{font-size:13px;color:var(--muted);margin:0 0 16px;padding-left:18px}
-.steps li{margin:4px 0}
-.steps b{color:var(--ink)}
-footer{margin-top:18px;font-size:12px;color:var(--muted)}
-footer a{color:var(--muted)}
-.note{font-size:12px;color:var(--muted);margin-top:8px}
+body{font:15px/1.5 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
+a{color:var(--acc)}
+.w{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.logo{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.logo i{font-style:normal;opacity:.4;font-weight:600}
+.top a{font-size:13px;color:var(--muted);text-decoration:none}
+h1{font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.15;font-weight:700;letter-spacing:-.03em;margin-bottom:12px;max-width:16ch}
+.lead{color:var(--muted);font-size:1.02rem;max-width:36ch;margin-bottom:22px}
+.btn{display:inline-block;border:1px solid var(--acc);background:var(--acc);color:var(--bg);font:inherit;font-weight:700;font-size:14px;padding:12px 16px;border-radius:8px;cursor:pointer;text-decoration:none}
+.btn.g{background:transparent;color:var(--ink);border-color:var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}
+.panel h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
+textarea,input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;padding:10px 12px}
+textarea{min-height:80px;resize:vertical}
+.gate{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:5px 10px;border-radius:4px}
+.gate.ALLOW{background:rgba(61,154,106,.2);color:var(--ok);border:1px solid rgba(61,154,106,.45)}
+.gate.BLOCK{background:rgba(212,92,92,.15);color:var(--bad);border:1px solid rgba(212,92,92,.45)}
+.tag{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;margin-right:6px}
+.tag.FACT{color:var(--ok)}.tag.CLAIM{color:#8ab4f8}.tag.HYPOTHESIS{color:var(--warn)}.tag.UNGROUNDED{color:var(--bad)}
+.stmt{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
+.meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
+.prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:640px){.prices{grid-template-columns:1fr}}
+.price{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg2)}
+.price.hi{border-color:var(--acc)}
+.price h3{font-size:14px;margin-bottom:6px}
+.price .amt{font-weight:700;font-size:1.15rem;margin-bottom:8px}
+.price ul{list-style:none;font-size:12px;color:var(--muted)}
+.price li{margin:4px 0}
+footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="logo">АКСИ <span>СЛЕД</span></div>
-<h1>Проверяемый след ответа</h1>
-<p class="lead">Один продукт: зафиксировать текст ответа, поставить печать на устройстве, скачать квитанцию и проверить её позже — без облачного аккаунта.</p>
-<ol class="steps">
-  <li>Вставьте <b>вопрос</b> и <b>ответ</b></li>
-  <li><b>Запечатать</b> (SHA-256 + ECDSA)</li>
-  <li><b>Скачать квитанцию</b> → на другом устройстве <b>Проверить</b></li>
-</ol>
-<div class="card">
-  <label for="q">Вопрос</label>
-  <input type="text" id="q" placeholder="Какой срок по договору?">
-  <label for="a">Ответ</label>
-  <textarea id="a" placeholder="Текст ответа (свой или от любого ИИ)…"></textarea>
-  <div class="row">
-    <button type="button" class="p" id="seal">Запечатать</button>
-    <button type="button" id="dl" disabled>Скачать квитанцию</button>
+<div class="w">
+  <div class="top">
+    <div class="logo">AKSI <i>DIP</i></div>
+    <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
   </div>
-  <p class="note">Печать на вашем устройстве. Мы не получаем ваш текст на сервер.</p>
-</div>
-<div class="card">
-  <label>Статус</label>
-  <div class="out" id="out">—</div>
-</div>
-<div class="card">
-  <label>Проверить квитанцию (.json)</label>
+  <h1>Квитанция на каждое решение ИИ</h1>
+  <p class="lead">Один продукт. Ответ без опоры — BLOCK. С опорой — ALLOW и файл для аудита.</p>
   <div class="row">
-    <input type="file" id="file" accept=".json,application/json,*/*" style="flex:1;color:var(--muted);font-size:13px">
-    <button type="button" id="chk">Проверить</button>
+    <button type="button" class="btn" id="demoAllow">Демо ALLOW</button>
+    <button type="button" class="btn g" id="demoBlock">Демо BLOCK</button>
   </div>
-  <div class="out" id="vres" style="margin-top:10px">—</div>
+  <div class="panel">
+    <h2>Проверить свой ответ</h2>
+    <label>Вопрос / цель</label>
+    <input id="goal" placeholder="Например: сумма штрафа по делу">
+    <label>Ответ модели (или человека)</label>
+    <textarea id="answer" placeholder="Текст ответа…"></textarea>
+    <label>Источник (пусто = нет опоры → BLOCK)</label>
+    <input id="src" placeholder="Акт №12, фрагмент…">
+    <div class="row">
+      <button type="button" class="btn" id="run">Выдать квитанцию</button>
+      <button type="button" class="btn g" id="dl" disabled>Скачать JSON</button>
+    </div>
+    <div id="out" style="margin-top:14px"></div>
+  </div>
+  <div class="panel">
+    <h2>Цены</h2>
+    <div class="prices">
+      <div class="price"><h3>Pilot</h3><div class="amt">от 400 000 ₽</div><ul><li>60 дней</li><li>ваши сценарии</li><li>policy gate</li></ul></div>
+      <div class="price hi"><h3>Business</h3><div class="amt">3–15 млн ₽/год</div><ul><li>контур</li><li>журнал</li><li>встраивание</li></ul></div>
+      <div class="price"><h3>Enterprise</h3><div class="amt">project</div><ul><li>on-prem</li><li>интеграции</li><li>SLA</li></ul></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <a class="btn" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20пилот">Запросить пилот</a>
+    </div>
+  </div>
+  <footer>AKSI DIP · Decision Integrity<br>Не чат-бот. Слой допуска ответа. · aksilove@internet.ru</footer>
 </div>
-<footer>
-  aksilove@internet.ru ·
-  <a href="/HONEST.md">честно</a> ·
-  <a href="/capsule.html">память</a> ·
-  <a href="/organism.html">lab</a>
-</footer>
-<script src="/aksi-capsule.js?v=13"></script>
 <script>
-(function () {
-  var C = window.AKSI_CAPSULE;
-  var lastSeal = null;
-  var out = document.getElementById("out");
-  var vres = document.getElementById("vres");
-  var dl = document.getElementById("dl");
-  if (!C) {
-    out.textContent = "Модуль не загрузился. Обновите страницу (Ctrl+Shift+R).";
-    return;
-  }
-  C.ensureKeys().catch(function () {});
-
-  async function sealPair(q, a) {
-    var token = "sled-" + Date.now().toString(36);
-    C.remember(token + " | Q: " + q + " | A: " + a);
-    await C.ask(token, { research: false });
-    var r = await C.sealLast();
-    if (!r.ok) return r;
-    r.seal.display = { q: q, a: a };
-    if (!r.seal.body) r.seal.body = {};
-    r.seal.body.q = q;
-    r.seal.body.a = a;
-    return r;
-  }
-
-  document.getElementById("seal").onclick = async function () {
-    var q = document.getElementById("q").value.trim() || "(без вопроса)";
-    var a = document.getElementById("a").value.trim();
-    if (!a) { out.textContent = "Введите текст ответа."; return; }
-    out.className = "out";
-    out.textContent = "Печатаю…";
-    try {
-      var r = await sealPair(q, a);
-      if (!r.ok) { out.textContent = "Ошибка: " + (r.error || ""); return; }
-      lastSeal = r.seal;
-      out.className = "out ok";
-      out.textContent = "Печать готова\nhash: " + r.seal.hash.slice(0, 42) + "…\nalg: " + r.seal.alg + "\n" + r.seal.sealedAt;
-      dl.disabled = false;
-    } catch (e) {
-      out.textContent = String(e.message || e);
+(function(){
+  function fnv(s){var h=0x811c9dc5;s=String(s||'');for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193);}return('00000000'+(h>>>0).toString(16)).slice(-8);}
+  function uid(){return 'dr_'+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);}
+  function build(opt){
+    opt=opt||{};
+    var ev=(opt.evidence||[]).map(function(e,i){return{id:e.id||('ev_'+(i+1)),source:e.source||'source',url:e.url||null,snippet:String(e.snippet||'').slice(0,400)};});
+    var ids=ev.map(function(e){return e.id;});
+    var stmts=(opt.statements||[]).map(function(s){
+      var based=s.based_on||[];if(!Array.isArray(based))based=based?[based]:[];
+      var has=based.some(function(id){return ids.indexOf(id)>=0;});
+      var cls=s.class||(!has||!based.length?'UNGROUNDED':(/^возможно|вероятно|кажется/i.test(s.text)?'HYPOTHESIS':'CLAIM'));
+      if(cls!=='UNGROUNDED'&&!based.length)cls='UNGROUNDED';
+      return{text:String(s.text||'').slice(0,2000),class:cls,based_on:based};
+    });
+    if(!stmts.length&&opt.answer){
+      stmts=[{text:String(opt.answer).slice(0,2000),class:ev.length?'CLAIM':'UNGROUNDED',based_on:ids.slice(0,3)}];
     }
+    var ug=stmts.filter(function(s){return s.class==='UNGROUNDED';}).length;
+    var allow=ug===0&&stmts.length>0;
+    var body={schema:'aksi-decision-receipt/v1',version:'1.1.0',id:uid(),created_at:new Date().toISOString(),goal:String(opt.goal||'').slice(0,400),policy:opt.policy||'strict',gate:allow?'ALLOW':'BLOCK',evidence:ev,statements:stmts,metrics:{evidence_count:ev.length,ungrounded_count:ug}};
+    var prev='GENESIS';
+    var payload=JSON.stringify({id:body.id,gate:body.gate,statements:body.statements,evidence:body.evidence,prev:prev});
+    body.proof={alg:'fnv1a-32',content_hash:fnv(payload),chain_hash:fnv(prev+fnv(payload))};
+    return body;
+  }
+  function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
+  var cur=null;
+  function paint(rec){
+    cur=rec;
+    document.getElementById('dl').disabled=!rec;
+    var html='<span class="gate '+rec.gate+'">'+rec.gate+'</span>';
+    html+='<div class="meta">'+esc(rec.id)+' · evidence '+rec.metrics.evidence_count+' · ungrounded '+rec.metrics.ungrounded_count+' · hash '+esc(rec.proof.chain_hash)+'</div>';
+    html+=rec.statements.map(function(s){return '<div class="stmt"><span class="tag '+s.class+'">'+s.class+'</span>'+esc(s.text)+'</div>';}).join('');
+    document.getElementById('out').innerHTML=html;
+  }
+  document.getElementById('demoAllow').onclick=function(){
+    paint(build({goal:'Что такое Decision Receipt',evidence:[{id:'ev_1',source:'AKSI DIP',snippet:'Gate ALLOW/BLOCK'}],statements:[{text:'Decision Receipt — квитанция к ответу ИИ.',class:'CLAIM',based_on:['ev_1']},{text:'Без evidence в strict будет BLOCK.',class:'FACT',based_on:['ev_1']}]}));
   };
-
-  dl.onclick = function () {
-    if (!lastSeal) return;
-    var receipt = {
-      format: "aksi-receipt",
-      product: "AKSI Trail",
-      version: "1.0",
-      contact: "aksilove@internet.ru",
-      seal: lastSeal,
-      display: lastSeal.display || null,
-      note: "Verify at https://milana808.github.io/"
-    };
-    var blob = new Blob([JSON.stringify(receipt, null, 2)], { type: "application/json" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "aksi-sled-" + Date.now() + ".json";
-    a.click();
+  document.getElementById('demoBlock').onclick=function(){
+    paint(build({goal:'Штраф без документов',answer:'Штраф ровно 2.4 млн без оснований',evidence:[]}));
   };
-
-  document.getElementById("chk").onclick = async function () {
-    var f = document.getElementById("file").files && document.getElementById("file").files[0];
-    if (!f) { vres.textContent = "Выберите файл квитанции."; return; }
-    try {
-      var data = JSON.parse((await f.text()).replace(/^\uFEFF/, ""));
-      var seal = data.seal || data;
-      var r = await C.verifySeal(seal);
-      vres.className = "out " + (r.ok ? "ok" : "");
-      var disp = data.display || seal.display || seal.body || {};
-      vres.textContent = (r.ok ? "ПРОВЕРКА OK\n" : "НЕ ПРОШЛА\n") +
-        "hash: " + (r.hashOk ? "ok" : "fail") + " · подпись: " + (r.sigOk ? "ok" : "fail") + "\n" +
-        "Q: " + String(disp.q || "").slice(0, 80) + "\n" +
-        "A: " + String(disp.a || "").slice(0, 120);
-    } catch (e) {
-      vres.textContent = "Ошибка: " + (e.message || e);
-    }
+  document.getElementById('run').onclick=function(){
+    var goal=document.getElementById('goal').value.trim();
+    var answer=document.getElementById('answer').value.trim();
+    var src=document.getElementById('src').value.trim();
+    if(!answer){document.getElementById('out').innerHTML='<div class="meta">Введите ответ</div>';return;}
+    var ev=src?[{id:'ev_1',source:src,snippet:src}]:[];
+    paint(build({goal:goal,answer:answer,evidence:ev}));
   };
+  document.getElementById('dl').onclick=function(){
+    if(!cur)return;
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(cur,null,2)],{type:'application/json'}));
+    a.download=cur.id+'.json';a.click();
+  };
+  document.getElementById('demoBlock').click();
 })();
 </script>
 </body>
