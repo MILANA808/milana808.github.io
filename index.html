@@ -3,30 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AKSI DIP — квитанция на решение ИИ</title>
-<meta name="description" content="Продукт: ответ ИИ с gate ALLOW/BLOCK. Факт, гипотеза или без опоры. Скачать квитанцию для аудита.">
+<title>AKSI DIP — слой подотчётности решений ИИ</title>
+<meta name="description" content="Когда модели станут сколь угодно сильными, останется вопрос: на каком основании принят ответ. AKSI DIP — квитанция, gate, след.">
 <link rel="canonical" href="https://milana808.github.io/">
-<meta name="theme-color" content="#0f0e0c">
+<meta name="theme-color" content="#0c0b09">
 <style>
-:root{--bg:#0f0e0c;--bg2:#161410;--card:#1e1b16;--ink:#f3eee6;--muted:#9a9288;--line:#3a352e;--ok:#3d9a6a;--bad:#d45c5c;--warn:#c9a227;--acc:#e8e0d4;--mono:ui-monospace,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font:15px/1.5 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
-a{color:var(--acc)}
-.w{max-width:720px;margin:0 auto;padding:20px 16px 48px}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
-.logo{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
-.logo i{font-style:normal;opacity:.4;font-weight:600}
+:root{--bg:#0c0b09;--bg2:#141210;--card:#1a1814;--ink:#f4f0e8;--muted:#9c958c;--line:#2e2a24;--ok:#3d9a6a;--bad:#d45c5c;--warn:#c9a227;--acc:#ece6dc;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:system-ui,-apple-system,Segoe UI,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}body{font:15px/1.55 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}a{color:var(--acc)}
+.w{max-width:760px;margin:0 auto;padding:22px 16px 56px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:36px}
+.logo{font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.logo i{font-style:normal;opacity:.4;font-weight:600}
 .top a{font-size:13px;color:var(--muted);text-decoration:none}
-h1{font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.15;font-weight:700;letter-spacing:-.03em;margin-bottom:12px;max-width:16ch}
-.lead{color:var(--muted);font-size:1.02rem;max-width:36ch;margin-bottom:22px}
+.eyebrow{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;margin-bottom:14px}
+h1{font-size:clamp(1.7rem,4.2vw,2.35rem);line-height:1.12;font-weight:700;letter-spacing:-.035em;margin-bottom:16px;max-width:18ch}
+.lead{color:var(--muted);font-size:1.05rem;max-width:42ch;margin-bottom:14px}
+.thesis{border-left:3px solid var(--acc);padding:10px 0 10px 14px;margin:18px 0 24px;font-size:15px;max-width:48ch}
 .btn{display:inline-block;border:1px solid var(--acc);background:var(--acc);color:var(--bg);font:inherit;font-weight:700;font-size:14px;padding:12px 16px;border-radius:8px;cursor:pointer;text-decoration:none}
 .btn.g{background:transparent;color:var(--ink);border-color:var(--line)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:16px 0}
-.panel h2{font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}@media(max-width:640px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}.card h3{font-size:14px;margin-bottom:8px}.card p{font-size:13px;color:var(--muted)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:20px 0}
+.panel h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 label{display:block;font-size:12px;color:var(--muted);margin:8px 0 4px}
 textarea,input{width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;padding:10px 12px}
-textarea{min-height:80px;resize:vertical}
+textarea{min-height:84px;resize:vertical}
 .gate{display:inline-block;font-family:var(--mono);font-size:12px;font-weight:700;padding:5px 10px;border-radius:4px}
 .gate.ALLOW{background:rgba(61,154,106,.2);color:var(--ok);border:1px solid rgba(61,154,106,.45)}
 .gate.BLOCK{background:rgba(212,92,92,.15);color:var(--bad);border:1px solid rgba(212,92,92,.45)}
@@ -34,15 +35,12 @@ textarea{min-height:80px;resize:vertical}
 .tag.FACT{color:var(--ok)}.tag.CLAIM{color:#8ab4f8}.tag.HYPOTHESIS{color:var(--warn)}.tag.UNGROUNDED{color:var(--bad)}
 .stmt{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}
 .meta{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:8px}
-.prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px}
-@media(max-width:640px){.prices{grid-template-columns:1fr}}
-.price{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg2)}
-.price.hi{border-color:var(--acc)}
-.price h3{font-size:14px;margin-bottom:6px}
-.price .amt{font-weight:700;font-size:1.15rem;margin-bottom:8px}
-.price ul{list-style:none;font-size:12px;color:var(--muted)}
-.price li{margin:4px 0}
-footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.prices{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}@media(max-width:640px){.prices{grid-template-columns:1fr}}
+.price{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--bg2)}.price.hi{border-color:var(--acc)}
+.price h3{font-size:14px;margin-bottom:6px}.price .amt{font-weight:700;font-size:1.1rem;margin-bottom:8px}
+.price ul{list-style:none;font-size:12px;color:var(--muted)}.price li{margin:4px 0}
+.era{font-size:13px;color:var(--muted);margin:8px 0 0;max-width:52ch}
+footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -51,38 +49,51 @@ footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-si
     <div class="logo">AKSI <i>DIP</i></div>
     <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
   </div>
-  <h1>Квитанция на каждое решение ИИ</h1>
-  <p class="lead">Один продукт. Ответ без опоры — BLOCK. С опорой — ALLOW и файл для аудита.</p>
+  <div class="eyebrow">DECISION INTEGRITY PLATFORM</div>
+  <h1>Слой, который нужен и после AGI</h1>
+  <p class="lead">Модели будут сильнее. Вопрос не исчезнет: <em>на каком основании этот ответ допущен в решение?</em></p>
+  <div class="thesis"><strong>AKSI DIP не соревнуется с сингулярностью.</strong> Он ставит между любой моделью и человеком обязательную квитанцию: факт, гипотеза или пустота — и gate ALLOW / BLOCK.</div>
+  <div class="grid">
+    <div class="card"><h3>Сегодня</h3><p>Ответы ИИ уже в справках и письмах. Без следа — риск для аудита, суда, репутации.</p></div>
+    <div class="card"><h3>При любом будущем AGI</h3><p>Чем сильнее генерация, тем дороже ошибка доверия. Нужен не «ещё умнее чат», а правило допуска ответа.</p></div>
+    <div class="card"><h3>Что продаём</h3><p>Не личность модели. Слой Decision Integrity: evidence, класс утверждения, gate, квитанция.</p></div>
+    <div class="card"><h3>Для кого</h3><p>Risk, CISO, аудит, юристы, closed-loop — везде, где ответ должен быть объясним человеку.</p></div>
+  </div>
   <div class="row">
     <button type="button" class="btn" id="demoAllow">Демо ALLOW</button>
     <button type="button" class="btn g" id="demoBlock">Демо BLOCK</button>
   </div>
   <div class="panel">
-    <h2>Проверить свой ответ</h2>
-    <label>Вопрос / цель</label>
-    <input id="goal" placeholder="Например: сумма штрафа по делу">
-    <label>Ответ модели (или человека)</label>
-    <textarea id="answer" placeholder="Текст ответа…"></textarea>
-    <label>Источник (пусто = нет опоры → BLOCK)</label>
-    <input id="src" placeholder="Акт №12, фрагмент…">
+    <h2>Продукт в деле</h2>
+    <label>Цель / вопрос</label>
+    <input id="goal" placeholder="Сумма обязательства по договору">
+    <label>Ответ (любая модель, агент, человек)</label>
+    <textarea id="answer" placeholder="Текст, который хотят допустить в отчёт…"></textarea>
+    <label>Опора / источник (пусто = BLOCK)</label>
+    <input id="src" placeholder="Договор, п. 4.2 / акт / реестр…">
     <div class="row">
       <button type="button" class="btn" id="run">Выдать квитанцию</button>
       <button type="button" class="btn g" id="dl" disabled>Скачать JSON</button>
     </div>
     <div id="out" style="margin-top:14px"></div>
+    <p class="era">Один контракт для GPT, локальной LLM и будущего AGI-агента: сначала квитанция — потом действие.</p>
   </div>
   <div class="panel">
-    <h2>Цены</h2>
+    <h2>Масштаб поставки</h2>
     <div class="prices">
-      <div class="price"><h3>Pilot</h3><div class="amt">от 400 000 ₽</div><ul><li>60 дней</li><li>ваши сценарии</li><li>policy gate</li></ul></div>
-      <div class="price hi"><h3>Business</h3><div class="amt">3–15 млн ₽/год</div><ul><li>контур</li><li>журнал</li><li>встраивание</li></ul></div>
-      <div class="price"><h3>Enterprise</h3><div class="amt">project</div><ul><li>on-prem</li><li>интеграции</li><li>SLA</li></ul></div>
+      <div class="price"><h3>Pilot</h3><div class="amt">от 400 000 ₽</div><ul><li>60 дней</li><li>5–10 сценариев</li><li>policy strict</li></ul></div>
+      <div class="price hi"><h3>Business</h3><div class="amt">3–15 млн ₽/год</div><ul><li>контур организации</li><li>журнал квитанций</li><li>встройка в агентов</li></ul></div>
+      <div class="price"><h3>Infrastructure</h3><div class="amt">project</div><ul><li>on-prem / air-gap</li><li>стандарт receipt v1</li><li>SLA и интеграции</li></ul></div>
     </div>
     <div class="row" style="margin-top:14px">
-      <a class="btn" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20пилот">Запросить пилот</a>
+      <a class="btn" href="mailto:aksilove@internet.ru?subject=AKSI%20DIP%20—%20слой%20на%20эпоху%20AGI">Запросить внедрение</a>
     </div>
   </div>
-  <footer>AKSI DIP · Decision Integrity<br>Не чат-бот. Слой допуска ответа. · aksilove@internet.ru</footer>
+  <footer>
+    <strong style="color:var(--ink)">AKSI DIP</strong> · Decision Integrity Platform<br>
+    Чем умнее машины, тем нужнее проверяемый допуск их выводов.<br>
+    aksilove@internet.ru
+  </footer>
 </div>
 <script>
 (function(){
@@ -104,7 +115,7 @@ footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-si
     }
     var ug=stmts.filter(function(s){return s.class==='UNGROUNDED';}).length;
     var allow=ug===0&&stmts.length>0;
-    var body={schema:'aksi-decision-receipt/v1',version:'1.1.0',id:uid(),created_at:new Date().toISOString(),goal:String(opt.goal||'').slice(0,400),policy:opt.policy||'strict',gate:allow?'ALLOW':'BLOCK',evidence:ev,statements:stmts,metrics:{evidence_count:ev.length,ungrounded_count:ug}};
+    var body={schema:'aksi-decision-receipt/v1',version:'1.2.0',id:uid(),created_at:new Date().toISOString(),goal:String(opt.goal||'').slice(0,400),policy:opt.policy||'strict',gate:allow?'ALLOW':'BLOCK',evidence:ev,statements:stmts,metrics:{evidence_count:ev.length,ungrounded_count:ug,statement_count:stmts.length},principle:'technology_serves_human',era_note:'Model-agnostic integrity layer — remains relevant under stronger models including future AGI systems.'};
     var prev='GENESIS';
     var payload=JSON.stringify({id:body.id,gate:body.gate,statements:body.statements,evidence:body.evidence,prev:prev});
     body.proof={alg:'fnv1a-32',content_hash:fnv(payload),chain_hash:fnv(prev+fnv(payload))};
@@ -113,26 +124,24 @@ footer{margin-top:32px;padding-top:16px;border-top:1px solid var(--line);font-si
   function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;'})[c];});}
   var cur=null;
   function paint(rec){
-    cur=rec;
-    document.getElementById('dl').disabled=!rec;
+    cur=rec;document.getElementById('dl').disabled=!rec;
     var html='<span class="gate '+rec.gate+'">'+rec.gate+'</span>';
-    html+='<div class="meta">'+esc(rec.id)+' · evidence '+rec.metrics.evidence_count+' · ungrounded '+rec.metrics.ungrounded_count+' · hash '+esc(rec.proof.chain_hash)+'</div>';
+    html+='<div class="meta">'+esc(rec.id)+' · evidence '+rec.metrics.evidence_count+' · ungrounded '+rec.metrics.ungrounded_count+' · '+esc(rec.proof.chain_hash)+'</div>';
     html+=rec.statements.map(function(s){return '<div class="stmt"><span class="tag '+s.class+'">'+s.class+'</span>'+esc(s.text)+'</div>';}).join('');
     document.getElementById('out').innerHTML=html;
   }
   document.getElementById('demoAllow').onclick=function(){
-    paint(build({goal:'Что такое Decision Receipt',evidence:[{id:'ev_1',source:'AKSI DIP',snippet:'Gate ALLOW/BLOCK'}],statements:[{text:'Decision Receipt — квитанция к ответу ИИ.',class:'CLAIM',based_on:['ev_1']},{text:'Без evidence в strict будет BLOCK.',class:'FACT',based_on:['ev_1']}]}));
+    paint(build({goal:'Допустить вывод в корпоративный отчёт',evidence:[{id:'ev_1',source:'Политика DIP',snippet:'Без evidence — BLOCK'}],statements:[{text:'Любая модель, включая будущие AGI-агенты, может быть обёрнута в Decision Receipt.',class:'CLAIM',based_on:['ev_1']},{text:'Gate BLOCK означает: ответ не допущен в решение без опоры.',class:'FACT',based_on:['ev_1']}]}));
   };
   document.getElementById('demoBlock').onclick=function(){
-    paint(build({goal:'Штраф без документов',answer:'Штраф ровно 2.4 млн без оснований',evidence:[]}));
+    paint(build({goal:'Утвердить цифру без первички',answer:'Обязательство составляет ровно 2.4 млн без документов',evidence:[]}));
   };
   document.getElementById('run').onclick=function(){
     var goal=document.getElementById('goal').value.trim();
     var answer=document.getElementById('answer').value.trim();
     var src=document.getElementById('src').value.trim();
     if(!answer){document.getElementById('out').innerHTML='<div class="meta">Введите ответ</div>';return;}
-    var ev=src?[{id:'ev_1',source:src,snippet:src}]:[];
-    paint(build({goal:goal,answer:answer,evidence:ev}));
+    paint(build({goal:goal,answer:answer,evidence:src?[{id:'ev_1',source:src,snippet:src}]:[]}));
   };
   document.getElementById('dl').onclick=function(){
     if(!cur)return;

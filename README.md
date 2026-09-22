@@ -1,5 +1,8 @@
 # AKSI DIP
 
-Продукт: https://milana808.github.io/
+Decision Integrity Platform — слой подотчётности ответов ИИ.
+Нужен сегодня и остаётся нужным при более сильных моделях.
 
-Контакт: aksilove@internet.ru
+https://milana808.github.io/
+
+aksilove@internet.ru
