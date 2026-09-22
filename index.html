@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>АКСИ — offline-агент на вашем устройстве</title>
-<meta name="description" content="АКСИ: локальные ответы, память «запомни:». Без обязательного облака. Не AGI.">
+<meta name="description" content="АКСИ: локальные ответы, память, Студия режимов. Не AGI.">
 <link rel="canonical" href="https://milana808.github.io/">
 <meta name="theme-color" content="#11100e">
 <style>
@@ -28,15 +28,15 @@ button{background:var(--acc);color:var(--bg);border:0;border-radius:10px;font:in
 <body>
 <header>
   <div class="logo">АКСИ <span>OFFLINE</span></div>
-  <div><a href="/llm/">LLM</a><a href="/runtime/">Runtime</a><a href="mailto:aksilove@internet.ru">контакт</a></div>
+  <div><a href="/studio/">Студия</a><a href="/llm/">LLM</a><a href="/runtime/">Runtime</a><a href="mailto:aksilove@internet.ru">контакт</a></div>
 </header>
 <div class="shell">
   <div class="intro">
     <h1>Локальный агент на вашем устройстве</h1>
-    <p>Ответы из Neuro SEED и памяти. «запомни: факт» — без облака. Не AGI — offline-напарник.</p>
+    <p>Offline-агент + <a href="/studio/" style="color:#e8e0d4">Студия режимов</a> (ядро 2025: метакод, Guardian, оси). Не AGI.</p>
   </div>
   <div id="st">загрузка…</div>
-  <div class="hint">«кто ты?» · «что такое ADIA?» · «запомни: мой проект — закрытый контур»</div>
+  <div class="hint">«кто ты?» · «запомни: факт» · Студия: /studio/</div>
   <div id="feed"></div>
   <div class="composer">
     <input id="q" placeholder="Спросите АКСИ…" maxlength="2000" autocomplete="off">
@@ -68,7 +68,7 @@ button{background:var(--acc);color:var(--bg);border:0;border-radius:10px;font:in
     var fact=m[1].trim();if(!fact)return null;
     var arr=loadMem();arr.unshift({t:fact,at:Date.now()});saveMem(arr);
     if(window.AKSI_NEURO&&typeof AKSI_NEURO.learn==='function'){try{AKSI_NEURO.learn(fact);}catch(e){}}
-    return 'Запомнила локально: «'+fact.slice(0,180)+'». Память устройства, не облако.';
+    return 'Запомнила локально: «'+fact.slice(0,180)+'».';
   }
   function fromMem(q){
     var best=null,bs=0,ql=q.toLowerCase().split(/\s+/).filter(function(w){return w.length>2;});
@@ -86,19 +86,15 @@ button{background:var(--acc);color:var(--bg);border:0;border-radius:10px;font:in
         if(typeof r==='string'&&r.trim())return r;
         if(r&&(r.text||r.answer))return String(r.text||r.answer);
       }
-      if(window.AKSI_NEURO&&typeof AKSI_NEURO.query==='function'){
-        var r2=AKSI_NEURO.query(q);
-        if(r2&&(r2.answer||r2.text))return String(r2.answer||r2.text);
-      }
     }catch(e){}
     return null;
   }
   function fallback(q){
     var ql=q.toLowerCase();
-    if(/кто ты|что ты|что такое акси/.test(ql))return 'Я АКСИ — offline-агент в браузере. Neuro + память. aksilove@internet.ru. Не AGI.';
-    if(/привет|здравств/.test(ql))return 'Привет. Спросите или напишите «запомни: …».';
-    if(/помощь|help/.test(ql))return 'Вопрос · запомни: факт · /llm/ при WebGPU.';
-    return 'Точного ответа в локальной базе нет. «запомни: …» или /llm/.';
+    if(/кто ты|что ты|что такое акси/.test(ql))return 'Я АКСИ — offline-агент. Студия режимов: /studio/. aksilove@internet.ru. Не AGI.';
+    if(/привет|здравств/.test(ql))return 'Привет. Спросите или «запомни: …». Студия: /studio/';
+    if(/студи|метакод|guardian/.test(ql))return 'Студия режимов (ядро 2025): https://milana808.github.io/studio/';
+    return 'Точного ответа нет. «запомни: …» или /studio/.';
   }
   function answer(q){
     var t=teach(q);if(t)return{text:t,src:'память'};
@@ -110,15 +106,12 @@ button{background:var(--acc);color:var(--bg);border:0;border-radius:10px;font:in
     var q=document.getElementById('q').value.trim();if(!q)return;
     document.getElementById('q').value='';add('Вы',q);
     document.getElementById('go').disabled=true;
-    setTimeout(function(){
-      var r=answer(q);add('АКСИ',r.text,r.src);
-      document.getElementById('go').disabled=false;status();
-    },30);
+    setTimeout(function(){var r=answer(q);add('АКСИ',r.text,r.src);document.getElementById('go').disabled=false;status();},30);
   }
   document.getElementById('go').onclick=send;
   document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();send();}});
   status();
-  add('АКСИ','На связи offline. Локальный агент: спросить, запомнить, ответить с устройства.','система');
+  add('АКСИ','На связи. Агент + Студия режимов /studio/ (метакод 2025).','система');
 })();
 </script>
 </body>
