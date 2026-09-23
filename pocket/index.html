@@ -53,10 +53,11 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <script src="/aksi-offline-full.js?v=2"></script>
 <script type="module">
 import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/+esm';
+import WasmFromCDN from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/esm/wasm-from-cdn.js';
 (function(){
 const $=id=>document.getElementById(id);
-const MODEL_URL='https://huggingface.co/Vikhrmodels/Vikhr-Qwen-2.5-0.5B-instruct-GGUF/resolve/main/Vikhr-Qwen-2.5-0.5B-instruct-Q3_K_M.gguf';
-const MODEL_SIZE='355 MB', WASM='https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/esm/wasm/wllama.wasm';
+const MODEL={repo:'Vikhrmodels/Vikhr-Qwen-2.5-0.5B-instruct-GGUF',file:'Vikhr-Qwen-2.5-0.5B-instruct-Q3_K_M.gguf'};
+const MODEL_SIZE='355 MB';
 let llm=null,ready=false,busy=false,answerNode=null;
 function esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function add(w,t,cl){const d=document.createElement('div');d.className='msg '+cl;d.innerHTML='<div class="who">'+esc(w)+'</div>'+esc(t);$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight;return d}
@@ -65,11 +66,22 @@ function refresh(){$('model').textContent=ready?'Vikhr 0.5B':'—';$('badge').te
 async function load(){
  if(ready||busy)return;busy=true;$('load').disabled=true;set(1,'запускаю Vikhr runtime…');
  try{
-  llm=new Wllama({default:WASM},{allowOffline:false});const gpu=llm.isSupportWebGPU();$('gpu').textContent=gpu?'доступен':'нет';
+  llm=new Wllama(WasmFromCDN,{allowOffline:false,parallelDownloads:1});llm.setCompat('default');const gpu=llm.isSupportWebGPU();$('gpu').textContent=gpu?'доступен':'нет';
   set(3,'Vikhr-Qwen 0.5B · '+MODEL_SIZE+' · безопасный запуск WASM…');
-  await llm.loadModelFromUrl(MODEL_URL,{n_ctx:1024,n_gpu_layers:0,n_threads:2,reasoning:false,progressCallback:({loaded,total})=>set(total?Math.round(5+loaded/total*90):5,'загрузка Vikhr: '+Math.round(loaded/1048576)+' / '+Math.round(total/1048576)+' MB')});
+  await llm.loadModelFromHF(MODEL,{n_ctx:1024,n_gpu_layers:0,n_threads:1,reasoning:false,useCache:true,progressCallback:({loaded,total})=>set(total?Math.round(5+loaded/total*90):5,'загрузка Vikhr: '+Math.round(loaded/1048576)+' / '+Math.round(total/1048576)+' MB')});
   ready=true;set(100,'готово · Vikhr локально · CPU/WASM');add('AKSI','Vikhr-Qwen 0.5B загружен. Теперь можно задавать вопросы.','aksi');refresh();
- }catch(e){llm=null;ready=false;set(0,'ошибка загрузки');add('AKSI','Не удалось загрузить Vikhr: '+String(e?.message||e).slice(0,700),'aksi');refresh()}
+ }catch(e){
+  const msg=String(e?.message||e); llm=null; ready=false; set(0,'ошибка загрузки · '+msg.slice(0,120));
+  add('AKSI','Первый запуск не удался. Запускаю чистый повтор без старого кэша…\n'+msg.slice(0,500),'aksi');
+  try{
+    llm=new Wllama(WasmFromCDN,{allowOffline:false,parallelDownloads:1});llm.setCompat('default');
+    await llm.loadModelFromHF(MODEL,{n_ctx:1024,n_gpu_layers:0,n_threads:1,reasoning:false,useCache:false,progressCallback:({loaded,total})=>set(total?Math.round(5+loaded/total*90):5,'чистая загрузка: '+Math.round(loaded/1048576)+' / '+Math.round(total/1048576)+' MB')});
+    ready=true;set(100,'готово · чистый запуск · CPU/WASM');add('AKSI','Готово. Модель запущена после очистки старого состояния.','aksi');
+  }catch(e2){
+    llm=null;ready=false;set(0,'не удалось запустить runtime');add('AKSI','Runtime не запустился.\n'+String(e2?.message||e2).slice(0,900),'aksi');
+  }
+  refresh();
+}
  finally{busy=false;$('load').disabled=false;refresh()}
 }
 async function send(){
@@ -86,7 +98,7 @@ async function send(){
 }
 $('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});
 $('clear').onclick=()=>{try{window.AKSI_OFFLINE.clearMemory();add('AKSI','Локальная память очищена.','aksi');refresh()}catch(e){}};
-$('gpu').textContent=navigator.gpu?'доступен':'нет';set(0,'Готово. Vikhr-Qwen 0.5B · '+MODEL_SIZE+' · CPU/WASM-safe');refresh();
+$('gpu').textContent=navigator.gpu?'доступен':'нет';set(0,'Готово. Нажми «Загрузить мозг» · CPU/WASM-safe');refresh();
 })();
 </script>
 </body></html>
