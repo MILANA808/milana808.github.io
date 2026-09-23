@@ -74,7 +74,7 @@ function candidateQueries(q){
 }
 function scoreEvidence(x,q){
  const v=vec(q), z=vec(x.text||'');
- return .65*cos(v,z)+.35*(1-Math.min(1,Math.abs((x.text||'').length-q.length)/(Math.max(1,q.length))));
+ return .65*sim(v,z)+.35*(1-Math.min(1,Math.abs((x.text||'').length-q.length)/(Math.max(1,q.length))));
 }
 async function evidenceSearch(q){
  const qs=candidateQueries(q), all=[];
@@ -121,10 +121,11 @@ async function universalAnswer(q){
  if(val!==null){$('out').textContent='Математический вывод: '+val+'\\n\\nТочный вычислительный режим AKSI.';return}
  const local=retrieve(raw);
  if(local[0]&&local[0].s>.72){answer(raw);return}
- $('out').textContent='AKSI строит пространство свидетельств…';
+ $('out').textContent='AKSI строит пространство свидетельств…';$('state').innerHTML='<span class="chip">режим=запрос</span><span class="chip">статус=вычисление</span>';
  try{
   const base='https://milana-backend.replit.app';
-  const rr=await fetch(base+'/api/universal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:raw,web:true})});
+  const ac=new AbortController();const timer=setTimeout(()=>ac.abort(),18000);
+   const rr=await fetch(base+'/api/universal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:raw,web:true}),signal:ac.signal});clearTimeout(timer);
   if(rr.ok){
    const d=await rr.json();
    if(d.answer){
@@ -135,13 +136,29 @@ async function universalAnswer(q){
    }
   }
  }catch(e){}
- const items=await evidenceSearch(raw);
+ let items=[];
+ try{items=await evidenceSearch(raw)}catch(e){items=[]}
  for(const x of items)learn(x.text,x.source,false);
  save();render();
  const merged=retrieve(raw);
- $('out').textContent=evidenceSynthesis(raw,items);
- $('state').innerHTML=['режим='+r.kind,'свидетельств='+items.length,'память='+S.facts.length,'резонанс='+((merged[0]?.s)||0).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('');
- $('explain').textContent='Маршрут: '+r.action+' → поиск нескольких свидетельств → математическое ранжирование → запись в память → синтез. AKSI не утверждает то, для чего не нашла достаточного свидетельства.';
+ if(items.length){
+   $('out').textContent=evidenceSynthesis(raw,items);
+   $('state').innerHTML=['режим='+r.kind,'свидетельств='+items.length,'память='+S.facts.length,'резонанс='+((merged[0]?.s)||0).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('');
+   $('explain').textContent='Маршрут: '+r.action+' → внешние свидетельства → математическое ранжирование → память. Ответ построен даже без внешней LLM.';
+ }else{
+   // Never abstain merely because evidence is absent: reason from the question structure and current state.
+   const w=toks(raw).filter(t=>t.length>2);
+   const related=merged.slice(0,3).map(z=>z.f.text);
+   const calc=mathEval(raw);
+   let localText='';
+   if(calc!==null)localText='Результат вычисления: '+calc+'.';
+   else if(related.length)localText='AKSI не нашла прямого факта, но ближайшее состояние памяти такое:\n'+related.join('\n');
+   else localText='AKSI получила вопрос и сформировала гипотезу без выдачи её за установленный факт.\n\nЗапрос: '+raw+'\nКлючевые понятия: '+w.join(', ')+'\n\nРабочий вывод: вопрос требует либо контекста, либо внешнего знания; я могу продолжить рассуждение и проверить гипотезы, но не буду подменять неизвестное выдуманным фактом.';
+   $('out').textContent=localText;
+   $('state').innerHTML=['режим=local-reasoning','свидетельств=0','память='+S.facts.length,'резонанс='+((merged[0]?.s)||0).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('');
+   $('explain').textContent='Внешний поиск не ответил. AKSI не зависает: локальное математическое ядро продолжает цикл признаки → гипервектор → память → гипотеза → ответ.';
+ }
+ь → синтез. AKSI не утверждает то, для чего не нашла достаточного свидетельства.';
 }async function importCorpus(url,label='external'){try{ $('out').textContent='Загружаю корпус: '+label+'…';const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();const items=d.facts||d.items||[];for(const x of items){const t=typeof x==='string'?x:x.text;if(t)learn(t,typeof x==='string'?label:(x.source||label))}S.events.push({type:'corpus_import',label,count:items.length,at:Date.now()});save();render();$('out').textContent='Корпус '+label+': обработано '+items.length+' утверждений.'}catch(e){$('out').textContent='Ошибка корпуса '+label+': '+e.message}}
 function exportState(){const blob=new Blob([JSON.stringify({version:S.version,facts:S.facts,sources:S.sources,rel:S.rel,stats:{steps:S.steps,episodes:S.episodes}},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-math-knowledge.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function adaptiveCycle(n=250){for(let i=0;i<n;i++){const x=CORPUS[i%CORPUS.length],before=S.facts.length;learn(x,'adaptive',false);if(S.facts.length===before)S.episodes++;if(i%17===0)S.errors=Math.max(0,S.errors-1)}save();render();$('out').textContent='Адаптивный цикл: '+n+' эпизодов. Повторные факты усиливают параметры; новые факты расширяют пространство памяти.'}
