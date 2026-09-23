@@ -11,7 +11,7 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 <div class="grid"><div class="stat"><b id="facts">0</b><small>фактов памяти</small></div><div class="stat"><b id="terms">0</b><small>состояний</small></div><div class="stat"><b id="edges">0</b><small>связей</small></div><div class="stat"><b id="entropy">0</b><small>энтропия</small></div></div></section>
 <section class="panel"><b>1. Обучение</b><p class="muted">Вставь русский текст. Движок извлечёт символические n-граммы, понятия и отношения. Это обучение математических параметров, а не веса нейросети.</p>
 <textarea id="train" placeholder="Например: Москва находится в России. Россия находится в Европе. Вода кипит при нормальном давлении при температуре около 100 градусов Цельсия."></textarea>
-<div class="row"><button id="learn" class="primary">Обучить ядро</button><button id="seed">Загрузить базовый корпус</button><button id="reset">Сбросить</button></div><div class="bar"><i id="prog"></i></div></section>
+<div class="row"><button id="learn" class="primary">Обучить ядро</button><button id="seed">Запустить обучение AKSI</button><button id="cycle">Самообучение ×10</button><button id="reset">Сбросить</button></div><div class="bar"><i id="prog"></i></div></section>
 <section class="panel"><b>2. Спросить</b><textarea id="q" style="min-height:70px" placeholder="Напиши вопрос или утверждение…"></textarea><div class="row"><button id="ask" class="primary">Вычислить ответ</button></div></section>
 <section class="panel"><b>Результат</b><div id="out" class="answer">Я жду математического состояния.</div><div id="state" class="chips" style="margin-top:10px"></div></section>
 <section class="panel"><b>Математическое состояние</b><div id="explain" class="muted">Здесь будет декомпозиция: признаки → гипотезы → память → энергия → выбор → генерация.</div></section>
@@ -19,7 +19,7 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 <script>
 (()=>{'use strict';
 const K='aksi-math-v01';
-const S={N:3,alpha:.18,dim:64,ngrams:{},vocab:{},facts:[],edges:{},counts:{},seed:1};
+const S={N:4,alpha:.18,dim:256,ngrams:{},vocab:{},facts:[],edges:{},relations:{},concepts:{},counts:{},seed:1,steps:0};
 const $=id=>document.getElementById(id);
 const norm=s=>String(s||'').toLowerCase().replace(/[«»"']/g,'').replace(/\s+/g,' ').trim();
 const toks=s=>norm(s).replace(/[^а-яёa-z0-9?!.,:;\- ]/g,' ').split(/\s+/).filter(Boolean);
@@ -30,8 +30,13 @@ function learn(text){
  const ts=toks(text); if(!ts.length)return;
  for(let i=0;i<ts.length;i++){const t=ts[i];S.vocab[t]=(S.vocab[t]||0)+1;for(let n=1;n<=S.N;n++){if(i+n<ts.length){const key=ts.slice(i,i+n).join(' ');S.ngrams[key]=(S.ngrams[key]||0)+1}}}
  const sentences=text.split(/[.!?]+/).map(x=>x.trim()).filter(Boolean);
- for(const f of sentences){const v=vec(f);S.facts.push({text:f,vec:v,t:Date.now()});const w=toks(f);for(let i=0;i<w.length-1;i++){const k=w[i]+'→'+w[i+1];S.edges[k]=(S.edges[k]||0)+1}}
- localStorage.setItem(K,JSON.stringify(S));render();$('prog').style.width='100%';setTimeout(()=>$('prog').style.width='0',300)
+ for(const f of sentences){
+   const v=vec(f), w=toks(f); S.facts.push({text:f,vec:v,t:Date.now()});
+   for(let i=0;i<w.length-1;i++){const k=w[i]+'→'+w[i+1];S.edges[k]=(S.edges[k]||0)+1}
+   const m=f.match(/^(.+?)\s+(находится|является|есть|имеет|содержит|включает|может|обращается|создаёт|использует|связано с|похоже на)\s+(.+)$/i);
+   if(m){const a=norm(m[1]),r=norm(m[2]),b=norm(m[3]);const key=a+'|'+r+'|'+b;S.relations[key]=(S.relations[key]||0)+1;S.concepts[a]=(S.concepts[a]||0)+1;S.concepts[b]=(S.concepts[b]||0)+1}
+ }
+ S.steps++; localStorage.setItem(K,JSON.stringify(S));render();$('prog').style.width='100%';setTimeout(()=>$('prog').style.width='0',300)
 }
 function candidates(prefix){
  const p=toks(prefix).slice(-(S.N-1));const out=[];
@@ -40,26 +45,39 @@ function candidates(prefix){
 }
 function entropy(vals){const z=vals.reduce((a,b)=>a+b,0)||1;return -vals.reduce((h,x)=>{const p=x/z;return h+(p? p*Math.log2(p):0)},0)}
 function retrieve(q){
- const qv=vec(q);return S.facts.map(f=>({f,s:sim(qv,f.vec)})).sort((a,b)=>b.s-a.s).slice(0,5)
+ const qv=vec(q);return S.facts.map(f=>({f,s:sim(qv,f.vec)})).sort((a,b)=>b.s-a.s).slice(0,8)
+}
+function infer(q){
+ const nq=norm(q).replace(/[?]/g,'');
+ const direct=Object.keys(S.relations).filter(k=>k.includes(nq));
+ const words=toks(nq).filter(x=>x.length>2);
+ const hits=Object.entries(S.relations).map(([k,v])=>{const p=k.split('|');const overlap=words.filter(w=>k.includes(w)).length;return {k,v,score:overlap/(words.length||1)}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+ const derived=[];
+ for(const x of hits.slice(0,20)){const p=x.k.split('|');for(const y of hits.slice(0,20)){const q=y.k.split('|');if(p[2]===q[0]&&p[1]===q[1])derived.push({text:p[0]+' '+p[1]+' '+q[2],rule:'транзитивный вывод',score:x.score*y.score*.8})}}
+ return {direct,hits,derived}
 }
 function intent(q){const t=toks(q);return {question:/\?|почему|зачем|как|что|кто|где|когда/.test(q),terms:t,uncertainty:1/Math.sqrt(1+t.length)}}
 function generate(q){
- const I=intent(q), R=retrieve(q), best=R[0];
+ const I=intent(q), R=retrieve(q), best=R[0], G=infer(q);
  let response='';
- if(best&&best.s>.62){response='Наиболее согласованное состояние памяти:\n'+best.f.text+'.';}
- else if(best&&best.s>.42){response='Я не нахожу точного совпадения, но ближайшее состояние памяти:\n'+best.f.text+'.';}
- else response='В текущем математическом состоянии нет достаточного свидетельства для достоверного ответа.';
+ if(G.direct.length) response='Найдено прямое состояние знания:\n'+G.direct.slice(0,3).join('\n');
+ else if(G.derived.length) response='Математический вывод:\n'+G.derived.slice(0,3).map(x=>x.text+' ['+x.rule+']').join('\n');
+ else if(best&&best.s>.62) response='Наиболее согласованное состояние памяти:\n'+best.f.text+'.';
+ else if(best&&best.s>.42) response='Ближайшее состояние памяти (не доказательство):\n'+best.f.text+'.';
+ else response='Недостаточно свидетельств. Я не буду выдумывать ответ.';
  const c=candidates(norm(q));const vals=c.map(x=>x.score);const H=entropy(vals);
  const hyps=R.slice(0,3).map((x,i)=>({id:i+1,energy:1-Math.max(-1,Math.min(1,x.s)),prob:Math.max(0,x.s)}));
  const z=hyps.reduce((a,b)=>a+b.prob,0)||1;hyps.forEach(x=>x.prob/=z);
  $('out').textContent=response;
- $('state').innerHTML='<span class="chip">вопрос='+I.question+'</span><span class="chip">неопределённость='+I.uncertainty.toFixed(3)+'</span><span class="chip">лучшее сходство='+(best?best.s.toFixed(3):'0')+'</span><span class="chip">гипотез='+hyps.length+'</span>';
- $('explain').textContent='Запрос преобразован в вектор v(q). Память ранжирована по косинусному сходству. Гипотезы получают массу P(H) ∝ similarity. Для продолжения текста оцениваются условные n-граммы. Энтропия следующего шага H='+H.toFixed(3)+'. Пока свидетельств недостаточно, движок обязан сказать об этом, а не галлюцинировать.';
+ $('state').innerHTML='<span class="chip">вопрос='+I.question+'</span><span class="chip">неопределённость='+I.uncertainty.toFixed(3)+'</span><span class="chip">сходство='+(best?best.s.toFixed(3):'0')+'</span><span class="chip">гипотез='+hyps.length+'</span><span class="chip">выводов='+G.derived.length+'</span><span class="chip">шагов='+S.steps+'</span>';
+ $('explain').textContent='Запрос → гипервектор v(q) → ассоциативная память → пространство гипотез → поиск отношений → транзитивный вывод → генерация. H='+H.toFixed(3)+'. Это математический inference runtime, а не нейросеть.';
 }
 function render(){$('facts').textContent=S.facts.length;$('terms').textContent=Object.keys(S.vocab).length;$('edges').textContent=Object.keys(S.edges).length;const vals=Object.values(S.ngrams);$('entropy').textContent=entropy(vals).toFixed(2)}
 $('learn').onclick=()=>learn($('train').value);
 $('ask').onclick=()=>generate($('q').value);
-$('seed').onclick=()=>learn('Москва находится в России. Россия находится в Европе. Москва является столицей России. Вода при нормальном атмосферном давлении кипит примерно при ста градусах Цельсия. Вода может находиться в твёрдом жидком и газообразном состоянии. Солнце является звездой. Земля обращается вокруг Солнца. Язык состоит из символов слов отношений и контекста. AKSI хранит состояния и проверяет гипотезы через свидетельства.');
+const CORPUS=`Язык состоит из символов слов отношений и контекста. Слово получает смысл из контекста и отношений. Предложение состоит из понятий и связей. Москва находится в России. Россия находится в Европе. Москва является столицей России. Европа является частью Земли. Земля обращается вокруг Солнца. Солнце является звездой. Луна обращается вокруг Земли. Вода существует в твёрдом жидком и газообразном состоянии. Вода при нормальном давлении кипит примерно при ста градусах Цельсия. Лёд является твёрдой водой. Пар является газообразной водой. Температура измеряет тепловое состояние. Причина предшествует следствию. Свидетельство повышает уверенность в гипотезе. Противоречие снижает уверенность в гипотезе. Память хранит состояния прошлого. Контекст изменяет значение слова. Сходство измеряет близость двух состояний. Энтропия измеряет неопределённость. Вероятность выражает степень уверенности. Гипотеза является возможным объяснением наблюдения. Наблюдение может подтверждать гипотезу. Наблюдение может опровергать гипотезу. Информация уменьшает неопределённость. Хорошее действие максимально уменьшает неопределённость при разумной стоимости. AKSI хранит состояния и проверяет гипотезы через свидетельства. AKSI строит гипотезы перед выводом. AKSI не должна выдавать неизвестное за известное. Математическая память может связывать понятия. Связь имеет направление и тип. Два состояния могут быть похожими. Разные состояния могут иметь общую структуру. Человек задаёт вопрос. Система преобразует вопрос в математическое состояние. Система ищет согласованные состояния памяти. Система сравнивает гипотезы. Система обновляет уверенность после нового свидетельства. Система выбирает продолжение с максимальным согласованием. Система может отказаться от ответа при высокой неопределённости.`;
+$('seed').onclick=()=>{learn(CORPUS);$('out').textContent='Базовое математическое обучение завершено.'};
+$('cycle').onclick=async()=>{for(let i=0;i<10;i++){learn(CORPUS);await new Promise(r=>setTimeout(r,20));} $('out').textContent='10 циклов обучения завершены. Шагов: '+S.steps;};
 $('reset').onclick=()=>{localStorage.removeItem(K);location.reload()};
 try{const x=JSON.parse(localStorage.getItem(K));if(x){Object.assign(S,x);S.facts=x.facts||[];S.edges=x.edges||{};S.ngrams=x.ngrams||{};S.vocab=x.vocab||{}}}catch(e){} render();
 })();</script></body></html>
