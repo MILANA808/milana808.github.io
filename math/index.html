@@ -6,8 +6,8 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 @media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
 </style></head>
 <body><main>
-<section class="hero"><h1>AKSI MATH v0.9</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
-<p>Это экспериментальный математический runtime. Он не притворяется GPT: и при необходимости выходит из локальной памяти во внешний поиск Wikipedia, сохраняя источник. язык представлен состоянием, связями, вероятностями, памятью и динамическим частотным полем; ответы выбираются по совместному резонансу структуры и спектра.</p>
+<section class="hero"><h1>AKSI MATH v0.9</h1><div class="muted">Математическое ядро AKSI · локальный runtime + управляемый Web/LLM контур</div>
+<p>Это экспериментальный математический runtime. Локальное ядро работает без нейросети; при необходимости AKSI подключает внешний поиск и отдельный model gateway как генератор кандидатов, а затем применяет математическую арбитрацию. язык представлен состоянием, связями, вероятностями, памятью и динамическим частотным полем; ответы выбираются по совместному резонансу структуры и спектра.</p>
 <div class="grid"><div class="stat"><b id="facts">0</b><small>фактов памяти</small></div><div class="stat"><b id="terms">0</b><small>состояний</small></div><div class="stat"><b id="edges">0</b><small>связей</small></div><div class="stat"><b id="entropy">0</b><small>энтропия</small></div></div></section>
 <section class="panel"><b>1. Обучение</b><p class="muted">Вставь русский текст. Движок извлечёт символические n-граммы, понятия и отношения. Это обучение математических параметров, а не веса нейросети.</p>
 <textarea id="train" placeholder="Например: Москва находится в России. Россия находится в Европе. Вода кипит при нормальном давлении при температуре около 100 градусов Цельсия."></textarea>
@@ -130,9 +130,9 @@ async function universalAnswer(q){
    const d=await rr.json();
    if(d.answer){
     $('out').textContent=d.answer;
-    $('state').innerHTML=['режим='+((d.mode)||'AKSI universal'),'маршрут='+(d.route?.type||'general'),'свидетельств='+(d.sources||[]).length,'уверенность='+(d.confidence??0).toFixed(3),'противоречий='+(d.contradictions||[]).length,'память='+S.facts.length].map(x=>'<span class="chip">'+x+'</span>').join('');
+    $('state').innerHTML=['режим='+((d.mode)||'AKSI universal'),'маршрут='+(d.route?.type||'general'),'эпистемика='+(d.epistemic||'—'),'свидетельств='+(d.sources||[]).length,'доменов='+(d.source_domains||[]).length,'уверенность='+(d.confidence??0).toFixed(3),'противоречий='+(d.contradictions||[]).length,'память='+S.facts.length].map(x=>'<span class="chip">'+x+'</span>').join('');
     $('candidates').innerHTML=(d.candidates||[]).map((c,i)=>'<span class="chip">'+(i+1)+': '+c.role+' · '+Number(c.score||0).toFixed(3)+(c.contradictions?.length?' · conflict':'')+'</span>').join('');
-    $('explain').textContent='AKSI-контроллер: маршрут → внешние свидетельства → несколько кандидатов → математическая оценка → выбор. Внешняя модель — генератор, не источник истины.';
+    $('explain').textContent='AKSI-контроллер: маршрут → план → внешние свидетельства → кандидаты → математическая оценка → выбор. Эпистемика: '+(d.epistemic||'—')+'. Внешняя модель — генератор, не источник истины. План: '+((d.plan||[]).map(x=>x.goal||x).join(' → ')||'нет')+'.';
     return;
    }
   }
