@@ -29,18 +29,18 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <header><div class="brand">AKSI<small>POCKET INTELLIGENCE</small></div><div id="badge" class="badge">проверка устройства…</div></header>
 <section class="hero">
 <h1>Настоящий локальный мозг.<br>Прямо в телефоне.</h1>
-<p>Модель работает на устройстве через WebGPU. После первой загрузки веса браузер может использовать локальный кэш; AKSI добавляет память, проверку и Discovery.</p>
+<p>Российский локальный мозг Vikhr-Qwen 0.5B работает прямо в браузере. Первый запуск скачивает около 398 MB, затем модель кэшируется.</p>
 <div class="grid">
 <div class="stat"><b id="gpu">—</b><span>WebGPU</span></div>
 <div class="stat"><b id="model">—</b><span>модель</span></div>
 <div class="stat"><b id="mem">0</b><span>память AKSI</span></div>
 </div>
-<label>Мозг</label><div class="stat"><b>Qwen3 0.6B · ONNX</b><span>автоматически WebGPU → WASM</span></div>
+<label>Мозг</label><div class="stat"><b>Vikhr-Qwen 0.5B · Q4_K_M</b><span>русскоязычная модель · WebGPU/WASM</span></div>
 <div class="controls"><button id="load" class="primary">Загрузить мозг</button><button id="clear">Очистить память</button></div>
 <div id="progress"><div id="bar"></div></div><div id="status">Готовлю Pocket Runtime…</div>
 </section>
 <section class="chat">
-<div id="feed" class="feed"><div class="msg aksi"><div class="who">AKSI</div>Я готова. Нажми «Загрузить мозг». Первый запуск скачает модель; это единственный большой шаг. Потом задавай мне задачи.</div></div>
+<div id="feed" class="feed"><div class="msg aksi"><div class="who">AKSI</div>Я готова. Нажми «Загрузить мозг». Первый запуск скачает около 398 MB. Потом модель используется локально.</div></div>
 <div class="compose"><input id="q" placeholder="Напиши задачу AKSI…" maxlength="5000"><button id="send" class="primary">Думать</button></div>
 </section>
 <div class="note">Честный режим: это не AGI и не сознание. «Память» — локальные данные; модель — открытые веса. Сеть нужна для первой загрузки модели и самого сайта, если кэш ещё пуст.</div>
@@ -51,51 +51,42 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <script src="/aksi-decision-receipt.js?v=11"></script>
 <script src="/aksi-webllm.js?v=5"></script>
 <script src="/aksi-offline-full.js?v=2"></script>
-<script>
+<script type="module">
+import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/+esm';
 (function(){
- const $=id=>document.getElementById(id);
- let worker=null, ready=false, busy=false, answerNode=null;
- function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
- function add(who,text,cls){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML='<div class="who">'+who+'</div>'+esc(text);$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight;return d}
- function set(p,msg){$('bar').style.width=Math.max(0,Math.min(100,p))+'%';$('status').textContent=msg||''}
- function refresh(){ $('model').textContent=ready?'Qwen3 0.6B':'—';$('badge').textContent=ready?'● LOCAL BRAIN':'○ NOT LOADED';$('send').disabled=!ready||busy; if(window.AKSI_OFFLINE){try{$('mem').textContent=window.AKSI_OFFLINE.status().memory}catch(e){}}}
- function start(){
-   if(worker)return;
-   if(!window.Worker){add('AKSI','Этот браузер не поддерживает Worker. Открой страницу в Safari или Chrome.','aksi');return}
-   worker=new Worker('./worker.js?v=1',{type:'module'});
-   worker.onmessage=(e)=>{
-     const m=e.data||{};
-     if(m.type==='status'){ $('gpu').textContent=m.device==='webgpu'?'ON':'OFF';set(m.progress,m.message);return}
-     if(m.type==='progress'){set(m.progress,'загрузка: '+m.file);return}
-     if(m.type==='ready'){ready=true;$('gpu').textContent=m.device==='webgpu'?'ON':'WASM';set(100,'готово · '+m.device);add('AKSI','Локальный мозг загружен. '+(m.device==='webgpu'?'Inference идёт на GPU.':'WebGPU недоступен: WASM будет заметно медленнее.'),'aksi');refresh();return}
-     if(m.type==='token'){if(answerNode){answerNode.textContent+=m.text;$('feed').scrollTop=$('feed').scrollHeight}return}
-     if(m.type==='done'){if(answerNode&&answerNode.textContent==='…')answerNode.textContent=m.text||'Модель не вернула ответ.';busy=false;set(100,'готово');refresh();return}
-     if(m.type==='error'){busy=false;ready=false;set(0,'ошибка · '+String(m.message).slice(0,180));if(answerNode)answerNode.textContent='Ошибка: '+m.message;else add('AKSI','Ошибка: '+m.message,'aksi');refresh();}
-   };
-   worker.onerror=(e)=>{busy=false;ready=false;set(0,'ошибка worker');add('AKSI','Worker не запустился: '+(e.message||'неизвестная ошибка')+' · попробуй Safari/Chrome.','aksi');refresh()};
- }
- async function load(){
-   if(ready||worker)return;
-   $('load').disabled=true;set(1,'запускаю локальный worker…');start();
-   if(worker)worker.postMessage({type:'load'});
-   $('load').disabled=false;
- }
- async function send(){
-   const q=$('q').value.trim();if(!q||!ready||busy)return;
-   $('q').value='';add('Вы',q,'you');busy=true;refresh();set(100,'AKSI думает локально…');
-   const bubble=add('AKSI','…','aksi');answerNode=bubble.lastChild;
-   let memory='';
-   try{memory=(window.AKSI_OFFLINE.memory()||[]).slice(0,6).map(x=>typeof x==='string'?x:x.text).filter(Boolean).join('\n').slice(0,1800)}catch(e){}
-   const messages=[
-     {role:'system',content:'Ты AKSI Pocket — локальный ИИ. Отвечай по-русски, кратко и по делу. Разделяй факт, гипотезу и неизвестность. Не выдумывай источники. Не раскрывай внутренние рассуждения.'+(memory?'\nЛокальная память:\n'+memory:'')},
-     {role:'user',content:q}
-   ];
-   worker.postMessage({type:'generate',messages});
- }
- $('load').onclick=load;$('send').onclick=send;
- $('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});
- $('clear').onclick=()=>{try{window.AKSI_OFFLINE.clearMemory();add('AKSI','Локальная память очищена.','aksi');refresh()}catch(e){}};
- $('gpu').textContent=(navigator.gpu?'доступен':'нет');set(0,'Готово. Нажми «Загрузить мозг».');refresh();
+const $=id=>document.getElementById(id);
+const MODEL_URL='https://huggingface.co/Vikhrmodels/Vikhr-Qwen-2.5-0.5B-instruct-GGUF/resolve/main/Vikhr-Qwen-2.5-0.5B-instruct-Q4_K_M.gguf';
+const MODEL_SIZE='398 MB', WASM='https://cdn.jsdelivr.net/npm/@wllama/wllama@3.5.1/wasm/wllama.wasm';
+let llm=null,ready=false,busy=false,answerNode=null;
+function esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function add(w,t,cl){const d=document.createElement('div');d.className='msg '+cl;d.innerHTML='<div class="who">'+esc(w)+'</div>'+esc(t);$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight;return d}
+function set(p,m){$('bar').style.width=Math.max(0,Math.min(100,p))+'%';$('status').textContent=m||''}
+function refresh(){$('model').textContent=ready?'Vikhr 0.5B':'—';$('badge').textContent=ready?'● VIKHR LOCAL':'○ NOT LOADED';$('send').disabled=!ready||busy;try{$('mem').textContent=window.AKSI_OFFLINE?.status()?.memory??0}catch(e){}}
+async function load(){
+ if(ready||busy)return;busy=true;$('load').disabled=true;set(1,'запускаю Vikhr runtime…');
+ try{
+  llm=new Wllama({default:WASM});llm.setCompat('default');const gpu=llm.isSupportWebGPU();$('gpu').textContent=gpu?'ON':'OFF';
+  set(3,'Vikhr-Qwen 0.5B · '+MODEL_SIZE+' · загрузка…');
+  await llm.loadModelFromUrl(MODEL_URL,{n_ctx:1024,n_gpu_layers:gpu?99999:0,n_threads:Math.max(1,Math.min(4,(navigator.hardwareConcurrency||2)-1)),reasoning:false,progressCallback:({loaded,total})=>set(total?Math.round(5+loaded/total*90):5,'загрузка Vikhr: '+Math.round(loaded/1048576)+' / '+Math.round(total/1048576)+' MB')});
+  ready=true;set(100,'готово · Vikhr локально');add('AKSI','Vikhr-Qwen 0.5B загружен. Теперь можно задавать вопросы.','aksi');refresh();
+ }catch(e){llm=null;ready=false;set(0,'ошибка загрузки');add('AKSI','Не удалось загрузить Vikhr: '+String(e?.message||e).slice(0,700),'aksi');refresh()}
+ finally{busy=false;$('load').disabled=false;refresh()}
+}
+async function send(){
+ const q=$('q').value.trim();if(!q||!ready||busy)return;$('q').value='';add('Вы',q,'you');busy=true;refresh();
+ const d=add('AKSI','…','aksi');answerNode=d.lastChild;let memory='';
+ try{memory=(window.AKSI_OFFLINE?.memory?.()||[]).slice(0,6).map(x=>typeof x==='string'?x:x.text).filter(Boolean).join('\n').slice(0,1800)}catch(e){}
+ const messages=[{role:'system',content:'Ты AKSI Pocket — локальный русскоязычный ИИ. Отвечай по-русски, кратко и по делу. Разделяй факт, гипотезу и неизвестность. Не выдумывай источники.'+(memory?'\nЛокальная память:\n'+memory:'')},{role:'user',content:q}];
+ try{
+  const stream=await llm.createChatCompletion({messages,max_tokens:220,temperature:.3,top_k:40,top_p:.9,stream:true});let text='';
+  for await(const chunk of stream){const x=chunk?.choices?.[0]?.delta?.content||chunk?.choices?.[0]?.text||'';if(x){text+=x;answerNode.textContent=text;$('feed').scrollTop=$('feed').scrollHeight}}
+  if(!text)answerNode.textContent='Модель не вернула текст.';set(100,'готово');
+ }catch(e){answerNode.textContent='Ошибка: '+String(e?.message||e);set(0,'ошибка генерации')}
+ busy=false;refresh();
+}
+$('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});
+$('clear').onclick=()=>{try{window.AKSI_OFFLINE.clearMemory();add('AKSI','Локальная память очищена.','aksi');refresh()}catch(e){}};
+$('gpu').textContent=navigator.gpu?'доступен':'нет';set(0,'Готово. Vikhr-Qwen 0.5B · '+MODEL_SIZE);refresh();
 })();
 </script>
 </body></html>
