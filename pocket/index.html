@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090d">
+<link rel="manifest" href="manifest.json">
+<title>AKSI Pocket — локальный мозг</title>
+<style>
+:root{--bg:#07090d;--panel:#0e131c;--panel2:#111925;--line:#233044;--text:#eef4ff;--muted:#8391a6;--accent:#9fe8ff;--good:#72e0a1;--warn:#ffd27d;--bad:#ff8e9e}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#183247 0,#07090d 45%);color:var(--text);font:15px/1.5 system-ui,-apple-system,sans-serif;min-height:100vh}
+main{max-width:760px;margin:auto;padding:14px 14px 30px}
+header{display:flex;justify-content:space-between;align-items:center;padding:8px 2px 14px}.brand{font-weight:800;letter-spacing:.12em}.brand small{display:block;color:var(--muted);font-size:9px;letter-spacing:.18em;margin-top:2px}
+.badge{border:1px solid var(--line);border-radius:99px;padding:5px 9px;font-size:11px;color:var(--muted)}
+.hero{border:1px solid var(--line);border-radius:20px;padding:20px;background:linear-gradient(145deg,#101a27,#0b1018);box-shadow:0 20px 60px #0008}
+h1{font-size:28px;line-height:1.05;margin:0 0 9px}.hero p{color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.stat{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a0f17}.stat b{display:block;font-size:12px}.stat span{font-size:10px;color:var(--muted)}
+.controls{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:12px;padding:11px 14px;font-weight:700}button.primary{background:var(--accent);color:#061018;border-color:var(--accent)}button:disabled{opacity:.45}
+select,input{width:100%;border:1px solid var(--line);background:#080d14;color:var(--text);border-radius:12px;padding:12px;font:inherit}label{display:block;color:var(--muted);font-size:11px;margin:14px 0 6px}
+#progress{height:7px;background:#05080d;border-radius:99px;overflow:hidden;margin-top:12px}#bar{height:100%;width:0;background:var(--accent);transition:width .2s}
+#status{font:11px ui-monospace,monospace;color:var(--muted);margin-top:8px;min-height:17px}
+.chat{margin-top:14px;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#0a0f17}.feed{min-height:260px;max-height:55vh;overflow:auto;padding:14px}.msg{padding:12px;margin-bottom:9px;border-radius:14px;white-space:pre-wrap}.you{background:#101927;margin-left:12%}.aksi{background:#0e1720;border:1px solid #1c3442;margin-right:4%}.who{font-size:10px;color:var(--muted);margin-bottom:4px}
+.compose{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}.compose input{flex:1}.compose button{min-width:88px}
+.note{color:var(--muted);font-size:11px;margin-top:12px}.links{display:flex;gap:14px;margin-top:14px}.links a{color:var(--accent);font-size:12px;text-decoration:none}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand">AKSI<small>POCKET INTELLIGENCE</small></div><div id="badge" class="badge">проверка устройства…</div></header>
+<section class="hero">
+<h1>Настоящий локальный мозг.<br>Прямо в телефоне.</h1>
+<p>Модель работает на устройстве через WebGPU. После первой загрузки веса браузер может использовать локальный кэш; AKSI добавляет память, проверку и Discovery.</p>
+<div class="grid">
+<div class="stat"><b id="gpu">—</b><span>WebGPU</span></div>
+<div class="stat"><b id="model">—</b><span>модель</span></div>
+<div class="stat"><b id="mem">0</b><span>память AKSI</span></div>
+</div>
+<label for="models">Мозг</label><select id="models"></select>
+<div class="controls"><button id="load" class="primary">Загрузить мозг</button><button id="clear">Очистить память</button></div>
+<div id="progress"><div id="bar"></div></div><div id="status">Готовлю Pocket Runtime…</div>
+</section>
+<section class="chat">
+<div id="feed" class="feed"><div class="msg aksi"><div class="who">AKSI</div>Я готова. Нажми «Загрузить мозг». Первый запуск скачает модель; это единственный большой шаг. Потом задавай мне задачи.</div></div>
+<div class="compose"><input id="q" placeholder="Напиши задачу AKSI…" maxlength="5000"><button id="send" class="primary">Думать</button></div>
+</section>
+<div class="note">Честный режим: это не AGI и не сознание. «Память» — локальные данные; модель — открытые веса. Сеть нужна для первой загрузки модели и самого сайта, если кэш ещё пуст.</div>
+<div class="links"><a href="/discovery/">Discovery Lab</a><a href="/superpose/">Superpose</a><a href="/offline/">Offline Core</a></div>
+</main>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-knowledge.js?v=3"></script>
+<script src="/aksi-decision-receipt.js?v=11"></script>
+<script src="/aksi-webllm.js?v=4"></script>
+<script src="/aksi-offline-full.js?v=2"></script>
+<script>
+(function(){
+ const $=id=>document.getElementById(id), W=window.AKSI_WEBLLM, O=window.AKSI_OFFLINE;
+ function add(who,text,cls){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML='<div class="who">'+who+'</div>'+String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight}
+ function refresh(){
+   const s=W.status(); $('gpu').textContent=s.webgpu?'ON':'OFF'; $('model').textContent=s.model?s.model.replace(/-.*/,''):'—'; $('mem').textContent=O?O.status().memory:0;
+   $('badge').textContent=s.ready?'● LOCAL BRAIN':'○ NOT LOADED'; $('status').textContent=s.message||'готово'; $('bar').style.width=(s.progress||0)+'%';
+   $('send').disabled=!s.ready;
+ }
+ W.models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;$('models').appendChild(o)});
+ async function load(){ $('load').disabled=true; try{await W.load($('models').value,p=>{ $('bar').style.width=p.progress+'%';$('status').textContent=p.message; }); add('AKSI','Мозг загружен: '+W.status().model,'aksi'); }catch(e){add('AKSI','Не удалось запустить локальный мозг: '+(e.message||e),'aksi')} $('load').disabled=false;refresh();}
+ async function send(){const q=$('q').value.trim();if(!q||!W.ready())return;$('q').value='';add('Вы',q,'you');$('send').disabled=true;$('status').textContent='AKSI думает локально…';
+   try{const r=await W.complete(q,{max_tokens:700,temperature:.35});if(r.text)add('AKSI',r.text,'aksi');else add('AKSI','Ошибка модели: '+(r.error||'неизвестно'),'aksi');}
+   finally{$('send').disabled=false;refresh();}
+ }
+ $('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+ $('clear').onclick=()=>{if(O){O.clearMemory();refresh();add('AKSI','Локальная память очищена.','aksi')}};
+ window.addEventListener('aksi-webllm-progress',refresh);refresh();
+})();
+</script>
+</body></html>
