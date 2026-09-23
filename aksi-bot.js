@@ -216,6 +216,18 @@
 
     if (/^(исследуй|изучи|research)\s*[:：]?\s+/i.test(q) || /^исследуй\s+/i.test(q)) {
       var topic = q.replace(/^(исследуй|изучи|research)\s*[:：]?\s*/i, "").trim() || q;
+      if (G.AKSI_AGENT_RUNTIME && G.AKSI_AGENT_RUNTIME.run) {
+        try {
+          var live = await G.AKSI_AGENT_RUNTIME.run(topic, { max_sources: 10, timeout_ms: 120000 });
+          var body = live.report && live.report.analysis ? live.report.analysis : (live.report && live.report.summary) || "";
+          var head = "AKSI Infinity · " + live.status + "\nЗадача: " + live.id + "\n\n";
+          var ev = live.verification ? "\n\nПроверка: источников " + live.verification.sources_count + ", независимых доменов " + live.verification.independent_source_count + "." : "";
+          var rc = live.receipt ? "\nReceipt: " + live.receipt.protocol + " · " + live.receipt.result_hash : "";
+          return applyGate({ text: head + body + ev + rc, source: "infinity-agent", offline: false, sources: live.sources, receipt: live.receipt, verification: live.verification, score: live.sources.length ? 0.08 : 0.001 }, q);
+        } catch (e) {
+          /* fall through to the historic local research path */
+        }
+      }
       try {
         var report = await localResearch(topic);
         return applyGate({ text: report.text, source: "research", offline: true, sources: report.sources, score: report.sources.length ? 0.05 : 0.001 }, q);
