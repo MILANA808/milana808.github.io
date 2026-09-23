@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Semantic Sampling</title>
+<style>
+body{margin:0;background:#080b12;color:#eef2ff;font:16px system-ui,-apple-system,sans-serif}
+main{max-width:1100px;margin:auto;padding:28px}.hero{padding:28px;border:1px solid #273044;border-radius:24px;background:#0d1220}
+h1{font-size:clamp(34px,7vw,68px);margin:0 0 10px} h2{margin-top:32px}
+p{line-height:1.6;color:#b9c3d8}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{padding:18px;border:1px solid #273044;border-radius:16px;background:#0b101b}
+.metric{font-size:30px;font-weight:700}.label{color:#8290aa;font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+canvas{width:100%;height:280px;background:#05070c;border:1px solid #273044;border-radius:16px}
+button{border:0;border-radius:12px;padding:12px 16px;background:#eef2ff;color:#080b12;font-weight:700;cursor:pointer}
+code{color:#c8d3ff}.note{font-size:13px;color:#8e9ab2}.warn{border-left:3px solid #d9b36c;padding-left:12px}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<section class="hero"><div class="label">AKSI RESEARCH LAB · AKSI-SS/0.1</div>
+<h1>Semantic Sampling</h1>
+<p>Из непрерывного исполнения агента сохраняются не все события, а семантически значимые контрольные точки. Реконструктор никогда не выдаёт неизвестный участок за доказанный.</p>
+<button id="run">Запустить эксперимент</button></section>
+<h2>Первый эксперимент</h2><div class="grid">
+<div class="card"><div class="label">events</div><div id="events" class="metric">100</div></div>
+<div class="card"><div class="label">checkpoints</div><div id="cp" class="metric">—</div></div>
+<div class="card"><div class="label">compression</div><div id="ratio" class="metric">—</div></div>
+</div>
+<h2>Траектория</h2><canvas id="plot" width="1000" height="280"></canvas>
+<p class="note">Линия — полная синтетическая траектория. Точки — сохранённые семантические отсчёты. Это визуальный исследовательский стенд, не доказательство теоремы.</p>
+<h2>Что уже встроено в Infinity</h2>
+<div class="grid">
+<div class="card"><b>AKSI-S</b><p>Adaptive semantic checkpoints, критические события и ограничение максимального разрыва.</p></div>
+<div class="card"><b>AKSI-R</b><p>Реконструкция с явным состоянием <code>unknown</code> для непокрытых интервалов.</p></div>
+<div class="card"><b>AKSI-V</b><p>Хэш состояния и подпись sampling commitment внутри runtime receipt.</p></div>
+</div>
+<h2>Научная граница</h2><p class="warn">Сейчас это исследовательская гипотеза. Мы не заявляем новую теорему, универсальную реконструкцию поведения ИИ, уникальность или патентоспособность. Подписанный receipt доказывает целостность записанного доказательства, а не истинность внешнего мира.</p>
+<p><a href="https://github.com/MILANA808/Milana-backend" style="color:#c8d3ff">Исходный код</a> · <a href="/bot.html" style="color:#c8d3ff">AKSI Bot</a></p>
+</main>
+<script>
+const canvas=document.getElementById('plot'),ctx=canvas.getContext('2d');
+function experiment(){
+ const T=100, a=[], cp=[0], threshold=.3, maxGap=12; let state=0,last=0;
+ for(let i=0;i<T;i++){ if([18,39,61,82].includes(i)) state+=(Math.random()-.5)*1.8; a.push(state+(Math.random()-.5)*.08); }
+ let lastState=a[0];
+ for(let i=1;i<T;i++){let d=Math.abs(a[i]-lastState);if(d>=threshold||i-last>=maxGap){cp.push(i);last=i;lastState=a[i];}}
+ if(cp.at(-1)!==T-1)cp.push(T-1);
+ document.getElementById('events').textContent=T;
+ document.getElementById('cp').textContent=cp.length;
+ document.getElementById('ratio').textContent=(cp.length/T*100).toFixed(1)+'%';
+ ctx.clearRect(0,0,canvas.width,canvas.height); ctx.beginPath();
+ a.forEach((v,i)=>{const x=i/(T-1)*canvas.width,y=140-v*70;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+ cp.forEach(i=>{const x=i/(T-1)*canvas.width,y=140-a[i]*70;ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);ctx.fill();});
+}
+document.getElementById('run').onclick=experiment; experiment();
+</script></body></html>
