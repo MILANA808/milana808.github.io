@@ -14,7 +14,7 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 <div class="row"><button id="learn" class="primary">Обучить ядро</button><button id="seed">Запустить обучение AKSI</button><button id="wiki">Импортировать факты Википедии</button><button id="adaptive">Адаптация ×250</button><button id="export">Экспорт памяти</button><button id="cycle">Самообучение ×100</button><button id="bench">Бенчмарк</button><button id="reset">Сбросить</button></div><div class="bar"><i id="prog"></i></div></section>
 <section class="panel"><b>Живое частотное поле</b><p class="muted">Состояние кодируется динамическим спектром: частота, фаза, амплитуда, резонанс и затухание. Это математическая динамика, а не звук и не нейронная сеть.</p><canvas id="field" height="150" style="width:100%;background:#060a10;border:1px solid #202d40;border-radius:12px"></canvas><div id="freqstate" class="chips" style="margin-top:8px"></div></section>
 <section class="panel"><b>Источник знаний</b><p class="muted">Факты Wikipedia загружаются отдельным корпусом с URL происхождения. AKSI не копирует веса нейросетей. Для внешних данных используется принцип xAI/Grok: источник → свидетельство → проверка → математическое состояние → ответ.</p><div id="sources" class="chips"></div></section>\n<section class="panel"><b>Математический бенчмарк</b><p class="muted">Отдельный набор задач проверяет retrieval, отношения, вывод, abstention и provenance. Метрики не сравнивают систему с LLM автоматически — они показывают измеряемое состояние самого движка.</p><div id="benchout" class="answer">Бенчмарк ещё не запускался.</div></section>\n<section class="panel"><b>2. Спросить</b><textarea id="q" style="min-height:70px" placeholder="Напиши вопрос или утверждение…"></textarea><div class="row"><button id="ask" class="primary">Вычислить ответ</button></div></section>
-<section class="panel"><b>Результат</b><div id="out" class="answer">Я жду математического состояния.</div><div id="state" class="chips" style="margin-top:10px"></div></section>
+<section class="panel"><b>Результат</b><div id="out" class="answer">Я жду математического состояния.</div><div id="state" class="chips" style="margin-top:10px"></div><div id="candidates" class="chips" style="margin-top:10px"></div></section>
 <section class="panel"><b>Математическое состояние</b><div id="explain" class="muted">Здесь будет декомпозиция: признаки → гипотезы → память → энергия → выбор → генерация.</div></section>
 </main>
 <script>
@@ -130,8 +130,9 @@ async function universalAnswer(q){
    const d=await rr.json();
    if(d.answer){
     $('out').textContent=d.answer;
-    $('state').innerHTML=['режим=AKSI universal','свидетельств='+(d.sources||[]).length,'память='+S.facts.length].map(x=>'<span class="chip">'+x+'</span>').join('');
-    $('explain').textContent='AKSI-контроллер → внешние свидетельства → языковой модуль → ответ. Внешняя модель не считается источником истины.';
+    $('state').innerHTML=['режим='+((d.mode)||'AKSI universal'),'маршрут='+(d.route?.type||'general'),'свидетельств='+(d.sources||[]).length,'уверенность='+(d.confidence??0).toFixed(3),'противоречий='+(d.contradictions||[]).length,'память='+S.facts.length].map(x=>'<span class="chip">'+x+'</span>').join('');
+    $('candidates').innerHTML=(d.candidates||[]).map((c,i)=>'<span class="chip">'+(i+1)+': '+c.role+' · '+Number(c.score||0).toFixed(3)+(c.contradictions?.length?' · conflict':'')+'</span>').join('');
+    $('explain').textContent='AKSI-контроллер: маршрут → внешние свидетельства → несколько кандидатов → математическая оценка → выбор. Внешняя модель — генератор, не источник истины.';
     return;
    }
   }
