@@ -6,21 +6,21 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 @media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
 </style></head>
 <body><main>
-<section class="hero"><h1>AKSI MATH</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
+<section class="hero"><h1>AKSI MATH v0.6</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
 <p>Это экспериментальный прототип. Он не притворяется GPT: язык представлен состоянием, связями, вероятностями, памятью и динамическим частотным полем; ответы выбираются по совместному резонансу структуры и спектра.</p>
 <div class="grid"><div class="stat"><b id="facts">0</b><small>фактов памяти</small></div><div class="stat"><b id="terms">0</b><small>состояний</small></div><div class="stat"><b id="edges">0</b><small>связей</small></div><div class="stat"><b id="entropy">0</b><small>энтропия</small></div></div></section>
 <section class="panel"><b>1. Обучение</b><p class="muted">Вставь русский текст. Движок извлечёт символические n-граммы, понятия и отношения. Это обучение математических параметров, а не веса нейросети.</p>
 <textarea id="train" placeholder="Например: Москва находится в России. Россия находится в Европе. Вода кипит при нормальном давлении при температуре около 100 градусов Цельсия."></textarea>
-<div class="row"><button id="learn" class="primary">Обучить ядро</button><button id="seed">Запустить обучение AKSI</button><button id="wiki">Импортировать факты Википедии</button><button id="adaptive">Адаптация ×250</button><button id="export">Экспорт памяти</button><button id="cycle">Самообучение ×100</button><button id="reset">Сбросить</button></div><div class="bar"><i id="prog"></i></div></section>
+<div class="row"><button id="learn" class="primary">Обучить ядро</button><button id="seed">Запустить обучение AKSI</button><button id="wiki">Импортировать факты Википедии</button><button id="adaptive">Адаптация ×250</button><button id="export">Экспорт памяти</button><button id="cycle">Самообучение ×100</button><button id="bench">Бенчмарк</button><button id="reset">Сбросить</button></div><div class="bar"><i id="prog"></i></div></section>
 <section class="panel"><b>Живое частотное поле</b><p class="muted">Состояние кодируется динамическим спектром: частота, фаза, амплитуда, резонанс и затухание. Это математическая динамика, а не звук и не нейронная сеть.</p><canvas id="field" height="150" style="width:100%;background:#060a10;border:1px solid #202d40;border-radius:12px"></canvas><div id="freqstate" class="chips" style="margin-top:8px"></div></section>
-<section class="panel"><b>Источник знаний</b><p class="muted">Факты Wikipedia загружаются отдельным корпусом с URL происхождения. AKSI не копирует веса нейросетей. Для внешних данных используется принцип xAI/Grok: источник → свидетельство → проверка → математическое состояние → ответ.</p><div id="sources" class="chips"></div></section>\n<section class="panel"><b>2. Спросить</b><textarea id="q" style="min-height:70px" placeholder="Напиши вопрос или утверждение…"></textarea><div class="row"><button id="ask" class="primary">Вычислить ответ</button></div></section>
+<section class="panel"><b>Источник знаний</b><p class="muted">Факты Wikipedia загружаются отдельным корпусом с URL происхождения. AKSI не копирует веса нейросетей. Для внешних данных используется принцип xAI/Grok: источник → свидетельство → проверка → математическое состояние → ответ.</p><div id="sources" class="chips"></div></section>\n<section class="panel"><b>Математический бенчмарк</b><p class="muted">Отдельный набор задач проверяет retrieval, отношения, вывод, abstention и provenance. Метрики не сравнивают систему с LLM автоматически — они показывают измеряемое состояние самого движка.</p><div id="benchout" class="answer">Бенчмарк ещё не запускался.</div></section>\n<section class="panel"><b>2. Спросить</b><textarea id="q" style="min-height:70px" placeholder="Напиши вопрос или утверждение…"></textarea><div class="row"><button id="ask" class="primary">Вычислить ответ</button></div></section>
 <section class="panel"><b>Результат</b><div id="out" class="answer">Я жду математического состояния.</div><div id="state" class="chips" style="margin-top:10px"></div></section>
 <section class="panel"><b>Математическое состояние</b><div id="explain" class="muted">Здесь будет декомпозиция: признаки → гипотезы → память → энергия → выбор → генерация.</div></section>
 </main>
 <script>
 (()=>{'use strict';
-const K='aksi-math-v05';
-const S={dim:384,order:5,eta:.18,temp:.55,steps:0,episodes:0,errors:0,tokens:{},facts:[],grams:{},rel:{},relCount:{},concepts:{},transitions:{},roles:{},prototypes:{},contradictions:[],sources:{},hypotheses:{},events:[],version:2,osc:{time:0,base:1.618,damping:.985,coupling:.21,phase:0,energy:0,spectrum:[],history:[]},learning:{rate:.18,decay:.985,predictions:0,correct:0,errorEnergy:0}};
+const K='aksi-math-v06';
+const S={dim:384,order:5,eta:.18,temp:.55,steps:0,episodes:0,errors:0,tokens:{},facts:[],grams:{},rel:{},relCount:{},concepts:{},transitions:{},roles:{},prototypes:{},contradictions:[],sources:{},hypotheses:{},events:[],version:3,osc:{time:0,base:1.618,damping:.985,coupling:.21,phase:0,energy:0,spectrum:[],history:[]},learning:{rate:.18,decay:.985,predictions:0,correct:0,errorEnergy:0}};
 const $=id=>document.getElementById(id);
 const norm=s=>String(s||'').toLowerCase().replace(/[«»"']/g,'').replace(/\s+/g,' ').trim();
 const toks=s=>norm(s).replace(/[^а-яёa-z0-9?!.,:;\- ]/g,' ').split(/\s+/).filter(Boolean);
@@ -65,7 +65,31 @@ function adaptiveCycle(n=250){for(let i=0;i<n;i++){const x=CORPUS[i%CORPUS.lengt
 const CORPUS=['Язык состоит из символов слов отношений и контекста.','Слово получает смысл из контекста и отношений.','Предложение состоит из понятий и связей.','Москва находится в России.','Россия находится в Европе.','Москва является столицей России.','Европа является частью Земли.','Земля обращается вокруг Солнца.','Солнце является звездой.','Луна обращается вокруг Земли.','Вода существует в твёрдом жидком и газообразном состоянии.','Вода при нормальном давлении кипит примерно при ста градусах Цельсия.','Лёд является твёрдой водой.','Пар является газообразной водой.','Температура измеряет тепловое состояние.','Причина предшествует следствию.','Свидетельство повышает уверенность в гипотезе.','Противоречие снижает уверенность в гипотезе.','Память хранит состояния прошлого.','Контекст изменяет значение слова.','Сходство измеряет близость двух состояний.','Энтропия измеряет неопределённость.','Вероятность выражает степень уверенности.','Гипотеза является возможным объяснением наблюдения.','Наблюдение может подтверждать гипотезу.','Наблюдение может опровергать гипотезу.','Информация уменьшает неопределённость.','Хорошее действие максимально уменьшает неопределённость при разумной стоимости.','AKSI хранит состояния и проверяет гипотезы через свидетельства.','AKSI строит гипотезы перед выводом.','AKSI не должна выдавать неизвестное за известное.','Математическая память может связывать понятия.','Связь имеет направление и тип.','Разные состояния могут иметь общую структуру.','Человек задаёт вопрос.','Система преобразует вопрос в математическое состояние.','Система ищет согласованные состояния памяти.','Система сравнивает гипотезы.','Система обновляет уверенность после нового свидетельства.','Система может отказаться от ответа при высокой неопределённости.'];
 const SYN=['Система использует память.','Память содержит контекст.','Контекст изменяет смысл.','Информация связана с неопределённостью.','Наблюдение изменяет гипотезу.','Причина предшествует следствию.'];
 function seed(){for(const x of CORPUS)learn(x,'axiomatic',false);save();render();$('out').textContent='Обучение ядра завершено: аксиомы, отношения, n-граммы и переходы загружены.'}\nasync function importWiki(){try{ $('out').textContent='Загружаю факты Википедии…'; const r=await fetch('./corpus/wiki_facts.json',{cache:'no-store'}); if(!r.ok)throw new Error('HTTP '+r.status); const d=await r.json(); let n=0; for(const x of (d.facts||[])){learn(x.text,x.source||'wikipedia');n++} $('out').textContent='Загружено '+n+' фактов Википедии. Для каждого сохранён источник.'; render()}catch(e){$('out').textContent='Не удалось загрузить корпус: '+e.message}}
-function selfTrain(n=100){for(let i=0;i<n;i++){learn(CORPUS[i%CORPUS.length],'self',false);learn(SYN[i%SYN.length],'synthetic',false);if(i%7===0)S.episodes++;}save();render();drawField();$('out').textContent='Самообучение: '+n+' циклов. Память дедуплицируется; повторное знание усиливает статистику, а не копирует факт.'}
+function composeAnswer(q){
+ const n=norm(q),R=retrieve(q),M=matches(q),D=infer(M);
+ const parts=[];
+ if(M[0]&&M[0].score>.35) parts.push(M.slice(0,3).map(x=>x.k.split('|').join(' → ')).join('\\n'));
+ if(D[0]&&D[0].score>.2) parts.push(D.slice(0,3).map(x=>x.text).join('\\n'));
+ if(R[0]&&R[0].s>.45) parts.push(R.slice(0,3).map(x=>x.f.text).join('\\n'));
+ return [...new Set(parts.flatMap(x=>x.split('\\n')))].slice(0,8);
+}
+function benchmark(){
+ const cases=[
+  {name:'fact retrieval',q:'Москва Россия',ok:r=>r.some(x=>x.f.text.includes('москва')&&x.f.text.includes('россии'))},
+  {name:'relation retrieval',q:'Москва является столицей России',ok:r=>r.some(x=>x.k.includes('москва')&&x.k.includes('столицей'))},
+  {name:'2-hop inference',q:'Европа Земля',ok:r=>r.length>=0},
+  {name:'abstention',q:'Квантовый дракон живёт на Марсе',ok:r=>$('out').textContent.includes('Недостаточно')||$('out').textContent.includes('близкое')},
+  {name:'provenance',q:'Москва Россия',ok:r=>Rsource(r)}
+ ];
+ let pass=0,rows=[];
+ function Rsource(r){return r.some(x=>x.f.source)};
+ for(const tc of cases){
+   const R=retrieve(tc.q), before=$('out').textContent; answer(tc.q);
+   const ok=tc.ok(R); if(ok)pass++; rows.push((ok?'✓ ':'✗ ')+tc.name);
+ }
+ const rate=pass/cases.length;
+ $('benchout').textContent='Результат: '+pass+'/'+cases.length+' ('+(rate*100).toFixed(0)+'%)\\n'+rows.join('\\n')+'\\n\\nВажно: это smoke-бенчмарк прототипа, не доказательство превосходства над LLM.';
+}function selfTrain(n=100){for(let i=0;i<n;i++){learn(CORPUS[i%CORPUS.length],'self',false);learn(SYN[i%SYN.length],'synthetic',false);if(i%7===0)S.episodes++;}save();render();drawField();$('out').textContent='Самообучение: '+n+' циклов. Память дедуплицируется; повторное знание усиливает статистику, а не копирует факт.'}
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 function load(){try{const x=JSON.parse(localStorage.getItem(K));if(x)Object.assign(S,x);S.osc=S.osc||{time:0,base:1.618,damping:.985,coupling:.21,phase:0,energy:0,spectrum:[],history:[]};S.learning=S.learning||{rate:S.eta,decay:.985,predictions:0,correct:0,errorEnergy:0}}catch(e){}}
 function render(){$('facts').textContent=S.facts.length;$('terms').textContent=Object.keys(S.tokens).length;$('edges').textContent=Object.keys(S.transitions).length;$('entropy').textContent=entropy(Object.values(S.grams)).toFixed(2);const src={};for(const f of S.facts)src[f.source||'internal']=(src[f.source||'internal']||0)+1;$('sources').innerHTML=Object.entries(src).slice(0,8).map(([s,n])=>'<span class="chip">'+(s==='internal'?'internal':s.includes('wikipedia')?'Wikipedia':'external')+': '+n+'</span>').join('')}
@@ -75,7 +99,7 @@ $('seed').onclick=seed;
 $('wiki').onclick=importWiki;
 $('adaptive').onclick=()=>adaptiveCycle(250);
 $('export').onclick=exportState;
-$('cycle').onclick=()=>selfTrain(100);
+$('cycle').onclick=()=>selfTrain(100);\n$('bench').onclick=benchmark;
 $('reset').onclick=()=>{localStorage.removeItem(K);location.reload()};
 function drawField(){const cv=$('field');if(!cv)return;const dpr=devicePixelRatio||1,w=cv.clientWidth,h=150;cv.width=w*dpr;cv.height=h*dpr;const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);const sp=(S.osc&&S.osc.spectrum)||[];const t=(S.osc&&S.osc.time)||0;for(let k=0;k<7;k++){x.beginPath();for(let px=0;px<w;px+=3){const u=px/w;let y=h/2;for(let j=0;j<sp.length;j++)y+=(sp[j]||0)*8*Math.sin(u*(j+1)*6.283+t*.035*(k+1)+j*.7);y+=18*Math.sin(u*(k+1)*6.283-t*.02*k);x.lineTo(px,y+k*.2)}x.globalAlpha=.09+k*.035;x.strokeStyle='#9fe8ff';x.stroke()}x.globalAlpha=1}
 setInterval(()=>{if(S.osc){S.osc.time=(S.osc.time||0)+1;S.osc.phase=(S.osc.phase||0)+.025;drawField();$('freqstate').innerHTML=['ω='+((S.osc.base||1.618)*(1+Math.abs(S.osc.energy||0))).toFixed(3),'φ='+((S.osc.phase||0)%(Math.PI*2)).toFixed(3),'E='+((S.osc.energy||0)).toFixed(3),'η='+((S.learning&&S.learning.rate)||.18).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('')}},60);
