@@ -54,16 +54,52 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <script>
 (function(){
  const $=id=>document.getElementById(id), W=window.AKSI_WEBLLM, O=window.AKSI_OFFLINE;
+ let CPU=null, cpuLoading=false;
  function add(who,text,cls){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML='<div class="who">'+who+'</div>'+String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight}
  function refresh(){
-   const s=W.status(); $('gpu').textContent=s.webgpu?'ON':'OFF'; $('model').textContent=s.model?s.model.replace(/-.*/,''):'—'; $('mem').textContent=O?O.status().memory:0;
-   $('badge').textContent=s.ready?'● LOCAL BRAIN':'○ NOT LOADED'; $('status').textContent=s.message||'готово'; $('bar').style.width=(s.progress||0)+'%';
-   $('send').disabled=!s.ready;
+   const s=W.status(), local=!!CPU;
+   $('gpu').textContent=s.webgpu?'ON':(local?'CPU/WASM':'OFF');
+   $('model').textContent=s.model?s.model.replace(/-.*/,''):(local?'Qwen3-0.6B':'—');
+   $('mem').textContent=O?O.status().memory:0;
+   $('badge').textContent=s.ready?'● LOCAL GPU BRAIN':(local?'● LOCAL CPU BRAIN':'○ NOT LOADED');
+   $('status').textContent=s.message||'готово'; $('bar').style.width=(s.progress||0)+'%';
+   $('send').disabled=!(s.ready||local);
  }
  W.models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;$('models').appendChild(o)});
- async function load(){ $('load').disabled=true; try{await W.load($('models').value,p=>{ $('bar').style.width=p.progress+'%';$('status').textContent=p.message; }); add('AKSI','Мозг загружен: '+W.status().model,'aksi'); }catch(e){add('AKSI','Не удалось запустить локальный мозг: '+(e.message||e),'aksi')} $('load').disabled=false;refresh();}
- async function send(){const q=$('q').value.trim();if(!q||!W.ready())return;$('q').value='';add('Вы',q,'you');$('send').disabled=true;$('status').textContent='AKSI думает локально…';
-   try{const r=await W.complete(q,{max_tokens:700,temperature:.35});if(r.text)add('AKSI',r.text,'aksi');else add('AKSI','Ошибка модели: '+(r.error||'неизвестно'),'aksi');}
+ async function loadCPU(){
+   if(cpuLoading||CPU)return CPU; cpuLoading=true; $('load').disabled=true;
+   $('status').textContent='WebGPU нет — включаю CPU/WASM fallback…';$('bar').style.width='5%';
+   try{
+     const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0');
+     $('status').textContent='Загружаю сжатый Qwen3-0.6B для браузера…';$('bar').style.width='20%';
+     CPU=await mod.pipeline('text-generation','onnx-community/Qwen3-0.6B-ONNX',{dtype:'q4'});
+     $('bar').style.width='100%';$('status').textContent='готово · Qwen3-0.6B CPU/WASM';
+     add('AKSI','GPU недоступен, поэтому я запустила резервный локальный мозг Qwen3-0.6B через WASM. Он медленнее, зато работает без WebGPU.','aksi');
+     return CPU;
+   }catch(e){add('AKSI','CPU/WASM fallback не запустился: '+(e.message||e),'aksi');throw e}
+   finally{cpuLoading=false;$('load').disabled=false;refresh();}
+ }
+ async function load(){
+   $('load').disabled=true;
+   try{
+     if(W.status().webgpu){await W.load($('models').value,p=>{$('bar').style.width=p.progress+'%';$('status').textContent=p.message});add('AKSI','GPU-мозг загружен: '+W.status().model,'aksi');}
+     else await loadCPU();
+   }catch(e){add('AKSI','Не удалось запустить локальный мозг: '+(e.message||e),'aksi')}
+   $('load').disabled=false;refresh();
+ }
+ async function send(){
+   const q=$('q').value.trim();if(!q||(!W.ready()&&!CPU))return;$('q').value='';add('Вы',q,'you');$('send').disabled=true;$('status').textContent='AKSI думает локально…';
+   try{
+     let rr;
+     if(W.ready()) rr=await W.complete(q,{max_tokens:700,temperature:.35});
+     else {
+       const memory=O&&O.memory?O.memory().slice(0,8).map(x=>typeof x==='string'?x:x.text).filter(Boolean).join('\n'):'';
+       const messages=[{role:'system',content:'Ты AKSI Pocket. Отвечай по-русски. Отделяй факты от гипотез. Не выдумывай.'+(memory?'\nПамять:\n'+memory.slice(0,2500): '')},{role:'user',content:q}];
+       const out=await CPU(messages,{max_new_tokens:512,do_sample:false});
+       const last=out&&out[0]&&out[0].generated_text; rr={text:typeof last==='string'?last:(last&&last.at(-1)&&last.at(-1).content)||'',source:'transformers.js'};
+     }
+     if(rr&&rr.text)add('AKSI',rr.text,'aksi');else add('AKSI','Модель не вернула текст.','aksi');
+   }catch(e){add('AKSI','Ошибка локального inference: '+(e.message||e),'aksi')}
    finally{$('send').disabled=false;refresh();}
  }
  $('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
