@@ -6,8 +6,8 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 @media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
 </style></head>
 <body><main>
-<section class="hero"><h1>AKSI MATH v0.6</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
-<p>Это экспериментальный прототип. Он не притворяется GPT: язык представлен состоянием, связями, вероятностями, памятью и динамическим частотным полем; ответы выбираются по совместному резонансу структуры и спектра.</p>
+<section class="hero"><h1>AKSI MATH v0.7</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
+<p>Это экспериментальный математический runtime. Он не притворяется GPT: и при необходимости выходит из локальной памяти во внешний поиск Wikipedia, сохраняя источник. язык представлен состоянием, связями, вероятностями, памятью и динамическим частотным полем; ответы выбираются по совместному резонансу структуры и спектра.</p>
 <div class="grid"><div class="stat"><b id="facts">0</b><small>фактов памяти</small></div><div class="stat"><b id="terms">0</b><small>состояний</small></div><div class="stat"><b id="edges">0</b><small>связей</small></div><div class="stat"><b id="entropy">0</b><small>энтропия</small></div></div></section>
 <section class="panel"><b>1. Обучение</b><p class="muted">Вставь русский текст. Движок извлечёт символические n-граммы, понятия и отношения. Это обучение математических параметров, а не веса нейросети.</p>
 <textarea id="train" placeholder="Например: Москва находится в России. Россия находится в Европе. Вода кипит при нормальном давлении при температуре около 100 градусов Цельсия."></textarea>
@@ -19,7 +19,7 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 </main>
 <script>
 (()=>{'use strict';
-const K='aksi-math-v06';
+const K='aksi-math-v07';
 const S={dim:384,order:5,eta:.18,temp:.55,steps:0,episodes:0,errors:0,tokens:{},facts:[],grams:{},rel:{},relCount:{},concepts:{},transitions:{},roles:{},prototypes:{},contradictions:[],sources:{},hypotheses:{},events:[],version:3,osc:{time:0,base:1.618,damping:.985,coupling:.21,phase:0,energy:0,spectrum:[],history:[]},learning:{rate:.18,decay:.985,predictions:0,correct:0,errorEnergy:0}};
 const $=id=>document.getElementById(id);
 const norm=s=>String(s||'').toLowerCase().replace(/[«»"']/g,'').replace(/\s+/g,' ').trim();
@@ -59,6 +59,45 @@ function answer(q){const R=retrieve(q),M=matches(q),D=infer(M);let text,mode,con
  $('state').innerHTML=[mode,'уверенность='+conf.toFixed(3),'неопределённость='+u.toFixed(3),'гипотез='+R.length,'энтропия='+H.toFixed(3),'резонанс='+rs.toFixed(3),'выводов='+D.length,'ошибок='+S.errors,'шагов='+S.steps,'эпизодов='+S.episodes,'источников='+Object.keys(S.sources).length].map(x=>'<span class="chip">'+x+'</span>').join('');
  $('explain').textContent='Цикл: признаки → гипервектор → ассоциативная память → отношения → гипотезы → энергия → распределение → вывод → проверка неопределённости → provenance. Следующие кандидаты: '+nextWords(q).join(', ')+'. Частотное состояние: ω='+((S.osc.base||1.618)*(1+Math.abs(rs))).toFixed(3)+' · φ='+((S.osc.phase||0)%(Math.PI*2)).toFixed(3);
 }
+function mathEval(q){
+ const s=norm(q).replace(/,/g,'.').replace(/[^0-9+\\-*/().%^ ]/g,'').trim();
+ if(!s||!/[+*/%^]/.test(s))return null;
+ try{if(!/^[0-9+\\-*/().%^ ]+$/.test(s))return null;const v=Function('"use strict";return ('+s.replaceAll('^','**')+')')();return Number.isFinite(v)?v:null}catch(e){return null}
+}
+function questionType(q){
+ const n=norm(q);
+ if(/\\b(сколько|равно|посчитай|вычисли|процент|плюс|минус|умнож|делен)/.test(n))return 'math';
+ if(/\\b(кто|что|где|когда|почему|как|какой|какая|какие|сколько)/.test(n))return 'question';
+ return 'statement';
+}
+async function liveWikipedia(q){
+ const query=norm(q).replace(/^(кто|что|где|когда|почему|как|какой|какая|какие|сколько)\\s+/,'').trim();
+ if(query.length<2)return [];
+ const url='https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(query)+'&srlimit=5&format=json&origin=*';
+ const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('Wikipedia HTTP '+r.status);
+ const d=await r.json();return (d.query&&d.query.search||[]).map(x=>({title:x.title,text:x.snippet.replace(/<[^>]+>/g,' ').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&'),source:'wikipedia:'+x.title,url:'https://ru.wikipedia.org/wiki/'+encodeURIComponent(x.title)}));
+}
+async function universalAnswer(q){
+ const type=questionType(q);
+ if(type==='math'){
+  const v=mathEval(q);
+  if(v!==null){$('out').textContent='Математический вывод: '+v+'\\n\\nМетод: точное вычисление выражения.';return}
+ }
+ const local=retrieve(q);
+ if(local[0]&&local[0].s>.62){answer(q);return}
+ try{
+  $('out').textContent='Локального свидетельства недостаточно. Ищу внешнее свидетельство…';
+  const web=await liveWikipedia(q);
+  for(const x of web)learn(x.text,x.source,false);
+  save();render();
+  const merged=retrieve(q);
+  if(web.length){
+   const best=merged[0];
+   $('out').textContent='Внешнее свидетельство (Wikipedia):\\n'+web[0].title+'\\n'+web[0].text+'\\n\\nИсточник: '+web[0].url+'\\n\\nAKSI затем преобразовала свидетельство в математическую память. Это не гарантирует полноту ответа.';
+   $('state').innerHTML=['web-search','найдено='+web.length,'локальная память='+S.facts.length,'резонанс='+((best&&best.s)||0).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('');
+  }else $('out').textContent='Свидетельство не найдено. Я не буду выдумывать ответ.';
+ }catch(e){$('out').textContent='Внешний поиск недоступен: '+e.message+'\\n\\nЛокальный режим остаётся доступен.'}
+}
 async function importCorpus(url,label='external'){try{ $('out').textContent='Загружаю корпус: '+label+'…';const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();const items=d.facts||d.items||[];for(const x of items){const t=typeof x==='string'?x:x.text;if(t)learn(t,typeof x==='string'?label:(x.source||label))}S.events.push({type:'corpus_import',label,count:items.length,at:Date.now()});save();render();$('out').textContent='Корпус '+label+': обработано '+items.length+' утверждений.'}catch(e){$('out').textContent='Ошибка корпуса '+label+': '+e.message}}
 function exportState(){const blob=new Blob([JSON.stringify({version:S.version,facts:S.facts,sources:S.sources,rel:S.rel,stats:{steps:S.steps,episodes:S.episodes}},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-math-knowledge.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function adaptiveCycle(n=250){for(let i=0;i<n;i++){const x=CORPUS[i%CORPUS.length],before=S.facts.length;learn(x,'adaptive',false);if(S.facts.length===before)S.episodes++;if(i%17===0)S.errors=Math.max(0,S.errors-1)}save();render();$('out').textContent='Адаптивный цикл: '+n+' эпизодов. Повторные факты усиливают параметры; новые факты расширяют пространство памяти.'}
@@ -74,10 +113,11 @@ function composeAnswer(q){
  return [...new Set(parts.flatMap(x=>x.split('\\n')))].slice(0,8);
 }
 function benchmark(){
+ S.learning.predictions=0;S.learning.correct=0;S.learning.errorEnergy=0;
  const cases=[
   {name:'fact retrieval',q:'Москва Россия',ok:r=>r.some(x=>x.f.text.includes('москва')&&x.f.text.includes('россии'))},
   {name:'relation retrieval',q:'Москва является столицей России',ok:r=>r.some(x=>x.k.includes('москва')&&x.k.includes('столицей'))},
-  {name:'2-hop inference',q:'Европа Земля',ok:r=>r.length>=0},
+  {name:'2-hop inference',q:'Европа часть Земли',ok:r=>r.some(x=>x.k.includes('европа')&&x.k.includes('земли'))},
   {name:'abstention',q:'Квантовый дракон живёт на Марсе',ok:r=>$('out').textContent.includes('Недостаточно')||$('out').textContent.includes('близкое')},
   {name:'provenance',q:'Москва Россия',ok:r=>Rsource(r)}
  ];
@@ -94,7 +134,7 @@ function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 function load(){try{const x=JSON.parse(localStorage.getItem(K));if(x)Object.assign(S,x);S.osc=S.osc||{time:0,base:1.618,damping:.985,coupling:.21,phase:0,energy:0,spectrum:[],history:[]};S.learning=S.learning||{rate:S.eta,decay:.985,predictions:0,correct:0,errorEnergy:0}}catch(e){}}
 function render(){$('facts').textContent=S.facts.length;$('terms').textContent=Object.keys(S.tokens).length;$('edges').textContent=Object.keys(S.transitions).length;$('entropy').textContent=entropy(Object.values(S.grams)).toFixed(2);const src={};for(const f of S.facts)src[f.source||'internal']=(src[f.source||'internal']||0)+1;$('sources').innerHTML=Object.entries(src).slice(0,8).map(([s,n])=>'<span class="chip">'+(s==='internal'?'internal':s.includes('wikipedia')?'Wikipedia':'external')+': '+n+'</span>').join('')}
 $('learn').onclick=()=>learn($('train').value);
-$('ask').onclick=()=>answer($('q').value);
+$('ask').onclick=()=>universalAnswer($('q').value);
 $('seed').onclick=seed;
 $('wiki').onclick=importWiki;
 $('adaptive').onclick=()=>adaptiveCycle(250);
