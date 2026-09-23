@@ -29,13 +29,13 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <header><div class="brand">AKSI<small>POCKET INTELLIGENCE</small></div><div id="badge" class="badge">проверка устройства…</div></header>
 <section class="hero">
 <h1>Настоящий локальный мозг.<br>Прямо в телефоне.</h1>
-<p>Российский локальный мозг Vikhr-Qwen 0.5B работает прямо в браузере. Первый запуск скачивает около 398 MB, затем модель кэшируется.</p>
+<p>Российский локальный мозг Vikhr-Qwen 0.5B работает прямо в браузере. Первый запуск скачивает около 355 MB, затем модель кэшируется.</p>
 <div class="grid">
 <div class="stat"><b id="gpu">—</b><span>WebGPU</span></div>
 <div class="stat"><b id="model">—</b><span>модель</span></div>
 <div class="stat"><b id="mem">0</b><span>память AKSI</span></div>
 </div>
-<label>Мозг</label><div class="stat"><b>Vikhr-Qwen 0.5B · Q4_K_M</b><span>русскоязычная модель · WebGPU/WASM</span></div>
+<label>Мозг</label><div class="stat"><b>Vikhr-Qwen 0.5B · Q3_K_M</b><span>русскоязычная модель · WebGPU/WASM</span></div>
 <div class="controls"><button id="load" class="primary">Загрузить мозг</button><button id="clear">Очистить память</button></div>
 <div id="progress"><div id="bar"></div></div><div id="status">Готовлю Pocket Runtime…</div>
 </section>
@@ -55,8 +55,8 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 import { Wllama } from 'https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/+esm';
 (function(){
 const $=id=>document.getElementById(id);
-const MODEL_URL='https://huggingface.co/Vikhrmodels/Vikhr-Qwen-2.5-0.5B-instruct-GGUF/resolve/main/Vikhr-Qwen-2.5-0.5B-instruct-Q4_K_M.gguf';
-const MODEL_SIZE='398 MB', WASM='https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/src/wasm/wllama.wasm';
+const MODEL_URL='https://huggingface.co/Vikhrmodels/Vikhr-Qwen-2.5-0.5B-instruct-GGUF/resolve/main/Vikhr-Qwen-2.5-0.5B-instruct-Q3_K_M.gguf';
+const MODEL_SIZE='355 MB', WASM='https://cdn.jsdelivr.net/npm/@wllama/wllama@3.6.1/esm/wasm/wllama.wasm';
 let llm=null,ready=false,busy=false,answerNode=null;
 function esc(x){return String(x||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 function add(w,t,cl){const d=document.createElement('div');d.className='msg '+cl;d.innerHTML='<div class="who">'+esc(w)+'</div>'+esc(t);$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight;return d}
@@ -65,10 +65,10 @@ function refresh(){$('model').textContent=ready?'Vikhr 0.5B':'—';$('badge').te
 async function load(){
  if(ready||busy)return;busy=true;$('load').disabled=true;set(1,'запускаю Vikhr runtime…');
  try{
-  llm=new Wllama({default:WASM},{allowOffline:false});llm.setCompat('default');const gpu=llm.isSupportWebGPU();$('gpu').textContent=gpu?'ON':'OFF';
-  set(3,'Vikhr-Qwen 0.5B · '+MODEL_SIZE+' · загрузка…');
-  await llm.loadModelFromUrl(MODEL_URL,{n_ctx:1024,n_gpu_layers:gpu?99999:0,n_threads:Math.max(1,Math.min(4,(navigator.hardwareConcurrency||2)-1)),reasoning:false,progressCallback:({loaded,total})=>set(total?Math.round(5+loaded/total*90):5,'загрузка Vikhr: '+Math.round(loaded/1048576)+' / '+Math.round(total/1048576)+' MB')});
-  ready=true;set(100,'готово · Vikhr локально');add('AKSI','Vikhr-Qwen 0.5B загружен. Теперь можно задавать вопросы.','aksi');refresh();
+  llm=new Wllama({default:WASM},{allowOffline:false});const gpu=llm.isSupportWebGPU();$('gpu').textContent=gpu?'доступен':'нет';
+  set(3,'Vikhr-Qwen 0.5B · '+MODEL_SIZE+' · безопасный запуск WASM…');
+  await llm.loadModelFromUrl(MODEL_URL,{n_ctx:1024,n_gpu_layers:0,n_threads:2,reasoning:false,progressCallback:({loaded,total})=>set(total?Math.round(5+loaded/total*90):5,'загрузка Vikhr: '+Math.round(loaded/1048576)+' / '+Math.round(total/1048576)+' MB')});
+  ready=true;set(100,'готово · Vikhr локально · CPU/WASM');add('AKSI','Vikhr-Qwen 0.5B загружен. Теперь можно задавать вопросы.','aksi');refresh();
  }catch(e){llm=null;ready=false;set(0,'ошибка загрузки');add('AKSI','Не удалось загрузить Vikhr: '+String(e?.message||e).slice(0,700),'aksi');refresh()}
  finally{busy=false;$('load').disabled=false;refresh()}
 }
@@ -86,7 +86,7 @@ async function send(){
 }
 $('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});
 $('clear').onclick=()=>{try{window.AKSI_OFFLINE.clearMemory();add('AKSI','Локальная память очищена.','aksi');refresh()}catch(e){}};
-$('gpu').textContent=navigator.gpu?'доступен':'нет';set(0,'Готово. Vikhr-Qwen 0.5B · '+MODEL_SIZE);refresh();
+$('gpu').textContent=navigator.gpu?'доступен':'нет';set(0,'Готово. Vikhr-Qwen 0.5B · '+MODEL_SIZE+' · CPU/WASM-safe');refresh();
 })();
 </script>
 </body></html>
