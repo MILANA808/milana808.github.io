@@ -6,6 +6,8 @@
 <title>AKSI Offline Full — локальный ИИ</title>
 <meta name="description" content="Offline-контур AKSI: Neuro, память, Receipt. Не сознание. Не AGI.">
 <meta name="theme-color" content="#0f0e0c">
+<meta name="offline-mode" content="local-first">
+<link rel="manifest" href="/offline/manifest.json">
 <style>
 :root{--bg:#0f0e0c;--card:#1c1915;--ink:#f2ebe3;--muted:#9a9288;--line:#33302b;--ok:#3d9a6a;--acc:#e8e0d4;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -38,6 +40,7 @@ button:disabled{opacity:.4}
   Offline = Neuro SEED + память («запомни:») + Decision Receipt + опционально WebLLM при WebGPU.
 </div>
 <div id="st">загрузка…</div>
+<div id="net" style="font:11px ui-monospace,monospace;color:#9a9288;margin-bottom:8px">проверка автономного режима…</div>
 <div id="feed"></div>
 <div class="composer">
   <input id="q" placeholder="Вопрос или «запомни: факт»" maxlength="2000" autocomplete="off">
@@ -61,7 +64,7 @@ button:disabled{opacity:.4}
   function paintStatus(){
     if(!O){document.getElementById('st').textContent='offline-full.js missing';return;}
     var s=O.status();
-    document.getElementById('st').textContent='v'+s.version+' · mem '+s.memory+' · neuro '+(s.neuro?'on':'off')+' · receipt '+(s.receipt?'on':'off')+' · webllm '+(s.webllm?'ready':'off');
+    document.getElementById('st').textContent='v'+s.version+' · mem '+s.memory+' · neuro '+(s.neuro?'on':'off')+' · receipt '+(s.receipt?'on':'off')+' · webllm '+(s.webllm?'ready':'off'); document.getElementById('net').textContent=(navigator.onLine?'сеть доступна · базовый режим всё равно работает локально':'OFFLINE · сетевые запросы не нужны для базового режима');
   }
   async function send(){
     var q=document.getElementById('q').value.trim();if(!q||!O)return;
@@ -74,6 +77,7 @@ button:disabled{opacity:.4}
   document.getElementById('go').onclick=send;
   document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();send();}});
   paintStatus();
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('/offline/sw.js').catch(function(){});
   if(O)add('AKSI','Offline Full готов. «запомни: …» или вопрос. Сознания нет — есть локальный поиск и правила.','system');
 })();
 </script>
