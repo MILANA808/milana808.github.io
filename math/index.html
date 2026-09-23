@@ -52,7 +52,7 @@ function answer(q){const R=retrieve(q),M=matches(q),D=infer(M);let text,mode,con
  else if(D[0]&&D[0].score>.3){text='Выведено из структуры памяти:\\n'+D.slice(0,4).map(x=>x.text+' ['+x.rule+']').join('\\n');mode='inference';conf=Math.min(.92,D[0].score)}
  else if(R[0]&&R[0].s>.68){text='Наиболее согласованное состояние памяти:\\n'+R[0].f.text+'.';mode='memory';conf=Math.min(.9,R[0].s)}
  else if(R[0]&&R[0].s>.48){text='Есть близкое свидетельство, но это не доказательство:\\n'+R[0].f.text+'.';mode='weak';conf=Math.min(.65,R[0].s)}
- else{text='Недостаточно свидетельств. Я сохраняю неопределённость и не выдаю догадку за факт.';mode='abstain';conf=.05}
+ else{text='';mode='abstain';conf=.05}
  const cand=R.map(x=>Math.exp((x.s-1)/S.temp)),H=entropy(cand),u=1-conf;const rs=S.osc.energy||0;conf=Math.max(0,Math.min(.99,conf+.08*Math.tanh(rs)));const contradiction=contradictionScore(q);if(contradiction>.82){conf*=.55;text+='\n\n⚠ Сильный конфликт состояний: требуется дополнительное свидетельство.'}predictAndLearn(q);
  const src=[...(new Set(R.slice(0,5).map(x=>x.f.source||'internal')))].join(' | ');
  $('out').textContent=text+(src?'\\n\\nИсточник знания: '+src:'');
@@ -122,6 +122,19 @@ async function universalAnswer(q){
  const local=retrieve(raw);
  if(local[0]&&local[0].s>.72){answer(raw);return}
  $('out').textContent='AKSI строит пространство свидетельств…';
+ try{
+  const base='https://milana-backend.replit.app';
+  const rr=await fetch(base+'/api/universal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:raw,web:true})});
+  if(rr.ok){
+   const d=await rr.json();
+   if(d.answer){
+    $('out').textContent=d.answer;
+    $('state').innerHTML=['режим=AKSI universal','свидетельств='+(d.sources||[]).length,'память='+S.facts.length].map(x=>'<span class="chip">'+x+'</span>').join('');
+    $('explain').textContent='AKSI-контроллер → внешние свидетельства → языковой модуль → ответ. Внешняя модель не считается источником истины.';
+    return;
+   }
+  }
+ }catch(e){}
  const items=await evidenceSearch(raw);
  for(const x of items)learn(x.text,x.source,false);
  save();render();
