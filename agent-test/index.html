@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Agent — live test</title>
+<style>
+body{margin:0;background:#07090d;color:#eef2f7;font:15px system-ui,sans-serif}.wrap{max-width:820px;margin:auto;padding:24px 16px}.card{background:#0d121a;border:1px solid #253044;border-radius:14px;padding:16px;margin:12px 0}h1{margin:0 0 8px}button{padding:11px 15px;border:0;border-radius:9px;background:#b8a3ff;color:#101018;font-weight:800}input{width:100%;box-sizing:border-box;padding:11px;background:#080b10;color:#fff;border:1px solid #293348;border-radius:9px;margin:8px 0}pre{white-space:pre-wrap;background:#080b10;border-radius:9px;padding:12px;overflow:auto}.ok{color:#61e7a3}.bad{color:#ff7185}.muted{color:#8e99ad}
+</style></head>
+<body><div class="wrap">
+<h1>AKSI Agent — LIVE TEST</h1>
+<div class="muted">Проверяет реальный backend: доступность → создание задачи → worker → report → receipt.</div>
+<div class="card"><input id="api" value="https://milana-backend.onrender.com"><input id="goal" value="Проверь, что AKSI backend принимает автономную исследовательскую задачу и формирует отчёт с receipt."><button id="run">Запустить тест</button></div>
+<div class="card"><b id="state">Ожидание</b><pre id="log"></pre></div>
+</div>
+<script>
+const $=id=>document.getElementById(id), log=(s)=>{$('log').textContent+=s+'\n'};
+async function test(){
+ $('run').disabled=true;$('log').textContent='';
+ const base=$('api').value.replace(/\/$/,''); const goal=$('goal').value;
+ try{
+  log('1. GET /api/agent/tasks');
+  let r=await fetch(base+'/api/agent/tasks?limit=1'); if(!r.ok) throw new Error('GET tasks HTTP '+r.status);
+  log('PASS: backend reachable');
+  log('2. POST /api/agent/tasks');
+  r=await fetch(base+'/api/agent/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+   goal,permissions:{internet:true,read_pages:true,browser_actions:false,downloads:false,memory:true,external_actions:false},max_sources:5
+  })});
+  if(!r.ok) throw new Error('POST task HTTP '+r.status);
+  let d=await r.json(), task=d.task; if(!task||!task.id) throw new Error('No task id');
+  log('PASS: '+task.id);
+  for(let i=0;i<40;i++){
+   await new Promise(x=>setTimeout(x,1500));
+   r=await fetch(base+'/api/agent/tasks/'+encodeURIComponent(task.id)); if(!r.ok) throw new Error('poll HTTP '+r.status);
+   task=(await r.json()).task;
+   log('POLL '+(i+1)+': '+task.status+' · sources='+(task.sources||[]).length);
+   if(['COMPLETED','FAILED','STOPPED','NEEDS_PERMISSION'].includes(task.status)) break;
+  }
+  if(task.status!=='COMPLETED') throw new Error('Task finished as '+task.status);
+  if(!task.report) throw new Error('Missing report');
+  if(!task.receipt||!task.receipt.result_hash) throw new Error('Missing receipt hash');
+  log('PASS: report present');
+  log('PASS: receipt '+task.receipt.result_hash);
+  $('state').textContent='TEST PASSED';$('state').className='ok';
+ }catch(e){$('state').textContent='TEST FAILED';$('state').className='bad';log('ERROR: '+(e.message||e));}
+ $('run').disabled=false;
+}
+$('run').onclick=test;
+</script></body></html>
