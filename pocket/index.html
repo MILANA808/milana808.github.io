@@ -35,7 +35,7 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <div class="stat"><b id="model">—</b><span>модель</span></div>
 <div class="stat"><b id="mem">0</b><span>память AKSI</span></div>
 </div>
-<label for="models">Мозг</label><select id="models"></select>
+<label>Мозг</label><div class="stat"><b>Qwen3 0.6B · ONNX</b><span>автоматически WebGPU → WASM</span></div>
 <div class="controls"><button id="load" class="primary">Загрузить мозг</button><button id="clear">Очистить память</button></div>
 <div id="progress"><div id="bar"></div></div><div id="status">Готовлю Pocket Runtime…</div>
 </section>
@@ -54,7 +54,7 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <script>
 (async function(){
  const $=id=>document.getElementById(id);
- let pipe=null, loading=false, device='wasm', busy=false;
+ let pipe=null, loading=false, device='wasm', busy=false, TJS=null;
  const MODEL='onnx-community/Qwen3-0.6B-ONNX';
  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
  function add(who,text,cls){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML='<div class="who">'+who+'</div>'+esc(text);$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight;return d}
@@ -64,7 +64,8 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
  async function load(){
    if(loading||pipe)return; loading=true;$('load').disabled=true;
    try{
-     const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+     TJS=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+     const mod=TJS;
      const hasGPU=await gpuOK(); device=hasGPU?'webgpu':'wasm';
      set(8,hasGPU?'WebGPU найден · готовлю Qwen3 0.6B…':'WebGPU нет · запускаю CPU/WASM Qwen3 0.6B…');
      pipe=await mod.pipeline('text-generation',MODEL,{
@@ -89,7 +90,7 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
        {role:'system',content:'Ты AKSI Pocket — локальный ИИ. Отвечай по-русски, кратко и по делу. Разделяй факт, гипотезу и неизвестность. Не выдумывай источники. Не раскрывай внутренние рассуждения. Если данных недостаточно — скажи это.'+(memory?'\nЛокальная память:\n'+memory:'')},
        {role:'user',content:q}
      ];
-     const streamer=new mod.TextStreamer(pipe.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:(t)=>{body.textContent+=t;$('feed').scrollTop=$('feed').scrollHeight}});
+     const streamer=new TJS.TextStreamer(pipe.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:(t)=>{body.textContent+=t;$('feed').scrollTop=$('feed').scrollHeight}});
      await pipe(messages,{max_new_tokens:320,do_sample:false,streamer:streamer,chat_template_kwargs:{enable_thinking:false}});
      if(body.textContent==='…') body.textContent='Модель не вернула ответ.';
    }catch(e){body.textContent='Ошибка локального inference: '+(e&&e.message||e)}
