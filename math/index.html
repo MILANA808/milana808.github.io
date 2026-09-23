@@ -63,5 +63,5 @@ $('ask').onclick=()=>answer($('q').value);
 $('seed').onclick=seed;
 $('cycle').onclick=()=>selfTrain(100);
 $('reset').onclick=()=>{localStorage.removeItem(K);location.reload()};
-load();render();
+const hadState=!!localStorage.getItem(K);load();render();if(!hadState){seed();selfTrain(25);$('out').textContent='Первичное математическое обучение завершено: аксиоматическое ядро + 25 циклов адаптации.'}
 })();</script></body></html>
