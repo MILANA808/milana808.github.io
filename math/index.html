@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AKSI Math — математический языковой движок</title>
+<style>
+body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:18px}main{max-width:850px;margin:auto}.hero,.panel{background:#0d141e;border:1px solid #253448;border-radius:18px;padding:18px;margin-bottom:12px}h1{margin:0 0 8px}.muted{color:#8d9bb0}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#09101a;border:1px solid #202d40;border-radius:12px;padding:10px}.stat b{display:block}.stat small{color:#8492a7}textarea,input,button{font:inherit;border-radius:11px;border:1px solid #29384c;background:#080d14;color:#edf5ff;padding:11px}textarea{width:100%;min-height:110px;box-sizing:border-box}button{cursor:pointer;font-weight:700}button.primary{background:#9fe8ff;color:#061018}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.answer{white-space:pre-wrap;background:#09111a;border-left:3px solid #9fe8ff;padding:14px;border-radius:8px}.bar{height:6px;background:#05080c;border-radius:99px;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;width:0;background:#9fe8ff}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{font:11px ui-monospace;color:#9fe8ff;background:#0a111a;border:1px solid #243348;padding:5px 7px;border-radius:99px}
+@media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
+</style></head>
+<body><main>
+<section class="hero"><h1>AKSI MATH</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
+<p>Это экспериментальный прототип. Он не притворяется GPT: язык представлен состоянием, связями, вероятностями, памятью и динамическим выбором продолжения.</p>
+<div class="grid"><div class="stat"><b id="facts">0</b><small>фактов памяти</small></div><div class="stat"><b id="terms">0</b><small>состояний</small></div><div class="stat"><b id="edges">0</b><small>связей</small></div><div class="stat"><b id="entropy">0</b><small>энтропия</small></div></div></section>
+<section class="panel"><b>1. Обучение</b><p class="muted">Вставь русский текст. Движок извлечёт символические n-граммы, понятия и отношения. Это обучение математических параметров, а не веса нейросети.</p>
+<textarea id="train" placeholder="Например: Москва находится в России. Россия находится в Европе. Вода кипит при нормальном давлении при температуре около 100 градусов Цельсия."></textarea>
+<div class="row"><button id="learn" class="primary">Обучить ядро</button><button id="seed">Загрузить базовый корпус</button><button id="reset">Сбросить</button></div><div class="bar"><i id="prog"></i></div></section>
+<section class="panel"><b>2. Спросить</b><textarea id="q" style="min-height:70px" placeholder="Напиши вопрос или утверждение…"></textarea><div class="row"><button id="ask" class="primary">Вычислить ответ</button></div></section>
+<section class="panel"><b>Результат</b><div id="out" class="answer">Я жду математического состояния.</div><div id="state" class="chips" style="margin-top:10px"></div></section>
+<section class="panel"><b>Математическое состояние</b><div id="explain" class="muted">Здесь будет декомпозиция: признаки → гипотезы → память → энергия → выбор → генерация.</div></section>
+</main>
+<script>
+(()=>{'use strict';
+const K='aksi-math-v01';
+const S={N:3,alpha:.18,dim:64,ngrams:{},vocab:{},facts:[],edges:{},counts:{},seed:1};
+const $=id=>document.getElementById(id);
+const norm=s=>String(s||'').toLowerCase().replace(/[«»"']/g,'').replace(/\s+/g,' ').trim();
+const toks=s=>norm(s).replace(/[^а-яёa-z0-9?!.,:;\- ]/g,' ').split(/\s+/).filter(Boolean);
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function vec(s){const a=new Float64Array(S.dim);for(const t of toks(s)){let h=hash(t);for(let k=0;k<4;k++){h=Math.imul(h^(h>>>13),1274126177);a[h%S.dim]+=((h>>>31)?1:-1)}}let z=Math.hypot(...a)||1;return Array.from(a,x=>x/z)}
+function sim(a,b){let z=0;for(let i=0;i<a.length;i++)z+=a[i]*b[i];return z}
+function learn(text){
+ const ts=toks(text); if(!ts.length)return;
+ for(let i=0;i<ts.length;i++){const t=ts[i];S.vocab[t]=(S.vocab[t]||0)+1;for(let n=1;n<=S.N;n++){if(i+n<ts.length){const key=ts.slice(i,i+n).join(' ');S.ngrams[key]=(S.ngrams[key]||0)+1}}}
+ const sentences=text.split(/[.!?]+/).map(x=>x.trim()).filter(Boolean);
+ for(const f of sentences){const v=vec(f);S.facts.push({text:f,vec:v,t:Date.now()});const w=toks(f);for(let i=0;i<w.length-1;i++){const k=w[i]+'→'+w[i+1];S.edges[k]=(S.edges[k]||0)+1}}
+ localStorage.setItem(K,JSON.stringify(S));render();$('prog').style.width='100%';setTimeout(()=>$('prog').style.width='0',300)
+}
+function candidates(prefix){
+ const p=toks(prefix).slice(-(S.N-1));const out=[];
+ for(const key in S.ngrams){const a=key.split(' ');if(a.length<2)continue;if(p.length<=a.length-1&&a.slice(0,p.length).join(' ')===p.join(' ')){out.push({w:a[p.length],score:S.ngrams[key]})}}
+ out.sort((a,b)=>b.score-a.score);return out.slice(0,12)
+}
+function entropy(vals){const z=vals.reduce((a,b)=>a+b,0)||1;return -vals.reduce((h,x)=>{const p=x/z;return h+(p? p*Math.log2(p):0)},0)}
+function retrieve(q){
+ const qv=vec(q);return S.facts.map(f=>({f,s:sim(qv,f.vec)})).sort((a,b)=>b.s-a.s).slice(0,5)
+}
+function intent(q){const t=toks(q);return {question:/\?|почему|зачем|как|что|кто|где|когда/.test(q),terms:t,uncertainty:1/Math.sqrt(1+t.length)}}
+function generate(q){
+ const I=intent(q), R=retrieve(q), best=R[0];
+ let response='';
+ if(best&&best.s>.62){response='Наиболее согласованное состояние памяти:\n'+best.f.text+'.';}
+ else if(best&&best.s>.42){response='Я не нахожу точного совпадения, но ближайшее состояние памяти:\n'+best.f.text+'.';}
+ else response='В текущем математическом состоянии нет достаточного свидетельства для достоверного ответа.';
+ const c=candidates(norm(q));const vals=c.map(x=>x.score);const H=entropy(vals);
+ const hyps=R.slice(0,3).map((x,i)=>({id:i+1,energy:1-Math.max(-1,Math.min(1,x.s)),prob:Math.max(0,x.s)}));
+ const z=hyps.reduce((a,b)=>a+b.prob,0)||1;hyps.forEach(x=>x.prob/=z);
+ $('out').textContent=response;
+ $('state').innerHTML='<span class="chip">вопрос='+I.question+'</span><span class="chip">неопределённость='+I.uncertainty.toFixed(3)+'</span><span class="chip">лучшее сходство='+(best?best.s.toFixed(3):'0')+'</span><span class="chip">гипотез='+hyps.length+'</span>';
+ $('explain').textContent='Запрос преобразован в вектор v(q). Память ранжирована по косинусному сходству. Гипотезы получают массу P(H) ∝ similarity. Для продолжения текста оцениваются условные n-граммы. Энтропия следующего шага H='+H.toFixed(3)+'. Пока свидетельств недостаточно, движок обязан сказать об этом, а не галлюцинировать.';
+}
+function render(){$('facts').textContent=S.facts.length;$('terms').textContent=Object.keys(S.vocab).length;$('edges').textContent=Object.keys(S.edges).length;const vals=Object.values(S.ngrams);$('entropy').textContent=entropy(vals).toFixed(2)}
+$('learn').onclick=()=>learn($('train').value);
+$('ask').onclick=()=>generate($('q').value);
+$('seed').onclick=()=>learn('Москва находится в России. Россия находится в Европе. Москва является столицей России. Вода при нормальном атмосферном давлении кипит примерно при ста градусах Цельсия. Вода может находиться в твёрдом жидком и газообразном состоянии. Солнце является звездой. Земля обращается вокруг Солнца. Язык состоит из символов слов отношений и контекста. AKSI хранит состояния и проверяет гипотезы через свидетельства.');
+$('reset').onclick=()=>{localStorage.removeItem(K);location.reload()};
+try{const x=JSON.parse(localStorage.getItem(K));if(x){Object.assign(S,x);S.facts=x.facts||[];S.edges=x.edges||{};S.ngrams=x.ngrams||{};S.vocab=x.vocab||{}}}catch(e){} render();
+})();</script></body></html>
