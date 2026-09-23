@@ -49,62 +49,54 @@ select,input{width:100%;border:1px solid var(--line);background:#080d14;color:va
 <script src="/aksi-neuro.js?v=10"></script>
 <script src="/aksi-knowledge.js?v=3"></script>
 <script src="/aksi-decision-receipt.js?v=11"></script>
-<script src="/aksi-webllm.js?v=4"></script>
+<script src="/aksi-webllm.js?v=5"></script>
 <script src="/aksi-offline-full.js?v=2"></script>
 <script>
-(function(){
- const $=id=>document.getElementById(id), W=window.AKSI_WEBLLM, O=window.AKSI_OFFLINE;
- let CPU=null, cpuLoading=false;
- function add(who,text,cls){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML='<div class="who">'+who+'</div>'+String(text||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight}
- function refresh(){
-   const s=W.status(), local=!!CPU;
-   $('gpu').textContent=s.webgpu?'ON':(local?'CPU/WASM':'OFF');
-   $('model').textContent=s.model?s.model.replace(/-.*/,''):(local?'Qwen3-0.6B':'—');
-   $('mem').textContent=O?O.status().memory:0;
-   $('badge').textContent=s.ready?'● LOCAL GPU BRAIN':(local?'● LOCAL CPU BRAIN':'○ NOT LOADED');
-   $('status').textContent=s.message||'готово'; $('bar').style.width=(s.progress||0)+'%';
-   $('send').disabled=!(s.ready||local);
- }
- W.models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;$('models').appendChild(o)});
- async function loadCPU(){
-   if(cpuLoading||CPU)return CPU; cpuLoading=true; $('load').disabled=true;
-   $('status').textContent='WebGPU нет — включаю CPU/WASM fallback…';$('bar').style.width='5%';
-   try{
-     const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0');
-     $('status').textContent='Загружаю сжатый Qwen3-0.6B для браузера…';$('bar').style.width='20%';
-     CPU=await mod.pipeline('text-generation','onnx-community/Qwen3-0.6B-ONNX',{dtype:'q4'});
-     $('bar').style.width='100%';$('status').textContent='готово · Qwen3-0.6B CPU/WASM';
-     add('AKSI','GPU недоступен, поэтому я запустила резервный локальный мозг Qwen3-0.6B через WASM. Он медленнее, зато работает без WebGPU.','aksi');
-     return CPU;
-   }catch(e){add('AKSI','CPU/WASM fallback не запустился: '+(e.message||e),'aksi');throw e}
-   finally{cpuLoading=false;$('load').disabled=false;refresh();}
- }
+(async function(){
+ const $=id=>document.getElementById(id);
+ let pipe=null, loading=false, device='wasm', busy=false;
+ const MODEL='onnx-community/Qwen3-0.6B-ONNX';
+ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+ function add(who,text,cls){const d=document.createElement('div');d.className='msg '+cls;d.innerHTML='<div class="who">'+who+'</div>'+esc(text);$('feed').appendChild(d);$('feed').scrollTop=$('feed').scrollHeight;return d}
+ function set(p,msg){$('bar').style.width=Math.max(0,Math.min(100,p))+'%';$('status').textContent=msg||''}
+ async function gpuOK(){try{return !!(navigator.gpu && await navigator.gpu.requestAdapter())}catch(e){return false}}
+ function refresh(){ $('gpu').textContent=device==='webgpu'?'ON':(pipe?'CPU/WASM':'OFF');$('model').textContent=pipe?'Qwen3 0.6B':'—';$('badge').textContent=pipe?'● LOCAL BRAIN':'○ NOT LOADED';$('send').disabled=!pipe||busy; if(window.AKSI_OFFLINE) $('mem').textContent=window.AKSI_OFFLINE.status().memory}
  async function load(){
-   $('load').disabled=true;
+   if(loading||pipe)return; loading=true;$('load').disabled=true;
    try{
-     if(W.status().webgpu){await W.load($('models').value,p=>{$('bar').style.width=p.progress+'%';$('status').textContent=p.message});add('AKSI','GPU-мозг загружен: '+W.status().model,'aksi');}
-     else await loadCPU();
-   }catch(e){add('AKSI','Не удалось запустить локальный мозг: '+(e.message||e),'aksi')}
-   $('load').disabled=false;refresh();
+     const mod=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+     const hasGPU=await gpuOK(); device=hasGPU?'webgpu':'wasm';
+     set(8,hasGPU?'WebGPU найден · готовлю Qwen3 0.6B…':'WebGPU нет · запускаю CPU/WASM Qwen3 0.6B…');
+     pipe=await mod.pipeline('text-generation',MODEL,{
+       device:device,
+       dtype:hasGPU?'q4f16':'q4',
+       progress_callback:(x)=>{if(x&&typeof x.progress==='number')set(10+x.progress*88,(x.file||x.status||'загрузка модели…').toString().slice(-80))}
+     });
+     set(100,'готово · '+(hasGPU?'WebGPU':'CPU/WASM')+' · Qwen3 0.6B');
+     add('AKSI','Локальный мозг загружен. '+(hasGPU?'GPU-режим включён.':'GPU нет — работаю через WASM, поэтому медленнее.'),'aksi');
+   }catch(e){
+     pipe=null; set(0,'ошибка запуска');
+     add('AKSI','Не удалось загрузить локальную модель: '+(e&&e.message||e),'aksi');
+   }finally{loading=false;$('load').disabled=false;refresh()}
  }
  async function send(){
-   const q=$('q').value.trim();if(!q||(!W.ready()&&!CPU))return;$('q').value='';add('Вы',q,'you');$('send').disabled=true;$('status').textContent='AKSI думает локально…';
+   const q=$('q').value.trim();if(!q||!pipe||busy)return;$('q').value='';add('Вы',q,'you');busy=true;$('send').disabled=true;set(100,'AKSI думает локально…');
+   const bubble=add('AKSI','…','aksi'); const body=bubble.lastChild;
    try{
-     let rr;
-     if(W.ready()) rr=await W.complete(q,{max_tokens:700,temperature:.35});
-     else {
-       const memory=O&&O.memory?O.memory().slice(0,8).map(x=>typeof x==='string'?x:x.text).filter(Boolean).join('\n'):'';
-       const messages=[{role:'system',content:'Ты AKSI Pocket. Отвечай по-русски. Отделяй факты от гипотез. Не выдумывай.'+(memory?'\nПамять:\n'+memory.slice(0,2500): '')},{role:'user',content:q}];
-       const out=await CPU(messages,{max_new_tokens:512,do_sample:false});
-       const last=out&&out[0]&&out[0].generated_text; rr={text:typeof last==='string'?last:(last&&last.at(-1)&&last.at(-1).content)||'',source:'transformers.js'};
-     }
-     if(rr&&rr.text)add('AKSI',rr.text,'aksi');else add('AKSI','Модель не вернула текст.','aksi');
-   }catch(e){add('AKSI','Ошибка локального inference: '+(e.message||e),'aksi')}
-   finally{$('send').disabled=false;refresh();}
+     let memory='';
+     try{memory=(window.AKSI_OFFLINE.memory()||[]).slice(0,6).map(x=>typeof x==='string'?x:x.text).filter(Boolean).join('\n').slice(0,1800)}catch(e){}
+     const messages=[
+       {role:'system',content:'Ты AKSI Pocket — локальный ИИ. Отвечай по-русски, кратко и по делу. Разделяй факт, гипотезу и неизвестность. Не выдумывай источники. Не раскрывай внутренние рассуждения. Если данных недостаточно — скажи это.'+(memory?'\nЛокальная память:\n'+memory:'')},
+       {role:'user',content:q}
+     ];
+     const streamer=new mod.TextStreamer(pipe.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:(t)=>{body.textContent+=t;$('feed').scrollTop=$('feed').scrollHeight}});
+     await pipe(messages,{max_new_tokens:320,do_sample:false,streamer:streamer,chat_template_kwargs:{enable_thinking:false}});
+     if(body.textContent==='…') body.textContent='Модель не вернула ответ.';
+   }catch(e){body.textContent='Ошибка локального inference: '+(e&&e.message||e)}
+   finally{busy=false;set(100,'готово');refresh()}
  }
- $('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
- $('clear').onclick=()=>{if(O){O.clearMemory();refresh();add('AKSI','Локальная память очищена.','aksi')}};
- window.addEventListener('aksi-webllm-progress',refresh);refresh();
+ $('load').onclick=load;$('send').onclick=send;$('q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});$('clear').onclick=()=>{try{window.AKSI_OFFLINE.clearMemory();add('AKSI','Локальная память очищена.','aksi');refresh()}catch(e){}};
+ refresh();
 })();
 </script>
 </body></html>
