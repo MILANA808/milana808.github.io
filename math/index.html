@@ -6,7 +6,7 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 @media(max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
 </style></head>
 <body><main>
-<section class="hero"><h1>AKSI MATH v0.7</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
+<section class="hero"><h1>AKSI MATH v0.8</h1><div class="muted">Чисто математический языковой runtime · без LLM · без нейросети · без внешних библиотек</div>
 <p>Это экспериментальный математический runtime. Он не притворяется GPT: и при необходимости выходит из локальной памяти во внешний поиск Wikipedia, сохраняя источник. язык представлен состоянием, связями, вероятностями, памятью и динамическим частотным полем; ответы выбираются по совместному резонансу структуры и спектра.</p>
 <div class="grid"><div class="stat"><b id="facts">0</b><small>фактов памяти</small></div><div class="stat"><b id="terms">0</b><small>состояний</small></div><div class="stat"><b id="edges">0</b><small>связей</small></div><div class="stat"><b id="entropy">0</b><small>энтропия</small></div></div></section>
 <section class="panel"><b>1. Обучение</b><p class="muted">Вставь русский текст. Движок извлечёт символические n-граммы, понятия и отношения. Это обучение математических параметров, а не веса нейросети.</p>
@@ -19,7 +19,7 @@ body{margin:0;background:#07090d;color:#edf5ff;font:15px/1.5 system-ui;padding:1
 </main>
 <script>
 (()=>{'use strict';
-const K='aksi-math-v07';
+const K='aksi-math-v08';
 const S={dim:384,order:5,eta:.18,temp:.55,steps:0,episodes:0,errors:0,tokens:{},facts:[],grams:{},rel:{},relCount:{},concepts:{},transitions:{},roles:{},prototypes:{},contradictions:[],sources:{},hypotheses:{},events:[],version:3,osc:{time:0,base:1.618,damping:.985,coupling:.21,phase:0,energy:0,spectrum:[],history:[]},learning:{rate:.18,decay:.985,predictions:0,correct:0,errorEnergy:0}};
 const $=id=>document.getElementById(id);
 const norm=s=>String(s||'').toLowerCase().replace(/[«»"']/g,'').replace(/\s+/g,' ').trim();
@@ -59,6 +59,43 @@ function answer(q){const R=retrieve(q),M=matches(q),D=infer(M);let text,mode,con
  $('state').innerHTML=[mode,'уверенность='+conf.toFixed(3),'неопределённость='+u.toFixed(3),'гипотез='+R.length,'энтропия='+H.toFixed(3),'резонанс='+rs.toFixed(3),'выводов='+D.length,'ошибок='+S.errors,'шагов='+S.steps,'эпизодов='+S.episodes,'источников='+Object.keys(S.sources).length].map(x=>'<span class="chip">'+x+'</span>').join('');
  $('explain').textContent='Цикл: признаки → гипервектор → ассоциативная память → отношения → гипотезы → энергия → распределение → вывод → проверка неопределённости → provenance. Следующие кандидаты: '+nextWords(q).join(', ')+'. Частотное состояние: ω='+((S.osc.base||1.618)*(1+Math.abs(rs))).toFixed(3)+' · φ='+((S.osc.phase||0)%(Math.PI*2)).toFixed(3);
 }
+function route(q){
+ const n=norm(q);
+ if(mathEval(q)!==null)return {kind:'calculation',action:'compute',need:0};
+ if(/\\b(кто|что|где|когда|почему|как|какой|какая|какие|сколько|зачем|чем|может ли|правда ли)\\b/.test(n))return {kind:'question',action:'evidence',need:.35};
+ return {kind:'statement',action:'learn',need:.15};
+}
+function candidateQueries(q){
+ const n=norm(q).replace(/[?!]+$/,'').trim();
+ const out=[n];
+ if(/\\bпочему\\b/.test(n))out.push(n.replace(/^почему\\s+/,'')+' причина');
+ if(/\\bкак\\b/.test(n))out.push(n+' принцип устройство');
+ return [...new Set(out)].filter(x=>x.length>2).slice(0,3);
+}
+function scoreEvidence(x,q){
+ const v=vec(q), z=vec(x.text||'');
+ return .65*cos(v,z)+.35*(1-Math.min(1,Math.abs((x.text||'').length-q.length)/(Math.max(1,q.length))));
+}
+async function evidenceSearch(q){
+ const qs=candidateQueries(q), all=[];
+ for(const query of qs){
+  try{
+   const url='https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch='+encodeURIComponent(query)+'&srlimit=5&format=json&origin=*';
+   const r=await fetch(url,{cache:'no-store'});if(!r.ok)continue;
+   const d=await r.json();
+   for(const x of (d.query?.search||[]))all.push({title:x.title,text:x.snippet.replace(/<[^>]+>/g,' ').replace(/&[^;]+;/g,' '),source:'wikipedia:'+x.title,url:'https://ru.wikipedia.org/wiki/'+encodeURIComponent(x.title)});
+  }catch(e){}
+ }
+ const seen=new Set();
+ return all.filter(x=>{if(seen.has(x.title))return false;seen.add(x.title);return true})
+   .map(x=>({...x,score:scoreEvidence(x,q)})).sort((a,b)=>b.score-a.score).slice(0,8);
+}
+function evidenceSynthesis(q,items){
+ if(!items.length)return 'Доказательств не найдено. AKSI воздержалась от выдумывания.';
+ const top=items.slice(0,3);
+ const lines=top.map((x,i)=>((i+1)+'. '+x.title+' — '+x.text+'\\nИсточник: '+x.url));
+ return 'Синтез свидетельств AKSI\\n\\n'+lines.join('\\n\\n')+'\\n\\nМатематическое состояние: '+top.map(x=>x.score.toFixed(3)).join(' · ')+'\\n\\nВажно: это найденные свидетельства, а не гарантия полного ответа.';
+}
 function mathEval(q){
  const s=norm(q).replace(/,/g,'.').replace(/[^0-9+\\-*/().%^ ]/g,'').trim();
  if(!s||!/[+*/%^]/.test(s))return null;
@@ -78,27 +115,21 @@ async function liveWikipedia(q){
  const d=await r.json();return (d.query&&d.query.search||[]).map(x=>({title:x.title,text:x.snippet.replace(/<[^>]+>/g,' ').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&amp;/g,'&'),source:'wikipedia:'+x.title,url:'https://ru.wikipedia.org/wiki/'+encodeURIComponent(x.title)}));
 }
 async function universalAnswer(q){
- const type=questionType(q);
- if(type==='math'){
-  const v=mathEval(q);
-  if(v!==null){$('out').textContent='Математический вывод: '+v+'\\n\\nМетод: точное вычисление выражения.';return}
- }
- const local=retrieve(q);
- if(local[0]&&local[0].s>.62){answer(q);return}
- try{
-  $('out').textContent='Локального свидетельства недостаточно. Ищу внешнее свидетельство…';
-  const web=await liveWikipedia(q);
-  for(const x of web)learn(x.text,x.source,false);
-  save();render();
-  const merged=retrieve(q);
-  if(web.length){
-   const best=merged[0];
-   $('out').textContent='Внешнее свидетельство (Wikipedia):\\n'+web[0].title+'\\n'+web[0].text+'\\n\\nИсточник: '+web[0].url+'\\n\\nAKSI затем преобразовала свидетельство в математическую память. Это не гарантирует полноту ответа.';
-   $('state').innerHTML=['web-search','найдено='+web.length,'локальная память='+S.facts.length,'резонанс='+((best&&best.s)||0).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('');
-  }else $('out').textContent='Свидетельство не найдено. Я не буду выдумывать ответ.';
- }catch(e){$('out').textContent='Внешний поиск недоступен: '+e.message+'\\n\\nЛокальный режим остаётся доступен.'}
-}
-async function importCorpus(url,label='external'){try{ $('out').textContent='Загружаю корпус: '+label+'…';const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();const items=d.facts||d.items||[];for(const x of items){const t=typeof x==='string'?x:x.text;if(t)learn(t,typeof x==='string'?label:(x.source||label))}S.events.push({type:'corpus_import',label,count:items.length,at:Date.now()});save();render();$('out').textContent='Корпус '+label+': обработано '+items.length+' утверждений.'}catch(e){$('out').textContent='Ошибка корпуса '+label+': '+e.message}}
+ const raw=q.trim();if(!raw)return;
+ const r=route(raw);
+ const val=r.action==='compute'?mathEval(raw):null;
+ if(val!==null){$('out').textContent='Математический вывод: '+val+'\\n\\nТочный вычислительный режим AKSI.';return}
+ const local=retrieve(raw);
+ if(local[0]&&local[0].s>.72){answer(raw);return}
+ $('out').textContent='AKSI строит пространство свидетельств…';
+ const items=await evidenceSearch(raw);
+ for(const x of items)learn(x.text,x.source,false);
+ save();render();
+ const merged=retrieve(raw);
+ $('out').textContent=evidenceSynthesis(raw,items);
+ $('state').innerHTML=['режим='+r.kind,'свидетельств='+items.length,'память='+S.facts.length,'резонанс='+((merged[0]?.s)||0).toFixed(3)].map(x=>'<span class="chip">'+x+'</span>').join('');
+ $('explain').textContent='Маршрут: '+r.action+' → поиск нескольких свидетельств → математическое ранжирование → запись в память → синтез. AKSI не утверждает то, для чего не нашла достаточного свидетельства.';
+}async function importCorpus(url,label='external'){try{ $('out').textContent='Загружаю корпус: '+label+'…';const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);const d=await r.json();const items=d.facts||d.items||[];for(const x of items){const t=typeof x==='string'?x:x.text;if(t)learn(t,typeof x==='string'?label:(x.source||label))}S.events.push({type:'corpus_import',label,count:items.length,at:Date.now()});save();render();$('out').textContent='Корпус '+label+': обработано '+items.length+' утверждений.'}catch(e){$('out').textContent='Ошибка корпуса '+label+': '+e.message}}
 function exportState(){const blob=new Blob([JSON.stringify({version:S.version,facts:S.facts,sources:S.sources,rel:S.rel,stats:{steps:S.steps,episodes:S.episodes}},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-math-knowledge.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function adaptiveCycle(n=250){for(let i=0;i<n;i++){const x=CORPUS[i%CORPUS.length],before=S.facts.length;learn(x,'adaptive',false);if(S.facts.length===before)S.episodes++;if(i%17===0)S.errors=Math.max(0,S.errors-1)}save();render();$('out').textContent='Адаптивный цикл: '+n+' эпизодов. Повторные факты усиливают параметры; новые факты расширяют пространство памяти.'}
 const CORPUS=['Язык состоит из символов слов отношений и контекста.','Слово получает смысл из контекста и отношений.','Предложение состоит из понятий и связей.','Москва находится в России.','Россия находится в Европе.','Москва является столицей России.','Европа является частью Земли.','Земля обращается вокруг Солнца.','Солнце является звездой.','Луна обращается вокруг Земли.','Вода существует в твёрдом жидком и газообразном состоянии.','Вода при нормальном давлении кипит примерно при ста градусах Цельсия.','Лёд является твёрдой водой.','Пар является газообразной водой.','Температура измеряет тепловое состояние.','Причина предшествует следствию.','Свидетельство повышает уверенность в гипотезе.','Противоречие снижает уверенность в гипотезе.','Память хранит состояния прошлого.','Контекст изменяет значение слова.','Сходство измеряет близость двух состояний.','Энтропия измеряет неопределённость.','Вероятность выражает степень уверенности.','Гипотеза является возможным объяснением наблюдения.','Наблюдение может подтверждать гипотезу.','Наблюдение может опровергать гипотезу.','Информация уменьшает неопределённость.','Хорошее действие максимально уменьшает неопределённость при разумной стоимости.','AKSI хранит состояния и проверяет гипотезы через свидетельства.','AKSI строит гипотезы перед выводом.','AKSI не должна выдавать неизвестное за известное.','Математическая память может связывать понятия.','Связь имеет направление и тип.','Разные состояния могут иметь общую структуру.','Человек задаёт вопрос.','Система преобразует вопрос в математическое состояние.','Система ищет согласованные состояния памяти.','Система сравнивает гипотезы.','Система обновляет уверенность после нового свидетельства.','Система может отказаться от ответа при высокой неопределённости.'];
