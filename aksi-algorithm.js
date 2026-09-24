@@ -1,18 +1,18 @@
 /**
- * AKSI MODEL / ADIA 4.0 — hedgehog x rhinoceros decision core
+ * AKSI MODEL / ADIA 4.0.1 — unified decision core
  * score → rank → claim-throttle → gate → seal
  * Formula: AKSI=(A×I×S)×(1+0.4√n)
  * Not AGI. aksilove@internet.ru
  */
 (function (G) {
   'use strict';
-  var VERSION = '4.0.0';
+  var VERSION = '4.0.1';
   var LEDGER_KEY = 'aksi_adia4_ledger';
   var POLICY = { companion: 55, lab: 70, strict: 80 };
   var CLEAT_POLICY = {
-    companion: { minG: 0.25, maxAbsRate: 0.45, vetoG: 0.08 },
-    lab: { minG: 0.4, maxAbsRate: 0.3, vetoG: 0.15 },
-    strict: { minG: 0.55, maxAbsRate: 0.18, vetoG: 0.22 }
+    companion: { minG: 0.12, maxAbsRate: 0.55, vetoG: 0.02 },
+    lab: { minG: 0.35, maxAbsRate: 0.3, vetoG: 0.12 },
+    strict: { minG: 0.5, maxAbsRate: 0.18, vetoG: 0.2 }
   };
   function clamp01(x) { x = Number(x); if (isNaN(x)) return 0; return x < 0 ? 0 : x > 1 ? 1 : x; }
   function round(x, d) { d = d == null ? 3 : d; var p = Math.pow(10, d); return Math.round(Number(x) * p) / p; }
@@ -115,12 +115,12 @@
     var blob = evidenceBlob(evidence);
     var claims = segmentClaims(answer), scored = [], i, c, support, abs, hedge, g, kind, absHits, hHits, j;
     for (i = 0; i < claims.length; i++) {
-      c = claims[i]; support = blob ? overlap(c, blob) : 0; absHits = 0; hHits = 0;
+      c = claims[i]; support = blob ? overlap(c, blob) : 0.35; absHits = 0; hHits = 0;
       for (j = 0; j < ABS_RE.length; j++) if (ABS_RE[j].test(c)) absHits++;
       for (j = 0; j < HEDGE_RE.length; j++) if (HEDGE_RE[j].test(c)) hHits++;
       abs = clamp01(absHits / 2); hedge = clamp01(hHits / 2);
       g = clamp01(0.7 * support + 0.15 * hedge + 0.15 * (support > 0.12 ? 1 : 0) - 0.35 * abs * (1 - support));
-      kind = support >= 0.22 && abs < 0.3 ? 'GROUNDED' : abs > 0.3 && support < 0.1 ? 'OVERCLAIM' : !blob ? 'UNGROUNDED' : 'CLAIM';
+      kind = support >= 0.22 && abs < 0.3 ? 'GROUNDED' : abs > 0.3 && support < 0.1 ? 'OVERCLAIM' : !blob ? 'LOCAL' : 'CLAIM';
       scored.push({ text: c.slice(0, 240), support: round(support, 4), g: round(g, 4), kind: kind });
     }
     var G = 0, over = 0;
@@ -136,14 +136,14 @@
     var policy = opts.policy || 'companion';
     var threshold = POLICY[policy] != null ? POLICY[policy] : POLICY.companion;
     var list = Array.isArray(candidates) ? candidates : [candidates];
-    var ranked = [], i, c, text, src, m, entry;
+    var ranked = [], i, c, text, src, m;
     for (i = 0; i < list.length; i++) {
       c = list[i]; if (c == null) continue;
       text = typeof c === 'string' ? c : c.text || c.content || '';
       src = typeof c === 'string' ? opts.source || 'local' : c.source || opts.source || 'local';
       if (!String(text).trim()) continue;
       m = score(query, { text: text, source: src }, opts);
-      ranked.push({ text: text, source: src, metrics: m, pass: m.EQS >= threshold });
+      ranked.push({ text: text, source: src, metrics: m, pass: m.EQS >= threshold, EQS: m.EQS });
     }
     ranked.sort(function (a, b) {
       if (b.metrics.EQS !== a.metrics.EQS) return b.metrics.EQS - a.metrics.EQS;
@@ -154,14 +154,18 @@
     var gate = { decision: 'BLOCK', reason: 'no_candidate' };
     if (best) {
       throttle = claimThrottle(best.text, opts.evidence || [], policy);
-      if (!best.pass && throttle.verdict === 'BIND') gate = { decision: 'DEFER', reason: 'eqs_below_policy' };
-      else if (!best.pass) gate = { decision: 'BLOCK', reason: 'eqs_below_policy' };
-      else gate = { decision: throttle.gate, reason: throttle.verdict };
+      if (!best.pass) {
+        gate = { decision: policy === 'strict' ? 'BLOCK' : 'DEFER', reason: 'eqs_below_policy' };
+      } else if (throttle.verdict === 'VETO' && policy === 'companion') {
+        gate = { decision: 'DEFER', reason: 'throttle_soft' };
+      } else {
+        gate = { decision: throttle.gate, reason: throttle.verdict };
+      }
     }
     var sealed = null;
     if (best && opts.seal !== false) sealed = seal(query, best.text, best.metrics);
     return {
-      ok: !!best, version: VERSION, model: 'AKSI', algorithm: 'ADIA 4.0 Unified Decision Model',
+      ok: !!best, version: VERSION, model: 'AKSI', algorithm: 'ADIA 4.0.1',
       policy: policy, threshold: threshold, query: String(query || '').slice(0, 300),
       best: best, ranked: ranked, throttle: throttle, gate: gate, seal: sealed,
       formula: 'AKSI=(A×I×S)×(1+0.4√n); gate←EQS+claimThrottle',
@@ -175,10 +179,10 @@
     return { ok: !!text, text: text, metrics: r.best ? r.best.metrics : score(query, text, opts), throttle: r.throttle, gate: r.gate, seal: r.seal, version: VERSION, process: r };
   }
   function status() {
-    return { version: VERSION, name: 'AKSI / ADIA 4.0', model: 'unified', pipeline: 'score→rank→claimThrottle→gate→seal', policies: POLICY };
+    return { version: VERSION, name: 'AKSI / ADIA 4.0.1', model: 'unified', pipeline: 'score→rank→claimThrottle→gate→seal', policies: POLICY };
   }
   G.AKSI_ALGORITHM = {
-    version: VERSION, name: 'AKSI ADIA 4.0', model: 'AKSI',
+    version: VERSION, name: 'AKSI ADIA 4.0.1', model: 'AKSI',
     process: process, evaluate: evaluate, score: score, claimThrottle: claimThrottle,
     status: status, seal: seal, POLICY: POLICY
   };
