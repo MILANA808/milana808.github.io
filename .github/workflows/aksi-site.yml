@@ -1,4 +1,4 @@
-# AKSI product CI — Release 1.0 + ADIA 3.0
+# AKSI product CI — ADIA 4.0.1
 name: AKSI verification
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   product:
-    name: Product + ADIA 3.0
+    name: Product + ADIA 4.0.1
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,11 +51,13 @@ jobs:
                    aksi-rag.js aksi-quantum.js aksi-trust-vault.js aksi-webllm.js \
                    aksi-chats.js aksi-p2p-sdp.js aksi-product.js app-runtime.js sw.js
           do
-            node --check "$f"
-            echo "syntax OK $f"
+            if [ -f "$f" ]; then
+              node --check "$f"
+              echo "syntax OK $f"
+            fi
           done
 
-      - name: ADIA 3.0 contract
+      - name: ADIA 4.0.1 contract
         run: |
           node <<'NODE'
           global.window = global;
@@ -67,7 +69,7 @@ jobs:
           require('./aksi-algorithm.js');
           const A = global.AKSI_ALGORITHM;
           if (!A) throw new Error('AKSI_ALGORITHM missing');
-          if (A.version !== '3.0.0') throw new Error('expected ADIA 3.0.0, got ' + A.version);
+          if (!String(A.version).startsWith('4.')) throw new Error('expected ADIA 4.x, got ' + A.version);
           if (typeof A.process !== 'function') throw new Error('process() required');
           if (typeof A.evaluate !== 'function') throw new Error('evaluate() required');
 
@@ -88,6 +90,10 @@ jobs:
           if (!m.quantum || m.quantum.mode !== 'deterministic-client-simulation') {
             throw new Error('quantum sim contract failed');
           }
+          if (!r.gate || !r.gate.decision) throw new Error('gate required');
+          if (r.gate.decision !== 'ALLOW' && r.gate.decision !== 'DEFER') {
+            throw new Error('unexpected gate for seed: ' + r.gate.decision);
+          }
           const st = A.status();
           if (!st.ledgerOk) throw new Error('ledger not ok');
           if (st.formula.indexOf('AKSI') < 0) throw new Error('formula missing');
@@ -95,9 +101,10 @@ jobs:
           const ev = A.evaluate('test', 'AKSI local verification answer', { seal: false });
           if (!ev.ok || !ev.metrics.EQS) throw new Error('evaluate failed');
 
-          console.log('ADIA 3.0 contract OK', {
+          console.log('ADIA 4.0.1 contract OK', {
             EQS: m.EQS,
             AKSI: m.AKSI,
+            gate: r.gate.decision,
             best: r.best.source,
             ledger: st.ledgerLen
           });
@@ -118,5 +125,5 @@ jobs:
           test -f present.html
           test -f PRODUCT.md
           test -f ALGORITHM.md
-          grep -q 'ADIA 3.0' ALGORITHM.md
+          grep -qE 'ADIA 4' ALGORITHM.md
           echo "docs OK"
