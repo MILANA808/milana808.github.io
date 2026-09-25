@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ STACK</title>
+<meta name="description" content="AKSI STACK — collect → ADIA gate → Bond SHA-256. Не AGI."/>
+<link rel="canonical" href="https://milana808.github.io/stack/"/>
+<meta name="theme-color" content="#0a0a0b"/>
+<style>
+:root{--bg:#0a0a0b;--s:#121214;--e:#1a1a1e;--l:rgba(255,255,255,.08);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--l);position:sticky;top:0;background:rgba(10,10,11,.92);backdrop-filter:blur(10px)}
+header a{color:var(--m);text-decoration:none;font-size:13px}header h1{margin:0;font-size:15px}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+.card{background:var(--s);border:1px solid var(--l);border-radius:14px;padding:16px;margin-bottom:12px}
+h2{margin:0 0 8px;font-size:14px}.lead{margin:0;color:var(--m);font-size:13px;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.cell{background:var(--e);border-radius:10px;padding:10px;font-size:12px;color:var(--m)}.cell b{display:block;color:var(--t);margin-top:2px}
+textarea{width:100%;min-height:70px;margin-top:8px;background:var(--e);border:1px solid var(--l);border-radius:10px;color:var(--t);padding:12px;font:inherit}
+button{margin-top:10px;border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:600;background:var(--a);color:#0a0a0b;cursor:pointer}
+pre{margin:10px 0 0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:var(--m);max-height:45vh;overflow:auto}
+.pipe{font-family:ui-monospace,monospace;font-size:12px;color:var(--a);margin-top:10px}
+</style>
+</head>
+<body>
+<header><a href="/">← АКСИ</a><h1>STACK</h1></header>
+<main class="wrap">
+  <div class="card">
+    <h2>Единая технология</h2>
+    <p class="lead">Собраны рабочие кирпичи АКСИ в один decide-путь.</p>
+    <div class="pipe">collect → ADIA 4 gate → Bond SHA-256 → ± WebLLM / PQ</div>
+    <div class="grid">
+      <div class="cell">ADIA <b id="a">…</b></div>
+      <div class="cell">Bond <b id="b">…</b></div>
+      <div class="cell">WebLLM <b id="l">…</b></div>
+      <div class="cell">PQ <b id="p">…</b></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Decide</h2>
+    <p class="lead">кто ты? · 12*7 · запомни: факт</p>
+    <textarea id="q" placeholder="Запрос…"></textarea>
+    <button type="button" id="go">Запустить STACK</button>
+    <pre id="out">—</pre>
+  </div>
+  <div class="card">
+    <p class="lead">Кирпичи: algorithm · bond · webllm · pq · memory. Не AGI. aksilove@internet.ru</p>
+  </div>
+</main>
+<script src="/aksi-algorithm.js?v=401"></script>
+<script src="/aksi-bond.js"></script>
+<script src="/aksi-webllm.js?v=3"></script>
+<script src="/aksi-pq.js"></script>
+<script src="/aksi-stack.js?v=1"></script>
+<script>
+(function(){
+  function ui(){
+    var s=window.AKSI_STACK&&AKSI_STACK.status?AKSI_STACK.status():{};
+    document.getElementById('a').textContent=s.adia||'—';
+    document.getElementById('b').textContent=s.bond||'—';
+    document.getElementById('l').textContent=s.webllm?'ready':'off';
+    document.getElementById('p').textContent=s.pq?'yes':'no';
+  }
+  document.getElementById('go').onclick=async function(){
+    var out=document.getElementById('out');out.textContent='…';
+    if(!window.AKSI_STACK){out.textContent='STACK not loaded';return;}
+    try{
+      var r=await AKSI_STACK.decide(document.getElementById('q').value,{policy:'companion',useWebLLM:true});
+      out.textContent=JSON.stringify({
+        answer:r.answer,
+        gate:r.gate,
+        throttle:r.throttle&&{verdict:r.throttle.verdict,G:r.throttle.G},
+        bond:r.bond,
+        bricks:r.bricks,
+        tech:r.tech,
+        version:r.version
+      },null,2);
+      ui();
+    }catch(e){out.textContent=String(e&&e.message||e);}
+  };
+  setTimeout(ui,60);
+})();
+</script>
+</body>
+</html>
