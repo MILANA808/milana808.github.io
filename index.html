@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ — продукт</title>
-<meta name="description" content="АКСИ: единый runtime — chat, memory, WebLLM, ADIA gate, Bond, receipt. Не AGI."/>
+<meta name="description" content="АКСИ: runtime на телефоне и ПК — Neuro, WebLLM 0.5B, ADIA, Bond. Не AGI."/>
 <link rel="canonical" href="https://milana808.github.io/"/>
 <meta name="theme-color" content="#0a0a0b"/>
 <style>
@@ -57,8 +57,8 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel on" data-p="home">
     <div class="card">
       <h2>Финальный продукт</h2>
-      <p class="lead">Не каталог папок — один runtime. Модули вызывают друг друга.</p>
-      <div class="pipe">INPUT → collect → ADIA gate → Bond → receipt</div>
+      <p class="lead">Телефон и ПК: Neuro всегда; WebLLM — если есть WebGPU. Модули работают вместе.</p>
+      <div class="pipe">INPUT → Neuro/LLM → ADIA gate → Bond</div>
       <div class="metrics">
         <div class="metric"><span>LLM</span><b id="mLlm">off</b></div>
         <div class="metric"><span>GPU</span><b id="mGpu">…</b></div>
@@ -76,9 +76,9 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   </section>
   <section class="panel" data-p="chat">
     <div class="card">
-      <h2>Chat · runtime</h2>
+      <h2>Chat</h2>
       <div class="thread" id="thread"></div>
-      <textarea id="q" placeholder="Вопрос… · запомни: факт · 12*8"></textarea>
+      <textarea id="q" placeholder="Вопрос… · запомни: факт"></textarea>
       <div class="row">
         <label class="lead" style="font-size:12px"><input type="checkbox" id="useLlm"/> WebLLM</label>
         <select id="policy" style="width:auto;min-width:110px">
@@ -95,15 +95,15 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   </section>
   <section class="panel" data-p="mods">
     <div class="card">
-      <h2>Модули · живые функции</h2>
-      <p class="lead">Каждая кнопка — реальный вызов, не страница-описание.</p>
+      <h2>Модули</h2>
+      <p class="lead">Живые функции, не папки.</p>
       <div class="grid2" style="margin-top:12px">
-        <button type="button" class="mod" data-fn="ping"><h3>ADIA</h3><p>score · rank · gate</p></button>
-        <button type="button" class="mod" data-fn="bond"><h3>Bond</h3><p>SHA-256 квитанция</p></button>
-        <button type="button" class="mod" data-fn="mem"><h3>Memory</h3><p>локальные факты</p></button>
-        <button type="button" class="mod" data-fn="llm"><h3>WebLLM</h3><p>статус модели</p></button>
-        <button type="button" class="mod" data-fn="stack"><h3>STACK</h3><p>полный decide</p></button>
-        <button type="button" class="mod" data-fn="receipt"><h3>Receipt</h3><p>последняя цепочка</p></button>
+        <button type="button" class="mod" data-fn="ping"><h3>ADIA</h3><p>gate</p></button>
+        <button type="button" class="mod" data-fn="bond"><h3>Bond</h3><p>SHA-256</p></button>
+        <button type="button" class="mod" data-fn="mem"><h3>Memory</h3><p>факты</p></button>
+        <button type="button" class="mod" data-fn="llm"><h3>WebLLM</h3><p>статус</p></button>
+        <button type="button" class="mod" data-fn="stack"><h3>STACK</h3><p>decide</p></button>
+        <button type="button" class="mod" data-fn="receipt"><h3>Receipt</h3><p>цепочка</p></button>
       </div>
       <pre id="fnOut" style="margin-top:12px">Выберите модуль</pre>
     </div>
@@ -111,7 +111,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel" data-p="llm">
     <div class="card">
       <h2>WebLLM</h2>
-      <p class="lead">Старт с 0.5B. Большие модели могут закрыть вкладку.</p>
+      <p class="lead">На телефоне: 0.5B. iPhone без WebGPU — Chat через Neuro. «Дообучение» = память + system, не веса модели.</p>
       <div class="lead" style="margin-top:8px"><b id="wlSt">idle</b> · <span id="wlPct">0</span>%</div>
       <div class="bar"><i id="wlBar"></i></div>
       <p class="lead" id="wlMsg" style="margin-top:8px;font:11px ui-monospace,monospace"></p>
@@ -125,14 +125,12 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel" data-p="decision">
     <div class="card">
       <h2>Decision</h2>
-      <p class="lead">Последний прогон gate / bond / metrics</p>
-      <pre id="decOut" style="margin-top:10px">Пока пусто — отправьте сообщение в Chat</pre>
+      <pre id="decOut" style="margin-top:10px">Пока пусто</pre>
     </div>
   </section>
   <section class="panel" data-p="mem">
     <div class="card">
       <h2>Memory</h2>
-      <p class="lead">«запомни: …» в чате</p>
       <div class="list" id="memL" style="margin-top:8px"></div>
       <div class="row">
         <button type="button" class="ghost" id="memR">Обновить</button>
@@ -152,7 +150,8 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
 <script src="/aksi-algorithm.js?v=401"></script>
 <script src="/aksi-bond.js"></script>
 <script src="/aksi-stack.js?v=1"></script>
-<script src="/aksi-webllm.js?v=41"></script>
+<script src="/aksi-neuro.js"></script>
+<script src="/aksi-webllm.js?v=42"></script>
 <script>
 (function () {
   var MEM = "aksi_prod_mem";
@@ -185,7 +184,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     $("wlSt").textContent = st.ready ? "ready" : st.loading ? "loading" : "idle";
     $("wlPct").textContent = st.progress || 0;
     $("wlBar").style.width = (st.progress || 0) + "%";
-    $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "");
+    $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "") + (st.note ? " · " + st.note : "");
     var s = $("wlPick");
     if (s && st.models && !s.options.length) {
       st.models.forEach(function (m) {
@@ -213,12 +212,8 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     if (!S.last) { $("decOut").textContent = "Пока пусто"; return; }
     $("decOut").textContent = JSON.stringify({
       answer: String(S.last.answer || "").slice(0, 200),
-      gate: S.last.gate,
-      throttle: S.last.throttle && { verdict: S.last.throttle.verdict, G: S.last.throttle.G },
-      bond: S.last.bond,
-      bricks: S.last.bricks,
-      source: S.last.best && S.last.best.source,
-      version: S.last.version || S.last.tech
+      gate: S.last.gate, bond: S.last.bond, bricks: S.last.bricks,
+      source: S.last.best && S.last.best.source
     }, null, 2);
   }
   async function decide(q) {
@@ -227,7 +222,8 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     var te = /^(?:запомни|remember)\s*[:：]\s*(.+)$/i.exec(q);
     if (te) {
       var arr = lm(); arr.push({ t: te[1].slice(0, 500), ts: Date.now() }); sm(arr);
-      return { answer: "Сохранено в Memory", gate: { decision: "ALLOW" }, bricks: ["memory"], best: { source: "memory" } };
+      try { if (window.AKSI_WEBLLM && AKSI_WEBLLM.adapt) AKSI_WEBLLM.adapt(te[1]); } catch (e) {}
+      return { answer: "Сохранено (+адаптация промпта)", gate: { decision: "ALLOW" }, bricks: ["memory","adapt"], best: { source: "memory" } };
     }
     var mem = lm().map(function (x) { return { t: x.t, text: x.t }; });
     var pol = $("policy").value;
@@ -236,23 +232,29 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     }
     var cands = [];
     if (/акси|aksi|кто ты/i.test(q))
-      cands.push({ text: "АКСИ — единый runtime: Chat ↔ ADIA ↔ Bond ↔ Memory ↔ WebLLM. Не AGI.", source: "seed" });
+      cands.push({ text: "АКСИ — runtime на телефоне и ПК: Neuro, WebLLM (если GPU), ADIA, Bond. Не AGI.", source: "seed" });
     mem.forEach(function (x) { if (x.t && x.t.length > 8) cands.push({ text: x.t, source: "memory" }); });
+    try {
+      if (window.AKSI_NEURO && AKSI_NEURO.query) {
+        var nr = AKSI_NEURO.query(q);
+        if (nr && (nr.answer || nr.text)) cands.push({ text: String(nr.answer || nr.text), source: "neuro" });
+      }
+    } catch (e) {}
     if ($("useLlm").checked && window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready()) {
       try {
-        var L = await AKSI_WEBLLM.complete(q, { max_tokens: 320 });
+        var L = await AKSI_WEBLLM.complete(q, { max_tokens: 256 });
         if (L && L.text) cands.push({ text: L.text, source: "webllm" });
       } catch (e) {}
     }
-    if (!cands.length) cands.push({ text: "Нет кандидатов. Загрузите WebLLM или «запомни:».", source: "fallback" });
+    if (!cands.length) cands.push({ text: "Нет кандидатов. На iPhone без GPU используйте Neuro: просто спросите или «запомни:».", source: "fallback" });
     if (window.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
       var res = AKSI_ALGORITHM.process(q, cands, { policy: pol, seal: true });
       var out = { answer: res.best ? res.best.text : "", gate: res.gate, throttle: res.throttle, best: res.best, version: res.version, bricks: ["adia-4"] };
       if (window.AKSI_BOND && AKSI_BOND.createBond) {
         try {
-          var b = await AKSI_BOND.createBond({ query: q, answer: out.answer, source: out.best && out.best.source, gate: out.gate && out.gate.decision, eqs: out.best && out.best.metrics && out.best.metrics.EQS });
+          var b = await AKSI_BOND.createBond({ query: q, answer: out.answer, source: out.best && out.best.source, gate: out.gate && out.gate.decision });
           out.bond = { bond_id: b.bond_id, integrity: b.integrity };
-          out.bricks.push("bond-sha256");
+          out.bricks.push("bond");
         } catch (e) {}
       }
       return out;
@@ -263,35 +265,27 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     if (ev && ev.preventDefault) ev.preventDefault();
     var q = $("q").value;
     if (!q.trim()) return;
-    if (window.AKSI_WEBLLM && AKSI_WEBLLM.loading && AKSI_WEBLLM.loading()) {
-      bub("ai", "Модель загружается — подождите или снимите WebLLM.", "system");
-      return;
-    }
     bub("me", q); $("q").value = ""; $("send").disabled = true;
     try {
       var r = await decide(q);
       S.last = r;
-      var meta = [r && r.gate && r.gate.decision, r && r.best && r.best.source, r && r.bricks && r.bricks.join("+")].filter(Boolean).join(" · ");
-      bub("ai", (r && r.answer) || "—", meta);
+      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.best && r.best.source].filter(Boolean).join(" · "));
       ui(); rdec();
     } catch (err) {
-      bub("ai", "Ошибка: " + String(err && err.message || err).slice(0, 200), "error");
+      bub("ai", "Ошибка: " + String(err && err.message || err).slice(0, 160), "error");
     } finally { $("send").disabled = false; }
   };
   $("clr").onclick = function () { $("thread").innerHTML = ""; };
-  $("memR").onclick = rm;
-  $("memC").onclick = function () { sm([]); rm(); };
+  $("memR").onclick = rm; $("memC").onclick = function () { sm([]); rm(); };
   $("wlLoad").onclick = function (ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
     if (!window.AKSI_WEBLLM) { $("wlMsg").textContent = "Модуль не загружен"; return; }
-    $("wlLoad").disabled = true;
-    $("wlMsg").textContent = "Загрузка…";
+    $("wlLoad").disabled = true; $("wlMsg").textContent = "Загрузка…";
     Promise.resolve(AKSI_WEBLLM.load($("wlPick").value || null)).then(function (st) {
       rlm();
       if (st && st.ready) { $("wlMsg").textContent = "Готово"; $("useLlm").checked = true; }
-      else if (st && st.error) $("wlMsg").textContent = "Ошибка: " + st.error;
-    }).catch(function (e) {
-      $("wlMsg").textContent = String(e && e.message || e); rlm();
+      else if (st && st.error) $("wlMsg").textContent = st.error;
+    }).catch(function (e) { $("wlMsg").textContent = String(e && e.message || e); rlm();
     }).then(function () { $("wlLoad").disabled = false; });
   };
   $("wlOut").onclick = function () {
@@ -300,31 +294,21 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   };
   document.querySelectorAll("[data-fn]").forEach(function (btn) {
     btn.addEventListener("click", async function () {
-      var fn = btn.getAttribute("data-fn");
-      var out = $("fnOut");
-      out.textContent = "…";
+      var fn = btn.getAttribute("data-fn"), out = $("fnOut"); out.textContent = "…";
       try {
         if (fn === "ping") {
-          if (!window.AKSI_ALGORITHM) throw new Error("ADIA offline");
-          var r = AKSI_ALGORITHM.process("тест", [{ text: "Локальный ответ АКСИ для проверки gate.", source: "seed" }], { policy: "companion", seal: true });
-          out.textContent = JSON.stringify({ version: AKSI_ALGORITHM.version, gate: r.gate, EQS: r.best && r.best.metrics && r.best.metrics.EQS }, null, 2);
+          var r = AKSI_ALGORITHM.process("тест", [{ text: "Проверка gate АКСИ.", source: "seed" }], { policy: "companion", seal: true });
+          out.textContent = JSON.stringify({ gate: r.gate, EQS: r.best && r.best.metrics && r.best.metrics.EQS }, null, 2);
         } else if (fn === "bond") {
-          if (!window.AKSI_BOND) throw new Error("Bond offline");
-          var b = await AKSI_BOND.createBond({ query: "module-test", answer: "bond live", source: "mods", gate: "ALLOW" });
-          out.textContent = JSON.stringify({ protocol: b.protocol, bond_id: b.bond_id, integrity: b.integrity }, null, 2);
-        } else if (fn === "mem") {
-          out.textContent = JSON.stringify({ count: lm().length, sample: lm().slice(-3) }, null, 2);
-        } else if (fn === "llm") {
-          out.textContent = JSON.stringify(window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : { error: "no webllm" }, null, 2);
-        } else if (fn === "stack") {
-          if (!window.AKSI_STACK) throw new Error("STACK offline");
+          var b = await AKSI_BOND.createBond({ query: "t", answer: "ok", source: "mods", gate: "ALLOW" });
+          out.textContent = JSON.stringify({ bond_id: b.bond_id, integrity: b.integrity }, null, 2);
+        } else if (fn === "mem") out.textContent = JSON.stringify({ count: lm().length, sample: lm().slice(-3) }, null, 2);
+        else if (fn === "llm") out.textContent = JSON.stringify(AKSI_WEBLLM.status(), null, 2);
+        else if (fn === "stack") {
           var s = await AKSI_STACK.decide("кто ты?", { policy: "companion", memory: lm().map(function (x) { return { t: x.t }; }) });
-          S.last = s;
-          out.textContent = JSON.stringify({ answer: s.answer, gate: s.gate, bond: s.bond, bricks: s.bricks }, null, 2);
-          ui();
+          S.last = s; out.textContent = JSON.stringify({ answer: s.answer, gate: s.gate, bricks: s.bricks }, null, 2); ui();
         } else if (fn === "receipt") {
-          var bonds = window.AKSI_BOND && AKSI_BOND.listBonds ? AKSI_BOND.listBonds() : [];
-          out.textContent = JSON.stringify({ last: S.last && { gate: S.last.gate, bond: S.last.bond }, bonds: bonds.slice(-5) }, null, 2);
+          out.textContent = JSON.stringify({ last: S.last && S.last.bond, bonds: AKSI_BOND.listBonds ? AKSI_BOND.listBonds().slice(-5) : [] }, null, 2);
         }
       } catch (e) { out.textContent = String(e && e.message || e); }
     });
@@ -333,7 +317,6 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     b.addEventListener("click", function () { go(b.getAttribute("data-go")); });
   });
   window.addEventListener("aksi-webllm-progress", rlm);
-  window.addEventListener("aksi:webllm-ready", rlm);
   setTimeout(function () {
     rlm(); ui();
     try { var g = new URLSearchParams(location.search).get("go"); if (g) go(g); } catch (e) {}
