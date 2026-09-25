@@ -3,120 +3,118 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ</title>
-<meta name="description" content="АКСИ — локальный агент: chat, WebLLM, decision gate, memory, receipt. Не AGI."/>
+<title>АКСИ — продукт</title>
+<meta name="description" content="АКСИ: единый runtime — chat, memory, WebLLM, ADIA gate, Bond, receipt. Не AGI."/>
 <link rel="canonical" href="https://milana808.github.io/"/>
 <meta name="theme-color" content="#0a0a0b"/>
 <style>
-:root{
-  --bg:#0a0a0b;--surface:#121214;--elev:#1a1a1e;
-  --line:rgba(255,255,255,.08);--text:#f4f4f5;--muted:#a1a1aa;
-  --accent:#a78bfa;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;
-  --nav:60px;--r:14px;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-body{padding-bottom:calc(var(--nav) + env(safe-area-inset-bottom,0px) + 8px)}
-a{color:var(--accent);text-decoration:none}
-.top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(10,10,11,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.mark{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,#c4b5fd,#7c3aed);display:grid;place-items:center;font-weight:800;font-size:12px;color:#0a0a0b}
-.top h1{margin:0;font-size:15px;font-weight:650;letter-spacing:-.01em}
-.badge{margin-left:auto;font-size:11px;color:var(--muted);padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-variant-numeric:tabular-nums}
-.badge.on{color:var(--ok);border-color:rgba(52,211,153,.35)}
-.wrap{max-width:720px;margin:0 auto;padding:16px}
+:root{--bg:#0a0a0b;--s:#121214;--e:#1a1a1e;--l:rgba(255,255,255,.08);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--ok:#34d399;--nav:58px;--r:14px}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--t)}
+body{padding-bottom:calc(var(--nav)+env(safe-area-inset-bottom,0px)+8px)}
+a{color:var(--a);text-decoration:none}
+.top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(10,10,11,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--l)}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,#c4b5fd,#7c3aed);display:grid;place-items:center;font-weight:800;font-size:12px;color:#0a0a0b}
+.top h1{margin:0;font-size:15px;font-weight:650}
+.pill{margin-left:auto;font-size:11px;color:var(--m);padding:4px 10px;border-radius:999px;border:1px solid var(--l)}
+.pill.on{color:var(--ok);border-color:rgba(52,211,153,.35)}
+.wrap{max-width:720px;margin:0 auto;padding:14px}
 .panel{display:none}.panel.on{display:block}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:0 0 12px}
+.card{background:var(--s);border:1px solid var(--l);border-radius:var(--r);padding:14px;margin:0 0 12px}
 .card h2{margin:0 0 6px;font-size:14px;font-weight:600}
-.lead{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.lead{margin:0;color:var(--m);font-size:13px;line-height:1.5}
+.pipe{font:12px/1.4 ui-monospace,monospace;color:var(--a);margin-top:10px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
 @media(max-width:420px){.metrics{grid-template-columns:1fr 1fr}}
-.metric{background:var(--elev);border-radius:10px;padding:10px 12px}
-.metric span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:2px}
-.metric b{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
-button,.btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--accent);color:#0a0a0b}
-button.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
-button:disabled{opacity:.4;cursor:not-allowed}
-textarea,input,select{width:100%;background:var(--elev);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:11px 12px;font:inherit;font-size:14px}
-textarea{min-height:72px;resize:vertical;line-height:1.45}
-textarea:focus,input:focus,select:focus{outline:none;border-color:rgba(167,139,250,.5)}
-.thread{display:flex;flex-direction:column;gap:10px;max-height:min(42vh,420px);overflow:auto;margin-bottom:12px;padding:2px}
-.msg{max-width:88%;padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
-.msg.me{align-self:flex-end;background:#27272a}
-.msg.ai{align-self:flex-start;background:var(--elev);border:1px solid var(--line)}
-.msg .meta{margin-top:6px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.bar{height:4px;background:var(--elev);border-radius:99px;overflow:hidden;margin:10px 0}
-.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s ease}
-.list{max-height:40vh;overflow:auto}
-.list div{padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--muted);line-height:1.4}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
-pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:var(--muted)}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;height:calc(var(--nav) + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);display:flex;background:rgba(10,10,11,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
-.bnav button{flex:1;height:var(--nav);background:transparent;color:var(--muted);border:0;border-radius:0;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
-.bnav button.on{color:var(--accent)}
-.bnav button span{font-size:16px;line-height:1;opacity:.9}
+.metric{background:var(--e);border-radius:10px;padding:10px}.metric span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--m)}.metric b{font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+button{appearance:none;border:0;border-radius:10px;padding:10px 14px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;background:var(--a);color:#0a0a0b}
+button.ghost{background:transparent;color:var(--m);border:1px solid var(--l)}
+button:disabled{opacity:.45;cursor:not-allowed}
+textarea,input,select{width:100%;background:var(--e);border:1px solid var(--l);border-radius:10px;color:var(--t);padding:11px 12px;font:inherit;font-size:14px}
+textarea{min-height:70px;resize:vertical}
+.thread{display:flex;flex-direction:column;gap:10px;max-height:min(40vh,400px);overflow:auto;margin-bottom:10px}
+.msg{max-width:90%;padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.msg.me{align-self:flex-end;background:#27272a}.msg.ai{align-self:flex-start;background:var(--e);border:1px solid var(--l)}
+.msg .meta{margin-top:6px;font-size:11px;color:var(--m)}
+.bar{height:4px;background:var(--e);border-radius:99px;overflow:hidden;margin:10px 0}.bar i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mod{background:var(--e);border:1px solid var(--l);border-radius:12px;padding:12px;text-align:left;cursor:pointer}
+.mod h3{margin:0 0 4px;font-size:13px;color:var(--t)}.mod p{margin:0;font-size:11px;color:var(--m);line-height:1.4}
+.list div{padding:8px 0;border-bottom:1px solid var(--l);font-size:12px;color:var(--m)}
+pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:var(--m);max-height:36vh;overflow:auto}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:50;height:calc(var(--nav)+env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);display:flex;background:rgba(10,10,11,.94);backdrop-filter:blur(14px);border-top:1px solid var(--l)}
+.bnav button{flex:1;height:var(--nav);background:0;color:var(--m);border:0;border-radius:0;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
+.bnav button.on{color:var(--a)}.bnav button span{font-size:15px;line-height:1}
 </style>
 </head>
 <body>
 <header class="top">
-  <div class="mark">A</div>
+  <div class="logo">A</div>
   <h1>АКСИ</h1>
-  <div class="badge" id="pill">local</div>
+  <div class="pill" id="pill">local</div>
 </header>
 <main class="wrap">
   <section class="panel on" data-p="home">
     <div class="card">
-      <h2>Локальный агент</h2>
-      <p class="lead">Ответ на устройстве, память, WebLLM по желанию, проверка качества и квитанция. Не AGI.</p>
+      <h2>Финальный продукт</h2>
+      <p class="lead">Не каталог папок — один runtime. Модули вызывают друг друга.</p>
+      <div class="pipe">INPUT → collect → ADIA gate → Bond → receipt</div>
       <div class="metrics">
-        <div class="metric"><span>LLM</span><b id="sLlm">off</b></div>
-        <div class="metric"><span>GPU</span><b id="sGpu">…</b></div>
-        <div class="metric"><span>Memory</span><b id="sMem">0</b></div>
-        <div class="metric"><span>Ledger</span><b id="sLed">0</b></div>
-        <div class="metric"><span>ADIA</span><b id="sAdia">…</b></div>
-        <div class="metric"><span>Gate</span><b id="sGate">—</b></div>
+        <div class="metric"><span>LLM</span><b id="mLlm">off</b></div>
+        <div class="metric"><span>GPU</span><b id="mGpu">…</b></div>
+        <div class="metric"><span>ADIA</span><b id="mAdia">…</b></div>
+        <div class="metric"><span>Bond</span><b id="mBond">…</b></div>
+        <div class="metric"><span>Memory</span><b id="mMem">0</b></div>
+        <div class="metric"><span>Gate</span><b id="mGate">—</b></div>
       </div>
-    </div>
-    <div class="card">
-      <p class="lead">Pipeline: memory → model → rank → gate → receipt</p>
       <div class="row">
-        <button type="button" data-go="chat">Открыть чат</button>
-        <button type="button" class="ghost" data-go="llm">Модель</button>
-        <a class="lead" href="/folders/" style="margin-left:4px">Папки</a>
-        <a class="lead" href="/studio/">Студия</a>
+        <button type="button" data-go="chat">Чат</button>
+        <button type="button" class="ghost" data-go="mods">Модули</button>
+        <button type="button" class="ghost" data-go="llm">WebLLM</button>
       </div>
-      <p class="lead" style="margin-top:14px">aksilove@internet.ru</p>
     </div>
   </section>
   <section class="panel" data-p="chat">
     <div class="card">
-      <h2>Chat</h2>
+      <h2>Chat · runtime</h2>
       <div class="thread" id="thread"></div>
-      <textarea id="q" placeholder="Сообщение…  ·  запомни: факт"></textarea>
+      <textarea id="q" placeholder="Вопрос… · запомни: факт · 12*8"></textarea>
       <div class="row">
         <label class="lead" style="font-size:12px"><input type="checkbox" id="useLlm"/> WebLLM</label>
-        <label class="lead" style="font-size:12px"><input type="checkbox" id="useWeb"/> Backend</label>
-        <select id="policy" style="width:auto;min-width:120px">
+        <select id="policy" style="width:auto;min-width:110px">
           <option value="companion">companion</option>
           <option value="lab">lab</option>
           <option value="strict">strict</option>
         </select>
       </div>
-      <div class="row"><input id="backend" placeholder="Backend URL (…/api/universal)"/></div>
       <div class="row">
         <button type="button" id="send">Отправить</button>
         <button type="button" class="ghost" id="clr">Очистить</button>
       </div>
     </div>
   </section>
+  <section class="panel" data-p="mods">
+    <div class="card">
+      <h2>Модули · живые функции</h2>
+      <p class="lead">Каждая кнопка — реальный вызов, не страница-описание.</p>
+      <div class="grid2" style="margin-top:12px">
+        <button type="button" class="mod" data-fn="ping"><h3>ADIA</h3><p>score · rank · gate</p></button>
+        <button type="button" class="mod" data-fn="bond"><h3>Bond</h3><p>SHA-256 квитанция</p></button>
+        <button type="button" class="mod" data-fn="mem"><h3>Memory</h3><p>локальные факты</p></button>
+        <button type="button" class="mod" data-fn="llm"><h3>WebLLM</h3><p>статус модели</p></button>
+        <button type="button" class="mod" data-fn="stack"><h3>STACK</h3><p>полный decide</p></button>
+        <button type="button" class="mod" data-fn="receipt"><h3>Receipt</h3><p>последняя цепочка</p></button>
+      </div>
+      <pre id="fnOut" style="margin-top:12px">Выберите модуль</pre>
+    </div>
+  </section>
   <section class="panel" data-p="llm">
     <div class="card">
       <h2>WebLLM</h2>
-      <p class="lead">Браузерная модель · WebGPU · Chrome/Edge. Начните с 0.5B — большие модели могут закрыть вкладку (мало RAM).</p>
+      <p class="lead">Старт с 0.5B. Большие модели могут закрыть вкладку.</p>
       <div class="lead" style="margin-top:8px"><b id="wlSt">idle</b> · <span id="wlPct">0</span>%</div>
       <div class="bar"><i id="wlBar"></i></div>
-      <div class="lead">model <b id="wlMd">—</b> · gpu <b id="wlGpu">…</b></div>
-      <p class="lead mono" id="wlMsg" style="margin-top:8px"></p>
+      <p class="lead" id="wlMsg" style="margin-top:8px;font:11px ui-monospace,monospace"></p>
       <div class="row">
         <select id="wlPick" style="flex:1;min-width:140px"></select>
         <button type="button" id="wlLoad">Загрузить</button>
@@ -124,17 +122,17 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
       </div>
     </div>
   </section>
-  <section class="panel" data-p="model">
+  <section class="panel" data-p="decision">
     <div class="card">
       <h2>Decision</h2>
-      <p class="lead">Последний прогон ADIA</p>
-      <pre class="out" id="modOut" style="margin-top:10px">Пока пусто — отправьте сообщение в Chat</pre>
+      <p class="lead">Последний прогон gate / bond / metrics</p>
+      <pre id="decOut" style="margin-top:10px">Пока пусто — отправьте сообщение в Chat</pre>
     </div>
   </section>
   <section class="panel" data-p="mem">
     <div class="card">
       <h2>Memory</h2>
-      <p class="lead">Локально · команда «запомни: …»</p>
+      <p class="lead">«запомни: …» в чате</p>
       <div class="list" id="memL" style="margin-top:8px"></div>
       <div class="row">
         <button type="button" class="ghost" id="memR">Обновить</button>
@@ -142,53 +140,42 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
       </div>
     </div>
   </section>
-  <section class="panel" data-p="trust">
-    <div class="card">
-      <h2>Trust</h2>
-      <p class="lead">Квитанции решения (FNV chain)</p>
-      <div class="list" id="ledL" style="margin-top:8px"></div>
-      <div class="row">
-        <button type="button" id="dl" disabled>Скачать JSON</button>
-        <button type="button" class="ghost" id="ledR">Обновить</button>
-      </div>
-    </div>
-  </section>
 </main>
 <nav class="bnav">
   <button type="button" class="on" data-go="home"><span>○</span>Home</button>
   <button type="button" data-go="chat"><span>◈</span>Chat</button>
+  <button type="button" data-go="mods"><span>⬡</span>Модули</button>
   <button type="button" data-go="llm"><span>◎</span>LLM</button>
-  <button type="button" data-go="model"><span>Σ</span>Decision</button>
-  <button type="button" data-go="mem"><span>□</span>Memory</button>
-  <button type="button" data-go="trust"><span>✓</span>Trust</button>
+  <button type="button" data-go="decision"><span>Σ</span>Gate</button>
+  <button type="button" data-go="mem"><span>□</span>Mem</button>
 </nav>
 <script src="/aksi-algorithm.js?v=401"></script>
+<script src="/aksi-bond.js"></script>
+<script src="/aksi-stack.js?v=1"></script>
 <script src="/aksi-webllm.js?v=41"></script>
 <script>
 (function () {
-  var MEM = "aksi_mem_v2", LED = "aksi_led_v2", S = { last: null };
+  var MEM = "aksi_prod_mem";
+  var S = { last: null };
   function $(id) { return document.getElementById(id); }
   function lm() { try { var a = JSON.parse(localStorage.getItem(MEM) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function sm(a) { localStorage.setItem(MEM, JSON.stringify((a || []).slice(-120))); ui(); }
-  function ll() { try { var a = JSON.parse(localStorage.getItem(LED) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function sl(a) { localStorage.setItem(LED, JSON.stringify((a || []).slice(-100))); ui(); }
-  function fnv(s) {
-    var h = 0x811c9dc5, i; s = String(s || "");
-    for (i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
-    return ("00000000" + (h >>> 0).toString(16)).slice(-8);
-  }
+  function sm(a) { localStorage.setItem(MEM, JSON.stringify((a || []).slice(-150))); ui(); }
   function go(t) {
     document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("on", p.getAttribute("data-p") === t); });
     document.querySelectorAll(".bnav button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-go") === t); });
-    if (t === "mem") rm(); if (t === "trust") rl(); if (t === "model") rmod(); if (t === "llm") rlm(); ui();
+    if (t === "mem") rm();
+    if (t === "decision") rdec();
+    if (t === "llm") rlm();
+    ui();
   }
   function ui() {
-    $("sMem").textContent = lm().length; $("sLed").textContent = ll().length;
-    if (S.last && S.last.gate) $("sGate").textContent = S.last.gate.decision || "—";
+    $("mMem").textContent = lm().length;
+    $("mAdia").textContent = (window.AKSI_ALGORITHM && AKSI_ALGORITHM.version) || "—";
+    $("mBond").textContent = (window.AKSI_BOND && AKSI_BOND.version) || "—";
+    if (S.last && S.last.gate) $("mGate").textContent = S.last.gate.decision || "—";
     var st = window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : {};
-    $("sLlm").textContent = st.ready ? "ready" : st.loading ? "loading" : "off";
-    $("sGpu").textContent = st.webgpu === true ? "yes" : st.webgpu === false ? "no" : "…";
-    $("sAdia").textContent = (window.AKSI_ALGORITHM && AKSI_ALGORITHM.version) || "…";
+    $("mLlm").textContent = st.ready ? "ready" : st.loading ? "…" : "off";
+    $("mGpu").textContent = st.webgpu === true ? "yes" : st.webgpu === false ? "no" : "…";
     var p = $("pill");
     if (st.ready) { p.textContent = "WebLLM"; p.classList.add("on"); }
     else { p.textContent = "local"; p.classList.remove("on"); }
@@ -196,22 +183,25 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
   function rlm() {
     var st = window.AKSI_WEBLLM && AKSI_WEBLLM.status ? AKSI_WEBLLM.status() : {};
     $("wlSt").textContent = st.ready ? "ready" : st.loading ? "loading" : "idle";
-    $("wlPct").textContent = st.progress || 0; $("wlBar").style.width = (st.progress || 0) + "%";
-    $("wlMd").textContent = st.model || "—";
-    $("wlGpu").textContent = st.webgpu === true ? "yes" : st.webgpu === false ? "no" : "…";
+    $("wlPct").textContent = st.progress || 0;
+    $("wlBar").style.width = (st.progress || 0) + "%";
     $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "");
     var s = $("wlPick");
     if (s && st.models && !s.options.length) {
       st.models.forEach(function (m) {
-        var o = document.createElement("option"); o.value = m.id; o.textContent = m.label || m.id; s.appendChild(o);
+        var o = document.createElement("option");
+        o.value = m.id; o.textContent = m.label || m.id; s.appendChild(o);
       });
     }
     ui();
   }
   function bub(role, t, meta) {
-    var d = document.createElement("div"); d.className = "msg " + (role === "me" ? "me" : "ai"); d.textContent = t;
+    var d = document.createElement("div");
+    d.className = "msg " + (role === "me" ? "me" : "ai");
+    d.textContent = t;
     if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
-    $("thread").appendChild(d); $("thread").scrollTop = 1e9;
+    $("thread").appendChild(d);
+    $("thread").scrollTop = 1e9;
   }
   function rm() {
     var a = lm();
@@ -219,130 +209,135 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
       ? a.slice().reverse().map(function (x) { return "<div>" + String(x.t || "").slice(0, 240) + "</div>"; }).join("")
       : "<div>Пусто</div>";
   }
-  function rl() {
-    var a = ll();
-    $("ledL").innerHTML = a.length
-      ? a.slice().reverse().map(function (x) { return "<div class='mono'>" + (x.hash || "") + " · " + (x.gate || "") + "</div>"; }).join("")
-      : "<div>Нет записей</div>";
-    $("dl").disabled = !S.last || !S.last.receipt;
-  }
-  function rmod() {
-    if (!S.last) { $("modOut").textContent = "Пока пусто"; return; }
-    $("modOut").textContent = JSON.stringify({
-      gate: S.last.gate, throttle: S.last.throttle,
-      best: S.last.best && { source: S.last.best.source, EQS: S.last.best.EQS || (S.last.best.metrics && S.last.best.metrics.EQS) },
-      version: S.last.version
+  function rdec() {
+    if (!S.last) { $("decOut").textContent = "Пока пусто"; return; }
+    $("decOut").textContent = JSON.stringify({
+      answer: String(S.last.answer || "").slice(0, 200),
+      gate: S.last.gate,
+      throttle: S.last.throttle && { verdict: S.last.throttle.verdict, G: S.last.throttle.G },
+      bond: S.last.bond,
+      bricks: S.last.bricks,
+      source: S.last.best && S.last.best.source,
+      version: S.last.version || S.last.tech
     }, null, 2);
   }
-  function safeMath(q) {
-    var s = String(q).replace(/(посчитай|вычисли)/gi, "").replace(",", ".").trim();
-    if (!/^[\d\s+\-*/().]+$/.test(s) || !/[+*/\-]/.test(s)) return null;
-    try { var v = Function('"use strict";return (' + s + ")")(); return typeof v === "number" && isFinite(v) ? v : null; } catch (e) { return null; }
-  }
-  async function think(q) {
-    q = String(q || "").trim(); if (!q) return null;
+  async function decide(q) {
+    q = String(q || "").trim();
+    if (!q) return null;
     var te = /^(?:запомни|remember)\s*[:：]\s*(.+)$/i.exec(q);
     if (te) {
-      var m = lm(); m.push({ t: te[1].slice(0, 500), ts: Date.now() }); sm(m);
-      return { answer: "Сохранено", gate: { decision: "ALLOW" }, throttle: { verdict: "BIND", G: 1 }, best: { source: "memory", EQS: 99 } };
+      var arr = lm(); arr.push({ t: te[1].slice(0, 500), ts: Date.now() }); sm(arr);
+      return { answer: "Сохранено в Memory", gate: { decision: "ALLOW" }, bricks: ["memory"], best: { source: "memory" } };
     }
-    var cands = [], pol = $("policy").value, calc = safeMath(q);
-    if (calc != null) cands.push({ text: "Результат: " + calc, source: "calc" });
-    if (/акси|aksi|кто ты|что ты/i.test(q))
-      cands.push({ text: "АКСИ — локальный агент: память, WebLLM, decision gate (ADIA), квитанция. Не AGI. aksilove@internet.ru", source: "seed" });
-    lm().forEach(function (x) { if (String(x.t || "").length > 10) cands.push({ text: x.t, source: "memory" }); });
+    var mem = lm().map(function (x) { return { t: x.t, text: x.t }; });
+    var pol = $("policy").value;
+    if (window.AKSI_STACK && AKSI_STACK.decide) {
+      return await AKSI_STACK.decide(q, { policy: pol, memory: mem, useWebLLM: !!($("useLlm").checked), seal: true });
+    }
+    var cands = [];
+    if (/акси|aksi|кто ты/i.test(q))
+      cands.push({ text: "АКСИ — единый runtime: Chat ↔ ADIA ↔ Bond ↔ Memory ↔ WebLLM. Не AGI.", source: "seed" });
+    mem.forEach(function (x) { if (x.t && x.t.length > 8) cands.push({ text: x.t, source: "memory" }); });
     if ($("useLlm").checked && window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready()) {
       try {
         var L = await AKSI_WEBLLM.complete(q, { max_tokens: 320 });
         if (L && L.text) cands.push({ text: L.text, source: "webllm" });
-        else if (L && L.error) cands.push({ text: "WebLLM: " + L.error, source: "fallback" });
-      } catch (e) {
-        cands.push({ text: "WebLLM сбой: " + String(e && e.message || e).slice(0, 120), source: "fallback" });
-      }
-    }
-    var bu = $("backend").value.trim();
-    if ($("useWeb").checked && bu) {
-      try {
-        var r = await fetch(bu.replace(/\/$/, "") + "/api/universal", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ q: q, web: true }) });
-        if (r.ok) { var j = await r.json(); if (j.answer) cands.push({ text: j.answer, source: "backend", evidence: j.sources }); }
       } catch (e) {}
     }
-    if (!cands.length) cands.push({ text: "Нет кандидатов. Загрузите WebLLM (0.5B) или «запомни: …».", source: "fallback" });
-    var ev = []; cands.forEach(function (c) { if (c.evidence) ev = ev.concat(c.evidence); });
-    var out;
+    if (!cands.length) cands.push({ text: "Нет кандидатов. Загрузите WebLLM или «запомни:».", source: "fallback" });
     if (window.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
-      var res = AKSI_ALGORITHM.process(q, cands, { policy: pol, evidence: ev, seal: true });
-      var b = res.best;
-      out = { answer: b ? b.text : "", gate: res.gate, throttle: res.throttle, best: b, version: res.version };
-    } else {
-      out = { answer: cands[0].text, gate: { decision: "ALLOW" }, best: cands[0], version: "no-adia" };
+      var res = AKSI_ALGORITHM.process(q, cands, { policy: pol, seal: true });
+      var out = { answer: res.best ? res.best.text : "", gate: res.gate, throttle: res.throttle, best: res.best, version: res.version, bricks: ["adia-4"] };
+      if (window.AKSI_BOND && AKSI_BOND.createBond) {
+        try {
+          var b = await AKSI_BOND.createBond({ query: q, answer: out.answer, source: out.best && out.best.source, gate: out.gate && out.gate.decision, eqs: out.best && out.best.metrics && out.best.metrics.EQS });
+          out.bond = { bond_id: b.bond_id, integrity: b.integrity };
+          out.bricks.push("bond-sha256");
+        } catch (e) {}
+      }
+      return out;
     }
-    var body = {
-      q: q.slice(0, 160), answer: String(out.answer).slice(0, 600),
-      gate: out.gate && out.gate.decision, G: out.throttle && out.throttle.G,
-      ts: new Date().toISOString(), prev: (ll().slice(-1)[0] || {}).hash || null
-    };
-    body.hash = "fnv:" + fnv(JSON.stringify(body));
-    out.receipt = body;
-    var led = ll(); led.push(body); sl(led);
-    return out;
+    return { answer: cands[0].text, gate: { decision: "ALLOW" }, best: cands[0], bricks: ["local"] };
   }
   $("send").onclick = async function (ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
-    var q = $("q").value; if (!q.trim()) return;
+    var q = $("q").value;
+    if (!q.trim()) return;
     if (window.AKSI_WEBLLM && AKSI_WEBLLM.loading && AKSI_WEBLLM.loading()) {
-      bub("ai", "Модель ещё загружается — подождите или снимите галку WebLLM.", "system");
+      bub("ai", "Модель загружается — подождите или снимите WebLLM.", "system");
       return;
     }
     bub("me", q); $("q").value = ""; $("send").disabled = true;
     try {
-      var r = await think(q); S.last = r;
-      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.throttle && r.throttle.verdict, r && r.best && r.best.source].filter(Boolean).join(" · "));
-      ui(); rmod();
+      var r = await decide(q);
+      S.last = r;
+      var meta = [r && r.gate && r.gate.decision, r && r.best && r.best.source, r && r.bricks && r.bricks.join("+")].filter(Boolean).join(" · ");
+      bub("ai", (r && r.answer) || "—", meta);
+      ui(); rdec();
     } catch (err) {
       bub("ai", "Ошибка: " + String(err && err.message || err).slice(0, 200), "error");
     } finally { $("send").disabled = false; }
   };
   $("clr").onclick = function () { $("thread").innerHTML = ""; };
-  $("memR").onclick = rm; $("memC").onclick = function () { sm([]); rm(); };
-  $("ledR").onclick = rl;
-  $("dl").onclick = function () {
-    if (!S.last || !S.last.receipt) return;
-    var b = new Blob([JSON.stringify(S.last.receipt, null, 2)], { type: "application/json" });
-    var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "aksi-receipt.json"; a.click();
-  };
+  $("memR").onclick = rm;
+  $("memC").onclick = function () { sm([]); rm(); };
   $("wlLoad").onclick = function (ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
-    if (!window.AKSI_WEBLLM) { $("wlMsg").textContent = "Модуль WebLLM не загружен"; return; }
-    go("llm");
-    $("wlMsg").textContent = "Загрузка… не закрывайте вкладку";
+    if (!window.AKSI_WEBLLM) { $("wlMsg").textContent = "Модуль не загружен"; return; }
     $("wlLoad").disabled = true;
-    var mid = $("wlPick").value || null;
-    Promise.resolve(AKSI_WEBLLM.load(mid)).then(function (st) {
+    $("wlMsg").textContent = "Загрузка…";
+    Promise.resolve(AKSI_WEBLLM.load($("wlPick").value || null)).then(function (st) {
       rlm();
-      if (st && st.ready) {
-        $("wlMsg").textContent = "Готово. Можно в Chat";
-        var box = $("useLlm"); if (box) box.checked = true;
-      } else if (st && st.error) {
-        $("wlMsg").textContent = "Ошибка: " + st.error;
-      }
+      if (st && st.ready) { $("wlMsg").textContent = "Готово"; $("useLlm").checked = true; }
+      else if (st && st.error) $("wlMsg").textContent = "Ошибка: " + st.error;
     }).catch(function (e) {
-      $("wlMsg").textContent = String(e && e.message || e);
-      rlm();
+      $("wlMsg").textContent = String(e && e.message || e); rlm();
     }).then(function () { $("wlLoad").disabled = false; });
   };
-  $("wlOut").onclick = function (ev) {
-    if (ev && ev.preventDefault) ev.preventDefault();
+  $("wlOut").onclick = function () {
     if (window.AKSI_WEBLLM) AKSI_WEBLLM.unload();
-    var box = $("useLlm"); if (box) box.checked = false;
-    rlm();
+    $("useLlm").checked = false; rlm();
   };
+  document.querySelectorAll("[data-fn]").forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      var fn = btn.getAttribute("data-fn");
+      var out = $("fnOut");
+      out.textContent = "…";
+      try {
+        if (fn === "ping") {
+          if (!window.AKSI_ALGORITHM) throw new Error("ADIA offline");
+          var r = AKSI_ALGORITHM.process("тест", [{ text: "Локальный ответ АКСИ для проверки gate.", source: "seed" }], { policy: "companion", seal: true });
+          out.textContent = JSON.stringify({ version: AKSI_ALGORITHM.version, gate: r.gate, EQS: r.best && r.best.metrics && r.best.metrics.EQS }, null, 2);
+        } else if (fn === "bond") {
+          if (!window.AKSI_BOND) throw new Error("Bond offline");
+          var b = await AKSI_BOND.createBond({ query: "module-test", answer: "bond live", source: "mods", gate: "ALLOW" });
+          out.textContent = JSON.stringify({ protocol: b.protocol, bond_id: b.bond_id, integrity: b.integrity }, null, 2);
+        } else if (fn === "mem") {
+          out.textContent = JSON.stringify({ count: lm().length, sample: lm().slice(-3) }, null, 2);
+        } else if (fn === "llm") {
+          out.textContent = JSON.stringify(window.AKSI_WEBLLM ? AKSI_WEBLLM.status() : { error: "no webllm" }, null, 2);
+        } else if (fn === "stack") {
+          if (!window.AKSI_STACK) throw new Error("STACK offline");
+          var s = await AKSI_STACK.decide("кто ты?", { policy: "companion", memory: lm().map(function (x) { return { t: x.t }; }) });
+          S.last = s;
+          out.textContent = JSON.stringify({ answer: s.answer, gate: s.gate, bond: s.bond, bricks: s.bricks }, null, 2);
+          ui();
+        } else if (fn === "receipt") {
+          var bonds = window.AKSI_BOND && AKSI_BOND.listBonds ? AKSI_BOND.listBonds() : [];
+          out.textContent = JSON.stringify({ last: S.last && { gate: S.last.gate, bond: S.last.bond }, bonds: bonds.slice(-5) }, null, 2);
+        }
+      } catch (e) { out.textContent = String(e && e.message || e); }
+    });
+  });
   document.querySelectorAll("[data-go]").forEach(function (b) {
     b.addEventListener("click", function () { go(b.getAttribute("data-go")); });
   });
   window.addEventListener("aksi-webllm-progress", rlm);
   window.addEventListener("aksi:webllm-ready", rlm);
-  setTimeout(function () { rlm(); ui(); }, 40);
+  setTimeout(function () {
+    rlm(); ui();
+    try { var g = new URLSearchParams(location.search).get("go"); if (g) go(g); } catch (e) {}
+  }, 40);
 })();
 </script>
 </body>
