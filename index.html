@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ — продукт</title>
-<meta name="description" content="АКСИ: runtime на телефоне и ПК — Neuro, WebLLM 0.5B, ADIA, Bond. Не AGI."/>
+<meta name="description" content="АКСИ: расширенный контекст — история, память, Neuro, WebLLM. Не AGI."/>
 <link rel="canonical" href="https://milana808.github.io/"/>
 <meta name="theme-color" content="#0a0a0b"/>
 <style>
@@ -57,8 +57,8 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel on" data-p="home">
     <div class="card">
       <h2>Финальный продукт</h2>
-      <p class="lead">Телефон и ПК: Neuro всегда; WebLLM — если есть WebGPU. Модули работают вместе.</p>
-      <div class="pipe">INPUT → Neuro/LLM → ADIA gate → Bond</div>
+      <p class="lead">Расширенный контекст: история чата + память + Neuro. WebLLM при WebGPU (не 128k cloud).</p>
+      <div class="pipe">история → память → Neuro/LLM → ADIA → Bond</div>
       <div class="metrics">
         <div class="metric"><span>LLM</span><b id="mLlm">off</b></div>
         <div class="metric"><span>GPU</span><b id="mGpu">…</b></div>
@@ -76,9 +76,9 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   </section>
   <section class="panel" data-p="chat">
     <div class="card">
-      <h2>Chat</h2>
+      <h2>Chat · широкий контекст</h2>
       <div class="thread" id="thread"></div>
-      <textarea id="q" placeholder="Вопрос… · запомни: факт"></textarea>
+      <textarea id="q" placeholder="Вопрос… · запомни: факт (попадёт в контекст)"></textarea>
       <div class="row">
         <label class="lead" style="font-size:12px"><input type="checkbox" id="useLlm"/> WebLLM</label>
         <select id="policy" style="width:auto;min-width:110px">
@@ -96,12 +96,11 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel" data-p="mods">
     <div class="card">
       <h2>Модули</h2>
-      <p class="lead">Живые функции, не папки.</p>
       <div class="grid2" style="margin-top:12px">
         <button type="button" class="mod" data-fn="ping"><h3>ADIA</h3><p>gate</p></button>
         <button type="button" class="mod" data-fn="bond"><h3>Bond</h3><p>SHA-256</p></button>
         <button type="button" class="mod" data-fn="mem"><h3>Memory</h3><p>факты</p></button>
-        <button type="button" class="mod" data-fn="llm"><h3>WebLLM</h3><p>статус</p></button>
+        <button type="button" class="mod" data-fn="llm"><h3>WebLLM</h3><p>ctx status</p></button>
         <button type="button" class="mod" data-fn="stack"><h3>STACK</h3><p>decide</p></button>
         <button type="button" class="mod" data-fn="receipt"><h3>Receipt</h3><p>цепочка</p></button>
       </div>
@@ -111,7 +110,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel" data-p="llm">
     <div class="card">
       <h2>WebLLM</h2>
-      <p class="lead">На телефоне: 0.5B. iPhone без WebGPU — Chat через Neuro. «Дообучение» = память + system, не веса модели.</p>
+      <p class="lead">Контекст: system+память+история (desktop до ~16 реплик). Модели 0.5–1.5B ≠ 128k токенов облака.</p>
       <div class="lead" style="margin-top:8px"><b id="wlSt">idle</b> · <span id="wlPct">0</span>%</div>
       <div class="bar"><i id="wlBar"></i></div>
       <p class="lead" id="wlMsg" style="margin-top:8px;font:11px ui-monospace,monospace"></p>
@@ -151,21 +150,18 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
 <script src="/aksi-bond.js"></script>
 <script src="/aksi-stack.js?v=1"></script>
 <script src="/aksi-neuro.js"></script>
-<script src="/aksi-webllm.js?v=42"></script>
+<script src="/aksi-webllm.js?v=43"></script>
 <script>
 (function () {
   var MEM = "aksi_prod_mem";
-  var S = { last: null };
+  var S = { last: null, hist: [] };
   function $(id) { return document.getElementById(id); }
   function lm() { try { var a = JSON.parse(localStorage.getItem(MEM) || "[]"); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
-  function sm(a) { localStorage.setItem(MEM, JSON.stringify((a || []).slice(-150))); ui(); }
+  function sm(a) { localStorage.setItem(MEM, JSON.stringify((a || []).slice(-200)); ui(); }
   function go(t) {
     document.querySelectorAll(".panel").forEach(function (p) { p.classList.toggle("on", p.getAttribute("data-p") === t); });
     document.querySelectorAll(".bnav button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-go") === t); });
-    if (t === "mem") rm();
-    if (t === "decision") rdec();
-    if (t === "llm") rlm();
-    ui();
+    if (t === "mem") rm(); if (t === "decision") rdec(); if (t === "llm") rlm(); ui();
   }
   function ui() {
     $("mMem").textContent = lm().length;
@@ -184,12 +180,12 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     $("wlSt").textContent = st.ready ? "ready" : st.loading ? "loading" : "idle";
     $("wlPct").textContent = st.progress || 0;
     $("wlBar").style.width = (st.progress || 0) + "%";
-    $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "") + (st.note ? " · " + st.note : "");
+    var ctx = st.context ? (" · ctx turns=" + st.context.turns) : "";
+    $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "") + ctx;
     var s = $("wlPick");
     if (s && st.models && !s.options.length) {
       st.models.forEach(function (m) {
-        var o = document.createElement("option");
-        o.value = m.id; o.textContent = m.label || m.id; s.appendChild(o);
+        var o = document.createElement("option"); o.value = m.id; o.textContent = m.label || m.id; s.appendChild(o);
       });
     }
     ui();
@@ -199,40 +195,30 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     d.className = "msg " + (role === "me" ? "me" : "ai");
     d.textContent = t;
     if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
-    $("thread").appendChild(d);
-    $("thread").scrollTop = 1e9;
+    $("thread").appendChild(d); $("thread").scrollTop = 1e9;
   }
   function rm() {
     var a = lm();
-    $("memL").innerHTML = a.length
-      ? a.slice().reverse().map(function (x) { return "<div>" + String(x.t || "").slice(0, 240) + "</div>"; }).join("")
-      : "<div>Пусто</div>";
+    $("memL").innerHTML = a.length ? a.slice().reverse().map(function (x) { return "<div>" + String(x.t || "").slice(0, 240) + "</div>"; }).join("") : "<div>Пусто</div>";
   }
   function rdec() {
     if (!S.last) { $("decOut").textContent = "Пока пусто"; return; }
-    $("decOut").textContent = JSON.stringify({
-      answer: String(S.last.answer || "").slice(0, 200),
-      gate: S.last.gate, bond: S.last.bond, bricks: S.last.bricks,
-      source: S.last.best && S.last.best.source
-    }, null, 2);
+    $("decOut").textContent = JSON.stringify({ answer: String(S.last.answer || "").slice(0, 200), gate: S.last.gate, bond: S.last.bond, bricks: S.last.bricks, source: S.last.best && S.last.best.source, hist_len: S.hist.length }, null, 2);
   }
   async function decide(q) {
     q = String(q || "").trim();
     if (!q) return null;
     var te = /^(?:запомни|remember)\s*[:：]\s*(.+)$/i.exec(q);
     if (te) {
-      var arr = lm(); arr.push({ t: te[1].slice(0, 500), ts: Date.now() }); sm(arr);
+      var arr = lm(); arr.push({ t: te[1].slice(0, 800), ts: Date.now() }); sm(arr);
       try { if (window.AKSI_WEBLLM && AKSI_WEBLLM.adapt) AKSI_WEBLLM.adapt(te[1]); } catch (e) {}
-      return { answer: "Сохранено (+адаптация промпта)", gate: { decision: "ALLOW" }, bricks: ["memory","adapt"], best: { source: "memory" } };
+      return { answer: "В контексте (память + адаптация)", gate: { decision: "ALLOW" }, bricks: ["memory","adapt"], best: { source: "memory" } };
     }
     var mem = lm().map(function (x) { return { t: x.t, text: x.t }; });
     var pol = $("policy").value;
-    if (window.AKSI_STACK && AKSI_STACK.decide) {
-      return await AKSI_STACK.decide(q, { policy: pol, memory: mem, useWebLLM: !!($("useLlm").checked), seal: true });
-    }
     var cands = [];
     if (/акси|aksi|кто ты/i.test(q))
-      cands.push({ text: "АКСИ — runtime на телефоне и ПК: Neuro, WebLLM (если GPU), ADIA, Bond. Не AGI.", source: "seed" });
+      cands.push({ text: "АКСИ — локальный runtime с расширенным контекстом: история чата, память, Neuro, опционально WebLLM. Не AGI.", source: "seed" });
     mem.forEach(function (x) { if (x.t && x.t.length > 8) cands.push({ text: x.t, source: "memory" }); });
     try {
       if (window.AKSI_NEURO && AKSI_NEURO.query) {
@@ -242,11 +228,11 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     } catch (e) {}
     if ($("useLlm").checked && window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready()) {
       try {
-        var L = await AKSI_WEBLLM.complete(q, { max_tokens: 256 });
+        var L = await AKSI_WEBLLM.complete(q, { max_tokens: 384, history: S.hist });
         if (L && L.text) cands.push({ text: L.text, source: "webllm" });
       } catch (e) {}
     }
-    if (!cands.length) cands.push({ text: "Нет кандидатов. На iPhone без GPU используйте Neuro: просто спросите или «запомни:».", source: "fallback" });
+    if (!cands.length) cands.push({ text: "Нет кандидатов. Добавьте «запомни:» или загрузите WebLLM.", source: "fallback" });
     if (window.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
       var res = AKSI_ALGORITHM.process(q, cands, { policy: pol, seal: true });
       var out = { answer: res.best ? res.best.text : "", gate: res.gate, throttle: res.throttle, best: res.best, version: res.version, bricks: ["adia-4"] };
@@ -269,13 +255,14 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     try {
       var r = await decide(q);
       S.last = r;
-      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.best && r.best.source].filter(Boolean).join(" · "));
+      try { S.hist.push({ role: "user", content: q }); S.hist.push({ role: "assistant", content: (r && r.answer) || "" }); S.hist = S.hist.slice(-24); } catch (e) {}
+      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.best && r.best.source, "hist:" + S.hist.length].filter(Boolean).join(" · "));
       ui(); rdec();
     } catch (err) {
       bub("ai", "Ошибка: " + String(err && err.message || err).slice(0, 160), "error");
     } finally { $("send").disabled = false; }
   };
-  $("clr").onclick = function () { $("thread").innerHTML = ""; };
+  $("clr").onclick = function () { $("thread").innerHTML = ""; S.hist = []; };
   $("memR").onclick = rm; $("memC").onclick = function () { sm([]); rm(); };
   $("wlLoad").onclick = function (ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
@@ -297,19 +284,17 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
       var fn = btn.getAttribute("data-fn"), out = $("fnOut"); out.textContent = "…";
       try {
         if (fn === "ping") {
-          var r = AKSI_ALGORITHM.process("тест", [{ text: "Проверка gate АКСИ.", source: "seed" }], { policy: "companion", seal: true });
-          out.textContent = JSON.stringify({ gate: r.gate, EQS: r.best && r.best.metrics && r.best.metrics.EQS }, null, 2);
+          var r = AKSI_ALGORITHM.process("тест", [{ text: "Проверка.", source: "seed" }], { policy: "companion", seal: true });
+          out.textContent = JSON.stringify({ gate: r.gate }, null, 2);
         } else if (fn === "bond") {
           var b = await AKSI_BOND.createBond({ query: "t", answer: "ok", source: "mods", gate: "ALLOW" });
-          out.textContent = JSON.stringify({ bond_id: b.bond_id, integrity: b.integrity }, null, 2);
-        } else if (fn === "mem") out.textContent = JSON.stringify({ count: lm().length, sample: lm().slice(-3) }, null, 2);
+          out.textContent = JSON.stringify({ bond_id: b.bond_id }, null, 2);
+        } else if (fn === "mem") out.textContent = JSON.stringify({ count: lm().length }, null, 2);
         else if (fn === "llm") out.textContent = JSON.stringify(AKSI_WEBLLM.status(), null, 2);
         else if (fn === "stack") {
           var s = await AKSI_STACK.decide("кто ты?", { policy: "companion", memory: lm().map(function (x) { return { t: x.t }; }) });
-          S.last = s; out.textContent = JSON.stringify({ answer: s.answer, gate: s.gate, bricks: s.bricks }, null, 2); ui();
-        } else if (fn === "receipt") {
-          out.textContent = JSON.stringify({ last: S.last && S.last.bond, bonds: AKSI_BOND.listBonds ? AKSI_BOND.listBonds().slice(-5) : [] }, null, 2);
-        }
+          S.last = s; out.textContent = JSON.stringify({ answer: s.answer, gate: s.gate }, null, 2); ui();
+        } else if (fn === "receipt") out.textContent = JSON.stringify({ hist: S.hist.length, last: S.last && S.last.bond }, null, 2);
       } catch (e) { out.textContent = String(e && e.message || e); }
     });
   });
