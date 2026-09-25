@@ -67,7 +67,7 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
   <section class="panel on" data-p="home">
     <div class="card">
       <h2>Локальный агент</h2>
-      <p class="lead">Ответ на устройстве, память, WebLLM по желанию, проверка качества и квитанция решения. Не AGI.</p>
+      <p class="lead">Ответ на устройстве, память, WebLLM по желанию, проверка качества и квитанция. Не AGI.</p>
       <div class="metrics">
         <div class="metric"><span>LLM</span><b id="sLlm">off</b></div>
         <div class="metric"><span>GPU</span><b id="sGpu">…</b></div>
@@ -94,7 +94,7 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
       <div class="thread" id="thread"></div>
       <textarea id="q" placeholder="Сообщение…  ·  запомни: факт"></textarea>
       <div class="row">
-        <label class="lead" style="font-size:12px"><input type="checkbox" id="useLlm" checked/> WebLLM</label>
+        <label class="lead" style="font-size:12px"><input type="checkbox" id="useLlm"/> WebLLM</label>
         <label class="lead" style="font-size:12px"><input type="checkbox" id="useWeb"/> Backend</label>
         <select id="policy" style="width:auto;min-width:120px">
           <option value="companion">companion</option>
@@ -112,7 +112,7 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
   <section class="panel" data-p="llm">
     <div class="card">
       <h2>WebLLM</h2>
-      <p class="lead">Браузерная модель · WebGPU · Chrome / Edge</p>
+      <p class="lead">Браузерная модель · WebGPU · Chrome/Edge. Начните с 0.5B — большие модели могут закрыть вкладку (мало RAM).</p>
       <div class="lead" style="margin-top:8px"><b id="wlSt">idle</b> · <span id="wlPct">0</span>%</div>
       <div class="bar"><i id="wlBar"></i></div>
       <div class="lead">model <b id="wlMd">—</b> · gpu <b id="wlGpu">…</b></div>
@@ -163,7 +163,7 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
   <button type="button" data-go="trust"><span>✓</span>Trust</button>
 </nav>
 <script src="/aksi-algorithm.js?v=401"></script>
-<script src="/aksi-webllm.js?v=3"></script>
+<script src="/aksi-webllm.js?v=41"></script>
 <script>
 (function () {
   var MEM = "aksi_mem_v2", LED = "aksi_led_v2", S = { last: null };
@@ -252,7 +252,13 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
       cands.push({ text: "АКСИ — локальный агент: память, WebLLM, decision gate (ADIA), квитанция. Не AGI. aksilove@internet.ru", source: "seed" });
     lm().forEach(function (x) { if (String(x.t || "").length > 10) cands.push({ text: x.t, source: "memory" }); });
     if ($("useLlm").checked && window.AKSI_WEBLLM && AKSI_WEBLLM.ready && AKSI_WEBLLM.ready()) {
-      try { var L = await AKSI_WEBLLM.complete(q, { max_tokens: 400 }); if (L && L.text) cands.push({ text: L.text, source: "webllm" }); } catch (e) {}
+      try {
+        var L = await AKSI_WEBLLM.complete(q, { max_tokens: 320 });
+        if (L && L.text) cands.push({ text: L.text, source: "webllm" });
+        else if (L && L.error) cands.push({ text: "WebLLM: " + L.error, source: "fallback" });
+      } catch (e) {
+        cands.push({ text: "WebLLM сбой: " + String(e && e.message || e).slice(0, 120), source: "fallback" });
+      }
     }
     var bu = $("backend").value.trim();
     if ($("useWeb").checked && bu) {
@@ -261,7 +267,7 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
         if (r.ok) { var j = await r.json(); if (j.answer) cands.push({ text: j.answer, source: "backend", evidence: j.sources }); }
       } catch (e) {}
     }
-    if (!cands.length) cands.push({ text: "Нет кандидатов. Загрузите WebLLM или добавьте «запомни: …».", source: "fallback" });
+    if (!cands.length) cands.push({ text: "Нет кандидатов. Загрузите WebLLM (0.5B) или «запомни: …».", source: "fallback" });
     var ev = []; cands.forEach(function (c) { if (c.evidence) ev = ev.concat(c.evidence); });
     var out;
     if (window.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
@@ -281,13 +287,20 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
     var led = ll(); led.push(body); sl(led);
     return out;
   }
-  $("send").onclick = async function () {
+  $("send").onclick = async function (ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
     var q = $("q").value; if (!q.trim()) return;
+    if (window.AKSI_WEBLLM && AKSI_WEBLLM.loading && AKSI_WEBLLM.loading()) {
+      bub("ai", "Модель ещё загружается — подождите или снимите галку WebLLM.", "system");
+      return;
+    }
     bub("me", q); $("q").value = ""; $("send").disabled = true;
     try {
       var r = await think(q); S.last = r;
-      bub("ai", r.answer || "—", [r.gate && r.gate.decision, r.throttle && r.throttle.verdict, r.best && r.best.source].filter(Boolean).join(" · "));
+      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.throttle && r.throttle.verdict, r && r.best && r.best.source].filter(Boolean).join(" · "));
       ui(); rmod();
+    } catch (err) {
+      bub("ai", "Ошибка: " + String(err && err.message || err).slice(0, 200), "error");
     } finally { $("send").disabled = false; }
   };
   $("clr").onclick = function () { $("thread").innerHTML = ""; };
@@ -298,11 +311,32 @@ pre.out{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;colo
     var b = new Blob([JSON.stringify(S.last.receipt, null, 2)], { type: "application/json" });
     var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "aksi-receipt.json"; a.click();
   };
-  $("wlLoad").onclick = function () {
+  $("wlLoad").onclick = function (ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
     if (!window.AKSI_WEBLLM) { $("wlMsg").textContent = "Модуль WebLLM не загружен"; return; }
-    AKSI_WEBLLM.load($("wlPick").value || null).then(rlm).catch(function (e) { $("wlMsg").textContent = String(e && e.message || e); rlm(); });
+    go("llm");
+    $("wlMsg").textContent = "Загрузка… не закрывайте вкладку";
+    $("wlLoad").disabled = true;
+    var mid = $("wlPick").value || null;
+    Promise.resolve(AKSI_WEBLLM.load(mid)).then(function (st) {
+      rlm();
+      if (st && st.ready) {
+        $("wlMsg").textContent = "Готово. Можно в Chat";
+        var box = $("useLlm"); if (box) box.checked = true;
+      } else if (st && st.error) {
+        $("wlMsg").textContent = "Ошибка: " + st.error;
+      }
+    }).catch(function (e) {
+      $("wlMsg").textContent = String(e && e.message || e);
+      rlm();
+    }).then(function () { $("wlLoad").disabled = false; });
   };
-  $("wlOut").onclick = function () { if (window.AKSI_WEBLLM) AKSI_WEBLLM.unload(); rlm(); };
+  $("wlOut").onclick = function (ev) {
+    if (ev && ev.preventDefault) ev.preventDefault();
+    if (window.AKSI_WEBLLM) AKSI_WEBLLM.unload();
+    var box = $("useLlm"); if (box) box.checked = false;
+    rlm();
+  };
   document.querySelectorAll("[data-go]").forEach(function (b) {
     b.addEventListener("click", function () { go(b.getAttribute("data-go")); });
   });
