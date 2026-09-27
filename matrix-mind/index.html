@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Vector Mind — мысль как вектор</title>
-<meta name="description" content="Семантические координаты, Хопфилд, policy, Lorenz, crypto proof. Не бэкпроп."/>
+<title>АКСИ Vector Mind v2 — trained</title>
+<meta name="description" content="Обученный векторный движок: 49 паттернов, Хопфилд, intent rank, ECDSA proof."/>
 <link rel="canonical" href="https://milana808.github.io/matrix-mind/"/>
 <style>
 :root{--bg:#07080c;--card:#12141c;--line:rgba(255,255,255,.08);--t:#e8ecf4;--m:#8b93a7;--a:#7eb6ff;--ok:#3dd68c;--accent:#b794f6}
@@ -19,28 +19,26 @@ canvas{display:block;width:100%;height:100%;min-height:280px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.chips button{background:var(--card);border:1px solid var(--line);color:var(--m);border-radius:999px;padding:5px 10px;font-size:12px;cursor:pointer}
 .ans{margin-top:10px;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);white-space:pre-wrap;font-size:14px;min-height:3em}
 .proof{margin-top:8px;font:11px/1.5 ui-monospace,monospace;color:var(--m);word-break:break-all}.proof b{color:var(--ok)}
-.legend{position:absolute;left:10px;bottom:10px;font-size:11px;color:var(--m);background:rgba(0,0,0,.45);padding:6px 8px;border-radius:8px}
 </style>
 </head>
 <body>
 <div class="layout">
-<header><h1>АКСИ · Vector Mind</h1><p>Мысль = вектор · Память = Хопфилд · Подпись S_t · не бэкпроп</p></header>
-<div id="cwrap"><canvas id="cv"></canvas>
-<div class="legend">input · S · identity · memory · concepts</div></div>
+<header><h1>АКСИ · Vector Mind v2</h1><p>trained · 49 паттернов · Хопфилд · ECDSA · не бэкпроп</p></header>
+<div id="cwrap"><canvas id="cv"></canvas></div>
 <div class="panel">
 <div class="chips">
 <button type="button" data-q="кто ты">кто ты</button>
 <button type="button" data-q="русский алфавит">алфавит</button>
-<button type="button" data-q="запомни: резонанс АКСИ держит смысл">запомни</button>
-<button type="button" data-q="посчитай 2^8">math</button>
+<button type="button" data-q="формула aksi">формула</button>
+<button type="button" data-q="запомни: факт обучения вектора">запомни</button>
 </div>
-<div class="composer"><input id="q" type="text" placeholder="Ввод → волна…"/><button type="button" id="go">Мысль</button></div>
-<div class="ans" id="ans">Ожидание…</div>
+<div class="composer"><input id="q" type="text" placeholder="Вопрос к обученному движку…"/><button type="button" id="go">Мысль</button></div>
+<div class="ans" id="ans">Движок обучен — задайте вопрос…</div>
 <div class="proof" id="proof">proof: —</div>
 </div></div>
-<script src="/aksi-math-ai.js?v=v1"></script>
-<script src="/aksi-conscious.js?v=v1"></script>
-<script src="/aksi-vector-mind.js?v=v1"></script>
+<script src="/aksi-math-ai.js?v=v2"></script>
+<script src="/aksi-conscious.js?v=v2"></script>
+<script src="/aksi-vector-mind.js?v=21"></script>
 <script>
 (function(){
 var cv=document.getElementById('cv'),ctx=cv.getContext('2d'),graph=null,wave=0,nodes=[];
@@ -48,9 +46,9 @@ function resize(){var r=cv.parentElement.getBoundingClientRect();cv.width=Math.f
 function project(p){if(!p)return null;var w=cv.width/devicePixelRatio,h=cv.height/devicePixelRatio,cx=w*.5,cy=h*.48,scale=Math.min(w,h)*.28,z=1+(p.z||0)*.35;return{x:cx+p.x*scale*z,y:cy-p.y*scale*z,r:4+Math.abs(p.mag||0)*6};}
 function buildNodes(g){nodes=[];if(!g)return;function add(p,color,label){if(p)nodes.push({p:p,color:color,label:label});}(g.concepts||[]).forEach(function(c){add(c,'#718096',c.label);});add(g.input,'#7eb6ff','input');add(g.memory,'#f6ad55','memory');add(g.state,'#b794f6','S');add(g.identity,'#3dd68c','identity');}
 function draw(){var w=cv.width/devicePixelRatio,h=cv.height/devicePixelRatio;ctx.clearRect(0,0,w,h);wave+=.02;nodes.forEach(function(n,i){var a=project(n.p);if(!a)return;ctx.beginPath();ctx.fillStyle=n.color;ctx.globalAlpha=.85;ctx.arc(a.x,a.y,a.r*(1+.08*Math.sin(wave*3+i)),0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;ctx.fillStyle='rgba(255,255,255,.55)';ctx.font='10px system-ui';ctx.fillText(n.label||'',a.x+8,a.y-6);});requestAnimationFrame(draw);}draw();
-async function run(){var q=document.getElementById('q').value.trim();if(!q||!window.AKSI_VECTOR)return;document.getElementById('ans').textContent='… S_t → Hopfield → policy → proof';var r=await AKSI_VECTOR.think(q);document.getElementById('ans').textContent=r.answer||r.error||'—';var p=r.proof||{};document.getElementById('proof').innerHTML='t='+(r.state&&r.state.t)+' · resonance <b>'+(r.state&&r.state.resonance)+'</b> · '+(p.alg||'')+' · hash <b>'+(p.hash||'').slice(0,24)+'…</b>';graph=r.graph;buildNodes(graph);}
+async function run(){var q=document.getElementById('q').value.trim();if(!q||!window.AKSI_VECTOR)return;document.getElementById('ans').textContent='… train → S_t → Hopfield → proof';var r=await AKSI_VECTOR.think(q);document.getElementById('ans').textContent=r.answer||r.error||'—';var p=r.proof||{};document.getElementById('proof').innerHTML='v'+(r.version||'')+' · t='+(r.state&&r.state.t)+' · res <b>'+(r.state&&r.state.resonance)+'</b> · pats '+(r.state&&r.state.patterns)+' · '+(p.alg||'')+' · <b>'+(p.hash||'').slice(0,20)+'…</b>';graph=r.graph;buildNodes(graph);}
 document.getElementById('go').onclick=run;document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')run();});document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){document.getElementById('q').value=b.getAttribute('data-q');run();};});
-if(window.AKSI_VECTOR)AKSI_VECTOR.think('инициализация').then(function(r){graph=r.graph;buildNodes(graph);});
+if(window.AKSI_VECTOR){var st=AKSI_VECTOR.status();document.getElementById('proof').textContent='trained:'+st.trained+' · curriculum:'+st.curriculum+' · patterns:'+st.patterns;AKSI_VECTOR.think('инициализация').then(function(r){graph=r.graph;buildNodes(graph);});}
 })();
 </script>
 </body>
