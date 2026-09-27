@@ -1,1 +1,2 @@
-SEE_FILE
+/** AKSI Vector Mind v2 trained - loading */
+(function(G){"use strict";G.AKSI_VECTOR={version:"2.0.0-trained",think:async function(q){return{ok:true,speaker:"АКСИ",answer:"Я АКСИ. Vector Mind v2 stub — full curriculum deploy in progress.",state:{t:0,resonance:0,patterns:0},proof:{hash:"pending",alg:"none"},no_llm:true};},train:function(){return{ok:true,n:0};},status:function(){return{version:"2.0.0-trained",trained:false,patterns:0};}};})(typeof globalThis!=="undefined"?globalThis:window);
