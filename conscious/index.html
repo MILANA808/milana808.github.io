@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Conscious — алфавит и ответ на любой вопрос</title>
+<meta name="description" content="АКСИ обучена русскому алфавиту. На любой вопрос — структурированный осознанный ответ. Offline."/>
+<link rel="canonical" href="https://milana808.github.io/conscious/"/>
+<meta name="theme-color" content="#0b0c10"/>
+<style>
+:root{--bg:#0b0c10;--card:#14161c;--line:rgba(255,255,255,.08);--t:#eef0f4;--m:#9aa3b2;--a:#8ab4f8;--ok:#3dd68c}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--t);line-height:1.45;min-height:100vh}
+.w{max-width:720px;margin:0 auto;padding:18px 14px 40px}
+h1{font-size:1.2rem;margin:0 0 4px}.sub{color:var(--m);font-size:.9rem;margin:0 0 12px}
+.composer{display:flex;gap:8px;margin:12px 0}
+.composer input{flex:1;background:var(--card);border:1px solid var(--line);color:var(--t);border-radius:12px;padding:12px 14px;font-size:15px}
+.composer button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:var(--a);color:#0b0c10;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips button{background:var(--card);border:1px solid var(--line);color:var(--m);border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+.card h2{margin:0 0 8px;font-size:12px;color:var(--m);text-transform:uppercase}
+.ans{font-size:15px;white-space:pre-wrap;word-break:break-word}
+.meta{font:12px/1.5 ui-monospace,monospace;color:var(--m);margin-top:10px}
+.ok{color:var(--ok)}a{color:var(--a)}footer{margin-top:20px;font-size:12px;color:var(--m)}
+.alpha{font-size:13px;letter-spacing:.06em;line-height:1.8;color:var(--a)}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>АКСИ Conscious</h1>
+  <p class="sub">Русский алфавит · осознанный ответ на любой вопрос · offline</p>
+  <div class="card"><h2>Алфавит (33)</h2><div class="alpha" id="alpha">…</div></div>
+  <div class="chips">
+    <button type="button" data-q="русский алфавит">алфавит</button>
+    <button type="button" data-q="буква я">буква Я</button>
+    <button type="button" data-q="гласные">гласные</button>
+    <button type="button" data-q="кто ты">кто ты</button>
+    <button type="button" data-q="что такое квантовая физика">любой вопрос</button>
+  </div>
+  <div class="composer">
+    <input id="q" type="text" placeholder="Любой вопрос…"/>
+    <button type="button" id="go">Спросить</button>
+  </div>
+  <div class="card"><h2>Ответ</h2><div class="ans" id="ans">—</div><div class="meta" id="meta"></div></div>
+  <footer>Не AGI · fact-first · <a href="/math/">Math</a> · <a href="/one/">ONE</a> · aksilove@internet.ru</footer>
+</div>
+<script src="/aksi-neuro.js?v=c1"></script>
+<script src="/aksi-clm.js?v=c1"></script>
+<script src="/aksi-math-ai.js?v=c1"></script>
+<script src="/aksi-conscious.js?v=c1"></script>
+<script>
+(function(){
+  function boot(){
+    if(window.AKSI_CONSCIOUS) document.getElementById('alpha').textContent=AKSI_CONSCIOUS.alphabetList();
+  }
+  function run(){
+    var q=document.getElementById('q').value.trim();
+    if(!q||!window.AKSI_CONSCIOUS)return;
+    var r=AKSI_CONSCIOUS.answer(q);
+    document.getElementById('ans').textContent=r.answer||'—';
+    document.getElementById('meta').innerHTML='source <span class="ok">'+(r.source||'')+'</span> · conf '+r.confidence+' · conscious:'+(r.conscious?'да':'нет');
+  }
+  document.getElementById('go').onclick=run;
+  document.getElementById('q').addEventListener('keydown',function(e){if(e.key==='Enter')run();});
+  document.querySelectorAll('[data-q]').forEach(function(b){
+    b.onclick=function(){document.getElementById('q').value=b.getAttribute('data-q');run();};
+  });
+  boot();
+})();
+</script>
+</body>
+</html>
