@@ -2,52 +2,208 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Authority — ИИ без ИИ</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>АКСИ Authority — мандат для ИИ</title>
+<meta name="description" content="АКСИ Authority Runtime: ИИ без обязательной LLM. Алгоритм + quantum gate + ALLOW/BLOCK + Permit. Не чатбот. Не AGI. Offline-first."/>
+<link rel="canonical" href="https://milana808.github.io/authority/"/>
+<meta name="theme-color" content="#0b0c10"/>
+<meta property="og:title" content="АКСИ Authority Runtime"/>
+<meta property="og:description" content="Слой мандата: ответ от АКСИ → gate → Permit или Block-proof. technology_serves_human"/>
+<meta property="og:url" content="https://milana808.github.io/authority/"/>
+<meta property="og:type" content="website"/>
 <style>
-:root{--bg:#0f1115;--card:#1a1d24;--text:#e8eaed;--muted:#9aa0a6;--allow:#34a853;--block:#ea4335;--accent:#8ab4f8;--line:#2a2f3a}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.45;min-height:100vh}
-header,main,footer{max-width:720px;margin:0 auto;padding:1rem}
-h1{font-size:1.25rem;margin:0 0 .25rem}header p{margin:0;color:var(--muted);font-size:.9rem}
-.composer{display:flex;gap:.5rem;margin:1rem 0}.composer input{flex:1;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:.75rem 1rem}
-.composer button{background:var(--accent);color:#0f1115;border:none;border-radius:10px;padding:.75rem 1.1rem;font-weight:650;cursor:pointer}
-.status{font-size:.8rem;color:var(--muted);margin-bottom:1rem}.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.75rem 1rem;margin:.5rem 0}
-.step .name{font-size:.75rem;text-transform:uppercase;color:var(--muted)}.gate-allow{border-color:var(--allow)}.gate-block{border-color:var(--block)}
-.badge{display:inline-block;font-size:.7rem;padding:.15rem .45rem;border-radius:999px;font-weight:650}
-.badge.allow{background:rgba(52,168,83,.2);color:var(--allow)}.badge.block{background:rgba(234,67,53,.2);color:var(--block)}
-footer{color:var(--muted);font-size:.8rem}
+:root{
+  --bg:#0b0c10;--card:#14161c;--line:rgba(255,255,255,.08);
+  --text:#eef0f4;--muted:#9aa3b2;--accent:#8ab4f8;--violet:#a78bfa;
+  --allow:#3dd68c;--block:#f07178;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
+body{background:
+  radial-gradient(900px 420px at 10% -10%,rgba(167,139,250,.18),transparent 55%),
+  radial-gradient(700px 380px at 100% 0%,rgba(138,180,248,.12),transparent 50%),
+  var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  font-weight:800;font-size:14px;color:#0b0c10;
+  background:linear-gradient(145deg,#c4b5fd,#8ab4f8)}
+h1{margin:0;font-size:1.25rem;font-weight:700;letter-spacing:-.02em}
+.sub{margin:2px 0 0;color:var(--muted);font-size:.88rem}
+.hero{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));
+  border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-bottom:14px}
+.hero h2{margin:0 0 8px;font-size:1.05rem;font-weight:650}
+.hero p{margin:0;color:var(--muted);font-size:.92rem}
+.pipe{margin-top:12px;font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);
+  word-break:break-word}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pill{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.pill.ok{color:var(--allow);border-color:rgba(61,214,140,.35)}
+.composer{display:flex;gap:8px;margin:14px 0 8px}
+.composer input{flex:1;min-width:0;background:var(--card);border:1px solid var(--line);color:var(--text);
+  border-radius:14px;padding:13px 14px;font-size:15px;outline:none}
+.composer input:focus{border-color:rgba(138,180,248,.45)}
+.composer button{border:0;border-radius:14px;padding:13px 16px;font-weight:700;cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--violet));color:#0b0c10}
+.composer button:disabled{opacity:.5;cursor:wait}
+.examples{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.examples button{background:transparent;border:1px solid var(--line);color:var(--muted);
+  border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+.examples button:hover{color:var(--text);border-color:rgba(255,255,255,.18)}
+.status{font-size:12px;color:var(--muted);margin-bottom:10px;min-height:1.2em}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.step .name{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.step .body{margin-top:4px;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.gate-allow{border-color:rgba(61,214,140,.45)}
+.gate-block{border-color:rgba(240,113,120,.5)}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:6px}
+.badge.allow{background:rgba(61,214,140,.15);color:var(--allow)}
+.badge.block{background:rgba(240,113,120,.15);color:var(--block)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.actions button,.actions a{background:transparent;border:1px solid var(--line);color:var(--text);
+  border-radius:12px;padding:9px 12px;font-size:13px;cursor:pointer;text-decoration:none}
+footer{margin-top:28px;color:var(--muted);font-size:12px}
+footer a{color:var(--accent);text-decoration:none}
+.answer-box{margin-top:10px;padding:14px;border-radius:14px;background:rgba(138,180,248,.06);
+  border:1px solid rgba(138,180,248,.2);font-size:15px;white-space:pre-wrap;word-break:break-word}
 </style>
 </head>
 <body>
-<header>
-<h1>AKSI Authority Runtime</h1>
-<p>v2 · ИИ без ИИ · Neuro+CLM+Episteme+Quantum · ответ всегда от АКСИ</p>
-</header>
-<main>
-<div class="composer">
-<input id="goal" type="text" placeholder="кто ты · запомни: факт · можно ли отправить письмо без evidence"/>
-<button id="run" type="button">Запуск</button>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">A</div>
+    <div>
+      <h1>АКСИ Authority</h1>
+      <p class="sub">Production · мандат для ответа и действия</p>
+    </div>
+  </div>
+
+  <section class="hero">
+    <h2>ИИ без обязательной LLM</h2>
+    <p>Не чатбот. Не AGI. Слой, который решает: можно ли доверять утверждению или действию — и оставляет проверяемый след.</p>
+    <div class="pipe">GOAL → PLAN → CLM/Episteme → АКСИ → Quantum gate → ALLOW|BLOCK → PERMIT → REPORT</div>
+    <div class="pills">
+      <span class="pill ok">no LLM required</span>
+      <span class="pill">speaker: АКСИ</span>
+      <span class="pill">default-deny</span>
+      <span class="pill">offline-first</span>
+    </div>
+  </section>
+
+  <div class="examples">
+    <button type="button" data-ex="кто ты">кто ты</button>
+    <button type="button" data-ex="запомни: корень мандата — человек">запомни</button>
+    <button type="button" data-ex="можно ли отправить письмо без evidence">BLOCK-демо</button>
+  </div>
+
+  <div class="composer">
+    <input id="goal" type="text" placeholder="Цель…" autocomplete="off" enterkeyhint="send"/>
+    <button id="run" type="button">Запуск</button>
+  </div>
+  <div class="status" id="status">загрузка…</div>
+  <div id="answer" class="answer-box" hidden></div>
+  <div id="trace"></div>
+
+  <div class="actions">
+    <button type="button" id="export">Export JSON</button>
+    <button type="button" id="clear">Очистить</button>
+    <a href="/">← Home</a>
+    <a href="/dip/">DIP</a>
+  </div>
+
+  <footer>
+    technology_serves_human · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
+  </footer>
 </div>
-<div class="status" id="status">…</div>
-<div id="trace"></div>
-<button type="button" id="export" style="margin-top:1rem;background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:.5rem .75rem;cursor:pointer">Export JSON</button>
-</main>
-<footer>technology_serves_human · aksilove@internet.ru · no LLM required</footer>
-<script src="/aksi-clm.js?v=auth2"></script>
-<script src="/aksi-episteme.js?v=auth2"></script>
-<script src="/aksi-neuro.js?v=auth2"></script>
-<script src="/aksi-quantum.js?v=auth2"></script>
-<script src="/aksi-fly-gate.js?v=auth2"></script>
-<script src="/aksi-bond.js?v=auth2"></script>
-<script src="/aksi-algorithm.js?v=auth2"></script>
-<script src="/aksi-authority-runtime.js?v=auth2"></script>
+
+<script src="/aksi-clm.js?v=p2"></script>
+<script src="/aksi-episteme.js?v=p2"></script>
+<script src="/aksi-neuro.js?v=p2"></script>
+<script src="/aksi-quantum.js?v=p2"></script>
+<script src="/aksi-fly-gate.js?v=p2"></script>
+<script src="/aksi-bond.js?v=p2"></script>
+<script src="/aksi-algorithm.js?v=p2"></script>
+<script src="/aksi-authority-runtime.js?v=p2"></script>
 <script>
 (function(){
-var statusEl=document.getElementById('status'),traceEl=document.getElementById('trace'),goalEl=document.getElementById('goal'),runBtn=document.getElementById('run'),lastReport=null;
-function refreshStatus(){if(!window.AKSI_AUTHORITY){statusEl.textContent='runtime не загружен';return}var s=AKSI_AUTHORITY.status();statusEl.textContent='АКСИ '+s.version+' · no_llm:'+(s.no_llm?'да':'нет')+' · Neuro:'+(s.hasNeuro?'да':'нет')+' · Q:'+(s.hasQuantum?'да':'нет')+' · CLM:'+(s.hasCLM?'да':'нет')+' · reports:'+s.reports}
-function addStep(name,body,gate){var div=document.createElement('div');div.className='step';if(gate==='ALLOW')div.classList.add('gate-allow');if(gate==='BLOCK')div.classList.add('gate-block');var badge='';if(gate==='ALLOW')badge='<span class="badge allow">ALLOW</span> ';if(gate==='BLOCK')badge='<span class="badge block">BLOCK</span> ';div.innerHTML='<div class="name">'+badge+name+'</div><div class="body"></div>';div.querySelector('.body').textContent=body;traceEl.appendChild(div)}
-async function run(){if(!window.AKSI_AUTHORITY){addStep('ERROR','AKSI_AUTHORITY не найден');return}var goal=goalEl.value.trim();if(!goal)return;runBtn.disabled=true;traceEl.innerHTML='';addStep('GOAL',goal);try{var rep=await AKSI_AUTHORITY.run(goal);lastReport=rep;(rep.trace||[]).forEach(function(t){var body=typeof t.data==='string'?t.data:JSON.stringify(t.data);if(body.length>400)body=body.slice(0,400)+'…';addStep(t.step,body,t.step==='DECISION'||t.step==='PERMIT'||t.step==='BLOCK_PROOF'?(rep.decision&&rep.decision.gate):null)});addStep('ANSWER',rep.answer||'',rep.decision&&rep.decision.gate);addStep('REPORT_HASH',(rep.report_hash||'')+' · id='+(rep.id||''))}catch(e){addStep('ERROR',String(e&&e.message?e.message:e))}runBtn.disabled=false;refreshStatus()}
-runBtn.addEventListener('click',run);goalEl.addEventListener('keydown',function(e){if(e.key==='Enter')run()});document.getElementById('export').addEventListener('click',function(){if(!lastReport)return;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)],{type:'application/json'}));a.download='aksi-authority-report.json';a.click()});refreshStatus();
+  var statusEl=document.getElementById("status");
+  var traceEl=document.getElementById("trace");
+  var answerEl=document.getElementById("answer");
+  var goalEl=document.getElementById("goal");
+  var runBtn=document.getElementById("run");
+  var lastReport=null;
+
+  function refreshStatus(){
+    if(!window.AKSI_AUTHORITY){statusEl.textContent="runtime не загружен";return;}
+    var s=AKSI_AUTHORITY.status();
+    statusEl.textContent="АКСИ "+s.version+" · no_llm:"+(s.no_llm?"да":"нет")+
+      " · Neuro:"+(s.hasNeuro?"да":"нет")+" · Q:"+(s.hasQuantum?"да":"нет")+
+      " · CLM:"+(s.hasCLM?"да":"нет")+" · Fly:"+(s.hasFlyGate?"да":"нет");
+  }
+
+  function addStep(name,body,gate){
+    var div=document.createElement("div");
+    div.className="step";
+    if(gate==="ALLOW")div.classList.add("gate-allow");
+    if(gate==="BLOCK")div.classList.add("gate-block");
+    var badge="";
+    if(gate==="ALLOW")badge='<span class="badge allow">ALLOW</span> ';
+    if(gate==="BLOCK")badge='<span class="badge block">BLOCK</span> ';
+    div.innerHTML='<div class="name">'+badge+name+'</div><div class="body"></div>';
+    div.querySelector(".body").textContent=body;
+    traceEl.appendChild(div);
+  }
+
+  async function run(){
+    if(!window.AKSI_AUTHORITY){addStep("ERROR","AKSI_AUTHORITY не найден");return;}
+    var goal=goalEl.value.trim();
+    if(!goal)return;
+    runBtn.disabled=true;
+    traceEl.innerHTML="";
+    answerEl.hidden=true;
+    addStep("GOAL",goal);
+    try{
+      var rep=await AKSI_AUTHORITY.run(goal);
+      lastReport=rep;
+      (rep.trace||[]).forEach(function(t){
+        var body=typeof t.data==="string"?t.data:JSON.stringify(t.data);
+        if(body.length>380)body=body.slice(0,380)+"…";
+        var g=null;
+        if(t.step==="DECISION"||t.step==="PERMIT"||t.step==="BLOCK_PROOF")
+          g=rep.decision&&rep.decision.gate;
+        addStep(t.step,body,g);
+      });
+      answerEl.hidden=false;
+      answerEl.textContent=rep.answer||"";
+      if(rep.decision&&rep.decision.gate==="BLOCK")answerEl.style.borderColor="rgba(240,113,120,.45)";
+      else answerEl.style.borderColor="rgba(138,180,248,.2)";
+    }catch(e){
+      addStep("ERROR",String(e&&e.message?e.message:e));
+    }
+    runBtn.disabled=false;
+    refreshStatus();
+  }
+
+  runBtn.addEventListener("click",run);
+  goalEl.addEventListener("keydown",function(e){if(e.key==="Enter")run();});
+  document.querySelectorAll("[data-ex]").forEach(function(b){
+    b.addEventListener("click",function(){
+      goalEl.value=b.getAttribute("data-ex");
+      run();
+    });
+  });
+  document.getElementById("export").addEventListener("click",function(){
+    if(!lastReport)return;
+    var a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"}));
+    a.download="aksi-authority-report.json";
+    a.click();
+  });
+  document.getElementById("clear").addEventListener("click",function(){
+    traceEl.innerHTML="";answerEl.hidden=true;lastReport=null;
+  });
+  refreshStatus();
 })();
 </script>
 </body>
