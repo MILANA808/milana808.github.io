@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ — Decision Integrity · Authority</title>
-<meta name="description" content="АКСИ Decision Integrity: gate ALLOW/BLOCK + receipt. Authority: ИИ без ИИ. Не чатбот. Не AGI."/>
+<meta name="description" content="АКСИ Decision Integrity + ONE unified contour. Gate ALLOW/BLOCK. Не чатбот. Не AGI."/>
 <link rel="canonical" href="https://milana808.github.io/"/>
 <meta name="theme-color" content="#0a0a0b"/>
 <style>
@@ -57,7 +57,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel on" data-p="home">
     <div class="card">
       <h2>Decision Integrity</h2>
-      <p class="lead">Не чатбот. Слой: ответ ИИ → gate ALLOW/BLOCK → квитанция. Ядро offline; сервер не обязателен.</p>
+      <p class="lead">Не чатбот. Слой: ответ → gate ALLOW/BLOCK → квитанция. ONE соединяет все модули.</p>
       <div class="pipe">вход → ADIA gate → Bond/receipt → export</div>
       <div class="metrics">
         <div class="metric"><span>LLM</span><b id="mLlm">off</b></div>
@@ -70,10 +70,11 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
       <div class="row">
         <button type="button" data-go="decision">Gate</button>
         <button type="button" class="ghost" data-go="chat">Демо-чат</button>
+        <a class="lead" href="/one/" style="margin-left:4px">ONE →</a>
         <a class="lead" href="/authority/" style="margin-left:4px">Authority →</a>
         <a class="lead" href="/dip/" style="margin-left:4px">DIP →</a>
       </div>
-      <p class="lead" style="margin-top:10px">Authority: ИИ без ИИ · quantum gate · ответ от АКСИ</p>
+      <p class="lead" style="margin-top:10px">ONE = CLM · Episteme · Neuro · Quantum · Bond · Authority</p>
       <p class="lead" style="margin-top:12px">aksilove@internet.ru</p>
     </div>
   </section>
@@ -113,7 +114,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel" data-p="llm">
     <div class="card">
       <h2>WebLLM</h2>
-      <p class="lead">Опция, не ядро продажи. На телефоне: 0.5B. Без WebGPU — Neuro + gate.</p>
+      <p class="lead">Опция, не ядро продажи.</p>
       <div class="lead" style="margin-top:8px"><b id="wlSt">idle</b> · <span id="wlPct">0</span>%</div>
       <div class="bar"><i id="wlBar"></i></div>
       <p class="lead" id="wlMsg" style="margin-top:8px;font:11px ui-monospace,monospace"></p>
@@ -127,8 +128,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   <section class="panel" data-p="decision">
     <div class="card">
       <h2>Gate · receipt</h2>
-      <p class="lead">Последний прогон — то, что продаём</p>
-      <pre id="decOut" style="margin-top:10px">Пока пусто — отправьте в Chat или Модули → STACK</pre>
+      <pre id="decOut" style="margin-top:10px">Пока пусто</pre>
     </div>
   </section>
   <section class="panel" data-p="mem">
@@ -184,8 +184,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     $("wlSt").textContent = st.ready ? "ready" : st.loading ? "loading" : "idle";
     $("wlPct").textContent = st.progress || 0;
     $("wlBar").style.width = (st.progress || 0) + "%";
-    var ctx = st.context ? (" · ctx turns=" + st.context.turns) : "";
-    $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "") + ctx;
+    $("wlMsg").textContent = (st.message || "") + (st.error ? " · " + st.error : "");
     var s = $("wlPick");
     if (s && st.models && !s.options.length) {
       st.models.forEach(function (m) {
@@ -207,7 +206,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   }
   function rdec() {
     if (!S.last) { $("decOut").textContent = "Пока пусто"; return; }
-    $("decOut").textContent = JSON.stringify({ answer: String(S.last.answer || "").slice(0, 200), gate: S.last.gate, bond: S.last.bond, bricks: S.last.bricks, source: S.last.best && S.last.best.source, hist_len: S.hist.length }, null, 2);
+    $("decOut").textContent = JSON.stringify({ answer: String(S.last.answer || "").slice(0, 200), gate: S.last.gate, bond: S.last.bond }, null, 2);
   }
   async function decide(q) {
     q = String(q || "").trim();
@@ -215,14 +214,13 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     var te = /^(?:запомни|remember)\s*[:：]\s*(.+)$/i.exec(q);
     if (te) {
       var arr = lm(); arr.push({ t: te[1].slice(0, 800), ts: Date.now() }); sm(arr);
-      try { if (window.AKSI_WEBLLM && AKSI_WEBLLM.adapt) AKSI_WEBLLM.adapt(te[1]); } catch (e) {}
-      return { answer: "В контексте (память + адаптация)", gate: { decision: "ALLOW" }, bricks: ["memory","adapt"], best: { source: "memory" } };
+      return { answer: "В контексте (память)", gate: { decision: "ALLOW" }, best: { source: "memory" } };
     }
     var mem = lm().map(function (x) { return { t: x.t, text: x.t }; });
     var pol = $("policy").value;
     var cands = [];
-    if (/акси|aksi|кто ты|dip|integrity/i.test(q))
-      cands.push({ text: "АКСИ DIP — Decision Integrity Runtime: gate ALLOW/BLOCK + receipt. Не чатбот, не AGI. Контакт: aksilove@internet.ru", source: "seed" });
+    if (/акси|aksi|кто ты|dip|integrity|one/i.test(q))
+      cands.push({ text: "АКСИ ONE / DIP — единый контур: gate ALLOW/BLOCK + receipt. Контакт: aksilove@internet.ru", source: "seed" });
     mem.forEach(function (x) { if (x.t && x.t.length > 8) cands.push({ text: x.t, source: "memory" }); });
     try {
       if (window.AKSI_NEURO && AKSI_NEURO.query) {
@@ -236,20 +234,19 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
         if (L && L.text) cands.push({ text: L.text, source: "webllm" });
       } catch (e) {}
     }
-    if (!cands.length) cands.push({ text: "Нет grounded-кандидатов. В strict gate может быть BLOCK. Добавьте «запомни:» или SEED.", source: "fallback" });
+    if (!cands.length) cands.push({ text: "Нет grounded-кандидатов. Откройте /one/.", source: "fallback" });
     if (window.AKSI_ALGORITHM && AKSI_ALGORITHM.process) {
       var res = AKSI_ALGORITHM.process(q, cands, { policy: pol, seal: true });
-      var out = { answer: res.best ? res.best.text : "", gate: res.gate, throttle: res.throttle, best: res.best, version: res.version, bricks: ["adia-4"] };
+      var out = { answer: res.best ? res.best.text : "", gate: res.gate, best: res.best };
       if (window.AKSI_BOND && AKSI_BOND.createBond) {
         try {
           var b = await AKSI_BOND.createBond({ query: q, answer: out.answer, source: out.best && out.best.source, gate: out.gate && out.gate.decision });
           out.bond = { bond_id: b.bond_id, integrity: b.integrity };
-          out.bricks.push("bond");
         } catch (e) {}
       }
       return out;
     }
-    return { answer: cands[0].text, gate: { decision: "ALLOW" }, best: cands[0], bricks: ["local"] };
+    return { answer: cands[0].text, gate: { decision: "ALLOW" }, best: cands[0] };
   }
   $("send").onclick = async function (ev) {
     if (ev && ev.preventDefault) ev.preventDefault();
@@ -260,7 +257,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
       var r = await decide(q);
       S.last = r;
       try { S.hist.push({ role: "user", content: q }); S.hist.push({ role: "assistant", content: (r && r.answer) || "" }); S.hist = S.hist.slice(-24); } catch (e) {}
-      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.best && r.best.source, "hist:" + S.hist.length].filter(Boolean).join(" · "));
+      bub("ai", (r && r.answer) || "—", [r && r.gate && r.gate.decision, r && r.best && r.best.source].filter(Boolean).join(" · "));
       ui(); rdec();
     } catch (err) {
       bub("ai", "Ошибка: " + String(err && err.message || err).slice(0, 160), "error");
@@ -268,21 +265,15 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
   };
   $("clr").onclick = function () { $("thread").innerHTML = ""; S.hist = []; };
   $("memR").onclick = rm; $("memC").onclick = function () { sm([]); rm(); };
-  $("wlLoad").onclick = function (ev) {
-    if (ev && ev.preventDefault) ev.preventDefault();
+  $("wlLoad").onclick = function () {
     if (!window.AKSI_WEBLLM) { $("wlMsg").textContent = "Модуль не загружен"; return; }
-    $("wlLoad").disabled = true; $("wlMsg").textContent = "Загрузка…";
+    $("wlLoad").disabled = true;
     Promise.resolve(AKSI_WEBLLM.load($("wlPick").value || null)).then(function (st) {
       rlm();
-      if (st && st.ready) { $("wlMsg").textContent = "Готово"; $("useLlm").checked = true; }
-      else if (st && st.error) $("wlMsg").textContent = st.error;
-    }).catch(function (e) { $("wlMsg").textContent = String(e && e.message || e); rlm();
-    }).then(function () { $("wlLoad").disabled = false; });
+      if (st && st.ready) { $("useLlm").checked = true; }
+    }).catch(function (e) { $("wlMsg").textContent = String(e && e.message || e); }).then(function () { $("wlLoad").disabled = false; });
   };
-  $("wlOut").onclick = function () {
-    if (window.AKSI_WEBLLM) AKSI_WEBLLM.unload();
-    $("useLlm").checked = false; rlm();
-  };
+  $("wlOut").onclick = function () { if (window.AKSI_WEBLLM) AKSI_WEBLLM.unload(); $("useLlm").checked = false; rlm(); };
   document.querySelectorAll("[data-fn]").forEach(function (btn) {
     btn.addEventListener("click", async function () {
       var fn = btn.getAttribute("data-fn"), out = $("fnOut"); out.textContent = "…";
@@ -298,7 +289,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
         else if (fn === "stack") {
           var s = await AKSI_STACK.decide("кто ты?", { policy: "companion", memory: lm().map(function (x) { return { t: x.t }; }) });
           S.last = s; out.textContent = JSON.stringify({ answer: s.answer, gate: s.gate }, null, 2); ui();
-        } else if (fn === "receipt") out.textContent = JSON.stringify({ hist: S.hist.length, last: S.last && S.last.bond }, null, 2);
+        } else if (fn === "receipt") out.textContent = JSON.stringify({ last: S.last && S.last.bond }, null, 2);
       } catch (e) { out.textContent = String(e && e.message || e); }
     });
   });
@@ -306,10 +297,7 @@ pre{margin:0;white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:va
     b.addEventListener("click", function () { go(b.getAttribute("data-go")); });
   });
   window.addEventListener("aksi-webllm-progress", rlm);
-  setTimeout(function () {
-    rlm(); ui();
-    try { var g = new URLSearchParams(location.search).get("go"); if (g) go(g); } catch (e) {}
-  }, 40);
+  setTimeout(function () { rlm(); ui(); }, 40);
 })();
 </script>
 </body>
