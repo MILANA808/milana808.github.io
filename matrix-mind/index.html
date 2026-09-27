@@ -40,6 +40,8 @@ footer{margin-top:22px;font-size:12px;color:var(--m)}footer a{color:var(--a);tex
     <button type="button" data-zone="алфавит">алфавит</button>
     <button type="button" data-zone="запомни">запомни</button>
     <button type="button" data-zone="math">math</button>
+    <button type="button" id="llmLoad">◎ WebLLM</button>
+    <button type="button" id="llmExplain">✦ Объяснить</button>
     <button type="button" data-zone="формула">формула</button>
     <button type="button" data-zone="привет">привет</button>
   </div>
@@ -64,9 +66,41 @@ footer{margin-top:22px;font-size:12px;color:var(--m)}footer a{color:var(--a);tex
     <h2>4D · live state geometry</h2>
     <svg id="mind-svg" viewBox="0 0 360 360" width="100%" height="280" role="img" aria-label="4D semantic state projection"></svg>
   </div>
+  <div class="card" style="margin-top:10px">
+    <h2>WebLLM · optional semantic layer</h2>
+    <div class="mono" id="llmStatus">off · ядро продолжает работать без LLM</div>
+    <div class="ans" id="llmOut" style="margin-top:8px;min-height:2.4em">WebLLM не является источником состояния S: он только объясняет уже вычисленный результат.</div>
+  </div>
   <div class="proof" id="proof">proof: —</div>
   <footer>technology_serves_human · <a href="/one/">ONE</a> · <a href="/authority/">Authority</a> · aksilove@internet.ru</footer>
 </div>
+<script src="/aksi-webllm.js?v=43"></script>
 <script src="/matrix-mind/agent.js?v=2"></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id);}
+  function status(){
+    var s=window.AKSI_WEBLLM&&AKSI_WEBLLM.status?AKSI_WEBLLM.status():{};
+    if($("llmStatus")) $("llmStatus").textContent=(s.ready?"ready":"off")+(s.loading?" · loading "+(s.progress||0)+"%":"")+(s.model?" · "+s.model:"")+(s.webgpu===false?" · WebGPU недоступен":"");
+    return s;
+  }
+  $("llmLoad").addEventListener("click",function(){
+    if(!window.AKSI_WEBLLM){$("llmStatus").textContent="WebLLM module unavailable";return;}
+    $("llmLoad").disabled=true;
+    AKSI_WEBLLM.load().then(function(){status();}).finally(function(){$("llmLoad").disabled=false;});
+  });
+  $("llmExplain").addEventListener("click",async function(){
+    var st=status();
+    if(!st.ready){$("llmOut").textContent="Сначала нажмите «WebLLM». На iPhone потребуется поддержка WebGPU; без неё геометрическое ядро всё равно работает." ;return;}
+    var s=window.AKSI_SMYSL&&AKSI_SMYSL.getS?AKSI_SMYSL.getS():[1,0,0,0];
+    var w=window.AKSI_SMYSL&&AKSI_SMYSL.getW?AKSI_SMYSL.getW():[];
+    var prompt="Объясни кратко вычисленный результат AKSI-СМЫСЛ. S="+JSON.stringify(s)+"; memory="+JSON.stringify(w)+"; не придумывай новые факты, не меняй S, объясняй только математическую интерпретацию."; 
+    $("llmOut").textContent="…";
+    var r=await AKSI_WEBLLM.complete(prompt,{max_tokens:220,temperature:0.2});
+    $("llmOut").textContent=r.text||("WebLLM error: "+(r.error||"unknown"));
+  });
+  window.addEventListener("aksi-webllm-progress",status); status();
+})();
+</script>
 </body>
 </html>
