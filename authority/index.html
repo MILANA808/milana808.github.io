@@ -1,1 +1,54 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Authority — ИИ без ИИ</title>
+<style>
+:root{--bg:#0f1115;--card:#1a1d24;--text:#e8eaed;--muted:#9aa0a6;--allow:#34a853;--block:#ea4335;--accent:#8ab4f8;--line:#2a2f3a}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.45;min-height:100vh}
+header,main,footer{max-width:720px;margin:0 auto;padding:1rem}
+h1{font-size:1.25rem;margin:0 0 .25rem}header p{margin:0;color:var(--muted);font-size:.9rem}
+.composer{display:flex;gap:.5rem;margin:1rem 0}.composer input{flex:1;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:.75rem 1rem}
+.composer button{background:var(--accent);color:#0f1115;border:none;border-radius:10px;padding:.75rem 1.1rem;font-weight:650;cursor:pointer}
+.status{font-size:.8rem;color:var(--muted);margin-bottom:1rem}.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:.75rem 1rem;margin:.5rem 0}
+.step .name{font-size:.75rem;text-transform:uppercase;color:var(--muted)}.gate-allow{border-color:var(--allow)}.gate-block{border-color:var(--block)}
+.badge{display:inline-block;font-size:.7rem;padding:.15rem .45rem;border-radius:999px;font-weight:650}
+.badge.allow{background:rgba(52,168,83,.2);color:var(--allow)}.badge.block{background:rgba(234,67,53,.2);color:var(--block)}
+footer{color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<header>
+<h1>AKSI Authority Runtime</h1>
+<p>v2 · ИИ без ИИ · Neuro+CLM+Episteme+Quantum · ответ всегда от АКСИ</p>
+</header>
+<main>
+<div class="composer">
+<input id="goal" type="text" placeholder="кто ты · запомни: факт · можно ли отправить письмо без evidence"/>
+<button id="run" type="button">Запуск</button>
+</div>
+<div class="status" id="status">…</div>
+<div id="trace"></div>
+<button type="button" id="export" style="margin-top:1rem;background:transparent;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:.5rem .75rem;cursor:pointer">Export JSON</button>
+</main>
+<footer>technology_serves_human · aksilove@internet.ru · no LLM required</footer>
+<script src="/aksi-clm.js?v=auth2"></script>
+<script src="/aksi-episteme.js?v=auth2"></script>
+<script src="/aksi-neuro.js?v=auth2"></script>
+<script src="/aksi-quantum.js?v=auth2"></script>
+<script src="/aksi-fly-gate.js?v=auth2"></script>
+<script src="/aksi-bond.js?v=auth2"></script>
+<script src="/aksi-algorithm.js?v=auth2"></script>
+<script src="/aksi-authority-runtime.js?v=auth2"></script>
+<script>
+(function(){
+var statusEl=document.getElementById('status'),traceEl=document.getElementById('trace'),goalEl=document.getElementById('goal'),runBtn=document.getElementById('run'),lastReport=null;
+function refreshStatus(){if(!window.AKSI_AUTHORITY){statusEl.textContent='runtime не загружен';return}var s=AKSI_AUTHORITY.status();statusEl.textContent='АКСИ '+s.version+' · no_llm:'+(s.no_llm?'да':'нет')+' · Neuro:'+(s.hasNeuro?'да':'нет')+' · Q:'+(s.hasQuantum?'да':'нет')+' · CLM:'+(s.hasCLM?'да':'нет')+' · reports:'+s.reports}
+function addStep(name,body,gate){var div=document.createElement('div');div.className='step';if(gate==='ALLOW')div.classList.add('gate-allow');if(gate==='BLOCK')div.classList.add('gate-block');var badge='';if(gate==='ALLOW')badge='<span class="badge allow">ALLOW</span> ';if(gate==='BLOCK')badge='<span class="badge block">BLOCK</span> ';div.innerHTML='<div class="name">'+badge+name+'</div><div class="body"></div>';div.querySelector('.body').textContent=body;traceEl.appendChild(div)}
+async function run(){if(!window.AKSI_AUTHORITY){addStep('ERROR','AKSI_AUTHORITY не найден');return}var goal=goalEl.value.trim();if(!goal)return;runBtn.disabled=true;traceEl.innerHTML='';addStep('GOAL',goal);try{var rep=await AKSI_AUTHORITY.run(goal);lastReport=rep;(rep.trace||[]).forEach(function(t){var body=typeof t.data==='string'?t.data:JSON.stringify(t.data);if(body.length>400)body=body.slice(0,400)+'…';addStep(t.step,body,t.step==='DECISION'||t.step==='PERMIT'||t.step==='BLOCK_PROOF'?(rep.decision&&rep.decision.gate):null)});addStep('ANSWER',rep.answer||'',rep.decision&&rep.decision.gate);addStep('REPORT_HASH',(rep.report_hash||'')+' · id='+(rep.id||''))}catch(e){addStep('ERROR',String(e&&e.message?e.message:e))}runBtn.disabled=false;refreshStatus()}
+runBtn.addEventListener('click',run);goalEl.addEventListener('keydown',function(e){if(e.key==='Enter')run()});document.getElementById('export').addEventListener('click',function(){if(!lastReport)return;var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)],{type:'application/json'}));a.download='aksi-authority-report.json';a.click()});refreshStatus();
+})();
+</script>
+</body>
+</html>
