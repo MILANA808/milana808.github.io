@@ -1,0 +1,7 @@
+const assert=require('assert'),fs=require('fs');
+const html=fs.readFileSync('world/index.html','utf8');
+for(const s of ['AKSI Runtime','agentGoal','/api/agent/tasks','AKSI_RUNTIME','/aksi-runtime.js','/superpose/']) assert.ok(html.includes(s), 'missing '+s);
+assert.ok(fs.existsSync('aksi-runtime.js'));
+assert.ok(fs.existsSync('README_AKSI_WORLD.md'));
+assert.ok(html.includes('Не AGI') || html.includes('Не новый foundation model'));
+console.log('AKSI World surface test: OK');
