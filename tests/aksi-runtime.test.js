@@ -1,67 +1,12 @@
-const assert = require('assert');
-const fs = require('fs');
-const vm = require('vm');
-const { webcrypto } = require('crypto');
-
-const source = fs.readFileSync('aksi-runtime.js', 'utf8');
-const context = {
-  console,
-  Date,
-  Math,
-  TextEncoder,
-  Uint8Array,
-  ArrayBuffer,
-  performance: { now: () => 0 },
-  crypto: webcrypto
-};
-context.window = context;
-vm.createContext(context);
-vm.runInContext(source, context, { filename: 'aksi-runtime.js' });
-
-(async () => {
-  assert.ok(context.AKSI_RUNTIME);
-  assert.strictEqual(context.AKSI_RUNTIME.version, '1.4.0');
-
-  const degraded = await context.AKSI_RUNTIME.selfTest();
-  assert.strictEqual(degraded.ok, false);
-  assert.strictEqual(degraded.sha256, true);
-  assert.strictEqual(degraded.status.integrity.crypto, true);
-
-  context.AKSI_CORE = { query: async () => ({ text: 'local core result', source: 'core', offline: true }) };
-  const ready = await context.AKSI_RUNTIME.selfTest();
-  assert.strictEqual(ready.ok, true);
-
-  const answer = context.AKSI_RUNTIME.answer('q', 'a', {
-    source: 'core', kind: 'computed', confidence: 1.4, citations: ['x', 'y']
-  });
-  assert.strictEqual(answer.schema, 'AKSI-ANSWER-1');
-  assert.strictEqual(answer.confidence, 1);
-  assert.deepStrictEqual(answer.citations, ['x', 'y']);
-
-  const value = { b: 2, a: 'AKSI', ignored: undefined };
-  const reordered = { a: 'AKSI', b: 2 };
-  assert.strictEqual(context.AKSI_RUNTIME.canonical(value), context.AKSI_RUNTIME.canonical(reordered));
-  assert.strictEqual(
-    await context.AKSI_RUNTIME.sha256(value),
-    await context.AKSI_RUNTIME.sha256(reordered)
-  );
-
-  context.AKSI_METRICS = {
-    measure: ({ input, output }) => ({
-      version: '1.1.0', inputs: String(input).length, outputs: String(output).length
-    })
-  };
-  const result = await context.AKSI_RUNTIME.execute('test query', { useMemory: false });
-  assert.strictEqual(result.schema, 'AKSI-ANSWER-1');
-  assert.strictEqual(result.source, 'core');
-  assert.ok(result.integrityHash);
-  assert.strictEqual(result.integrityHash.length, 64);
-  assert.ok(Array.isArray(result.trace));
-  assert.ok(result.trace.some(e => e.type === 'route.core'));
-  assert.ok(result.trace.some(e => e.type === 'verification.complete'));
-
-  console.log('AKSI runtime contract tests: OK');
-})().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const assert=require('assert'),fs=require('fs'),vm=require('vm'),{webcrypto}=require('crypto');
+const source=fs.readFileSync('aksi-runtime.js','utf8');
+const store=new Map();
+const context={console,Date,Math,TextEncoder,Uint8Array,ArrayBuffer,crypto:webcrypto,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v)),removeItem:k=>store.delete(k)},CustomEvent:function(type,init){this.type=type;this.detail=init&&init.detail},dispatchEvent:()=>true};
+context.window=context;vm.createContext(context);vm.runInContext(source,context,{filename:'aksi-runtime.js'});
+(async()=>{assert.ok(context.AKSI_RUNTIME);assert.strictEqual(context.AKSI_RUNTIME.version,'2.1.0');
+context.AKSI_STACK={decide:async(q)=>({ok:true,answer:'Результат '+q,best:{text:'Результат '+q,source:'test'},gate:{decision:'ALLOW',reason:'test'},candidates:1,adia:{version:'test'}})};
+const st=await context.AKSI_RUNTIME.selfTest();assert.strictEqual(st.ok,true);assert.strictEqual(st.sha256,true);
+const a=await context.AKSI_RUNTIME.execute('hello',{save:true});assert.strictEqual(a.schema,'AKSI-RESULT-1');assert.strictEqual(a.answer,'Результат hello');assert.strictEqual(a.gate.decision,'ALLOW');assert.strictEqual(a.receipt.hash.length,64);assert.strictEqual(context.AKSI_RUNTIME.memory().length,1);assert.strictEqual(context.AKSI_RUNTIME.receipts().length,1);
+const x={b:2,a:'AKSI',u:undefined},y={a:'AKSI',b:2};assert.strictEqual(context.AKSI_RUNTIME.canonical(x),context.AKSI_RUNTIME.canonical(y));assert.strictEqual(await context.AKSI_RUNTIME.sha256(x),await context.AKSI_RUNTIME.sha256(y));
+context.AKSI_STACK={decide:async()=>({answer:'second',best:{text:'second',source:'test2'},gate:{decision:'DEFER'},candidates:2,adia:{version:'test2'}})};
+const b=await context.AKSI_RUNTIME.execute('second');assert.strictEqual(b.gate.decision,'DEFER');assert.strictEqual(b.receipt.hash.length,64);console.log('AKSI runtime contract tests: OK')})().catch(e=>{console.error(e);process.exitCode=1});
