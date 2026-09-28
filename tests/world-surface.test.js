@@ -6,5 +6,5 @@ assert.ok(fs.existsSync('README_AKSI_WORLD.md'));
 assert.ok(html.includes('Не AGI') || html.includes('Не новый foundation model'));
 assert.ok(html.includes('Browser Actions'));
 assert.ok(html.includes('/api/agent/browser/sessions'));
-assert.ok(html.includes('/approvals/grant'));
+assert.ok(html.includes('/api/core/tasks/'));
 console.log('AKSI World surface test: OK');
