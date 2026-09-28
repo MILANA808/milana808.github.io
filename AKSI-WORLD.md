@@ -20,12 +20,15 @@ The public World demo can:
 - create a SHA-256 Bond receipt;
 - submit a task to the AKSI backend;
 - let the backend search public web pages and build a report;
-- use browser read-mode when explicitly enabled.
+- use browser read-mode when explicitly enabled;
+- open a task-scoped browser session;
+- request and grant a one-time, action-specific approval;
+- execute an approved click or text-entry action and consume the token once.
 
 ### Safety and truth boundaries
 - A cryptographic hash proves integrity of a recorded payload, not truth.
 - A receipt records provenance; it does not prove that an external claim is correct.
-- The browser agent defaults to no side-effecting external actions.
+- The browser agent defaults to no side-effecting external actions. UI-mutating actions require a task-scoped, one-time approval token; approvals are explicit and action-specific.
 - The quantum layer in the browser is a classical simulation.
 - Existing foundation models remain replaceable components.
 - AKSI is not presented as AGI.
@@ -51,4 +54,4 @@ The intended production loop is:
 9. Bond records an integrity receipt.
 
 ## Current status
-This repository is an experimental public prototype. The strongest next production work is to add task-specific evaluators, richer evidence cards, server-side signature management, and explicit approval workflows for every real-world side effect.
+This repository is an experimental public prototype. The prototype now includes explicit task-scoped browser approvals. Remaining production work is deployment verification, stronger task-specific evaluators, richer claim→source evidence cards, persistent server-side identity management, broader action adapters (API/form/file workflows), and production observability.
