@@ -102,6 +102,7 @@
         teach: true,
         answer: 'Сохранено',
         fact: te[1].slice(0, 500),
+        memory: (function(){ try { var k='aksi_runtime_memory_v2', a=JSON.parse(localStorage.getItem(k)||'[]'); a.push({id:String(Date.now()),text:te[1].slice(0,500),ts:new Date().toISOString()}); localStorage.setItem(k,JSON.stringify(a.slice(-200))); return true; } catch(e){ return false; } })(),
         gate: { decision: 'ALLOW' },
         bricks: ['memory']
       };
