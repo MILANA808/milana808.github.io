@@ -3,57 +3,79 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>AKSI Mandate — Decision Receipt v1</title>
-<meta name="description" content="Fail-closed gate + ECDSA Decision Receipt. Offline verify. No LLM required."/>
+<title>AKSI Mandate — Decision Receipt Protocol</title>
+<meta name="description" content="Fail-closed gate for AI actions. ECDSA Decision Receipt. Offline verify. Not a chatbot. Not AGI."/>
 <link rel="canonical" href="https://milana808.github.io/mandate/"/>
 <meta name="theme-color" content="#0b0d12"/>
+<meta property="og:title" content="AKSI Mandate Protocol"/>
+<meta property="og:description" content="No evidence → BLOCK. Signed receipt. Offline verify."/>
+<meta property="og:url" content="https://milana808.github.io/mandate/"/>
 <style>
-:root{--bg:#0b0d12;--card:#141822;--line:rgba(255,255,255,.1);--t:#e8ecf4;--m:#8b93a7;--a:#7eb6ff;--ok:#3dd68c;--bad:#f87171}
+:root{--bg:#0b0d12;--card:#141822;--line:rgba(255,255,255,.1);--t:#e8ecf4;--m:#8b93a7;--a:#7eb6ff;--ok:#3dd68c;--bad:#f87171;--vio:#a78bfa}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
-.wrap{max-width:760px;margin:0 auto;padding:18px 14px 48px}
-h1{margin:0;font-size:1.2rem}p.sub{color:var(--m);font-size:.9rem;margin:6px 0 16px}
+.wrap{max-width:780px;margin:0 auto;padding:18px 14px 56px}
+.hero h1{margin:0;font-size:1.35rem;font-weight:700}
+.hero .sub{color:var(--m);margin:8px 0 0;font-size:.95rem}
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0}
+.badge-row span{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.card h2{margin:0 0 6px;font-size:13px;font-weight:600}
+.card p{margin:0;color:var(--m);font-size:13px}
+.pipe{font:12px/1.5 ui-monospace,Menlo,monospace;color:var(--a);margin:12px 0;padding:12px;background:rgba(126,182,255,.06);border-radius:12px;border:1px solid rgba(126,182,255,.15)}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-button{border:0;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;background:#1c2230;color:var(--t)}
-button.primary{background:linear-gradient(135deg,#7eb6ff,#a78bfa);color:#0a0b10}
+button{border:0;border-radius:12px;padding:10px 14px;font-weight:600;cursor:pointer;background:#1c2230;color:var(--t);font:inherit;font-size:13px}
+button.primary{background:linear-gradient(135deg,var(--a),var(--vio));color:#0a0b10}
 button.danger{background:#3a1520;color:#fecaca}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
 label{display:block;font-size:12px;color:var(--m);margin:8px 0 4px}
 input,select,textarea{width:100%;background:#0e121a;border:1px solid var(--line);border-radius:10px;color:var(--t);padding:10px;font:inherit}
-textarea{min-height:72px;resize:vertical}
-.gate{font-size:1.4rem;font-weight:800;letter-spacing:.04em}
+textarea{min-height:70px;resize:vertical}
+.gate{font-size:1.5rem;font-weight:800;letter-spacing:.04em}
 .gate.ALLOW{color:var(--ok)}.gate.BLOCK{color:var(--bad)}
-pre{white-space:pre-wrap;word-break:break-word;font:11px/1.45 ui-monospace,Menlo,monospace;color:var(--m);max-height:280px;overflow:auto}
+pre{white-space:pre-wrap;word-break:break-word;font:11px/1.45 ui-monospace,Menlo,monospace;color:var(--m);max-height:300px;overflow:auto;margin:8px 0 0}
 .ok{color:var(--ok)}.bad{color:var(--bad)}
-footer{margin-top:28px;font-size:12px;color:var(--m)}footer a{color:var(--a);text-decoration:none}
-.chips span{display:inline-block;background:#1c2230;border-radius:999px;padding:4px 10px;font-size:12px;color:var(--m);margin:2px}
+footer{margin-top:32px;font-size:12px;color:var(--m)}footer a{color:var(--a);text-decoration:none}
+.non{margin-top:16px;font-size:12px;color:var(--m);border-top:1px solid var(--line);padding-top:12px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>AKSI Mandate Protocol v1</h1>
-  <p class="sub">Decision Receipt · fail-closed gate · ECDSA P-256 · offline verify · no LLM required</p>
-  <div class="chips">
-    <span>schema: aksi-mandate/v1</span>
-    <span>alg: ECDSA-P256-SHA256</span>
+  <div class="hero">
+    <h1>AKSI Mandate Protocol</h1>
+    <p class="sub">Мандат на решение и действие: без evidence — BLOCK. С подписью — portable receipt. Проверка offline.</p>
+  </div>
+  <div class="badge-row">
+    <span>product v1.1</span>
+    <span>ECDSA-P256-SHA256</span>
     <span>default-deny</span>
+    <span>no LLM required</span>
+    <span>not AGI</span>
+  </div>
+  <div class="pipe">goal → evidence → gate ALLOW|BLOCK → sign receipt → offline verify</div>
+  <div class="grid">
+    <div class="card"><h2>Зачем</h2><p>Агент не должен действовать «потому что модель так сказала». Нужен проверяемый мандат.</p></div>
+    <div class="card"><h2>Для кого</h2><p>Internal tools, MCP gate, compliance demo, air-gap — где важен audit trail.</p></div>
+    <div class="card"><h2>Что не является</h2><p>Не чатбот. Не foundation model. Не «сознание». Слой доверия к решению.</p></div>
+    <div class="card"><h2>Крипто</h2><p>Настоящая ECDSA P-256 в браузере. Подмена JSON ломает verify.</p></div>
   </div>
   <div class="row">
     <button type="button" class="primary" id="btn-allow">Demo ALLOW</button>
-    <button type="button" class="danger" id="btn-block">Demo BLOCK (no evidence)</button>
-    <button type="button" id="btn-weak">Demo BLOCK (weak)</button>
+    <button type="button" class="danger" id="btn-block">Demo BLOCK</button>
+    <button type="button" id="btn-weak">Demo weak → BLOCK</button>
   </div>
   <div class="card">
     <label>Goal / action</label>
     <input id="goal" value="Сохранить локальный факт"/>
-    <label>Answer / effect description</label>
+    <label>Answer / effect</label>
     <textarea id="answer">Факт записан после явного подтверждения.</textarea>
     <label>Policy</label>
     <select id="policy">
-      <option value="strict" selected>strict (evidence required)</option>
+      <option value="strict" selected>strict — evidence required</option>
       <option value="companion">companion</option>
-      <option value="lab">lab (always ALLOW, still signed)</option>
+      <option value="lab">lab — always ALLOW, still signed</option>
     </select>
-    <label>Evidence JSON array (optional)</label>
+    <label>Evidence JSON</label>
     <textarea id="evidence">[{"source":"user_explicit","tier":"sealed","snippet":"User confirmed the write."}]</textarea>
     <div class="row">
       <button type="button" class="primary" id="btn-run">Create mandate</button>
@@ -64,14 +86,28 @@ footer{margin-top:28px;font-size:12px;color:var(--m)}footer a{color:var(--a);tex
   <div class="card">
     <div id="gate" class="gate">—</div>
     <div id="meta" style="color:var(--m);font-size:13px;margin-top:6px"></div>
-    <pre id="out">Нажмите Demo или Create mandate</pre>
+    <pre id="out">Demo или Create mandate → здесь receipt</pre>
+  </div>
+  <div class="card">
+    <h2>Verify чужой receipt</h2>
+    <p style="color:var(--m);font-size:13px;margin:0 0 8px">Вставьте JSON receipt с другой машины — проверка без сервера.</p>
+    <textarea id="import" placeholder='{"schema":"aksi-mandate/v1", ...}'></textarea>
+    <div class="row"><button type="button" id="btn-import">Verify pasted</button></div>
+    <div id="import-meta" style="font-size:13px;margin-top:8px;color:var(--m)"></div>
+  </div>
+  <div class="non">
+    <b>Non-claims:</b> не замена IAM; не SCITT registry; не доказательство что действие <i>выполнилось</i> во внешнем мире — только что gate+подпись зафиксированы локально.
   </div>
   <footer>
-    technology_serves_human · <a href="/authority/">Authority</a> · <a href="/receipt/">Receipt</a> · <a href="/">Home</a>
-    · contact aksilove@internet.ru
+    technology_serves_human ·
+    <a href="/authority/">Authority</a> ·
+    <a href="/receipt/">Receipt</a> ·
+    <a href="/one/">ONE</a> ·
+    <a href="/">Home</a>
+    · aksilove@internet.ru
   </footer>
 </div>
-<script src="/mandate/aksi-mandate.js?v=1"></script>
+<script src="/mandate/aksi-mandate.js?v=11"></script>
 <script>
 (function(){
   var last=null;
@@ -82,22 +118,22 @@ footer{margin-top:28px;font-size:12px;color:var(--m)}footer a{color:var(--a);tex
     el.textContent=g;
     el.className='gate '+(g==='ALLOW'||g==='BLOCK'?g:'');
     document.getElementById('meta').textContent=
-      (res&&res.allowed?'allowed=true':'allowed=false')+
+      'allowed='+(!!(res&&res.allowed))+
       ' · id='+(last&&last.id||'')+
-      ' · '+((last&&last.alg)||'');
+      ' · '+(last&&last.alg||'')+
+      ' · reasons='+JSON.stringify((last&&last.reasons)||[]);
     document.getElementById('out').textContent=JSON.stringify(last,null,2);
   }
   async function runCustom(){
     var ev=[];
     try{ev=JSON.parse(document.getElementById('evidence').value||'[]');}catch(e){alert('Evidence JSON invalid');return;}
-    var res=await AKSI_MANDATE.create({
+    show(await AKSI_MANDATE.create({
       goal:document.getElementById('goal').value,
       action:document.getElementById('goal').value,
       answer:document.getElementById('answer').value,
       policy:document.getElementById('policy').value,
       evidence:ev
-    });
-    show(res);
+    }));
   }
   document.getElementById('btn-allow').onclick=async function(){show(await AKSI_MANDATE.demo('allow'));};
   document.getElementById('btn-block').onclick=async function(){show(await AKSI_MANDATE.demo('block'));};
@@ -107,12 +143,20 @@ footer{margin-top:28px;font-size:12px;color:var(--m)}footer a{color:var(--a);tex
     if(!last){alert('No receipt');return;}
     var v=await AKSI_MANDATE.verify(last);
     document.getElementById('meta').innerHTML=
-      (v.ok?'<span class="ok">VERIFY OK</span>':'<span class="bad">VERIFY FAIL</span>')+
-      ' · '+JSON.stringify(v);
+      (v.ok?'<span class="ok">VERIFY OK</span>':'<span class="bad">VERIFY FAIL</span>')+' · '+JSON.stringify(v);
   };
   document.getElementById('btn-copy').onclick=function(){
     if(!last)return;
     navigator.clipboard.writeText(JSON.stringify(last,null,2));
+  };
+  document.getElementById('btn-import').onclick=async function(){
+    try{
+      var v=await AKSI_MANDATE.importAndVerify(document.getElementById('import').value);
+      document.getElementById('import-meta').innerHTML=
+        (v.ok?'<span class="ok">VERIFY OK</span>':'<span class="bad">VERIFY FAIL</span>')+' · '+JSON.stringify(v);
+    }catch(e){
+      document.getElementById('import-meta').innerHTML='<span class="bad">parse error</span>';
+    }
   };
 })();
 </script>
