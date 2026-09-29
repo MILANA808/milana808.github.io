@@ -1,5 +1,5 @@
 (function(g){'use strict';
-var V='2.1.0',MEM='aksi_runtime_memory_v2',REC='aksi_runtime_receipts_v2';
+var V='2.2.0',MEM='aksi_runtime_memory_v2',REC='aksi_runtime_receipts_v2';
 function read(k,d){try{var x=JSON.parse(g.localStorage.getItem(k)||'null');return x==null?d:x}catch(e){return d}}
 function write(k,v){try{g.localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function canonical(v){if(v===undefined)return'null';if(v===null||typeof v!=='object')return JSON.stringify(v);if(Array.isArray(v))return'['+v.map(canonical).join(',')+']';return'{'+Object.keys(v).filter(function(k){return v[k]!==undefined&&typeof v[k]!=='function'}).sort().map(function(k){return JSON.stringify(k)+':'+canonical(v[k])}).join(',')+'}'}
@@ -17,9 +17,9 @@ if(g.AKSI_STACK&&typeof g.AKSI_STACK.decide==='function'){emit('collect','STACK 
 else{var c=[];if(g.AKSI_KNOWLEDGE&&g.AKSI_KNOWLEDGE.search)try{var k=g.AKSI_KNOWLEDGE.search(q);if(k)c.push({text:k.body,source:'knowledge'})}catch(e){};memory().slice().reverse().slice(0,8).forEach(function(m){c.push({text:m.text,source:'memory'})});if(!c.length)c=[{text:'AKSI STACK не загружен.',source:'fallback'}];var a=g.AKSI_ALGORITHM&&g.AKSI_ALGORITHM.process?g.AKSI_ALGORITHM.process(q,c,{policy:opts.policy||'companion',seal:true}):{best:c[0],gate:{decision:'DEFER'}};result={ok:true,answer:a.best&&a.best.text||'',best:a.best,gate:a.gate,bond:null,candidates:c.length,adia:{version:a.version,seal:a.seal}}}
 emit('evaluate','Оценка кандидатов и policy gate');
 var answer=String(result.answer||(result.best&&result.best.text)||'');var gate=result.gate||{decision:'UNKNOWN'};var bond=result.bond||null;
-var receipt={schema:'AKSI-RECEIPT-1',ts:new Date().toISOString(),query:q,source:result.best&&result.best.source||'none',gate:gate,bond_id:bond&&bond.bond_id||null};
+var verification=null;try{if(g.AKSI_VERIFIER&&g.AKSI_VERIFIER.verify){verification=g.AKSI_VERIFIER.verify(answer,(result.best&&result.best.evidence)||result.evidence||opts.evidence||[]);}}catch(e){verification={version:g.AKSI_VERIFIER&&g.AKSI_VERIFIER.version||'unknown',error:String(e&&e.message||e).slice(0,160)};}var receipt={schema:'AKSI-RECEIPT-2',ts:new Date().toISOString(),query:q,source:result.best&&result.best.source||'none',gate:gate,bond_id:bond&&bond.bond_id||null,verification:verification};
 receipt.hash=await sha256(receipt);addReceipt(receipt);if(opts.save)remember('Задача: '+q+'\nОтвет: '+answer);emit('complete','Готово');
-return{schema:'AKSI-RESULT-1',runtime:V,query:q,answer:answer,source:result.best&&result.best.source||'none',gate:gate,metrics:result.best&&result.best.metrics||null,ranked:result.ranked||[],candidates:result.candidates||0,throttle:result.throttle||null,seal:result.adia&&result.adia.seal||null,bond:bond,receipt:receipt,trace:trace,ms:Date.now()-started}}
+return{schema:'AKSI-RESULT-2',runtime:V,query:q,answer:answer,verification:verification,source:result.best&&result.best.source||'none',gate:gate,metrics:result.best&&result.best.metrics||null,ranked:result.ranked||[],candidates:result.candidates||0,throttle:result.throttle||null,seal:result.adia&&result.adia.seal||null,bond:bond,receipt:receipt,trace:trace,ms:Date.now()-started}}
 async function selfTest(){var s=status(),sha=false;try{sha=(await sha256({test:'AKSI',version:V})).length===64}catch(e){}return{ok:sha&&!!(g.AKSI_STACK&&g.AKSI_STACK.decide),version:V,status:s,sha256:sha}}
 g.AKSI_RUNTIME={version:V,status:status,canonical:canonical,sha256:sha256,execute:execute,run:execute,memory:memory,remember:remember,clearMemory:clearMemory,receipts:receipts,selfTest:selfTest}
 })(typeof window!=='undefined'?window:globalThis);
