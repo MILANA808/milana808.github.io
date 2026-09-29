@@ -1,0 +1,44 @@
+{
+  "schema": "aksi-manifest/v1",
+  "agent_id": "did:aksi:agent:sovereign-2026",
+  "name": "АКСИ Offline Agent",
+  "policy": "strict",
+  "allowed_tools": [
+    "http.get",
+    "http.post",
+    "weather.fetch",
+    "memory.write",
+    "memory.read",
+    "search.web",
+    "file.read"
+  ],
+  "denied_tools": [
+    "shell.exec",
+    "file.delete",
+    "file.write",
+    "system.shutdown",
+    "crypto.transfer",
+    "bank.transfer"
+  ],
+  "allowed_domains": [
+    "api.openweathermap.org",
+    "wttr.in",
+    "api.weather.com",
+    "example.com",
+    "wikipedia.org",
+    "ru.wikipedia.org"
+  ],
+  "allowed_syscalls": [
+    "fs.read",
+    "net.http.get",
+    "net.http.post",
+    "memory.local"
+  ],
+  "limits": {
+    "max_spend": 100,
+    "max_http_per_session": 20,
+    "max_tool_calls_per_step": 3,
+    "max_payload_bytes": 65536
+  },
+  "principle": "technology_serves_human"
+}
