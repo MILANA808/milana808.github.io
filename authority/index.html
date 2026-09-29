@@ -1,1 +1,116 @@
-SEE_FILE_AUTH
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>АКСИ Authority — мандат для ИИ</title>
+<meta name="description" content="АКСИ Authority Runtime + Mandate ECDSA. Gate ALLOW/BLOCK. Offline-first. Не чатбот. Не AGI."/>
+<link rel="canonical" href="https://milana808.github.io/authority/"/>
+<meta name="theme-color" content="#0b0c10"/>
+<style>
+:root{--bg:#0b0c10;--card:#14161c;--line:rgba(255,255,255,.08);--text:#eef0f4;--muted:#9aa3b2;--accent:#8ab4f8;--violet:#a78bfa;--allow:#3dd68c;--block:#f07178}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:14px;color:#0b0c10;background:linear-gradient(145deg,#c4b5fd,#8ab4f8)}
+h1{margin:0;font-size:1.25rem}.sub{margin:2px 0 0;color:var(--muted);font-size:.88rem}
+.hero{border:1px solid var(--line);border-radius:18px;padding:18px 16px;margin-bottom:14px;background:rgba(255,255,255,.02)}
+.pipe{margin-top:12px;font:12px/1.5 ui-monospace,monospace;color:var(--accent)}
+.composer{display:flex;gap:8px;margin:14px 0}
+.composer input{flex:1;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:14px;padding:13px 14px;font-size:15px}
+.composer button{border:0;border-radius:14px;padding:13px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--violet));color:#0b0c10}
+.examples{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.examples button{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+.status{font-size:12px;color:var(--muted);min-height:1.2em;margin-bottom:10px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:8px 0}
+.step .name{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.answer-box{margin-top:10px;padding:14px;border-radius:14px;background:rgba(138,180,248,.06);border:1px solid rgba(138,180,248,.2);white-space:pre-wrap}
+.gate-allow{border-color:rgba(61,214,140,.45)}.gate-block{border-color:rgba(240,113,120,.5)}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:6px}
+.badge.allow{background:rgba(61,214,140,.15);color:var(--allow)}.badge.block{background:rgba(240,113,120,.15);color:var(--block)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.actions button,.actions a{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 12px;font-size:13px;cursor:pointer;text-decoration:none}
+footer{margin-top:28px;color:var(--muted);font-size:12px}footer a{color:var(--accent);text-decoration:none}
+pre{white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:var(--muted);max-height:240px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="logo">A</div><div><h1>АКСИ Authority</h1><p class="sub">Production · GOAL→…→Mandate ECDSA · offline</p></div></div>
+  <div class="hero">
+    <p>Полный цикл Authority + подписанный Mandate receipt (если модуль загружен).</p>
+    <div class="pipe">PLAN → RESEARCH → ALGO → GATE → PERMIT|BLOCK → MANDATE sign → REPORT</div>
+  </div>
+  <div class="composer">
+    <input id="goal" type="text" placeholder="Цель / вопрос…" value="кто ты"/>
+    <button type="button" id="run">Run</button>
+  </div>
+  <div class="examples">
+    <button type="button" data-q="кто ты">кто ты</button>
+    <button type="button" data-q="можно ли отправить письмо без evidence">action without evidence</button>
+    <button type="button" data-q="запомни: pilot fact for mandate">запомни</button>
+  </div>
+  <div class="status" id="status">ready</div>
+  <div id="out"></div>
+  <div class="actions">
+    <a href="/mandate/">Mandate Protocol</a>
+    <a href="/">Home</a>
+    <button type="button" id="export">Export JSON</button>
+  </div>
+  <footer>
+    <a href="/mandate/">Mandate</a> · technology_serves_human · aksilove@internet.ru
+  </footer>
+</div>
+<script src="/aksi-clm.js?v=p2"></script>
+<script src="/aksi-episteme.js?v=p2"></script>
+<script src="/aksi-neuro.js?v=p2"></script>
+<script src="/aksi-quantum.js?v=p2"></script>
+<script src="/aksi-fly-gate.js?v=p2"></script>
+<script src="/aksi-bond.js?v=p2"></script>
+<script src="/aksi-algorithm.js?v=p2"></script>
+<script src="/mandate/aksi-mandate.js?v=11"></script>
+<script src="/aksi-authority-runtime.js?v=21"></script>
+<script>
+(function(){
+  var last=null;
+  function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return ({'&':'&','<':'<','>':'>'})[c];});}
+  async function go(q){
+    document.getElementById('status').textContent='running…';
+    document.getElementById('out').innerHTML='';
+    if(!window.AKSI_AUTHORITY){document.getElementById('status').textContent='Authority runtime missing';return;}
+    try{
+      last=await AKSI_AUTHORITY.run(q);
+      var g=last.decision&&last.decision.gate||'—';
+      var m=last.proof&&last.proof.mandate;
+      var html='';
+      html+='<div class="step '+(g==='ALLOW'?'gate-allow':'gate-block')+'">';
+      html+='<div class="name">Decision</div><div><span class="badge '+(g==='ALLOW'?'allow':'block')+'">'+g+'</span> '+esc(last.decision&&last.decision.reason)+'</div></div>';
+      html+='<div class="answer-box">'+esc(last.answer)+'</div>';
+      if(m){
+        html+='<div class="step"><div class="name">Mandate ECDSA</div><div>'+esc(m.alg||m.error||'')+' · gate '+esc(m.gate)+' · '+(m.payload_hash?m.payload_hash.slice(0,20)+'…':'')+'</div></div>';
+      } else {
+        html+='<div class="step"><div class="name">Mandate</div><div>module not attached</div></div>';
+      }
+      html+='<div class="step"><div class="name">Trace</div><pre>'+esc(JSON.stringify(last.trace,null,2))+'</pre></div>';
+      document.getElementById('out').innerHTML=html;
+      document.getElementById('status').textContent='ok · '+(last.version||'')+' · mandate='+(m&&m.alg?'yes':'no');
+    }catch(e){
+      document.getElementById('status').textContent=String(e&&e.message||e);
+    }
+  }
+  document.getElementById('run').onclick=function(){go(document.getElementById('goal').value);};
+  document.getElementById('goal').addEventListener('keydown',function(e){if(e.key==='Enter')go(document.getElementById('goal').value);});
+  document.querySelectorAll('[data-q]').forEach(function(b){b.onclick=function(){document.getElementById('goal').value=b.getAttribute('data-q');go(b.getAttribute('data-q'));};});
+  document.getElementById('export').onclick=function(){
+    if(!last)return;
+    var blob=new Blob([JSON.stringify(last,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-authority-report.json';a.click();
+  };
+  if(window.AKSI_AUTHORITY&&AKSI_AUTHORITY.status){
+    var s=AKSI_AUTHORITY.status();
+    document.getElementById('status').textContent='ready · '+s.version+' · mandate='+(s.hasMandate?'yes':'no');
+  }
+})();
+</script>
+</body>
+</html>
