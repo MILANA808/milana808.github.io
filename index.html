@@ -3,56 +3,68 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ — Decision Integrity · Mandate</title>
-<meta name="description" content="АКСИ Mandate: fail-closed gate + ECDSA Decision Receipt. Offline verify. Не чатбот. Не AGI."/>
+<title>АКСИ — Mandate · Decision Integrity</title>
+<meta name="description" content="AKSI Mandate Protocol: fail-closed gate, ECDSA Decision Receipt, offline verify. Не чатбот. Не AGI."/>
 <link rel="canonical" href="https://milana808.github.io/"/>
 <meta name="theme-color" content="#0a0a0b"/>
+<meta property="og:title" content="АКСИ Mandate Protocol"/>
+<meta property="og:description" content="Без evidence → BLOCK. Подписанный receipt. Offline verify."/>
 <style>
-:root{--bg:#0a0a0b;--s:#121214;--e:#1a1a1e;--l:rgba(255,255,255,.08);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--ok:#34d399;--r:14px}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,sans-serif;background:var(--bg);color:var(--t)}
+:root{--bg:#0a0a0b;--s:#121214;--l:rgba(255,255,255,.09);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--ok:#34d399;--r:14px}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:system-ui,sans-serif;background:var(--bg);color:var(--t);line-height:1.45}
 a{color:var(--a);text-decoration:none}
-.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
-.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(145deg,#c4b5fd,#7c3aed);display:grid;place-items:center;font-weight:800;font-size:12px;color:#0a0a0b}
-h1{margin:0;font-size:1.15rem}.sub{margin:4px 0 0;color:var(--m);font-size:13px}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 56px}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(145deg,#c4b5fd,#7c3aed);display:grid;place-items:center;font-weight:800;font-size:13px;color:#0a0a0b}
+h1{margin:0;font-size:1.2rem}.sub{margin:2px 0 0;color:var(--m);font-size:13px}
 .card{background:var(--s);border:1px solid var(--l);border-radius:var(--r);padding:16px;margin:0 0 12px}
-.card h2{margin:0 0 8px;font-size:15px}.lead{margin:0;color:var(--m);font-size:13px;line-height:1.5}
-.pipe{font:12px/1.5 ui-monospace,monospace;color:var(--a);margin-top:10px}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-.btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--a);color:#0a0a0b;font-weight:600;font-size:13px}
+.card.hero{border-color:rgba(167,139,250,.35);background:linear-gradient(180deg,rgba(167,139,250,.08),var(--s))}
+.card h2{margin:0 0 8px;font-size:15px}.lead{margin:0;color:var(--m);font-size:13px}
+.pipe{font:12px/1.55 ui-monospace,monospace;color:var(--a);margin:12px 0 0;padding:10px 12px;background:rgba(167,139,250,.06);border-radius:10px;border:1px solid rgba(167,139,250,.15)}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{display:inline-block;padding:11px 16px;border-radius:11px;background:linear-gradient(135deg,#a78bfa,#7eb6ff);color:#0a0a0b;font-weight:700;font-size:13px}
 .btn.ghost{background:transparent;color:var(--m);border:1px solid var(--l)}
-footer{margin-top:28px;font-size:12px;color:var(--m)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+.grid .card{margin:0}.grid h3{margin:0 0 4px;font-size:13px}.grid p{margin:0;font-size:12px;color:var(--m)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.badges span{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--l);color:var(--m)}
+.live{margin-top:8px;font-size:12px;color:var(--ok)}
+footer{margin-top:28px;font-size:12px;color:var(--m)}.non{font-size:12px;color:var(--m)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
-    <div class="logo">A</div>
-    <div>
-      <h1>АКСИ · Decision Integrity</h1>
-      <p class="sub">Не чатбот. Мандат на решение и действие.</p>
-    </div>
-  </div>
-  <div class="card">
-    <h2>AKSI Mandate Protocol</h2>
-    <p class="lead">Fail-closed gate: без evidence → BLOCK. ECDSA Decision Receipt. Offline verify. Не AGI.</p>
-    <div class="pipe">goal → evidence → ALLOW|BLOCK → sign → offline verify</div>
+  <div class="top"><div class="logo">A</div><div><h1>АКСИ · Decision Integrity</h1><p class="sub">Слой мандата на решение и действие · не чатбот · не AGI</p></div></div>
+  <div class="card hero">
+    <h2>Mandate Protocol v1.1</h2>
+    <p class="lead">Агент не действует «потому что модель так сказала». Нужен проверяемый мандат: evidence → gate → ECDSA receipt → offline verify.</p>
+    <div class="pipe">goal → evidence → ALLOW | BLOCK → sign (P-256) → verify without server</div>
+    <div class="badges"><span>default-deny</span><span>ECDSA-P256-SHA256</span><span>no LLM required</span><span>portable JSON</span></div>
     <div class="row">
-      <a class="btn" href="/mandate/">Открыть Mandate →</a>
-      <a class="btn ghost" href="/authority/">Authority</a>
+      <a class="btn" href="/mandate/">Открыть продукт Mandate →</a>
+      <a class="btn ghost" href="/authority/">Authority Runtime</a>
       <a class="btn ghost" href="/one/">ONE</a>
-      <a class="btn ghost" href="/dip/">DIP</a>
     </div>
+    <p class="live" id="live">проверяю runtime…</p>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>ALLOW</h3><p>Sealed evidence → gate открывает, receipt подписывается.</p></div>
+    <div class="card"><h3>BLOCK</h3><p>Нет evidence / weak-only → запрет, receipt всё равно подписан.</p></div>
+    <div class="card"><h3>Verify</h3><p>Третья сторона проверяет JSON offline. Подмена ломает hash.</p></div>
+    <div class="card"><h3>Air-gap</h3><p>Браузерный runtime без обязательного облака.</p></div>
   </div>
   <div class="card">
-    <h2>Что это</h2>
-    <p class="lead">Слой доверия к решению агента: default-deny, подписанная квитанция, проверка без сервера. Для internal tools, compliance demo, air-gap.</p>
+    <h2>Контур</h2>
+    <p class="lead">Mandate — остриё. Authority — GOAL→REPORT. ONE — модули. DIP — narrative.</p>
+    <div class="row"><a class="btn ghost" href="/dip/">DIP</a><a class="btn ghost" href="/receipt/">Receipt lab</a></div>
   </div>
-  <div class="card">
-    <h2>Non-claims</h2>
-    <p class="lead">Не foundation model. Не SCITT registry. Не доказательство исполнения во внешнем мире — только gate + подпись локально.</p>
-  </div>
+  <div class="card"><h2>Non-claims</h2><p class="non">Не foundation model. Не SCITT. Не IAM. Не proof внешнего исполнения — только gate + подпись локально.</p></div>
   <footer>technology_serves_human · aksilove@internet.ru</footer>
 </div>
+<script src="/mandate/aksi-mandate.js?v=11"></script>
+<script>
+(function(){var el=document.getElementById('live');try{if(window.AKSI_MANDATE){var s=AKSI_MANDATE.status();el.textContent='runtime '+s.version+' · '+s.alg+' · ready';}else el.textContent='модуль mandate не загружен';}catch(e){el.textContent='error';}})();
+</script>
 </body>
 </html>
