@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Permit — продукт</title>
+<meta name="description" content="АКСИ Permit: агент не выполняет tool-call без мандата. ALLOW/BLOCK + ECDSA receipt. Offline verify."/>
+<link rel="canonical" href="https://milana808.github.io/permit/"/>
+<meta name="theme-color" content="#0a0a0b"/>
+<style>
+:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--ok:#34d399;--bad:#f87171}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{margin:0;font-size:1.4rem}.tag{color:var(--m);font-size:14px;margin:6px 0 16px}
+.hero{background:linear-gradient(180deg,rgba(167,139,250,.12),transparent);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.hero p{margin:0;color:var(--m);font-size:14px}
+.pipe{font:12px ui-monospace,monospace;color:var(--a);margin-top:12px}
+.tools{display:grid;gap:8px;margin:16px 0}
+.tool{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left;width:100%;color:inherit;font:inherit}
+.tool:hover{border-color:rgba(167,139,250,.4)}
+.tool b{display:block;font-size:14px}.tool span{font-size:12px;color:var(--m)}
+.tool .go{flex-shrink:0;background:var(--a);color:#0a0a0b;border:0;border-radius:8px;padding:8px 12px;font-weight:700;font-size:12px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.gate{font-size:1.6rem;font-weight:800}.gate.ALLOW{color:var(--ok)}.gate.BLOCK{color:var(--bad)}
+.meta{font-size:12px;color:var(--m);margin-top:6px}
+pre{white-space:pre-wrap;word-break:break-word;font:11px/1.4 ui-monospace,monospace;color:var(--m);max-height:220px;overflow:auto;margin:10px 0 0}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:13px}
+button.primary{background:var(--a);color:#0a0a0b}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+footer{margin-top:28px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
+.note{font-size:12px;color:var(--m);margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>АКСИ Permit</h1>
+  <p class="tag">Продукт · агент не действует без мандата</p>
+  <div class="hero">
+    <p><b style="color:var(--t)">Что это:</b> слой между «модель решила» и «система сделала». Tool-call проходит только через gate. Результат — подписанный receipt (ECDSA), проверяется offline.</p>
+    <div class="pipe">tool request → evidence? → ALLOW | BLOCK → signed receipt</div>
+  </div>
+  <p style="font-size:13px;color:var(--m);margin:0 0 8px">Выбери действие агента:</p>
+  <div class="tools">
+    <button type="button" class="tool" data-demo="api"><div><b>HTTP API call</b><span>внешний запрос без evidence</span></div><span class="go">Run</span></button>
+    <button type="button" class="tool" data-demo="weak"><div><b>Config write</b><span>только «слух» как основание</span></div><span class="go">Run</span></button>
+    <button type="button" class="tool" data-demo="save"><div><b>Memory write</b><span>явное подтверждение пользователя</span></div><span class="go">Run</span></button>
+  </div>
+  <div class="card" id="result" hidden>
+    <div id="gate" class="gate">—</div>
+    <div id="meta" class="meta"></div>
+    <div id="human" style="margin-top:10px;font-size:14px"></div>
+    <pre id="json"></pre>
+    <div class="row">
+      <button type="button" class="primary" id="btn-copy">Скачать JSON</button>
+      <button type="button" id="btn-verify">Verify подпись</button>
+    </div>
+    <div id="vmsg" class="meta" style="margin-top:8px"></div>
+  </div>
+  <div class="card">
+    <b style="font-size:13px">Проверить чужой receipt</b>
+    <textarea id="paste" style="width:100%;margin-top:8px;min-height:70px;background:#0e0e10;border:1px solid var(--line);border-radius:10px;color:var(--t);padding:10px;font:12px ui-monospace,monospace" placeholder="Вставь JSON receipt…"></textarea>
+    <div class="row"><button type="button" id="btn-paste">Verify</button></div>
+    <div id="pmsg" class="meta" style="margin-top:8px"></div>
+  </div>
+  <p class="note">Не чатбот. Не AGI. Замок на действие + доказательство. Contact: aksilove@internet.ru</p>
+  <footer><a href="/">Home</a> · <a href="/mandate/">Protocol</a></footer>
+</div>
+<script src="/mandate/aksi-mandate.js?v=12"></script>
+<script>
+(function(){
+  var API=window.AKSI_PERMIT||window.AKSI_MANDATE;var last=null;
+  var human={api:'Агент хотел вызвать внешний API без оснований → мандат запрещён.',weak:'Основание слабое (tier=weak) → мандат запрещён.',save:'Пользователь явно подтвердил запись → мандат выдан, receipt подписан.'};
+  function show(res,kind){
+    last=res.receipt;document.getElementById('result').hidden=false;
+    var g=res.gate,el=document.getElementById('gate');el.textContent=g;el.className='gate '+g;
+    document.getElementById('meta').textContent=(res.allowed?'действие разрешено':'действие запрещено')+' · '+(last.alg||'')+' · '+(last.id||'');
+    document.getElementById('human').textContent=human[kind]||'';
+    document.getElementById('json').textContent=JSON.stringify(last,null,2);
+    document.getElementById('vmsg').textContent='';
+  }
+  document.querySelectorAll('[data-demo]').forEach(function(btn){
+    btn.addEventListener('click',async function(){
+      var k=btn.getAttribute('data-demo');var map={api:'block',weak:'weak',save:'allow'};
+      show(await API.demo(map[k]),k);
+    });
+  });
+  document.getElementById('btn-copy').onclick=function(){
+    if(!last)return;var t=JSON.stringify(last,null,2);navigator.clipboard.writeText(t);
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'application/json'}));a.download=(last.id||'aksi-permit')+'.json';a.click();
+  };
+  document.getElementById('btn-verify').onclick=async function(){
+    if(!last)return;var v=await API.verify(last);
+    document.getElementById('vmsg').innerHTML=v.ok?'<span class="ok">Подпись валидна</span>':'<span class="bad">Подпись невалидна</span> · '+(v.error||'');
+  };
+  document.getElementById('btn-paste').onclick=async function(){
+    try{var v=await API.importAndVerify(document.getElementById('paste').value);
+      document.getElementById('pmsg').innerHTML=v.ok?'<span class="ok">VERIFY OK</span> · gate '+v.gate:'<span class="bad">VERIFY FAIL</span> · '+(v.error||'');
+    }catch(e){document.getElementById('pmsg').innerHTML='<span class="bad">parse error</span>';}
+  };
+})();
+</script>
+</body>
+</html>
