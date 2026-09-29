@@ -14,7 +14,7 @@ const unsupported=context.AKSI_VERIFIER.verify(
 );
 assert.strictEqual(unsupported.unsupported,2);
 const partial=context.AKSI_VERIFIER.verify(
- 'Марс — планета Солнечной системы с тонкой атмосферой.',
+ 'Марс имеет атмосферу планета',
  [{title:'Mars',text:'Марс — планета Солнечной системы.'}]
 );
 assert.strictEqual(partial.partial,1);
