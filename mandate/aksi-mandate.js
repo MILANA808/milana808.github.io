@@ -1,12 +1,12 @@
 /**
- * AKSI Mandate Protocol v1.0 — Decision Receipt + fail-closed gate
+ * AKSI Mandate Protocol v1.1 — Decision Receipt + fail-closed gate
  * ECDSA P-256 sign/verify · offline · no personal data · no LLM required
  * Schema: aksi-mandate/v1
  * Contact: aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VER = "1.0.0";
+  var VER = "1.1.0";
   var SCHEMA = "aksi-mandate/v1";
   var DID = "did:aksi:mandate:v1";
   var KEY_DB = "aksi_mandate_keys_v1";
@@ -283,6 +283,11 @@
     };
   }
 
+  async function importAndVerify(jsonOrObj) {
+    var r = typeof jsonOrObj === "string" ? JSON.parse(jsonOrObj) : jsonOrObj;
+    return verify(r);
+  }
+
   async function demo(name) {
     name = String(name || "allow").toLowerCase();
     if (name === "block" || name === "no_evidence") {
@@ -338,6 +343,7 @@
     demo: demo,
     evaluateGate: evaluateGate,
     exportJSON: exportJSON,
+    importAndVerify: importAndVerify,
     status: function () {
       return { version: VER, schema: SCHEMA, did: DID, alg: "ECDSA-P256-SHA256", no_llm: true };
     }
