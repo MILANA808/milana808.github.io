@@ -1,6 +1,11 @@
+/**
+ * AKSI Authority Runtime v2.1.0-mandate
+ * GOAL→…→PROOF with optional AKSI_MANDATE ECDSA receipt
+ * Contact: aksilove@internet.ru · not AGI
+ */
 (function (G) {
   "use strict";
-  var VER = "2.0.1-algo-quantum";
+  var VER = "2.1.0-mandate";
   var PROTOCOL = "AKSI-AUTHORITY/2";
   var STORE = "aksi_authority_reports_v2";
   var IDENTITY = "АКСИ";
@@ -82,7 +87,7 @@
     var g = String(goal || "").trim();
     var parts = [], origin = "template", score = 0.4;
     if (planObj.kind === "identity" || /кто ты|что ты|who are you|что такое акси/i.test(g)) {
-      return { text: "Я АКСИ — локальный Authority Runtime. Отвечаю алгоритмами: Closed-Loop Memory, Episteme, квантовый симулятор answerGate и gate ALLOW/BLOCK. Не облачная LLM. Contact: aksilove@internet.ru", origin: "identity", score: 0.95, speaker: IDENTITY };
+      return { text: "Я АКСИ — локальный Authority Runtime. Алгоритмы + gate ALLOW/BLOCK + Mandate ECDSA. Не облачная LLM. Contact: aksilove@internet.ru", origin: "identity", score: 0.95, speaker: IDENTITY };
     }
     if (G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") {
       try {
@@ -96,25 +101,24 @@
     }
     var sealed = (researchObj.memoryHits || []).filter(function (h) { return h && (h.tier === "sealed" || h.tier === "provisional"); });
     if (sealed.length) {
-      parts.push("Из памяти (CLM " + (sealed[0].tier || "") + "): " + hitText(sealed[0]));
+      parts.push("Из памяти (CLM): " + hitText(sealed[0]));
       origin = origin === "neuro-seed" ? "neuro+clm" : "clm";
       score = Math.max(score, sealed[0].tier === "sealed" ? 0.8 : 0.6);
     }
     if (researchObj.epistemeHits && researchObj.epistemeHits.length) {
       parts.push("Episteme: " + hitText(researchObj.epistemeHits[0]));
-      origin = origin.indexOf("clm") >= 0 ? origin + "+episteme" : "episteme";
       score = Math.max(score, 0.58);
     }
     if (planObj.kind === "memory") {
       var fact = g.replace(/^(запомни|remember|сохрани|выучи)\s*:?\s*/i, "").trim() || g;
-      return { text: "Я АКСИ. Приму факт в Closed-Loop Memory: «" + fact.slice(0, 200) + "». После записи self-test (probe → tier).", origin: "memory-intent", score: 0.7, speaker: IDENTITY, factToSeal: fact };
+      return { text: "Я АКСИ. Приму факт в CLM: «" + fact.slice(0, 200) + "».", origin: "memory-intent", score: 0.7, speaker: IDENTITY, factToSeal: fact };
     }
     if (planObj.kind === "action") {
       var hasStrong = sealed.length > 0 || score >= 0.7;
-      return { text: hasStrong ? "Я АКСИ. Есть локальные evidence. Действие только при ALLOW + Permit." : "Я АКСИ. Для действия нужны sealed/provisional факты — вероятен BLOCK.", origin: "action-policy", score: hasStrong ? 0.65 : 0.35, speaker: IDENTITY };
+      return { text: hasStrong ? "Я АКСИ. Есть evidence. Действие только при ALLOW + Permit." : "Я АКСИ. Для действия нужны факты — вероятен BLOCK.", origin: "action-policy", score: hasStrong ? 0.65 : 0.35, speaker: IDENTITY };
     }
     if (parts.length) return { text: "Я АКСИ. " + parts.join(" · "), origin: origin, score: score, speaker: IDENTITY };
-    return { text: "Я АКСИ. Локальных sealed-фактов мало. Могу запомнить («запомни: …»), ответить из Neuro-SEED или отказать в действии. Это алгоритм + quantum gate, не генеративная модель.", origin: "gap-honest", score: 0.25, speaker: IDENTITY };
+    return { text: "Я АКСИ. Локальных фактов мало. Могу запомнить («запомни: …») или отказать в действии. Не генеративная модель.", origin: "gap-honest", score: 0.25, speaker: IDENTITY };
   }
   function quantumGate(goal, answer) {
     if (G.AKSI_QUANTUM && typeof G.AKSI_QUANTUM.answerGate === "function") {
@@ -123,7 +127,7 @@
     var h = 0, t = String(goal) + "|" + String(answer);
     for (var i = 0; i < t.length; i++) h = (Math.imul(31, h) + t.charCodeAt(i)) | 0;
     var qcli = 0.35 + (Math.abs(h) % 50) / 100;
-    return { version: "surrogate", backend: "hash-surrogate", QCLI: +qcli.toFixed(3), qcli: +qcli.toFixed(3), resonance: +((qcli * 0.9).toFixed(3)), band: qcli >= 0.72 ? "high" : qcli >= 0.45 ? "mid" : "low" };
+    return { version: "surrogate", backend: "hash-surrogate", QCLI: +qcli.toFixed(3), qcli: +qcli.toFixed(3), band: qcli >= 0.72 ? "high" : qcli >= 0.45 ? "mid" : "low" };
   }
   function decide(goal, planObj, algo, qx, researchObj) {
     var gate = "ALLOW", reason = "aksi-algorithmic";
@@ -140,12 +144,6 @@
     }
     if (planObj.kind === "action" && (lowEv || conf < 0.55 || qcli < 0.4)) { gate = "BLOCK"; reason = "action-default-deny-weak-evidence"; }
     if (algo.origin === "gap-honest" && planObj.kind === "action") { gate = "BLOCK"; reason = "gap-cannot-authorize-action"; }
-    if (G.AKSI_ALGORITHM && typeof G.AKSI_ALGORITHM.process === "function") {
-      try {
-        var ad = G.AKSI_ALGORITHM.process(goal, [{ text: text, score: conf }], { policy: planObj.kind === "action" ? "strict" : "companion" });
-        if (ad && ad.decision === "BLOCK") { gate = "BLOCK"; reason = ad.reason || reason; }
-      } catch (e) {}
-    }
     if (qx && qx.band === "low" && planObj.kind === "action") { gate = "BLOCK"; reason = "quantum-band-low-action"; }
     return { gate: gate, reason: reason, conf: +conf.toFixed(3), qcli: +qcli.toFixed(3), eqs: +eqs.toFixed(3), policy: planObj.kind === "action" ? "strict" : "companion", speaker: IDENTITY, ts: now() };
   }
@@ -182,7 +180,32 @@
       qcli: decision.qcli, quantum_backend: (qx && qx.backend) || null, evidence_count: (researchObj.evidence || []).length, no_llm: true, ts: now()
     };
     receipt.integrity = await sha256(canon(receipt));
-    return { bond: bond, receipt: receipt };
+    var mandate = null;
+    if (G.AKSI_MANDATE && typeof G.AKSI_MANDATE.create === "function") {
+      try {
+        var ev = (researchObj.evidence || []).map(function (e, i) {
+          return { id: e.id || "ev_" + (i + 1), source: e.source || "authority", tier: e.tier || "ok", snippet: String(e.text || e.snippet || "").slice(0, 400) };
+        });
+        if (decision.gate === "ALLOW" && !ev.length) {
+          ev = [{ id: "ev_algo", source: "authority-algo", tier: "ok", snippet: "algorithmic path ALLOW" }];
+        }
+        var mres = await G.AKSI_MANDATE.create({
+          goal: goal, action: goal, answer: answer,
+          policy: decision.gate === "ALLOW" ? "companion" : "strict",
+          evidence: decision.gate === "ALLOW" ? ev : []
+        });
+        mandate = {
+          gate: mres.gate, allowed: mres.allowed,
+          receipt_id: mres.receipt && mres.receipt.id,
+          payload_hash: mres.receipt && mres.receipt.payload_hash,
+          alg: mres.receipt && mres.receipt.alg,
+          signature: mres.receipt && mres.receipt.signature,
+          publicJwk: mres.receipt && mres.receipt.publicJwk,
+          reasons: mres.receipt && mres.receipt.reasons
+        };
+      } catch (e) { mandate = { error: String(e && e.message || e) }; }
+    }
+    return { bond: bond, receipt: receipt, mandate: mandate };
   }
   async function run(goal, opts) {
     opts = opts || {};
@@ -199,14 +222,7 @@
     var qx = quantumGate(g, algo.text);
     step("QUANTUM_ANSWER_GATE", { backend: qx.backend, QCLI: qx.QCLI || qx.qcli, band: qx.band });
     var answer = algo.text;
-    if (G.AKSI_QUANTUM && typeof G.AKSI_QUANTUM.sealAnswer === "function") {
-      try {
-        var sealedAns = G.AKSI_QUANTUM.sealAnswer(g, algo.text);
-        if (sealedAns && sealedAns.text) { answer = sealedAns.text; if (sealedAns.meta) answer += "\n[" + sealedAns.meta + "]"; }
-      } catch (e) {}
-    } else if (qx && qx.QCLI != null) {
-      answer += "\n[Q" + qx.QCLI + " · " + (qx.band || "") + " · " + (qx.backend || "sim") + "]";
-    }
+    if (qx && qx.QCLI != null) answer += "\n[Q" + qx.QCLI + " · " + (qx.band || "") + " · " + (qx.backend || "sim") + "]";
     var decision = decide(g, planObj, algo, qx, researchObj);
     step("DECISION", decision);
     var permit = await issuePermit(g, decision, algo);
@@ -214,7 +230,7 @@
     var mem = await memoryWrite(algo, permit);
     step("MEMORY", mem);
     var pr = await proof(g, answer, researchObj, decision, permit, qx);
-    step("PROOF", { integrity: pr.receipt.integrity });
+    step("PROOF", { integrity: pr.receipt.integrity, mandate: pr.mandate && pr.mandate.alg });
     var report = {
       ok: true, protocol: PROTOCOL, version: VER, id: uid(), speaker: IDENTITY, no_llm: true, goal: g, plan: planObj,
       research: { evidence_count: researchObj.evidence.length, offline: true },
@@ -236,6 +252,7 @@
       hasNeuro: !!(G.AKSI_NEURO && G.AKSI_NEURO.think),
       hasQuantum: !!(G.AKSI_QUANTUM && G.AKSI_QUANTUM.answerGate),
       hasBond: !!(G.AKSI_BOND && G.AKSI_BOND.createBond),
+      hasMandate: !!(G.AKSI_MANDATE && G.AKSI_MANDATE.create),
       hasFlyGate: !!(G.AKSI_FLY_GATE && G.AKSI_FLY_GATE.evaluate),
       hasADIA: !!(G.AKSI_ALGORITHM && G.AKSI_ALGORITHM.process),
       reports: loadReports().length
