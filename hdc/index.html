@@ -119,27 +119,27 @@ function dreamAnim(report, onDone){
       ctx.beginPath(); ctx.arc(p.x,p.y,2+(1-cool)*3,0,TWO_PI);
       ctx.fillStyle=`hsla(${200+80*cool},90%,65%,${0.35+0.5*cool})`; ctx.fill(); }
     if(cool>0.65) for(const tg of targets){ ctx.fillStyle=`rgba(196,181,253,${(cool-0.65)*2.5})`; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.fillText(tg.l,tg.x,tg.y-12); ctx.beginPath(); ctx.arc(tg.x,tg.y,6,0,TWO_PI); ctx.fill(); }
-    stat.textContent=cool<1?(`Сон… ${(cool*100)|0}%`):(`Шум памяти уменьшен на ${report.noiseReducedPct.toFixed(1)}% · mean ${report.meanBefore.toFixed(3)} → ${report.meanAfter.toFixed(3)}`);
+    stat.textContent=cool<1?('Сон… '+(cool*100|0)+'%'):('Шум памяти уменьшен на '+report.noiseReducedPct.toFixed(1)+'% · mean '+report.meanBefore.toFixed(3)+' → '+report.meanAfter.toFixed(3));
     t+=0.016; if(t<1.35) anim=requestAnimationFrame(step); else if(onDone) onDone();
   }; step();
 }
-document.getElementById('btn-health').onclick=()=>{ out.textContent=''; const {mind,dreams}=ensure(); const h=dreams.measureCapitalHealth(mind);
-  log('mean '+h.mean.toFixed(4)); for(const s of h.scores) log(s.entity+' → '+s.expect+' '+s.score.toFixed(4)); stat.textContent='health '+h.mean.toFixed(4); };
-document.getElementById('btn-noise').onclick=()=>{ out.textContent=''; const {mind,dreams}=ensure(); const b=dreams.measureCapitalHealth(mind); dreams.injectNoise(mind,45); const a=dreams.measureCapitalHealth(mind);
-  log('noise x45'); log('mean '+b.mean.toFixed(4)+' → '+a.mean.toFixed(4)); for(const s of a.scores) log(s.entity+' '+s.score.toFixed(4));
+document.getElementById('btn-health').onclick=function(){ out.textContent=''; var w=ensure(); var h=w.dreams.measureCapitalHealth(w.mind);
+  log('mean '+h.mean.toFixed(4)); h.scores.forEach(function(s){ log(s.entity+' → '+s.expect+' '+s.score.toFixed(4)); }); stat.textContent='health '+h.mean.toFixed(4); };
+document.getElementById('btn-noise').onclick=function(){ out.textContent=''; var w=ensure(); var b=w.dreams.measureCapitalHealth(w.mind); w.dreams.injectNoise(w.mind,45); var a=w.dreams.measureCapitalHealth(w.mind);
+  log('noise x45'); log('mean '+b.mean.toFixed(4)+' → '+a.mean.toFixed(4)); a.scores.forEach(function(s){ log(s.entity+' '+s.score.toFixed(4)); });
   stat.textContent='NOISY '+a.mean.toFixed(4);
   ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,cv.width,cv.height);
-  for(let i=0;i<180;i++){ ctx.fillStyle=`hsla(${Math.random()*360},70%,60%,0.45)`; ctx.beginPath(); ctx.arc(Math.random()*cv.width,Math.random()*cv.height,Math.random()*4+1,0,TWO_PI); ctx.fill(); } };
-document.getElementById('btn-sleep').onclick=()=>{ out.textContent=''; const {mind,dreams}=ensure(); const before=dreams.measureCapitalHealth(mind); log('Before '+before.mean.toFixed(4));
-  const rep=dreams.sleepCycle(mind).consolidation;
-  dreamAnim(rep, ()=>{ log('After '+rep.meanAfter.toFixed(4)); log('Noise reduced '+rep.noiseReducedPct.toFixed(1)+'%');
-    for(const s of rep.after.scores) log(s.entity+' → '+s.expect+' '+s.score.toFixed(4));
+  for(var i=0;i<180;i++){ ctx.fillStyle='hsla('+Math.random()*360+',70%,60%,0.45)'; ctx.beginPath(); ctx.arc(Math.random()*cv.width,Math.random()*cv.height,Math.random()*4+1,0,TWO_PI); ctx.fill(); } };
+document.getElementById('btn-sleep').onclick=function(){ out.textContent=''; var w=ensure(); var before=w.dreams.measureCapitalHealth(w.mind); log('Before '+before.mean.toFixed(4));
+  var rep=w.dreams.sleepCycle(w.mind).consolidation;
+  dreamAnim(rep, function(){ log('After '+rep.meanAfter.toFixed(4)); log('Noise reduced '+rep.noiseReducedPct.toFixed(1)+'%');
+    rep.after.scores.forEach(function(s){ log(s.entity+' → '+s.expect+' '+s.score.toFixed(4)); });
     log(rep.meanAfter>0.25&&rep.meanAfter>rep.meanBefore?'PASS recovery':'check'); }); };
-document.getElementById('btn-reason').onclick=()=>{ out.textContent=''; const {mind,cand}=ensure();
-  const probe=mind.probeSlot('japan','capital');
-  const ranked=cand.map(l=>({l,s:mind.space.cosine(probe,mind.space.atom(l))})).sort((a,b)=>b.s-a.s);
+document.getElementById('btn-reason').onclick=function(){ out.textContent=''; var w=ensure();
+  var probe=w.mind.probeSlot('japan','capital');
+  var ranked=w.cand.map(function(l){ return {l:l,s:w.mind.space.cosine(probe,w.mind.space.atom(l))}; }).sort(function(a,b){ return b.s-a.s; });
   log('france:paris :: japan:? → '+ranked[0].l+' ('+ranked[0].s.toFixed(3)+')');
-  log(ranked[0].l==='tokyo'?'PASS':'…'); stat.textContent='answer '+ranked[0].l); };
+  log(ranked[0].l==='tokyo'?'PASS':'…'); stat.textContent='answer '+ranked[0].l; };
 </script>
 </body>
 </html>
