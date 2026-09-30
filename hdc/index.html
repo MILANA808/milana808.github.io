@@ -3,163 +3,189 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Phase-HRR — голографический HDC</title>
-<meta name="description" content="Complex phase HDC / HRR в браузере: bind=сумма фаз, bundle=интерференция, analogical query без GPU."/>
+<title>АКСИ Geometric Intelligence — Phase-HRR</title>
+<meta name="description" content="Геометрическое рассуждение на Phase-HRR: траектория, аналогии без нейросетей."/>
 <link rel="canonical" href="https://milana808.github.io/hdc/"/>
 <meta name="theme-color" content="#0a0a0b"/>
 <style>
-:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9;--ok:#34d399;--bad:#f87171}
+:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9;--ok:#34d399;--vio:#a78bfa}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
-.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
-h1{margin:0;font-size:1.35rem}.sub{color:var(--m);font-size:14px;margin:6px 0 14px}
-.badges span{display:inline-block;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
-.pipe{font:12px ui-monospace,monospace;color:var(--a);margin:8px 0}
-button{border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:13px;margin:4px 4px 0 0}
+.wrap{max-width:780px;margin:0 auto;padding:18px 14px 48px}
+h1{margin:0;font-size:1.3rem}.sub{color:var(--m);font-size:13px;margin:6px 0 12px}
+.badges span{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px;display:inline-block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+.pipe{font:11px ui-monospace,monospace;color:var(--a);margin:6px 0}
+button{border:0;border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:13px;margin:3px}
 button.primary{background:linear-gradient(135deg,#67e8f9,#a78bfa);color:#0a0a0b}
-pre{white-space:pre-wrap;word-break:break-word;font:11px/1.4 ui-monospace,monospace;color:var(--m);max-height:320px;overflow:auto;margin:8px 0 0;background:#0e0e10;padding:10px;border-radius:10px}
-footer{margin-top:24px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
-.note{font-size:12px;color:var(--m)}
+canvas{width:100%;height:auto;background:#0e0e12;border-radius:12px;border:1px solid var(--line);display:block}
+pre{white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;color:var(--m);max-height:220px;overflow:auto;margin:8px 0 0;background:#0e0e10;padding:10px;border-radius:10px}
+.note{font-size:12px;color:var(--m)}footer{margin-top:20px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>АКСИ Phase-HRR</h1>
-  <p class="sub">Голографический HDC: фазы (−π…π], bind = сумма, bundle = интерференция cos/sin. Без GPU.</p>
-  <div class="badges">
-    <span>D=4096 browser</span><span>phase-HRR</span><span>CPU only</span><span>not AGI</span>
-  </div>
-  <div class="pipe">atom → bind(entity, ROLE⊙value) → factMemory → unbind → nearest label</div>
+  <h1>АКСИ Geometric Intelligence</h1>
+  <p class="sub">Мышление как траектория в Phase-HRR. Аналогия A:B :: C:? через role-transfer. Без нейросетей.</p>
+  <div class="badges"><span>phase-HRR</span><span>geometric reasoning</span><span>D=4096</span><span>not AGI</span></div>
+  <div class="pipe">France:Paris :: Japan:? → detect ROLE:capital → probe(japan) → Tokyo</div>
   <div class="card">
-    <button type="button" class="primary" id="btn-run">Run demo (train + analogy)</button>
-    <button type="button" id="btn-math">Math checks</button>
+    <button type="button" class="primary" id="btn-reason">Reason: Франция→Париж :: Япония→?</button>
+    <button type="button" id="btn-traj">Trajectory Rome→Tokyo</button>
+    <button type="button" id="btn-math">Math</button>
   </div>
-  <div class="card"><pre id="out">Нажми Run demo…</pre></div>
-  <p class="note">Ассоциативная / аналоговая память на волновой интерференции (Plate HRR / Kanerva HDC). Не foundation model.</p>
+  <div class="card"><canvas id="cv" width="720" height="380"></canvas></div>
+  <div class="card"><pre id="out">Нажми Reason…</pre></div>
+  <p class="note">Расстояние на canvas ∝ (1 − cos). Точка анимируется по узлам траектории.</p>
   <footer><a href="/">Home</a> · <a href="/permit/">Permit</a> · aksilove@internet.ru</footer>
 </div>
 <script type="module">
-const PI = Math.PI, TWO_PI = 2 * Math.PI;
-function wrapPhase(x) {
-  let a = x - TWO_PI * Math.floor((x + PI) / TWO_PI);
-  if (a <= -PI) a += TWO_PI;
-  if (a > PI) a -= TWO_PI;
-  return a;
-}
+const PI=Math.PI, TWO_PI=2*Math.PI;
+function wrapPhase(x){ let a=x-TWO_PI*Math.floor((x+PI)/TWO_PI); if(a<=-PI)a+=TWO_PI; if(a>PI)a-=TWO_PI; return a; }
 class HyperSpace {
-  constructor(D = 4096, seed = 0xc0ffee) {
-    this.D = D; this._state = seed >>> 0; this.atoms = new Map();
-  }
+  constructor(D=4096, seed=0x6e01){ this.D=D; this._state=seed>>>0; this.atoms=new Map(); }
   _rand(){ let x=this._state; x^=x<<13; x^=x>>>17; x^=x<<5; this._state=x>>>0; return this._state; }
-  _randPhase(){ return (this._rand()/0x100000000)*TWO_PI - PI; }
-  random(){ const v=new Float64Array(this.D); for(let i=0;i<this.D;i++) v[i]=this._randPhase(); return v; }
-  atom(name){ const k=String(name); let v=this.atoms.get(k); if(!v){ v=this.random(); this.atoms.set(k,v);} return v; }
-  bind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++) o[i]=wrapPhase(a[i]+b[i]); return o; }
-  unbind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++) o[i]=wrapPhase(a[i]-b[i]); return o; }
-  bundle(...vs){
-    if(!vs.length) return new Float64Array(this.D);
-    if(vs.length===1) return Float64Array.from(vs[0]);
+  _rp(){ return (this._rand()/0x100000000)*TWO_PI-PI; }
+  random(){ const v=new Float64Array(this.D); for(let i=0;i<this.D;i++)v[i]=this._rp(); return v; }
+  atom(n){ const k=String(n); let v=this.atoms.get(k); if(!v){v=this.random();this.atoms.set(k,v);} return v; }
+  bind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=wrapPhase(a[i]+b[i]); return o; }
+  unbind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=wrapPhase(a[i]-b[i]); return o; }
+  bundle(...vs){ if(!vs.length)return new Float64Array(this.D); if(vs.length===1)return Float64Array.from(vs[0]);
     const sc=new Float64Array(this.D), ss=new Float64Array(this.D);
     for(const v of vs) for(let i=0;i<this.D;i++){ sc[i]+=Math.cos(v[i]); ss[i]+=Math.sin(v[i]); }
-    const o=new Float64Array(this.D); for(let i=0;i<this.D;i++) o[i]=Math.atan2(ss[i],sc[i]); return o;
-  }
-  permute(v,k=1){ const D=this.D; let s=((k%D)+D)%D; if(!s) return Float64Array.from(v);
-    const o=new Float64Array(D); for(let i=0;i<D;i++) o[i]=v[(i+s)%D]; return o; }
-  invPermute(v,k=1){ return this.permute(v,-k); }
-  cosine(a,b){ let s=0; for(let i=0;i<this.D;i++) s+=Math.cos(a[i]-b[i]); return s/this.D; }
+    const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=Math.atan2(ss[i],sc[i]); return o; }
+  cosine(a,b){ let s=0; for(let i=0;i<this.D;i++)s+=Math.cos(a[i]-b[i]); return s/this.D; }
   zeros(){ return new Float64Array(this.D); }
-  encodeText(text){
-    const words=String(text).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean);
-    if(!words.length) return this.zeros();
-    const parts=[];
-    for(let i=0;i<words.length;i++){ parts.push(this.permute(this.atom(words[i]),i)); parts.push(this.atom(words[i])); }
-    for(let i=0;i<words.length-1;i++) parts.push(this.bind(this.atom(words[i]), this.permute(this.atom(words[i+1]),1)));
-    return this.bundle(...parts);
-  }
-  encodeNgrams(text,n=3){
-    const s=String(text).toLowerCase().replace(/\s+/g,' ').trim();
-    if(!s.length) return this.zeros();
-    const grams=[]; const N=Math.min(n,s.length);
-    for(let i=0;i<=s.length-N;i++){ const slice=s.slice(i,i+N); let g=this.atom(slice[0]);
-      for(let j=1;j<slice.length;j++) g=this.bind(g,this.permute(this.atom(slice[j]),j)); grams.push(g); }
-    grams.push(this.atom(s)); return this.bundle(...grams);
-  }
-  stats(){ return {D:this.D, atoms:this.atoms.size, model:'phase-HRR'}; }
 }
 class MatrixMind {
-  constructor(space){ this.space=space; this.context=space.zeros(); this.factMemory=space.zeros();
-    this.items=new Map(); this.facts=[]; this._factCount=0; this.trainedDocs=0; }
-  remember(label, vec=null){
-    const key=String(label).toLowerCase().trim();
-    let v = vec instanceof Float64Array ? vec : this.space.atom(key);
-    if(this.items.has(key)) v=this.space.bundle(this.items.get(key), v);
-    this.items.set(key,v); return v;
-  }
-  train(text){
-    const t0=performance.now();
-    const tv=this.space.encodeText(text); const ng=this.space.encodeNgrams(text);
-    this.context=this.space.bundle(this.context,tv,ng);
-    for(const w of text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean)) this.remember(w);
-    this.trainedDocs++; return performance.now()-t0;
-  }
+  constructor(space){ this.space=space; this.factMemory=space.zeros(); this.items=new Map(); this._fc=0; }
+  remember(label){ const k=String(label).toLowerCase(); let v=this.space.atom(k); if(this.items.has(k))v=this.space.bundle(this.items.get(k),v); this.items.set(k,v); return v; }
   trainEntity(entity, slots){
-    const eName=String(entity).toLowerCase(); const eAtom=this.space.atom(eName); this.remember(eName);
+    const e=String(entity).toLowerCase(); const eA=this.space.atom(e); this.remember(e);
     const parts=[];
-    for(const {role,value} of slots){
-      const vName=String(value).toLowerCase(); this.remember(vName);
-      const slot=this.space.bind(this.space.atom('ROLE:'+role), this.space.atom(vName));
-      parts.push(this.space.bind(eAtom, slot));
-    }
-    this.factMemory = this._factCount===0 ? this.space.bundle(...parts) : this.space.bundle(this.factMemory, ...parts);
-    this._factCount += parts.length; this.facts.push({entity:eName,slots});
+    for(const {role,value} of slots){ const v=String(value).toLowerCase(); this.remember(v);
+      const slot=this.space.bind(this.space.atom('ROLE:'+role), this.space.atom(v));
+      parts.push(this.space.bind(eA, slot)); }
+    this.factMemory=this._fc===0?this.space.bundle(...parts):this.space.bundle(this.factMemory,...parts);
+    this._fc+=parts.length;
   }
   probeSlot(entity, role){
     return this.space.unbind(this.space.unbind(this.factMemory, this.space.atom(String(entity).toLowerCase())), this.space.atom('ROLE:'+role));
   }
 }
-class SemanticSampler {
+class GeometricReasoningEngine {
   constructor(mind){ this.mind=mind; this.space=mind.space; }
-  answerRole(role, entity, candidates){
-    const probe=this.mind.probeSlot(entity, role);
-    const ranked=candidates.map(label=>({label, score:this.space.cosine(probe, this.space.atom(label))})).sort((a,b)=>b.score-a.score);
-    return {best:ranked[0], ranked};
+  project(vector, topK=6, candidates=null){
+    const labels=candidates||[...this.mind.items.keys()];
+    return labels.map(label=>({label, vector:this.space.atom(label), score:this.space.cosine(vector, this.space.atom(label))})).sort((a,b)=>b.score-a.score).slice(0,topK);
+  }
+  detectRole(entity, value, roles=['capital','country']){
+    const vA=this.space.atom(String(value).toLowerCase());
+    let best={role:null,score:-1};
+    for(const role of roles){ const probe=this.mind.probeSlot(entity, role); const score=this.space.cosine(probe,vA);
+      if(score>best.score) best={role,score,probe}; }
+    return best;
+  }
+  analogize(a,b,c,candidates){
+    a=a.toLowerCase(); b=b.toLowerCase(); c=c.toLowerCase();
+    const steps=[]; const det=this.detectRole(a,b);
+    steps.push({rule:'detect_role:'+(det.role||'none'), to:b, score:det.score});
+    let answerVec, method;
+    if(det.role && det.score>0.05){ answerVec=this.mind.probeSlot(c, det.role); method='role_transfer:'+det.role;
+      steps.push({rule:'probeSlot('+c+','+det.role+')', to:'?', score:1}); }
+    else { answerVec=this.space.bind(this.space.unbind(this.space.atom(b), this.space.atom(a)), this.space.atom(c)); method='phase_bind_unbind'; }
+    const hits=this.project(answerVec,8,candidates).filter(h=>h.label!==a && h.label!==c);
+    const answer=hits[0]||{label:null,score:-1};
+    steps.push({rule:'project', to:answer.label, score:answer.score});
+    return {answer, steps, method, hits, detected:det};
+  }
+  _phaseLerp(a,b,t){ const D=this.space.D,o=new Float64Array(D); for(let i=0;i<D;i++){ let d=b[i]-a[i]; if(d>PI)d-=TWO_PI; if(d<-PI)d+=TWO_PI; let x=a[i]+t*d; if(x>PI)x-=TWO_PI; if(x<=-PI)x+=TWO_PI; o[i]=x; } return o; }
+  buildTrajectory(start, target, opts={}){
+    const hops=opts.hops||5, cand=opts.candidates||null;
+    const v0=this.space.atom(start), v1=this.space.atom(target);
+    const nodes=[{label:start,vector:v0,score:1}]; const path=[start]; let prev=start;
+    for(let h=1;h<=hops;h++){
+      const mid=this._phaseLerp(v0,v1,h/(hops+1));
+      const snap=this.project(mid,5,cand).find(s=>s.label!==prev)||this.project(mid,1,cand)[0];
+      if(snap && snap.label!==prev && !path.includes(snap.label) && snap.score>0.01){
+        nodes.push(snap); path.push(snap.label); prev=snap.label;
+      }
+    }
+    nodes.push({label:target,vector:v1,score:1}); if(path[path.length-1]!==target) path.push(target);
+    return {nodes, pathLabels:path};
+  }
+  layoutNodes(nodes,w,h,pad=40){
+    const n=nodes.length; if(!n)return nodes;
+    const dist=Array.from({length:n},()=>new Float64Array(n));
+    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){ const s=this.space.cosine(nodes[i].vector,nodes[j].vector); dist[i][j]=dist[j][i]=Math.max(0.05,1-s); }
+    const pos=Array.from({length:n},(_,i)=>({x:pad+(w-2*pad)*(i+1)/(n+1), y:h/2+(i%2?-30:30)}));
+    const scale=Math.min(w,h)*0.4;
+    for(let it=0;it<80;it++) for(let i=0;i<n;i++){ let fx=0,fy=0;
+      for(let j=0;j<n;j++){ if(i===j)continue; const dx=pos[i].x-pos[j].x, dy=pos[i].y-pos[j].y, len=Math.hypot(dx,dy)||1e-6;
+        const force=((len-dist[i][j]*scale)/len)*0.06; fx-=force*dx; fy-=force*dy; }
+      pos[i].x=Math.min(w-pad,Math.max(pad,pos[i].x+fx)); pos[i].y=Math.min(h-pad,Math.max(pad,pos[i].y+fy));
+    }
+    nodes.forEach((nd,i)=>{ nd.x=pos[i].x; nd.y=pos[i].y; }); return nodes;
   }
 }
-const out = document.getElementById('out');
-function log(s){ out.textContent += s + '\n'; }
-document.getElementById('btn-run').onclick = () => {
-  out.textContent = '';
-  const space = new HyperSpace(4096, 0xc0ffee);
-  const mind = new MatrixMind(space);
-  const sampler = new SemanticSampler(mind);
-  log('Phase-HRR D=4096 · ' + space.stats().model);
-  const t0 = performance.now();
-  for (const d of ['Paris is the capital of France','Berlin is the capital of Germany','Tokyo is the capital of Japan','Rome is the capital of Italy'])
-    log('train ' + d + ' · ' + mind.train(d).toFixed(1) + ' ms');
-  mind.trainEntity('france', [{role:'capital', value:'paris'}]);
-  mind.trainEntity('germany', [{role:'capital', value:'berlin'}]);
-  mind.trainEntity('japan', [{role:'capital', value:'tokyo'}]);
-  mind.trainEntity('italy', [{role:'capital', value:'rome'}]);
-  log('total ' + (performance.now()-t0).toFixed(1) + ' ms');
-  const cities = ['paris','berlin','tokyo','rome','moscow','aksi'];
-  let pass = 0;
-  for (const [c, expect] of [['france','paris'],['japan','tokyo'],['italy','rome'],['germany','berlin']]) {
-    const r = sampler.answerRole('capital', c, cities);
-    const ok = r.best?.label === expect; if (ok) pass++;
-    log((ok?'PASS':'FAIL') + '  ' + c + ' → ' + r.best?.label + ' (' + r.best?.score.toFixed(3) + ')');
-  }
-  log(pass === 4 ? 'ALL ANALOGIES PASS' : ('FAILED ' + (4-pass)));
+const out=document.getElementById('out'); const cv=document.getElementById('cv'); const ctx=cv.getContext('2d');
+function log(s){ out.textContent+=s+'\n'; }
+function boot(){
+  const space=new HyperSpace(4096, 0x6e01); const mind=new MatrixMind(space);
+  const cities=['paris','berlin','tokyo','rome','moscow','aksi','london'];
+  const countries=['france','germany','japan','italy','russia','uk'];
+  for(const x of [...cities,...countries]) mind.remember(x);
+  mind.trainEntity('france',[{role:'capital',value:'paris'}]);
+  mind.trainEntity('germany',[{role:'capital',value:'berlin'}]);
+  mind.trainEntity('japan',[{role:'capital',value:'tokyo'}]);
+  mind.trainEntity('italy',[{role:'capital',value:'rome'}]);
+  return { engine:new GeometricReasoningEngine(mind), cand:[...cities,...countries] };
+}
+let anim=null;
+function drawStatic(nodes, path){
+  const w=cv.width, h=cv.height; ctx.fillStyle='#0e0e12'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(103,232,249,0.35)'; ctx.lineWidth=2; ctx.beginPath();
+  for(let i=0;i<path.length;i++){ const n=nodes.find(x=>x.label===path[i]); if(!n)continue; if(i===0)ctx.moveTo(n.x,n.y); else ctx.lineTo(n.x,n.y); }
+  ctx.stroke();
+  for(const n of nodes){ ctx.beginPath(); ctx.arc(n.x,n.y,10,0,TWO_PI); ctx.fillStyle='#a78bfa'; ctx.fill();
+    ctx.fillStyle='#f4f4f5'; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.fillText(n.label, n.x, n.y-16);
+    if(n.score!=null && n.score<1) ctx.fillText(n.score.toFixed(2), n.x, n.y+22); }
+}
+function animatePath(nodes, path){
+  if(anim) cancelAnimationFrame(anim);
+  const pts=path.map(l=>nodes.find(n=>n.label===l)).filter(Boolean);
+  if(pts.length<2){ drawStatic(nodes,path); return; }
+  let t=0;
+  const step=()=>{ drawStatic(nodes, path);
+    const total=pts.length-1; const f=t*total; const i=Math.min(total-1, Math.floor(f)); const u=f-i;
+    const x=pts[i].x+(pts[i+1].x-pts[i].x)*u; const y=pts[i].y+(pts[i+1].y-pts[i].y)*u;
+    ctx.beginPath(); ctx.arc(x,y,6,0,TWO_PI); ctx.fillStyle='#67e8f9'; ctx.fill();
+    ctx.strokeStyle='#67e8f9'; ctx.lineWidth=2; ctx.beginPath();
+    for(let j=0;j<=i;j++){ if(j===0)ctx.moveTo(pts[0].x,pts[0].y); else ctx.lineTo(pts[j].x,pts[j].y); }
+    ctx.lineTo(x,y); ctx.stroke();
+    t+=0.008; anim=requestAnimationFrame(step); if(t>1) t=0;
+  }; step();
+}
+document.getElementById('btn-reason').onclick=()=>{
+  out.textContent=''; const {engine,cand}=boot();
+  const r=engine.analogize('france','paris','japan',cand);
+  log('france:paris :: japan:?');
+  log('method: '+r.method);
+  log('detect: '+r.detected.role+' ('+r.detected.score.toFixed(4)+')');
+  for(const s of r.steps) log('  '+s.rule+' → '+s.to+' ('+(s.score||0).toFixed(3)+')');
+  log((r.answer?.label==='tokyo'?'PASS':'FAIL')+' → '+r.answer?.label+' conf '+r.answer?.score.toFixed(4));
+  const traj=engine.buildTrajectory('france', r.answer.label||'tokyo', {candidates:cand, hops:4});
+  animatePath(engine.layoutNodes(traj.nodes.map(n=>({...n})), cv.width, cv.height), traj.pathLabels);
 };
-document.getElementById('btn-math').onclick = () => {
-  out.textContent = '';
-  const space = new HyperSpace(2048, 42);
-  const a = space.random(), b = space.random();
-  const id = space.cosine(a, space.unbind(space.bind(a,b), b));
-  const perm = space.cosine(a, space.invPermute(space.permute(a,7),7));
-  log('sim(random)≈0  ' + space.cosine(a,b).toFixed(4));
-  log('unbind∘bind≈id ' + id.toFixed(4) + (id>0.99?' OK':' FAIL'));
-  log('permute inv    ' + perm.toFixed(4) + (perm>0.99?' OK':' FAIL'));
-  log('wrapPhase(3π)  ' + wrapPhase(3*Math.PI).toFixed(4));
+document.getElementById('btn-traj').onclick=()=>{
+  out.textContent=''; const {engine,cand}=boot();
+  const traj=engine.buildTrajectory('rome','tokyo',{candidates:cand, hops:6});
+  log('Path: '+traj.pathLabels.join(' → '));
+  animatePath(engine.layoutNodes(traj.nodes.map(n=>({...n})), cv.width, cv.height), traj.pathLabels);
+};
+document.getElementById('btn-math').onclick=()=>{
+  out.textContent=''; const s=new HyperSpace(2048,42); const a=s.random(),b=s.random();
+  log('sim random '+s.cosine(a,b).toFixed(4));
+  log('unbind∘bind '+s.cosine(a,s.unbind(s.bind(a,b),b)).toFixed(4));
 };
 </script>
 </body>
