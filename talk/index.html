@@ -3,83 +3,140 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Talk — свободный LLM в браузере</title>
-<meta name="description" content="Свободный разговорный LLM в браузере через WebLLM (WebGPU). Не Phase-HRR."/>
+<title>АКСИ — разговорный ИИ</title>
+<meta name="description" content="Свободный разговорный ИИ АКСИ в браузере: WebLLM + offline knowledge."/>
 <link rel="canonical" href="https://milana808.github.io/talk/"/>
 <meta name="theme-color" content="#0c0c0e"/>
 <style>
-:root{--bg:#0c0c0e;--card:#141416;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#34d399;--acc:#818cf8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;min-height:100vh}
-.wrap{max-width:720px;margin:0 auto;padding:14px 12px 32px;display:flex;flex-direction:column;min-height:100vh}
-h1{margin:0;font-size:1.2rem}p.sub{color:var(--m);font-size:13px;margin:6px 0 12px}
-.badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin-right:4px}
+:root{--bg:#0b0b0d;--card:#141416;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#34d399;--acc:#818cf8}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--t);font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+.top{padding:12px 14px 0;max-width:800px;width:100%;margin:0 auto}
+h1{margin:0;font-size:1.15rem;font-weight:700}
+.sub{color:var(--m);font-size:12px;margin:4px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
 .badge.on{border-color:var(--a);color:var(--a)}
-.bar{height:6px;background:#1c1c1f;border-radius:4px;overflow:hidden;margin:8px 0}
+.bar{height:4px;background:#1c1c1f;border-radius:4px;overflow:hidden;margin:6px 0}
 .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--a));transition:width .2s}
-#status{font-size:12px;color:var(--m);min-height:1.2em}
-#chat{flex:1;overflow:auto;padding:8px 0;max-height:calc(100vh - 220px);min-height:280px}
-.msg{margin:8px 0;padding:10px 12px;border-radius:12px;max-width:92%;line-height:1.45;font-size:14px;white-space:pre-wrap;word-break:break-word}
-.msg.user{background:#1e1b2e;margin-left:auto;border:1px solid rgba(129,140,248,.3)}
-.msg.bot{background:#12181a;border:1px solid rgba(52,211,153,.25)}
-.msg.sys{background:transparent;color:var(--m);font-size:12px;border:0;padding:4px 0}
-.composer{display:flex;gap:8px;margin-top:8px;position:sticky;bottom:0;background:var(--bg);padding-top:8px}
-.composer textarea{flex:1;resize:none;min-height:48px;max-height:120px;border-radius:12px;border:1px solid var(--line);background:#111;color:var(--t);padding:10px 12px;font:inherit}
-button{border:0;border-radius:12px;padding:12px 16px;font-weight:650;cursor:pointer;font:inherit;font-size:13px}
-button.go{background:linear-gradient(135deg,#818cf8,#34d399);color:#0a0a0b}
+#status{font-size:12px;color:var(--m);min-height:1.1em;margin-bottom:4px}
+#chat{flex:1;overflow-y:auto;padding:8px 14px;max-width:800px;width:100%;margin:0 auto}
+.msg{margin:8px 0;padding:10px 12px;border-radius:14px;max-width:90%;line-height:1.5;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.msg.user{background:#1e1b2e;margin-left:auto;border:1px solid rgba(129,140,248,.35)}
+.msg.bot{background:#121a16;border:1px solid rgba(52,211,153,.28)}
+.msg.sys{background:transparent;color:var(--m);font-size:12px;border:0;padding:2px 0;max-width:100%}
+.composer{max-width:800px;width:100%;margin:0 auto;padding:8px 14px 14px;display:flex;gap:8px;background:var(--bg);border-top:1px solid var(--line)}
+.composer textarea{flex:1;resize:none;min-height:44px;max-height:120px;border-radius:12px;border:1px solid var(--line);background:#111;color:var(--t);padding:10px 12px;font:inherit}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:650;cursor:pointer;font:inherit;font-size:13px}
+button.go{background:linear-gradient(135deg,#818cf8,#34d399);color:#0a0a0b;min-width:48px}
 button:disabled{opacity:.4;cursor:not-allowed}
-button.ghost{background:#1c1c1f;color:var(--t)}
-.row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-footer{margin-top:12px;font-size:12px;color:var(--m)}footer a{color:var(--acc)}
-select{background:#111;color:var(--t);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:12px}
+button.ghost{background:#1c1c1f;color:var(--t);font-size:12px;padding:6px 10px}
+select{background:#111;color:var(--t);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chips button{background:#1c1c1f;color:var(--m);font-size:12px;padding:6px 10px}
+footer{max-width:800px;margin:0 auto;padding:0 14px 12px;font-size:11px;color:var(--m)}footer a{color:var(--acc)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>АКСИ Talk</h1>
-  <p class="sub">Свободный разговорный LLM в браузере (WebLLM + WebGPU). Это настоящая нейросеть, не Phase-HRR.</p>
+<div class="top">
+  <h1>АКСИ · разговорный ИИ</h1>
+  <p class="sub">Свободный диалог. WebLLM в браузере (если есть WebGPU) + offline-мозг АКСИ всегда.</p>
   <div class="row">
-    <span class="badge" id="gpu">WebGPU …</span>
-    <span class="badge" id="ready">модель не загружена</span>
-    <select id="model">
-      <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen2.5 0.5B (быстрая)</option>
-      <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen2.5 1.5B (баланс)</option>
+    <span class="badge" id="gpu">GPU…</span>
+    <span class="badge" id="mode">offline brain</span>
+    <select id="model" title="Модель">
+      <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B — быстро</option>
+      <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B — баланс</option>
       <option value="Phi-3.5-mini-instruct-q4f16_1-MLC">Phi-3.5 mini</option>
       <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
     </select>
-    <button type="button" class="ghost" id="btn-load">Загрузить модель</button>
+    <button type="button" class="ghost" id="btn-load">Загрузить LLM</button>
   </div>
   <div class="bar"><i id="prog"></i></div>
-  <div id="status">Нажми «Загрузить модель» (нужен WebGPU: Chrome/Edge, лучше ПК).</div>
-  <div id="chat"></div>
-  <div class="composer">
-    <textarea id="inp" placeholder="Пиши что угодно — свободный диалог…" rows="2" disabled></textarea>
-    <button type="button" class="go" id="btn-send" disabled>→</button>
+  <div id="status">Можно писать сразу (offline). Для полного LLM — «Загрузить LLM».</div>
+  <div class="chips">
+    <button type="button" data-q="Привет! Кто ты?">Кто ты?</button>
+    <button type="button" data-q="Что такое АКСИ Permit?">Permit</button>
+    <button type="button" data-q="Как устроен offline-режим?">Offline</button>
+    <button type="button" data-q="Объясни простыми словами, что такое искусственный интеллект">Что такое ИИ</button>
   </div>
-  <footer>
-    <a href="/">Home</a> · <a href="/hdc/">Phase-HRR</a> · <a href="/llm/">LLM lab</a> · <a href="/permit/">Permit</a><br/>
-    Модель качается с CDN в браузер, сервер АКСИ не видит твои сообщения. aksilove@internet.ru
-  </footer>
 </div>
+<div id="chat"></div>
+<div class="composer">
+  <textarea id="inp" placeholder="Пиши что угодно…" rows="1"></textarea>
+  <button type="button" class="go" id="btn-send">→</button>
+</div>
+<footer>
+  <a href="/">Home</a> · <a href="/permit/">Permit</a> · <a href="/math/">Math</a> · <a href="/llm/">LLM lab</a>
+  · сообщения LLM не уходят на сервер АКСИ · aksilove@internet.ru
+</footer>
 <script type="module">
-const chat = document.getElementById('chat');
+const chatEl = document.getElementById('chat');
 const status = document.getElementById('status');
 const prog = document.getElementById('prog');
 const inp = document.getElementById('inp');
 const btnSend = document.getElementById('btn-send');
 const btnLoad = document.getElementById('btn-load');
 const gpuBadge = document.getElementById('gpu');
-const readyBadge = document.getElementById('ready');
+const modeBadge = document.getElementById('mode');
 
 let engine = null;
+let busy = false;
 const history = [];
-const SYSTEM = 'Ты АКСИ — полезный ассистент. Отвечай кратко и по делу на языке пользователя. Ты работаешь локально в браузере пользователя.';
+
+const SYSTEM = `Ты — АКСИ (AKSI), разговорный ассистент проекта milana808.github.io.
+Говори на языке пользователя (обычно русский). Будь полезной, живой, без канцелярита.
+
+Факты о проекте:
+- АКСИ — суверенный offline-first слой для агентов: Decision Integrity / Action Permit.
+- Permit: tool-call проходит gate ALLOW|BLOCK + ECDSA receipt (мандат, домены, intent).
+- Math/Phase-HRR — математическая ассоциативная память (не замена LLM).
+- Talk — этот чат: WebLLM локально в браузере или offline-brain.
+- Контакт: aksilove@internet.ru. Публично не раскрывай личные ФИО/дату рождения.
+- Принцип: technology_serves_human — технология служит человеку.
+- Не утверждай, что ты AGI. Честно говори ограничения маленькой локальной модели.
+
+Отвечай по существу, можно с лёгким теплом. Если не знаешь — скажи прямо.`;
+
+/* ── Offline conversational brain (no GPU) ───────────────────── */
+const BRAIN = [
+  {k:/привет|здравств|hello|hi\b/i, a:'Привет! Я АКСИ — разговорный ассистент. Можешь спросить про Permit, offline, ИИ или просто поболтать. Если загрузишь LLM (кнопка сверху) — ответы станут свободнее.'},
+  {k:/кто ты|что ты|who are you/i, a:'Я АКСИ. В режиме offline отвечаю по встроенным знаниям проекта. С загруженным WebLLM — полноценная маленькая языковая модель прямо в твоём браузере, без сервера АКСИ.'},
+  {k:/permit|мандат|замок|gate|allow|block/i, a:'АКСИ Action Permit — слой между «модель решила» и «система сделала». Tool-call проверяется по мандату (tools, домены, spend) и intent цели. Результат: ALLOW или BLOCK + подписанный ECDSA receipt. Демо: /permit/'},
+  {k:/offline|оффлайн|без сервер|локальн/i, a:'Offline-first: ядро и Permit работают в браузере без бэкенда. LLM (WebLLM) тоже может крутиться локально на WebGPU — сообщения не уходят на сервер АКСИ.'},
+  {k:/hdc|phase|матем|геометр|hrr/i, a:'Phase-HRR / Math AI — ассоциативная память на фазовых векторах (bind/unbind). Это не разговорный LLM, а геометрия фактов и аналогий. Разговорный режим — этот чат. Math: /math/'},
+  {k:/webllm|модель|gpu|нейросет/i, a:'Разговорный LLM здесь = WebLLM (MLC): модель скачивается в браузер и считает на WebGPU. Нужен Chrome/Edge на ПК. На многих телефонах GPU недоступен — тогда работает offline-brain.'},
+  {k:/искусственн\w* интеллект|\bии\b|\bai\b|что такое ии/i, a:'Искусственный интеллект — системы, которые по данным и правилам выдают полезные ответы или действия: от поиска до агентов с tool-call. Большие LLM «угадывают» текст по статистике; АКСИ рядом добавляет контроль действий (Permit), чтобы агент не выходил за мандат.'},
+  {k:/агент|agent|langchain|tool/i, a:'Агент = LLM + инструменты (HTTP, файлы, оплата…). Риск — модель может вызвать опасный tool. Permit как раз режет это: default-deny, allowlist, intent, receipt для аудита.'},
+  {k:/купить|цен|продаж|коммерц|license/i, a:'Пилот и SDK Action Permit — через aksilove@internet.ru. Это не «ещё один чат», а замок на действия агента + audit trail.'},
+  {k:/помог|что умеешь|help|команд/i, a:'Могу объяснить АКСИ, Permit, offline, отличия Math vs LLM, и просто отвечать на вопросы. Для свободного стиля загрузи LLM. Быстрые ссылки: /permit/ · /math/ · /llm/'},
+  {k:/спасибо|благодар/i, a:'Пожалуйста. Если нужно — пиши ещё или зайди на /permit/.'},
+  {k:/пока|до свидан|bye/i, a:'До связи. Береги сигнал ✨'},
+];
+
+function offlineReply(q) {
+  for (const row of BRAIN) {
+    if (row.k.test(q)) return row.a;
+  }
+  // light topical fallback
+  if (/\d+[\s]*[\+\-\*\/\^]/.test(q) || /посчитай|вычисли/i.test(q)) {
+    try {
+      const expr = q.replace(/[^0-9\+\-\*\/\(\)\.\^\s]/g, '').replace(/\^/g, '**');
+      // eslint-disable-next-line no-new-func
+      const v = Function('"use strict"; return (' + expr + ')')();
+      if (typeof v === 'number' && isFinite(v)) return 'Получается ' + v + '. (offline-калькулятор; для сложного — загрузи LLM)';
+    } catch (e) {}
+  }
+  return 'Поняла вопрос. В offline-режиме у меня узкая база знаний АКСИ. Нажми «Загрузить LLM» (нужен WebGPU) — смогу отвечать свободнее на любые темы. Или спроси: Permit, offline, кто ты, что такое ИИ.';
+}
 
 function add(role, text) {
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   d.textContent = text;
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
+  chatEl.appendChild(d);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  return d;
 }
 
 async function checkGPU() {
@@ -87,7 +144,8 @@ async function checkGPU() {
     if (!navigator.gpu) { gpuBadge.textContent = 'WebGPU нет'; return false; }
     const a = await navigator.gpu.requestAdapter();
     if (!a) { gpuBadge.textContent = 'WebGPU нет'; return false; }
-    gpuBadge.textContent = 'WebGPU OK'; gpuBadge.classList.add('on');
+    gpuBadge.textContent = 'WebGPU OK';
+    gpuBadge.classList.add('on');
     return true;
   } catch (e) {
     gpuBadge.textContent = 'WebGPU нет';
@@ -98,77 +156,99 @@ async function checkGPU() {
 async function loadModel() {
   const ok = await checkGPU();
   if (!ok) {
-    status.textContent = 'Нужен браузер с WebGPU (Chrome/Edge на ПК). На iPhone WebGPU часто недоступен — тогда свободный LLM в браузере не запустится.';
-    add('sys', 'WebGPU недоступен. Phase-HRR чат: /hdc/ · или серверный backend.');
+    status.textContent = 'WebGPU нет — остаёмся на offline-brain. Попробуй Chrome/Edge на компьютере.';
+    add('sys', 'LLM недоступен без WebGPU. Offline-ответы работают.');
     return;
   }
   btnLoad.disabled = true;
-  status.textContent = 'Загрузка WebLLM…';
+  status.textContent = 'Загрузка модели… первый раз может занять несколько минут.';
   const modelId = document.getElementById('model').value;
   try {
-    const webllm = await import('https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm');
+    let webllm;
+    try {
+      webllm = await import('https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm');
+    } catch (e1) {
+      webllm = await import('https://esm.sh/@mlc-ai/web-llm@0.2.79');
+    }
     engine = await webllm.CreateMLCEngine(modelId, {
       initProgressCallback: (p) => {
         const frac = typeof p.progress === 'number' ? p.progress : 0;
         prog.style.width = Math.round(frac * 100) + '%';
-        status.textContent = (p.text || 'loading') + ' ' + Math.round(frac * 100) + '%';
+        status.textContent = (p.text || 'loading') + ' · ' + Math.round(frac * 100) + '%';
       }
     });
-    readyBadge.textContent = 'модель готова';
-    readyBadge.classList.add('on');
-    status.textContent = 'Готово. Пиши свободно — это LLM, не геометрический retrieval.';
-    inp.disabled = false;
-    btnSend.disabled = false;
-    inp.focus();
+    modeBadge.textContent = 'LLM online';
+    modeBadge.classList.add('on');
+    status.textContent = 'LLM готов — пиши свободно.';
     add('sys', 'Модель: ' + modelId + ' · локально в браузере');
   } catch (e) {
-    status.textContent = 'Ошибка: ' + (e && e.message ? e.message : e);
+    status.textContent = 'Не удалось загрузить LLM: ' + (e.message || e);
     btnLoad.disabled = false;
-    add('sys', String(e));
+    add('sys', String(e.message || e));
   }
 }
 
-async function send() {
-  const text = inp.value.trim();
-  if (!text || !engine) return;
+async function send(prefill) {
+  const text = (prefill != null ? prefill : inp.value).trim();
+  if (!text || busy) return;
   inp.value = '';
   add('user', text);
   history.push({ role: 'user', content: text });
+  busy = true;
   btnSend.disabled = true;
-  const botEl = document.createElement('div');
-  botEl.className = 'msg bot';
-  botEl.textContent = '…';
-  chat.appendChild(botEl);
+  const botEl = add('bot', '…');
+
   try {
-    const messages = [{ role: 'system', content: SYSTEM }, ...history.slice(-12)];
-    const chunks = await engine.chat.completions.create({
-      messages,
-      stream: true,
-      temperature: 0.7,
-      max_tokens: 512
-    });
-    let full = '';
-    for await (const chunk of chunks) {
-      const d = chunk.choices?.[0]?.delta?.content || '';
-      full += d;
-      botEl.textContent = full || '…';
-      chat.scrollTop = chat.scrollHeight;
+    if (engine) {
+      const messages = [{ role: 'system', content: SYSTEM }, ...history.slice(-14)];
+      const stream = await engine.chat.completions.create({
+        messages,
+        stream: true,
+        temperature: 0.75,
+        max_tokens: 512
+      });
+      let full = '';
+      for await (const chunk of stream) {
+        const d = chunk.choices?.[0]?.delta?.content || '';
+        full += d;
+        botEl.textContent = full || '…';
+        chatEl.scrollTop = chatEl.scrollHeight;
+      }
+      if (!full) full = offlineReply(text);
+      botEl.textContent = full;
+      history.push({ role: 'assistant', content: full });
+    } else {
+      // small delay for UX
+      await new Promise((r) => setTimeout(r, 120));
+      const ans = offlineReply(text);
+      botEl.textContent = ans;
+      history.push({ role: 'assistant', content: ans });
     }
-    if (!full) botEl.textContent = '(пустой ответ)';
-    history.push({ role: 'assistant', content: full });
   } catch (e) {
-    botEl.textContent = 'Ошибка генерации: ' + (e.message || e);
+    const fb = offlineReply(text);
+    botEl.textContent = fb + '\n\n(LLM error: ' + (e.message || e) + ')';
+    history.push({ role: 'assistant', content: botEl.textContent });
   }
+  busy = false;
   btnSend.disabled = false;
   inp.focus();
 }
 
-btnLoad.onclick = loadModel;
-btnSend.onclick = send;
+btnLoad.onclick = () => loadModel();
+btnSend.onclick = () => send();
 inp.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
-checkGPU();
+document.querySelectorAll('.chips [data-q]').forEach((b) => {
+  b.onclick = () => send(b.getAttribute('data-q'));
+});
+
+add('sys', 'Можно писать сразу. Для полного разговорного LLM — «Загрузить LLM».');
+checkGPU().then((ok) => {
+  if (ok) status.textContent = 'WebGPU есть — можно загрузить LLM. Offline-brain уже отвечает.';
+  else status.textContent = 'Пиши сейчас (offline-brain). LLM нужен WebGPU.';
+});
+inp.focus();
 </script>
 </body>
 </html>
