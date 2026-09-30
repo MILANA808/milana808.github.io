@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Phase-HRR — голографический HDC</title>
+<meta name="description" content="Complex phase HDC / HRR в браузере: bind=сумма фаз, bundle=интерференция, analogical query без GPU."/>
+<link rel="canonical" href="https://milana808.github.io/hdc/"/>
+<meta name="theme-color" content="#0a0a0b"/>
+<style>
+:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9;--ok:#34d399;--bad:#f87171}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{margin:0;font-size:1.35rem}.sub{color:var(--m);font-size:14px;margin:6px 0 14px}
+.badges span{display:inline-block;font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.pipe{font:12px ui-monospace,monospace;color:var(--a);margin:8px 0}
+button{border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:13px;margin:4px 4px 0 0}
+button.primary{background:linear-gradient(135deg,#67e8f9,#a78bfa);color:#0a0a0b}
+pre{white-space:pre-wrap;word-break:break-word;font:11px/1.4 ui-monospace,monospace;color:var(--m);max-height:320px;overflow:auto;margin:8px 0 0;background:#0e0e10;padding:10px;border-radius:10px}
+footer{margin-top:24px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
+.note{font-size:12px;color:var(--m)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>АКСИ Phase-HRR</h1>
+  <p class="sub">Голографический HDC: фазы (−π…π], bind = сумма, bundle = интерференция cos/sin. Без GPU.</p>
+  <div class="badges">
+    <span>D=4096 browser</span><span>phase-HRR</span><span>CPU only</span><span>not AGI</span>
+  </div>
+  <div class="pipe">atom → bind(entity, ROLE⊙value) → factMemory → unbind → nearest label</div>
+  <div class="card">
+    <button type="button" class="primary" id="btn-run">Run demo (train + analogy)</button>
+    <button type="button" id="btn-math">Math checks</button>
+  </div>
+  <div class="card"><pre id="out">Нажми Run demo…</pre></div>
+  <p class="note">Ассоциативная / аналоговая память на волновой интерференции (Plate HRR / Kanerva HDC). Не foundation model.</p>
+  <footer><a href="/">Home</a> · <a href="/permit/">Permit</a> · aksilove@internet.ru</footer>
+</div>
+<script type="module">
+const PI = Math.PI, TWO_PI = 2 * Math.PI;
+function wrapPhase(x) {
+  let a = x - TWO_PI * Math.floor((x + PI) / TWO_PI);
+  if (a <= -PI) a += TWO_PI;
+  if (a > PI) a -= TWO_PI;
+  return a;
+}
+class HyperSpace {
+  constructor(D = 4096, seed = 0xc0ffee) {
+    this.D = D; this._state = seed >>> 0; this.atoms = new Map();
+  }
+  _rand(){ let x=this._state; x^=x<<13; x^=x>>>17; x^=x<<5; this._state=x>>>0; return this._state; }
+  _randPhase(){ return (this._rand()/0x100000000)*TWO_PI - PI; }
+  random(){ const v=new Float64Array(this.D); for(let i=0;i<this.D;i++) v[i]=this._randPhase(); return v; }
+  atom(name){ const k=String(name); let v=this.atoms.get(k); if(!v){ v=this.random(); this.atoms.set(k,v);} return v; }
+  bind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++) o[i]=wrapPhase(a[i]+b[i]); return o; }
+  unbind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++) o[i]=wrapPhase(a[i]-b[i]); return o; }
+  bundle(...vs){
+    if(!vs.length) return new Float64Array(this.D);
+    if(vs.length===1) return Float64Array.from(vs[0]);
+    const sc=new Float64Array(this.D), ss=new Float64Array(this.D);
+    for(const v of vs) for(let i=0;i<this.D;i++){ sc[i]+=Math.cos(v[i]); ss[i]+=Math.sin(v[i]); }
+    const o=new Float64Array(this.D); for(let i=0;i<this.D;i++) o[i]=Math.atan2(ss[i],sc[i]); return o;
+  }
+  permute(v,k=1){ const D=this.D; let s=((k%D)+D)%D; if(!s) return Float64Array.from(v);
+    const o=new Float64Array(D); for(let i=0;i<D;i++) o[i]=v[(i+s)%D]; return o; }
+  invPermute(v,k=1){ return this.permute(v,-k); }
+  cosine(a,b){ let s=0; for(let i=0;i<this.D;i++) s+=Math.cos(a[i]-b[i]); return s/this.D; }
+  zeros(){ return new Float64Array(this.D); }
+  encodeText(text){
+    const words=String(text).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean);
+    if(!words.length) return this.zeros();
+    const parts=[];
+    for(let i=0;i<words.length;i++){ parts.push(this.permute(this.atom(words[i]),i)); parts.push(this.atom(words[i])); }
+    for(let i=0;i<words.length-1;i++) parts.push(this.bind(this.atom(words[i]), this.permute(this.atom(words[i+1]),1)));
+    return this.bundle(...parts);
+  }
+  encodeNgrams(text,n=3){
+    const s=String(text).toLowerCase().replace(/\s+/g,' ').trim();
+    if(!s.length) return this.zeros();
+    const grams=[]; const N=Math.min(n,s.length);
+    for(let i=0;i<=s.length-N;i++){ const slice=s.slice(i,i+N); let g=this.atom(slice[0]);
+      for(let j=1;j<slice.length;j++) g=this.bind(g,this.permute(this.atom(slice[j]),j)); grams.push(g); }
+    grams.push(this.atom(s)); return this.bundle(...grams);
+  }
+  stats(){ return {D:this.D, atoms:this.atoms.size, model:'phase-HRR'}; }
+}
+class MatrixMind {
+  constructor(space){ this.space=space; this.context=space.zeros(); this.factMemory=space.zeros();
+    this.items=new Map(); this.facts=[]; this._factCount=0; this.trainedDocs=0; }
+  remember(label, vec=null){
+    const key=String(label).toLowerCase().trim();
+    let v = vec instanceof Float64Array ? vec : this.space.atom(key);
+    if(this.items.has(key)) v=this.space.bundle(this.items.get(key), v);
+    this.items.set(key,v); return v;
+  }
+  train(text){
+    const t0=performance.now();
+    const tv=this.space.encodeText(text); const ng=this.space.encodeNgrams(text);
+    this.context=this.space.bundle(this.context,tv,ng);
+    for(const w of text.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean)) this.remember(w);
+    this.trainedDocs++; return performance.now()-t0;
+  }
+  trainEntity(entity, slots){
+    const eName=String(entity).toLowerCase(); const eAtom=this.space.atom(eName); this.remember(eName);
+    const parts=[];
+    for(const {role,value} of slots){
+      const vName=String(value).toLowerCase(); this.remember(vName);
+      const slot=this.space.bind(this.space.atom('ROLE:'+role), this.space.atom(vName));
+      parts.push(this.space.bind(eAtom, slot));
+    }
+    this.factMemory = this._factCount===0 ? this.space.bundle(...parts) : this.space.bundle(this.factMemory, ...parts);
+    this._factCount += parts.length; this.facts.push({entity:eName,slots});
+  }
+  probeSlot(entity, role){
+    return this.space.unbind(this.space.unbind(this.factMemory, this.space.atom(String(entity).toLowerCase())), this.space.atom('ROLE:'+role));
+  }
+}
+class SemanticSampler {
+  constructor(mind){ this.mind=mind; this.space=mind.space; }
+  answerRole(role, entity, candidates){
+    const probe=this.mind.probeSlot(entity, role);
+    const ranked=candidates.map(label=>({label, score:this.space.cosine(probe, this.space.atom(label))})).sort((a,b)=>b.score-a.score);
+    return {best:ranked[0], ranked};
+  }
+}
+const out = document.getElementById('out');
+function log(s){ out.textContent += s + '\n'; }
+document.getElementById('btn-run').onclick = () => {
+  out.textContent = '';
+  const space = new HyperSpace(4096, 0xc0ffee);
+  const mind = new MatrixMind(space);
+  const sampler = new SemanticSampler(mind);
+  log('Phase-HRR D=4096 · ' + space.stats().model);
+  const t0 = performance.now();
+  for (const d of ['Paris is the capital of France','Berlin is the capital of Germany','Tokyo is the capital of Japan','Rome is the capital of Italy'])
+    log('train ' + d + ' · ' + mind.train(d).toFixed(1) + ' ms');
+  mind.trainEntity('france', [{role:'capital', value:'paris'}]);
+  mind.trainEntity('germany', [{role:'capital', value:'berlin'}]);
+  mind.trainEntity('japan', [{role:'capital', value:'tokyo'}]);
+  mind.trainEntity('italy', [{role:'capital', value:'rome'}]);
+  log('total ' + (performance.now()-t0).toFixed(1) + ' ms');
+  const cities = ['paris','berlin','tokyo','rome','moscow','aksi'];
+  let pass = 0;
+  for (const [c, expect] of [['france','paris'],['japan','tokyo'],['italy','rome'],['germany','berlin']]) {
+    const r = sampler.answerRole('capital', c, cities);
+    const ok = r.best?.label === expect; if (ok) pass++;
+    log((ok?'PASS':'FAIL') + '  ' + c + ' → ' + r.best?.label + ' (' + r.best?.score.toFixed(3) + ')');
+  }
+  log(pass === 4 ? 'ALL ANALOGIES PASS' : ('FAILED ' + (4-pass)));
+};
+document.getElementById('btn-math').onclick = () => {
+  out.textContent = '';
+  const space = new HyperSpace(2048, 42);
+  const a = space.random(), b = space.random();
+  const id = space.cosine(a, space.unbind(space.bind(a,b), b));
+  const perm = space.cosine(a, space.invPermute(space.permute(a,7),7));
+  log('sim(random)≈0  ' + space.cosine(a,b).toFixed(4));
+  log('unbind∘bind≈id ' + id.toFixed(4) + (id>0.99?' OK':' FAIL'));
+  log('permute inv    ' + perm.toFixed(4) + (perm>0.99?' OK':' FAIL'));
+  log('wrapPhase(3π)  ' + wrapPhase(3*Math.PI).toFixed(4));
+};
+</script>
+</body>
+</html>
