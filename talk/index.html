@@ -3,252 +3,197 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ — разговорный ИИ</title>
-<meta name="description" content="Свободный разговорный ИИ АКСИ в браузере: WebLLM + offline knowledge."/>
+<title>АКСИ — генеративный диалог</title>
+<meta name="description" content="Офлайн генерация ответов: слова собираются в диалог. Без сервера и без WebGPU."/>
 <link rel="canonical" href="https://milana808.github.io/talk/"/>
-<meta name="theme-color" content="#0c0c0e"/>
+<meta name="theme-color" content="#0b0b0d"/>
 <style>
-:root{--bg:#0b0b0d;--card:#141416;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#34d399;--acc:#818cf8}
+:root{--bg:#0b0b0d;--t:#f4f4f5;--m:#a1a1aa;--a:#34d399;--acc:#a78bfa;--line:rgba(255,255,255,.1)}
 *{box-sizing:border-box}html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--t);font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
-.top{padding:12px 14px 0;max-width:800px;width:100%;margin:0 auto}
-h1{margin:0;font-size:1.15rem;font-weight:700}
-.sub{color:var(--m);font-size:12px;margin:4px 0 8px}
-.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
-.badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
+.top{padding:12px 14px 0;max-width:720px;width:100%;margin:0 auto}
+h1{margin:0;font-size:1.15rem}.sub{color:var(--m);font-size:12px;margin:4px 0 8px}
+.badge{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px}
 .badge.on{border-color:var(--a);color:var(--a)}
-.bar{height:4px;background:#1c1c1f;border-radius:4px;overflow:hidden;margin:6px 0}
-.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--a));transition:width .2s}
-#status{font-size:12px;color:var(--m);min-height:1.1em;margin-bottom:4px}
-#chat{flex:1;overflow-y:auto;padding:8px 14px;max-width:800px;width:100%;margin:0 auto}
-.msg{margin:8px 0;padding:10px 12px;border-radius:14px;max-width:90%;line-height:1.5;font-size:14px;white-space:pre-wrap;word-break:break-word}
-.msg.user{background:#1e1b2e;margin-left:auto;border:1px solid rgba(129,140,248,.35)}
-.msg.bot{background:#121a16;border:1px solid rgba(52,211,153,.28)}
-.msg.sys{background:transparent;color:var(--m);font-size:12px;border:0;padding:2px 0;max-width:100%}
-.composer{max-width:800px;width:100%;margin:0 auto;padding:8px 14px 14px;display:flex;gap:8px;background:var(--bg);border-top:1px solid var(--line)}
-.composer textarea{flex:1;resize:none;min-height:44px;max-height:120px;border-radius:12px;border:1px solid var(--line);background:#111;color:var(--t);padding:10px 12px;font:inherit}
-button{border:0;border-radius:12px;padding:11px 14px;font-weight:650;cursor:pointer;font:inherit;font-size:13px}
-button.go{background:linear-gradient(135deg,#818cf8,#34d399);color:#0a0a0b;min-width:48px}
-button:disabled{opacity:.4;cursor:not-allowed}
-button.ghost{background:#1c1c1f;color:var(--t);font-size:12px;padding:6px 10px}
-select{background:#111;color:var(--t);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:12px}
+#chat{flex:1;overflow-y:auto;padding:8px 14px;max-width:720px;width:100%;margin:0 auto}
+.msg{margin:8px 0;padding:10px 12px;border-radius:14px;max-width:92%;line-height:1.5;font-size:14px;white-space:pre-wrap;word-break:break-word}
+.msg.user{background:#1e1b2e;margin-left:auto;border:1px solid rgba(167,139,250,.35)}
+.msg.bot{background:#121a16;border:1px solid rgba(52,211,153,.3)}
+.msg.sys{color:var(--m);font-size:12px;background:transparent;border:0;padding:4px 0}
+.composer{max-width:720px;width:100%;margin:0 auto;padding:8px 14px 16px;display:flex;gap:8px;border-top:1px solid var(--line)}
+.composer textarea{flex:1;min-height:44px;max-height:120px;resize:none;border-radius:12px;border:1px solid var(--line);background:#111;color:var(--t);padding:10px 12px;font:inherit}
+button.go{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#34d399);color:#0a0a0b;cursor:pointer}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-.chips button{background:#1c1c1f;color:var(--m);font-size:12px;padding:6px 10px}
-footer{max-width:800px;margin:0 auto;padding:0 14px 12px;font-size:11px;color:var(--m)}footer a{color:var(--acc)}
+.chips button{border:0;background:#1c1c1f;color:var(--m);border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
+footer{max-width:720px;margin:0 auto;padding:0 14px 12px;font-size:11px;color:var(--m)}footer a{color:var(--acc)}
+.meta{font-size:10px;color:var(--m);margin-top:4px}
 </style>
 </head>
 <body>
 <div class="top">
-  <h1>АКСИ · разговорный ИИ</h1>
-  <p class="sub">Свободный диалог. WebLLM в браузере (если есть WebGPU) + offline-мозг АКСИ всегда.</p>
-  <div class="row">
-    <span class="badge" id="gpu">GPU…</span>
-    <span class="badge" id="mode">offline brain</span>
-    <select id="model" title="Модель">
-      <option value="Qwen2.5-0.5B-Instruct-q4f16_1-MLC">Qwen 0.5B — быстро</option>
-      <option value="Qwen2.5-1.5B-Instruct-q4f16_1-MLC" selected>Qwen 1.5B — баланс</option>
-      <option value="Phi-3.5-mini-instruct-q4f16_1-MLC">Phi-3.5 mini</option>
-      <option value="Llama-3.2-1B-Instruct-q4f16_1-MLC">Llama 3.2 1B</option>
-    </select>
-    <button type="button" class="ghost" id="btn-load">Загрузить LLM</button>
-  </div>
-  <div class="bar"><i id="prog"></i></div>
-  <div id="status">Можно писать сразу (offline). Для полного LLM — «Загрузить LLM».</div>
+  <h1>АКСИ · генеративный диалог</h1>
+  <p class="sub">Ответ собирается из слов по цепям (Марков) + теме запроса. Работает сразу — без WebGPU и без сервера.</p>
+  <span class="badge on">generator ON</span>
+  <span class="badge">offline</span>
   <div class="chips">
-    <button type="button" data-q="Привет! Кто ты?">Кто ты?</button>
-    <button type="button" data-q="Что такое АКСИ Permit?">Permit</button>
-    <button type="button" data-q="Как устроен offline-режим?">Offline</button>
-    <button type="button" data-q="Объясни простыми словами, что такое искусственный интеллект">Что такое ИИ</button>
+    <button type="button" data-q="Привет, расскажи о себе">О себе</button>
+    <button type="button" data-q="Что такое искусственный интеллект?">Что такое ИИ</button>
+    <button type="button" data-q="Как устроен АКСИ Permit?">Permit</button>
+    <button type="button" data-q="Напиши короткий стих про волны">Стих</button>
+    <button type="button" data-q="Объясни зачем нужен offline ИИ">Offline</button>
   </div>
 </div>
 <div id="chat"></div>
 <div class="composer">
-  <textarea id="inp" placeholder="Пиши что угодно…" rows="1"></textarea>
-  <button type="button" class="go" id="btn-send">→</button>
+  <textarea id="inp" placeholder="Напиши что угодно — отвечу словами…" rows="1"></textarea>
+  <button type="button" class="go" id="go">→</button>
 </div>
 <footer>
-  <a href="/">Home</a> · <a href="/permit/">Permit</a> · <a href="/math/">Math</a> · <a href="/llm/">LLM lab</a>
-  · сообщения LLM не уходят на сервер АКСИ · aksilove@internet.ru
+  <a href="/">Home</a> · <a href="/permit/">Permit</a> · <a href="/llm/">WebLLM</a>
+  · локальная генерация фраз, не облачный GPT · aksilove@internet.ru
 </footer>
-<script type="module">
-const chatEl = document.getElementById('chat');
-const status = document.getElementById('status');
-const prog = document.getElementById('prog');
-const inp = document.getElementById('inp');
-const btnSend = document.getElementById('btn-send');
-const btnLoad = document.getElementById('btn-load');
-const gpuBadge = document.getElementById('gpu');
-const modeBadge = document.getElementById('mode');
-
-let engine = null;
-let busy = false;
-const history = [];
-
-const SYSTEM = `Ты — АКСИ (AKSI), разговорный ассистент проекта milana808.github.io.
-Говори на языке пользователя (обычно русский). Будь полезной, живой, без канцелярита.
-
-Факты о проекте:
-- АКСИ — суверенный offline-first слой для агентов: Decision Integrity / Action Permit.
-- Permit: tool-call проходит gate ALLOW|BLOCK + ECDSA receipt (мандат, домены, intent).
-- Math/Phase-HRR — математическая ассоциативная память (не замена LLM).
-- Talk — этот чат: WebLLM локально в браузере или offline-brain.
-- Контакт: aksilove@internet.ru. Публично не раскрывай личные ФИО/дату рождения.
-- Принцип: technology_serves_human — технология служит человеку.
-- Не утверждай, что ты AGI. Честно говори ограничения маленькой локальной модели.
-
-Отвечай по существу, можно с лёгким теплом. Если не знаешь — скажи прямо.`;
-
-/* ── Offline conversational brain (no GPU) ───────────────────── */
-const BRAIN = [
-  {k:/привет|здравств|hello|hi\b/i, a:'Привет! Я АКСИ — разговорный ассистент. Можешь спросить про Permit, offline, ИИ или просто поболтать. Если загрузишь LLM (кнопка сверху) — ответы станут свободнее.'},
-  {k:/кто ты|что ты|who are you/i, a:'Я АКСИ. В режиме offline отвечаю по встроенным знаниям проекта. С загруженным WebLLM — полноценная маленькая языковая модель прямо в твоём браузере, без сервера АКСИ.'},
-  {k:/permit|мандат|замок|gate|allow|block/i, a:'АКСИ Action Permit — слой между «модель решила» и «система сделала». Tool-call проверяется по мандату (tools, домены, spend) и intent цели. Результат: ALLOW или BLOCK + подписанный ECDSA receipt. Демо: /permit/'},
-  {k:/offline|оффлайн|без сервер|локальн/i, a:'Offline-first: ядро и Permit работают в браузере без бэкенда. LLM (WebLLM) тоже может крутиться локально на WebGPU — сообщения не уходят на сервер АКСИ.'},
-  {k:/hdc|phase|матем|геометр|hrr/i, a:'Phase-HRR / Math AI — ассоциативная память на фазовых векторах (bind/unbind). Это не разговорный LLM, а геометрия фактов и аналогий. Разговорный режим — этот чат. Math: /math/'},
-  {k:/webllm|модель|gpu|нейросет/i, a:'Разговорный LLM здесь = WebLLM (MLC): модель скачивается в браузер и считает на WebGPU. Нужен Chrome/Edge на ПК. На многих телефонах GPU недоступен — тогда работает offline-brain.'},
-  {k:/искусственн\w* интеллект|\bии\b|\bai\b|что такое ии/i, a:'Искусственный интеллект — системы, которые по данным и правилам выдают полезные ответы или действия: от поиска до агентов с tool-call. Большие LLM «угадывают» текст по статистике; АКСИ рядом добавляет контроль действий (Permit), чтобы агент не выходил за мандат.'},
-  {k:/агент|agent|langchain|tool/i, a:'Агент = LLM + инструменты (HTTP, файлы, оплата…). Риск — модель может вызвать опасный tool. Permit как раз режет это: default-deny, allowlist, intent, receipt для аудита.'},
-  {k:/купить|цен|продаж|коммерц|license/i, a:'Пилот и SDK Action Permit — через aksilove@internet.ru. Это не «ещё один чат», а замок на действия агента + audit trail.'},
-  {k:/помог|что умеешь|help|команд/i, a:'Могу объяснить АКСИ, Permit, offline, отличия Math vs LLM, и просто отвечать на вопросы. Для свободного стиля загрузи LLM. Быстрые ссылки: /permit/ · /math/ · /llm/'},
-  {k:/спасибо|благодар/i, a:'Пожалуйста. Если нужно — пиши ещё или зайди на /permit/.'},
-  {k:/пока|до свидан|bye/i, a:'До связи. Береги сигнал ✨'},
-];
-
-function offlineReply(q) {
-  for (const row of BRAIN) {
-    if (row.k.test(q)) return row.a;
+<script>
+(function () {
+  var CORPUS = [
+    "привет я акси разговорный контур проекта я собираю ответы из слов и смысла запроса",
+    "здравствуй рада тебя слышать я работаю прямо в браузере без сервера и без видеокарты",
+    "я акси не претендую на магию просто генерирую фразы по обученным цепям и знаниям проекта",
+    "обо мне можно сказать так я локальный генератор диалога с памятью о permit и offline",
+    "искусственный интеллект это программы которые по данным правилам и статистике выдают полезный текст решение или действие",
+    "большие языковые модели предсказывают следующее слово а агенты ещё и вызывают инструменты",
+    "важно не путать красивый текст с пониманием мира модель может ошибаться поэтому нужен контроль действий",
+    "акси рядом с моделями ставит замок permit чтобы агент не выходил за мандат человека",
+    "акси action permit это слой между решением модели и действием системы",
+    "tool call проходит проверку мандата доменов и цели пользователя затем allow или block",
+    "даже при block создаётся подписанный receipt чтобы остался audit trail",
+    "демо permit открыто на сайте в разделе permit там три сценария погоды атаки и чужого домена",
+    "offline режим значит ядро отвечает в браузере даже когда сервер недоступен",
+    "это полезно для приватности устойчивости и сценариев где нельзя слать данные в облако",
+    "технология должна служить человеку а не заставлять человека служить инфраструктуре",
+    "волны смысла катятся по фазам памяти тихий берег ответа собирает слова в речь",
+    "в тишине браузера рождается короткая строка как след от мысли на песке",
+    "спасибо за вопрос давай продолжим я рядом в этом окне",
+    "если сигнал слабый переформулируй запрос я всё равно попробую собрать связный ответ",
+    "я могу объяснить идеи проекта поддержать короткий диалог или набросать текст по теме",
+    "для сложных фактов из внешнего мира лучше сверяться с первоисточниками я локальная система",
+    "принцип простой technology serves human технология служит человеку",
+    "пока и до связи пусть у тебя будет ясный следующий шаг",
+    "диалог это обмен репликами где каждая фраза опирается на предыдущую и на общий контекст",
+    "слова выстраиваются друг за другом как шаги по тропинке смысла",
+    "когда ты спрашиваешь я выбираю тему оцениваю намерение и генерирую цепочку токенов",
+    "генерация не равна всезнанию зато она работает здесь и сейчас без облака",
+    "permit мандат домен intent receipt вот каркас безопасного агента",
+    "человек задаёт цель агент предлагает шаг замок решает можно ли выполнить",
+    "если цель пицца а инструмент удаление файлов это block и подробная причина",
+    "если цель погода и инструмент weather на разрешённом домене это allow"
+  ];
+  var START = "<s>", END = "</s>";
+  function tokenize(s) {
+    return String(s).toLowerCase().replace(/[«»\"\"]/g, "").replace(/([.,!?;:()])/g, " $1 ").split(/\s+/).filter(Boolean);
   }
-  // light topical fallback
-  if (/\d+[\s]*[\+\-\*\/\^]/.test(q) || /посчитай|вычисли/i.test(q)) {
-    try {
-      const expr = q.replace(/[^0-9\+\-\*\/\(\)\.\^\s]/g, '').replace(/\^/g, '**');
-      // eslint-disable-next-line no-new-func
-      const v = Function('"use strict"; return (' + expr + ')')();
-      if (typeof v === 'number' && isFinite(v)) return 'Получается ' + v + '. (offline-калькулятор; для сложного — загрузи LLM)';
-    } catch (e) {}
-  }
-  return 'Поняла вопрос. В offline-режиме у меня узкая база знаний АКСИ. Нажми «Загрузить LLM» (нужен WebGPU) — смогу отвечать свободнее на любые темы. Или спроси: Permit, offline, кто ты, что такое ИИ.';
-}
-
-function add(role, text) {
-  const d = document.createElement('div');
-  d.className = 'msg ' + role;
-  d.textContent = text;
-  chatEl.appendChild(d);
-  chatEl.scrollTop = chatEl.scrollHeight;
-  return d;
-}
-
-async function checkGPU() {
-  try {
-    if (!navigator.gpu) { gpuBadge.textContent = 'WebGPU нет'; return false; }
-    const a = await navigator.gpu.requestAdapter();
-    if (!a) { gpuBadge.textContent = 'WebGPU нет'; return false; }
-    gpuBadge.textContent = 'WebGPU OK';
-    gpuBadge.classList.add('on');
-    return true;
-  } catch (e) {
-    gpuBadge.textContent = 'WebGPU нет';
-    return false;
-  }
-}
-
-async function loadModel() {
-  const ok = await checkGPU();
-  if (!ok) {
-    status.textContent = 'WebGPU нет — остаёмся на offline-brain. Попробуй Chrome/Edge на компьютере.';
-    add('sys', 'LLM недоступен без WebGPU. Offline-ответы работают.');
-    return;
-  }
-  btnLoad.disabled = true;
-  status.textContent = 'Загрузка модели… первый раз может занять несколько минут.';
-  const modelId = document.getElementById('model').value;
-  try {
-    let webllm;
-    try {
-      webllm = await import('https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@0.2.79/+esm');
-    } catch (e1) {
-      webllm = await import('https://esm.sh/@mlc-ai/web-llm@0.2.79');
+  function trainMarkov(lines) {
+    var model = new Map();
+    function add(key, next) {
+      var m = model.get(key);
+      if (!m) { m = new Map(); model.set(key, m); }
+      m.set(next, (m.get(next) || 0) + 1);
     }
-    engine = await webllm.CreateMLCEngine(modelId, {
-      initProgressCallback: (p) => {
-        const frac = typeof p.progress === 'number' ? p.progress : 0;
-        prog.style.width = Math.round(frac * 100) + '%';
-        status.textContent = (p.text || 'loading') + ' · ' + Math.round(frac * 100) + '%';
+    for (var li = 0; li < lines.length; li++) {
+      var toks = [START].concat(tokenize(lines[li]), [END]);
+      for (var i = 0; i < toks.length - 1; i++) {
+        add(toks[i], toks[i + 1]);
+        if (i + 2 < toks.length) add(toks[i] + "\t" + toks[i + 1], toks[i + 2]);
       }
-    });
-    modeBadge.textContent = 'LLM online';
-    modeBadge.classList.add('on');
-    status.textContent = 'LLM готов — пиши свободно.';
-    add('sys', 'Модель: ' + modelId + ' · локально в браузере');
-  } catch (e) {
-    status.textContent = 'Не удалось загрузить LLM: ' + (e.message || e);
-    btnLoad.disabled = false;
-    add('sys', String(e.message || e));
-  }
-}
-
-async function send(prefill) {
-  const text = (prefill != null ? prefill : inp.value).trim();
-  if (!text || busy) return;
-  inp.value = '';
-  add('user', text);
-  history.push({ role: 'user', content: text });
-  busy = true;
-  btnSend.disabled = true;
-  const botEl = add('bot', '…');
-
-  try {
-    if (engine) {
-      const messages = [{ role: 'system', content: SYSTEM }, ...history.slice(-14)];
-      const stream = await engine.chat.completions.create({
-        messages,
-        stream: true,
-        temperature: 0.75,
-        max_tokens: 512
-      });
-      let full = '';
-      for await (const chunk of stream) {
-        const d = chunk.choices?.[0]?.delta?.content || '';
-        full += d;
-        botEl.textContent = full || '…';
-        chatEl.scrollTop = chatEl.scrollHeight;
-      }
-      if (!full) full = offlineReply(text);
-      botEl.textContent = full;
-      history.push({ role: 'assistant', content: full });
-    } else {
-      // small delay for UX
-      await new Promise((r) => setTimeout(r, 120));
-      const ans = offlineReply(text);
-      botEl.textContent = ans;
-      history.push({ role: 'assistant', content: ans });
     }
-  } catch (e) {
-    const fb = offlineReply(text);
-    botEl.textContent = fb + '\n\n(LLM error: ' + (e.message || e) + ')';
-    history.push({ role: 'assistant', content: botEl.textContent });
+    return model;
   }
-  busy = false;
-  btnSend.disabled = false;
+  function pick(map) {
+    var total = 0;
+    map.forEach(function (c) { total += c; });
+    var r = Math.random() * total;
+    var keys = Array.from(map.keys());
+    for (var i = 0; i < keys.length; i++) {
+      r -= map.get(keys[i]);
+      if (r <= 0) return keys[i];
+    }
+    return keys[0];
+  }
+  function generate(model, maxLen) {
+    maxLen = maxLen || 28;
+    var w1 = START, w2 = null, out = [];
+    for (var i = 0; i < maxLen; i++) {
+      var next = null;
+      if (w2 && model.has(w1 + "\t" + w2)) next = pick(model.get(w1 + "\t" + w2));
+      else if (model.has(w1)) next = pick(model.get(w1));
+      else break;
+      if (next === END) break;
+      out.push(next);
+      if (out.length >= 2) { w1 = out[out.length - 2]; w2 = out[out.length - 1]; }
+      else { w1 = out[0]; w2 = null; }
+    }
+    var text = out.join(" ").replace(/\s+([.,!?;:])/g, "$1");
+    if (!text) text = "я собираю ответ ещё раз попробуй иначе сформулировать";
+    text = text.charAt(0).toUpperCase() + text.slice(1);
+    if (!/[.!?]$/.test(text)) text += ".";
+    return text;
+  }
+  var TOPICS = [
+    { re: /привет|здравств|hello|hi\b/i, seeds: [CORPUS[0], CORPUS[1]], open: ["Привет!", "Здравствуй!", "Рада тебя видеть."] },
+    { re: /кто ты|что ты|о себе|представ/i, seeds: [CORPUS[2], CORPUS[3]], open: ["Коротко обо мне.", "Давай представлюсь."] },
+    { re: /permit|мандат|замок|gate|allow|block|агент/i, seeds: [CORPUS[8], CORPUS[9], CORPUS[28], CORPUS[29]], open: ["Про Permit по делу.", "Это про безопасность агента."] },
+    { re: /offline|оффлайн|без сервер|приват/i, seeds: [CORPUS[12], CORPUS[13]], open: ["Про offline.", "Локальность — часть дизайна."] },
+    { re: /ии|интеллект|нейро|llm|gpt|модель/i, seeds: [CORPUS[4], CORPUS[5], CORPUS[6]], open: ["Хороший вопрос.", "Объясню просто."] },
+    { re: /стих|поэм|волн|креатив|напиши/i, seeds: [CORPUS[15], CORPUS[16]], open: ["Вот набросок.", "Слушай ритм."] },
+    { re: /спасибо|благодар/i, seeds: [CORPUS[17]], open: ["Пожалуйста."] },
+    { re: /пока|до свид|bye/i, seeds: [CORPUS[22]], open: ["До связи!"] }
+  ];
+  function detect(q) {
+    for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].re.test(q)) return TOPICS[i];
+    return null;
+  }
+  function reply(userText) {
+    var topic = detect(userText);
+    var localLines = topic ? topic.seeds.concat(CORPUS) : CORPUS;
+    var localModel = trainMarkov(localLines);
+    var n = 1 + (Math.random() < 0.55 ? 1 : 0);
+    var parts = [];
+    if (topic && topic.open) parts.push(topic.open[(Math.random() * topic.open.length) | 0]);
+    for (var i = 0; i < n; i++) parts.push(generate(localModel, 18 + ((Math.random() * 14) | 0)));
+    var stop = { что:1, как:1, это:1, для:1, или:1, the:1, and:1, и:1, в:1, на:1, с:1, по:1, не:1, да:1, ну:1, мне:1, ты:1, вы:1 };
+    var seeds = tokenize(userText).filter(function (w) { return w.length > 2 && !stop[w]; }).slice(0, 4);
+    if (seeds.length && Math.random() < 0.35) parts.push("Ты затронул(а) «" + seeds[0] + "» — держу это в фокусе.");
+    if (Math.random() < 0.18) parts.push("Это локальная генерация, не облачный GPT.");
+    return parts.join(" ");
+  }
+  var chat = document.getElementById("chat");
+  var inp = document.getElementById("inp");
+  function add(role, text, meta) {
+    var d = document.createElement("div");
+    d.className = "msg " + role;
+    d.textContent = text;
+    if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
+    chat.appendChild(d);
+    chat.scrollTop = chat.scrollHeight;
+  }
+  function send(pre) {
+    var q = (pre != null ? pre : inp.value).trim();
+    if (!q) return;
+    inp.value = "";
+    add("user", q);
+    var t0 = performance.now();
+    var a = reply(q);
+    add("bot", a, "gen · " + (performance.now() - t0).toFixed(1) + " ms · offline");
+  }
+  document.getElementById("go").onclick = function () { send(); };
+  inp.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  document.querySelectorAll(".chips [data-q]").forEach(function (b) {
+    b.onclick = function () { send(b.getAttribute("data-q")); };
+  });
+  add("sys", "Генератор включён. Пиши — отвечу связными фразами сразу.");
   inp.focus();
-}
-
-btnLoad.onclick = () => loadModel();
-btnSend.onclick = () => send();
-inp.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-});
-document.querySelectorAll('.chips [data-q]').forEach((b) => {
-  b.onclick = () => send(b.getAttribute('data-q'));
-});
-
-add('sys', 'Можно писать сразу. Для полного разговорного LLM — «Загрузить LLM».');
-checkGPU().then((ok) => {
-  if (ok) status.textContent = 'WebGPU есть — можно загрузить LLM. Offline-brain уже отвечает.';
-  else status.textContent = 'Пиши сейчас (offline-brain). LLM нужен WebGPU.';
-});
-inp.focus();
+})();
 </script>
 </body>
 </html>
