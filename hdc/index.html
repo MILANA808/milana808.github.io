@@ -3,43 +3,55 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Phase-HRR · Dreams</title>
-<meta name="description" content="Phase-HRR + Quantum Dreams memory consolidation"/>
+<title>АКСИ Phase-HRR · Chat</title>
+<meta name="description" content="Geometric chat on Phase-HRR — no LLM"/>
 <link rel="canonical" href="https://milana808.github.io/hdc/"/>
 <style>
-:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9}
+:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.12);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9;--vio:#a78bfa}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif}
-.wrap{max-width:800px;margin:0 auto;padding:16px 14px 48px}
-h1{margin:0;font-size:1.25rem}.sub{color:var(--m);font-size:13px;margin:6px 0 10px}
-button{border:0;border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:12px;margin:3px}
+.wrap{max-width:820px;margin:0 auto;padding:14px 12px 40px}
+h1{margin:0;font-size:1.2rem}.sub{color:var(--m);font-size:12px;margin:4px 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:8px 0}
+button{border:0;border-radius:10px;padding:8px 12px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:12px;margin:2px}
 button.primary{background:linear-gradient(135deg,#67e8f9,#a78bfa);color:#0a0a0b}
 button.dream{background:linear-gradient(135deg,#312e81,#7c3aed);color:#e9d5ff}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
 canvas{width:100%;background:#0a0a12;border-radius:12px;border:1px solid var(--line);display:block}
-pre{white-space:pre-wrap;font:11px ui-monospace,monospace;color:var(--m);max-height:200px;overflow:auto;margin:8px 0 0;background:#0e0e10;padding:10px;border-radius:10px}
-.stat{font-size:13px;color:var(--a);margin-top:8px}
-footer{margin-top:18px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
+#log{height:220px;overflow:auto;font:13px/1.45 system-ui;padding:8px}
+.msg{margin:6px 0;padding:8px 10px;border-radius:10px;max-width:92%}
+.msg.user{background:#1e293b;margin-left:auto;text-align:right}
+.msg.bot{background:#1a1528;border:1px solid rgba(167,139,250,.35)}
+.msg .meta{font-size:10px;color:var(--m);margin-top:4px}
+.row{display:flex;gap:8px;margin-top:8px}
+.row input{flex:1;border-radius:10px;border:1px solid var(--line);background:#0e0e12;color:var(--t);padding:10px 12px;font:inherit}
+pre{white-space:pre-wrap;font:11px ui-monospace,monospace;color:var(--m);max-height:100px;overflow:auto;margin:6px 0 0}
+.stat{font-size:12px;color:var(--a);margin-top:6px}
+footer{margin-top:14px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>АКСИ Phase-HRR · Geometric + Dreams</h1>
-  <p class="sub">Аналогии + consolidation («сон») против cross-talk. CPU only. not AGI.</p>
+  <h1>АКСИ · Разговор с Axi Mind</h1>
+  <p class="sub">Phase-HRR chat: bind(Q,A) память · без LLM. Ответы из обученных диалогов + похожие формулировки.</p>
   <div class="card">
-    <button type="button" class="primary" id="btn-reason">Reason analogy</button>
-    <button type="button" id="btn-noise">Inject noise</button>
-    <button type="button" class="dream" id="btn-sleep">Запустить Сны (Sleep Cycle)</button>
+    <button type="button" class="primary" id="btn-send">Отправить</button>
+    <button type="button" id="btn-noise">Noise</button>
+    <button type="button" class="dream" id="btn-sleep">Sleep Cycle</button>
     <button type="button" id="btn-health">Health</button>
   </div>
-  <div class="card"><canvas id="cv" width="760" height="400"></canvas><div class="stat" id="stat">—</div></div>
-  <div class="card"><pre id="out">Reason / Noise / Sleep…</pre></div>
+  <div class="card"><div id="log"></div>
+    <div class="row"><input id="inp" placeholder="привет / кто ты / как дела / столица франции" autocomplete="off"/>
+    <button type="button" class="primary" id="btn-go">→</button></div>
+  </div>
+  <div class="card"><canvas id="cv" width="760" height="280"></canvas><div class="stat" id="stat">—</div></div>
+  <div class="card"><pre id="dbg"></pre></div>
   <footer><a href="/">Home</a> · <a href="/permit/">Permit</a> · aksilove@internet.ru</footer>
 </div>
 <script type="module">
 const PI=Math.PI, TWO_PI=2*Math.PI;
 function wrapPhase(x){ let a=x-TWO_PI*Math.floor((x+PI)/TWO_PI); if(a<=-PI)a+=TWO_PI; if(a>PI)a-=TWO_PI; return a; }
+function tokenize(t){ return String(t).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean); }
 class HyperSpace {
-  constructor(D=4096, seed=0xd1e){ this.D=D; this._state=seed>>>0; this.atoms=new Map(); }
+  constructor(D=4096, seed=0xc4a7){ this.D=D; this._state=seed>>>0; this.atoms=new Map(); }
   _rand(){ let x=this._state; x^=x<<13; x^=x>>>17; x^=x<<5; this._state=x>>>0; return this._state; }
   _rp(){ return (this._rand()/0x100000000)*TWO_PI-PI; }
   random(){ const v=new Float64Array(this.D); for(let i=0;i<this.D;i++)v[i]=this._rp(); return v; }
@@ -50,96 +62,119 @@ class HyperSpace {
     const sc=new Float64Array(this.D), ss=new Float64Array(this.D);
     for(const v of vs) for(let i=0;i<this.D;i++){ sc[i]+=Math.cos(v[i]); ss[i]+=Math.sin(v[i]); }
     const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=Math.atan2(ss[i],sc[i]); return o; }
+  permute(v,k=1){ const D=this.D,s=((k%D)+D)%D; if(!s)return Float64Array.from(v); const o=new Float64Array(D); for(let i=0;i<D;i++)o[i]=v[(i+s)%D]; return o; }
   cosine(a,b){ let s=0; for(let i=0;i<this.D;i++)s+=Math.cos(a[i]-b[i]); return s/this.D; }
   zeros(){ return new Float64Array(this.D); }
 }
-class MatrixMind {
-  constructor(space){ this.space=space; this.factMemory=space.zeros(); this.context=space.zeros(); this.items=new Map(); this.facts=[]; this._factCount=0; }
-  remember(label){ const k=String(label).toLowerCase(); let v=this.space.atom(k); if(this.items.has(k))v=this.space.bundle(this.items.get(k),v); this.items.set(k,v); return v; }
-  train(){ const junk=this.space.bind(this.space.random(), this.space.random()); this.factMemory=this.space.bundle(this.factMemory,junk); this._factCount++; this.remember('noise_'+Math.random().toString(36).slice(2,8)); }
-  trainEntity(entity, slots){
-    const e=String(entity).toLowerCase(); const eA=this.space.atom(e); this.remember(e);
-    const parts=[]; const slotRecs=[];
-    for(const {role,value} of slots){ const v=String(value).toLowerCase(); this.remember(v);
-      const slot=this.space.bind(this.space.atom('ROLE:'+role), this.space.atom(v));
-      parts.push(this.space.bind(eA, slot)); slotRecs.push({role,value:v}); }
-    this.factMemory=this.facts.length?this.space.bundle(this.factMemory,...parts):this.space.bundle(...parts);
-    this._factCount+=parts.length; this.facts.push({entity:e, slots:slotRecs});
+class GeometricLanguageEngine {
+  constructor(){
+    this.space=new HyperSpace(4096,0xc4a7);
+    this.chatMemory=this.space.zeros();
+    this.answers=new Map(); this.answerVecs=new Map(); this.questionVecs=new Map();
+    this.vocab=new Set(); this.trained=0;
+    this.dialogues=[
+      {q:'привет',a:'здравствуй, я акси'},{q:'hello',a:'hello, i am aksi'},
+      {q:'кто ты',a:'я геометрический разум на фазах пи'},{q:'who are you',a:'i am geometric mind on phase waves'},
+      {q:'как дела',a:'мои фазы стабильны'},{q:'how are you',a:'my phases are stable'},
+      {q:'что ты умеешь',a:'аналогии, память и consolidation сна'},
+      {q:'что такое акси',a:'акси это offline permit и phase-hrr ядро'},
+      {q:'столица франции',a:'париж'},{q:'capital of france',a:'paris'},
+      {q:'столица японии',a:'токио'},{q:'помоги',a:'задай вопрос из обученных диалогов'},
+      {q:'спасибо',a:'пожалуйста, фазы на месте'},{q:'пока',a:'до встречи, береги сигнал'},
+      {q:'что такое hdc',a:'hyperdimensional computing на векторах фаз'},
+      {q:'как ты думаешь',a:'через bind unbind и косинус фаз'}
+    ];
+    this.trainChatBrain(this.dialogues);
   }
-  probeSlot(entity, role){ return this.space.unbind(this.space.unbind(this.factMemory, this.space.atom(String(entity).toLowerCase())), this.space.atom('ROLE:'+role)); }
+  sequenceToVector(text){
+    const tokens=tokenize(text); if(!tokens.length) return this.space.zeros();
+    const parts=[];
+    for(let i=0;i<tokens.length;i++){ const a=this.space.atom(tokens[i]); parts.push(this.space.permute(a,i)); parts.push(a); this.vocab.add(tokens[i]); }
+    for(let i=0;i<tokens.length-1;i++) parts.push(this.space.bind(this.space.atom(tokens[i]), this.space.permute(this.space.atom(tokens[i+1]),1)));
+    return this.space.bundle(...parts);
+  }
+  trainChatBrain(list){
+    for(const turn of list){
+      const q=turn.q.trim(), a=turn.a.trim();
+      const qv=this.sequenceToVector(q), av=this.sequenceToVector(a);
+      const bound=this.space.bind(qv, av);
+      this.chatMemory=this.trained===0?bound:this.space.bundle(this.chatMemory, bound);
+      this.questionVecs.set(q.toLowerCase(), qv);
+      this.answerVecs.set(a.toLowerCase(), av);
+      this.answers.set(a.toLowerCase(), a);
+      this.answers.set('Q:'+q.toLowerCase(), a);
+      this.trained++;
+    }
+  }
+  generateResponse(raw){
+    const t0=performance.now(); const q=String(raw||'').trim(); if(!q) return {text:'…',confidence:0,ms:0};
+    const qv=this.sequenceToVector(q);
+    let bestQ=null, bestQs=-1;
+    for(const [qq,vec] of this.questionVecs){ const s=this.space.cosine(qv,vec); if(s>bestQs){bestQs=s; bestQ=qq;} }
+    let pathA=null;
+    if(bestQ){ const ans=this.answers.get('Q:'+bestQ); if(ans) pathA={text:ans,confidence:bestQs,method:'nearest_question',matchQ:bestQ}; }
+    const extracted=this.space.unbind(this.chatMemory, qv);
+    let pathB=null, bestAs=-1, bestAt=null;
+    for(const [key,av] of this.answerVecs){ const s=this.space.cosine(extracted, av); if(s>bestAs){ bestAs=s; bestAt=this.answers.get(key)||key; } }
+    if(bestAt) pathB={text:bestAt,confidence:bestAs,method:'unbind_chatMemory'};
+    let best=pathA;
+    if(!best||(pathB&&pathB.confidence>best.confidence+0.02)) best=pathB;
+    if(!best) best={text:'сигнал слаб — обучите ещё диалог',confidence:0,method:'fallback'};
+    return {text:best.text, confidence:best.confidence, method:best.method, matchQ:best.matchQ||null, ms:performance.now()-t0, qv, extracted};
+  }
 }
-class QuantumDreamEngine {
-  measureCapitalHealth(mind){
-    const tests=[['france','paris'],['japan','tokyo'],['germany','berlin'],['italy','rome']];
-    const scores=tests.map(([entity,expect])=>({entity,expect,score:mind.space.cosine(mind.probeSlot(entity,'capital'), mind.space.atom(expect))}));
-    return {scores, mean:scores.reduce((s,x)=>s+x.score,0)/scores.length};
-  }
-  injectNoise(mind, count=40){ for(let i=0;i<count;i++) mind.train(); return count; }
-  consolidateMemory(mind){
-    const before=this.measureCapitalHealth(mind); const parts=[];
-    for(const fact of mind.facts){ const eA=mind.space.atom(fact.entity);
-      for(const {role,value} of fact.slots){ const slot=mind.space.bind(mind.space.atom('ROLE:'+role), mind.space.atom(value)); parts.push(mind.space.bind(eA, slot)); } }
-    if(parts.length){ mind.factMemory=mind.space.bundle(...parts); mind._factCount=parts.length; }
-    for(const [label,vec] of [...mind.items.entries()]){ if(/^noise_/i.test(label)){ mind.items.delete(label); continue; }
-      const pure=mind.space.atom(label); mind.items.set(label, mind.space.bundle(pure,pure,pure,vec)); }
-    const after=this.measureCapitalHealth(mind);
-    const nb=Math.max(0,1-before.mean), na=Math.max(0,1-after.mean);
-    const noiseReducedPct=nb>1e-6?Math.max(0,Math.min(100,((nb-na)/nb)*100)):0;
-    return {before, after, meanBefore:before.mean, meanAfter:after.mean, noiseReducedPct};
-  }
-  sleepCycle(mind){ return {consolidation:this.consolidateMemory(mind)}; }
+// minimal dreams for noise/sleep on fact side
+class MiniDreams {
+  constructor(eng){ this.eng=eng; this.base=[...eng.dialogues]; }
+  injectNoise(n){ for(let i=0;i<n;i++){ const junk=this.eng.space.bind(this.eng.space.random(), this.eng.space.random()); this.eng.chatMemory=this.eng.space.bundle(this.eng.chatMemory,junk);} }
+  sleep(){ this.eng.trained=0; this.eng.chatMemory=this.eng.space.zeros(); this.eng.questionVecs.clear(); this.eng.answerVecs.clear();
+    this.eng.trainChatBrain(this.base); }
 }
-const out=document.getElementById('out'), stat=document.getElementById('stat');
+const eng=new GeometricLanguageEngine();
+const dreams=new MiniDreams(eng);
+const logEl=document.getElementById('log'), dbg=document.getElementById('dbg'), stat=document.getElementById('stat');
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
-function log(s){ out.textContent+=s+'\n'; }
-let world=null;
-function boot(){
-  const space=new HyperSpace(4096,0xd1e); const mind=new MatrixMind(space);
-  for(const x of ['paris','berlin','tokyo','rome','moscow','france','germany','japan','italy','russia','aksi']) mind.remember(x);
-  mind.trainEntity('france',[{role:'capital',value:'paris'}]);
-  mind.trainEntity('germany',[{role:'capital',value:'berlin'}]);
-  mind.trainEntity('japan',[{role:'capital',value:'tokyo'}]);
-  mind.trainEntity('italy',[{role:'capital',value:'rome'}]);
-  world={mind, dreams:new QuantumDreamEngine(), cand:['paris','berlin','tokyo','rome','moscow','france','germany','japan','italy','aksi']};
-  return world;
+function addMsg(role, text, meta){
+  const d=document.createElement('div'); d.className='msg '+role;
+  d.textContent=text; if(meta){ const m=document.createElement('div'); m.className='meta'; m.textContent=meta; d.appendChild(m); }
+  logEl.appendChild(d); logEl.scrollTop=logEl.scrollHeight;
 }
-function ensure(){ return world||boot(); }
-let anim=null;
-function dreamAnim(report, onDone){
-  if(anim) cancelAnimationFrame(anim);
-  const w=cv.width,h=cv.height;
-  const targets=[{x:w*0.2,y:h*0.4,l:'france'},{x:w*0.35,y:h*0.25,l:'paris'},{x:w*0.55,y:h*0.35,l:'japan'},{x:w*0.7,y:h*0.5,l:'tokyo'}];
-  const particles=Array.from({length:100},(_,i)=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,target:targets[i%targets.length]}));
-  let t=0;
-  const step=()=>{
-    const cool=Math.min(1,t/1.2);
-    ctx.fillStyle='rgba(10,10,18,0.28)'; ctx.fillRect(0,0,w,h);
-    for(const p of particles){ p.vx+=(p.target.x-p.x)*0.012*cool; p.vy+=(p.target.y-p.y)*0.012*cool; p.vx*=0.93; p.vy*=0.93;
-      p.x+=p.vx*(1.4-cool); p.y+=p.vy*(1.4-cool);
-      ctx.beginPath(); ctx.arc(p.x,p.y,2+(1-cool)*3,0,TWO_PI);
-      ctx.fillStyle=`hsla(${200+80*cool},90%,65%,${0.35+0.5*cool})`; ctx.fill(); }
-    if(cool>0.65) for(const tg of targets){ ctx.fillStyle=`rgba(196,181,253,${(cool-0.65)*2.5})`; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.fillText(tg.l,tg.x,tg.y-12); ctx.beginPath(); ctx.arc(tg.x,tg.y,6,0,TWO_PI); ctx.fill(); }
-    stat.textContent=cool<1?('Сон… '+(cool*100|0)+'%'):('Шум памяти уменьшен на '+report.noiseReducedPct.toFixed(1)+'% · mean '+report.meanBefore.toFixed(3)+' → '+report.meanAfter.toFixed(3));
-    t+=0.016; if(t<1.35) anim=requestAnimationFrame(step); else if(onDone) onDone();
-  }; step();
+function drawWave(qv, extracted, label){
+  const w=cv.width, h=cv.height; ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,w,h);
+  function wave(vec, color, y0){
+    ctx.beginPath(); ctx.strokeStyle=color; ctx.lineWidth=1.5;
+    const step=Math.max(1, (vec.length/w)|0);
+    for(let x=0;x<w;x++){ const i=Math.min(vec.length-1, x*step); const y=y0+Math.sin(vec[i])* (h*0.18); if(x===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }
+    ctx.stroke();
+  }
+  if(qv) wave(qv, 'rgba(103,232,249,0.85)', h*0.3);
+  if(extracted) wave(extracted, 'rgba(167,139,250,0.9)', h*0.7);
+  ctx.fillStyle='#a1a1aa'; ctx.font='11px system-ui'; ctx.fillText('query phase', 8, 16); ctx.fillText('memory interference → answer', 8, h*0.55);
+  if(label){ ctx.fillStyle='#67e8f9'; ctx.font='13px system-ui'; ctx.fillText(label, 8, h-12); }
 }
-document.getElementById('btn-health').onclick=function(){ out.textContent=''; var w=ensure(); var h=w.dreams.measureCapitalHealth(w.mind);
-  log('mean '+h.mean.toFixed(4)); h.scores.forEach(function(s){ log(s.entity+' → '+s.expect+' '+s.score.toFixed(4)); }); stat.textContent='health '+h.mean.toFixed(4); };
-document.getElementById('btn-noise').onclick=function(){ out.textContent=''; var w=ensure(); var b=w.dreams.measureCapitalHealth(w.mind); w.dreams.injectNoise(w.mind,45); var a=w.dreams.measureCapitalHealth(w.mind);
-  log('noise x45'); log('mean '+b.mean.toFixed(4)+' → '+a.mean.toFixed(4)); a.scores.forEach(function(s){ log(s.entity+' '+s.score.toFixed(4)); });
-  stat.textContent='NOISY '+a.mean.toFixed(4);
-  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,cv.width,cv.height);
-  for(var i=0;i<180;i++){ ctx.fillStyle='hsla('+Math.random()*360+',70%,60%,0.45)'; ctx.beginPath(); ctx.arc(Math.random()*cv.width,Math.random()*cv.height,Math.random()*4+1,0,TWO_PI); ctx.fill(); } };
-document.getElementById('btn-sleep').onclick=function(){ out.textContent=''; var w=ensure(); var before=w.dreams.measureCapitalHealth(w.mind); log('Before '+before.mean.toFixed(4));
-  var rep=w.dreams.sleepCycle(w.mind).consolidation;
-  dreamAnim(rep, function(){ log('After '+rep.meanAfter.toFixed(4)); log('Noise reduced '+rep.noiseReducedPct.toFixed(1)+'%');
-    rep.after.scores.forEach(function(s){ log(s.entity+' → '+s.expect+' '+s.score.toFixed(4)); });
-    log(rep.meanAfter>0.25&&rep.meanAfter>rep.meanBefore?'PASS recovery':'check'); }); };
-document.getElementById('btn-reason').onclick=function(){ out.textContent=''; var w=ensure();
-  var probe=w.mind.probeSlot('japan','capital');
-  var ranked=w.cand.map(function(l){ return {l:l,s:w.mind.space.cosine(probe,w.mind.space.atom(l))}; }).sort(function(a,b){ return b.s-a.s; });
-  log('france:paris :: japan:? → '+ranked[0].l+' ('+ranked[0].s.toFixed(3)+')');
-  log(ranked[0].l==='tokyo'?'PASS':'…'); stat.textContent='answer '+ranked[0].l; };
+function reply(){
+  const inp=document.getElementById('inp'); const q=inp.value.trim(); if(!q) return;
+  inp.value=''; addMsg('user', q);
+  const r=eng.generateResponse(q);
+  addMsg('bot', r.text, r.method+' · conf '+r.confidence.toFixed(3)+' · '+r.ms.toFixed(1)+'ms');
+  dbg.textContent=JSON.stringify({method:r.method, matchQ:r.matchQ, confidence:+r.confidence.toFixed(4), ms:+r.ms.toFixed(1)}, null, 0);
+  stat.textContent='trained '+eng.trained+' · D='+eng.space.D;
+  drawWave(r.qv, r.extracted, r.text);
+}
+document.getElementById('btn-go').onclick=reply;
+document.getElementById('btn-send').onclick=reply;
+document.getElementById('inp').addEventListener('keydown', function(e){ if(e.key==='Enter') reply(); });
+document.getElementById('btn-noise').onclick=function(){ dreams.injectNoise(30); stat.textContent='noise injected into chatMemory'; addMsg('bot','(шум в chatMemory — ответы могут деградировать)','system'); };
+document.getElementById('btn-sleep').onclick=function(){ dreams.sleep(); addMsg('bot','Sleep: chatMemory пересобран из чистых диалогов','system'); stat.textContent='sleep done · trained '+eng.trained;
+  // cool animation
+  let t=0; const id=setInterval(function(){ t+=0.05; ctx.fillStyle='rgba(10,10,18,0.2)'; ctx.fillRect(0,0,cv.width,cv.height);
+    for(let i=0;i<40;i++){ ctx.fillStyle='hsla('+(220+t*40)+',80%,60%,'+(0.2+t*0.3)+')'; ctx.beginPath(); ctx.arc(Math.random()*cv.width,Math.random()*cv.height,2+t*2,0,TWO_PI); ctx.fill(); }
+    if(t>1) clearInterval(id); }, 30); };
+document.getElementById('btn-health').onclick=function(){
+  const qs=['привет','кто ты','столица франции']; let s='';
+  qs.forEach(function(q){ const r=eng.generateResponse(q); s+=q+' → '+r.text+' ('+r.confidence.toFixed(2)+')\n'; });
+  dbg.textContent=s; stat.textContent='health ok'; };
+addMsg('bot','Напиши: привет · кто ты · как дела · столица франции','system');
 </script>
 </body>
 </html>
