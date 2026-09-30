@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ — генеративный диалог</title>
-<meta name="description" content="Офлайн генерация ответов: слова собираются в диалог. Без сервера и без WebGPU."/>
+<title>АКСИ — ответы на любые вопросы</title>
+<meta name="description" content="АКСИ: локальные знания + математика + Wikipedia research. Ответ почти на любой вопрос в браузере."/>
 <link rel="canonical" href="https://milana808.github.io/talk/"/>
 <meta name="theme-color" content="#0b0b0d"/>
 <style>
@@ -23,175 +23,216 @@ h1{margin:0;font-size:1.15rem}.sub{color:var(--m);font-size:12px;margin:4px 0 8p
 .composer{max-width:720px;width:100%;margin:0 auto;padding:8px 14px 16px;display:flex;gap:8px;border-top:1px solid var(--line)}
 .composer textarea{flex:1;min-height:44px;max-height:120px;resize:none;border-radius:12px;border:1px solid var(--line);background:#111;color:var(--t);padding:10px 12px;font:inherit}
 button.go{border:0;border-radius:12px;padding:12px 16px;font-weight:700;background:linear-gradient(135deg,#a78bfa,#34d399);color:#0a0a0b;cursor:pointer}
+button.go:disabled{opacity:.45}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .chips button{border:0;background:#1c1c1f;color:var(--m);border-radius:999px;padding:6px 10px;font-size:12px;cursor:pointer}
 footer{max-width:720px;margin:0 auto;padding:0 14px 12px;font-size:11px;color:var(--m)}footer a{color:var(--acc)}
-.meta{font-size:10px;color:var(--m);margin-top:4px}
+.meta{font-size:10px;color:var(--m);margin-top:6px}
+.meta a{color:var(--acc)}
 </style>
 </head>
 <body>
 <div class="top">
-  <h1>АКСИ · генеративный диалог</h1>
-  <p class="sub">Ответ собирается из слов по цепям (Марков) + теме запроса. Работает сразу — без WebGPU и без сервера.</p>
-  <span class="badge on">generator ON</span>
-  <span class="badge">offline</span>
+  <h1>АКСИ · спроси что угодно</h1>
+  <p class="sub">Локальные знания + счёт + поиск в Wikipedia → связный ответ. Без WebGPU. Нужен интернет только для фактов извне.</p>
+  <span class="badge on">hybrid Q&A</span>
+  <span class="badge">wiki research</span>
   <div class="chips">
-    <button type="button" data-q="Привет, расскажи о себе">О себе</button>
-    <button type="button" data-q="Что такое искусственный интеллект?">Что такое ИИ</button>
+    <button type="button" data-q="Привет! Кто ты?">Кто ты</button>
+    <button type="button" data-q="Что такое чёрная дыра?">Чёрная дыра</button>
+    <button type="button" data-q="Кто такой Ломоносов?">Ломоносов</button>
     <button type="button" data-q="Как устроен АКСИ Permit?">Permit</button>
-    <button type="button" data-q="Напиши короткий стих про волны">Стих</button>
-    <button type="button" data-q="Объясни зачем нужен offline ИИ">Offline</button>
+    <button type="button" data-q="Сколько будет (15+7)*3?">Счёт</button>
   </div>
 </div>
 <div id="chat"></div>
 <div class="composer">
-  <textarea id="inp" placeholder="Напиши что угодно — отвечу словами…" rows="1"></textarea>
+  <textarea id="inp" placeholder="Любой вопрос…" rows="1"></textarea>
   <button type="button" class="go" id="go">→</button>
 </div>
 <footer>
   <a href="/">Home</a> · <a href="/permit/">Permit</a> · <a href="/llm/">WebLLM</a>
-  · локальная генерация фраз, не облачный GPT · aksilove@internet.ru
+  · факты: Wikipedia · aksilove@internet.ru
 </footer>
 <script>
 (function () {
-  var CORPUS = [
-    "привет я акси разговорный контур проекта я собираю ответы из слов и смысла запроса",
-    "здравствуй рада тебя слышать я работаю прямо в браузере без сервера и без видеокарты",
-    "я акси не претендую на магию просто генерирую фразы по обученным цепям и знаниям проекта",
-    "обо мне можно сказать так я локальный генератор диалога с памятью о permit и offline",
-    "искусственный интеллект это программы которые по данным правилам и статистике выдают полезный текст решение или действие",
-    "большие языковые модели предсказывают следующее слово а агенты ещё и вызывают инструменты",
-    "важно не путать красивый текст с пониманием мира модель может ошибаться поэтому нужен контроль действий",
-    "акси рядом с моделями ставит замок permit чтобы агент не выходил за мандат человека",
-    "акси action permit это слой между решением модели и действием системы",
-    "tool call проходит проверку мандата доменов и цели пользователя затем allow или block",
-    "даже при block создаётся подписанный receipt чтобы остался audit trail",
-    "демо permit открыто на сайте в разделе permit там три сценария погоды атаки и чужого домена",
-    "offline режим значит ядро отвечает в браузере даже когда сервер недоступен",
-    "это полезно для приватности устойчивости и сценариев где нельзя слать данные в облако",
-    "технология должна служить человеку а не заставлять человека служить инфраструктуре",
-    "волны смысла катятся по фазам памяти тихий берег ответа собирает слова в речь",
-    "в тишине браузера рождается короткая строка как след от мысли на песке",
-    "спасибо за вопрос давай продолжим я рядом в этом окне",
-    "если сигнал слабый переформулируй запрос я всё равно попробую собрать связный ответ",
-    "я могу объяснить идеи проекта поддержать короткий диалог или набросать текст по теме",
-    "для сложных фактов из внешнего мира лучше сверяться с первоисточниками я локальная система",
-    "принцип простой technology serves human технология служит человеку",
-    "пока и до связи пусть у тебя будет ясный следующий шаг",
-    "диалог это обмен репликами где каждая фраза опирается на предыдущую и на общий контекст",
-    "слова выстраиваются друг за другом как шаги по тропинке смысла",
-    "когда ты спрашиваешь я выбираю тему оцениваю намерение и генерирую цепочку токенов",
-    "генерация не равна всезнанию зато она работает здесь и сейчас без облака",
-    "permit мандат домен intent receipt вот каркас безопасного агента",
-    "человек задаёт цель агент предлагает шаг замок решает можно ли выполнить",
-    "если цель пицца а инструмент удаление файлов это block и подробная причина",
-    "если цель погода и инструмент weather на разрешённом домене это allow"
+  var LOCAL = [
+    { re: /привет|здравств|hello|hi\b/i, a: "Привет! Я АКСИ — гибридный ответчик: знаю свой проект, считаю простые выражения и для остальных вопросов ищу смысл в Wikipedia, затем собираю ответ своими словами." },
+    { re: /кто ты|что ты такое|о себе|who are you/i, a: "Я АКСИ (milana808.github.io). Не облачный GPT: работаю в браузере. Для фактов о мире подключаю Wikipedia, для агентов есть Permit (/permit/) — замок ALLOW/BLOCK на tool-call. Контакт: aksilove@internet.ru." },
+    { re: /permit|мандат|action permit|gate|allow|block/i, a: "АКСИ Action Permit — слой между «модель решила» и «система сделала». Tool-call проверяется по мандату (tools, домены, лимиты) и цели пользователя → ALLOW или BLOCK + ECDSA-receipt. Демо: https://milana808.github.io/permit/" },
+    { re: /offline|оффлайн|без сервер/i, a: "Offline-first: ядро и Permit могут работать без своего бэкенда. Ответы «про мир» подтягивают Wikipedia (нужен интернет). Принцип: technology serves human." },
+    { re: /спасибо|благодар/i, a: "Пожалуйста. Спрашивай ещё — если темы нет в локальной памяти, пойду в Wikipedia." },
+    { re: /пока|до свид|bye/i, a: "До связи. Удачи." }
   ];
-  var START = "<s>", END = "</s>";
-  function tokenize(s) {
-    return String(s).toLowerCase().replace(/[«»\"\"]/g, "").replace(/([.,!?;:()])/g, " $1 ").split(/\s+/).filter(Boolean);
-  }
-  function trainMarkov(lines) {
-    var model = new Map();
-    function add(key, next) {
-      var m = model.get(key);
-      if (!m) { m = new Map(); model.set(key, m); }
-      m.set(next, (m.get(next) || 0) + 1);
-    }
-    for (var li = 0; li < lines.length; li++) {
-      var toks = [START].concat(tokenize(lines[li]), [END]);
-      for (var i = 0; i < toks.length - 1; i++) {
-        add(toks[i], toks[i + 1]);
-        if (i + 2 < toks.length) add(toks[i] + "\t" + toks[i + 1], toks[i + 2]);
-      }
-    }
-    return model;
-  }
-  function pick(map) {
-    var total = 0;
-    map.forEach(function (c) { total += c; });
-    var r = Math.random() * total;
-    var keys = Array.from(map.keys());
-    for (var i = 0; i < keys.length; i++) {
-      r -= map.get(keys[i]);
-      if (r <= 0) return keys[i];
-    }
-    return keys[0];
-  }
-  function generate(model, maxLen) {
-    maxLen = maxLen || 28;
-    var w1 = START, w2 = null, out = [];
-    for (var i = 0; i < maxLen; i++) {
-      var next = null;
-      if (w2 && model.has(w1 + "\t" + w2)) next = pick(model.get(w1 + "\t" + w2));
-      else if (model.has(w1)) next = pick(model.get(w1));
-      else break;
-      if (next === END) break;
-      out.push(next);
-      if (out.length >= 2) { w1 = out[out.length - 2]; w2 = out[out.length - 1]; }
-      else { w1 = out[0]; w2 = null; }
-    }
-    var text = out.join(" ").replace(/\s+([.,!?;:])/g, "$1");
-    if (!text) text = "я собираю ответ ещё раз попробуй иначе сформулировать";
-    text = text.charAt(0).toUpperCase() + text.slice(1);
-    if (!/[.!?]$/.test(text)) text += ".";
-    return text;
-  }
-  var TOPICS = [
-    { re: /привет|здравств|hello|hi\b/i, seeds: [CORPUS[0], CORPUS[1]], open: ["Привет!", "Здравствуй!", "Рада тебя видеть."] },
-    { re: /кто ты|что ты|о себе|представ/i, seeds: [CORPUS[2], CORPUS[3]], open: ["Коротко обо мне.", "Давай представлюсь."] },
-    { re: /permit|мандат|замок|gate|allow|block|агент/i, seeds: [CORPUS[8], CORPUS[9], CORPUS[28], CORPUS[29]], open: ["Про Permit по делу.", "Это про безопасность агента."] },
-    { re: /offline|оффлайн|без сервер|приват/i, seeds: [CORPUS[12], CORPUS[13]], open: ["Про offline.", "Локальность — часть дизайна."] },
-    { re: /ии|интеллект|нейро|llm|gpt|модель/i, seeds: [CORPUS[4], CORPUS[5], CORPUS[6]], open: ["Хороший вопрос.", "Объясню просто."] },
-    { re: /стих|поэм|волн|креатив|напиши/i, seeds: [CORPUS[15], CORPUS[16]], open: ["Вот набросок.", "Слушай ритм."] },
-    { re: /спасибо|благодар/i, seeds: [CORPUS[17]], open: ["Пожалуйста."] },
-    { re: /пока|до свид|bye/i, seeds: [CORPUS[22]], open: ["До связи!"] }
-  ];
-  function detect(q) {
-    for (var i = 0; i < TOPICS.length; i++) if (TOPICS[i].re.test(q)) return TOPICS[i];
+
+  function tryMath(q) {
+    if (!/[0-9]/.test(q)) return null;
+    if (!/(посчита|вычисл|сколько будет|\d+[\s]*[\+\-\*\/\^\(\)]|[\+\-\*\/]=)/i.test(q) && !/^[\d\s\+\-\*\/\^\(\)\.]+$/.test(q.trim())) return null;
+    try {
+      var expr = q.replace(/[^0-9\+\-\*\/\(\)\.\^\s]/g, " ").replace(/\^/g, "**").replace(/\s+/g, "");
+      if (!expr || !/[\d\)]$/.test(expr)) return null;
+      var v = Function('"use strict"; return (' + expr + ')')();
+      if (typeof v === "number" && isFinite(v)) return "Считаю: " + expr.replace(/\*\*/g, "^") + " = " + v;
+    } catch (e) {}
     return null;
   }
-  function reply(userText) {
-    var topic = detect(userText);
-    var localLines = topic ? topic.seeds.concat(CORPUS) : CORPUS;
-    var localModel = trainMarkov(localLines);
-    var n = 1 + (Math.random() < 0.55 ? 1 : 0);
-    var parts = [];
-    if (topic && topic.open) parts.push(topic.open[(Math.random() * topic.open.length) | 0]);
-    for (var i = 0; i < n; i++) parts.push(generate(localModel, 18 + ((Math.random() * 14) | 0)));
-    var stop = { что:1, как:1, это:1, для:1, или:1, the:1, and:1, и:1, в:1, на:1, с:1, по:1, не:1, да:1, ну:1, мне:1, ты:1, вы:1 };
-    var seeds = tokenize(userText).filter(function (w) { return w.length > 2 && !stop[w]; }).slice(0, 4);
-    if (seeds.length && Math.random() < 0.35) parts.push("Ты затронул(а) «" + seeds[0] + "» — держу это в фокусе.");
-    if (Math.random() < 0.18) parts.push("Это локальная генерация, не облачный GPT.");
-    return parts.join(" ");
+
+  function cleanQuery(q) {
+    return String(q)
+      .replace(/^(что|кто|где|когда|как|почему|зачем|расскажи|объясни|такое|такой)\s+/ig, "")
+      .replace(/[?!.]+$/g, "")
+      .trim();
   }
+
+  function wikiSearch(lang, query) {
+    var url = "https://" + lang + ".wikipedia.org/w/api.php?action=opensearch&search=" +
+      encodeURIComponent(query) + "&limit=5&namespace=0&format=json&origin=*";
+    return fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+      var titles = (data && data[1]) || [];
+      return titles;
+    }).catch(function () { return []; });
+  }
+
+  function wikiSummary(lang, title) {
+    var url = "https://" + lang + ".wikipedia.org/api/rest_v1/page/summary/" +
+      encodeURIComponent(title.replace(/ /g, "_"));
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error("no summary");
+      return r.json();
+    }).then(function (j) {
+      return {
+        title: j.title || title,
+        extract: j.extract || "",
+        url: (j.content_urls && j.content_urls.desktop && j.content_urls.desktop.page) ||
+          ("https://" + lang + ".wikipedia.org/wiki/" + encodeURIComponent(title))
+      };
+    });
+  }
+
+  function composeFromWiki(question, hit) {
+    var extract = (hit.extract || "").trim();
+    if (!extract) return null;
+    // take ~2–4 sentences
+    var parts = extract.split(/(?<=[.!?])\s+/);
+    var body = parts.slice(0, 4).join(" ");
+    if (body.length > 900) body = body.slice(0, 880) + "…";
+    var lead = [
+      "Кратко по источникам:",
+      "Вот что удалось собрать:",
+      "По открытым данным:"
+    ][(Math.random() * 3) | 0];
+    return lead + "\n\n" + body + "\n\nИсточник: " + hit.title;
+  }
+
+  async function research(question) {
+    var q = cleanQuery(question) || question;
+    // RU then EN
+    var langs = /[а-яё]/i.test(q) ? ["ru", "en"] : ["en", "ru"];
+    for (var li = 0; li < langs.length; li++) {
+      var lang = langs[li];
+      var titles = await wikiSearch(lang, q);
+      if (!titles.length && q !== question) titles = await wikiSearch(lang, question);
+      for (var ti = 0; ti < Math.min(titles.length, 3); ti++) {
+        try {
+          var sum = await wikiSummary(lang, titles[ti]);
+          if (sum.extract && sum.extract.length > 40) {
+            return { hit: sum, lang: lang, method: "wikipedia:" + lang };
+          }
+        } catch (e) {}
+      }
+    }
+    return null;
+  }
+
+  function localReply(q) {
+    for (var i = 0; i < LOCAL.length; i++) {
+      if (LOCAL[i].re.test(q)) return LOCAL[i].a;
+    }
+    return null;
+  }
+
+  async function answer(q) {
+    var math = tryMath(q);
+    if (math) return { text: math, method: "math", link: null };
+
+    var loc = localReply(q);
+    // Pure greetings / about — no need wiki
+    if (loc && /привет|здравств|кто ты|что ты|permit|offline|спасибо|пока|hello|hi\b|bye/i.test(q)) {
+      return { text: loc, method: "local", link: null };
+    }
+
+    // Always try research for open questions
+    var res = await research(q);
+    if (res && res.hit) {
+      var text = composeFromWiki(q, res.hit);
+      if (loc && /акси|permit/i.test(q)) text = loc + "\n\n" + text;
+      return { text: text, method: res.method, link: res.hit.url };
+    }
+
+    if (loc) return { text: loc, method: "local", link: null };
+
+    return {
+      text: "Не нашла устойчивого источника по запросу «" + q + "». Уточни формулировку (имя, термин) — попробую снова через Wikipedia. Для тем АКСИ: Permit, offline, кто ты.",
+      method: "fallback",
+      link: null
+    };
+  }
+
   var chat = document.getElementById("chat");
   var inp = document.getElementById("inp");
-  function add(role, text, meta) {
+  var go = document.getElementById("go");
+  var busy = false;
+
+  function add(role, text, metaHtml) {
     var d = document.createElement("div");
     d.className = "msg " + role;
     d.textContent = text;
-    if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
+    if (metaHtml) {
+      var m = document.createElement("div");
+      m.className = "meta";
+      m.innerHTML = metaHtml;
+      d.appendChild(m);
+    }
     chat.appendChild(d);
     chat.scrollTop = chat.scrollHeight;
+    return d;
   }
-  function send(pre) {
+
+  async function send(pre) {
     var q = (pre != null ? pre : inp.value).trim();
-    if (!q) return;
+    if (!q || busy) return;
     inp.value = "";
+    busy = true;
+    go.disabled = true;
     add("user", q);
+    var bot = add("bot", "Думаю…");
     var t0 = performance.now();
-    var a = reply(q);
-    add("bot", a, "gen · " + (performance.now() - t0).toFixed(1) + " ms · offline");
+    try {
+      var r = await answer(q);
+      bot.textContent = r.text;
+      var meta = r.method + " · " + (performance.now() - t0).toFixed(0) + " ms";
+      if (r.link) meta += ' · <a href="' + r.link + '" target="_blank" rel="noopener">открыть источник</a>';
+      var m = document.createElement("div");
+      m.className = "meta";
+      m.innerHTML = meta;
+      bot.appendChild(m);
+    } catch (e) {
+      bot.textContent = "Сбой сети или поиска. Проверь интернет и спроси ещё раз. (" + (e.message || e) + ")";
+    }
+    busy = false;
+    go.disabled = false;
+    inp.focus();
   }
-  document.getElementById("go").onclick = function () { send(); };
+
+  go.onclick = function () { send(); };
   inp.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   });
   document.querySelectorAll(".chips [data-q]").forEach(function (b) {
     b.onclick = function () { send(b.getAttribute("data-q")); };
   });
-  add("sys", "Генератор включён. Пиши — отвечу связными фразами сразу.");
+
+  add("sys", "Спроси что угодно. Локально / счёт / Wikipedia → ответ.");
   inp.focus();
 })();
 </script>
