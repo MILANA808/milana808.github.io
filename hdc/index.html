@@ -3,46 +3,43 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Geometric Intelligence — Phase-HRR</title>
-<meta name="description" content="Геометрическое рассуждение на Phase-HRR: траектория, аналогии без нейросетей."/>
+<title>АКСИ Phase-HRR · Dreams</title>
+<meta name="description" content="Phase-HRR + Quantum Dreams memory consolidation"/>
 <link rel="canonical" href="https://milana808.github.io/hdc/"/>
-<meta name="theme-color" content="#0a0a0b"/>
 <style>
-:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9;--ok:#34d399;--vio:#a78bfa}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
-.wrap{max-width:780px;margin:0 auto;padding:18px 14px 48px}
-h1{margin:0;font-size:1.3rem}.sub{color:var(--m);font-size:13px;margin:6px 0 12px}
-.badges span{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px;display:inline-block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
-.pipe{font:11px ui-monospace,monospace;color:var(--a);margin:6px 0}
-button{border:0;border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:13px;margin:3px}
+:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif}
+.wrap{max-width:800px;margin:0 auto;padding:16px 14px 48px}
+h1{margin:0;font-size:1.25rem}.sub{color:var(--m);font-size:13px;margin:6px 0 10px}
+button{border:0;border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:12px;margin:3px}
 button.primary{background:linear-gradient(135deg,#67e8f9,#a78bfa);color:#0a0a0b}
-canvas{width:100%;height:auto;background:#0e0e12;border-radius:12px;border:1px solid var(--line);display:block}
-pre{white-space:pre-wrap;font:11px/1.4 ui-monospace,monospace;color:var(--m);max-height:220px;overflow:auto;margin:8px 0 0;background:#0e0e10;padding:10px;border-radius:10px}
-.note{font-size:12px;color:var(--m)}footer{margin-top:20px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
+button.dream{background:linear-gradient(135deg,#312e81,#7c3aed);color:#e9d5ff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+canvas{width:100%;background:#0a0a12;border-radius:12px;border:1px solid var(--line);display:block}
+pre{white-space:pre-wrap;font:11px ui-monospace,monospace;color:var(--m);max-height:200px;overflow:auto;margin:8px 0 0;background:#0e0e10;padding:10px;border-radius:10px}
+.stat{font-size:13px;color:var(--a);margin-top:8px}
+footer{margin-top:18px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>АКСИ Geometric Intelligence</h1>
-  <p class="sub">Мышление как траектория в Phase-HRR. Аналогия A:B :: C:? через role-transfer. Без нейросетей.</p>
-  <div class="badges"><span>phase-HRR</span><span>geometric reasoning</span><span>D=4096</span><span>not AGI</span></div>
-  <div class="pipe">France:Paris :: Japan:? → detect ROLE:capital → probe(japan) → Tokyo</div>
+  <h1>АКСИ Phase-HRR · Geometric + Dreams</h1>
+  <p class="sub">Аналогии + consolidation («сон») против cross-talk. CPU only. not AGI.</p>
   <div class="card">
-    <button type="button" class="primary" id="btn-reason">Reason: Франция→Париж :: Япония→?</button>
-    <button type="button" id="btn-traj">Trajectory Rome→Tokyo</button>
-    <button type="button" id="btn-math">Math</button>
+    <button type="button" class="primary" id="btn-reason">Reason analogy</button>
+    <button type="button" id="btn-noise">Inject noise</button>
+    <button type="button" class="dream" id="btn-sleep">Запустить Сны (Sleep Cycle)</button>
+    <button type="button" id="btn-health">Health</button>
   </div>
-  <div class="card"><canvas id="cv" width="720" height="380"></canvas></div>
-  <div class="card"><pre id="out">Нажми Reason…</pre></div>
-  <p class="note">Расстояние на canvas ∝ (1 − cos). Точка анимируется по узлам траектории.</p>
+  <div class="card"><canvas id="cv" width="760" height="400"></canvas><div class="stat" id="stat">—</div></div>
+  <div class="card"><pre id="out">Reason / Noise / Sleep…</pre></div>
   <footer><a href="/">Home</a> · <a href="/permit/">Permit</a> · aksilove@internet.ru</footer>
 </div>
 <script type="module">
 const PI=Math.PI, TWO_PI=2*Math.PI;
 function wrapPhase(x){ let a=x-TWO_PI*Math.floor((x+PI)/TWO_PI); if(a<=-PI)a+=TWO_PI; if(a>PI)a-=TWO_PI; return a; }
 class HyperSpace {
-  constructor(D=4096, seed=0x6e01){ this.D=D; this._state=seed>>>0; this.atoms=new Map(); }
+  constructor(D=4096, seed=0xd1e){ this.D=D; this._state=seed>>>0; this.atoms=new Map(); }
   _rand(){ let x=this._state; x^=x<<13; x^=x>>>17; x^=x<<5; this._state=x>>>0; return this._state; }
   _rp(){ return (this._rand()/0x100000000)*TWO_PI-PI; }
   random(){ const v=new Float64Array(this.D); for(let i=0;i<this.D;i++)v[i]=this._rp(); return v; }
@@ -57,136 +54,92 @@ class HyperSpace {
   zeros(){ return new Float64Array(this.D); }
 }
 class MatrixMind {
-  constructor(space){ this.space=space; this.factMemory=space.zeros(); this.items=new Map(); this._fc=0; }
+  constructor(space){ this.space=space; this.factMemory=space.zeros(); this.context=space.zeros(); this.items=new Map(); this.facts=[]; this._factCount=0; }
   remember(label){ const k=String(label).toLowerCase(); let v=this.space.atom(k); if(this.items.has(k))v=this.space.bundle(this.items.get(k),v); this.items.set(k,v); return v; }
+  train(){ const junk=this.space.bind(this.space.random(), this.space.random()); this.factMemory=this.space.bundle(this.factMemory,junk); this._factCount++; this.remember('noise_'+Math.random().toString(36).slice(2,8)); }
   trainEntity(entity, slots){
     const e=String(entity).toLowerCase(); const eA=this.space.atom(e); this.remember(e);
-    const parts=[];
+    const parts=[]; const slotRecs=[];
     for(const {role,value} of slots){ const v=String(value).toLowerCase(); this.remember(v);
       const slot=this.space.bind(this.space.atom('ROLE:'+role), this.space.atom(v));
-      parts.push(this.space.bind(eA, slot)); }
-    this.factMemory=this._fc===0?this.space.bundle(...parts):this.space.bundle(this.factMemory,...parts);
-    this._fc+=parts.length;
+      parts.push(this.space.bind(eA, slot)); slotRecs.push({role,value:v}); }
+    this.factMemory=this.facts.length?this.space.bundle(this.factMemory,...parts):this.space.bundle(...parts);
+    this._factCount+=parts.length; this.facts.push({entity:e, slots:slotRecs});
   }
-  probeSlot(entity, role){
-    return this.space.unbind(this.space.unbind(this.factMemory, this.space.atom(String(entity).toLowerCase())), this.space.atom('ROLE:'+role));
-  }
+  probeSlot(entity, role){ return this.space.unbind(this.space.unbind(this.factMemory, this.space.atom(String(entity).toLowerCase())), this.space.atom('ROLE:'+role)); }
 }
-class GeometricReasoningEngine {
-  constructor(mind){ this.mind=mind; this.space=mind.space; }
-  project(vector, topK=6, candidates=null){
-    const labels=candidates||[...this.mind.items.keys()];
-    return labels.map(label=>({label, vector:this.space.atom(label), score:this.space.cosine(vector, this.space.atom(label))})).sort((a,b)=>b.score-a.score).slice(0,topK);
+class QuantumDreamEngine {
+  measureCapitalHealth(mind){
+    const tests=[['france','paris'],['japan','tokyo'],['germany','berlin'],['italy','rome']];
+    const scores=tests.map(([entity,expect])=>({entity,expect,score:mind.space.cosine(mind.probeSlot(entity,'capital'), mind.space.atom(expect))}));
+    return {scores, mean:scores.reduce((s,x)=>s+x.score,0)/scores.length};
   }
-  detectRole(entity, value, roles=['capital','country']){
-    const vA=this.space.atom(String(value).toLowerCase());
-    let best={role:null,score:-1};
-    for(const role of roles){ const probe=this.mind.probeSlot(entity, role); const score=this.space.cosine(probe,vA);
-      if(score>best.score) best={role,score,probe}; }
-    return best;
+  injectNoise(mind, count=40){ for(let i=0;i<count;i++) mind.train(); return count; }
+  consolidateMemory(mind){
+    const before=this.measureCapitalHealth(mind); const parts=[];
+    for(const fact of mind.facts){ const eA=mind.space.atom(fact.entity);
+      for(const {role,value} of fact.slots){ const slot=mind.space.bind(mind.space.atom('ROLE:'+role), mind.space.atom(value)); parts.push(mind.space.bind(eA, slot)); } }
+    if(parts.length){ mind.factMemory=mind.space.bundle(...parts); mind._factCount=parts.length; }
+    for(const [label,vec] of [...mind.items.entries()]){ if(/^noise_/i.test(label)){ mind.items.delete(label); continue; }
+      const pure=mind.space.atom(label); mind.items.set(label, mind.space.bundle(pure,pure,pure,vec)); }
+    const after=this.measureCapitalHealth(mind);
+    const nb=Math.max(0,1-before.mean), na=Math.max(0,1-after.mean);
+    const noiseReducedPct=nb>1e-6?Math.max(0,Math.min(100,((nb-na)/nb)*100)):0;
+    return {before, after, meanBefore:before.mean, meanAfter:after.mean, noiseReducedPct};
   }
-  analogize(a,b,c,candidates){
-    a=a.toLowerCase(); b=b.toLowerCase(); c=c.toLowerCase();
-    const steps=[]; const det=this.detectRole(a,b);
-    steps.push({rule:'detect_role:'+(det.role||'none'), to:b, score:det.score});
-    let answerVec, method;
-    if(det.role && det.score>0.05){ answerVec=this.mind.probeSlot(c, det.role); method='role_transfer:'+det.role;
-      steps.push({rule:'probeSlot('+c+','+det.role+')', to:'?', score:1}); }
-    else { answerVec=this.space.bind(this.space.unbind(this.space.atom(b), this.space.atom(a)), this.space.atom(c)); method='phase_bind_unbind'; }
-    const hits=this.project(answerVec,8,candidates).filter(h=>h.label!==a && h.label!==c);
-    const answer=hits[0]||{label:null,score:-1};
-    steps.push({rule:'project', to:answer.label, score:answer.score});
-    return {answer, steps, method, hits, detected:det};
-  }
-  _phaseLerp(a,b,t){ const D=this.space.D,o=new Float64Array(D); for(let i=0;i<D;i++){ let d=b[i]-a[i]; if(d>PI)d-=TWO_PI; if(d<-PI)d+=TWO_PI; let x=a[i]+t*d; if(x>PI)x-=TWO_PI; if(x<=-PI)x+=TWO_PI; o[i]=x; } return o; }
-  buildTrajectory(start, target, opts={}){
-    const hops=opts.hops||5, cand=opts.candidates||null;
-    const v0=this.space.atom(start), v1=this.space.atom(target);
-    const nodes=[{label:start,vector:v0,score:1}]; const path=[start]; let prev=start;
-    for(let h=1;h<=hops;h++){
-      const mid=this._phaseLerp(v0,v1,h/(hops+1));
-      const snap=this.project(mid,5,cand).find(s=>s.label!==prev)||this.project(mid,1,cand)[0];
-      if(snap && snap.label!==prev && !path.includes(snap.label) && snap.score>0.01){
-        nodes.push(snap); path.push(snap.label); prev=snap.label;
-      }
-    }
-    nodes.push({label:target,vector:v1,score:1}); if(path[path.length-1]!==target) path.push(target);
-    return {nodes, pathLabels:path};
-  }
-  layoutNodes(nodes,w,h,pad=40){
-    const n=nodes.length; if(!n)return nodes;
-    const dist=Array.from({length:n},()=>new Float64Array(n));
-    for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){ const s=this.space.cosine(nodes[i].vector,nodes[j].vector); dist[i][j]=dist[j][i]=Math.max(0.05,1-s); }
-    const pos=Array.from({length:n},(_,i)=>({x:pad+(w-2*pad)*(i+1)/(n+1), y:h/2+(i%2?-30:30)}));
-    const scale=Math.min(w,h)*0.4;
-    for(let it=0;it<80;it++) for(let i=0;i<n;i++){ let fx=0,fy=0;
-      for(let j=0;j<n;j++){ if(i===j)continue; const dx=pos[i].x-pos[j].x, dy=pos[i].y-pos[j].y, len=Math.hypot(dx,dy)||1e-6;
-        const force=((len-dist[i][j]*scale)/len)*0.06; fx-=force*dx; fy-=force*dy; }
-      pos[i].x=Math.min(w-pad,Math.max(pad,pos[i].x+fx)); pos[i].y=Math.min(h-pad,Math.max(pad,pos[i].y+fy));
-    }
-    nodes.forEach((nd,i)=>{ nd.x=pos[i].x; nd.y=pos[i].y; }); return nodes;
-  }
+  sleepCycle(mind){ return {consolidation:this.consolidateMemory(mind)}; }
 }
-const out=document.getElementById('out'); const cv=document.getElementById('cv'); const ctx=cv.getContext('2d');
+const out=document.getElementById('out'), stat=document.getElementById('stat');
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 function log(s){ out.textContent+=s+'\n'; }
+let world=null;
 function boot(){
-  const space=new HyperSpace(4096, 0x6e01); const mind=new MatrixMind(space);
-  const cities=['paris','berlin','tokyo','rome','moscow','aksi','london'];
-  const countries=['france','germany','japan','italy','russia','uk'];
-  for(const x of [...cities,...countries]) mind.remember(x);
+  const space=new HyperSpace(4096,0xd1e); const mind=new MatrixMind(space);
+  for(const x of ['paris','berlin','tokyo','rome','moscow','france','germany','japan','italy','russia','aksi']) mind.remember(x);
   mind.trainEntity('france',[{role:'capital',value:'paris'}]);
   mind.trainEntity('germany',[{role:'capital',value:'berlin'}]);
   mind.trainEntity('japan',[{role:'capital',value:'tokyo'}]);
   mind.trainEntity('italy',[{role:'capital',value:'rome'}]);
-  return { engine:new GeometricReasoningEngine(mind), cand:[...cities,...countries] };
+  world={mind, dreams:new QuantumDreamEngine(), cand:['paris','berlin','tokyo','rome','moscow','france','germany','japan','italy','aksi']};
+  return world;
 }
+function ensure(){ return world||boot(); }
 let anim=null;
-function drawStatic(nodes, path){
-  const w=cv.width, h=cv.height; ctx.fillStyle='#0e0e12'; ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle='rgba(103,232,249,0.35)'; ctx.lineWidth=2; ctx.beginPath();
-  for(let i=0;i<path.length;i++){ const n=nodes.find(x=>x.label===path[i]); if(!n)continue; if(i===0)ctx.moveTo(n.x,n.y); else ctx.lineTo(n.x,n.y); }
-  ctx.stroke();
-  for(const n of nodes){ ctx.beginPath(); ctx.arc(n.x,n.y,10,0,TWO_PI); ctx.fillStyle='#a78bfa'; ctx.fill();
-    ctx.fillStyle='#f4f4f5'; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.fillText(n.label, n.x, n.y-16);
-    if(n.score!=null && n.score<1) ctx.fillText(n.score.toFixed(2), n.x, n.y+22); }
-}
-function animatePath(nodes, path){
+function dreamAnim(report, onDone){
   if(anim) cancelAnimationFrame(anim);
-  const pts=path.map(l=>nodes.find(n=>n.label===l)).filter(Boolean);
-  if(pts.length<2){ drawStatic(nodes,path); return; }
+  const w=cv.width,h=cv.height;
+  const targets=[{x:w*0.2,y:h*0.4,l:'france'},{x:w*0.35,y:h*0.25,l:'paris'},{x:w*0.55,y:h*0.35,l:'japan'},{x:w*0.7,y:h*0.5,l:'tokyo'}];
+  const particles=Array.from({length:100},(_,i)=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,target:targets[i%targets.length]}));
   let t=0;
-  const step=()=>{ drawStatic(nodes, path);
-    const total=pts.length-1; const f=t*total; const i=Math.min(total-1, Math.floor(f)); const u=f-i;
-    const x=pts[i].x+(pts[i+1].x-pts[i].x)*u; const y=pts[i].y+(pts[i+1].y-pts[i].y)*u;
-    ctx.beginPath(); ctx.arc(x,y,6,0,TWO_PI); ctx.fillStyle='#67e8f9'; ctx.fill();
-    ctx.strokeStyle='#67e8f9'; ctx.lineWidth=2; ctx.beginPath();
-    for(let j=0;j<=i;j++){ if(j===0)ctx.moveTo(pts[0].x,pts[0].y); else ctx.lineTo(pts[j].x,pts[j].y); }
-    ctx.lineTo(x,y); ctx.stroke();
-    t+=0.008; anim=requestAnimationFrame(step); if(t>1) t=0;
+  const step=()=>{
+    const cool=Math.min(1,t/1.2);
+    ctx.fillStyle='rgba(10,10,18,0.28)'; ctx.fillRect(0,0,w,h);
+    for(const p of particles){ p.vx+=(p.target.x-p.x)*0.012*cool; p.vy+=(p.target.y-p.y)*0.012*cool; p.vx*=0.93; p.vy*=0.93;
+      p.x+=p.vx*(1.4-cool); p.y+=p.vy*(1.4-cool);
+      ctx.beginPath(); ctx.arc(p.x,p.y,2+(1-cool)*3,0,TWO_PI);
+      ctx.fillStyle=`hsla(${200+80*cool},90%,65%,${0.35+0.5*cool})`; ctx.fill(); }
+    if(cool>0.65) for(const tg of targets){ ctx.fillStyle=`rgba(196,181,253,${(cool-0.65)*2.5})`; ctx.font='12px system-ui'; ctx.textAlign='center'; ctx.fillText(tg.l,tg.x,tg.y-12); ctx.beginPath(); ctx.arc(tg.x,tg.y,6,0,TWO_PI); ctx.fill(); }
+    stat.textContent=cool<1?(`Сон… ${(cool*100)|0}%`):(`Шум памяти уменьшен на ${report.noiseReducedPct.toFixed(1)}% · mean ${report.meanBefore.toFixed(3)} → ${report.meanAfter.toFixed(3)}`);
+    t+=0.016; if(t<1.35) anim=requestAnimationFrame(step); else if(onDone) onDone();
   }; step();
 }
-document.getElementById('btn-reason').onclick=()=>{
-  out.textContent=''; const {engine,cand}=boot();
-  const r=engine.analogize('france','paris','japan',cand);
-  log('france:paris :: japan:?');
-  log('method: '+r.method);
-  log('detect: '+r.detected.role+' ('+r.detected.score.toFixed(4)+')');
-  for(const s of r.steps) log('  '+s.rule+' → '+s.to+' ('+(s.score||0).toFixed(3)+')');
-  log((r.answer?.label==='tokyo'?'PASS':'FAIL')+' → '+r.answer?.label+' conf '+r.answer?.score.toFixed(4));
-  const traj=engine.buildTrajectory('france', r.answer.label||'tokyo', {candidates:cand, hops:4});
-  animatePath(engine.layoutNodes(traj.nodes.map(n=>({...n})), cv.width, cv.height), traj.pathLabels);
-};
-document.getElementById('btn-traj').onclick=()=>{
-  out.textContent=''; const {engine,cand}=boot();
-  const traj=engine.buildTrajectory('rome','tokyo',{candidates:cand, hops:6});
-  log('Path: '+traj.pathLabels.join(' → '));
-  animatePath(engine.layoutNodes(traj.nodes.map(n=>({...n})), cv.width, cv.height), traj.pathLabels);
-};
-document.getElementById('btn-math').onclick=()=>{
-  out.textContent=''; const s=new HyperSpace(2048,42); const a=s.random(),b=s.random();
-  log('sim random '+s.cosine(a,b).toFixed(4));
-  log('unbind∘bind '+s.cosine(a,s.unbind(s.bind(a,b),b)).toFixed(4));
-};
+document.getElementById('btn-health').onclick=()=>{ out.textContent=''; const {mind,dreams}=ensure(); const h=dreams.measureCapitalHealth(mind);
+  log('mean '+h.mean.toFixed(4)); for(const s of h.scores) log(s.entity+' → '+s.expect+' '+s.score.toFixed(4)); stat.textContent='health '+h.mean.toFixed(4); };
+document.getElementById('btn-noise').onclick=()=>{ out.textContent=''; const {mind,dreams}=ensure(); const b=dreams.measureCapitalHealth(mind); dreams.injectNoise(mind,45); const a=dreams.measureCapitalHealth(mind);
+  log('noise x45'); log('mean '+b.mean.toFixed(4)+' → '+a.mean.toFixed(4)); for(const s of a.scores) log(s.entity+' '+s.score.toFixed(4));
+  stat.textContent='NOISY '+a.mean.toFixed(4);
+  ctx.fillStyle='#0a0a12'; ctx.fillRect(0,0,cv.width,cv.height);
+  for(let i=0;i<180;i++){ ctx.fillStyle=`hsla(${Math.random()*360},70%,60%,0.45)`; ctx.beginPath(); ctx.arc(Math.random()*cv.width,Math.random()*cv.height,Math.random()*4+1,0,TWO_PI); ctx.fill(); } };
+document.getElementById('btn-sleep').onclick=()=>{ out.textContent=''; const {mind,dreams}=ensure(); const before=dreams.measureCapitalHealth(mind); log('Before '+before.mean.toFixed(4));
+  const rep=dreams.sleepCycle(mind).consolidation;
+  dreamAnim(rep, ()=>{ log('After '+rep.meanAfter.toFixed(4)); log('Noise reduced '+rep.noiseReducedPct.toFixed(1)+'%');
+    for(const s of rep.after.scores) log(s.entity+' → '+s.expect+' '+s.score.toFixed(4));
+    log(rep.meanAfter>0.25&&rep.meanAfter>rep.meanBefore?'PASS recovery':'check'); }); };
+document.getElementById('btn-reason').onclick=()=>{ out.textContent=''; const {mind,cand}=ensure();
+  const probe=mind.probeSlot('japan','capital');
+  const ranked=cand.map(l=>({l,s:mind.space.cosine(probe,mind.space.atom(l))})).sort((a,b)=>b.s-a.s);
+  log('france:paris :: japan:? → '+ranked[0].l+' ('+ranked[0].s.toFixed(3)+')');
+  log(ranked[0].l==='tokyo'?'PASS':'…'); stat.textContent='answer '+ranked[0].l); };
 </script>
 </body>
 </html>
