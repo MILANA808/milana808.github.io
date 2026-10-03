@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>АКСИ MATRIX · Quantum Chaos</title>
+<meta name="theme-color" content="#030508"/>
+<meta name="description" content="Локальный квантовый хаос: суперпозиция → коллапс. Вибрация, аудио, permit token."/>
+<link rel="canonical" href="https://milana808.github.io/matrix/chaos/"/>
+<style>
+:root{--bg:#030508;--panel:#0a0f14;--line:rgba(0,255,136,.18);--t:#e8fff4;--m:#6a9a80;--neon:#00ff88;--cyan:#00e5ff;--glow:0 0 24px rgba(0,255,136,.25)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--t);font-family:ui-monospace,Menlo,Consolas,monospace}
+body{background-image:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(0,255,136,.12),transparent),linear-gradient(rgba(0,255,136,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.03) 1px,transparent 1px);background-size:100% 100%,24px 24px,24px 24px;min-height:100dvh;display:flex;flex-direction:column}
+.wrap{max-width:480px;width:100%;margin:0 auto;padding:16px 14px 28px;flex:1;display:flex;flex-direction:column}
+.tag{font-size:10px;letter-spacing:.2em;color:var(--neon);text-transform:uppercase}
+h1{margin:4px 0 0;font-size:1.25rem;font-weight:700;text-shadow:var(--glow)}
+.sub{color:var(--m);font-size:12px;margin:6px 0 0;line-height:1.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;box-shadow:inset 0 0 40px rgba(0,255,136,.04)}
+label{display:block;font-size:11px;color:var(--m);margin-bottom:6px}
+textarea{width:100%;min-height:72px;resize:vertical;border-radius:10px;border:1px solid var(--line);background:#05080c;color:var(--t);padding:12px;font:inherit;font-size:14px;outline:none}
+textarea:focus{border-color:var(--neon)}
+.btn{width:100%;border:0;border-radius:12px;padding:14px;margin-top:10px;font:inherit;font-weight:700;font-size:14px;letter-spacing:.06em;cursor:pointer;background:linear-gradient(135deg,#00ff88,#00c8a0);color:#02100a;box-shadow:var(--glow)}
+.btn:active{transform:scale(.98)}.btn:disabled{opacity:.45}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
+.chip.on{color:var(--neon);border-color:rgba(0,255,136,.4)}
+.viz-wrap{height:160px;margin-top:4px}
+canvas{width:100%;height:100%;display:block;border-radius:10px;background:#05080c;border:1px solid var(--line)}
+.bars{margin-top:8px}
+.bar-row{display:grid;grid-template-columns:72px 1fr 48px;gap:6px;align-items:center;font-size:10px;margin:3px 0;color:var(--m)}
+.bar-row b{color:var(--cyan);font-weight:500}
+.track{height:6px;background:#12181f;border-radius:4px;overflow:hidden}
+.track>i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--neon));width:0}
+.answer{font-size:1.1rem;color:var(--neon);text-shadow:var(--glow);word-break:break-word;min-height:1.4em;padding:8px 0}
+.bits{font-size:11px;color:var(--m);word-break:break-all}
+footer{margin-top:auto;padding-top:16px;font-size:10px;color:var(--m);text-align:center}
+footer a{color:var(--cyan)}
+.scan{pointer-events:none;position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,.015) 3px);z-index:0}
+.wrap>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+<div class="scan" aria-hidden="true"></div>
+<div class="wrap">
+  <header>
+    <div class="tag">AKSI MATRIX · local quantum</div>
+    <h1>Квантовый хаос</h1>
+    <p class="sub">Суперпозиция на телефоне → коллапс. Вибрация · аудио · permit в localStorage.</p>
+  </header>
+  <div class="panel">
+    <label for="q">Запрос / agent seed</label>
+    <textarea id="q" rows="3">чему равен корень из 16?</textarea>
+    <button type="button" class="btn" id="go">ВЫЗВАТЬ КОЛЛАПС</button>
+    <div class="meta">
+      <span class="chip on">6 qubits</span>
+      <span class="chip" id="ent">H = —</span>
+      <span class="chip" id="perm">permit —</span>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="tag">амплитуды до коллапса</div>
+    <div class="viz-wrap"><canvas id="wave" width="480" height="160"></canvas></div>
+    <div class="bars" id="bars"></div>
+  </div>
+  <div class="panel">
+    <div class="tag">коллапс · shots=1</div>
+    <div class="answer" id="ans">—</div>
+    <div class="bits" id="bits"></div>
+  </div>
+  <footer>
+    offline · aksi_matrix_permit · technology_serves_human<br/>
+    <a href="https://milana808.github.io/">home</a> ·
+    <a href="https://milana808.github.io/matrix/">matrix</a> ·
+    <a href="https://milana808.github.io/permit/">permit</a>
+  </footer>
+</div>
+<script src="../quantum_browser_core.js?v=2"></script>
+<script>
+(function () {
+  var core = new QuantumBrowserCore(6);
+  var qEl = document.getElementById("q");
+  var go = document.getElementById("go");
+  var ans = document.getElementById("ans");
+  var bits = document.getElementById("bits");
+  var bars = document.getElementById("bars");
+  var ent = document.getElementById("ent");
+  var permChip = document.getElementById("perm");
+  var canvas = document.getElementById("wave");
+  var ctx = canvas.getContext("2d");
+  var phase = 0, lastTop = [];
+  var audioCtx = null, osc = null, gain = null, lfo = null;
+
+  function ensureAudio() {
+    if (audioCtx) return audioCtx;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+    return audioCtx;
+  }
+  function startHum(entropy) {
+    var ctxA = ensureAudio();
+    if (!ctxA) return;
+    stopHum(false);
+    if (ctxA.state === "suspended") ctxA.resume();
+    var base = 42 + Math.min(48, (entropy || 3) * 6);
+    osc = ctxA.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = base;
+    var osc2 = ctxA.createOscillator();
+    osc2.type = "triangle";
+    osc2.frequency.value = base * 1.5;
+    gain = ctxA.createGain();
+    gain.gain.value = 0.0001;
+    var g2 = ctxA.createGain();
+    g2.gain.value = 0.012;
+    lfo = ctxA.createOscillator();
+    lfo.frequency.value = 0.15 + Math.min(0.4, (entropy || 3) * 0.04);
+    var lfoGain = ctxA.createGain();
+    lfoGain.gain.value = 3 + (entropy || 3) * 0.5;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    osc.connect(gain);
+    osc2.connect(g2);
+    g2.connect(gain);
+    gain.connect(ctxA.destination);
+    osc.start();
+    osc2.start();
+    lfo.start();
+    osc._osc2 = osc2;
+    var t = ctxA.currentTime;
+    gain.gain.linearRampToValueAtTime(0.035, t + 0.4);
+  }
+  function stopHum(withDrop) {
+    if (!audioCtx || !gain || !osc) return;
+    var t = audioCtx.currentTime;
+    try {
+      if (withDrop) {
+        osc.frequency.cancelScheduledValues(t);
+        osc.frequency.setValueAtTime(osc.frequency.value, t);
+        osc.frequency.exponentialRampToValueAtTime(18, t + 0.35);
+        gain.gain.cancelScheduledValues(t);
+        gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), t);
+        gain.gain.linearRampToValueAtTime(0.0001, t + 0.45);
+      } else {
+        gain.gain.cancelScheduledValues(t);
+        gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.0001), t);
+        gain.gain.linearRampToValueAtTime(0.0001, t + 0.15);
+      }
+      var o = osc, o2 = osc._osc2, lf = lfo;
+      setTimeout(function () {
+        try { o.stop(); } catch (e) {}
+        try { if (o2) o2.stop(); } catch (e) {}
+        try { if (lf) lf.stop(); } catch (e) {}
+      }, withDrop ? 500 : 200);
+    } catch (e) {}
+    osc = null; gain = null; lfo = null;
+  }
+  function hapticCollapse() {
+    if (typeof navigator === "undefined" || typeof navigator.vibrate !== "function") return;
+    try { navigator.vibrate([40, 30, 60]); } catch (e) {}
+  }
+  function resizeCanvas() {
+    var r = canvas.getBoundingClientRect();
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.floor(r.width * dpr);
+    canvas.height = Math.floor(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+  function drawWave() {
+    var w = canvas.getBoundingClientRect().width;
+    var h = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#05080c";
+    ctx.fillRect(0, 0, w, h);
+    if (!lastTop.length) {
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(0,229,255,0.35)";
+      ctx.lineWidth = 1.5;
+      for (var x = 0; x < w; x++) {
+        var y = h / 2 + Math.sin(x * 0.04 + phase) * 12 * Math.sin(phase * 0.3);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    } else {
+      var maxP = lastTop[0].probability || 1e-6;
+      for (var i = 0; i < lastTop.length; i++) {
+        var p = lastTop[i].probability / maxP;
+        var amp = 8 + p * (h * 0.38);
+        ctx.beginPath();
+        ctx.strokeStyle = "hsla(" + (150 + i * 8) + ",100%,60%," + (0.25 + p * 0.6) + ")";
+        ctx.lineWidth = 1 + p * 1.5;
+        for (var x2 = 0; x2 < w; x2++) {
+          var tt = x2 / w;
+          var y2 = h / 2 + Math.sin(tt * Math.PI * 4 + phase + i * 0.7) * amp * Math.sin(Math.PI * tt);
+          if (x2 === 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+        }
+        ctx.stroke();
+      }
+    }
+    phase += 0.05;
+    requestAnimationFrame(drawWave);
+  }
+  drawWave();
+  function renderBars(top) {
+    bars.innerHTML = "";
+    top.slice(0, 6).forEach(function (row) {
+      var d = document.createElement("div");
+      d.className = "bar-row";
+      d.innerHTML = "<b>|" + row.bitstring + "⟩</b><div class=\"track\"><i style=\"width:" + Math.min(100, row.probability * 400) + "%\"></i></div><span>" + (row.probability * 100).toFixed(2) + "%</span>";
+      bars.appendChild(d);
+    });
+  }
+  var prev = QuantumBrowserCore.loadPermit && QuantumBrowserCore.loadPermit();
+  if (prev && prev.bitstring) {
+    permChip.textContent = "permit " + prev.bitstring.slice(0, 6) + "…";
+    permChip.classList.add("on");
+  }
+  function run() {
+    var q = qEl.value.trim();
+    if (!q) return;
+    go.disabled = true;
+    ans.textContent = "…хаос…";
+    bits.textContent = "";
+    ensureAudio();
+    setTimeout(function () {
+      try {
+        var t0 = performance.now();
+        var before = core.encode(q);
+        lastTop = before.top;
+        renderBars(before.top);
+        ent.textContent = "H = " + before.entropy.toFixed(3) + " bit";
+        ent.classList.add("on");
+        startHum(before.entropy);
+        setTimeout(function () {
+          hapticCollapse();
+          stopHum(true);
+          var col = core.collapse();
+          var ms = (performance.now() - t0).toFixed(1);
+          ans.textContent = col.answer;
+          bits.textContent = "|" + col.bitstring + "⟩ · p=" + col.probability.toFixed(4) + " · " + ms + " ms · offline";
+          if (QuantumBrowserCore.savePermit(col)) {
+            permChip.textContent = "permit saved";
+            permChip.classList.add("on");
+          }
+          go.disabled = false;
+        }, 420);
+      } catch (e) {
+        stopHum(false);
+        ans.textContent = "error";
+        bits.textContent = String(e.message || e);
+        go.disabled = false;
+      }
+    }, 20);
+  }
+  go.addEventListener("click", run);
+  qEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); }
+  });
+})();
+</script>
+</body>
+</html>
