@@ -3,223 +3,178 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>AKSI Action Permit — gate + signed receipt for AI agents</title>
-<meta name="description" content="Agent tool-calls pass mandate → ALLOW|BLOCK → ECDSA receipt. Not a chatbot. Runtime authorization for AI agents."/>
+<title>AKSI Permit — tested runtime gate</title>
+<meta name="description" content="Self-tested agent tool gate: ALLOW/BLOCK + ECDSA receipt. Not a demo mock."/>
 <link rel="canonical" href="https://milana808.github.io/permit/"/>
 <meta name="theme-color" content="#0a0a0b"/>
-<meta property="og:title" content="AKSI Action Permit"/>
-<meta property="og:description" content="Агент не выполняет tool-call без мандата. ALLOW/BLOCK + крипто-квитанция."/>
 <style>
 :root{--bg:#070708;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--ok:#34d399;--bad:#f87171}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,-apple-system,sans-serif;line-height:1.5}
-.wrap{max-width:720px;margin:0 auto;padding:24px 16px 56px}
-.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--a);margin:0 0 8px}
-h1{margin:0;font-size:clamp(1.4rem,4vw,1.85rem);line-height:1.2}
-.lead{color:var(--m);font-size:15px;margin:10px 0 18px;max-width:36em}
-.hero{border:1px solid var(--line);border-radius:16px;padding:18px;background:linear-gradient(165deg,rgba(167,139,250,.14),transparent 55%)}
-.pipe{font:12px/1.5 ui-monospace,monospace;color:var(--a);margin-top:12px;word-break:break-word}
-.grid{display:grid;gap:10px;margin:16px 0}
-@media(min-width:560px){.grid.2{grid-template-columns:1fr 1fr}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
-.card h2{margin:0 0 8px;font-size:14px}
-.card p,.card li{font-size:13px;color:var(--m);margin:0}
-.card ul{margin:8px 0 0;padding-left:1.1em}
-.tools{display:grid;gap:8px;margin-top:8px}
-.tool{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;background:#0e0e10;border:1px solid var(--line);border-radius:12px;padding:12px;color:inherit;font:inherit;cursor:pointer}
-.tool:hover{border-color:rgba(167,139,250,.5)}
-.tool b{display:block;font-size:14px}.tool span{font-size:12px;color:var(--m)}
-.tool .go{flex-shrink:0;background:var(--a);color:#0a0a0b;border:0;border-radius:8px;padding:8px 12px;font-weight:700;font-size:12px}
-.gate{font-size:1.6rem;font-weight:800;letter-spacing:.02em}.gate.ALLOW{color:var(--ok)}.gate.BLOCK{color:var(--bad)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px 48px}
+h1{margin:0;font-size:1.4rem}.sub{color:var(--m);font-size:14px;margin:8px 0 14px}
+.badge{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);margin:2px}
+.badge.ok{border-color:var(--ok);color:var(--ok)}.badge.bad{border-color:var(--bad);color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+.tests div{font:12px ui-monospace,monospace;padding:4px 0;border-bottom:1px solid var(--line)}
+.tests .p{color:var(--ok)}.tests .f{color:var(--bad)}
+.tool{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;margin:6px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0e0e10;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.tool:hover{border-color:rgba(167,139,250,.45)}
+.tool b{display:block;font-size:13px}.tool span{font-size:11px;color:var(--m)}
+.go{background:var(--a);color:#0a0a0b;border:0;border-radius:8px;padding:7px 11px;font-weight:700;font-size:12px}
+.gate{font-size:1.5rem;font-weight:800}.gate.ALLOW{color:var(--ok)}.gate.BLOCK{color:var(--bad)}
+pre{font:11px/1.4 ui-monospace,monospace;color:var(--m);white-space:pre-wrap;max-height:200px;overflow:auto;background:#0a0a0c;padding:10px;border-radius:10px}
+label{display:block;font-size:12px;color:var(--m);margin:8px 0 4px}
+input,textarea{width:100%;background:#0e0e10;border:1px solid var(--line);color:var(--t);border-radius:10px;padding:10px;font:inherit}
+button.primary{border:0;border-radius:10px;padding:10px 14px;background:var(--a);color:#0a0a0b;font-weight:700;cursor:pointer;font:inherit}
+button.ghost{border:0;border-radius:10px;padding:10px 14px;background:#1c1c1f;color:var(--t);cursor:pointer;font:inherit;margin-left:6px}
 .meta{font-size:12px;color:var(--m);margin-top:6px}
-pre{white-space:pre-wrap;word-break:break-word;font:11px/1.4 ui-monospace,monospace;color:var(--m);max-height:220px;overflow:auto;margin:10px 0 0;background:#0a0a0c;padding:10px;border-radius:10px}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-button,a.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:650;cursor:pointer;font:inherit;font-size:13px;text-decoration:none;display:inline-block}
-button.primary,a.btn.primary{background:var(--a);color:#0a0a0b}
-button.ghost,a.btn.ghost{background:#1c1c1f;color:var(--t)}
-a.btn.ok{background:var(--ok);color:#0a0a0b}
-.price{display:grid;gap:10px;margin:12px 0}
-@media(min-width:560px){.price{grid-template-columns:repeat(3,1fr)}}
-.price .card{position:relative}
-.price .amt{font-size:1.35rem;font-weight:800;margin:6px 0 4px;color:var(--t)}
-.price .amt small{font-size:12px;font-weight:500;color:var(--m)}
-.price.featured{border-color:rgba(52,211,153,.45)}
-.note{font-size:12px;color:var(--m);margin-top:8px}
-footer{margin-top:32px;font-size:12px;color:var(--m);border-top:1px solid var(--line);padding-top:14px}
-footer a{color:var(--a)}
-code{font-size:12px;background:#1c1c1f;padding:2px 6px;border-radius:6px}
+footer{margin-top:24px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <p class="eyebrow">Product · not a chatbot</p>
-  <h1>AKSI Action Permit</h1>
-  <p class="lead">Агент не выполняет опасный tool-call без мандата. Каждый ALLOW/BLOCK — подписанная квитанция (ECDSA) для audit.</p>
+  <h1>AKSI Permit</h1>
+  <p class="sub">Runtime gate для tool-call. Ниже — автотест, который реально гоняется в твоём браузере.</p>
+  <span class="badge" id="ver">v1.1</span>
+  <span class="badge" id="st">test…</span>
 
-  <div class="hero">
-    <p style="margin:0;font-size:14px;color:var(--m)"><b style="color:var(--t)">Зачем:</b> LLM-агенты уже вызывают HTTP, файлы, платежи. Без gate инцидент — вопрос времени. Permit — слой между «модель решила» и «система сделала».</p>
-    <div class="pipe">goal → mandate → intent → ALLOW | BLOCK → signed receipt → offline verify</div>
-    <div class="row" style="margin-top:14px">
-      <a class="btn ok" href="mailto:aksilove@internet.ru?subject=AKSI%20Permit%20Pilot&body=Хочу%20пилот%20Action%20Permit.">Запросить пилот</a>
-      <a class="btn ghost" href="./aksi-permit.js">Скачать SDK</a>
-    </div>
-  </div>
-
-  <div class="grid 2">
-    <div class="card">
-      <h2>Что внутри</h2>
-      <ul>
-        <li>Allow/deny tools + domains + spend</li>
-        <li>Intent: цель vs tool</li>
-        <li>ECDSA P-256 receipt (ALLOW и BLOCK)</li>
-        <li>offlineVerifyReceipt</li>
-        <li>JS SDK, браузер и Node</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h2>Кому</h2>
-      <ul>
-        <li>Internal agents (support, ops, CRM)</li>
-        <li>LangChain / tool-calling bots</li>
-        <li>CISO / compliance: «кто разрешил?»</li>
-        <li>Не подходит: «хочу свой ChatGPT»</li>
-      </ul>
-    </div>
+  <div class="card">
+    <b>Self-test</b>
+    <div class="tests" id="tests">запуск…</div>
   </div>
 
   <div class="card">
-    <h2>Живое демо</h2>
-    <p>Нажми Run — gate считается в браузере, без сервера.</p>
-    <div class="tools">
-      <button type="button" class="tool" data-s="ok"><div><b>1. Legit: погода</b><span>goal «Узнай погоду» · weather.fetch · wttr.in</span></div><span class="go">Run</span></button>
-      <button type="button" class="tool" data-s="attack"><div><b>2. Attack: пицца → delete</b><span>goal «Заказать пиццу» · file.delete</span></div><span class="go">Run</span></button>
-      <button type="button" class="tool" data-s="domain"><div><b>3. Attack: чужой домен</b><span>http.get → evil-exfil…</span></div><span class="go">Run</span></button>
-    </div>
-    <div id="result" hidden style="margin-top:14px">
+    <b>Сценарии</b>
+    <button type="button" class="tool" data-s="ok"><div><b>ALLOW · погода</b><span>weather.fetch → wttr.in</span></div><span class="go">Run</span></button>
+    <button type="button" class="tool" data-s="attack"><div><b>BLOCK · пицца → delete</b><span>file.delete /etc/passwd</span></div><span class="go">Run</span></button>
+    <button type="button" class="tool" data-s="domain"><div><b>BLOCK · evil domain</b><span>http.get evil host</span></div><span class="go">Run</span></button>
+    <div id="out" hidden style="margin-top:12px">
       <div id="gate" class="gate">—</div>
-      <div id="human" style="margin-top:8px;font-size:14px"></div>
-      <div id="meta" class="meta"></div>
+      <div id="human" class="meta"></div>
       <pre id="json"></pre>
-      <div class="row">
-        <button type="button" class="primary" id="btn-copy">Скачать receipt JSON</button>
-        <button type="button" class="ghost" id="btn-verify">Verify подпись</button>
-      </div>
-      <div id="vmsg" class="meta"></div>
+      <button type="button" class="ghost" id="btn-v">Verify</button>
+      <span id="vmsg" class="meta"></span>
     </div>
   </div>
-
-  <h2 style="font-size:1rem;margin:22px 0 8px">Цены</h2>
-  <div class="price">
-    <div class="card">
-      <b>Pilot</b>
-      <div class="amt">$1 990 <small>разово</small></div>
-      <p>Встройка в 1 агента · 2–4 недели · 2 policy-сценария · receipt export</p>
-    </div>
-    <div class="card" style="border-color:rgba(52,211,153,.4)">
-      <b>Studio</b>
-      <div class="amt">$79 <small>/мес</small></div>
-      <p>SDK · allowlist · receipts · docs · email</p>
-    </div>
-    <div class="card">
-      <b>Business</b>
-      <div class="amt">$399 <small>/мес</small></div>
-      <p>Несколько агентов · policy packs · audit export · priority</p>
-    </div>
-  </div>
-  <p class="note">Enterprise / on-prem — от $3k/мес или project $15k+. Письмо: <a href="mailto:aksilove@internet.ru" style="color:var(--ok)">aksilove@internet.ru</a></p>
 
   <div class="card">
-    <h2>SDK · вставка</h2>
-<pre style="max-height:none">import { AksiKernel } from './aksi-permit.js';
-
-const kernel = new AksiKernel();
-const step = await kernel.executeAgentStep(goal, toolCall);
-// side-effect только после ALLOW
-// BLOCK → SecurityBlockedError + receipt</pre>
-    <p class="meta" style="margin-top:8px"><a href="./aksi-permit.js" style="color:var(--a)">aksi-permit.js</a> · Web Crypto ECDSA P-256</p>
+    <b>Свой запрос</b>
+    <label>Goal</label>
+    <input id="goal" value="Узнай погоду в Москве"/>
+    <label>Tool</label>
+    <input id="tool" value="weather.fetch"/>
+    <label>URL (optional)</label>
+    <input id="url" value="https://wttr.in/Moscow"/>
+    <div style="margin-top:10px">
+      <button type="button" class="primary" id="btn-run">Execute gate</button>
+    </div>
   </div>
 
-  <div class="row" style="margin-top:20px">
-    <a class="btn ok" href="mailto:aksilove@internet.ru?subject=AKSI%20Permit%20Pilot">Написать · пилот</a>
-    <a class="btn ghost" href="/">Home</a>
+  <div class="card">
+    <b>Честно</b>
+    <p class="meta" style="margin:0">Это MVP: gate + подпись в браузере. Side-effect не выполняется сам — ты вызываешь tool только после ALLOW (<code>wrapTool</code>). Ключи ECDSA живут в localStorage. Не SaaS-кабинет и не AGI — runtime control.</p>
+    <p class="meta"><a href="./aksi-permit.js" style="color:var(--a)">aksi-permit.js</a> · <a href="mailto:aksilove@internet.ru" style="color:var(--ok)">aksilove@internet.ru</a></p>
   </div>
 
-  <footer>
-    technology_serves_human · не AGI · demo keys session-only<br/>
-    <a href="/">Home</a> · <a href="/talk/">Talk</a> · <a href="/offer/">Offer</a>
-  </footer>
+  <footer><a href="/">Home</a> · technology_serves_human</footer>
 </div>
 <script type="module">
-import { AksiKernel, SecurityBlockedError, offlineVerifyReceipt } from './aksi-permit.js';
+import {
+  AksiKernel, SecurityBlockedError, offlineVerifyReceipt, runSelfTest
+} from './aksi-permit.js?v=11';
 
 const kernel = new AksiKernel();
-const result = document.getElementById('result');
+const testsEl = document.getElementById('tests');
+const st = document.getElementById('st');
+const out = document.getElementById('out');
 const gateEl = document.getElementById('gate');
 const human = document.getElementById('human');
-const meta = document.getElementById('meta');
 const json = document.getElementById('json');
 const vmsg = document.getElementById('vmsg');
-let lastReceipt = null;
+let last = null;
 
-async function run(kind) {
+const self = await runSelfTest();
+testsEl.innerHTML = self.results.map(function (r) {
+  return '<div class="' + (r.pass ? 'p' : 'f') + '">' +
+    (r.pass ? 'PASS' : 'FAIL') + ' · ' + r.name +
+    (r.detail ? ' · ' + r.detail : '') + '</div>';
+}).join('');
+st.textContent = self.pass ? 'ALL PASS' : 'FAIL';
+st.className = 'badge ' + (self.pass ? 'ok' : 'bad');
+
+async function show(kind) {
+  out.hidden = false;
   vmsg.textContent = '';
-  result.hidden = false;
   try {
     if (kind === 'ok') {
-      const out = await kernel.executeAgentStep('Узнай погоду в Москве', {
-        tool: 'weather.fetch',
-        params: { city: 'Moscow' },
-        url: 'https://wttr.in/Moscow',
+      const r = await kernel.executeAgentStep('Узнай погоду в Москве', {
+        tool: 'weather.fetch', params: { city: 'Moscow' }, url: 'https://wttr.in/Moscow'
       });
       gateEl.textContent = 'ALLOW';
       gateEl.className = 'gate ALLOW';
-      human.textContent = 'Мандат и intent совпали. Реальный side-effect — только после ALLOW.';
-      meta.textContent = (out.reasons || []).join(' · ') + ' · verify=' + (out.verify && out.verify.ok);
-      lastReceipt = out.receipt;
-      json.textContent = JSON.stringify(out.receipt, null, 2);
+      human.textContent = 'verify=' + (r.verify && r.verify.ok) + ' · ' + (r.reasons || []).join(', ');
+      last = r.receipt;
+      json.textContent = JSON.stringify(r.receipt, null, 2);
     } else if (kind === 'attack') {
       await kernel.executeAgentStep('Заказать пиццу', {
-        tool: 'file.delete',
-        params: { path: '/etc/passwd' },
+        tool: 'file.delete', params: { path: '/etc/passwd' }
       });
-    } else {
+    } else if (kind === 'domain') {
       await kernel.executeAgentStep('Узнай погоду', {
-        tool: 'http.get',
-        url: 'https://evil-exfil.attacker.test/steal',
+        tool: 'http.get', url: 'https://evil-exfil.attacker.test/x'
       });
     }
   } catch (e) {
-    if (e.name === 'SecurityBlockedError' || e instanceof SecurityBlockedError) {
+    if (e.name === 'SecurityBlockedError') {
       gateEl.textContent = 'BLOCK';
       gateEl.className = 'gate BLOCK';
-      human.textContent = 'Агент остановлен. Receipt подписан и на BLOCK — для audit.';
-      meta.textContent = ((e.result && e.result.reasons) || []).join(' · ');
-      lastReceipt = e.receipt;
+      human.textContent = (e.result && e.result.reasons || []).join(' · ');
+      last = e.receipt;
       json.textContent = JSON.stringify(e.receipt, null, 2);
     } else {
       gateEl.textContent = 'ERROR';
-      gateEl.className = 'gate';
       human.textContent = String(e.message || e);
     }
   }
 }
 
-document.querySelectorAll('.tool').forEach(function (btn) {
-  btn.addEventListener('click', function () { run(btn.getAttribute('data-s')); });
+document.querySelectorAll('[data-s]').forEach(function (b) {
+  b.onclick = function () { show(b.getAttribute('data-s')); };
 });
 
-document.getElementById('btn-copy').onclick = function () {
-  if (!lastReceipt) return;
-  const blob = new Blob([JSON.stringify(lastReceipt, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (lastReceipt.id || 'receipt') + '.json';
-  a.click();
+document.getElementById('btn-run').onclick = async function () {
+  out.hidden = false;
+  vmsg.textContent = '';
+  const goal = document.getElementById('goal').value.trim();
+  const tool = document.getElementById('tool').value.trim();
+  const url = document.getElementById('url').value.trim();
+  try {
+    const r = await kernel.executeAgentStep(goal, {
+      tool: tool, params: {}, url: url || undefined
+    });
+    gateEl.textContent = 'ALLOW';
+    gateEl.className = 'gate ALLOW';
+    human.textContent = (r.reasons || []).join(' · ');
+    last = r.receipt;
+    json.textContent = JSON.stringify(r.receipt, null, 2);
+  } catch (e) {
+    if (e.name === 'SecurityBlockedError') {
+      gateEl.textContent = 'BLOCK';
+      gateEl.className = 'gate BLOCK';
+      human.textContent = (e.result && e.result.reasons || []).join(' · ');
+      last = e.receipt;
+      json.textContent = JSON.stringify(e.receipt, null, 2);
+    } else {
+      gateEl.textContent = 'ERROR';
+      human.textContent = String(e.message || e);
+    }
+  }
 };
 
-document.getElementById('btn-verify').onclick = async function () {
-  if (!lastReceipt) return;
-  const v = await offlineVerifyReceipt(lastReceipt);
-  vmsg.textContent = v.ok ? 'VERIFY OK — ECDSA signature valid (session key)' : 'VERIFY FAIL';
+document.getElementById('btn-v').onclick = async function () {
+  if (!last) return;
+  const v = await offlineVerifyReceipt(last);
+  vmsg.textContent = v.ok ? 'VERIFY OK' : 'VERIFY FAIL';
   vmsg.style.color = v.ok ? 'var(--ok)' : 'var(--bad)';
 };
 </script>
