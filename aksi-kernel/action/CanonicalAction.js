@@ -1,0 +1,4 @@
+import { createHash } from 'node:crypto';
+function stable(v){if(v===null||typeof v!=='object')return JSON.stringify(v);if(Array.isArray(v))return '['+v.map(stable).join(',')+']';return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';}
+export function canonicalAction(input={}){const action={schema:'aksi-action/v1',actor:input.actor||null,goal:input.goal||null,tool:input.tool||null,operation:input.operation||input.tool||null,resource:input.resource||input.url||null,params:input.params||{},authority:input.authority||null,expected:input.expected??null,limits:input.limits||null,sessionId:input.sessionId||null};return {...action,fingerprint:createHash('sha256').update(stable(action)).digest('hex')};}
+export function sameAction(a,b){return canonicalAction(a).fingerprint===canonicalAction(b).fingerprint;}
