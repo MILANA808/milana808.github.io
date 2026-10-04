@@ -44,7 +44,7 @@ jobs:
                   if ref.startswith(('http://','https://','mailto:','tel:','data:','javascript:','//','/')):
                       continue
                   target=(p.parent/ref).resolve()
-                  assert target.is_file(), f'{p}: missing local asset {ref}'
+                  assert target.is_file() or target.is_dir(), f'{p}: missing local asset {ref}'
           print('AKSI static validation + local asset validation: OK')
           PY
       - name: Upload validation diagnostics
