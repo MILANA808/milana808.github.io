@@ -10,21 +10,21 @@
 :root{--bg:#030508;--panel:rgba(8,12,18,.92);--line:rgba(0,255,136,.22);--t:#e8fff4;--m:#6a9a80;--neon:#00ff88;--cyan:#00e5ff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--t);font-family:ui-monospace,Menlo,Consolas,system-ui,sans-serif}
-.ui{max-width:480px;margin:0 auto;padding:14px 12px 32px}
+.ui{max-width:520px;margin:0 auto;padding:14px 12px 36px}
 .tag{font-size:10px;letter-spacing:.14em;color:var(--neon);text-transform:uppercase}
 h1{margin:6px 0 0;font-size:1.2rem}
-.sub{color:var(--m);font-size:11px;margin:6px 0 0;line-height:1.4}
+.sub{color:var(--m);font-size:11px;margin:6px 0 0;line-height:1.45}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
 label{display:block;font-size:10px;color:var(--m);margin-bottom:4px}
 textarea,input{width:100%;border-radius:10px;border:1px solid var(--line);background:#05080c;color:var(--t);padding:10px;font:inherit;font-size:13px}
-textarea{min-height:64px;resize:vertical}
+textarea{min-height:68px;resize:vertical}
 .btn{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#00ff88,#00c4a0);color:#02100a}
 .btn.sec{background:transparent;border:1px solid var(--line);color:var(--neon)}
 .btn:disabled{opacity:.45}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chip{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
 .chip.on{color:var(--neon)}
-.out{font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;min-height:4em}
+.out{font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;min-height:6em}
 .bits{font-size:10px;color:var(--m);margin-top:8px;word-break:break-all}
 .note{font-size:10px;color:var(--m);margin-top:8px;line-height:1.35}
 .row{display:flex;gap:6px;flex-wrap:wrap}
@@ -36,9 +36,9 @@ footer a{color:var(--cyan)}
 </head>
 <body>
 <div class="ui">
-  <div class="tag">AKSI · math-mind · phase-HRR</div>
-  <h1>Математический ответ</h1>
-  <p class="sub">Без WebLLM и без Wikipedia. Фазовая память + сборка из фактов.</p>
+  <div class="tag">AKSI · math-mind · long compose</div>
+  <h1>Развёрнутый ответ из памяти</h1>
+  <p class="sub">Не LLM. Длинный текст = essay-записи + связанные факты. Без Wikipedia / WebLLM.</p>
   <div class="panel">
     <label for="q">Вопрос</label>
     <textarea id="q" rows="2">почему небо синее?</textarea>
@@ -56,14 +56,13 @@ footer a{color:var(--cyan)}
     <div class="bits" id="bits"></div>
   </div>
   <div class="panel">
-    <div class="tag">teach (записать факт)</div>
+    <div class="tag">teach</div>
     <div class="row">
       <input id="ts" placeholder="subject" value="париж"/>
       <input id="tr" placeholder="relation" value="есть"/>
       <input id="to" placeholder="object" value="столица_франции"/>
     </div>
-    <button type="button" class="btn sec" id="teach">ЗАПИСАТЬ</button>
-    <p class="note">После записи спроси: «париж».</p>
+    <button type="button" class="btn sec" id="teach">ЗАПИСАТЬ ФАКТ</button>
   </div>
   <footer>
     <a href="https://milana808.github.io/">home</a> ·
@@ -76,7 +75,7 @@ function createMathMind(opts){
   opts=opts||{};
   var D=opts.D||1024;
   var seed0=opts.seed||0xA6512026;
-  function mulberry32(a){return function(){var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}}
+  function mulberry32(a){return function(){var t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;}};
   var rng=mulberry32(seed0);
   function wrap(x){return((x+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;}
   function randomVec(){var v=new Float64Array(D);for(var i=0;i<D;i++)v[i]=(rng()*2-1)*Math.PI;return v;}
@@ -85,25 +84,44 @@ function createMathMind(opts){
   function sim(a,b){var s=0;for(var i=0;i<D;i++)s+=Math.cos(a[i]-b[i]);return s/D;}
   function permute(v,k){var o=new Float64Array(D);var shift=((k%D)+D)%D;for(var i=0;i<D;i++)o[i]=v[(i+shift)%D];return o;}
   var ROLE={S:randomVec(),R:randomVec(),O:randomVec(),Q:randomVec(),A:randomVec()};
-  var lex={}, invLex=[], facts=[], hologram=null;
+  var lex={}; var facts=[];
   function tok(s){return String(s||'').toLowerCase().replace(/[«»"'.,!?;:()]/g,' ').replace(/\s+/g,' ').trim();}
-  function ensureToken(t){t=tok(t);if(!t)return null;if(!lex[t]){var v=randomVec();lex[t]=v;invLex.push({token:t,vec:v});}return lex[t];}
+  function ensureToken(t){t=tok(t);if(!t)return null;if(!lex[t])lex[t]=randomVec();return lex[t];}
   function encodePhrase(text){var parts=tok(text).split(' ').filter(Boolean);if(!parts.length)return randomVec();var acc=null;for(var i=0;i<parts.length;i++){var v=permute(ensureToken(parts[i]),i*7+1);acc=acc?bind(acc,v):v;}return acc;}
-  function addFact(s,r,o){ensureToken(s);ensureToken(r);ensureToken(o);var triple=bundle([bind(ensureToken(s),ROLE.S),bind(ensureToken(r),ROLE.R),bind(ensureToken(o),ROLE.O)]);var item={s:s,r:r,o:o,text:s+' '+r+' '+o,vec:triple,qa:false};facts.push(item);hologram=hologram?bundle([hologram,triple]):triple;return item;}
-  function addQA(question,answer){var qv=encodePhrase(question);var av=encodePhrase(answer);var pair=bundle([bind(qv,ROLE.Q),bind(av,ROLE.A)]);facts.push({s:question,r:'QA',o:answer,text:answer,vec:pair,qa:true});hologram=hologram?bundle([hologram,pair]):pair;var parts=tok(answer).split(' ');for(var i=0;i<parts.length;i++)ensureToken(parts[i]);return answer;}
-  function nearestFacts(probe,k){k=k||5;var scored=[];for(var i=0;i<facts.length;i++)scored.push({fact:facts[i],score:sim(probe,facts[i].vec)});scored.sort(function(a,b){return b.score-a.score;});return scored.slice(0,k);}
-  function tryMath(q){var s=String(q||'').toLowerCase().replace(/,/g,'.');s=s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');s=s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');s=s.replace(/\bpi\b|π|пи/g,'PI');s=s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi,' ');s=s.replace(/\?/g,' ').trim();var m=s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);if(!m)return null;var expr=m[0].replace(/\s+/g,'').replace(/\^/g,'**');if(!/[0-9PI]|sqrt/i.test(expr))return null;var safe=expr.replace(/PI/gi,'Math.PI').replace(/sqrt\(/gi,'Math.sqrt(');try{var v=new Function('"use strict";return ('+safe+')')();if(typeof v!=='number'||!isFinite(v))return null;var num=Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10);return expr+' = '+num;}catch(e){return null;}}
-  function detectIntent(s){if(/почему|зачем|отчего|why/.test(s))return'why';if(/кто|who/.test(s))return'who';if(/где|where/.test(s))return'where';if(/как|how/.test(s))return'how';if(/что\s+такое|что\s+значит|what\s+is|определ/.test(s))return'define';return'ask';}
-  function compose(intent,recovered){if(!recovered.length)return{text:'В фазовой памяти нет резонанса. Добавь факт через ЗАПИСАТЬ или сузь вопрос.',confidence:0};var best=recovered[0];var conf=Math.max(0,Math.min(1,(best.score+0.2)/1.2));var lines=[];if(intent==='why'&&best.r==='причина')lines.push(best.s+': причина — '+best.o+'.');else if(intent==='define')lines.push(best.s+' — это '+best.o+'.');else if(best.r==='есть'||best.r==='это')lines.push(best.s+' есть '+best.o+'.');else if(best.r==='находится')lines.push(best.s+' находится '+best.o+'.');else lines.push(best.s+' '+best.r+' '+best.o+'.');for(var i=0;i<recovered.length;i++){var s=recovered[i];if(s!==best&&s.s===best.s)lines.push('Также: '+s.s+' '+s.r+' '+s.o+'.');if(lines.length>4)break;}lines.push('(sim='+best.score.toFixed(3)+', n='+recovered.length+', D='+D+')');return{text:lines.join(' '),confidence:conf};}
-  function query(text){var q=String(text||'').trim();var qv=encodePhrase(q);var qLower=q.toLowerCase();var math=tryMath(q);if(math)return{ok:true,kind:'math',answer:math,confidence:1,trace:{method:'eval'}};var qToks=tok(q).split(' ').filter(function(w){return w.length>2;});var bestQA=null;for(var i=0;i<facts.length;i++){var f=facts[i];if(!f.qa)continue;var score=sim(qv,encodePhrase(f.s));var fToks=tok(f.s).split(' ').filter(function(w){return w.length>2;});var overlap=0;for(var j=0;j<fToks.length;j++)if(qToks.indexOf(fToks[j])>=0)overlap++;var contentHit=false;for(var j2=0;j2<fToks.length;j2++){if(qToks.indexOf(fToks[j2])>=0&&['что','такое','как','почему','кто'].indexOf(fToks[j2])<0)contentHit=true;}if(qToks.indexOf('такое')>=0||qToks.indexOf('что')>=0){if(!contentHit)score*=0.2;else score+=0.2*overlap;}else score+=0.1*overlap;if(!bestQA||score>bestQA.score)bestQA={fact:f,score:score,overlap:overlap};}if(bestQA&&bestQA.score>0.35&&(bestQA.overlap>0||bestQA.score>0.55))return{ok:true,kind:'qa-recall',answer:bestQA.fact.o,confidence:Math.min(1,bestQA.score),trace:{method:'phase-QA',score:bestQA.score}};var probes=nearestFacts(qv,12);var qTokens={};var qt=tok(q).split(' ');for(var qi=0;qi<qt.length;qi++)if(qt[qi])qTokens[qt[qi]]=1;for(var pi=0;pi<probes.length;pi++){var boost=0;var parts=[probes[pi].fact.s,probes[pi].fact.r,probes[pi].fact.o];for(var p2=0;p2<parts.length;p2++){var ws=tok(parts[p2]).split(' ');for(var w=0;w<ws.length;w++)if(ws[w].length>2&&qTokens[ws[w]])boost+=0.15;}probes[pi].score+=boost;}probes.sort(function(a,b){return b.score-a.score;});var recovered=[];for(var ri=0;ri<probes.length;ri++){if(probes[ri].score<=0.05)continue;var ff=probes[ri].fact;if(ff.qa)continue;recovered.push({score:probes[ri].score,s:ff.s,r:ff.r,o:ff.o});if(recovered.length>=5)break;}var intent=detectIntent(qLower);var composed=compose(intent,recovered);return{ok:true,kind:'compose',answer:composed.text,confidence:composed.confidence,trace:{method:'compose',intent:intent}};
+  function addFact(s,r,o){ensureToken(s);ensureToken(r);ensureToken(o);var triple=bundle([bind(ensureToken(s),ROLE.S),bind(ensureToken(r),ROLE.R),bind(ensureToken(o),ROLE.O)]);var item={s:s,r:r,o:o,text:s+' '+r+' '+o,vec:triple,qa:false};facts.push(item);return item;}
+  function addEssay(question,answer){var qv=encodePhrase(question);var av=encodePhrase(answer.slice(0,120));var pair=bundle([bind(qv,ROLE.Q),bind(av,ROLE.A)]);facts.push({s:question,r:'ESSAY',o:answer,text:answer,vec:pair,qa:true,essay:true});var parts=tok(answer).split(' ');for(var i=0;i<Math.min(parts.length,40);i++)ensureToken(parts[i]);return answer;}
+  function nearestFacts(probe,k){k=k||8;var scored=[];for(var i=0;i<facts.length;i++)scored.push({fact:facts[i],score:sim(probe,facts[i].vec)});scored.sort(function(a,b){return b.score-a.score;});return scored.slice(0,k);}
+  function tryMath(q){var s=String(q||'').toLowerCase().replace(/,/g,'.');s=s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');s=s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');s=s.replace(/\bpi\b|π|пи/g,'PI');s=s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi,' ');s=s.replace(/\?/g,' ').trim();var m=s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);if(!m)return null;var expr=m[0].replace(/\s+/g,'').replace(/\^/g,'**');if(!/[0-9PI]|sqrt/i.test(expr))return null;var safe=expr.replace(/PI/gi,'Math.PI').replace(/sqrt\(/gi,'Math.sqrt(');try{var v=new Function('"use strict";return ('+safe+')')();if(typeof v!=='number'||!isFinite(v))return null;var num=Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10);return 'Выражение: '+expr+'\nРезультат: '+num+'\n\nЭто точный классический расчёт на устройстве, не нейросеть.';}catch(e){return null;}}
+  function detectIntent(s){if(/почему|зачем|отчего|why/.test(s))return'why';if(/кто\s+ты|что\s+ты|о\s+себе/.test(s))return'identity';if(/кто|who/.test(s))return'who';if(/где|where/.test(s))return'where';if(/как\s+ты|как\s+работа|как\s+устроен|how/.test(s))return'how';if(/что\s+такое|что\s+значит|what\s+is|определ/.test(s))return'define';return'ask';}
+  function composeLong(intent,q,recovered,essay){var paras=[];if(essay&&essay.o)paras.push(essay.o);if(recovered.length){var best=recovered[0];var body=[];if(!essay){if(intent==='why'){body.push('По запросу «'+q+'» в фазовой памяти сильнее всего отозвалась связка про «'+best.s+'».');if(best.r==='причина')body.push('Прямая причина в записи: '+best.o+'.');else body.push('Базовый факт: '+best.s+' '+best.r+' '+best.o+'.');}else if(intent==='define'){body.push('Определение из памяти: «'+best.s+'» связано как «'+best.r+'» с «'+best.o+'».');}else{body.push('Найденная структура: '+best.s+' → '+best.r+' → '+best.o+'.');}}var related=[];for(var i=0;i<recovered.length;i++){var r=recovered[i];if(essay&&r.s===essay.s)continue;related.push(r.s+' '+r.r+' '+r.o);}if(related.length){body.push('Связанные записи в голограмме:');for(var j=0;j<Math.min(related.length,5);j++)body.push('• '+related[j]);}if(intent==='why'&&!essay)body.push('Это не вывод нейросети: ответ собран из геометрического резонанса записанных троек в Phase-HRR.');if(body.length)paras.push(body.join('\n'));}if(!paras.length)return{text:'По запросу «'+q+'» устойчивого резонанса нет.\n\nМатематический контур не выдумывает длинный текст «из воздуха». Он поднимает essay или склеивает факты.\n\nСпроси: небо, океан, permit, акси, кто ты — или запиши факт.',confidence:0};paras.push('—\nМетод: Phase-HRR, D='+D+'. Не WebLLM. Не Wikipedia. technology_serves_human.');var conf=essay?0.9:Math.max(0.15,Math.min(0.85,(recovered[0]?recovered[0].score:0)+0.25));return{text:paras.join('\n\n'),confidence:conf};}
+  function query(text){var q=String(text||'').trim();var qv=encodePhrase(q);var qLower=q.toLowerCase();var math=tryMath(q);if(math)return{ok:true,kind:'math',answer:math,confidence:1,trace:{method:'eval'}};var qToks=tok(q).split(' ').filter(function(w){return w.length>2;});var bestQA=null;for(var i=0;i<facts.length;i++){var f=facts[i];if(!f.qa)continue;var score=sim(qv,encodePhrase(f.s));var fToks=tok(f.s).split(' ').filter(function(w){return w.length>2;});var overlap=0;for(var j=0;j<fToks.length;j++)if(qToks.indexOf(fToks[j])>=0)overlap++;var contentHit=false;for(var j2=0;j2<fToks.length;j2++){if(qToks.indexOf(fToks[j2])>=0&&['что','такое','как','почему','кто','зачем'].indexOf(fToks[j2])<0)contentHit=true;}if(qToks.indexOf('такое')>=0||qToks.indexOf('что')>=0){if(!contentHit)score*=0.15;else score+=0.25*overlap;}else score+=0.12*overlap;if(!bestQA||score>bestQA.score)bestQA={fact:f,score:score,overlap:overlap};}var essayHit=null;if(bestQA&&bestQA.score>0.32&&(bestQA.overlap>0||bestQA.score>0.5))essayHit=bestQA.fact;var probes=nearestFacts(qv,14);var qTokens={};var qt=tok(q).split(' ');for(var qi=0;qi<qt.length;qi++)if(qt[qi])qTokens[qt[qi]]=1;for(var pi=0;pi<probes.length;pi++){var boost=0;var parts=[probes[pi].fact.s,probes[pi].fact.r,probes[pi].fact.o];for(var p2=0;p2<parts.length;p2++){var ws=tok(String(parts[p2])).split(' ');for(var w=0;w<ws.length;w++)if(ws[w].length>2&&qTokens[ws[w]])boost+=0.15;}probes[pi].score+=boost;}probes.sort(function(a,b){return b.score-a.score;});var recovered=[];for(var ri=0;ri<probes.length;ri++){if(probes[ri].score<=0.04)continue;var ff=probes[ri].fact;if(ff.qa)continue;recovered.push({score:probes[ri].score,s:ff.s,r:ff.r,o:ff.o});if(recovered.length>=6)break;}var intent=detectIntent(qLower);var composed=composeLong(intent,q,recovered,essayHit);return{ok:true,kind:essayHit?'essay+compose':'compose',answer:composed.text,confidence:composed.confidence,trace:{method:'long-compose',intent:intent,facts:recovered.length,essay:!!essayHit}};
   }
   function teach(s,r,o){return addFact(s,r,o);}
-  function stats(){var n=0;for(var k in lex)if(lex.hasOwnProperty(k))n++;return{D:D,facts:facts.length,tokens:n,hasHologram:!!hologram};}
-  function seedDefaults(){addQA('кто ты','Я математический контур АКСИ: фазовая память Phase-HRR, без нейросети и без WebLLM.');addQA('что такое акси','АКСИ — суверенный runtime: decision integrity, permit, локальная математическая память.');addQA('что такое permit','Permit — default-deny допуск действия агента с возможным cryptographic receipt.');addQA('что такое receipt','Receipt — подписанный след решения ALLOW или BLOCK для аудита.');addQA('как ты отвечаешь','Я кодирую вопрос в фазовый вектор, ищу резонанс в голограмме фактов и собираю фразу из ближайших троек.');addFact('небо','имеет_цвет','синий');addFact('синий_цвет_неба','причина','рассеяние_Рэлея');addFact('океан','имеет_цвет','синий');addFact('акси','есть','суверенный_runtime');addFact('permit','есть','default_deny_допуск');addFact('москва','есть','столица_россии');addFact('земля','находится','солнечная_система');addFact('вода','имеет_формулу','H2O');addQA('почему небо синее','Небо синее из-за рассеяния Рэлея: короткие (синие) волны рассеиваются в воздухе сильнее длинных.');addQA('почему океан синий','Океан синий потому что вода сильнее поглощает красную часть спектра.');addQA('почему закат красный','На закате луч проходит длиннее через атмосферу: синий уходит в стороны, остаются красные тона.');}
+  function stats(){var n=0;for(var k in lex)if(Object.prototype.hasOwnProperty.call(lex,k))n++;return{D:D,facts:facts.length,tokens:n};}
+  function seedDefaults(){
+    addEssay('кто ты','Я — математический контур АКСИ (Math-Mind) на фазовой памяти Phase-HRR.\n\nЯ не большая языковая модель: у меня нет миллиардов весов и я не «понимаю» мир как ChatGPT. Вместо этого вопрос кодируется в высокоразмерный фазовый вектор, ищется резонанс с записанными фактами (тройки субъект–отношение–объект и развёрнутые essay-ответы), затем из ближайших записей собирается текст.\n\nСильные стороны: прозрачность, offline, точный счёт, обучаемость через teach. Слабые: без заранее записанного знания длинный ответ не появится. Принцип: technology_serves_human.');
+    addEssay('что такое акси','АКСИ — суверенный runtime и контур decision integrity: проверка действия до исполнения (permit), криптографический след (receipt), локальная математическая/ассоциативная память, работа в браузере без обязательного сервера.\n\nЭто не «ещё один чат-бот». Продуктовый смысл — контроль автономных агентов: default-deny, аудит, человек в контуре решения. Контакт: aksilove@internet.ru.');
+    addEssay('что такое permit','Permit в АКСИ — слой допуска действия.\n\nАгент по умолчанию не имеет права выполнять tool-call (default-deny). Сначала сопоставляются цель, контекст и мандат; только при ALLOW действие может пойти дальше. После решения можно зафиксировать receipt — подписанный чек для аудита.\n\nЗачем: когда агенты получают доступ к инструментам, без замка на действие риск необратимых ошибок растёт.');
+    addEssay('почему небо синее','Небо кажется синим в основном из‑за рассеяния Рэлея.\n\nСолнечный свет — смесь длин волн. Молекулы воздуха сильнее рассеивают коротковолновую (синюю) часть, чем длинноволновую (красную). В результате с неба к глазу приходит больше рассеянного синего.\n\nНа закате путь луча через атмосферу длиннее: синий успевает рассеяться в стороны, и остаются тёплые красно-оранжевые тона. Это физическая картина из памяти контура, а не «творчество» нейросети.');
+    addEssay('почему океан синий','Океан часто выглядит синим по связанной оптике.\n\nЧистая вода сильнее поглощает красную часть спектра. Сине-зелёные длины волн рассеиваются и частично возвращаются к наблюдателю. Глубина, взвесь и угол солнца меняют оттенок.\n\nИ небо, и океан «синие» не потому что «покрашены», а потому что свет по-разному фильтруется и рассеивается.');
+    addEssay('как ты отвечаешь','Алгоритм ответа:\n\n1) Кодирование вопроса в фазовый вектор (permute + bind).\n2) Поиск резонанса с голограммой фактов и essay.\n3) Если найден развёрнутый essay — он основа абзацев.\n4) Рядом поднимаются тройки S–R–O.\n5) Числа считаются классически.\n\nДлинный ответ только там, где в памяти есть что сказать. Пустой мир → честный отказ.');
+    addEssay('что такое phase hrr','Phase-HRR — хранение символов как углов в высокоразмерном пространстве.\n\nBind — сложение фаз; bundle — интерференция atan2(sum sin, sum cos); сходство — mean cos разности фаз. Так кодируются роли и тройки без обучения градиентом.\n\nВетвь hyperdimensional computing: сильна для ассоциаций, слаба как замена LLM для открытого текста.');
+    addFact('небо','имеет_цвет','синий');
+    addFact('синий_цвет_неба','причина','рассеяние_Рэлея');
+    addFact('рассеяние_Рэлея','действует_на','короткие_волны_света');
+    addFact('океан','имеет_цвет','синий');
+    addFact('акси','есть','суверенный_runtime');
+    addFact('акси','использует','phase_hrr');
+    addFact('permit','есть','default_deny_допуск');
+    addFact('москва','есть','столица_россии');
+    addFact('земля','находится','солнечная_система');
+    addFact('вода','имеет_формулу','H2O');
+    addFact('math_mind','не_является','llm');
+    addFact('math_mind','является','ассоциативной_фазовой_памятью');
+  }
   seedDefaults();
-  return{D:D,query:query,teach:teach,addQA:addQA,addFact:addFact,stats:stats};
+  return{D:D,query:query,teach:teach,addEssay:addEssay,addFact:addFact,stats:stats};
 }
-
 (function(){
   var errEl=document.getElementById('err');
   var ans=document.getElementById('ans');
@@ -114,60 +132,11 @@ function createMathMind(opts){
   var go=document.getElementById('go');
   var qEl=document.getElementById('q');
   var mind;
-  try{
-    mind=createMathMind({D:1024});
-    var s=mind.stats();
-    st.textContent='D='+s.D+' · facts='+s.facts+' · tok='+s.tokens;
-  }catch(e){
-    errEl.hidden=false;
-    errEl.textContent='Init error: '+(e&&e.message?e.message:e);
-    st.textContent='error';
-    return;
-  }
-  function show(r,ms){
-    kindEl.textContent=r.kind||'—';
-    kindEl.classList.add('on');
-    confEl.textContent='conf '+(r.confidence!=null?Number(r.confidence).toFixed(2):'—');
-    confEl.classList.add('on');
-    ans.textContent=(r.answer||'(пусто)')+'\n\n['+(r.kind||'?')+' · '+ms+' ms]';
-    try{bits.textContent=r.trace?JSON.stringify(r.trace).slice(0,400):'';}catch(e){bits.textContent='';}
-  }
-  go.addEventListener('click',function(){
-    var q=(qEl.value||'').trim();
-    if(!q)return;
-    errEl.hidden=true;
-    go.disabled=true;
-    ans.textContent='…';
-    try{
-      var t0=performance.now();
-      var r=mind.query(q);
-      var ms=(performance.now()-t0).toFixed(1);
-      show(r,ms);
-    }catch(e){
-      errEl.hidden=false;
-      errEl.textContent='Query error: '+(e&&e.message?e.message:e);
-      ans.textContent='Ошибка запроса.';
-    }
-    go.disabled=false;
-  });
-  document.getElementById('teach').addEventListener('click',function(){
-    var s=document.getElementById('ts').value.trim();
-    var r=document.getElementById('tr').value.trim();
-    var o=document.getElementById('to').value.trim();
-    if(!s||!r||!o)return;
-    mind.teach(s,r,o);
-    var stt=mind.stats();
-    st.textContent='D='+stt.D+' · facts='+stt.facts+' · tok='+stt.tokens;
-    ans.textContent='Записано: '+s+' '+r+' '+o;
-  });
-  try{
-    var smoke=mind.query('кто ты');
-    if(!smoke||!smoke.answer)throw new Error('empty smoke');
-    bits.textContent='smoke ok';
-  }catch(e){
-    errEl.hidden=false;
-    errEl.textContent='Smoke failed: '+(e&&e.message?e.message:e);
-  }
+  try{mind=createMathMind({D:1024});var s=mind.stats();st.textContent='D='+s.D+' · facts='+s.facts+' · tok='+s.tokens;}catch(e){errEl.hidden=false;errEl.textContent='Init error: '+(e&&e.message?e.message:e);return;}
+  function show(r,ms){kindEl.textContent=r.kind||'—';kindEl.classList.add('on');confEl.textContent='conf '+(r.confidence!=null?Number(r.confidence).toFixed(2):'—');confEl.classList.add('on');ans.textContent=(r.answer||'(пусто)')+'\n\n['+(r.kind||'?')+' · '+ms+' ms]';try{bits.textContent=r.trace?JSON.stringify(r.trace):'';}catch(e){bits.textContent='';}}
+  go.addEventListener('click',function(){var q=(qEl.value||'').trim();if(!q)return;errEl.hidden=true;go.disabled=true;ans.textContent='…';try{var t0=performance.now();var r=mind.query(q);show(r,(performance.now()-t0).toFixed(1));}catch(e){errEl.hidden=false;errEl.textContent='Query error: '+(e&&e.message?e.message:e);ans.textContent='Ошибка.';}go.disabled=false;});
+  document.getElementById('teach').addEventListener('click',function(){var s=document.getElementById('ts').value.trim();var r=document.getElementById('tr').value.trim();var o=document.getElementById('to').value.trim();if(!s||!r||!o)return;mind.teach(s,r,o);var stt=mind.stats();st.textContent='D='+stt.D+' · facts='+stt.facts+' · tok='+stt.tokens;ans.textContent='Записано: '+s+' '+r+' '+o;});
+  try{var smoke=mind.query('почему небо синее');if(!smoke||!smoke.answer||smoke.answer.length<80)throw new Error('short smoke');bits.textContent='smoke ok · len='+smoke.answer.length;}catch(e){errEl.hidden=false;errEl.textContent='Smoke failed: '+(e&&e.message?e.message:e);}
 })();
 </script>
 </body>
