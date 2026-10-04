@@ -3,148 +3,253 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ Math AI — один математический ИИ</title>
-<meta name="description" content="Один Phase-HRR движок: факты, аналогии, чат. Без нейросетей и GPU."/>
+<title>AKSI MATRIX MATH — solver · verify · receipt</title>
+<meta name="theme-color" content="#0a0e14"/>
 <link rel="canonical" href="https://milana808.github.io/math/"/>
-<meta name="theme-color" content="#0a0a0b"/>
 <style>
-:root{--bg:#0a0a0b;--card:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#67e8f9;--vio:#a78bfa}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,sans-serif;line-height:1.45}
-.wrap{max-width:720px;margin:0 auto;padding:16px 14px 40px}
-h1{margin:0;font-size:1.25rem}.sub{color:var(--m);font-size:13px;margin:6px 0 12px}
-.badge{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px;display:inline-block}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
-#log{height:260px;overflow:auto;font-size:14px}
-.msg{margin:6px 0;padding:8px 10px;border-radius:10px;max-width:92%}
-.msg.user{background:#1e293b;margin-left:auto;text-align:right}
-.msg.bot{background:#152018;border:1px solid rgba(103,232,249,.25)}
-.msg .meta{font-size:10px;color:var(--m);margin-top:4px}
-.row{display:flex;gap:8px;margin-top:8px}
-input{flex:1;border-radius:10px;border:1px solid var(--line);background:#0e0e12;color:var(--t);padding:10px 12px;font:inherit}
-button{border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer;background:#1c1c1f;color:var(--t);font:inherit;font-size:13px}
-button.primary{background:linear-gradient(135deg,#67e8f9,#a78bfa);color:#0a0a0b}
-.chips button{font-size:12px;padding:6px 10px;margin:2px}
-pre{font:11px ui-monospace,monospace;color:var(--m);white-space:pre-wrap;margin:0}
-footer{margin-top:16px;font-size:12px;color:var(--m)}footer a{color:var(--a)}
+:root{--bg:#0a0e14;--p:#121820;--l:#243044;--t:#e8eef7;--m:#8b9bb0;--a:#3dffa8;--bad:#ff6b7a;--ok:#3dffa8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,system-ui,sans-serif}
+.w{max-width:720px;margin:0 auto;padding:16px 14px 48px}
+.tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
+h1{font-size:1.2rem;margin:6px 0 4px;font-weight:700}
+.lead{color:var(--m);font-size:12px;margin:0 0 14px;line-height:1.4}
+.box{background:var(--p);border:1px solid var(--l);border-radius:12px;padding:12px;margin:10px 0}
+label{display:block;font-size:11px;color:var(--m);margin-bottom:4px}
+input[type=text]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--l);background:#0c1018;color:var(--t);font:inherit}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+button{border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#04140c}
+button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
+button:disabled{opacity:.45}
+.log{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:10px;max-height:180px;overflow:auto;font-size:12px;color:var(--m);white-space:pre-wrap}
+.log .ok{color:var(--ok)}.log .bad{color:var(--bad)}.log .info{color:#7eb8ff}
+pre.out{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:12px;overflow:auto;font-size:12px;line-height:1.4;margin:0;white-space:pre-wrap;word-break:break-word}
+.chips{margin-top:8px}
+.chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 0 0}
+.chip.pass{border-color:var(--ok);color:var(--ok)}
+.chip.fail{border-color:var(--bad);color:var(--bad)}
+.ex{margin-top:8px}
+.ex button{font-size:11px;padding:6px 10px;font-weight:600;background:#1a2230;color:var(--t);border:1px solid var(--l)}
+footer{margin-top:16px;font-size:11px;color:var(--m)}
+footer a{color:var(--a)}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>АКСИ Math AI</h1>
-  <p class="sub">Один математический ИИ: фазы π · bind/unbind · факты · аналогии. Не нейросеть. Не AGI.</p>
-  <div>
-    <span class="badge" id="st">загрузка…</span>
-    <span class="badge">D=4096</span>
-    <span class="badge">phase-HRR</span>
-  </div>
-  <div class="card">
-    <div class="chips">
-      <button type="button" data-q="привет">привет</button>
-      <button type="button" data-q="кто ты">кто ты</button>
-      <button type="button" data-q="столица франции">столица франции</button>
-      <button type="button" data-q="столица японии">столица японии</button>
-      <button type="button" data-q="Если Франция это Париж, то чем является Япония?">аналогия</button>
-      <button type="button" data-q="как дела">как дела</button>
-    </div>
-    <div id="log"></div>
+<div class="w">
+  <div class="tag">AKSI-MATRIX-MATH-v0.1</div>
+  <h1>Solver → Verification → Receipt</h1>
+  <p class="lead">Локальный контур: гипотезы корней → жёсткая подстановка → JSON-чек. Без нейросетей. Offline-first.</p>
+  <div class="box">
+    <label for="eq">Уравнение</label>
+    <input type="text" id="eq" value="x^2 - 4 = 0" autocomplete="off" spellcheck="false"/>
     <div class="row">
-      <input id="inp" placeholder="спроси…" autocomplete="off"/>
-      <button type="button" class="primary" id="go">→</button>
+      <button type="button" id="run">Запустить цикл AKSI</button>
+      <button type="button" class="sec" id="dl">Скачать receipt.json</button>
+      <button type="button" class="sec" id="inject">Тест: ложная гипотеза 5</button>
+    </div>
+    <div class="ex">
+      <button type="button" data-eq="x^2 - 4 = 0">x²−4=0</button>
+      <button type="button" data-eq="x^2 - 9 = 0">x²−9=0</button>
+      <button type="button" data-eq="2*x + 4 = 10">2x+4=10</button>
+      <button type="button" data-eq="x^2 - 5*x + 6 = 0">x²−5x+6=0</button>
+      <button type="button" data-eq="x^3 - 8 = 0">x³−8=0</button>
     </div>
   </div>
-  <div class="card"><pre id="dbg">—</pre></div>
+  <div class="box">
+    <div class="tag">Live log</div>
+    <div class="log" id="log"></div>
+  </div>
+  <div class="box">
+    <div class="tag">Digital receipt</div>
+    <div class="chips" id="chips"></div>
+    <pre class="out" id="out">{}</pre>
+  </div>
   <footer>
-    <a href="/">Home</a> · <a href="/permit/">Permit</a> · <a href="/talk/">Talk LLM</a><br/>
-    aksilove@internet.ru · technology_serves_human
+    <a href="https://milana808.github.io/">home</a> ·
+    <a href="https://milana808.github.io/permit/">permit</a> ·
+    <a href="https://milana808.github.io/generate/">generate</a>
   </footer>
 </div>
-<script type="module">
-const PI=Math.PI, TWO_PI=2*Math.PI;
-function wrapPhase(x){ let a=x-TWO_PI*Math.floor((x+PI)/TWO_PI); if(a<=-PI)a+=TWO_PI; if(a>PI)a-=TWO_PI; return a; }
-function tokenize(t){ return String(t).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean); }
-class AksiMathAI {
-  constructor(D=4096, seed=0xa651){
-    this.D=D; this._state=seed>>>0; this.atoms=new Map(); this.items=new Map();
-    this.facts=[]; this.factMemory=new Float64Array(D); this.chatMemory=new Float64Array(D);
-    this.questions=new Map(); this.answers=new Map(); this.answerVecs=new Map(); this.trainedChat=0;
+<script>
+(function () {
+  "use strict";
+  function parseEquation(eq) {
+    var s = String(eq).replace(/\s+/g, "").replace(/−/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
+    var left, right;
+    if (s.indexOf("=") >= 0) {
+      var parts = s.split("=");
+      left = parts[0];
+      right = parts.slice(1).join("=") || "0";
+    } else {
+      left = s;
+      right = "0";
+    }
+    return { left: left, right: right, residual: "(" + left + ")-(" + right + ")", raw: eq };
   }
-  _rand(){ let x=this._state; x^=x<<13; x^=x>>>17; x^=x<<5; this._state=x>>>0; return this._state; }
-  _rp(){ return (this._rand()/0x100000000)*TWO_PI-PI; }
-  random(){ const v=new Float64Array(this.D); for(let i=0;i<this.D;i++)v[i]=this._rp(); return v; }
-  atom(n){ const k=String(n); let v=this.atoms.get(k); if(!v){v=this.random();this.atoms.set(k,v);} return v; }
-  bind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=wrapPhase(a[i]+b[i]); return o; }
-  unbind(a,b){ const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=wrapPhase(a[i]-b[i]); return o; }
-  bundle(...vs){ if(!vs.length)return new Float64Array(this.D); if(vs.length===1)return Float64Array.from(vs[0]);
-    const sc=new Float64Array(this.D), ss=new Float64Array(this.D);
-    for(const v of vs) for(let i=0;i<this.D;i++){ sc[i]+=Math.cos(v[i]); ss[i]+=Math.sin(v[i]); }
-    const o=new Float64Array(this.D); for(let i=0;i<this.D;i++)o[i]=Math.atan2(ss[i],sc[i]); return o; }
-  permute(v,k=1){ const D=this.D,s=((k%D)+D)%D; if(!s)return Float64Array.from(v); const o=new Float64Array(D); for(let i=0;i<D;i++)o[i]=v[(i+s)%D]; return o; }
-  cosine(a,b){ let s=0; for(let i=0;i<this.D;i++)s+=Math.cos(a[i]-b[i]); return s/this.D; }
-  encode(text){ const tokens=tokenize(text); if(!tokens.length)return new Float64Array(this.D);
-    const parts=[]; for(let i=0;i<tokens.length;i++){ const a=this.atom(tokens[i]); parts.push(this.permute(a,i)); parts.push(a); }
-    for(let i=0;i<tokens.length-1;i++) parts.push(this.bind(this.atom(tokens[i]), this.permute(this.atom(tokens[i+1]),1)));
-    return this.bundle(...parts); }
-  remember(label, vec){ const k=String(label).toLowerCase(); let v=vec||this.atom(k); if(this.items.has(k))v=this.bundle(this.items.get(k),v); this.items.set(k,v); return v; }
-  learnFact(entity, slots){
-    const e=String(entity).toLowerCase(); const eA=this.atom(e); this.remember(e); const parts=[]; const rec=[];
-    for(const {role,value} of slots){ const v=String(value).toLowerCase(); this.remember(v);
-      const slot=this.bind(this.atom('ROLE:'+role), this.atom(v)); parts.push(this.bind(eA, slot)); rec.push({role,value:v}); }
-    this.factMemory=this.facts.length?this.bundle(this.factMemory,...parts):this.bundle(...parts);
-    this.facts.push({entity:e,slots:rec});
+  function toEvalExpr(expr) {
+    return String(expr)
+      .replace(/\^/g, "**")
+      .replace(/(\d+(?:\.\d+)?)([a-zA-Z])/g, "($1*$2)")
+      .replace(/([a-zA-Z])(\d+(?:\.\d+)?)/g, "($1*$2)");
   }
-  probe(entity, role){ return this.unbind(this.unbind(this.factMemory, this.atom(String(entity).toLowerCase())), this.atom('ROLE:'+role)); }
-  nearest(vec, topK=5){ return [...this.items.keys()].map(label=>({label, score:this.cosine(vec, this.atom(label))})).sort((a,b)=>b.score-a.score).slice(0,topK); }
-  analogy(a,b,c){
-    a=a.toLowerCase(); b=b.toLowerCase(); c=c.toLowerCase();
-    let bestRole=null, bestSc=-1;
-    for(const role of ['capital','country']){ const sc=this.cosine(this.probe(a,role), this.atom(b)); if(sc>bestSc){bestSc=sc;bestRole=role;} }
-    const answerVec=(bestRole&&bestSc>0.05)?this.probe(c,bestRole):this.bind(this.unbind(this.atom(b),this.atom(a)), this.atom(c));
-    const hits=this.nearest(answerVec,8).filter(h=>h.label!==a&&h.label!==c);
-    return {answer:hits[0]?.label||null, confidence:hits[0]?.score||0, method:bestRole&&bestSc>0.05?('role_transfer:'+bestRole):'bind_unbind', hits};
+  function makeValueAt(residual) {
+    var e = toEvalExpr(residual);
+    return function (x) {
+      var fn = new Function("x", "\"use strict\"; return (" + e + ");");
+      return fn(x);
+    };
   }
-  teach(q,a){
-    const qv=this.encode(q), av=this.encode(a); const bound=this.bind(qv,av);
-    this.chatMemory=this.trainedChat===0?bound:this.bundle(this.chatMemory,bound);
-    this.questions.set(q.toLowerCase(),qv); this.answerVecs.set(a.toLowerCase(),av);
-    this.answers.set(a.toLowerCase(),a); this.answers.set('Q:'+q.toLowerCase(),a); this.trainedChat++;
+  function findHypotheses(equation, range) {
+    range = range == null ? 100 : range;
+    var parsed = parseEquation(equation);
+    var valueAt = makeValueAt(parsed.residual);
+    var hyps = [];
+    var seen = {};
+    function add(x) {
+      if (seen[x]) return;
+      try {
+        var v = valueAt(x);
+        if (typeof v === "number" && isFinite(v) && Math.abs(v) < 1e-9) {
+          hyps.push(x);
+          seen[x] = 1;
+        }
+      } catch (err) {}
+    }
+    for (var x = -range; x <= range; x++) add(x);
+    for (var k = -range * 2; k <= range * 2; k++) {
+      if (k % 2 === 0) continue;
+      add(k / 2);
+    }
+    hyps.sort(function (a, b) { return a - b; });
+    return { parsed: parsed, hypotheses: hyps, valueAt: valueAt };
   }
-  think(input){
-    const t0=performance.now(); const s=String(input||'').trim();
-    let m=s.match(/столиц[аеу]?\s+(\p{L}+)/iu)||s.match(/capital\s+of\s+(\w+)/i);
-    if(m){ const map={франции:'france',франция:'france',японии:'japan',япония:'japan',германии:'germany',италии:'italy',france:'france',japan:'japan'};
-      const ent=map[m[1].toLowerCase()]||m[1].toLowerCase(); const hits=this.nearest(this.probe(ent,'capital'),5);
-      return {text:hits[0]?hits[0].label:'?', confidence:hits[0]?.score||0, method:'fact_probe:capital', ms:performance.now()-t0}; }
-    m=s.match(/если\s+(\p{L}+)\s+это\s+(\p{L}+).*(?:чем|что)\s+(?:является\s+)?(\p{L}+)/iu);
-    if(m){ const map={франция:'france',париж:'paris',япония:'japan',токио:'tokyo',германия:'germany',берлин:'berlin',италия:'italy',рим:'rome'};
-      const r=this.analogy(map[m[1].toLowerCase()]||m[1], map[m[2].toLowerCase()]||m[2], map[m[3].toLowerCase()]||m[3]);
-      return {text:r.answer||'?', confidence:r.confidence, method:r.method, ms:performance.now()-t0}; }
-    const qv=this.encode(s); let bestQ=null,bestQs=-1;
-    for(const [qq,vec] of this.questions){ const sc=this.cosine(qv,vec); if(sc>bestQs){bestQs=sc;bestQ=qq;} }
-    if(bestQ){ const ans=this.answers.get('Q:'+bestQ); if(ans) return {text:ans, confidence:bestQs, method:'nearest_question', matchQ:bestQ, ms:performance.now()-t0}; }
-    return {text:'сигнал слаб — спроси из подсказок', confidence:0, method:'fallback', ms:performance.now()-t0};
+  function prettySub(residual, root) {
+    var r = root < 0 ? "(" + root + ")" : String(root);
+    return residual.replace(/\bx\b/gi, r).replace(/\*\*/g, "^");
   }
-  bootstrap(){
-    for(const x of ['paris','berlin','tokyo','rome','moscow','france','germany','japan','italy','russia','aksi']) this.remember(x);
-    this.learnFact('france',[{role:'capital',value:'paris'}]);
-    this.learnFact('germany',[{role:'capital',value:'berlin'}]);
-    this.learnFact('japan',[{role:'capital',value:'tokyo'}]);
-    this.learnFact('italy',[{role:'capital',value:'rome'}]);
-    [['привет','здравствуй, я акси — математический ии на фазах'],['кто ты','я геометрический разум: bind unbind cosine'],['как дела','фазы стабильны, память цела'],['столица франции','париж'],['столица японии','токио'],['спасибо','пожалуйста'],['пока','до встречи']].forEach(([q,a])=>this.teach(q,a));
-    return {D:this.D, facts:this.facts.length, chat:this.trainedChat, items:this.items.size};
+  function verifyRoots(equation, hypotheses) {
+    var parsed = parseEquation(equation);
+    var valueAt = makeValueAt(parsed.residual);
+    var steps = [];
+    var verified = [];
+    for (var i = 0; i < hypotheses.length; i++) {
+      var root = hypotheses[i];
+      var expression = prettySub(toEvalExpr(parsed.residual), root);
+      var result = null;
+      var status = "REJECTED";
+      try {
+        result = valueAt(root);
+        if (typeof result === "number" && isFinite(result) && Math.abs(result) < 1e-9) {
+          status = "VERIFIED";
+          result = 0;
+          verified.push(root);
+        }
+      } catch (e) {
+        expression = String(e && e.message ? e.message : e);
+        result = null;
+        status = "REJECTED";
+      }
+      steps.push({ root: root, expression: expression, result: result, status: status });
+    }
+    return { steps: steps, verified_roots: verified };
   }
-}
-const ai=new AksiMathAI();
-const st=ai.bootstrap();
-document.getElementById('st').textContent='ready · facts '+st.facts+' · chat '+st.chat;
-const log=document.getElementById('log'), dbg=document.getElementById('dbg');
-function add(role,text,meta){ const d=document.createElement('div'); d.className='msg '+role; d.textContent=text;
-  if(meta){ const m=document.createElement('div'); m.className='meta'; m.textContent=meta; d.appendChild(m);} log.appendChild(d); log.scrollTop=log.scrollHeight; }
-function ask(q){ if(!q)return; add('user',q); const r=ai.think(q); add('bot', r.text, (r.method||'')+' · conf '+(r.confidence||0).toFixed(3)+' · '+(r.ms||0).toFixed(1)+'ms');
-  dbg.textContent=JSON.stringify({method:r.method, confidence:r.confidence, ms:r.ms, matchQ:r.matchQ||null}); }
-document.getElementById('go').onclick=()=>{ const i=document.getElementById('inp'); ask(i.value.trim()); i.value=''; };
-document.getElementById('inp').addEventListener('keydown',e=>{ if(e.key==='Enter'){ ask(e.target.value.trim()); e.target.value=''; }});
-document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>ask(b.getAttribute('data-q')));
-add('bot','Один Math AI. Спроси или нажми подсказку.','system');
+  function buildReceipt(inputEquation, hypotheses, verification, extra) {
+    var verified = verification.verified_roots;
+    var integrity = verification.steps.every(function (s) {
+      if (s.status === "VERIFIED") return Math.abs(s.result) < 1e-9;
+      return true;
+    });
+    return {
+      system_id: "AKSI-MATRIX-MATH-v0.1",
+      timestamp: new Date().toISOString(),
+      input_equation: inputEquation,
+      hypotheses_found: hypotheses.slice(),
+      verification_steps: verification.steps,
+      verified_roots: verified.slice(),
+      integrity_status: integrity ? "PASSED" : "FAILED",
+      note: (extra && extra.note) || "Integer/half-integer search ±100; verification by substitution."
+    };
+  }
+  var logEl = document.getElementById("log");
+  var outEl = document.getElementById("out");
+  var chips = document.getElementById("chips");
+  var eqEl = document.getElementById("eq");
+  var lastReceipt = null;
+  function log(msg, cls) {
+    var line = document.createElement("div");
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function clearLog() { logEl.textContent = ""; }
+  function runCycle(opts) {
+    opts = opts || {};
+    var eq = (eqEl.value || "").trim();
+    if (!eq) return;
+    clearLog();
+    log("[Intent] Получено уравнение: " + eq, "info");
+    var found = findHypotheses(eq, 100);
+    log("[Math] Парсинг residual: " + found.parsed.residual, "info");
+    log("[Math] Сгенерированы гипотезы: [" + found.hypotheses.join(", ") + "]", "info");
+    var hyps = found.hypotheses.slice();
+    if (opts.injectFalse) {
+      if (hyps.indexOf(5) < 0) hyps.push(5);
+      log("[Test] Подмешана ложная гипотеза 5", "bad");
+    }
+    log("[Verification] Старт подстановки…", "info");
+    var ver = verifyRoots(eq, hyps);
+    for (var i = 0; i < ver.steps.length; i++) {
+      var s = ver.steps[i];
+      var cls = s.status === "VERIFIED" ? "ok" : "bad";
+      log("[Verification] x=" + s.root + " → " + s.expression + " = " + s.result + " → " + s.status, cls);
+    }
+    var receipt = buildReceipt(eq, hyps, ver, {
+      note: opts.injectFalse ? "False hypothesis 5 injected; verification must REJECT it." : undefined
+    });
+    lastReceipt = receipt;
+    outEl.textContent = JSON.stringify(receipt, null, 2);
+    chips.innerHTML = "";
+    var c1 = document.createElement("span");
+    c1.className = "chip " + (receipt.integrity_status === "PASSED" ? "pass" : "fail");
+    c1.textContent = "integrity: " + receipt.integrity_status;
+    chips.appendChild(c1);
+    var c2 = document.createElement("span");
+    c2.className = "chip pass";
+    c2.textContent = "verified: [" + receipt.verified_roots.join(", ") + "]";
+    chips.appendChild(c2);
+    log("[Receipt] Чек сформирован · " + receipt.timestamp, "ok");
+    return receipt;
+  }
+  document.getElementById("run").addEventListener("click", function () { runCycle({}); });
+  document.getElementById("inject").addEventListener("click", function () { runCycle({ injectFalse: true }); });
+  document.getElementById("dl").addEventListener("click", function () {
+    if (!lastReceipt) runCycle({});
+    if (!lastReceipt) return;
+    var blob = new Blob([JSON.stringify(lastReceipt, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "aksi-math-receipt.json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  document.querySelectorAll("[data-eq]").forEach(function (b) {
+    b.addEventListener("click", function () { eqEl.value = b.getAttribute("data-eq"); });
+  });
+  eqEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") runCycle({});
+  });
+  setTimeout(function () {
+    runCycle({});
+    var ver = verifyRoots("x^2 - 4 = 0", [-2, 2, 5]);
+    var ok =
+      ver.verified_roots.indexOf(2) >= 0 &&
+      ver.verified_roots.indexOf(-2) >= 0 &&
+      ver.verified_roots.indexOf(5) < 0 &&
+      ver.steps.some(function (s) { return s.root === 5 && s.status === "REJECTED"; });
+    log(ok ? "[Self-test] REJECTED root 5 correctly — PASS" : "[Self-test] FAIL", ok ? "ok" : "bad");
+  }, 200);
+})();
 </script>
 </body>
 </html>
