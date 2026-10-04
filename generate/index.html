@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>АКСИ Generate — локальная генерация</title>
+<meta name="description" content="Реальная генерация текста в браузере: WebLLM + контур АКСИ. Не шаблоны, не только вики."/>
+<link rel="canonical" href="https://milana808.github.io/generate/"/>
+<meta name="theme-color" content="#0c0e12"/>
+<style>
+:root{--bg:#0c0e12;--panel:#141820;--line:#2a3140;--t:#eef2f7;--m:#8b95a8;--a:#3dd68c;--w:#f0b429}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:16px 14px 48px}
+.tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--a)}
+h1{font-size:1.35rem;margin:6px 0 4px;font-weight:700}
+.lead{color:var(--m);font-size:13px;margin:0 0 14px;max-width:58ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
+.panel h2{margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer;background:var(--a);color:#04140c}
+button.sec{background:transparent;border:1px solid var(--line);color:var(--t)}
+button:disabled{opacity:.45;cursor:not-allowed}
+textarea{width:100%;min-height:88px;border-radius:10px;border:1px solid var(--line);background:#0a0c10;color:var(--t);padding:12px;font:inherit;resize:vertical}
+.bar{height:8px;background:#0a0c10;border-radius:6px;overflow:hidden;margin:8px 0}
+.bar>i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
+.meta{font-size:12px;color:var(--m)}
+.chip{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px 4px 2px 0}
+.chip.on{border-color:var(--a);color:var(--a)}
+.chip.warn{border-color:var(--w);color:var(--w)}
+.out{white-space:pre-wrap;word-break:break-word;min-height:4.5em;font-size:15px;line-height:1.55}
+.err{color:#ff8a8a;font-size:13px;margin-top:8px}
+.note{font-size:12px;color:var(--m);margin-top:8px;line-height:1.4}
+footer{margin-top:18px;font-size:12px;color:var(--m)}
+footer a{color:var(--a)}
+label{display:block;font-size:12px;color:var(--m);margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tag">AKSI · generate runtime</div>
+  <h1>Генерация как у LLM — локально</h1>
+  <p class="lead">
+    Здесь текст <b>реально дописывается моделью</b> (WebLLM / WebGPU), а не вытаскивается из вики и не склеивается из шаблонов.
+    Это не GPT‑4 в облаке: маленькая локальная модель, но это настоящая генерация токенов.
+  </p>
+  <div class="panel">
+    <h2>Модель</h2>
+    <div class="row">
+      <button type="button" id="loadBtn">Загрузить модель</button>
+      <button type="button" class="sec" id="unloadBtn">Выгрузить</button>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="meta" id="status">WebLLM ещё не загружен. Нужен WebGPU (Chrome/Edge; на части телефонов — да).</div>
+    <div class="row" style="margin-top:8px">
+      <span class="chip" id="cGpu">GPU ?</span>
+      <span class="chip" id="cReady">модель off</span>
+      <span class="chip" id="cModel">—</span>
+    </div>
+    <p class="note">Нажми «Загрузить модель» один раз (скачается quant ~0.5–1.5B). Потом — «Сгенерировать».</p>
+  </div>
+  <div class="panel">
+    <label for="q">Вопрос / задача</label>
+    <textarea id="q">Объясни простыми словами, что такое рассеяние Рэлея и почему небо синее. 4–6 предложений.</textarea>
+    <div class="row" style="margin-top:8px">
+      <button type="button" id="genBtn" disabled>Сгенерировать</button>
+      <button type="button" class="sec" id="mathBtn">Только счёт (без LLM)</button>
+    </div>
+    <div class="err" id="err" hidden></div>
+  </div>
+  <div class="panel">
+    <h2>Ответ</h2>
+    <div class="out" id="ans">Здесь появится сгенерированный текст.</div>
+    <p class="note" id="src">Источник: —</p>
+  </div>
+  <div class="panel">
+    <h2>Карта стека АКСИ</h2>
+    <p class="note" style="margin:0">
+      <b>Генерация</b> = WebLLM (эта страница + /llm/).<br/>
+      <b>Счёт</b> = classical math.<br/>
+      <b>Decision integrity</b> = /permit/ /authority/ — замок на действие агента.<br/>
+      <b>Phase-HRR</b> = /matrix/chaos/ /hdc/ — ассоциативная память, не замена GPT.<br/>
+      Уникальность продукта АКСИ — не «ещё один чат», а <b>контроль автономных действий + локальный runtime</b>.
+    </p>
+  </div>
+  <footer>
+    <a href="https://milana808.github.io/">home</a> ·
+    <a href="https://milana808.github.io/llm/">/llm/</a> ·
+    <a href="https://milana808.github.io/talk/">/talk/</a> ·
+    <a href="https://milana808.github.io/permit/">/permit/</a> ·
+    <a href="https://milana808.github.io/matrix/chaos/">/matrix/chaos/</a>
+  </footer>
+</div>
+<script src="/aksi-webllm.js"></script>
+<script>
+(function () {
+  var statusEl = document.getElementById('status');
+  var prog = document.getElementById('prog');
+  var cGpu = document.getElementById('cGpu');
+  var cReady = document.getElementById('cReady');
+  var cModel = document.getElementById('cModel');
+  var loadBtn = document.getElementById('loadBtn');
+  var unloadBtn = document.getElementById('unloadBtn');
+  var genBtn = document.getElementById('genBtn');
+  var mathBtn = document.getElementById('mathBtn');
+  var qEl = document.getElementById('q');
+  var ans = document.getElementById('ans');
+  var src = document.getElementById('src');
+  var err = document.getElementById('err');
+  var history = [];
+  function showErr(msg) {
+    if (!msg) { err.hidden = true; err.textContent = ''; return; }
+    err.hidden = false; err.textContent = msg;
+  }
+  function paintStatus() {
+    var W = window.AKSI_WEBLLM;
+    if (!W) { statusEl.textContent = 'aksi-webllm.js не загрузился'; return; }
+    var s = W.status();
+    prog.style.width = (s.progress || 0) + '%';
+    statusEl.textContent = (s.message || '') + (s.error ? ' · ' + s.error : '');
+    cGpu.textContent = s.webgpu === true ? 'GPU ok' : (s.webgpu === false ? 'GPU нет' : 'GPU ?');
+    cGpu.className = 'chip' + (s.webgpu ? ' on' : (s.webgpu === false ? ' warn' : ''));
+    cReady.textContent = s.ready ? 'модель ready' : (s.loading ? 'загрузка…' : 'модель off');
+    cReady.className = 'chip' + (s.ready ? ' on' : '');
+    cModel.textContent = s.model ? s.model.split('-').slice(0, 3).join('-') : '—';
+    genBtn.disabled = !s.ready;
+    loadBtn.disabled = !!s.loading;
+  }
+  window.addEventListener('aksi-webllm-progress', paintStatus);
+  loadBtn.addEventListener('click', function () {
+    showErr('');
+    var W = window.AKSI_WEBLLM;
+    if (!W) { showErr('Нет AKSI_WEBLLM'); return; }
+    W.load(null, function () { paintStatus(); }).then(function () {
+      paintStatus();
+      if (W.ready()) {
+        ans.textContent = 'Модель готова. Можно генерировать.';
+        src.textContent = 'Источник: webllm · ' + (W.status().model || '');
+      } else {
+        var st = W.status();
+        showErr(st.error || 'Не удалось загрузить. Нужен WebGPU. Chrome/Edge desktop или Android.');
+      }
+    }).catch(function (e) { showErr(String(e && e.message || e)); paintStatus(); });
+  });
+  unloadBtn.addEventListener('click', function () {
+    var W = window.AKSI_WEBLLM;
+    if (W && W.unload) W.unload();
+    genBtn.disabled = true;
+    paintStatus();
+  });
+  function tryMath(q) {
+    var s = String(q || '').toLowerCase().replace(/,/g, '.');
+    s = s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi, 'sqrt($1)');
+    s = s.replace(/\bpi\b|π|пи/g, 'PI');
+    s = s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi, ' ');
+    s = s.replace(/\?/g, ' ').trim();
+    var m = s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);
+    if (!m) return null;
+    var expr = m[0].replace(/\s+/g, '').replace(/\^/g, '**');
+    if (!/[0-9PI]|sqrt/i.test(expr)) return null;
+    var safe = expr.replace(/PI/gi, 'Math.PI').replace(/sqrt\(/gi, 'Math.sqrt(');
+    try {
+      var v = new Function('"use strict";return (' + safe + ')')();
+      if (typeof v !== 'number' || !isFinite(v)) return null;
+      return expr + ' = ' + (Number.isInteger(v) ? v : Math.round(v * 1e10) / 1e10);
+    } catch (e) { return null; }
+  }
+  mathBtn.addEventListener('click', function () {
+    showErr('');
+    var r = tryMath(qEl.value.trim());
+    if (r) { ans.textContent = r; src.textContent = 'Источник: classical math'; }
+    else { ans.textContent = 'Не выражение. Для текста — загрузи модель.'; src.textContent = 'Источник: —'; }
+  });
+  genBtn.addEventListener('click', function () {
+    showErr('');
+    var W = window.AKSI_WEBLLM;
+    if (!W || !W.ready()) { showErr('Сначала загрузи модель.'); return; }
+    var q = qEl.value.trim();
+    if (!q) return;
+    genBtn.disabled = true;
+    ans.textContent = 'Генерация…';
+    src.textContent = 'Источник: webllm…';
+    W.complete(q, { history: history.slice(-8), temperature: 0.5, max_tokens: (W.isMobile && W.isMobile()) ? 280 : 450 })
+      .then(function (res) {
+        if (res.error || !res.text) {
+          showErr(res.error || 'Пустой ответ');
+          ans.textContent = 'Не удалось сгенерировать.';
+          src.textContent = 'Источник: error';
+        } else {
+          ans.textContent = res.text;
+          src.textContent = 'Источник: webllm · ' + (res.model || '');
+          history.push({ role: 'user', content: q });
+          history.push({ role: 'assistant', content: res.text });
+        }
+        paintStatus();
+        genBtn.disabled = !W.ready();
+      })
+      .catch(function (e) { showErr(String(e && e.message || e)); genBtn.disabled = false; paintStatus(); });
+  });
+  if (!window.AKSI_WEBLLM) showErr('Не загрузился /aksi-webllm.js');
+  else paintStatus();
+})();
+</script>
+</body>
+</html>
