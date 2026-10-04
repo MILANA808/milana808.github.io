@@ -27,7 +27,9 @@ function sha256Hex(data) {
 }
 
 function canon(obj) {
-  return JSON.stringify(obj, Object.keys(obj).sort());
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return '[' + obj.map(canon).join(',') + ']';
+  return '{' + Object.keys(obj).sort().map((k) => JSON.stringify(k) + ':' + canon(obj[k])).join(',') + '}';
 }
 
 export function ensureKeyPair() {
@@ -60,6 +62,9 @@ export function createReceipt({
   policy,
   sessionId,
   privateKeyPem,
+  expectedResult,
+  actualResult,
+  verification,
 }) {
   const keys = privateKeyPem
     ? { privateKeyPem, publicKeyPem: null }
@@ -80,6 +85,9 @@ export function createReceipt({
     reasons: reasons || [],
     policy: policy || 'strict',
     principle: 'technology_serves_human',
+    ...(expectedResult !== undefined ? { expectedResult } : {}),
+    ...(actualResult !== undefined ? { actualResult } : {}),
+    ...(verification !== undefined ? { verification } : {}),
   };
 
   const payload_hash = sha256Hex(canon(payloadCore));
@@ -115,6 +123,9 @@ export function offlineVerifyReceipt(receipt, publicKeyPem) {
     reasons: receipt.reasons,
     policy: receipt.policy,
     principle: receipt.principle,
+    ...(receipt.expectedResult !== undefined ? { expectedResult: receipt.expectedResult } : {}),
+    ...(receipt.actualResult !== undefined ? { actualResult: receipt.actualResult } : {}),
+    ...(receipt.verification !== undefined ? { verification: receipt.verification } : {}),
   };
   const expected = sha256Hex(canon(core));
   if (expected !== receipt.payload_hash) {
