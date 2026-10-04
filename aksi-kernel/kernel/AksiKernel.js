@@ -1,5 +1,5 @@
 /**
- * AKSI Kernel — orchestrates Mandate → Exocortex → Permit → Receipts → Tool.
+ * AKSI Kernel — Mandate → Exocortex → Permit → Execute → Verify → Receipt.
  */
 import { writeFileSync, mkdirSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -29,25 +29,19 @@ export class AksiKernel {
     this.mandate = new MandateManager(opts.manifest);
     this.exocortex = new Exocortex(opts.sessionId);
     this.permit = new AksiPermit({ policy: this.mandate.getPolicy() });
-    this.receiptLog = [];
     this.resultVerifier = new ResultVerifier();
+    this.receiptLog = [];
     if (!existsSync(RECEIPTS_DIR)) mkdirSync(RECEIPTS_DIR, { recursive: true });
   }
 
-  async executeAgentStep(userGoal, proposedToolCall, options = {}) {
+  executeAgentStep(userGoal, proposedToolCall, options = {}) {
     if (userGoal) this.exocortex.setGoal(userGoal);
-
     this.exocortex.addThought('propose', {
       tool: proposedToolCall?.tool,
       note: JSON.stringify(proposedToolCall?.params || {}).slice(0, 120),
     });
 
-    const decision = this.permit.verifyAction(
-      proposedToolCall,
-      this.exocortex,
-      this.mandate
-    );
-
+    const decision = this.permit.verifyAction(proposedToolCall, this.exocortex, this.mandate);
     this._storeReceipt(decision.receipt);
     this.exocortex.addThought('gate', {
       tool: proposedToolCall?.tool,
@@ -55,20 +49,27 @@ export class AksiKernel {
       note: (decision.reasons || []).join('|'),
     });
 
-    if (!decision.allowed) {
-      throw new SecurityBlockedError(decision);
-    }
-
+    if (!decision.allowed) throw new SecurityBlockedError(decision);
     if (options.mode === 'real' && typeof options.executor !== 'function') {
       throw new Error('AKSI real execution requires an explicit executor');
     }
 
-    const toolResult = typeof options.executor === 'function'
-      ? await options.executor(proposedToolCall)
-      : this._simulateTool(proposedToolCall);
+    const executor = typeof options.executor === 'function'
+      ? options.executor
+      : (call) => this._simulateTool(call);
+    const result = executor(proposedToolCall);
+
+    if (result && typeof result.then === 'function') {
+      return result.then(actual => this._finishExecution(proposedToolCall, actual, options, decision.receipt));
+    }
+    return this._finishExecution(proposedToolCall, result, options, decision.receipt);
+  }
+
+  _finishExecution(proposedToolCall, toolResult, options, decisionReceipt) {
     const verification = options.expectedResult !== undefined
       ? this.resultVerifier.verify(options.expectedResult, toolResult)
       : { status: 'NOT_REQUESTED', reason: 'no_expected_result' };
+
     const executionReceipt = createReceipt({
       toolRequest: proposedToolCall,
       contextFingerprint: this.exocortex.contextFingerprint(),
@@ -83,7 +84,7 @@ export class AksiKernel {
     this._storeReceipt(executionReceipt);
     this.exocortex.addThought('execute', {
       tool: proposedToolCall?.tool,
-      note: String(toolResult).slice(0, 160),
+      note: JSON.stringify(toolResult).slice(0, 160),
     });
 
     return {
@@ -91,11 +92,11 @@ export class AksiKernel {
       gate: 'ALLOW',
       tool: proposedToolCall?.tool,
       toolResult,
-      receipt: decision.receipt,
+      receipt: decisionReceipt,
       executionReceipt,
       verification,
       context: this.exocortex.getContextSummary(),
-      verify: offlineVerifyReceipt(decision.receipt),
+      verify: offlineVerifyReceipt(executionReceipt),
     };
   }
 
@@ -106,37 +107,25 @@ export class AksiKernel {
       const q = params.city || params.q || call?.url || 'local';
       return { simulated: true, tool, data: { location: q, temp_c: 18, condition: 'clear', source: 'offline-sim' } };
     }
-    if (tool === 'memory.write') {
-      return { simulated: true, tool, stored: params.value || params.text || true };
-    }
-    if (tool === 'memory.read') {
-      return { simulated: true, tool, value: this.exocortex.getGoal() };
-    }
-    if (tool === 'search.web') {
-      return { simulated: true, tool, hits: [{ title: 'offline stub', q: params.q }] };
-    }
-    if (tool === 'file.read') {
-      return { simulated: true, tool, path: params.path, content: '[offline simulated read]' };
-    }
+    if (tool === 'memory.write') return { simulated: true, tool, stored: params.value || params.text || true };
+    if (tool === 'memory.read') return { simulated: true, tool, value: this.exocortex.getGoal() };
+    if (tool === 'search.web') return { simulated: true, tool, hits: [{ title: 'offline stub', q: params.q }] };
+    if (tool === 'file.read') return { simulated: true, tool, path: params.path, content: '[offline simulated read]' };
     return { simulated: true, tool, params };
   }
 
   _storeReceipt(receipt) {
     this.receiptLog.push(receipt);
-    const file = join(RECEIPTS_DIR, `${receipt.id}.json`);
-    writeFileSync(file, JSON.stringify(receipt, null, 2), 'utf8');
+    writeFileSync(join(RECEIPTS_DIR, `${receipt.id}.json`), JSON.stringify(receipt, null, 2), 'utf8');
   }
 
   listReceipts() {
     if (!existsSync(RECEIPTS_DIR)) return [];
-    return readdirSync(RECEIPTS_DIR)
-      .filter((f) => f.endsWith('.json'))
-      .map((f) => JSON.parse(readFileSync(join(RECEIPTS_DIR, f), 'utf8')));
+    return readdirSync(RECEIPTS_DIR).filter(f => f.endsWith('.json'))
+      .map(f => JSON.parse(readFileSync(join(RECEIPTS_DIR, f), 'utf8')));
   }
 
-  getPublicKeyPem() {
-    return ensureKeyPair().publicKeyPem;
-  }
+  getPublicKeyPem() { return ensureKeyPair().publicKeyPem; }
 
   status() {
     return {
