@@ -4,7 +4,7 @@
 (function(G){
   "use strict";
   var KEY="AKSI_BACKEND_URL";
-  var DEFAULTS=["https://milana-backend.replit.app","https://milana-backend.onrender.com"];
+  var DEFAULTS=["https://milana-backend.replit.app","https://aksi-backend.onrender.com"];
   function base(){
     try{return String(localStorage.getItem(KEY)||DEFAULTS[0]).replace(/\/$/,"")}catch(e){return DEFAULTS[0]}
   }
