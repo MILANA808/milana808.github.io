@@ -2,224 +2,122 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ · Neuro-Quantum LLM</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
+<title>АКСИ · Quantum Fractal Field</title>
 <meta name="theme-color" content="#030508"/>
-<meta name="description" content="Локальная микро-LLM + квантовый sampler в браузере."/>
+<meta name="description" content="6-qubit chaos → 3D particle field → collapse crystal. Offline visual."/>
 <link rel="canonical" href="https://milana808.github.io/matrix/chaos/"/>
 <style>
-:root{--bg:#030508;--panel:#0a0f14;--line:rgba(0,255,136,.18);--t:#e8fff4;--m:#6a9a80;--neon:#00ff88;--cyan:#00e5ff;--warn:#ff6b8a;--glow:0 0 20px rgba(0,255,136,.22)}
+:root{--bg:#030508;--panel:rgba(8,12,18,.92);--line:rgba(0,255,136,.2);--t:#e8fff4;--m:#6a9a80;--neon:#00ff88;--cyan:#00e5ff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--t);font-family:ui-monospace,Menlo,Consolas,system-ui,sans-serif}
-body{background-image:radial-gradient(ellipse 80% 45% at 50% -15%,rgba(0,255,136,.1),transparent),linear-gradient(rgba(0,255,136,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,.03) 1px,transparent 1px);background-size:auto,22px 22px,22px 22px}
-.wrap{max-width:520px;margin:0 auto;padding:14px 12px 32px}
-.tag{font-size:10px;letter-spacing:.18em;color:var(--neon);text-transform:uppercase}
-h1{margin:6px 0 0;font-size:1.2rem;text-shadow:var(--glow)}
-.sub{color:var(--m);font-size:12px;margin:6px 0 0;line-height:1.45}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
-label{display:block;font-size:11px;color:var(--m);margin-bottom:6px}
-textarea{width:100%;min-height:70px;border-radius:10px;border:1px solid var(--line);background:#05080c;color:var(--t);padding:10px;font:inherit;font-size:14px}
-.btn{width:100%;border:0;border-radius:12px;padding:13px;margin-top:10px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#00ff88,#00c4a0);color:#02100a;box-shadow:var(--glow)}
-.btn:disabled{opacity:.45;cursor:wait}
-.btn.ghost{background:#12181f;color:var(--t);box-shadow:none;border:1px solid var(--line);margin-top:8px}
-.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--t);font-family:ui-monospace,Menlo,Consolas,system-ui,sans-serif;overflow-x:hidden}
+#stage{position:fixed;inset:0;z-index:0}
+.ui{position:relative;z-index:2;max-width:480px;margin:0 auto;padding:12px 12px 24px;pointer-events:none}
+.ui .panel,.ui .btn,.ui textarea,.ui header{pointer-events:auto}
+header{padding:8px 4px 4px}
+.tag{font-size:10px;letter-spacing:.16em;color:var(--neon);text-transform:uppercase}
+h1{margin:4px 0 0;font-size:1.15rem;text-shadow:0 0 18px rgba(0,255,136,.35)}
+.sub{color:var(--m);font-size:11px;margin:4px 0 0;line-height:1.4}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0;backdrop-filter:blur(8px)}
+label{display:block;font-size:10px;color:var(--m);margin-bottom:4px}
+textarea{width:100%;min-height:56px;border-radius:10px;border:1px solid var(--line);background:#05080c;color:var(--t);padding:10px;font:inherit;font-size:13px;resize:vertical}
+.btn{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#00ff88,#00c4a0);color:#02100a;box-shadow:0 0 20px rgba(0,255,136,.25)}
+.btn:disabled{opacity:.45}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .chip{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
-.chip.on{color:var(--neon);border-color:rgba(0,255,136,.4)}
-.chip.warn{color:var(--warn)}
-.viz{height:120px;margin-top:4px}
-canvas{width:100%;height:100%;display:block;border-radius:10px;background:#05080c;border:1px solid var(--line)}
-.bars{margin-top:6px;font-size:10px;color:var(--m)}
-.bar-row{display:grid;grid-template-columns:64px 1fr 40px;gap:6px;align-items:center;margin:2px 0}
-.bar-row b{color:var(--cyan);font-weight:500}
-.track{height:5px;background:#12181f;border-radius:3px;overflow:hidden}
-.track i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--neon))}
-.out{font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word;min-height:5em}
-.bits{font-size:10px;color:var(--m);margin-top:8px;word-break:break-all}
-.progress{height:6px;background:#12181f;border-radius:4px;overflow:hidden;margin-top:8px}
-.progress>i{display:block;height:100%;width:0;background:var(--neon);transition:width .2s}
-.status{font-size:11px;color:var(--m);margin-top:6px;min-height:1.3em}
-footer{margin-top:18px;font-size:10px;color:var(--m);text-align:center}
+.chip.on{color:var(--neon)}
+.verdict{font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word;min-height:3.5em;color:var(--t)}
+.bits{font-size:10px;color:var(--m);margin-top:6px;word-break:break-all}
+footer{text-align:center;font-size:10px;color:var(--m);margin-top:8px}
 footer a{color:var(--cyan)}
-.note{font-size:10px;color:var(--m);margin-top:8px;line-height:1.4}
+.note{font-size:10px;color:var(--m);margin-top:6px;line-height:1.35}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="tag">AKSI · neuro-quantum core</div>
-  <h1>Локальный ИИ + квантовый sampler</h1>
-  <p class="sub">Микро-LLM (Transformers.js) · выбор токена через коллапс 6-кубитного хаоса · offline после кэша весов.</p>
-
+<div id="stage"></div>
+<div class="ui">
+  <header>
+    <div class="tag">AKSI · quantum fractal field</div>
+    <h1>3D хаос → кристалл</h1>
+    <p class="sub">1200 частиц · 6 кубитов · схлопывание в сферу / куб / спираль</p>
+  </header>
   <div class="panel">
-    <div class="tag">модель</div>
-    <div class="status" id="loadStatus">Ожидание инициализации…</div>
-    <div class="progress"><i id="loadBar"></i></div>
+    <label for="q">Запрос (закручивает вихрь)</label>
+    <textarea id="q" rows="2">чему равен корень из 16?</textarea>
+    <button type="button" class="btn" id="go">ВЫЗВАТЬ КОЛЛАПС</button>
     <div class="meta">
-      <span class="chip" id="chipModel">model —</span>
-      <span class="chip" id="chipDevice">device —</span>
-      <span class="chip" id="chipQ">quantum 6q</span>
-    </div>
-    <button type="button" class="btn ghost" id="btnInit">ЗАГРУЗИТЬ НЕЙРО-КВАНТОВУЮ МАТРИЦУ</button>
-  </div>
-
-  <div class="panel">
-    <label for="q">Вопрос</label>
-    <textarea id="q" rows="3">Чему равен корень из 16? Объясни кратко.</textarea>
-    <button type="button" class="btn" id="go" disabled>СГЕНЕРИРОВАТЬ (quantum sample)</button>
-    <div class="meta">
+      <span class="chip on">6q · 64</span>
       <span class="chip" id="ent">H = —</span>
+      <span class="chip" id="shape">shape —</span>
       <span class="chip" id="perm">permit —</span>
     </div>
   </div>
-
   <div class="panel">
-    <div class="tag">амплитуды хаоса</div>
-    <div class="viz"><canvas id="wave" width="480" height="120"></canvas></div>
-    <div class="bars" id="bars"></div>
-  </div>
-
-  <div class="panel">
-    <div class="tag">ответ</div>
-    <div class="out" id="ans">—</div>
+    <div class="tag">вердикт</div>
+    <div class="verdict" id="ans">Введи запрос — частицы в суперпозиции. Коллапс соберёт кристалл.</div>
     <div class="bits" id="bits"></div>
-    <p class="note">Не «первый ИИ в мире». Гибрид: реальная локальная LM + sampler на statevector (64). На слабых телефонах загрузка долгая; есть fallback quantum-only.</p>
+    <p class="note">Визуализация statevector, не лабораторный квантовый компьютер. technology_serves_human</p>
   </div>
-
   <footer>
-    aksi_matrix_permit · technology_serves_human<br/>
     <a href="https://milana808.github.io/">home</a> ·
     <a href="https://milana808.github.io/matrix/">matrix</a> ·
     <a href="https://milana808.github.io/permit/">permit</a>
   </footer>
 </div>
-
+<script type="importmap">
+{"imports":{"three":"https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js"}}
+</script>
 <script type="module">
-function fnv1a(str){let h=0x811c9dc5;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,0x01000193)}return h>>>0}
-function hashStream(str,need){const out=[];let block=str;while(out.length<need){const h=fnv1a(block);out.push(h&255,(h>>>8)&255,(h>>>16)&255,(h>>>24)&255);block=block+"|"+h.toString(16)}return out.slice(0,need)}
+import * as THREE from 'three';
+function fnv1a(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return h>>>0}
+function hashStream(str,n){const o=[];let b=str;while(o.length<n){const h=fnv1a(b);o.push(h&255,(h>>>8)&255,(h>>>16)&255,(h>>>24)&255);b=b+'|'+h.toString(16)}return o.slice(0,n)}
 class C{constructor(re,im){this.re=re;this.im=im}abs2(){return this.re*this.re+this.im*this.im}mul(o){return new C(this.re*o.re-this.im*o.im,this.re*o.im+this.im*o.re)}add(o){return new C(this.re+o.re,this.im+o.im)}}
 class QuantumCore{
-  constructor(){this.n=6;this.dim=64;this.state=null;this._probs=null;this.lastEntropy=0;this.lastTop=[];this.query=""}
+  constructor(){this.dim=64;this.state=null;this._probs=null;this.lastEntropy=0}
   _reset(){const s=Array.from({length:64},()=>new C(0,0));s[0]=new C(1,0);this.state=s}
-  _apply(q,m00,m01,m10,m11){const s=this.state,step=1<<q,next=s.slice();for(let b=0;b<64;b++){if(b&step)continue;const a0=s[b],a1=s[b|step];next[b]=m00.mul(a0).add(m01.mul(a1));next[b|step]=m10.mul(a0).add(m11.mul(a1))}this.state=next}
+  _apply(q,a,b,c,d){const s=this.state,st=1<<q,n=s.slice();for(let i=0;i<64;i++){if(i&st)continue;const x=s[i],y=s[i|st];n[i]=a.mul(x).add(b.mul(y));n[i|st]=c.mul(x).add(d.mul(y))}this.state=n}
   _H(q){const s=Math.SQRT1_2;this._apply(q,new C(s,0),new C(s,0),new C(s,0),new C(-s,0))}
-  _RX(q,t){const c=Math.cos(t/2),si=Math.sin(t/2);this._apply(q,new C(c,0),new C(0,-si),new C(0,-si),new C(c,0))}
-  _RY(q,t){const c=Math.cos(t/2),si=Math.sin(t/2);this._apply(q,new C(c,0),new C(-si,0),new C(si,0),new C(c,0))}
+  _RX(q,t){const c=Math.cos(t/2),s=Math.sin(t/2);this._apply(q,new C(c,0),new C(0,-s),new C(0,-s),new C(c,0))}
+  _RY(q,t){const c=Math.cos(t/2),s=Math.sin(t/2);this._apply(q,new C(c,0),new C(-s,0),new C(s,0),new C(c,0))}
   _RZ(q,t){this._apply(q,new C(Math.cos(-t/2),Math.sin(-t/2)),new C(0,0),new C(0,0),new C(Math.cos(t/2),Math.sin(t/2)))}
-  _CX(c,t){const next=this.state.slice(),cm=1<<c,tm=1<<t;for(let i=0;i<64;i++){if(i&cm){const j=i^tm;if(i<j){[next[i],next[j]]=[next[j],next[i]]}}}this.state=next}
+  _CX(c,t){const n=this.state.slice(),cm=1<<c,tm=1<<t;for(let i=0;i<64;i++)if(i&cm){const j=i^tm;if(i<j){[n[i],n[j]]=[n[j],n[i]]}}this.state=n}
   _CZ(a,b){const am=1<<a,bm=1<<b;for(let i=0;i<64;i++)if((i&am)&&(i&bm))this.state[i]=new C(-this.state[i].re,-this.state[i].im)}
-  encode(query){this.query=String(query||"");this._reset();for(let i=0;i<6;i++)this._H(i);const bytes=hashStream(this.query,24);for(let i=0;i<6;i++){this._RX(i,(bytes[2*i]/255)*Math.PI*2);this._RY(i,(bytes[2*i+1]/255)*Math.PI*2)}const b2=hashStream(this.query+"|c2",12);for(let i=0;i<6;i++){this._RZ(i,(b2[i]/255)*Math.PI*2);if(i+1<6)this._CX(i,i+1)}for(let i=0;i<6;i++)this._CZ(i,(i+1)%6);for(let i=0;i<5;i+=2){this._CX(i,i+1);this._RZ(i+1,Math.PI/(2+(i%5)));this._CX(i,i+1)}return this.spectrum(10)}
-  spectrum(topK=10){const probs=new Float64Array(64);let sum=0;for(let i=0;i<64;i++){probs[i]=this.state[i].abs2();sum+=probs[i]}if(sum>0)for(let i=0;i<64;i++)probs[i]/=sum;let H=0;for(let i=0;i<64;i++)if(probs[i]>1e-18)H-=probs[i]*Math.log2(probs[i]);this.lastEntropy=H;this._probs=probs;const idx=[...Array(64).keys()].sort((a,b)=>probs[b]-probs[a]);this.lastTop=idx.slice(0,topK).filter(j=>probs[j]>1e-15).map(j=>({bitstring:j.toString(2).padStart(6,"0"),index:j,probability:probs[j]}));return{entropy:H,top:this.lastTop,probs}}
-  collapse(){if(!this._probs)this.spectrum();const r=Math.random();let acc=0,chosen=63;for(let i=0;i<64;i++){acc+=this._probs[i];if(r<=acc){chosen=i;break}}return{bitstring:chosen.toString(2).padStart(6,"0"),index:chosen,probability:this._probs[chosen],entropyBefore:this.lastEntropy,query:this.query}}
+  encode(q){this._reset();for(let i=0;i<6;i++)this._H(i);const bytes=hashStream(String(q||''),24);for(let i=0;i<6;i++){this._RX(i,(bytes[2*i]/255)*Math.PI*2);this._RY(i,(bytes[2*i+1]/255)*Math.PI*2)}const b2=hashStream(String(q)+'|c',12);for(let i=0;i<6;i++){this._RZ(i,(b2[i]/255)*Math.PI*2);if(i<5)this._CX(i,i+1)}for(let i=0;i<6;i++)this._CZ(i,(i+1)%6);return this.spectrum()}
+  spectrum(){const p=new Float64Array(64);let s=0;for(let i=0;i<64;i++){p[i]=this.state[i].abs2();s+=p[i]}if(s>0)for(let i=0;i<64;i++)p[i]/=s;let H=0;for(let i=0;i<64;i++)if(p[i]>1e-18)H-=p[i]*Math.log2(p[i]);this._probs=p;this.lastEntropy=H;return{entropy:H,probs:p}}
+  collapse(){if(!this._probs)this.spectrum();const r=Math.random();let a=0,c=63;for(let i=0;i<64;i++){a+=this._probs[i];if(r<=a){c=i;break}}return{index:c,bitstring:c.toString(2).padStart(6,'0'),probability:this._probs[c],entropyBefore:this.lastEntropy}}
 }
-function quantumSampler(logits,quantumProbs64,temperature=1){const n=logits.length;let maxLog=-Infinity;for(let i=0;i<n;i++)if(logits[i]>maxLog)maxLog=logits[i];const t=Math.max(0.05,temperature);const weights=new Float64Array(n);let sum=0;for(let i=0;i<n;i++){const q=quantumProbs64[i&63];const base=Math.exp((logits[i]-maxLog)/t);const w=base*(0.15+0.85*q);weights[i]=w;sum+=w}if(!(sum>0))sum=1;let r=Math.random()*sum,acc=0,pick=n-1;for(let i=0;i<n;i++){acc+=weights[i];if(r<=acc){pick=i;break}}return pick}
-function savePermit(payload){try{const data={v:3,ts:new Date().toISOString(),bitstring:payload.bitstring,index:payload.index,entropy:payload.entropyBefore,query:payload.query||"",preview:(payload.text||"").slice(0,200)};localStorage.setItem("aksi_matrix_permit",JSON.stringify(data));return data}catch(e){return null}}
-let audioCtx=null,osc=null,gain=null,lfo=null;
+function shapeFromIndex(idx){const m=idx%3;return m===0?'sphere':m===1?'cube':'spiral'}
+function verdict(col,q,shape){const H=col.entropyBefore.toFixed(3);const lines=['АКСИ · фрактальный вердикт','|'+col.bitstring+'⟩  p='+col.probability.toFixed(4)+'  H='+H+' bit','геометрия коллапса: '+shape.toUpperCase(),'','Запрос: «'+(q.length>90?q.slice(0,87)+'…':q)+'»','Энтропия задала силу вихря; базис выбрал кристалл.'];if(/корень|sqrt|√/.test(q.toLowerCase())&&/16/.test(q))lines.push('Математический режим: √16 = 4 (главное значение в ℝ).');else lines.push('Визуальная проекция 64-мерного statevector, не лабораторный qubit.');lines.push('— technology_serves_human');return lines.join('\n')}
+let audioCtx,osc,gain;
 function ensureAudio(){if(audioCtx)return audioCtx;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;audioCtx=new AC();return audioCtx}
-function startHum(H){const a=ensureAudio();if(!a)return;stopHum(false);if(a.state==="suspended")a.resume();const base=40+Math.min(50,(H||3)*6);osc=a.createOscillator();osc.type="sine";osc.frequency.value=base;const o2=a.createOscillator();o2.type="triangle";o2.frequency.value=base*1.5;gain=a.createGain();gain.gain.value=0.0001;const g2=a.createGain();g2.gain.value=0.012;lfo=a.createOscillator();lfo.frequency.value=0.18;const lg=a.createGain();lg.gain.value=4;lfo.connect(lg);lg.connect(osc.frequency);osc.connect(gain);o2.connect(g2);g2.connect(gain);gain.connect(a.destination);osc.start();o2.start();lfo.start();osc._o2=o2;gain.gain.linearRampToValueAtTime(0.03,a.currentTime+0.35)}
-function stopHum(drop){if(!audioCtx||!gain||!osc)return;const t=audioCtx.currentTime;try{if(drop){osc.frequency.setValueAtTime(osc.frequency.value,t);osc.frequency.exponentialRampToValueAtTime(16,t+0.32);gain.gain.setValueAtTime(Math.max(gain.gain.value,1e-4),t);gain.gain.linearRampToValueAtTime(1e-4,t+0.42)}else gain.gain.linearRampToValueAtTime(1e-4,t+0.12);const o=osc,o2=osc._o2,lf=lfo;setTimeout(()=>{try{o.stop()}catch(e){}try{o2&&o2.stop()}catch(e){}try{lf&&lf.stop()}catch(e){}},drop?480:160)}catch(e){}osc=null;gain=null;lfo=null}
-function haptic(){if(navigator.vibrate)try{navigator.vibrate([40,30,60])}catch(e){}}
-
-const core=new QuantumCore();
-const loadStatus=document.getElementById("loadStatus");
-const loadBar=document.getElementById("loadBar");
-const chipModel=document.getElementById("chipModel");
-const chipDevice=document.getElementById("chipDevice");
-const btnInit=document.getElementById("btnInit");
-const go=document.getElementById("go");
-const qEl=document.getElementById("q");
-const ans=document.getElementById("ans");
-const bits=document.getElementById("bits");
-const ent=document.getElementById("ent");
-const permChip=document.getElementById("perm");
-const barsEl=document.getElementById("bars");
-const canvas=document.getElementById("wave");
-const ctx=canvas.getContext("2d");
-let lastTop=[];let phase=0;
-let tokenizer=null,model=null,modelId="",deviceLabel="—";
-function setProgress(p,msg){loadBar.style.width=Math.max(0,Math.min(100,p))+"%";if(msg)loadStatus.textContent=msg}
-
-const MODEL_CANDIDATES=["Xenova/Qwen1.5-0.5B-Chat","Xenova/SmolLM2-135M-Instruct","Xenova/gpt2"];
-
-async function initLocalAI(){
-  btnInit.disabled=true;
-  setProgress(2,"Загрузка нейро-квантовой матрицы… (Transformers.js)");
-  try{
-    const {env,AutoTokenizer,AutoModelForCausalLM}=await import("https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2");
-    env.allowLocalModels=false;env.useBrowserCache=true;
-    setProgress(8,"Библиотека OK. Веса модели…");
-    let lastErr=null;
-    for(const id of MODEL_CANDIDATES){
-      try{
-        setProgress(12,"Модель: "+id);
-        tokenizer=await AutoTokenizer.from_pretrained(id);
-        setProgress(40,"Токенизатор OK…");
-        model=await AutoModelForCausalLM.from_pretrained(id,{dtype:"q8",progress_callback:(info)=>{if(info&&info.progress!=null)setProgress(40+Math.round(info.progress*0.55),`Загрузка ${id}: ${Math.round((info.progress||0)*100)}%`)}});
-        modelId=id;deviceLabel=navigator.gpu?"webgpu/wasm":"wasm";
-        chipModel.textContent=id.split("/").pop();chipModel.classList.add("on");
-        chipDevice.textContent=deviceLabel;chipDevice.classList.add("on");
-        setProgress(100,"Готово. Можно генерировать.");
-        go.disabled=false;btnInit.textContent="МОДЕЛЬ ЗАГРУЖЕНА";return true;
-      }catch(e){lastErr=e;setProgress(15,"Fail "+id+" → lighter…")}
-    }
-    throw lastErr||new Error("no model");
-  }catch(e){
-    setProgress(0,"Ошибка: "+(e.message||e));
-    chipModel.textContent="fail";chipModel.classList.add("warn");
-    btnInit.disabled=false;btnInit.textContent="ПОВТОРИТЬ ЗАГРУЗКУ";
-    go.disabled=false;go.textContent="ТОЛЬКО КВАНТ (без LLM)";return false;
-  }
-}
-
-async function generateQuantumResponse(userQuery){
-  const q=String(userQuery||"").trim();
-  if(!q)return{text:"Пустой запрос.",collapse:null};
-  const before=core.encode(q);lastTop=before.top;renderBars(before.top);
-  ent.textContent="H = "+before.entropy.toFixed(3)+" bit";ent.classList.add("on");
-  startHum(before.entropy);haptic();
-  const collapse=core.collapse();stopHum(true);
-  if(!model||!tokenizer){
-    const text="[quantum-only] |"+collapse.bitstring+"⟩ H="+collapse.entropyBefore.toFixed(3)+". LLM не загружена. Запрос: «"+q.slice(0,120)+"».";
-    savePermit({...collapse,text});return{text,collapse,mode:"quantum-only"};
-  }
-  const system="You are AKSI, concise offline assistant. Answer in the user's language. Quantum seed |"+collapse.bitstring+"⟩ H="+collapse.entropyBefore.toFixed(2)+".";
-  let prompt;/qwen|smol|instruct|chat/i.test(modelId)
-    ? prompt=`<|im_start|>system\n${system}<|im_end|>\n<|im_start|>user\n${q}<|im_end|>\n<|im_start|>assistant\n`
-    : prompt=`Question: ${q}\nAnswer:`;
-  const maxNew=40;const generated=[];const eos=tokenizer.eos_token_id;
-  const temp=0.7+Math.min(0.6,before.entropy/12);
-  ans.textContent="";bits.textContent="|"+collapse.bitstring+"⟩ · sampling…";
-  for(let step=0;step<maxNew;step++){
-    const encoded=tokenizer(prompt+generated.map(id=>tokenizer.decode([id])).join(""),{return_tensors:"pt",truncation:true,max_length:512});
-    let outputs;
-    try{outputs=await model(encoded)}catch(e){
-      const out=await model.generate(encoded.input_ids,{max_new_tokens:maxNew,temperature:temp,do_sample:true,top_k:40});
-      let full=tokenizer.decode(out[0],{skip_special_tokens:true});
-      let reply=full;const idx=full.toLowerCase().lastIndexOf("assistant");
-      if(idx>=0)reply=full.slice(idx+9).replace(/^[\s:]+/,"");
-      if(reply.includes("Answer:"))reply=reply.split("Answer:").pop();
-      return{text:(reply.trim()||full.trim()),collapse,mode:"generate-fallback"};
-    }
-    const lg=outputs.logits;let logits;
-    if(lg&&lg.data){const dims=lg.dims||[];const vocab=dims[dims.length-1];const seq=dims[dims.length-2]||1;const offset=(seq-1)*vocab;logits=lg.data.slice?lg.data.slice(offset,offset+vocab):Array.from(lg.data).slice(offset,offset+vocab)}
-    else if(lg&&lg[0]){const last=lg[0][lg[0].length-1];logits=last.data||last}else break;
-    if(step%3===0)core.encode(q+"#"+step+"#"+collapse.bitstring);
-    const tokenId=quantumSampler(logits,core._probs||before.probs,temp);
-    if(tokenId===eos)break;generated.push(tokenId);
-    ans.textContent+=tokenizer.decode([tokenId],{skip_special_tokens:true});
-    if(/\n{2,}/.test(ans.textContent))break;
-  }
-  let text=tokenizer.decode(generated,{skip_special_tokens:true}).trim()||ans.textContent.trim();
-  savePermit({...collapse,text});permChip.textContent="permit saved";permChip.classList.add("on");
-  return{text,collapse,mode:"quantum-token-loop",tokens:generated.length};
-}
-
-function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0)}
-resize();addEventListener("resize",resize);
-(function draw(){const w=canvas.getBoundingClientRect().width,h=canvas.getBoundingClientRect().height;ctx.clearRect(0,0,w,h);ctx.fillStyle="#05080c";ctx.fillRect(0,0,w,h);if(!lastTop.length){ctx.beginPath();ctx.strokeStyle="rgba(0,229,255,.35)";ctx.lineWidth=1.4;for(let x=0;x<w;x++){const y=h/2+Math.sin(x*.04+phase)*9*Math.sin(phase*.3);x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}else{const maxP=lastTop[0].probability||1e-6;for(let i=0;i<lastTop.length;i++){const p=lastTop[i].probability/maxP,amp=5+p*h*.34;ctx.beginPath();ctx.strokeStyle=`hsla(${150+i*8},100%,60%,${0.25+p*0.55})`;for(let x=0;x<w;x++){const t=x/w,y=h/2+Math.sin(t*Math.PI*4+phase+i*.7)*amp*Math.sin(Math.PI*t);x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}}phase+=0.05;requestAnimationFrame(draw)})();
-function renderBars(top){barsEl.innerHTML="";top.slice(0,5).forEach(row=>{const d=document.createElement("div");d.className="bar-row";d.innerHTML=`<b>|${row.bitstring}⟩</b><div class="track"><i style="width:${Math.min(100,row.probability*400)}%"></i></div><span>${(row.probability*100).toFixed(1)}%</span>`;barsEl.appendChild(d)})}
-try{const prev=JSON.parse(localStorage.getItem("aksi_matrix_permit")||"null");if(prev&&prev.bitstring){permChip.textContent="permit "+prev.bitstring.slice(0,6)+"…";permChip.classList.add("on")}}catch(e){}
-btnInit.addEventListener("click",()=>initLocalAI());
-go.addEventListener("click",async()=>{const q=qEl.value.trim();if(!q)return;go.disabled=true;ans.textContent="…quantum encode + generate…";bits.textContent="";ensureAudio();try{const t0=performance.now();const res=await generateQuantumResponse(q);ans.textContent=res.text;bits.textContent=`|${res.collapse.bitstring}⟩ · mode=${res.mode} · ${(performance.now()-t0).toFixed(0)} ms · ${modelId||"no-llm"}`}catch(e){stopHum(false);ans.textContent="Ошибка: "+(e.message||e)}go.disabled=false});
-setProgress(0,"Нажми «Загрузить», чтобы скачать микро-LLM в кэш (один раз).");
+function startHum(H){const a=ensureAudio();if(!a)return;stopHum(false);if(a.state==='suspended')a.resume();const base=38+Math.min(40,(H||3)*5);osc=a.createOscillator();osc.type='sine';osc.frequency.value=base;const o2=a.createOscillator();o2.type='triangle';o2.frequency.value=base*1.5;gain=a.createGain();gain.gain.value=1e-4;const g2=a.createGain();g2.gain.value=0.01;osc.connect(gain);o2.connect(g2);g2.connect(gain);gain.connect(a.destination);osc.start();o2.start();osc._o2=o2;gain.gain.linearRampToValueAtTime(0.028,a.currentTime+0.3)}
+function stopHum(drop){if(!audioCtx||!gain||!osc)return;const t=audioCtx.currentTime;try{if(drop){osc.frequency.setValueAtTime(osc.frequency.value,t);osc.frequency.exponentialRampToValueAtTime(14,t+0.3);gain.gain.setValueAtTime(Math.max(gain.gain.value,1e-4),t);gain.gain.linearRampToValueAtTime(1e-4,t+0.4)}else gain.gain.linearRampToValueAtTime(1e-4,t+0.1);const o=osc,o2=osc._o2;setTimeout(()=>{try{o.stop()}catch(e){}try{o2&&o2.stop()}catch(e){}},drop?450:150)}catch(e){}osc=null;gain=null}
+function haptic(){if(navigator.vibrate)try{navigator.vibrate([35,25,55])}catch(e){}}
+function savePermit(col,shape,q){try{const d={v:4,ts:new Date().toISOString(),bitstring:col.bitstring,index:col.index,entropy:col.entropyBefore,shape,query:q};localStorage.setItem('aksi_matrix_permit',JSON.stringify(d));return d}catch(e){return null}}
+const N=1200;const core=new QuantumCore();const stage=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'low-power'});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x030508,1);stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,100);camera.position.set(0,0.4,6.2);
+const positions=new Float32Array(N*3),colors=new Float32Array(N*3),basePos=new Float32Array(N*3),targetPos=new Float32Array(N*3);
+for(let i=0;i<N;i++){const r=1.2+Math.random()*2.4,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);const x=r*Math.sin(ph)*Math.cos(th),y=r*Math.sin(ph)*Math.sin(th),z=r*Math.cos(ph);basePos[i*3]=x;basePos[i*3+1]=y;basePos[i*3+2]=z;positions[i*3]=x;positions[i*3+1]=y;positions[i*3+2]=z;targetPos[i*3]=x;targetPos[i*3+1]=y;targetPos[i*3+2]=z;const g=0.55+Math.random()*0.45;colors[i*3]=0.1*g;colors[i*3+1]=g;colors[i*3+2]=0.55+0.45*Math.random()}
+const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(positions,3));geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+const mat=new THREE.PointsMaterial({size:0.045,vertexColors:true,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true});
+const points=new THREE.Points(geo,mat);scene.add(points);
+const wire=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(2.8,1)),new THREE.LineBasicMaterial({color:0x00ff88,transparent:true,opacity:0.08}));scene.add(wire);
+let mode='cloud',entropy=3.5,vortexStrength=0,collapseT=0,crystalShape='sphere',rotY=0,textHash=0;
+function setShapeTargets(shape){crystalShape=shape;for(let i=0;i<N;i++){const u=i/N;let x,y,z;if(shape==='sphere'){const th=u*Math.PI*12.989,ph=Math.acos(1-2*((i*0.618)%1)),r=1.55;x=r*Math.sin(ph)*Math.cos(th);y=r*Math.sin(ph)*Math.sin(th);z=r*Math.cos(ph)}else if(shape==='cube'){const face=i%6,a=((i*7)%40)/20-1,b=((i*13)%40)/20-1,s=1.35;if(face===0){x=s;y=a*s;z=b*s}else if(face===1){x=-s;y=a*s;z=b*s}else if(face===2){x=a*s;y=s;z=b*s}else if(face===3){x=a*s;y=-s;z=b*s}else if(face===4){x=a*s;y=b*s;z=s}else{x=a*s;y=b*s;z=-s}}else{const t=u*Math.PI*10,r=0.35+u*1.4;x=r*Math.cos(t);y=(u-0.5)*3.0;z=r*Math.sin(t)}targetPos[i*3]=x;targetPos[i*3+1]=y;targetPos[i*3+2]=z}}
+function applyVortex(dt,strength,hash){const spin=0.4+strength*1.8,lift=strength*0.35;for(let i=0;i<N;i++){let x=positions[i*3],y=positions[i*3+1],z=positions[i*3+2];const ang=spin*dt*(0.7+((hash+i*17)&7)*0.05),cos=Math.cos(ang),sin=Math.sin(ang);const nx=x*cos-z*sin,nz=x*sin+z*cos;y+=Math.sin(i*0.05+performance.now()*0.001*strength)*lift*dt;const breath=1+(Math.sin(performance.now()*0.002+i)*0.02*strength);positions[i*3]=nx*breath;positions[i*3+1]=y;positions[i*3+2]=nz*breath;const g=0.45+0.55*Math.min(1,strength/2);colors[i*3]=0.05+0.2*strength;colors[i*3+1]=g;colors[i*3+2]=0.5+0.5*((i+hash)%8)/8}geo.attributes.color.needsUpdate=true}
+function lerpToTargets(dt,rate){const k=1-Math.exp(-rate*dt);for(let i=0;i<N;i++){positions[i*3]+=(targetPos[i*3]-positions[i*3])*k;positions[i*3+1]+=(targetPos[i*3+1]-positions[i*3+1])*k;positions[i*3+2]+=(targetPos[i*3+2]-positions[i*3+2])*k}}
+let last=performance.now();
+function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;rotY+=dt*(mode==='crystal'?0.55:0.12);points.rotation.y=rotY;wire.rotation.y=-rotY*0.3;wire.rotation.x=Math.sin(now*0.0003)*0.15;if(mode==='vortex')applyVortex(dt,vortexStrength,textHash);else if(mode==='collapse'){collapseT+=dt;lerpToTargets(dt,2.2);mat.opacity=0.55+0.45*Math.min(1,collapseT);if(collapseT>1.15){mode='crystal';mat.size=0.055}}else if(mode==='crystal'){lerpToTargets(dt,3.0);const b=1+Math.sin(now*0.002)*0.02;points.scale.setScalar(b)}else{for(let i=0;i<N;i++){positions[i*3]=basePos[i*3]+Math.sin(now*0.0004+i)*0.04;positions[i*3+1]=basePos[i*3+1]+Math.cos(now*0.0005+i*0.7)*0.04;positions[i*3+2]=basePos[i*3+2]+Math.sin(now*0.0003+i*1.3)*0.04}}geo.attributes.position.needsUpdate=true;renderer.render(scene,camera);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+const qEl=document.getElementById('q'),go=document.getElementById('go'),ans=document.getElementById('ans'),bits=document.getElementById('bits'),entEl=document.getElementById('ent'),shapeEl=document.getElementById('shape'),permEl=document.getElementById('perm');
+try{const p=JSON.parse(localStorage.getItem('aksi_matrix_permit')||'null');if(p&&p.bitstring){permEl.textContent='permit '+p.bitstring.slice(0,6)+'…';permEl.classList.add('on')}}catch(e){}
+let vortexTimer=0;
+function onInput(){const q=qEl.value;textHash=fnv1a(q||' ');const spec=core.encode(q||'idle');entropy=spec.entropy;vortexStrength=0.4+Math.min(2.2,entropy/3.2);mode='vortex';entEl.textContent='H = '+entropy.toFixed(3)+' bit';entEl.classList.add('on');clearTimeout(vortexTimer);vortexTimer=setTimeout(()=>{if(mode==='vortex')mode='cloud'},2800)}
+qEl.addEventListener('input',onInput);
+go.addEventListener('click',()=>{const q=qEl.value.trim()||'idle';go.disabled=true;ensureAudio();const spec=core.encode(q);entropy=spec.entropy;vortexStrength=0.5+Math.min(2.4,entropy/3);mode='vortex';startHum(entropy);entEl.textContent='H = '+entropy.toFixed(3)+' bit';ans.textContent='…суперпозиция… вихрь…';setTimeout(()=>{haptic();stopHum(true);const col=core.collapse();const shape=shapeFromIndex(col.index);setShapeTargets(shape);mode='collapse';collapseT=0;shapeEl.textContent=shape;shapeEl.classList.add('on');const text=verdict(col,q,shape);ans.textContent='';let i=0;(function tick(){if(i<=text.length){ans.textContent=text.slice(0,i);i++;setTimeout(tick,12)}else go.disabled=false})();bits.textContent='|'+col.bitstring+'⟩ · p='+col.probability.toFixed(4)+' · '+shape;if(savePermit(col,shape,q)){permEl.textContent='permit saved';permEl.classList.add('on')}},520)});
 </script>
 </body>
 </html>
