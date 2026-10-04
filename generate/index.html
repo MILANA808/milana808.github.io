@@ -3,202 +3,93 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ Generate — локальная генерация</title>
-<meta name="description" content="Реальная генерация текста в браузере: WebLLM + контур АКСИ. Не шаблоны, не только вики."/>
-<link rel="canonical" href="https://milana808.github.io/generate/"/>
+<title>АКСИ — ответы</title>
 <meta name="theme-color" content="#0c0e12"/>
+<link rel="canonical" href="https://milana808.github.io/generate/"/>
 <style>
-:root{--bg:#0c0e12;--panel:#141820;--line:#2a3140;--t:#eef2f7;--m:#8b95a8;--a:#3dd68c;--w:#f0b429}
+:root{--bg:#0c0e12;--p:#141820;--l:#2a3140;--t:#eef2f7;--m:#8b95a8;--a:#3dd68c;--w:#f0b429}
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,sans-serif}
-.wrap{max-width:720px;margin:0 auto;padding:16px 14px 48px}
-.tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--a)}
-h1{font-size:1.35rem;margin:6px 0 4px;font-weight:700}
-.lead{color:var(--m);font-size:13px;margin:0 0 14px;max-width:58ch}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}
-.panel h2{margin:0 0 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--m)}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer;background:var(--a);color:#04140c}
-button.sec{background:transparent;border:1px solid var(--line);color:var(--t)}
-button:disabled{opacity:.45;cursor:not-allowed}
-textarea{width:100%;min-height:88px;border-radius:10px;border:1px solid var(--line);background:#0a0c10;color:var(--t);padding:12px;font:inherit;resize:vertical}
-.bar{height:8px;background:#0a0c10;border-radius:6px;overflow:hidden;margin:8px 0}
-.bar>i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
-.meta{font-size:12px;color:var(--m)}
-.chip{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px 4px 2px 0}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}
+.w{max-width:640px;margin:0 auto;padding:14px 12px 40px}
+.tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
+h1{font-size:1.25rem;margin:4px 0}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px}
+.box{background:var(--p);border:1px solid var(--l);border-radius:12px;padding:12px;margin:10px 0}
+label{font-size:11px;color:var(--m);display:block;margin-bottom:4px}
+textarea{width:100%;min-height:72px;border-radius:10px;border:1px solid var(--l);background:#0a0c10;color:var(--t);padding:10px;font:inherit}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+button{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#04140c}
+button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
+button:disabled{opacity:.45}
+.chips{margin-top:8px}
+.chip{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 2px 0}
 .chip.on{border-color:var(--a);color:var(--a)}
 .chip.warn{border-color:var(--w);color:var(--w)}
-.out{white-space:pre-wrap;word-break:break-word;min-height:4.5em;font-size:15px;line-height:1.55}
-.err{color:#ff8a8a;font-size:13px;margin-top:8px}
-.note{font-size:12px;color:var(--m);margin-top:8px;line-height:1.4}
-footer{margin-top:18px;font-size:12px;color:var(--m)}
+.out{white-space:pre-wrap;word-break:break-word;min-height:5em;font-size:15px;line-height:1.55}
+.src{font-size:12px;color:var(--m);margin-top:8px}
+.err{color:#ff8a8a;font-size:13px;margin-top:6px}
+.bar{height:6px;background:#0a0c10;border-radius:4px;overflow:hidden;margin:6px 0}
+.bar>i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
+footer{margin-top:16px;font-size:12px;color:var(--m)}
 footer a{color:var(--a)}
-label{display:block;font-size:12px;color:var(--m);margin-bottom:4px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="tag">AKSI · generate runtime</div>
-  <h1>Генерация как у LLM — локально</h1>
-  <p class="lead">
-    Здесь текст <b>реально дописывается моделью</b> (WebLLM / WebGPU), а не вытаскивается из вики и не склеивается из шаблонов.
-    Это не GPT‑4 в облаке: маленькая локальная модель, но это настоящая генерация токенов.
-  </p>
-  <div class="panel">
-    <h2>Модель</h2>
-    <div class="row">
-      <button type="button" id="loadBtn">Загрузить модель</button>
-      <button type="button" class="sec" id="unloadBtn">Выгрузить</button>
+<div class="w">
+  <div class="tag">AKSI · всегда отвечает</div>
+  <h1>Спроси</h1>
+  <p class="lead">Сначала локальная память и счёт (без GPU). Если WebGPU есть — можно включить нейросеть.</p>
+  <div class="box">
+    <label for="q">Вопрос</label>
+    <textarea id="q">почему небо синее?</textarea>
+    <div class="btns">
+      <button type="button" id="ask">Ответить</button>
+      <button type="button" class="sec" id="llm">Включить нейросеть</button>
     </div>
     <div class="bar"><i id="prog"></i></div>
-    <div class="meta" id="status">WebLLM ещё не загружен. Нужен WebGPU (Chrome/Edge; на части телефонов — да).</div>
-    <div class="row" style="margin-top:8px">
+    <div class="chips">
+      <span class="chip on" id="cOff">offline ok</span>
       <span class="chip" id="cGpu">GPU ?</span>
-      <span class="chip" id="cReady">модель off</span>
-      <span class="chip" id="cModel">—</span>
-    </div>
-    <p class="note">Нажми «Загрузить модель» один раз (скачается quant ~0.5–1.5B). Потом — «Сгенерировать».</p>
-  </div>
-  <div class="panel">
-    <label for="q">Вопрос / задача</label>
-    <textarea id="q">Объясни простыми словами, что такое рассеяние Рэлея и почему небо синее. 4–6 предложений.</textarea>
-    <div class="row" style="margin-top:8px">
-      <button type="button" id="genBtn" disabled>Сгенерировать</button>
-      <button type="button" class="sec" id="mathBtn">Только счёт (без LLM)</button>
+      <span class="chip" id="cLlm">LLM off</span>
     </div>
     <div class="err" id="err" hidden></div>
   </div>
-  <div class="panel">
-    <h2>Ответ</h2>
-    <div class="out" id="ans">Здесь появится сгенерированный текст.</div>
-    <p class="note" id="src">Источник: —</p>
-  </div>
-  <div class="panel">
-    <h2>Карта стека АКСИ</h2>
-    <p class="note" style="margin:0">
-      <b>Генерация</b> = WebLLM (эта страница + /llm/).<br/>
-      <b>Счёт</b> = classical math.<br/>
-      <b>Decision integrity</b> = /permit/ /authority/ — замок на действие агента.<br/>
-      <b>Phase-HRR</b> = /matrix/chaos/ /hdc/ — ассоциативная память, не замена GPT.<br/>
-      Уникальность продукта АКСИ — не «ещё один чат», а <b>контроль автономных действий + локальный runtime</b>.
-    </p>
+  <div class="box">
+    <div class="tag">ответ</div>
+    <div class="out" id="ans">Нажми «Ответить» — сработает сразу, без загрузки модели.</div>
+    <div class="src" id="src">источник: —</div>
   </div>
   <footer>
-    <a href="https://milana808.github.io/">home</a> ·
-    <a href="https://milana808.github.io/llm/">/llm/</a> ·
-    <a href="https://milana808.github.io/talk/">/talk/</a> ·
-    <a href="https://milana808.github.io/permit/">/permit/</a> ·
-    <a href="https://milana808.github.io/matrix/chaos/">/matrix/chaos/</a>
+    <a href="/">home</a> · <a href="/permit/">permit</a> · <a href="/llm/">llm</a> · <a href="/matrix/chaos/">math-mind</a>
   </footer>
 </div>
 <script src="/aksi-webllm.js"></script>
 <script>
-(function () {
-  var statusEl = document.getElementById('status');
-  var prog = document.getElementById('prog');
-  var cGpu = document.getElementById('cGpu');
-  var cReady = document.getElementById('cReady');
-  var cModel = document.getElementById('cModel');
-  var loadBtn = document.getElementById('loadBtn');
-  var unloadBtn = document.getElementById('unloadBtn');
-  var genBtn = document.getElementById('genBtn');
-  var mathBtn = document.getElementById('mathBtn');
-  var qEl = document.getElementById('q');
-  var ans = document.getElementById('ans');
-  var src = document.getElementById('src');
-  var err = document.getElementById('err');
-  var history = [];
-  function showErr(msg) {
-    if (!msg) { err.hidden = true; err.textContent = ''; return; }
-    err.hidden = false; err.textContent = msg;
-  }
-  function paintStatus() {
-    var W = window.AKSI_WEBLLM;
-    if (!W) { statusEl.textContent = 'aksi-webllm.js не загрузился'; return; }
-    var s = W.status();
-    prog.style.width = (s.progress || 0) + '%';
-    statusEl.textContent = (s.message || '') + (s.error ? ' · ' + s.error : '');
-    cGpu.textContent = s.webgpu === true ? 'GPU ok' : (s.webgpu === false ? 'GPU нет' : 'GPU ?');
-    cGpu.className = 'chip' + (s.webgpu ? ' on' : (s.webgpu === false ? ' warn' : ''));
-    cReady.textContent = s.ready ? 'модель ready' : (s.loading ? 'загрузка…' : 'модель off');
-    cReady.className = 'chip' + (s.ready ? ' on' : '');
-    cModel.textContent = s.model ? s.model.split('-').slice(0, 3).join('-') : '—';
-    genBtn.disabled = !s.ready;
-    loadBtn.disabled = !!s.loading;
-  }
-  window.addEventListener('aksi-webllm-progress', paintStatus);
-  loadBtn.addEventListener('click', function () {
-    showErr('');
-    var W = window.AKSI_WEBLLM;
-    if (!W) { showErr('Нет AKSI_WEBLLM'); return; }
-    W.load(null, function () { paintStatus(); }).then(function () {
-      paintStatus();
-      if (W.ready()) {
-        ans.textContent = 'Модель готова. Можно генерировать.';
-        src.textContent = 'Источник: webllm · ' + (W.status().model || '');
-      } else {
-        var st = W.status();
-        showErr(st.error || 'Не удалось загрузить. Нужен WebGPU. Chrome/Edge desktop или Android.');
-      }
-    }).catch(function (e) { showErr(String(e && e.message || e)); paintStatus(); });
-  });
-  unloadBtn.addEventListener('click', function () {
-    var W = window.AKSI_WEBLLM;
-    if (W && W.unload) W.unload();
-    genBtn.disabled = true;
-    paintStatus();
-  });
-  function tryMath(q) {
-    var s = String(q || '').toLowerCase().replace(/,/g, '.');
-    s = s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi, 'sqrt($1)');
-    s = s.replace(/\bpi\b|π|пи/g, 'PI');
-    s = s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi, ' ');
-    s = s.replace(/\?/g, ' ').trim();
-    var m = s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);
-    if (!m) return null;
-    var expr = m[0].replace(/\s+/g, '').replace(/\^/g, '**');
-    if (!/[0-9PI]|sqrt/i.test(expr)) return null;
-    var safe = expr.replace(/PI/gi, 'Math.PI').replace(/sqrt\(/gi, 'Math.sqrt(');
-    try {
-      var v = new Function('"use strict";return (' + safe + ')')();
-      if (typeof v !== 'number' || !isFinite(v)) return null;
-      return expr + ' = ' + (Number.isInteger(v) ? v : Math.round(v * 1e10) / 1e10);
-    } catch (e) { return null; }
-  }
-  mathBtn.addEventListener('click', function () {
-    showErr('');
-    var r = tryMath(qEl.value.trim());
-    if (r) { ans.textContent = r; src.textContent = 'Источник: classical math'; }
-    else { ans.textContent = 'Не выражение. Для текста — загрузи модель.'; src.textContent = 'Источник: —'; }
-  });
-  genBtn.addEventListener('click', function () {
-    showErr('');
-    var W = window.AKSI_WEBLLM;
-    if (!W || !W.ready()) { showErr('Сначала загрузи модель.'); return; }
-    var q = qEl.value.trim();
-    if (!q) return;
-    genBtn.disabled = true;
-    ans.textContent = 'Генерация…';
-    src.textContent = 'Источник: webllm…';
-    W.complete(q, { history: history.slice(-8), temperature: 0.5, max_tokens: (W.isMobile && W.isMobile()) ? 280 : 450 })
-      .then(function (res) {
-        if (res.error || !res.text) {
-          showErr(res.error || 'Пустой ответ');
-          ans.textContent = 'Не удалось сгенерировать.';
-          src.textContent = 'Источник: error';
-        } else {
-          ans.textContent = res.text;
-          src.textContent = 'Источник: webllm · ' + (res.model || '');
-          history.push({ role: 'user', content: q });
-          history.push({ role: 'assistant', content: res.text });
-        }
-        paintStatus();
-        genBtn.disabled = !W.ready();
-      })
-      .catch(function (e) { showErr(String(e && e.message || e)); genBtn.disabled = false; paintStatus(); });
-  });
-  if (!window.AKSI_WEBLLM) showErr('Не загрузился /aksi-webllm.js');
-  else paintStatus();
+var KB=[
+{k:['кто ты','что ты','о себе','ты кто'],a:'Я контур АКСИ на milana808.github.io.\n\nСейчас отвечаю из локальной базы и точного счёта — на любом телефоне без WebGPU.\n\n«Включить нейросеть» (если есть WebGPU) поднимает WebLLM для свободной генерации.\n\nPermit/authority — замок на действия агента. Контакт: aksilove@internet.ru.'},
+{k:['почему небо','небо син','синий цвет неба','рэлея','релея'],a:'Небо кажется синим из‑за рассеяния Рэлея.\n\nМолекулы воздуха сильнее рассеивают короткие (синие) волны, чем длинные (красные). С дневного неба к глазу приходит больше рассеянного синего.\n\nНа закате путь луча длиннее: синий уходит в стороны, остаются красно‑оранжевые тона.'},
+{k:['почему океан','море син','океан син','вода син'],a:'Океан часто синий, потому что вода сильнее поглощает красную часть спектра. Сине‑зелёные волны рассеиваются обратно. Глубина и угол солнца меняют оттенок.'},
+{k:['что такое акси','акси это','проект акси'],a:'АКСИ — суверенный runtime: offline‑ядро, локальные ответы, decision integrity (permit/receipt), опциональный WebLLM.\n\nНе «ещё один ChatGPT», а контроль автономных агентов: default‑deny.'},
+{k:['permit','пермит','допуск'],a:'Permit — слой допуска действия.\n\nАгент по умолчанию не делает tool‑call (default‑deny). Только ALLOW разрешает действие; можно выдать cryptographic receipt.'},
+{k:['receipt','чек','квитанц'],a:'Receipt — подписанный след ALLOW/BLOCK: время, хеш, статус, подпись. Для аудита.'},
+{k:['как работа','как устроен','webllm','нейросет'],a:'1) «Ответить» — offline база + math, всегда.\n2) «Включить нейросеть» — WebLLM, нужен WebGPU.\nНа iPhone WebGPU часто нет — остаётся offline.'},
+{k:['закат крас','почему закат'],a:'На закате луч идёт через более толстый слой атмосферы. Синий рассеивается, остаются красные и оранжевые волны.'}
+];
+function offlineAnswer(q){var s=String(q||'').toLowerCase();for(var i=0;i<KB.length;i++){for(var j=0;j<KB[i].k.length;j++){if(s.indexOf(KB[i].k[j])>=0)return KB[i].a;}}return null;}
+function tryMath(q){var s=String(q||'').toLowerCase().replace(/,/g,'.');s=s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');s=s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');s=s.replace(/\bpi\b|π|пи/g,'PI');s=s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi,' ');s=s.replace(/\?/g,' ').trim();var m=s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);if(!m)return null;var expr=m[0].replace(/\s+/g,'').replace(/\^/g,'**');if(!/[0-9PI]|sqrt/i.test(expr))return null;var safe=expr.replace(/PI/gi,'Math.PI').replace(/sqrt\(/gi,'Math.sqrt(');try{var v=new Function('"use strict";return ('+safe+')')();if(typeof v!=='number'||!isFinite(v))return null;var num=Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10);return 'Выражение: '+expr+'\nРезультат: '+num;}catch(e){return null;}}
+async function wikiAnswer(q){var term=String(q||'').trim().replace(/[?？]/g,'');term=term.replace(/^(почему|зачем|что такое|что значит|как|what|why|who|how)\s+/i,'');term=term.replace(/\s+/g,' ').trim();if(/небо/.test(q)&&/син/.test(String(q).toLowerCase()))term='Рассеяние Рэлея';if(!term||term.length<2)return null;try{for(var li=0;li<2;li++){var lang=li===0?'ru':'en';var os=await fetch('https://'+lang+'.wikipedia.org/w/api.php?action=opensearch&limit=3&format=json&origin=*&search='+encodeURIComponent(term)).then(function(r){return r.json();});var titles=(os&&os[1])||[];if(!titles.length)continue;var sum=await fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(titles[0])).then(function(r){return r.json();});var extract=(sum&&(sum.extract||sum.description))||'';if(!extract)continue;return (sum.title||titles[0])+'\n\n'+extract.slice(0,900);}}catch(e){}return null;}
+(function(){
+var qEl=document.getElementById('q'),ans=document.getElementById('ans'),src=document.getElementById('src'),err=document.getElementById('err'),prog=document.getElementById('prog'),cGpu=document.getElementById('cGpu'),cLlm=document.getElementById('cLlm'),askBtn=document.getElementById('ask'),llmBtn=document.getElementById('llm'),history=[];
+function showErr(m){if(!m){err.hidden=true;err.textContent='';return;}err.hidden=false;err.textContent=m;}
+function paintLlm(){var W=window.AKSI_WEBLLM;if(!W){cLlm.textContent='LLM script?';return;}var s=W.status();prog.style.width=(s.progress||0)+'%';if(s.webgpu===true){cGpu.textContent='GPU ok';cGpu.className='chip on';}else if(s.webgpu===false){cGpu.textContent='GPU нет';cGpu.className='chip warn';}cLlm.textContent=s.ready?'LLM ready':(s.loading?'LLM…':'LLM off');cLlm.className='chip'+(s.ready?' on':'');llmBtn.disabled=!!s.loading;}
+window.addEventListener('aksi-webllm-progress',paintLlm);if(window.AKSI_WEBLLM)paintLlm();
+askBtn.addEventListener('click',async function(){showErr('');var q=(qEl.value||'').trim();if(!q)return;askBtn.disabled=true;ans.textContent='…';src.textContent='источник: …';
+var m=tryMath(q);if(m){ans.textContent=m;src.textContent='источник: math';askBtn.disabled=false;return;}
+var W=window.AKSI_WEBLLM;if(W&&W.ready()){src.textContent='источник: webllm…';try{var res=await W.complete(q,{history:history.slice(-6),temperature:0.45,max_tokens:320});if(res&&res.text){ans.textContent=res.text;src.textContent='источник: webllm · '+(res.model||'');history.push({role:'user',content:q});history.push({role:'assistant',content:res.text});askBtn.disabled=false;return;}}catch(e){}}
+var off=offlineAnswer(q);if(off){ans.textContent=off;src.textContent='источник: offline knowledge';askBtn.disabled=false;return;}
+src.textContent='источник: wikipedia…';var w=await wikiAnswer(q);if(w){ans.textContent=w;src.textContent='источник: wikipedia';askBtn.disabled=false;return;}
+ans.textContent='Нет локального ответа.\nПопробуй: кто ты, почему небо синее, permit, 12*12.\nИли включи нейросеть (WebGPU).';src.textContent='источник: none';askBtn.disabled=false;});
+llmBtn.addEventListener('click',function(){showErr('');var W=window.AKSI_WEBLLM;if(!W){showErr('Не загрузился aksi-webllm.js');return;}llmBtn.disabled=true;ans.textContent='Загрузка модели…';src.textContent='источник: webllm load…';W.load(null,function(){paintLlm();}).then(function(){paintLlm();if(W.ready()){ans.textContent='Нейросеть готова. Нажми «Ответить».';src.textContent='источник: webllm ready · '+(W.status().model||'');}else{var st=W.status();showErr(st.error||'WebGPU недоступен. «Ответить» всё равно работает offline.');ans.textContent='Модель не поднялась — используй «Ответить».';src.textContent='источник: offline only';}llmBtn.disabled=false;}).catch(function(e){showErr(String(e&&e.message||e));llmBtn.disabled=false;paintLlm();});});
 })();
 </script>
 </body>
