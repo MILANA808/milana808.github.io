@@ -3,93 +3,248 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ — ответы</title>
-<meta name="theme-color" content="#0c0e12"/>
+<title>АКСИ — умные ответы</title>
+<meta name="description" content="АКСИ: Wikipedia + math + offline + optional WebLLM"/>
 <link rel="canonical" href="https://milana808.github.io/generate/"/>
+<meta name="theme-color" content="#0b0d12"/>
 <style>
-:root{--bg:#0c0e12;--p:#141820;--l:#2a3140;--t:#eef2f7;--m:#8b95a8;--a:#3dd68c;--w:#f0b429}
+:root{--bg:#0b0d12;--p:#151922;--l:#2c3344;--t:#f0f3f8;--m:#9aa3b5;--a:#3dd68c}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}
-.w{max-width:640px;margin:0 auto;padding:14px 12px 40px}
-.tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
-h1{font-size:1.25rem;margin:4px 0}
-.lead{color:var(--m);font-size:13px;margin:0 0 12px}
-.box{background:var(--p);border:1px solid var(--l);border-radius:12px;padding:12px;margin:10px 0}
+body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,sans-serif}
+.w{max-width:680px;margin:0 auto;padding:14px 12px 48px}
+.tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--a)}
+h1{font-size:1.3rem;margin:6px 0 4px}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px;line-height:1.45}
+.box{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px;margin:10px 0}
 label{font-size:11px;color:var(--m);display:block;margin-bottom:4px}
-textarea{width:100%;min-height:72px;border-radius:10px;border:1px solid var(--l);background:#0a0c10;color:var(--t);padding:10px;font:inherit}
+textarea{width:100%;min-height:76px;border-radius:10px;border:1px solid var(--l);background:#0a0c10;color:var(--t);padding:11px;font:inherit;resize:vertical}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-button{border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#04140c}
+button{border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#04140c}
 button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
 button:disabled{opacity:.45}
-.chips{margin-top:8px}
-.chip{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 2px 0}
+.chip{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 0 0}
 .chip.on{border-color:var(--a);color:var(--a)}
-.chip.warn{border-color:var(--w);color:var(--w)}
-.out{white-space:pre-wrap;word-break:break-word;min-height:5em;font-size:15px;line-height:1.55}
-.src{font-size:12px;color:var(--m);margin-top:8px}
+.out{white-space:pre-wrap;word-break:break-word;min-height:6em;font-size:15px;line-height:1.6}
+.src{font-size:12px;color:var(--m);margin-top:10px}
+.src a{color:var(--a)}
 .err{color:#ff8a8a;font-size:13px;margin-top:6px}
-.bar{height:6px;background:#0a0c10;border-radius:4px;overflow:hidden;margin:6px 0}
+.bar{height:6px;background:#0a0c10;border-radius:4px;overflow:hidden;margin:8px 0 0}
 .bar>i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}
 footer{margin-top:16px;font-size:12px;color:var(--m)}
-footer a{color:var(--a)}
+footer a{color:var(--a);margin-right:8px}
+.ex{font-size:12px;color:var(--m);margin-top:8px}
+.ex button{display:inline-block;margin:3px 4px 0 0;padding:6px 10px;font-size:12px;font-weight:600;border-radius:8px;background:#1a2030;color:var(--t);border:1px solid var(--l)}
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="tag">AKSI · всегда отвечает</div>
-  <h1>Спроси</h1>
-  <p class="lead">Сначала локальная память и счёт (без GPU). Если WebGPU есть — можно включить нейросеть.</p>
+  <div class="tag">AKSI · knowledge</div>
+  <h1>Спроси о чём угодно</h1>
+  <p class="lead">Факты — из Wikipedia (RU/EN). Числа — считаю сам. Про АКСИ — локально. Нейросеть — по желанию (WebGPU).</p>
   <div class="box">
     <label for="q">Вопрос</label>
-    <textarea id="q">почему небо синее?</textarea>
+    <textarea id="q">что такое квантовая механика?</textarea>
     <div class="btns">
       <button type="button" id="ask">Ответить</button>
-      <button type="button" class="sec" id="llm">Включить нейросеть</button>
+      <button type="button" class="sec" id="llm">Нейросеть (WebGPU)</button>
     </div>
     <div class="bar"><i id="prog"></i></div>
-    <div class="chips">
-      <span class="chip on" id="cOff">offline ok</span>
-      <span class="chip" id="cGpu">GPU ?</span>
+    <div style="margin-top:8px">
+      <span class="chip on">wiki</span>
+      <span class="chip on">math</span>
       <span class="chip" id="cLlm">LLM off</span>
+      <span class="chip" id="cGpu">GPU ?</span>
+    </div>
+    <div class="ex">
+      Примеры:
+      <button type="button" data-q="что такое квантовая механика?">квантовая механика</button>
+      <button type="button" data-q="кто такой Ломоносов?">Ломоносов</button>
+      <button type="button" data-q="почему небо синее?">небо синее</button>
+      <button type="button" data-q="12*12">12×12</button>
+      <button type="button" data-q="что такое permit в АКСИ?">permit</button>
     </div>
     <div class="err" id="err" hidden></div>
   </div>
   <div class="box">
     <div class="tag">ответ</div>
-    <div class="out" id="ans">Нажми «Ответить» — сработает сразу, без загрузки модели.</div>
-    <div class="src" id="src">источник: —</div>
+    <div class="out" id="ans">Нажми «Ответить».</div>
+    <div class="src" id="src"></div>
   </div>
   <footer>
-    <a href="/">home</a> · <a href="/permit/">permit</a> · <a href="/llm/">llm</a> · <a href="/matrix/chaos/">math-mind</a>
+    <a href="/">home</a>
+    <a href="/talk/">talk</a>
+    <a href="/permit/">permit</a>
+    <a href="/llm/">llm</a>
   </footer>
 </div>
 <script src="/aksi-webllm.js"></script>
 <script>
-var KB=[
-{k:['кто ты','что ты','о себе','ты кто'],a:'Я контур АКСИ на milana808.github.io.\n\nСейчас отвечаю из локальной базы и точного счёта — на любом телефоне без WebGPU.\n\n«Включить нейросеть» (если есть WebGPU) поднимает WebLLM для свободной генерации.\n\nPermit/authority — замок на действия агента. Контакт: aksilove@internet.ru.'},
-{k:['почему небо','небо син','синий цвет неба','рэлея','релея'],a:'Небо кажется синим из‑за рассеяния Рэлея.\n\nМолекулы воздуха сильнее рассеивают короткие (синие) волны, чем длинные (красные). С дневного неба к глазу приходит больше рассеянного синего.\n\nНа закате путь луча длиннее: синий уходит в стороны, остаются красно‑оранжевые тона.'},
-{k:['почему океан','море син','океан син','вода син'],a:'Океан часто синий, потому что вода сильнее поглощает красную часть спектра. Сине‑зелёные волны рассеиваются обратно. Глубина и угол солнца меняют оттенок.'},
-{k:['что такое акси','акси это','проект акси'],a:'АКСИ — суверенный runtime: offline‑ядро, локальные ответы, decision integrity (permit/receipt), опциональный WebLLM.\n\nНе «ещё один ChatGPT», а контроль автономных агентов: default‑deny.'},
-{k:['permit','пермит','допуск'],a:'Permit — слой допуска действия.\n\nАгент по умолчанию не делает tool‑call (default‑deny). Только ALLOW разрешает действие; можно выдать cryptographic receipt.'},
-{k:['receipt','чек','квитанц'],a:'Receipt — подписанный след ALLOW/BLOCK: время, хеш, статус, подпись. Для аудита.'},
-{k:['как работа','как устроен','webllm','нейросет'],a:'1) «Ответить» — offline база + math, всегда.\n2) «Включить нейросеть» — WebLLM, нужен WebGPU.\nНа iPhone WebGPU часто нет — остаётся offline.'},
-{k:['закат крас','почему закат'],a:'На закате луч идёт через более толстый слой атмосферы. Синий рассеивается, остаются красные и оранжевые волны.'}
-];
-function offlineAnswer(q){var s=String(q||'').toLowerCase();for(var i=0;i<KB.length;i++){for(var j=0;j<KB[i].k.length;j++){if(s.indexOf(KB[i].k[j])>=0)return KB[i].a;}}return null;}
-function tryMath(q){var s=String(q||'').toLowerCase().replace(/,/g,'.');s=s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');s=s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');s=s.replace(/\bpi\b|π|пи/g,'PI');s=s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi,' ');s=s.replace(/\?/g,' ').trim();var m=s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);if(!m)return null;var expr=m[0].replace(/\s+/g,'').replace(/\^/g,'**');if(!/[0-9PI]|sqrt/i.test(expr))return null;var safe=expr.replace(/PI/gi,'Math.PI').replace(/sqrt\(/gi,'Math.sqrt(');try{var v=new Function('"use strict";return ('+safe+')')();if(typeof v!=='number'||!isFinite(v))return null;var num=Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10);return 'Выражение: '+expr+'\nРезультат: '+num;}catch(e){return null;}}
-async function wikiAnswer(q){var term=String(q||'').trim().replace(/[?？]/g,'');term=term.replace(/^(почему|зачем|что такое|что значит|как|what|why|who|how)\s+/i,'');term=term.replace(/\s+/g,' ').trim();if(/небо/.test(q)&&/син/.test(String(q).toLowerCase()))term='Рассеяние Рэлея';if(!term||term.length<2)return null;try{for(var li=0;li<2;li++){var lang=li===0?'ru':'en';var os=await fetch('https://'+lang+'.wikipedia.org/w/api.php?action=opensearch&limit=3&format=json&origin=*&search='+encodeURIComponent(term)).then(function(r){return r.json();});var titles=(os&&os[1])||[];if(!titles.length)continue;var sum=await fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(titles[0])).then(function(r){return r.json();});var extract=(sum&&(sum.extract||sum.description))||'';if(!extract)continue;return (sum.title||titles[0])+'\n\n'+extract.slice(0,900);}}catch(e){}return null;}
 (function(){
-var qEl=document.getElementById('q'),ans=document.getElementById('ans'),src=document.getElementById('src'),err=document.getElementById('err'),prog=document.getElementById('prog'),cGpu=document.getElementById('cGpu'),cLlm=document.getElementById('cLlm'),askBtn=document.getElementById('ask'),llmBtn=document.getElementById('llm'),history=[];
-function showErr(m){if(!m){err.hidden=true;err.textContent='';return;}err.hidden=false;err.textContent=m;}
-function paintLlm(){var W=window.AKSI_WEBLLM;if(!W){cLlm.textContent='LLM script?';return;}var s=W.status();prog.style.width=(s.progress||0)+'%';if(s.webgpu===true){cGpu.textContent='GPU ok';cGpu.className='chip on';}else if(s.webgpu===false){cGpu.textContent='GPU нет';cGpu.className='chip warn';}cLlm.textContent=s.ready?'LLM ready':(s.loading?'LLM…':'LLM off');cLlm.className='chip'+(s.ready?' on':'');llmBtn.disabled=!!s.loading;}
-window.addEventListener('aksi-webllm-progress',paintLlm);if(window.AKSI_WEBLLM)paintLlm();
-askBtn.addEventListener('click',async function(){showErr('');var q=(qEl.value||'').trim();if(!q)return;askBtn.disabled=true;ans.textContent='…';src.textContent='источник: …';
-var m=tryMath(q);if(m){ans.textContent=m;src.textContent='источник: math';askBtn.disabled=false;return;}
-var W=window.AKSI_WEBLLM;if(W&&W.ready()){src.textContent='источник: webllm…';try{var res=await W.complete(q,{history:history.slice(-6),temperature:0.45,max_tokens:320});if(res&&res.text){ans.textContent=res.text;src.textContent='источник: webllm · '+(res.model||'');history.push({role:'user',content:q});history.push({role:'assistant',content:res.text});askBtn.disabled=false;return;}}catch(e){}}
-var off=offlineAnswer(q);if(off){ans.textContent=off;src.textContent='источник: offline knowledge';askBtn.disabled=false;return;}
-src.textContent='источник: wikipedia…';var w=await wikiAnswer(q);if(w){ans.textContent=w;src.textContent='источник: wikipedia';askBtn.disabled=false;return;}
-ans.textContent='Нет локального ответа.\nПопробуй: кто ты, почему небо синее, permit, 12*12.\nИли включи нейросеть (WebGPU).';src.textContent='источник: none';askBtn.disabled=false;});
-llmBtn.addEventListener('click',function(){showErr('');var W=window.AKSI_WEBLLM;if(!W){showErr('Не загрузился aksi-webllm.js');return;}llmBtn.disabled=true;ans.textContent='Загрузка модели…';src.textContent='источник: webllm load…';W.load(null,function(){paintLlm();}).then(function(){paintLlm();if(W.ready()){ans.textContent='Нейросеть готова. Нажми «Ответить».';src.textContent='источник: webllm ready · '+(W.status().model||'');}else{var st=W.status();showErr(st.error||'WebGPU недоступен. «Ответить» всё равно работает offline.');ans.textContent='Модель не поднялась — используй «Ответить».';src.textContent='источник: offline only';}llmBtn.disabled=false;}).catch(function(e){showErr(String(e&&e.message||e));llmBtn.disabled=false;paintLlm();});});
+  var AKSI = [
+    {k:['permit','пермит','допуск действия'],a:'Permit в АКСИ — default-deny допуск действия агента: сначала проверка цели/мандата, потом ALLOW или BLOCK. Можно выдать cryptographic receipt для аудита.'},
+    {k:['что такое акси','акси это','проект акси','кто ты','что ты'],a:'АКСИ (milana808.github.io) — суверенный runtime: ответы в браузере, decision integrity (permit/receipt), опциональный WebLLM. Контакт: aksilove@internet.ru.'},
+    {k:['receipt','чек решения'],a:'Receipt — подписанный след решения ALLOW/BLOCK (время, хеш контекста, статус, подпись) для аудита.'}
+  ];
+  function aksiHit(q){
+    var s = q.toLowerCase();
+    for (var i=0;i<AKSI.length;i++){
+      for (var j=0;j<AKSI[i].k.length;j++){
+        if (s.indexOf(AKSI[i].k[j])>=0) return AKSI[i].a;
+      }
+    }
+    return null;
+  }
+  function tryMath(q){
+    var s = String(q||'').toLowerCase().replace(/,/g,'.');
+    s = s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');
+    s = s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');
+    s = s.replace(/\bpi\b|π|пи/g,'PI');
+    s = s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет|what\s+is/gi,' ');
+    s = s.replace(/\?/g,' ').trim();
+    if (!/[0-9]/.test(s) && !/sqrt|pi/i.test(s)) return null;
+    var m = s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%^()\s])+)/i);
+    if (!m) return null;
+    var expr = m[0].replace(/\s+/g,'').replace(/\^/g,'**');
+    if (expr.length < 1 || expr.length > 80) return null;
+    if (!/[0-9PI]|sqrt/i.test(expr)) return null;
+    if (/[a-zа-яё]{4,}/i.test(expr.replace(/sqrt|PI/gi,''))) return null;
+    var safe = expr.replace(/PI/gi,'Math.PI').replace(/sqrt\(/gi,'Math.sqrt(');
+    try {
+      var v = new Function('"use strict";return ('+safe+')')();
+      if (typeof v !== 'number' || !isFinite(v)) return null;
+      var num = Number.isInteger(v) ? String(v) : String(Math.round(v*1e12)/1e12);
+      return {text: 'Выражение: '+expr+'\nРезультат: '+num, source: 'math'};
+    } catch(e){ return null; }
+  }
+  function searchTerm(q){
+    var s = String(q||'').trim().replace(/[?？!！]/g,'');
+    s = s.replace(/^(а\s+)?(подскажи|расскажи|объясни|что\s+ты\s+знаешь\s+о|who\s+is|what\s+is|what\s+are)\s+/i,'');
+    s = s.replace(/^(почему|зачем|отчего|как|что такое|что значит|кто такой|кто такая|кто такие|когда|где|сколько|what|why|who|how|when|where)\s+/i,'');
+    s = s.replace(/\s+/g,' ').trim();
+    var low = String(q).toLowerCase();
+    if (/небо/.test(low) && /син/.test(low)) return 'Рассеяние Рэлея';
+    if (/океан|море/.test(low) && /син/.test(low)) return 'Цвет воды';
+    if (/закат/.test(low) && /крас/.test(low)) return 'Рассеяние Рэлея';
+    return s || String(q||'').trim();
+  }
+  async function wiki(q){
+    var term = searchTerm(q);
+    if (!term || term.length < 2) return null;
+    var langs = /[а-яё]/i.test(term) ? ['ru','en'] : ['en','ru'];
+    for (var i=0;i<langs.length;i++){
+      var lang = langs[i];
+      try {
+        var os = await fetch('https://'+lang+'.wikipedia.org/w/api.php?action=opensearch&limit=5&format=json&origin=*&search='+encodeURIComponent(term)).then(function(r){return r.json();});
+        var titles = (os && os[1]) || [];
+        if (!titles.length) continue;
+        var title = titles[0];
+        var sum = await fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title)).then(function(r){return r.json();});
+        if (sum && sum.type === 'disambiguation' && titles[1]){
+          sum = await fetch('https://'+lang+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(titles[1])).then(function(r){return r.json();});
+          title = titles[1];
+        }
+        var extract = (sum && (sum.extract || sum.description)) || '';
+        if (!extract || extract.length < 20) continue;
+        var url = (sum.content_urls && sum.content_urls.desktop && sum.content_urls.desktop.page) ||
+          ('https://'+lang+'.wikipedia.org/wiki/'+encodeURIComponent(sum.title||title));
+        return { text: (sum.title||title) + '\n\n' + extract, source: 'wikipedia/'+lang, url: url };
+      } catch(e){}
+    }
+    return null;
+  }
+  var qEl = document.getElementById('q');
+  var ans = document.getElementById('ans');
+  var src = document.getElementById('src');
+  var err = document.getElementById('err');
+  var prog = document.getElementById('prog');
+  var cLlm = document.getElementById('cLlm');
+  var cGpu = document.getElementById('cGpu');
+  var askBtn = document.getElementById('ask');
+  var llmBtn = document.getElementById('llm');
+  var history = [];
+  function showErr(m){ if(!m){err.hidden=true;err.textContent='';return;} err.hidden=false; err.textContent=m; }
+  function paintLlm(){
+    var W = window.AKSI_WEBLLM;
+    if (!W) return;
+    var s = W.status();
+    prog.style.width = (s.progress||0)+'%';
+    if (s.webgpu===true){ cGpu.textContent='GPU ok'; cGpu.className='chip on'; }
+    else if (s.webgpu===false){ cGpu.textContent='GPU нет'; cGpu.className='chip'; }
+    cLlm.textContent = s.ready ? 'LLM ready' : (s.loading ? 'LLM…' : 'LLM off');
+    cLlm.className = 'chip'+(s.ready?' on':'');
+    llmBtn.disabled = !!s.loading;
+  }
+  window.addEventListener('aksi-webllm-progress', paintLlm);
+  if (window.AKSI_WEBLLM) paintLlm();
+  document.querySelectorAll('[data-q]').forEach(function(b){
+    b.addEventListener('click', function(){ qEl.value = b.getAttribute('data-q'); });
+  });
+  askBtn.addEventListener('click', async function(){
+    showErr('');
+    var q = (qEl.value||'').trim();
+    if (!q) return;
+    askBtn.disabled = true;
+    ans.textContent = 'Ищу…';
+    src.textContent = '';
+    var math = tryMath(q);
+    if (math){
+      ans.textContent = math.text;
+      src.textContent = 'источник: точный расчёт на устройстве';
+      askBtn.disabled = false;
+      return;
+    }
+    var ak = aksiHit(q);
+    if (ak){
+      ans.textContent = ak;
+      src.textContent = 'источник: локальная база АКСИ';
+      askBtn.disabled = false;
+      return;
+    }
+    var W = window.AKSI_WEBLLM;
+    if (W && W.ready()){
+      src.textContent = 'источник: локальная нейросеть…';
+      try {
+        var res = await W.complete(q, { history: history.slice(-6), temperature: 0.4, max_tokens: 360 });
+        if (res && res.text){
+          ans.textContent = res.text;
+          src.textContent = 'источник: webllm · ' + (res.model||'');
+          history.push({role:'user',content:q});
+          history.push({role:'assistant',content:res.text});
+          askBtn.disabled = false;
+          return;
+        }
+      } catch(e){}
+    }
+    src.textContent = 'источник: Wikipedia…';
+    var w = await wiki(q);
+    if (w){
+      ans.textContent = w.text;
+      src.innerHTML = 'источник: '+w.source+(w.url ? ' · <a href="'+w.url+'" target="_blank" rel="noopener">открыть статью</a>' : '');
+      askBtn.disabled = false;
+      return;
+    }
+    ans.textContent = 'Не нашёл статью по запросу «'+q+'».\n\nПереформулируй короче (имя, термин). Или включи нейросеть, если есть WebGPU.';
+    src.textContent = 'источник: ничего не найдено';
+    askBtn.disabled = false;
+  });
+  llmBtn.addEventListener('click', function(){
+    showErr('');
+    var W = window.AKSI_WEBLLM;
+    if (!W){ showErr('Не загрузился aksi-webllm.js'); return; }
+    llmBtn.disabled = true;
+    ans.textContent = 'Загрузка локальной модели (нужен WebGPU, 1–2 мин)…';
+    W.load(null, function(){ paintLlm(); }).then(function(){
+      paintLlm();
+      if (W.ready()){
+        ans.textContent = 'Нейросеть готова. Нажми «Ответить» — генерация модели.';
+        src.textContent = 'источник: webllm ready';
+      } else {
+        showErr((W.status().error)||'WebGPU недоступен. Wikipedia по «Ответить» работает.');
+        ans.textContent = 'Модель не поднялась. Обычные вопросы — через Wikipedia.';
+      }
+      llmBtn.disabled = false;
+    }).catch(function(e){ showErr(String(e&&e.message||e)); llmBtn.disabled=false; paintLlm(); });
+  });
 })();
 </script>
 </body>
