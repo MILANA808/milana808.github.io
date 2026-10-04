@@ -47,6 +47,15 @@ jobs:
                   assert target.is_file(), f'{p}: missing local asset {ref}'
           print('AKSI static validation + local asset validation: OK')
           PY
+      - name: Upload validation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-validation
+          path: .
+          include-hidden-files: false
+          if-no-files-found: ignore
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
