@@ -4,9 +4,23 @@
 (function(G){
   "use strict";
   var KEY="AKSI_BACKEND_URL";
-  var DEFAULT="https://milana-backend.onrender.com";
+  var DEFAULTS=["https://milana-backend.replit.app","https://milana-backend.onrender.com"];
   function base(){
-    try{return String(localStorage.getItem(KEY)||DEFAULT).replace(/\/$/,"")}catch(e){return DEFAULT}
+    try{return String(localStorage.getItem(KEY)||DEFAULTS[0]).replace(/\/$/,"")}catch(e){return DEFAULTS[0]}
+  }
+  async function request(path,init){
+    var saved=null; try{saved=localStorage.getItem(KEY)}catch(e){}
+    var candidates=saved?[saved].concat(DEFAULTS.filter(function(x){return x!==saved})):DEFAULTS.slice();
+    var last=null;
+    for(var i=0;i<candidates.length;i++){
+      var b=String(candidates[i]).replace(/\/$/,"");
+      try{
+        var r=await fetch(b+path,Object.assign({cache:"no-store"},init||{}));
+        if(r.ok){try{localStorage.setItem(KEY,b)}catch(e){} return r;}
+        last=new Error("HTTP "+r.status+" from "+b);
+      }catch(e){last=e;}
+    }
+    throw last||new Error("No backend available");
   }
   function setBase(url){
     var v=String(url||"").trim().replace(/\/$/,"");
@@ -14,7 +28,7 @@
     localStorage.setItem(KEY,v); return v;
   }
   async function health(){
-    var r=await fetch(base()+"/health",{cache:"no-store"});
+    var r=await request("/health");
     var data=await r.json();
     return {ok:r.ok,base:base(),data:data};
   }
@@ -24,7 +38,7 @@
       internet:true,read_pages:true,browser_actions:false,
       downloads:false,memory:true,external_actions:false
     },opts.permissions||{});
-    var r=await fetch(base()+"/api/agent/tasks",{
+    var r=await request("/api/agent/tasks",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
       body:JSON.stringify({goal:String(goal||"").trim(),permissions:permissions,max_sources:opts.max_sources||10})
@@ -37,7 +51,7 @@
       if(opts.onProgress) opts.onProgress(last);
       if(["COMPLETED","FAILED","STOPPED","NEEDS_PERMISSION"].indexOf(last.status)>=0) break;
       await new Promise(function(resolve){setTimeout(resolve,opts.poll_ms||1800)});
-      var p=await fetch(base()+"/api/agent/tasks/"+encodeURIComponent(id),{cache:"no-store"});
+      var p=await request("/api/agent/tasks/"+encodeURIComponent(id));
       if(!p.ok) throw new Error("poll task HTTP "+p.status);
       var body=await p.json(); last=body.task||last;
     }
