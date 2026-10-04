@@ -30,7 +30,7 @@ jobs:
           test -f index.html
           test -f runtime/index.html
           test -f discovery/index.html
-          python - <<'PY'
+          python - <<'PY' > pages-validation.log 2>&1
           from pathlib import Path
           for p in Path('.').rglob('*.html'):
               s=p.read_text(encoding='utf-8')
@@ -52,8 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pages-validation
-          path: .
-          include-hidden-files: false
+          path: pages-validation.log
           if-no-files-found: ignore
 
       - name: Upload Pages artifact
