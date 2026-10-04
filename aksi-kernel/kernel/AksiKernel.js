@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { MandateManager } from '../mandate/MandateManager.js';
 import { Exocortex } from '../exocortex/Exocortex.js';
 import { AksiPermit, offlineVerifyReceipt } from '../permit/AksiPermit.js';
-import { ensureKeyPair } from '../receipt/Receipt.js';
+import { createReceipt, ensureKeyPair } from '../receipt/Receipt.js';
+import { ResultVerifier } from '../verify/ResultVerifier.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const RECEIPTS_DIR = join(__dirname, '../receipts');
@@ -29,10 +30,11 @@ export class AksiKernel {
     this.exocortex = new Exocortex(opts.sessionId);
     this.permit = new AksiPermit({ policy: this.mandate.getPolicy() });
     this.receiptLog = [];
+    this.resultVerifier = new ResultVerifier();
     if (!existsSync(RECEIPTS_DIR)) mkdirSync(RECEIPTS_DIR, { recursive: true });
   }
 
-  executeAgentStep(userGoal, proposedToolCall) {
+  async executeAgentStep(userGoal, proposedToolCall, options = {}) {
     if (userGoal) this.exocortex.setGoal(userGoal);
 
     this.exocortex.addThought('propose', {
@@ -57,7 +59,28 @@ export class AksiKernel {
       throw new SecurityBlockedError(decision);
     }
 
-    const toolResult = this._simulateTool(proposedToolCall);
+    if (options.mode === 'real' && typeof options.executor !== 'function') {
+      throw new Error('AKSI real execution requires an explicit executor');
+    }
+
+    const toolResult = typeof options.executor === 'function'
+      ? await options.executor(proposedToolCall)
+      : this._simulateTool(proposedToolCall);
+    const verification = options.expectedResult !== undefined
+      ? this.resultVerifier.verify(options.expectedResult, toolResult)
+      : { status: 'NOT_REQUESTED', reason: 'no_expected_result' };
+    const executionReceipt = createReceipt({
+      toolRequest: proposedToolCall,
+      contextFingerprint: this.exocortex.contextFingerprint(),
+      gate: 'ALLOW',
+      reasons: ['execution_complete', verification.status.toLowerCase()],
+      policy: this.mandate.getPolicy(),
+      sessionId: this.exocortex.sessionId,
+      expectedResult: options.expectedResult,
+      actualResult: toolResult,
+      verification,
+    });
+    this._storeReceipt(executionReceipt);
     this.exocortex.addThought('execute', {
       tool: proposedToolCall?.tool,
       note: String(toolResult).slice(0, 160),
@@ -69,6 +92,8 @@ export class AksiKernel {
       tool: proposedToolCall?.tool,
       toolResult,
       receipt: decision.receipt,
+      executionReceipt,
+      verification,
       context: this.exocortex.getContextSummary(),
       verify: offlineVerifyReceipt(decision.receipt),
     };
