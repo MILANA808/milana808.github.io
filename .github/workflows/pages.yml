@@ -39,7 +39,7 @@ jobs:
           import re
           for p in Path('.').rglob('*.html'):
               s=p.read_text(encoding='utf-8')
-              refs=re.findall(r'(?:href|src)=["\\']([^"\\'#?]+)', s, flags=re.I)
+              refs=re.findall(r'''(?:href|src)=["']([^"'#?]+)''', s, flags=re.I)
               for ref in refs:
                   if ref.startswith(('http://','https://','mailto:','tel:','data:','javascript:','//','/')):
                       continue
