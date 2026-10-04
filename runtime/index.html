@@ -54,7 +54,7 @@ footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid va
     <textarea id="goal" rows="3" placeholder="Исследуй X. Собери факты, отдели гипотезы, покажи пробелы…"></textarea>
     <div class="row">
       <button type="button" id="run">RUN</button>
-      <button type="button" class="ghost" id="exportBtn" disabled>Export session</button>
+      <button type="button" class="ghost" id="serverRun">SERVER RUN</button>\n      <button type="button" class="ghost" id="exportBtn" disabled>Export session</button>
     </div>
     <div class="demos" style="margin-top:10px"><h2>Demos</h2><div id="demos"></div></div>
   </div>
@@ -80,7 +80,7 @@ footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid va
 <footer>aksilove@internet.ru · principle: technology_serves_human · chain ≠ truth</footer>
 </div>
 <script src="./core/engine.js?v=13"></script>
-<script src="./core/engine-upgrade.js?v=3"></script>
+<script src="./core/engine-upgrade.js?v=3"></script>\n<script src="./backend/client.js?v=1"></script>
 <script>
 (function(){
   var R=window.AKSI_RUNTIME;
@@ -125,6 +125,35 @@ footer{margin-top:16px;font-size:12px;color:var(--muted);border-top:1px solid va
     }).join('')||'—';
     document.getElementById('report').textContent=(s.report&&s.report.markdown)||'—';
   }
+  document.getElementById('serverRun').onclick=async function(){
+    var goal=document.getElementById('goal').value.trim();
+    if(!goal) return;
+    var btn=document.getElementById('serverRun'); btn.disabled=true;
+    document.getElementById('live').innerHTML='<div><span class="t">SERVER</span> connecting to '+esc(AKSI_SERVER_RUNTIME.base())+'</div>';
+    try{
+      var h=await AKSI_SERVER_RUNTIME.health();
+      if(!h.ok) throw new Error('backend health HTTP failure');
+      var task=await AKSI_SERVER_RUNTIME.run(goal,{
+        onProgress:function(t){
+          document.getElementById('live').innerHTML='<div><span class="t">SERVER</span> '+esc(t.status||'')+' · '+esc((t.journal&&t.journal.length)?t.journal[t.journal.length-1].message:'')+'</div>';
+        }
+      });
+      document.getElementById('report').textContent=JSON.stringify({
+        execution:'server',
+        task_id:task.id,status:task.status,
+        verification:task.verification,
+        report:task.report,
+        receipt:task.receipt
+      },null,2);
+      document.getElementById('sId').textContent=String(task.id||'—').slice(0,14);
+      document.getElementById('sSt').textContent=task.status||'—';
+      document.getElementById('sFact').textContent=String((task.sources||[]).length);
+      document.getElementById('sGr').textContent=String((task.verification&&task.verification.independent_source_count)||0)+' domains';
+    }catch(e){
+      document.getElementById('live').textContent='SERVER ERROR: '+(e.message||e);
+    }
+    btn.disabled=false;
+  };
   document.getElementById('run').onclick=async function(){
     var goal=document.getElementById('goal').value.trim();
     if(!goal) return;
