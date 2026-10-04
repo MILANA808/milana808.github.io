@@ -2,328 +2,157 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Q-Mind v2.0 — Quantum Attention LM</title>
-<meta name="description" content="Квантово-инспирированная языковая модель: Hilbert embeddings, ρ-память, Quantum Attention, коллапс-генерация."/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Q-Mind v2.1 — Учитель квантовой информатики</title>
 <link rel="canonical" href="https://milana808.github.io/qai/"/>
 <meta name="theme-color" content="#05060a"/>
 <style>
-:root{--bg:#05060a;--p:#0b0f16;--l:#1c2736;--t:#e8f0ff;--m:#8090a8;--a:#5eead4;--q:#c4b5fd;--b:#38bdf8;--bad:#fb7185;--ok:#34d399}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 system-ui,-apple-system,sans-serif;min-height:100vh}
-.w{max-width:780px;margin:0 auto;padding:14px 12px 40px}
+:root{--bg:#05060a;--p:#0b0f16;--l:#1c2736;--t:#e8f0ff;--m:#8090a8;--a:#5eead4;--q:#c4b5fd;--b:#38bdf8;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}
+.w{max-width:720px;margin:0 auto;padding:14px 12px 40px}
 .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--q)}
-h1{font-size:1.3rem;margin:6px 0 4px;font-weight:750;background:linear-gradient(90deg,var(--a),var(--q),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{color:var(--m);font-size:12.5px;margin:0 0 12px;line-height:1.5;max-width:64ch}
+h1{font-size:1.3rem;margin:6px 0 4px;background:linear-gradient(90deg,var(--a),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px;line-height:1.45}
 .box{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px;margin:10px 0}
-#chat{height:320px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:4px}
-.msg{max-width:92%;padding:9px 12px;border-radius:12px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+#chat{height:360px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:95%;padding:10px 12px;border-radius:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--l)}
-.msg.bot{align-self:flex-start;background:#0e1620;border:1px solid rgba(94,234,212,.2)}
-.msg .meta{font-size:10px;color:var(--m);margin-top:4px}
+.msg.bot{align-self:flex-start;background:#0e1620;border:1px solid rgba(94,234,212,.25)}
+.msg .meta{font-size:10px;color:var(--m);margin-top:5px}
 .row{display:flex;gap:8px;margin-top:8px}
-textarea{flex:1;min-height:52px;border-radius:10px;border:1px solid var(--l);background:#070a10;color:var(--t);padding:10px;font:inherit;resize:vertical}
+textarea{flex:1;min-height:56px;border-radius:10px;border:1px solid var(--l);background:#070a10;color:var(--t);padding:10px;font:inherit}
 button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016}
 button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
-button:disabled{opacity:.45}
+.ex button{font-size:11px;padding:5px 9px;margin:2px;background:#121a26;color:var(--t);border:1px solid var(--l);border-radius:8px}
 .chips span{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 0 0}
 .chips span.on{border-color:var(--a);color:var(--a)}
-canvas{width:100%;height:72px;display:block;border-radius:8px;background:#06080e;border:1px solid var(--l);margin-top:8px}
-.log{font:11px/1.35 ui-monospace,Menlo,monospace;color:var(--m);max-height:100px;overflow:auto;margin-top:6px;white-space:pre-wrap}
-.log .q{color:var(--q)}.log .ok{color:var(--ok)}.log .info{color:var(--b)}
-.ex button{font-size:11px;padding:5px 9px;margin:2px;background:#121a26;color:var(--t);border:1px solid var(--l);border-radius:8px;font-weight:600}
-footer{font-size:12px;color:var(--m);margin-top:12px}
-footer a{color:var(--a);margin-right:8px}
-pre.rec{font:10px/1.3 ui-monospace,monospace;color:var(--m);background:#06080e;border:1px solid var(--l);border-radius:8px;padding:8px;overflow:auto;max-height:140px;margin:8px 0 0}
+canvas{width:100%;height:56px;margin-top:8px;border-radius:8px;background:#06080e;border:1px solid var(--l)}
+.log{font:11px ui-monospace,monospace;color:var(--m);max-height:72px;overflow:auto;margin-top:6px}
+.log .ok{color:var(--ok)}.log .q{color:var(--q)}
+footer{font-size:12px;color:var(--m);margin-top:12px}footer a{color:var(--a);margin-right:8px}
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="tag">AKSI · Q-Mind v2.0 · Quantum Attention LM</div>
-  <h1>Квантовое внимание → коллапс токенов</h1>
-  <p class="lead">Слова = кет-векторы в ℂ<sup>D</sup>. Память диалога = накопленное состояние ρ. Следующий токен — коллапс после интерференции Query с памятью. Без облачных LLM. Offline-first.</p>
+  <div class="tag">AKSI · Q-Mind v2.1 · Quantum Information</div>
+  <h1>Учитель квантовой информатики</h1>
+  <p class="lead">Понятные объяснения QI + квантовый ритуал (ρ-память, attention, коллапс). Offline в браузере.</p>
   <div class="box">
-    <div class="chips">
-      <span class="on" id="cD">D=16</span>
-      <span class="on" id="cV">vocab</span>
-      <span id="cS">S=—</span>
-      <span id="cTok">tokens: 0</span>
-    </div>
+    <div class="chips"><span class="on" id="cV">QI teacher</span><span id="cS">S=—</span><span id="cT">turns: 0</span></div>
     <div id="chat"></div>
-    <canvas id="cv" width="720" height="72"></canvas>
+    <canvas id="cv" width="640" height="56"></canvas>
     <div class="log" id="log"></div>
-    <div class="row">
-      <textarea id="inp" placeholder="Спроси… (контекст держится между репликами)"></textarea>
-      <button type="button" id="go">Коллапс</button>
-    </div>
+    <div class="row"><textarea id="inp" placeholder="Что такое кубит?"></textarea><button type="button" id="go">Спросить</button></div>
     <div class="ex">
       <button type="button" data-q="привет">привет</button>
-      <button type="button" data-q="кто ты?">кто ты</button>
+      <button type="button" data-q="что такое кубит?">кубит</button>
       <button type="button" data-q="что такое суперпозиция?">суперпозиция</button>
-      <button type="button" data-q="почему небо синее?">небо</button>
-      <button type="button" data-q="что такое permit?">permit</button>
-      <button type="button" data-q="как ты работаешь?">как работаешь</button>
-      <button type="button" class="sec" id="clear" style="cursor:pointer">сброс ρ</button>
+      <button type="button" data-q="что такое запутанность?">запутанность</button>
+      <button type="button" data-q="объясни алгоритм Гровера">Гровер</button>
+      <button type="button" data-q="что такое алгоритм Шора?">Шор</button>
+      <button type="button" data-q="как работает CNOT?">CNOT</button>
+      <button type="button" data-q="что такое декогеренция?">декогеренция</button>
+      <button type="button" data-q="что такое энтропия фон Неймана?">энтропия</button>
+      <button type="button" class="sec" id="clr">сброс</button>
     </div>
   </div>
-  <div class="box">
-    <div class="tag">Последний quantum receipt</div>
-    <pre class="rec" id="rec">{}</pre>
-  </div>
-  <footer>
-    <a href="/">home</a>
-    <a href="/math/">math core</a>
-    <a href="/permit/">permit</a>
-    <a href="/generate/">generate</a>
-  </footer>
+  <footer><a href="/">home</a><a href="/math/">math</a><a href="/permit/">permit</a></footer>
 </div>
-<script src="/qai/qmind-vocab.js"></script>
+<script src="/qai/qmind-vocab.js" onerror=""></script>
 <script>
-(function () {
-  "use strict";
-  var VOCAB = window.QMIND_VOCAB;
-  if (!VOCAB || !VOCAB.length) {
-    document.getElementById("chat").textContent = "Не загрузился qmind-vocab.js";
-    return;
-  }
-  var D = VOCAB[0].re.length;
-  var byTok = Object.create(null);
-  for (var i = 0; i < VOCAB.length; i++) byTok[VOCAB[i].t] = VOCAB[i];
-  document.getElementById("cD").textContent = "D=" + D;
-  document.getElementById("cV").textContent = "vocab " + VOCAB.length;
-
-  function zeros() { return { re: new Float64Array(D), im: new Float64Array(D) }; }
-  function clone(v) { return { re: Float64Array.from(v.re), im: Float64Array.from(v.im) }; }
-  function fromTok(tok) {
-    var e = byTok[tok];
-    if (!e) return null;
-    return { re: Float64Array.from(e.re), im: Float64Array.from(e.im) };
-  }
-  function norm(v) {
-    var s = 0, i;
-    for (i = 0; i < D; i++) s += v.re[i] * v.re[i] + v.im[i] * v.im[i];
-    s = Math.sqrt(s) || 1;
-    for (i = 0; i < D; i++) { v.re[i] /= s; v.im[i] /= s; }
-    return v;
-  }
-  function addScaled(a, b, alpha) {
-    for (var i = 0; i < D; i++) { a.re[i] += alpha * b.re[i]; a.im[i] += alpha * b.im[i]; }
-  }
-  function braket(a, b) {
-    var re = 0, im = 0, i;
-    for (i = 0; i < D; i++) {
-      re += a.re[i] * b.re[i] + a.im[i] * b.im[i];
-      im += a.re[i] * b.im[i] - a.im[i] * b.re[i];
-    }
-    return { re: re, im: im };
-  }
-  function phaseRotate(v, phi) {
-    var c = Math.cos(phi), s = Math.sin(phi);
-    for (var i = 0; i < D; i++) {
-      var r = v.re[i], im = v.im[i];
-      v.re[i] = r * c - im * s;
-      v.im[i] = r * s + im * c;
-    }
-  }
-  function tokenize(text) {
-    var s = String(text || "").toLowerCase().replace(/[?!.,;:«»"']/g, " ").replace(/\s+/g, " ").trim();
-    if (!s) return [];
-    var raw = s.split(" "), out = [];
-    for (var i = 0; i < raw.length; i++) {
-      var w = raw[i];
-      if (byTok[w]) out.push(w);
-      else {
-        var hit = null;
-        for (var t in byTok) {
-          if (w.indexOf(t) === 0 && t.length >= 3) { hit = t; break; }
-          if (t.indexOf(w) === 0 && w.length >= 3) { hit = t; break; }
-        }
-        if (hit) out.push(hit);
-      }
-    }
-    return out;
-  }
-  function encodePhrase(tokens) {
-    var acc = zeros();
-    if (!tokens.length) { for (var i = 0; i < D; i++) acc.re[i] = 1 / Math.sqrt(D); return acc; }
-    for (var i = 0; i < tokens.length; i++) {
-      var v = fromTok(tokens[i]);
-      if (!v) continue;
-      v = clone(v);
-      phaseRotate(v, i * 0.35);
-      addScaled(acc, v, 1);
-    }
-    return norm(acc);
-  }
-  function QuantumRegistryMemory() {
-    this.state = zeros(); this.state.re[0] = 1;
-    this.turns = 0; this.tokenCount = 0; this.decay = 0.88;
-  }
-  QuantumRegistryMemory.prototype.entangle = function (phraseVec, strength) {
-    strength = strength == null ? 0.55 : strength;
-    for (var i = 0; i < D; i++) { this.state.re[i] *= this.decay; this.state.im[i] *= this.decay; }
-    addScaled(this.state, phraseVec, strength);
-    norm(this.state);
-    this.turns++;
-  };
-  QuantumRegistryMemory.prototype.entropyProxy = function () {
-    var s = 0, p, i, sum = 0, amp = [];
-    for (i = 0; i < D; i++) { p = this.state.re[i] * this.state.re[i] + this.state.im[i] * this.state.im[i]; amp.push(p); sum += p; }
-    sum = sum || 1;
-    for (i = 0; i < D; i++) { p = amp[i] / sum; if (p > 1e-12) s -= p * Math.log2(p); }
-    return s;
-  };
-  function quantumAttentionScores(queryVec, memoryVec, banSet) {
-    var scores = new Float64Array(VOCAB.length);
-    var q = clone(queryVec);
-    var bound = zeros();
-    for (var i = 0; i < D; i++) {
-      bound.re[i] = q.re[i] * memoryVec.re[i] - q.im[i] * memoryVec.im[i];
-      bound.im[i] = q.re[i] * memoryVec.im[i] + q.im[i] * memoryVec.re[i];
-    }
-    norm(bound);
-    for (var k = 0; k < VOCAB.length; k++) {
-      var tok = VOCAB[k].t;
-      if (banSet && banSet[tok]) { scores[k] = 0; continue; }
-      var e = fromTok(tok);
-      var z = braket(e, bound), qz = braket(e, q);
-      var a = z.re * z.re + z.im * z.im, b = qz.re * qz.re + qz.im * qz.im;
-      scores[k] = 0.72 * a + 0.28 * b;
-    }
-    return scores;
-  }
-  function softmaxSample(scores, temperature, topK) {
-    temperature = temperature || 0.8; topK = topK || 12;
-    var idx = []; for (var i = 0; i < scores.length; i++) idx.push(i);
-    idx.sort(function (a, b) { return scores[b] - scores[a]; });
-    idx = idx.slice(0, topK);
-    var max = -1e99; for (var i = 0; i < idx.length; i++) if (scores[idx[i]] > max) max = scores[idx[i]];
-    var probs = [], sum = 0;
-    for (var i = 0; i < idx.length; i++) { var p = Math.exp((scores[idx[i]] - max) / temperature); probs.push(p); sum += p; }
-    var r = Math.random() * sum, acc = 0, pick = idx[0];
-    for (var i = 0; i < idx.length; i++) { acc += probs[i]; if (r <= acc) { pick = idx[i]; break; } }
-    return { index: pick, token: VOCAB[pick].t, score: scores[pick] };
-  }
-  function generate(queryVec, memory, maxTokens, logFn) {
-    maxTokens = maxTokens || 18;
-    var generated = [], ban = Object.create(null);
-    var local = clone(queryVec);
-    addScaled(local, memory.state, 0.35); norm(local);
-    for (var t = 0; t < maxTokens; t++) {
-      var scores = quantumAttentionScores(local, memory.state, ban);
-      for (var i = 0; i < generated.length; i++) {
-        var ti = generated[i];
-        for (var k = 0; k < VOCAB.length; k++) if (VOCAB[k].t === ti) scores[k] *= 0.15;
-      }
-      var sample = softmaxSample(scores, 0.72 + 0.1 * Math.random(), 14);
-      generated.push(sample.token);
-      if (logFn && t < 4) logFn("[collapse] t=" + t + " → «" + sample.token + "» amp²=" + sample.score.toFixed(4), "q");
-      var tv = fromTok(sample.token);
-      if (tv) { phaseRotate(tv, t * 0.25); addScaled(local, tv, 0.65); norm(local); }
-      if (t >= 5 && (sample.token === "пока" || sample.token === "готов")) break;
-      if (t >= 8 && sample.token === "пожалуйста") break;
-    }
-    return generated;
-  }
-  function intentBoost(tokens, memory) {
-    var s = tokens.join(" ");
-    function addPhrase(str, w) {
-      var v = encodePhrase(tokenize(str));
-      addScaled(memory.state, v, w); norm(memory.state);
-    }
-    if (/привет|hello|hi|здравств/.test(s)) addPhrase("привет я q-mind квантовый разум", 0.9);
-    if (/кто ты|что ты|о себе/.test(s)) addPhrase("я q-mind квантовая модель акси локально браузер", 1.0);
-    if (/суперпозиц/.test(s)) addPhrase("суперпозиция состояние амплитуды многих базисов вместе до коллапса", 1.0);
-    if (/небо|сине|рэлея/.test(s)) addPhrase("небо синее рассеяние рэлея свет волна воздух молекула", 1.0);
-    if (/permit|допуск/.test(s)) addPhrase("permit допуск действие агент allow block receipt", 1.0);
-    if (/как.*работ|как ты/.test(s)) addPhrase("кодирую слова фазы память матрица коллапс выбирает токен", 1.0);
-    if (/спасибо/.test(s)) addPhrase("пожалуйста готов", 0.8);
-  }
-  var memory = new QuantumRegistryMemory();
-  var chat = document.getElementById("chat");
-  var logEl = document.getElementById("log");
-  var inp = document.getElementById("inp");
-  var go = document.getElementById("go");
-  var cv = document.getElementById("cv");
-  var ctx = cv.getContext("2d");
-  var rec = document.getElementById("rec");
-  function log(msg, cls) {
-    var d = document.createElement("div"); if (cls) d.className = cls;
-    d.textContent = msg; logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight;
-  }
-  function clearLog() { logEl.textContent = ""; }
-  function addMsg(role, text, meta) {
-    var d = document.createElement("div"); d.className = "msg " + role; d.textContent = text;
-    if (meta) { var m = document.createElement("div"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
-    chat.appendChild(d); chat.scrollTop = chat.scrollHeight;
-  }
-  function drawState(v) {
-    var w = cv.width, h = cv.height; ctx.clearRect(0, 0, w, h);
-    var bw = w / D;
-    for (var i = 0; i < D; i++) {
-      var amp = Math.sqrt(v.re[i] * v.re[i] + v.im[i] * v.im[i]);
-      var bar = amp * (h - 8);
-      var g = ctx.createLinearGradient(0, h - bar, 0, h);
-      g.addColorStop(0, "#5eead4"); g.addColorStop(1, "#c4b5fd");
-      ctx.fillStyle = g; ctx.fillRect(i * bw + 1, h - bar, Math.max(bw - 2, 1), bar);
-    }
-  }
-  function reply() {
-    var text = (inp.value || "").trim();
-    if (!text) return;
-    inp.value = ""; clearLog(); go.disabled = true; addMsg("user", text);
-    var tokens = tokenize(text);
-    log("[A] tokens: [" + tokens.join(", ") + "]", "info");
-    var qVec = encodePhrase(tokens.length ? tokens : tokenize("вопрос"));
-    log("[A] encoded |φ⟩ in C^" + D, "info");
-    intentBoost(tokens, memory);
-    memory.entangle(qVec, 0.6);
-    var S = memory.entropyProxy();
-    document.getElementById("cS").textContent = "Sρ≈" + S.toFixed(2);
-    document.getElementById("cS").className = "on";
-    log("[B] entangle → ρ  turns=" + memory.turns + "  S≈" + S.toFixed(3), "q");
-    drawState(memory.state);
-    log("[C] Quantum Attention + collapse sampling…", "info");
-    var t0 = performance.now();
-    var gen = generate(qVec, memory, 16, log);
-    var ms = Math.round(performance.now() - t0);
-    var aVec = encodePhrase(gen);
-    memory.entangle(aVec, 0.4);
-    memory.tokenCount += gen.length;
-    document.getElementById("cTok").textContent = "tokens: " + memory.tokenCount;
-    var answer = gen.join(" ");
-    if (answer.length) answer = answer.charAt(0).toUpperCase() + answer.slice(1);
-    addMsg("bot", answer, "collapse ×" + gen.length + " · " + ms + " ms · Quantum Attention");
-    drawState(memory.state);
-    var receipt = {
-      system_id: "AKSI-Q-MIND-v2.0", engine: "quantum-attention-lm",
-      timestamp: new Date().toISOString(), D: D, vocab: VOCAB.length,
-      input: text, input_tokens: tokens, output_tokens: gen,
-      memory_turns: memory.turns, entropy_proxy: S, runtime_ms: ms, integrity: "COLLAPSE_CHAIN"
-    };
-    rec.textContent = JSON.stringify(receipt, null, 2);
-    log("[Receipt] sealed · " + receipt.timestamp, "ok");
-    go.disabled = false;
-    try { if (navigator.vibrate) navigator.vibrate([20, 30, 20]); } catch (e) {}
-  }
-  go.addEventListener("click", reply);
-  inp.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); reply(); }
-  });
-  document.querySelectorAll("[data-q]").forEach(function (b) {
-    b.addEventListener("click", function () { inp.value = b.getAttribute("data-q"); reply(); });
-  });
-  document.getElementById("clear").addEventListener("click", function () {
-    memory = new QuantumRegistryMemory();
-    chat.innerHTML = ""; clearLog();
-    document.getElementById("cTok").textContent = "tokens: 0";
-    document.getElementById("cS").textContent = "S=—";
-    drawState(memory.state);
-    log("[ρ] memory reset", "info");
-    addMsg("bot", "ρ сброшена. Можем начать диалог заново.", "system");
-  });
-  drawState(memory.state);
-  addMsg("bot", "Q-Mind v2.0 online. Слова — кет-векторы, память — ρ, ответ — цепочка коллапсов.", "system");
+/* fallback embed if external vocab fails */
+if(!window.QMIND_VOCAB){window.QMIND_VOCAB=[{"t":"кубит","g":"qi","re":[0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2],"im":[0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1]}];}
+window.QMIND_TEACH={
+"qubit":"Кубит — квантовый аналог бита. Его состояние |ψ⟩ = α|0⟩ + β|1⟩ живёт в двумерном комплексном пространстве Гильберта. |α|² и |β|² — вероятности исходов при измерении. До измерения кубит может быть в суперпозиции.",
+"superposition":"Суперпозиция — линейная комбинация базисных состояний с комплексными амплитудами. Система «несёт» несколько классических вариантов сразу; конкретный исход появляется только при измерении (коллапсе) с вероятностью квадрата модуля амплитуды.",
+"entanglement":"Запутанность — корреляция квантовых систем, которую нельзя разложить на независимые состояния подсистем. Измерение одного кубита мгновенно ограничивает описание другого (в рамках квантовой теории), без сверхсветовой передачи сигнала.",
+"grover":"Алгоритм Гровера даёт квадратичное ускорение поиска по неструктурированной базе: вместо O(N) достаточно O(√N) обращений к оракулу. Ключ — амплитудная амплификация: интерференция усиливает амплитуду правильного ответа.",
+"shor":"Алгоритм Шора эффективно факторизует большие числа на идеальном квантовом компьютере. Использует квантовое преобразование Фурье для нахождения периода модульной экспоненты — задача, трудная для классических машин.",
+"cnot":"CNOT — двухкубитный гейт: target инвертируется, если control = |1⟩. Вместе с однокубитными вращениями порождает универсальный набор. Это «рабочая лошадь» для создания запутанности.",
+"hadamard":"Гейт Адамара H переводит |0⟩ в равномерную суперпозицию (|0⟩+|1⟩)/√2. Это стандартный старт многих квантовых схем: создание «параллельных» амплитуд.",
+"decoherence":"Декогеренция — потеря квантовой когерентности из‑за взаимодействия с окружением. Фазы «размазываются», суперпозиция превращается в смесь. Главное препятствие для масштабируемых квантовых компьютеров.",
+"entropy":"Энтропия фон Неймана S(ρ) = −Tr(ρ log ρ) измеряет смешанность квантового состояния. Для чистого состояния S=0; для максимально смешанного — максимум. Квантовый аналог информационной энтропии Шеннона.",
+"teleport":"Квантовая телепортация передаёт неизвестное состояние кубита с помощью заранее запутанной пары и двух классических бит. Сама частица не перемещается — переносится квантовая информация.",
+"bell":"Состояния Белла — четыре максимально запутанных двухкубитных состояния. На них строятся тесты нелокальности (неравенства Белла) и протоколы телепортации.",
+"hilbert":"Пространство Гильберта — комплексное векторное пространство со скалярным произведением. Состояния квантовой системы — лучи (нормированные векторы с точностью до глобальной фазы) в этом пространстве.",
+"qi":"Квантовая информатика изучает хранение, передачу и обработку информации квантовыми системами: кубиты, каналы, энтропия, алгоритмы, коррекция ошибок и криптография.",
+"who":"Я Q-Mind v2.1 — учитель квантовой информатики в контуре АКСИ. Объясняю кубиты, суперпозицию, запутанность и алгоритмы. Работаю локально в браузере на квантово-инспирированной математике (фазы, ρ, коллапс).",
+"hi":"Привет! Я Q-Mind, учитель квантовой информатики. Спроси про кубит, суперпозицию, запутанность, Гровера, Шора, CNOT, декогеренцию.",
+"how":"Я кодирую слова в комплексные кет-векторы, держу диалог в памяти ρ, считаю Quantum Attention через интерференцию и выбираю токены коллапсом. Для точных определений включаю учебные карточки QI."
+};
+window.QMIND_MAP=[
+["что такое кубит|кубит это|what is a? ?qubit","qubit"],
+["суперпозиц","superposition"],
+["запутанн|entangl","entanglement"],
+["гровер|grover","grover"],
+["шора|shor|факториз","shor"],
+["cnot","cnot"],
+["hadamard|гадмар|адамар|хадамар","hadamard"],
+["декогеренц|decoher","decoherence"],
+["энтропи|entropy|нейман","entropy"],
+["телепортац|teleport","teleport"],
+["бель|bell","bell"],
+["гильберт|hilbert","hilbert"],
+["квантов\\w* информатик","qi"],
+["кто ты|что ты|о себе","who"],
+["привет|hello|hi|здравств","hi"],
+["как ты работа|как работаешь","how"]
+];
+</script>
+<script>
+(function(){
+"use strict";
+var VOCAB=window.QMIND_VOCAB,TEACH=window.QMIND_TEACH,MAP=window.QMIND_MAP;
+var D=(VOCAB[0]&&VOCAB[0].re&&VOCAB[0].re.length)||12;
+var byTok={};for(var i=0;i<VOCAB.length;i++)byTok[VOCAB[i].t]=VOCAB[i];
+document.getElementById("cV").textContent="vocab "+VOCAB.length+" · D="+D;
+function zeros(){return{re:new Float64Array(D),im:new Float64Array(D)};}
+function clone(v){return{re:Float64Array.from(v.re),im:Float64Array.from(v.im)};}
+function fromTok(t){var e=byTok[t];return e?{re:Float64Array.from(e.re),im:Float64Array.from(e.im)}:null;}
+function norm(v){var s=0,i;for(i=0;i<D;i++)s+=v.re[i]*v.re[i]+v.im[i]*v.im[i];s=Math.sqrt(s)||1;for(i=0;i<D;i++){v.re[i]/=s;v.im[i]/=s;}return v;}
+function addScaled(a,b,al){for(var i=0;i<D;i++){a.re[i]+=al*b.re[i];a.im[i]+=al*b.im[i];}}
+function braket(a,b){var re=0,im=0,i;for(i=0;i<D;i++){re+=a.re[i]*b.re[i]+a.im[i]*b.im[i];im+=a.re[i]*b.im[i]-a.im[i]*b.re[i];}return{re:re,im:im};}
+function phaseRotate(v,phi){var c=Math.cos(phi),s=Math.sin(phi);for(var i=0;i<D;i++){var r=v.re[i],im=v.im[i];v.re[i]=r*c-im*s;v.im[i]=r*s+im*c;}}
+function tokenize(text){var s=String(text||"").toLowerCase().replace(/[?!.,;:«»"']/g," ").replace(/\s+/g," ").trim();if(!s)return[];
+  var raw=s.split(" "),out=[];for(var i=0;i<raw.length;i++){var w=raw[i];if(byTok[w]){out.push(w);continue;}
+    var hit=null,best=0;for(var t in byTok){if(w.indexOf(t)===0&&t.length>=3&&t.length>best){hit=t;best=t.length;}
+      else if(t.indexOf(w)===0&&w.length>=3&&w.length>best){hit=t;best=w.length;}}if(hit)out.push(hit);}return out;}
+function encodePhrase(tokens){var acc=zeros();if(!tokens.length){for(var i=0;i<D;i++)acc.re[i]=1/Math.sqrt(D);return acc;}
+  for(var i=0;i<tokens.length;i++){var v=fromTok(tokens[i]);if(!v)continue;v=clone(v);phaseRotate(v,i*0.3);addScaled(acc,v,1);}return norm(acc);}
+function Mem(){this.state=zeros();this.state.re[0]=1;this.turns=0;this.decay=0.9;}
+Mem.prototype.entangle=function(v,s){s=s==null?0.5:s;for(var i=0;i<D;i++){this.state.re[i]*=this.decay;this.state.im[i]*=this.decay;}addScaled(this.state,v,s);norm(this.state);this.turns++;};
+Mem.prototype.S=function(){var s=0,p,i,sum=0,a=[];for(i=0;i<D;i++){p=this.state.re[i]*this.state.re[i]+this.state.im[i]*this.state.im[i];a.push(p);sum+=p;}sum=sum||1;for(i=0;i<D;i++){p=a[i]/sum;if(p>1e-12)s-=p*Math.log2(p);}return s;};
+function findTeach(text){var s=String(text).toLowerCase();for(var i=0;i<MAP.length;i++){try{if(new RegExp(MAP[i][0],"i").test(s))return TEACH[MAP[i][1]];}catch(e){}}return null;}
+function attentionCollapse(qVec,mem){var scores=[],bound=zeros(),q=clone(qVec);
+  for(var i=0;i<D;i++){bound.re[i]=q.re[i]*mem.state.re[i]-q.im[i]*mem.state.im[i];bound.im[i]=q.re[i]*mem.state.im[i]+q.im[i]*mem.state.re[i];}norm(bound);
+  for(var k=0;k<VOCAB.length;k++){var e=fromTok(VOCAB[k].t);if(!e){scores.push(0);continue;}var z=braket(e,bound);scores.push(z.re*z.re+z.im*z.im);}
+  var idx=0,m=-1;for(var i=0;i<scores.length;i++)if(scores[i]>m){m=scores[i];idx=i;}return VOCAB[idx]?VOCAB[idx].t:"?";}
+var memory=new Mem();
+var chat=document.getElementById("chat"),logEl=document.getElementById("log"),inp=document.getElementById("inp");
+var cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+function log(m,c){var d=document.createElement("div");if(c)d.className=c;d.textContent=m;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+function draw(){var v=memory.state,w=cv.width,h=cv.height;ctx.clearRect(0,0,w,h);var bw=w/D;for(var i=0;i<D;i++){var amp=Math.sqrt(v.re[i]*v.re[i]+v.im[i]*v.im[i]);var bar=amp*(h-4);var g=ctx.createLinearGradient(0,h-bar,0,h);g.addColorStop(0,"#5eead4");g.addColorStop(1,"#c4b5fd");ctx.fillStyle=g;ctx.fillRect(i*bw+1,h-bar,Math.max(bw-2,1),bar);}}
+function ask(){var text=(inp.value||"").trim();if(!text)return;inp.value="";logEl.textContent="";add("user",text);
+  var tokens=tokenize(text);var qVec=encodePhrase(tokens.length?tokens:["вопрос"]);
+  log("[Q] tokens: "+(tokens.join(", ")||"—"),"q");
+  var lesson=findTeach(text);
+  memory.entangle(qVec,0.55);
+  var tip=attentionCollapse(qVec,memory);
+  log("[ρ] S≈"+memory.S().toFixed(3)+" · peak «"+tip+"»","q");
+  document.getElementById("cS").textContent="S≈"+memory.S().toFixed(2);
+  document.getElementById("cS").className="on";
+  document.getElementById("cT").textContent="turns: "+memory.turns;
+  var answer;
+  if(lesson){answer=lesson;log("[Teach] QI card","ok");}
+  else{answer="По этой формулировке нет готовой учебной карточки.\nПопробуй: «что такое кубит?», суперпозиция, запутанность, Гровер, Шор, CNOT, декогеренция, энтропия.\n\n(Квантовый peak attention: «"+tip+"».)";}
+  add("bot",answer,(lesson?"QI lesson":"fallback")+" · turn "+memory.turns);
+  draw();try{if(navigator.vibrate)navigator.vibrate([15,20,15]);}catch(e){}}
+document.getElementById("go").onclick=ask;
+inp.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask();}});
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){inp.value=b.getAttribute("data-q");ask();};});
+document.getElementById("clr").onclick=function(){memory=new Mem();chat.innerHTML="";logEl.textContent="";document.getElementById("cT").textContent="turns: 0";draw();add("bot","Память ρ сброшена. Спроси про кубит или Гровера.","system");};
+draw();add("bot","Q-Mind v2.1 — учитель квантовой информатики.\nСпроси про кубит, суперпозицию, запутанность, алгоритмы Гровера и Шора, CNOT, декогеренцию.","system");
 })();
 </script>
 </body>
