@@ -31,7 +31,18 @@ jobs:
       - name: Runtime contract — digital life
         run: node tests/digital-life.test.js
       - name: Runtime contract — control plane
-        run: node tests/aksi-control-plane.test.js
+        run: |
+          set +e
+          node tests/aksi-control-plane.test.js 2>&1 | tee control-plane.log
+          code=${PIPESTATUS[0]}
+          exit $code
+      - name: Upload control-plane diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: control-plane-diagnostics
+          path: control-plane.log
+          if-no-files-found: ignore
       - name: Required files
         run: |
           test -f index.html
