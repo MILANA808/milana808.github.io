@@ -13,4 +13,4 @@ const allowed=kernel.executeAgentStep('Прочитай страницу',{tool:
 let blocked=false;try{kernel.executeAgentStep('Узнай погоду',{tool:'file.delete',params:{path:'/tmp/x'}});}catch(e){blocked=e instanceof SecurityBlockedError;}assert.equal(blocked,true);
 const asyncResult=await kernel.executeAgentStep('Прочитай страницу',{tool:'http.get',url:'https://example.com'},{mode:'real',executor:async()=>({status:200}),expectedResult:{status:200}});assert.equal(asyncResult.verification.status,'VERIFIED');
 const tasks=JSON.parse(fs.readFileSync('benchmark/tasks-v1.json','utf8'));assert.equal(tasks.length,10);assert.equal(new Set(tasks.map(x=>x.id)).size,10);console.log('AKSI control-plane contract PASS');
-})().catch(e=>{console.error(e);process.exit(1);});
+})().catch(e=>{const fs=require('fs'); const detail=e&&e.stack?e.stack:String(e); fs.writeFileSync('control-plane-failure.log',detail,'utf8'); console.error(e); process.exit(1);});
