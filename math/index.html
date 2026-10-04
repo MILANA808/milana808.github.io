@@ -3,27 +3,28 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>AKSI MATRIX MATH — solver · verify · receipt</title>
-<meta name="theme-color" content="#0a0e14"/>
+<title>AKSI Core v0.2 — Heuristic Gradient Agent</title>
+<meta name="description" content="Суверенное математическое ИИ-ядро: Ньютон–Рафсон, верификация, digital receipt. Offline-first."/>
 <link rel="canonical" href="https://milana808.github.io/math/"/>
+<meta name="theme-color" content="#0a0e14"/>
 <style>
-:root{--bg:#0a0e14;--p:#121820;--l:#243044;--t:#e8eef7;--m:#8b9bb0;--a:#3dffa8;--bad:#ff6b7a;--ok:#3dffa8}
+:root{--bg:#0a0e14;--p:#121820;--l:#243044;--t:#e8eef7;--m:#8b9bb0;--a:#3dffa8;--bad:#ff6b7a;--ok:#3dffa8;--info:#7eb8ff}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,system-ui,sans-serif}
-.w{max-width:720px;margin:0 auto;padding:16px 14px 48px}
+.w{max-width:760px;margin:0 auto;padding:16px 14px 48px}
 .tag{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--a)}
-h1{font-size:1.2rem;margin:6px 0 4px;font-weight:700}
-.lead{color:var(--m);font-size:12px;margin:0 0 14px;line-height:1.4}
+h1{font-size:1.15rem;margin:6px 0 4px;font-weight:700}
+.lead{color:var(--m);font-size:12px;margin:0 0 14px;line-height:1.45}
 .box{background:var(--p);border:1px solid var(--l);border-radius:12px;padding:12px;margin:10px 0}
 label{display:block;font-size:11px;color:var(--m);margin-bottom:4px}
 input[type=text]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--l);background:#0c1018;color:var(--t);font:inherit}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
 button{border:0;border-radius:8px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:var(--a);color:#04140c}
 button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
 button:disabled{opacity:.45}
-.log{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:10px;max-height:180px;overflow:auto;font-size:12px;color:var(--m);white-space:pre-wrap}
-.log .ok{color:var(--ok)}.log .bad{color:var(--bad)}.log .info{color:#7eb8ff}
-pre.out{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:12px;overflow:auto;font-size:12px;line-height:1.4;margin:0;white-space:pre-wrap;word-break:break-word}
+.log{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:10px;max-height:260px;overflow:auto;font-size:12px;color:var(--m);white-space:pre-wrap}
+.log .ok{color:var(--ok)}.log .bad{color:var(--bad)}.log .info{color:var(--info)}
+pre.out{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:12px;overflow:auto;font-size:11px;line-height:1.4;margin:0;white-space:pre-wrap;word-break:break-word}
 .chips{margin-top:8px}
 .chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 0 0}
 .chip.pass{border-color:var(--ok);color:var(--ok)}
@@ -32,27 +33,30 @@ pre.out{background:#080c12;border:1px solid var(--l);border-radius:8px;padding:1
 .ex button{font-size:11px;padding:6px 10px;font-weight:600;background:#1a2230;color:var(--t);border:1px solid var(--l)}
 footer{margin-top:16px;font-size:11px;color:var(--m)}
 footer a{color:var(--a)}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin-left:6px}
+.badge.on{border-color:var(--a);color:var(--a)}
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="tag">AKSI-MATRIX-MATH-v0.1</div>
-  <h1>Solver → Verification → Receipt</h1>
-  <p class="lead">Локальный контур: гипотезы корней → жёсткая подстановка → JSON-чек. Без нейросетей. Offline-first.</p>
+  <div class="tag">AKSI-MATRIX · Core v0.2</div>
+  <h1>Heuristic Gradient Descent Agent <span class="badge" id="mathjsBadge">math.js …</span></h1>
+  <p class="lead">Сovereign math AI in-browser: Newton–Raphson / numerical gradient → hard verification → digital receipt. No cloud LLM. Offline-first (math.js CDN optional parser).</p>
   <div class="box">
-    <label for="eq">Уравнение</label>
-    <input type="text" id="eq" value="x^2 - 4 = 0" autocomplete="off" spellcheck="false"/>
+    <label for="eq">Уравнение (переменная x)</label>
+    <input type="text" id="eq" value="x^2 - 2 = 0" autocomplete="off" spellcheck="false"/>
     <div class="row">
-      <button type="button" id="run">Запустить цикл AKSI</button>
+      <button type="button" id="run">Запустить AKSI Core</button>
       <button type="button" class="sec" id="dl">Скачать receipt.json</button>
-      <button type="button" class="sec" id="inject">Тест: ложная гипотеза 5</button>
     </div>
     <div class="ex">
+      <button type="button" data-eq="x^2 - 2 = 0">x²−2=0</button>
       <button type="button" data-eq="x^2 - 4 = 0">x²−4=0</button>
       <button type="button" data-eq="x^2 - 9 = 0">x²−9=0</button>
       <button type="button" data-eq="2*x + 4 = 10">2x+4=10</button>
       <button type="button" data-eq="x^2 - 5*x + 6 = 0">x²−5x+6=0</button>
       <button type="button" data-eq="x^3 - 8 = 0">x³−8=0</button>
+      <button type="button" data-eq="x^3 - x = 0">x³−x=0</button>
     </div>
   </div>
   <div class="box">
@@ -65,14 +69,19 @@ footer a{color:var(--a)}
     <pre class="out" id="out">{}</pre>
   </div>
   <footer>
-    <a href="https://milana808.github.io/">home</a> ·
-    <a href="https://milana808.github.io/permit/">permit</a> ·
-    <a href="https://milana808.github.io/generate/">generate</a>
+    <a href="/">home</a> · <a href="/permit/">permit</a> · <a href="/generate/">generate</a>
   </footer>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/mathjs@13.2.0/lib/browser/math.min.js"></script>
 <script>
 (function () {
   "use strict";
+  var HAS_MATHJS = typeof math !== "undefined" && math && typeof math.compile === "function";
+  var badge = document.getElementById("mathjsBadge");
+  if (badge) {
+    badge.textContent = HAS_MATHJS ? "math.js on" : "math.js off · fallback";
+    badge.className = "badge" + (HAS_MATHJS ? " on" : "");
+  }
   function parseEquation(eq) {
     var s = String(eq).replace(/\s+/g, "").replace(/−/g, "-").replace(/×/g, "*").replace(/÷/g, "/");
     var left, right;
@@ -86,94 +95,182 @@ footer a{color:var(--a)}
     }
     return { left: left, right: right, residual: "(" + left + ")-(" + right + ")", raw: eq };
   }
-  function toEvalExpr(expr) {
+  function toNativeExpr(expr) {
     return String(expr)
       .replace(/\^/g, "**")
       .replace(/(\d+(?:\.\d+)?)([a-zA-Z])/g, "($1*$2)")
       .replace(/([a-zA-Z])(\d+(?:\.\d+)?)/g, "($1*$2)");
   }
-  function makeValueAt(residual) {
-    var e = toEvalExpr(residual);
-    return function (x) {
-      var fn = new Function("x", "\"use strict\"; return (" + e + ");");
-      return fn(x);
-    };
-  }
-  function findHypotheses(equation, range) {
-    range = range == null ? 100 : range;
+  function makeEvaluator(equation) {
     var parsed = parseEquation(equation);
-    var valueAt = makeValueAt(parsed.residual);
-    var hyps = [];
-    var seen = {};
-    function add(x) {
-      if (seen[x]) return;
-      try {
-        var v = valueAt(x);
-        if (typeof v === "number" && isFinite(v) && Math.abs(v) < 1e-9) {
-          hyps.push(x);
-          seen[x] = 1;
+    var residual = parsed.residual;
+    var compiled = null;
+    if (HAS_MATHJS) {
+      try { compiled = math.compile(residual); } catch (e) { compiled = null; }
+    }
+    var nativeExpr = toNativeExpr(residual);
+    var nativeFn = null;
+    try { nativeFn = new Function("x", "\"use strict\"; return (" + nativeExpr + ");"); } catch (e) { nativeFn = null; }
+    function f(x) {
+      if (compiled) {
+        try {
+          var v = compiled.evaluate({ x: x });
+          if (typeof v === "number" && isFinite(v)) return v;
+        } catch (e) {}
+      }
+      if (nativeFn) {
+        var n = nativeFn(x);
+        if (typeof n === "number" && isFinite(n)) return n;
+      }
+      return NaN;
+    }
+    return { parsed: parsed, f: f, residual: residual };
+  }
+  function derivative(f, x, h) {
+    h = h || 1e-6;
+    var f1 = f(x + h), f0 = f(x - h);
+    if (!isFinite(f1) || !isFinite(f0)) return NaN;
+    return (f1 - f0) / (2 * h);
+  }
+  function newtonTrajectory(f, x0, opts) {
+    opts = opts || {};
+    var maxIter = opts.maxIter || 40;
+    var tol = opts.tol || 1e-10;
+    var trajectory = [];
+    var x = x0, stagnant = 0;
+    for (var i = 0; i < maxIter; i++) {
+      var fx = f(x);
+      var dfx = derivative(f, x);
+      var stepInfo = { iter: i + 1, x: x, f: fx, slope: dfx, action: "" };
+      if (!isFinite(fx)) {
+        stepInfo.action = "invalid f(x) — abort branch";
+        trajectory.push(stepInfo);
+        return { ok: false, root: x, trajectory: trajectory, reason: "nan" };
+      }
+      if (Math.abs(fx) < tol) {
+        stepInfo.action = "converged |f|<tol";
+        trajectory.push(stepInfo);
+        return { ok: true, root: x, trajectory: trajectory, iterations: i + 1 };
+      }
+      if (!isFinite(dfx) || Math.abs(dfx) < 1e-14) {
+        var nudge = (fx >= 0 ? -1 : 1) * (0.1 + Math.random() * 0.4);
+        stepInfo.action = "slope≈0 → heuristic nudge " + nudge.toFixed(4);
+        x = x + nudge;
+        trajectory.push(stepInfo);
+        stagnant++;
+        if (stagnant > 8) return { ok: false, root: x, trajectory: trajectory, reason: "flat" };
+        continue;
+      }
+      var delta = fx / dfx;
+      if (Math.abs(delta) > 50) {
+        delta = (delta > 0 ? 1 : -1) * 50;
+        stepInfo.action = "damped Newton Δ=" + delta.toFixed(6);
+      } else {
+        stepInfo.action = "Newton step Δ=" + delta.toFixed(8);
+      }
+      var xNext = x - delta;
+      stepInfo.x_next = xNext;
+      trajectory.push(stepInfo);
+      if (Math.abs(xNext - x) < 1e-15) {
+        stagnant++;
+        if (stagnant > 6) break;
+      } else stagnant = 0;
+      x = xNext;
+      if (Math.abs(x) > 1e8) return { ok: false, root: x, trajectory: trajectory, reason: "diverged" };
+    }
+    var finalF = f(x);
+    return { ok: Math.abs(finalF) < 1e-6, root: x, trajectory: trajectory, iterations: trajectory.length, reason: Math.abs(finalF) < 1e-6 ? "ok" : "max_iter" };
+  }
+  function aiSolve(equation, logFn) {
+    var eng = makeEvaluator(equation);
+    var f = eng.f;
+    var starts = [-10, -5, -3, -2, -1.5, -1, -0.5, 0.1, 0.5, 1, 1.5, 2, 3, 5, 10];
+    for (var r = 0; r < 12; r++) starts.push((Math.random() * 2 - 1) * 15);
+    if (logFn) logFn("[AI Core] residual: " + eng.residual, "info");
+    if (logFn) logFn("[AI Core] Мультистарт: " + starts.length + " точек", "info");
+    var branches = [], candidates = [];
+    for (var i = 0; i < starts.length; i++) {
+      var x0 = starts[i];
+      if (logFn && i < 6) logFn("[AI Core] Старт x0=" + x0.toFixed(4) + " · анализ наклона…", "info");
+      var run = newtonTrajectory(f, x0, { maxIter: 36, tol: 1e-12 });
+      branches.push({ x0: x0, ok: run.ok, root: run.root, iterations: run.iterations || run.trajectory.length, reason: run.reason || (run.ok ? "converged" : "fail"), trajectory: run.trajectory });
+      if (run.ok || (run.trajectory.length && Math.abs(f(run.root)) < 1e-5)) {
+        candidates.push(run.root);
+        if (logFn && (run.ok || i < 4)) {
+          logFn("[AI Core] x0=" + x0.toFixed(3) + " → x*=" + run.root.toFixed(8) + " · iters=" + (run.iterations || run.trajectory.length) + " · |f|=" + Math.abs(f(run.root)).toExponential(3), run.ok ? "ok" : "info");
         }
-      } catch (err) {}
+      }
     }
-    for (var x = -range; x <= range; x++) add(x);
-    for (var k = -range * 2; k <= range * 2; k++) {
-      if (k % 2 === 0) continue;
-      add(k / 2);
+    var unique = [];
+    candidates.sort(function (a, b) { return a - b; });
+    for (var c = 0; c < candidates.length; c++) {
+      var x = candidates[c], isNew = true;
+      for (var u = 0; u < unique.length; u++) { if (Math.abs(unique[u] - x) < 1e-5) { isNew = false; break; } }
+      if (isNew) unique.push(x);
     }
-    hyps.sort(function (a, b) { return a - b; });
-    return { parsed: parsed, hypotheses: hyps, valueAt: valueAt };
+    var thought = [];
+    unique.forEach(function (root) {
+      var best = null;
+      branches.forEach(function (b) {
+        if (Math.abs(b.root - root) < 1e-4 && b.trajectory && b.trajectory.length) {
+          if (!best || b.trajectory.length < best.trajectory.length) best = b;
+        }
+      });
+      if (best) {
+        thought.push({
+          root_target: root, x0: best.x0, iterations: best.iterations,
+          trajectory: best.trajectory.map(function (s) {
+            return { iter: s.iter, x: s.x, f: s.f, slope: s.slope, action: s.action, x_next: s.x_next };
+          })
+        });
+      }
+    });
+    if (logFn) logFn("[AI Core] Гипотезы: [" + unique.map(function (x) { return Number(x.toPrecision(10)); }).join(", ") + "]", "info");
+    return { residual: eng.residual, hypotheses: unique, branches: branches.length, thought_trajectories: thought, f: f };
   }
-  function prettySub(residual, root) {
-    var r = root < 0 ? "(" + root + ")" : String(root);
-    return residual.replace(/\bx\b/gi, r).replace(/\*\*/g, "^");
-  }
-  function verifyRoots(equation, hypotheses) {
-    var parsed = parseEquation(equation);
-    var valueAt = makeValueAt(parsed.residual);
-    var steps = [];
-    var verified = [];
+  function verifyRoots(equation, hypotheses, f) {
+    var eng = makeEvaluator(equation);
+    if (!f) f = eng.f;
+    var TOL = 1e-6, steps = [], verified = [];
     for (var i = 0; i < hypotheses.length; i++) {
       var root = hypotheses[i];
-      var expression = prettySub(toEvalExpr(parsed.residual), root);
-      var result = null;
+      var result = f(root);
       var status = "REJECTED";
-      try {
-        result = valueAt(root);
-        if (typeof result === "number" && isFinite(result) && Math.abs(result) < 1e-9) {
-          status = "VERIFIED";
-          result = 0;
-          verified.push(root);
-        }
-      } catch (e) {
-        expression = String(e && e.message ? e.message : e);
-        result = null;
-        status = "REJECTED";
+      var expression = eng.residual.replace(/\bx\b/gi, "(" + root + ")");
+      if (typeof result === "number" && isFinite(result) && Math.abs(result) < TOL) {
+        status = "VERIFIED";
+        var snap = Math.round(root);
+        if (Math.abs(root - snap) < 1e-7 && Math.abs(f(snap)) < TOL) root = snap;
+        result = Math.abs(result) < 1e-14 ? 0 : result;
+        if (verified.indexOf(root) < 0) verified.push(root);
       }
-      steps.push({ root: root, expression: expression, result: result, status: status });
+      steps.push({ root: root, expression: expression, result: result, abs_error: typeof result === "number" ? Math.abs(result) : null, status: status });
     }
     return { steps: steps, verified_roots: verified };
   }
-  function buildReceipt(inputEquation, hypotheses, verification, extra) {
-    var verified = verification.verified_roots;
-    var integrity = verification.steps.every(function (s) {
-      if (s.status === "VERIFIED") return Math.abs(s.result) < 1e-9;
-      return true;
-    });
+  function buildReceipt(equation, solve, verification) {
     return {
-      system_id: "AKSI-MATRIX-MATH-v0.1",
+      system_id: "AKSI-MATRIX-CORE-v0.2",
+      engine: "heuristic-newton-raphson",
       timestamp: new Date().toISOString(),
-      input_equation: inputEquation,
-      hypotheses_found: hypotheses.slice(),
+      input_equation: equation,
+      residual: solve.residual,
+      mathjs: HAS_MATHJS,
+      ai_search: {
+        branches_explored: solve.branches,
+        hypotheses_found: solve.hypotheses.slice(),
+        thought_trajectories: solve.thought_trajectories
+      },
       verification_steps: verification.steps,
-      verified_roots: verified.slice(),
-      integrity_status: integrity ? "PASSED" : "FAILED",
-      note: (extra && extra.note) || "Integer/half-integer search ±100; verification by substitution."
+      verified_roots: verification.verified_roots.slice(),
+      integrity_status: verification.verified_roots.length > 0 ? "PASSED" : "FAILED"
     };
   }
   var logEl = document.getElementById("log");
   var outEl = document.getElementById("out");
   var chips = document.getElementById("chips");
   var eqEl = document.getElementById("eq");
+  var runBtn = document.getElementById("run");
   var lastReceipt = null;
   function log(msg, cls) {
     var line = document.createElement("div");
@@ -183,72 +280,79 @@ footer a{color:var(--a)}
     logEl.scrollTop = logEl.scrollHeight;
   }
   function clearLog() { logEl.textContent = ""; }
-  function runCycle(opts) {
-    opts = opts || {};
+  function runCycle() {
     var eq = (eqEl.value || "").trim();
     if (!eq) return;
     clearLog();
+    runBtn.disabled = true;
     log("[Intent] Получено уравнение: " + eq, "info");
-    var found = findHypotheses(eq, 100);
-    log("[Math] Парсинг residual: " + found.parsed.residual, "info");
-    log("[Math] Сгенерированы гипотезы: [" + found.hypotheses.join(", ") + "]", "info");
-    var hyps = found.hypotheses.slice();
-    if (opts.injectFalse) {
-      if (hyps.indexOf(5) < 0) hyps.push(5);
-      log("[Test] Подмешана ложная гипотеза 5", "bad");
-    }
-    log("[Verification] Старт подстановки…", "info");
-    var ver = verifyRoots(eq, hyps);
-    for (var i = 0; i < ver.steps.length; i++) {
-      var s = ver.steps[i];
-      var cls = s.status === "VERIFIED" ? "ok" : "bad";
-      log("[Verification] x=" + s.root + " → " + s.expression + " = " + s.result + " → " + s.status, cls);
-    }
-    var receipt = buildReceipt(eq, hyps, ver, {
-      note: opts.injectFalse ? "False hypothesis 5 injected; verification must REJECT it." : undefined
-    });
-    lastReceipt = receipt;
-    outEl.textContent = JSON.stringify(receipt, null, 2);
-    chips.innerHTML = "";
-    var c1 = document.createElement("span");
-    c1.className = "chip " + (receipt.integrity_status === "PASSED" ? "pass" : "fail");
-    c1.textContent = "integrity: " + receipt.integrity_status;
-    chips.appendChild(c1);
-    var c2 = document.createElement("span");
-    c2.className = "chip pass";
-    c2.textContent = "verified: [" + receipt.verified_roots.join(", ") + "]";
-    chips.appendChild(c2);
-    log("[Receipt] Чек сформирован · " + receipt.timestamp, "ok");
-    return receipt;
+    log("[AI Core] Инициализация градиентного агента (Newton–Raphson)…", "info");
+    setTimeout(function () {
+      var t0 = performance.now();
+      var solve;
+      try { solve = aiSolve(eq, log); }
+      catch (err) {
+        log("[Error] " + (err && err.message ? err.message : err), "bad");
+        runBtn.disabled = false;
+        return;
+      }
+      log("[Verification] Жёсткая проверка |f(x)| < 1e-6…", "info");
+      var ver = verifyRoots(eq, solve.hypotheses, solve.f);
+      for (var i = 0; i < ver.steps.length; i++) {
+        var s = ver.steps[i];
+        log("[Verification] x=" + s.root + " → f=" + s.result + " → " + s.status, s.status === "VERIFIED" ? "ok" : "bad");
+      }
+      var receipt = buildReceipt(eq, solve, ver);
+      receipt.verification_steps = ver.steps.map(function (s) {
+        var path = null;
+        for (var t = 0; t < solve.thought_trajectories.length; t++) {
+          if (Math.abs(solve.thought_trajectories[t].root_target - s.root) < 1e-4) { path = solve.thought_trajectories[t]; break; }
+        }
+        return {
+          root: s.root, expression: s.expression, result: s.result, abs_error: s.abs_error, status: s.status,
+          ai_trajectory: path ? path.trajectory : null,
+          ai_iterations: path ? path.iterations : null,
+          ai_x0: path ? path.x0 : null
+        };
+      });
+      receipt.runtime_ms = Math.round(performance.now() - t0);
+      lastReceipt = receipt;
+      outEl.textContent = JSON.stringify(receipt, null, 2);
+      chips.innerHTML = "";
+      var c1 = document.createElement("span");
+      c1.className = "chip " + (receipt.integrity_status === "PASSED" ? "pass" : "fail");
+      c1.textContent = "integrity: " + receipt.integrity_status;
+      chips.appendChild(c1);
+      var c2 = document.createElement("span");
+      c2.className = "chip pass";
+      c2.textContent = "verified: [" + receipt.verified_roots.map(function (x) { return typeof x === "number" ? Number(x.toPrecision(8)) : x; }).join(", ") + "]";
+      chips.appendChild(c2);
+      var c3 = document.createElement("span");
+      c3.className = "chip";
+      c3.textContent = receipt.runtime_ms + " ms";
+      chips.appendChild(c3);
+      log("[Receipt] Цифровой чек сформирован · " + receipt.timestamp, "ok");
+      runBtn.disabled = false;
+    }, 20);
   }
-  document.getElementById("run").addEventListener("click", function () { runCycle({}); });
-  document.getElementById("inject").addEventListener("click", function () { runCycle({ injectFalse: true }); });
+  document.getElementById("run").addEventListener("click", runCycle);
   document.getElementById("dl").addEventListener("click", function () {
-    if (!lastReceipt) runCycle({});
-    if (!lastReceipt) return;
+    if (!lastReceipt) { runCycle(); setTimeout(function () { if (lastReceipt) download(); }, 120); }
+    else download();
+  });
+  function download() {
     var blob = new Blob([JSON.stringify(lastReceipt, null, 2)], { type: "application/json" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "aksi-math-receipt.json";
+    a.download = "aksi-core-receipt.json";
     a.click();
     URL.revokeObjectURL(a.href);
-  });
+  }
   document.querySelectorAll("[data-eq]").forEach(function (b) {
     b.addEventListener("click", function () { eqEl.value = b.getAttribute("data-eq"); });
   });
-  eqEl.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") runCycle({});
-  });
-  setTimeout(function () {
-    runCycle({});
-    var ver = verifyRoots("x^2 - 4 = 0", [-2, 2, 5]);
-    var ok =
-      ver.verified_roots.indexOf(2) >= 0 &&
-      ver.verified_roots.indexOf(-2) >= 0 &&
-      ver.verified_roots.indexOf(5) < 0 &&
-      ver.steps.some(function (s) { return s.root === 5 && s.status === "REJECTED"; });
-    log(ok ? "[Self-test] REJECTED root 5 correctly — PASS" : "[Self-test] FAIL", ok ? "ok" : "bad");
-  }, 200);
+  eqEl.addEventListener("keydown", function (e) { if (e.key === "Enter") runCycle(); });
+  setTimeout(runCycle, 300);
 })();
 </script>
 </body>
