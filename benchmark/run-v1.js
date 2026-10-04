@@ -9,7 +9,7 @@ const tasks = JSON.parse(readFileSync(new URL('./tasks-v1.json', import.meta.url
 const allowed = new Set(tasks.map(t=>t.id));
 
 function summarize(path) {
-  const rows = readFileSync(path, 'utf8').trim().split(/\\n/).filter(Boolean).map(JSON.parse);
+  const rows = readFileSync(path, 'utf8').trim().split(/\n/).filter(Boolean).map(JSON.parse);
   if (!rows.length) throw new Error('No benchmark rows');
   for (const row of rows) if (!allowed.has(row.task_id)) throw new Error('Unknown task: '+row.task_id);
   const sum = k => rows.filter(r=>Boolean(r[k])).length;
