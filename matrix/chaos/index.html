@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
-<title>АКСИ · Chaos Answer</title>
+<title>АКСИ · Math-Mind</title>
 <meta name="theme-color" content="#030508"/>
 <link rel="canonical" href="https://milana808.github.io/matrix/chaos/"/>
 <style>
@@ -12,117 +12,121 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--t);font-family:ui-monospace,Menlo,Consolas,system-ui,sans-serif;overflow-x:hidden}
 #stage{position:fixed;inset:0;z-index:0}
 .ui{position:relative;z-index:2;max-width:480px;margin:0 auto;padding:12px 12px 28px;pointer-events:none}
-.ui .panel,.ui .btn,.ui textarea,.ui header,.ui a{pointer-events:auto}
+.ui .panel,.ui .btn,.ui textarea,.ui header,.ui a,.ui input{pointer-events:auto}
 header{padding:8px 4px 2px}
 .tag{font-size:10px;letter-spacing:.16em;color:var(--neon);text-transform:uppercase}
 h1{margin:4px 0 0;font-size:1.15rem;text-shadow:0 0 16px rgba(0,255,136,.3)}
 .sub{color:var(--m);font-size:11px;margin:4px 0 0;line-height:1.4}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;margin:8px 0;backdrop-filter:blur(8px)}
 label{display:block;font-size:10px;color:var(--m);margin-bottom:4px}
-textarea{width:100%;min-height:58px;border-radius:10px;border:1px solid var(--line);background:#05080c;color:var(--t);padding:10px;font:inherit;font-size:13px}
-.btn{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#00ff88,#00c4a0);color:#02100a;box-shadow:0 0 18px rgba(0,255,136,.25)}
+textarea,input{width:100%;border-radius:10px;border:1px solid var(--line);background:#05080c;color:var(--t);padding:10px;font:inherit;font-size:13px}
+textarea{min-height:58px}
+.btn{width:100%;border:0;border-radius:12px;padding:12px;margin-top:8px;font:inherit;font-weight:700;font-size:13px;cursor:pointer;background:linear-gradient(135deg,#00ff88,#00c4a0);color:#02100a}
+.btn.sec{background:transparent;border:1px solid var(--line);color:var(--neon);margin-top:6px}
 .btn:disabled{opacity:.45}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .chip{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m)}
 .chip.on{color:var(--neon)}
-.out{font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;min-height:5.5em}
-.out .cur{display:inline-block;width:7px;height:1em;background:var(--neon);margin-left:2px;vertical-align:text-bottom;animation:blink .7s step-end infinite}
+.out{font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;min-height:5em}
+.out .cur{display:inline-block;width:7px;height:1em;background:var(--neon);margin-left:2px;animation:blink .7s step-end infinite}
 @keyframes blink{50%{opacity:0}}
 .bits{font-size:10px;color:var(--m);margin-top:6px;word-break:break-all}
-.portal{display:none;width:100%;margin-top:10px;border:1px solid rgba(0,255,136,.45);border-radius:12px;padding:12px;font:inherit;font-weight:700;font-size:12px;letter-spacing:.05em;text-align:center;text-decoration:none;color:var(--neon);background:linear-gradient(135deg,rgba(0,255,136,.14),rgba(0,229,255,.1))}
-.portal.show{display:block}
 .note{font-size:10px;color:var(--m);margin-top:6px;line-height:1.35}
 footer{text-align:center;font-size:10px;color:var(--m);margin-top:8px}
 footer a{color:var(--cyan)}
+.row{display:flex;gap:6px}.row input{flex:1}
 </style>
 </head>
 <body>
 <div id="stage"></div>
 <div class="ui">
   <header>
-    <div class="tag">AKSI · chaos answer</div>
-    <h1>Вопрос → ответ</h1>
-    <p class="sub">Math · локальные факты · Wikipedia · коллапс только для формы</p>
+    <div class="tag">AKSI · math-mind · phase-HRR</div>
+    <h1>Математический ответ</h1>
+    <p class="sub">Без WebLLM и без Wikipedia. Резонанс фактов в фазовом пространстве + сборка фразы.</p>
   </header>
   <div class="panel">
-    <label for="q">Любой вопрос</label>
+    <label for="q">Вопрос</label>
     <textarea id="q" rows="2">почему небо синее?</textarea>
     <button type="button" class="btn" id="go">СПРОСИТЬ</button>
     <div class="meta">
-      <span class="chip on">hybrid</span>
-      <span class="chip" id="ent">H = —</span>
-      <span class="chip" id="shape">shape —</span>
-      <span class="chip" id="src">src —</span>
+      <span class="chip on" id="st">D=—</span>
+      <span class="chip" id="kind">kind —</span>
+      <span class="chip" id="conf">conf —</span>
     </div>
   </div>
   <div class="panel">
     <div class="tag">ответ</div>
-    <div class="out" id="ans">Задай вопрос. Сначала посчитаю или найду факт, потом оформлю коллапсом.</div>
+    <div class="out" id="ans">Задай вопрос. Ответ из фазовой памяти (тройки S-R-O + QA), не из вики.</div>
     <div class="bits" id="bits"></div>
-    <a class="portal" id="portal" href="#">ВОЙТИ В КВАНТОВЫЙ КОНТУР</a>
-    <p class="note">Ответ = math / локальная база / Wikipedia. Коллапс не выдумывает факты.</p>
+    <p class="note">Можно научить: subject | relation | object. Hebb-запись в голограмму.</p>
+  </div>
+  <div class="panel">
+    <div class="tag">teach</div>
+    <div class="row"><input id="ts" placeholder="subject" value="париж"/><input id="tr" placeholder="relation" value="есть"/><input id="to" placeholder="object" value="столица_франции"/></div>
+    <button type="button" class="btn sec" id="teach">ЗАПИСАТЬ ФАКТ</button>
   </div>
   <footer>
     <a href="https://milana808.github.io/">home</a> ·
-    <a href="https://milana808.github.io/talk/">talk</a> ·
+    <a href="https://milana808.github.io/hdc/">hdc</a> ·
     <a href="https://milana808.github.io/permit/">permit</a>
   </footer>
 </div>
 <script type="importmap">{"imports":{"three":"https://cdnjs.cloudflare.com/ajax/libs/three.js/0.170.0/three.module.min.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
-function fnv1a(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return h>>>0}
-function hashStream(str,n){const o=[];let b=str;while(o.length<n){const h=fnv1a(b);o.push(h&255,(h>>>8)&255,(h>>>16)&255,(h>>>24)&255);b=b+'|'+h.toString(16)}return o.slice(0,n)}
-class C{constructor(re,im){this.re=re;this.im=im}abs2(){return this.re*this.re+this.im*this.im}mul(o){return new C(this.re*o.re-this.im*o.im,this.re*o.im+this.im*o.re)}add(o){return new C(this.re+o.re,this.im+o.im)}}
-class QuantumCore{
-  constructor(){this._probs=null;this.lastEntropy=0}
-  _reset(){const s=Array.from({length:64},()=>new C(0,0));s[0]=new C(1,0);this.state=s}
-  _apply(q,a,b,c,d){const s=this.state,st=1<<q,n=s.slice();for(let i=0;i<64;i++){if(i&st)continue;const x=s[i],y=s[i|st];n[i]=a.mul(x).add(b.mul(y));n[i|st]=c.mul(x).add(d.mul(y))}this.state=n}
-  _H(q){const s=Math.SQRT1_2;this._apply(q,new C(s,0),new C(s,0),new C(s,0),new C(-s,0))}
-  _RX(q,t){const c=Math.cos(t/2),s=Math.sin(t/2);this._apply(q,new C(c,0),new C(0,-s),new C(0,-s),new C(c,0))}
-  _RY(q,t){const c=Math.cos(t/2),s=Math.sin(t/2);this._apply(q,new C(c,0),new C(-s,0),new C(s,0),new C(c,0))}
-  _RZ(q,t){this._apply(q,new C(Math.cos(-t/2),Math.sin(-t/2)),new C(0,0),new C(0,0),new C(Math.cos(t/2),Math.sin(t/2)))}
-  _CX(c,t){const n=this.state.slice(),cm=1<<c,tm=1<<t;for(let i=0;i<64;i++)if(i&cm){const j=i^tm;if(i<j){[n[i],n[j]]=[n[j],n[i]]}}this.state=n}
-  _CZ(a,b){const am=1<<a,bm=1<<b;for(let i=0;i<64;i++)if((i&am)&&(i&bm))this.state[i]=new C(-this.state[i].re,-this.state[i].im)}
-  encode(q){this._reset();for(let i=0;i<6;i++)this._H(i);const bytes=hashStream(String(q||''),24);for(let i=0;i<6;i++){this._RX(i,(bytes[2*i]/255)*Math.PI*2);this._RY(i,(bytes[2*i+1]/255)*Math.PI*2)}const b2=hashStream(String(q)+'|c',12);for(let i=0;i<6;i++){this._RZ(i,(b2[i]/255)*Math.PI*2);if(i<5)this._CX(i,i+1)}for(let i=0;i<6;i++)this._CZ(i,(i+1)%6);return this.spectrum()}
-  spectrum(){const p=new Float64Array(64);let s=0;for(let i=0;i<64;i++){p[i]=this.state[i].abs2();s+=p[i]}if(s>0)for(let i=0;i<64;i++)p[i]/=s;let H=0;for(let i=0;i<64;i++)if(p[i]>1e-18)H-=p[i]*Math.log2(p[i]);this._probs=p;this.lastEntropy=H;return{entropy:H,probs:p}}
-  collapse(){if(!this._probs)this.spectrum();const r=Math.random();let a=0,c=63;for(let i=0;i<64;i++){a+=this._probs[i];if(r<=a){c=i;break}}return{index:c,bitstring:c.toString(2).padStart(6,'0'),probability:this._probs[c],entropyBefore:this.lastEntropy}}
+/* Math-Mind Phase-HRR inlined */
+function createMathMind(opts={}){
+const D=opts.D||2048,seed0=opts.seed||0xA6512026;
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+const rng=mulberry32(seed0);
+function wrap(x){return((x+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI}
+function randomVec(){const v=new Float64Array(D);for(let i=0;i<D;i++)v[i]=(rng()*2-1)*Math.PI;return v}
+function bind(a,b){const o=new Float64Array(D);for(let i=0;i<D;i++)o[i]=wrap(a[i]+b[i]);return o}
+function unbind(a,b){const o=new Float64Array(D);for(let i=0;i<D;i++)o[i]=wrap(a[i]-b[i]);return o}
+function bundle(vecs){const o=new Float64Array(D);for(let i=0;i<D;i++){let s=0,c=0;for(const v of vecs){s+=Math.sin(v[i]);c+=Math.cos(v[i])}o[i]=Math.atan2(s,c)}return o}
+function sim(a,b){let s=0;for(let i=0;i<D;i++)s+=Math.cos(a[i]-b[i]);return s/D}
+function permute(v,k){const o=new Float64Array(D),shift=((k%D)+D)%D;for(let i=0;i<D;i++)o[i]=v[(i+shift)%D];return o}
+const ROLE={S:randomVec(),R:randomVec(),O:randomVec(),Q:randomVec(),A:randomVec()};
+const lex=new Map(),invLex=[],facts=[];let hologram=null;
+function tok(s){return String(s||'').toLowerCase().replace(/[«»"'.,!?;:()]/g,' ').replace(/\s+/g,' ').trim()}
+function ensureToken(t){t=tok(t);if(!t)return null;if(!lex.has(t)){const v=randomVec();lex.set(t,v);invLex.push({token:t,vec:v})}return lex.get(t)}
+function encodePhrase(text){const parts=tok(text).split(' ').filter(Boolean);if(!parts.length)return randomVec();let acc=null;parts.forEach((p,i)=>{const v=permute(ensureToken(p),i*7+1);acc=acc?bind(acc,v):v});return acc}
+function addFact(s,r,o,surface){ensureToken(s);ensureToken(r);ensureToken(o);const vs=ensureToken(s),vr=ensureToken(r),vo=ensureToken(o);const triple=bundle([bind(vs,ROLE.S),bind(vr,ROLE.R),bind(vo,ROLE.O)]);const item={s,r,o,text:surface||(s+' '+r+' '+o),vec:triple};facts.push(item);hologram=hologram?bundle([hologram,triple]):triple;return item}
+function addQA(question,answer){const qv=encodePhrase(question),av=encodePhrase(answer);const pair=bundle([bind(qv,ROLE.Q),bind(av,ROLE.A)]);facts.push({s:question,r:'QA',o:answer,text:answer,vec:pair,qa:true});hologram=hologram?bundle([hologram,pair]):pair;tok(answer).split(' ').forEach(ensureToken);return answer}
+function nearestFacts(probe,k=5){const scored=facts.map(f=>({fact:f,score:sim(probe,f.vec)}));scored.sort((a,b)=>b.score-a.score);return scored.slice(0,k)}
+function tryMath(q){let s=String(q||'').toLowerCase().replace(/,/g,'.');s=s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');s=s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');s=s.replace(/\bpi\b|π|пи/g,'PI');s=s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет/gi,' ');s=s.replace(/\?/g,' ').trim();const m=s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|[0-9.+\-*/%\s()])+)/i);if(!m)return null;let expr=m[0].replace(/\s+/g,'').replace(/\^/g,'**');if(!/[0-9PI]|sqrt/i.test(expr))return null;const safe=expr.replace(/PI/gi,'Math.PI').replace(/sqrt\(/gi,'Math.sqrt(');try{const v=new Function('"use strict";return ('+safe+')')();if(typeof v!=='number'||!isFinite(v))return null;const num=Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10);return expr+' = '+num}catch(e){return null}}
+function detectIntent(s){if(/почему|зачем|отчего|why/.test(s))return'why';if(/кто|who/.test(s))return'who';if(/где|where/.test(s))return'where';if(/как|how/.test(s))return'how';if(/что\s+такое|что\s+значит|what\s+is|определ/.test(s))return'define';return'ask'}
+function compose(intent,q,recovered){if(!recovered.length)return{text:'В фазовой памяти нет устойчивого резонанса. Добавь факт через teach() или сузь вопрос.',confidence:0};const best=recovered[0];const conf=Math.max(0,Math.min(1,(best.score+0.2)/1.2));const lines=[];if(intent==='why'&&best.r==='причина')lines.push(best.s+': причина — '+best.o+'.');else if(intent==='define')lines.push(best.s+' — это '+best.o+'.');else if(best.r==='есть'||best.r==='это')lines.push(best.s+' есть '+best.o+'.');else if(best.r==='находится')lines.push(best.s+' находится '+best.o+'.');else lines.push(best.s+' '+best.r+' '+best.o+'.');const support=recovered.filter(r=>r.s===best.s&&r!==best).slice(0,2);for(const s of support)lines.push('Также: '+s.s+' '+s.r+' '+s.o+'.');lines.push('(резонанс sim='+best.score.toFixed(3)+', фактов='+recovered.length+', D='+D+')');return{text:lines.join(' '),confidence:conf}}
+function query(text){const q=String(text||'').trim();const qv=encodePhrase(q);const qLower=q.toLowerCase();const math=tryMath(q);if(math)return{ok:true,kind:'math',answer:math,confidence:1,trace:{method:'classical-eval'}};const qToks=tok(q).split(' ').filter(w=>w.length>2);let bestQA=null;for(const f of facts){if(!f.qa)continue;let score=sim(qv,encodePhrase(f.s));const fToks=tok(f.s).split(' ').filter(w=>w.length>2);const overlap=fToks.filter(w=>qToks.includes(w)).length;const contentHit=fToks.some(w=>qToks.includes(w)&&!['что','такое','как','почему','кто'].includes(w));if(qToks.includes('такое')||qToks.includes('что')){if(!contentHit)score*=0.2;else score+=0.2*overlap}else score+=0.1*overlap;if(!bestQA||score>bestQA.score)bestQA={fact:f,score,overlap}}if(bestQA&&bestQA.score>0.35&&(bestQA.overlap>0||bestQA.score>0.55))return{ok:true,kind:'qa-recall',answer:bestQA.fact.o,confidence:Math.min(1,bestQA.score),trace:{method:'phase-QA',score:bestQA.score,overlap:bestQA.overlap}};const probes=nearestFacts(qv,12);const qTokens=new Set(tok(q).split(' ').filter(Boolean));for(const p of probes){let boost=0;const parts=[p.fact.s,p.fact.r,p.fact.o].map(tok);for(const part of parts){for(const w of part.split(' ')){if(w.length>2&&qTokens.has(w))boost+=0.15}}p.score+=boost}probes.sort((a,b)=>b.score-a.score);const top=probes.filter(p=>p.score>0.05);const recovered=[];for(const p of top){const f=p.fact;if(f.qa)continue;recovered.push({score:p.score,s:f.s,r:f.r,o:f.o,text:f.text,qa:false});if(recovered.length>=5)break}const intent=detectIntent(qLower);const composed=compose(intent,q,recovered);return{ok:true,kind:'compose',answer:composed.text,confidence:composed.confidence,trace:{method:'phase-HRR-compose',intent,recovered:recovered.slice(0,5),sims:top.slice(0,5).map(t=>+t.score.toFixed(3)}}}
+function teach(s,r,o){return addFact(s,r,o)}
+function stats(){return{D,facts:facts.length,tokens:lex.size,hasHologram:!!hologram}}
+function seedDefaults(){addQA('кто ты','Я математический контур АКСИ: фазовая память Phase-HRR, без нейросети и без WebLLM.');addQA('что такое акси','АКСИ — суверенный runtime: decision integrity, permit, локальная математическая память.');addQA('что такое permit','Permit — default-deny допуск действия агента с возможным cryptographic receipt.');addQA('что такое receipt','Receipt — подписанный след решения ALLOW или BLOCK для аудита.');addQA('как ты отвечаешь','Я кодирую вопрос в фазовый вектор, ищу резонанс в голограмме фактов и собираю фразу из ближайших троек.');addFact('небо','имеет_цвет','синий');addFact('синий_цвет_неба','причина','рассеяние_Рэлея');addFact('рассеяние_Рэлея','есть','рассеяние_коротких_волн_на_молекулах_воздуха');addFact('океан','имеет_цвет','синий');addFact('синий_цвет_океана','причина','поглощение_красной_части_спектра_водой');addFact('акси','есть','суверенный_runtime');addFact('акси','использует','phase_hrr');addFact('permit','есть','default_deny_допуск');addFact('technology_serves_human','есть','принцип_акси');addFact('москва','есть','столица_россии');addFact('земля','находится','солнечная_система');addFact('вода','имеет_формулу','H2O');addQA('почему небо синее','Небо синее из-за рассеяния Рэлея: короткие (синие) волны рассеиваются в воздухе сильнее длинных.');addQA('почему океан синий','Океан синий потому что вода сильнее поглощает красную часть спектра, а сине-зелёная рассеивается назад.');addQA('почему закат красный','На закате луч проходит длиннее через атмосферу: синий уходит в стороны, остаются красные тона.')}
+seedDefaults();
+return{D,query,teach,addQA,addFact,stats,sim,encodePhrase,_facts:facts,_lexSize:()=>lex.size}
 }
-function normalizeMathQuery(q){let s=String(q||'').toLowerCase().trim().replace(/,/g,'.');s=s.replace(/корень\s+из\s*\(?\s*([0-9.]+)\s*\)?/gi,'sqrt($1)');s=s.replace(/√\s*\(?\s*([0-9.]+)\s*\)?/g,'sqrt($1)');s=s.replace(/\bpi\b|π|пи/g,'PI').replace(/×/g,'*').replace(/÷/g,'/');return s}
-function extractExpression(q){let s=normalizeMathQuery(q);s=s.replace(/чему\s+равен|посчитай|вычисли|сколько\s+будет|what\s+is|calculate/gi,' ');s=s.replace(/\?/g,' ').replace(/\s+/g,' ').trim();const m=s.match(/(?:sqrt\s*\(\s*[0-9.]+\s*\)|(?:PI|E|[0-9.+\-*/%^()\s])+)/i);if(!m)return null;let expr=m[0].replace(/\s+/g,'').replace(/\^/g,'**');if(!/[0-9PIE]|sqrt/i.test(expr))return null;return expr}
-function evalMath(expr){if(!expr||expr.length>80)return null;const safe=expr.replace(/PI/gi,'Math.PI').replace(/\bE\b/g,'Math.E').replace(/sqrt\(/gi,'Math.sqrt(');try{const v=new Function('"use strict";return ('+safe+')')();return(typeof v==='number'&&isFinite(v))?v:null}catch(e){return null}}
-function formatNum(v){return Number.isInteger(v)?String(v):String(Math.round(v*1e10)/1e10)}
-const LOCAL=[{k:['кто ты','что ты','ты кто','о себе','акси кто'],a:'Я контур АКСИ на milana808.github.io: offline-счёт, permit/decision integrity, визуальный коллапс. Не чат-бот BigTech и не AGI. Считаю выражения сам; общие факты беру из Wikipedia; про продукт АКСИ отвечаю из локальной базы.'},{k:['permit','пермит','допуск'],a:'Permit в АКСИ — правило «сначала проверка, потом действие»: default-deny. Агент не выполняет tool-call, пока мандат/интент не разрешили. После ALLOW можно выдать криптографический receipt (ECDSA).'},{k:['receipt','чек','квитанц'],a:'Decision Receipt — подписанный след решения: timestamp, хеш запроса/контекста, статус ALLOW/BLOCK, подпись. Нужен для аудита.'},{k:['adia','eqs','резонанс'],a:'ADIA/EQS — эвристики целостности ответа (источник, согласованность). Инженерные сигналы, не доказательство сознания.'},{k:['небо сине','синий цвет неба','почему небо'],a:'Небо кажется синим из‑за рассеяния Рэлея: коротковолновая (синяя) часть солнечного света рассеивается в атмосфере сильнее длинноволновой. На закате путь луча длиннее — остаются красные тона.'},{k:['океан син','море син','вода син'],a:'Океан кажется синим, потому что вода сильнее поглощает красную часть спектра, а сине-зелёная рассеивается и отражается. Глубина и угол солнца меняют оттенок.'},{k:['что такое акси','акси это','проект акси'],a:'АКСИ — суверенный runtime: offline ядро в браузере, decision integrity (gate/permit/receipt), локальный счёт и поиск фактов. Контакт: aksilove@internet.ru. Принцип: technology_serves_human.'},{k:['как работа','как устроен','pipeline','контур'],a:'Pipeline: вопрос → (math | локальная база | Wikipedia) → quantum collapse только для формы кристалла и permit → печать. Факты не рождаются из случайных битов.'}];
-function localAnswer(q){const s=String(q||'').toLowerCase();for(const row of LOCAL){if(row.k.some(k=>s.includes(k)))return row.a}return null}
-function searchQuery(q){let s=String(q||'').trim().replace(/[?？]/g,'');s=s.replace(/^(почему|зачем|что такое|что значит|кто такой|кто такая|как|when|what|why|who|how)\s+/i,'');s=s.replace(/\s+/g,' ').trim();if(/небо/.test(s)&&/син/.test(String(q).toLowerCase()))return 'Рассеяние Рэлея';if(/океан|море/.test(s)&&/син/.test(String(q).toLowerCase()))return 'Цвет воды';return s||String(q||'').trim()}
-async function wikiSearch(q){const term=searchQuery(q);if(!term||term.length<2)return null;for(const lang of ['ru','en']){try{const os=await fetch(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&limit=5&format=json&origin=*&search=${encodeURIComponent(term)}`).then(r=>r.json());const titles=(os&&os[1])||[];if(!titles.length)continue;const title=titles[0];const sum=await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`).then(r=>r.json());const extract=(sum&&(sum.extract||sum.description))||'';if(!extract)continue;return{lang,title:sum.title||title,extract:extract.slice(0,900),url:(sum.content_urls&&sum.content_urls.desktop&&sum.content_urls.desktop.page)||`https://${lang}.wikipedia.org/wiki/${encodeURIComponent(title)}`}}catch(e){}}return null}
-function shapeFromIndex(i){return i%3===0?'sphere':i%3===1?'cube':'spiral'}
-function portalFor(shape){return shape==='cube'?'../archive/':shape==='spiral'?'../agent/':'../core/'}
-function composeAnswer(q,col,shape,payload){const lines=[];lines.push('АКСИ · ответ');lines.push('источник: '+payload.source+' · |'+col.bitstring+'⟩ · H='+col.entropyBefore.toFixed(3)+' · '+shape);lines.push('');lines.push(payload.text);if(payload.cite){lines.push('');lines.push('Источник: '+payload.cite)}lines.push('');lines.push('— technology_serves_human');return lines.join('\n')}
-async function resolveAnswer(q){const expr=extractExpression(q);if(expr){const v=evalMath(expr);if(v!==null){let t='Результат: '+formatNum(v)+'\nВыражение: '+expr;if(/sqrt|корень|√/i.test(q)&&v>=0)t+='\nПроверка: ('+formatNum(v)+')² = '+formatNum(v*v);return{source:'math',text:t,cite:null}}}const loc=localAnswer(q);if(loc)return{source:'local',text:loc,cite:null};const w=await wikiSearch(q);if(w)return{source:'wikipedia/'+w.lang,text:w.title+'\n\n'+w.extract,cite:w.url};return{source:'none',text:'Не нашёл готового факта по запросу «'+q+'».\nУточни формулировку. Math: 12*12, корень из 16. Про АКСИ: «что такое permit».',cite:null}}
-let audioCtx,osc,gain;function ensureAudio(){if(audioCtx)return audioCtx;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;audioCtx=new AC();return audioCtx}
-function startHum(H){const a=ensureAudio();if(!a)return;stopHum(false);if(a.state==='suspended')a.resume();const base=38+Math.min(40,(H||3)*5);osc=a.createOscillator();osc.type='sine';osc.frequency.value=base;const o2=a.createOscillator();o2.type='triangle';o2.frequency.value=base*1.5;gain=a.createGain();gain.gain.value=1e-4;const g2=a.createGain();g2.gain.value=0.01;osc.connect(gain);o2.connect(g2);g2.connect(gain);gain.connect(a.destination);osc.start();o2.start();osc._o2=o2;gain.gain.linearRampToValueAtTime(0.028,a.currentTime+0.3)}
-function stopHum(drop){if(!audioCtx||!gain||!osc)return;const t=audioCtx.currentTime;try{if(drop){osc.frequency.setValueAtTime(osc.frequency.value,t);osc.frequency.exponentialRampToValueAtTime(14,t+0.3);gain.gain.setValueAtTime(Math.max(gain.gain.value,1e-4),t);gain.gain.linearRampToValueAtTime(1e-4,t+0.4)}else gain.gain.linearRampToValueAtTime(1e-4,t+0.1);const o=osc,o2=osc._o2;setTimeout(()=>{try{o.stop()}catch(e){}try{o2&&o2.stop()}catch(e){}},drop?450:150)}catch(e){}osc=null;gain=null}
-function haptic(){if(navigator.vibrate)try{navigator.vibrate([35,25,55])}catch(e){}}
-function savePermit(col,shape,q,preview){try{localStorage.setItem('aksi_matrix_permit',JSON.stringify({v:8,ts:new Date().toISOString(),bitstring:col.bitstring,index:col.index,entropy:col.entropyBefore,shape,query:q,preview:(preview||'').slice(0,180)}));return true}catch(e){return null}}
-function typeWriter(el,text,done){el.textContent='';let i=0;const cur=document.createElement('span');cur.className='cur';(function tick(){if(i<=text.length){el.textContent=text.slice(0,i);el.appendChild(cur);i++;setTimeout(tick,text.charAt(i-1)==='\n'?22:9)}else{el.textContent=text;if(done)done()}})()}
-const N=900;const core=new QuantumCore();const stage=document.getElementById('stage');
+
+const mind=createMathMind({D:2048});
+document.getElementById('st').textContent='D='+mind.D+' · facts='+mind.stats().facts;
+function typeWriter(el,text,done){el.textContent='';let i=0;const cur=document.createElement('span');cur.className='cur';(function tick(){if(i<=text.length){el.textContent=text.slice(0,i);el.appendChild(cur);i++;setTimeout(tick,text.charAt(i-1)==='\n'?20:8)}else{el.textContent=text;if(done)done()}})()}
+const qEl=document.getElementById('q'),ans=document.getElementById('ans'),bits=document.getElementById('bits'),kindEl=document.getElementById('kind'),confEl=document.getElementById('conf'),go=document.getElementById('go');
+go.addEventListener('click',()=>{const q=qEl.value.trim();if(!q)return;go.disabled=true;ans.textContent='…резонанс…';const t0=performance.now();const r=mind.query(q);const ms=(performance.now()-t0).toFixed(1);kindEl.textContent=r.kind;kindEl.classList.add('on');confEl.textContent='conf '+(r.confidence!=null?Number(r.confidence).toFixed(2):'—');confEl.classList.add('on');const text=r.answer+'\n\n['+r.kind+' · '+ms+' ms · tokens='+mind.stats().tokens+']';typeWriter(ans,text,()=>{go.disabled=false});bits.textContent=r.trace?JSON.stringify(r.trace).slice(0,280):'';textHash=fnv(q);vortexStrength=0.8+(r.confidence||0.2);mode='vortex';setTimeout(()=>{mode='crystal';setShapeTargets(r.kind==='math'?'cube':(r.confidence>0.5?'sphere':'spiral'))},400)});
+document.getElementById('teach').addEventListener('click',()=>{const s=document.getElementById('ts').value.trim(),r=document.getElementById('tr').value.trim(),o=document.getElementById('to').value.trim();if(!s||!r||!o)return;mind.teach(s,r,o);document.getElementById('st').textContent='D='+mind.D+' · facts='+mind.stats().facts;ans.textContent='Записано: '+s+' '+r+' '+o+'. Спроси снова.'});
+function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return h>>>0}
+const N=700,stage=document.getElementById('stage');
 const renderer=new THREE.WebGLRenderer({antialias:false,alpha:true,powerPreference:'low-power'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0x030508,1);stage.appendChild(renderer.domElement);
-const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,100);camera.position.set(0,0.35,6.1);
+const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,0.1,100);camera.position.set(0,0.3,6);
 const positions=new Float32Array(N*3),colors=new Float32Array(N*3),basePos=new Float32Array(N*3),targetPos=new Float32Array(N*3);
-for(let i=0;i<N;i++){const r=1.15+Math.random()*2.35,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);const x=r*Math.sin(ph)*Math.cos(th),y=r*Math.sin(ph)*Math.sin(th),z=r*Math.cos(ph);basePos[i*3]=x;basePos[i*3+1]=y;basePos[i*3+2]=z;positions[i*3]=x;positions[i*3+1]=y;positions[i*3+2]=z;targetPos[i*3]=x;targetPos[i*3+1]=y;targetPos[i*3+2]=z;const g=0.55+Math.random()*0.45;colors[i*3]=0.1*g;colors[i*3+1]=g;colors[i*3+2]=0.55+0.45*Math.random()}
+for(let i=0;i<N;i++){const r=1.2+Math.random()*2.2,th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);const x=r*Math.sin(ph)*Math.cos(th),y=r*Math.sin(ph)*Math.sin(th),z=r*Math.cos(ph);basePos[i*3]=x;basePos[i*3+1]=y;basePos[i*3+2]=z;positions[i*3]=x;positions[i*3+1]=y;positions[i*3+2]=z;targetPos[i*3]=x;targetPos[i*3+1]=y;targetPos[i*3+2]=z;const g=0.5+Math.random()*0.5;colors[i*3]=0.1*g;colors[i*3+1]=g;colors[i*3+2]=0.5+0.5*Math.random()}
 const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(positions,3));geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
-const mat=new THREE.PointsMaterial({size:0.045,vertexColors:true,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending,sizeAttenuation:true});
+const mat=new THREE.PointsMaterial({size:0.045,vertexColors:true,transparent:true,opacity:0.9,depthWrite:false,blending:THREE.AdditiveBlending});
 const points=new THREE.Points(geo,mat);scene.add(points);
-let mode='cloud',vortexStrength=0,collapseT=0,rotY=0,textHash=0;
-function setShapeTargets(shape){for(let i=0;i<N;i++){const u=i/N;let x,y,z;if(shape==='sphere'){const th=u*Math.PI*12.9,ph=Math.acos(1-2*((i*0.618)%1)),r=1.55;x=r*Math.sin(ph)*Math.cos(th);y=r*Math.sin(ph)*Math.sin(th);z=r*Math.cos(ph)}else if(shape==='cube'){const face=i%6,a=((i*7)%40)/20-1,b=((i*13)%40)/20-1,s=1.35;if(face===0){x=s;y=a*s;z=b*s}else if(face===1){x=-s;y=a*s;z=b*s}else if(face===2){x=a*s;y=s;z=b*s}else if(face===3){x=a*s;y=-s;z=b*s}else if(face===4){x=a*s;y=b*s;z=s}else{x=a*s;y=b*s;z=-s}}else{const t=u*Math.PI*10,r=0.35+u*1.4;x=r*Math.cos(t);y=(u-0.5)*3;z=r*Math.sin(t)}targetPos[i*3]=x;targetPos[i*3+1]=y;targetPos[i*3+2]=z}}
-function applyVortex(dt,strength,hash){const spin=0.4+strength*1.8,lift=strength*0.35;for(let i=0;i<N;i++){let x=positions[i*3],y=positions[i*3+1],z=positions[i*3+2];const ang=spin*dt*(0.7+((hash+i*17)&7)*0.05),cos=Math.cos(ang),sin=Math.sin(ang);const nx=x*cos-z*sin,nz=x*sin+z*cos;y+=Math.sin(i*0.05+performance.now()*0.001*strength)*lift*dt;const breath=1+Math.sin(performance.now()*0.002+i)*0.02*strength;positions[i*3]=nx*breath;positions[i*3+1]=y;positions[i*3+2]=nz*breath;const g=0.45+0.55*Math.min(1,strength/2);colors[i*3]=0.05+0.2*strength;colors[i*3+1]=g;colors[i*3+2]=0.5+0.5*((i+hash)%8)/8}geo.attributes.color.needsUpdate=true}
-function lerpToTargets(dt,rate){const k=1-Math.exp(-rate*dt);for(let i=0;i<N;i++){positions[i*3]+=(targetPos[i*3]-positions[i*3])*k;positions[i*3+1]+=(targetPos[i*3+1]-positions[i*3+1])*k;positions[i*3+2]+=(targetPos[i*3+2]-positions[i*3+2])*k}}
-let last=performance.now();function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;rotY+=dt*(mode==='crystal'?0.55:0.12);points.rotation.y=rotY;if(mode==='vortex')applyVortex(dt,vortexStrength,textHash);else if(mode==='collapse'){collapseT+=dt;lerpToTargets(dt,2.2);if(collapseT>1.15){mode='crystal';mat.size=0.055}}else if(mode==='crystal'){lerpToTargets(dt,3);points.scale.setScalar(1+Math.sin(now*0.002)*0.02)}else{for(let i=0;i<N;i++){positions[i*3]=basePos[i*3]+Math.sin(now*0.0004+i)*0.04;positions[i*3+1]=basePos[i*3+1]+Math.cos(now*0.0005+i*0.7)*0.04;positions[i*3+2]=basePos[i*3+2]+Math.sin(now*0.0003+i*1.3)*0.04}}geo.attributes.position.needsUpdate=true;renderer.render(scene,camera);requestAnimationFrame(frame)}requestAnimationFrame(frame);
+let mode='cloud',vortexStrength=0,rotY=0,textHash=0;
+function setShapeTargets(shape){for(let i=0;i<N;i++){const u=i/N;let x,y,z;if(shape==='sphere'){const th=u*Math.PI*12,ph=Math.acos(1-2*((i*0.618)%1)),r=1.5;x=r*Math.sin(ph)*Math.cos(th);y=r*Math.sin(ph)*Math.sin(th);z=r*Math.cos(ph)}else if(shape==='cube'){const face=i%6,a=((i*7)%40)/20-1,b=((i*13)%40)/20-1,s=1.3;if(face===0){x=s;y=a*s;z=b*s}else if(face===1){x=-s;y=a*s;z=b*s}else if(face===2){x=a*s;y=s;z=b*s}else if(face===3){x=a*s;y=-s;z=b*s}else if(face===4){x=a*s;y=b*s;z=s}else{x=a*s;y=b*s;z=-s}}else{const t=u*Math.PI*10,r=0.4+u*1.3;x=r*Math.cos(t);y=(u-0.5)*3;z=r*Math.sin(t)}targetPos[i*3]=x;targetPos[i*3+1]=y;targetPos[i*3+2]=z}}
+let last=performance.now();
+function frame(now){const dt=Math.min(0.05,(now-last)/1000);last=now;rotY+=dt*0.2;points.rotation.y=rotY;if(mode==='vortex'){const spin=0.5+vortexStrength;for(let i=0;i<N;i++){let x=positions[i*3],y=positions[i*3+1],z=positions[i*3+2];const ang=spin*dt*0.8,c=Math.cos(ang),s=Math.sin(ang);positions[i*3]=x*c-z*s;positions[i*3+2]=x*s+z*c;positions[i*3+1]=y+Math.sin(i+now*0.001)*0.01*vortexStrength}}else if(mode==='crystal'){const k=1-Math.exp(-2*dt);for(let i=0;i<N;i++){positions[i*3]+=(targetPos[i*3]-positions[i*3])*k;positions[i*3+1]+=(targetPos[i*3+1]-positions[i*3+1])*k;positions[i*3+2]+=(targetPos[i*3+2]-positions[i*3+2])*k}}else{for(let i=0;i<N;i++){positions[i*3]=basePos[i*3]+Math.sin(now*0.0004+i)*0.03;positions[i*3+1]=basePos[i*3+1]+Math.cos(now*0.0005+i)*0.03;positions[i*3+2]=basePos[i*3+2]+Math.sin(now*0.0003+i)*0.03}}geo.attributes.position.needsUpdate=true;renderer.render(scene,camera);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-const qEl=document.getElementById('q'),go=document.getElementById('go'),ans=document.getElementById('ans'),bits=document.getElementById('bits'),entEl=document.getElementById('ent'),shapeEl=document.getElementById('shape'),srcEl=document.getElementById('src'),portal=document.getElementById('portal');
-let vortexTimer=0;qEl.addEventListener('input',()=>{const q=qEl.value;textHash=fnv1a(q||' ');const spec=core.encode(q||'idle');vortexStrength=0.4+Math.min(2.2,spec.entropy/3.2);mode='vortex';entEl.textContent='H = '+spec.entropy.toFixed(3)+' bit';entEl.classList.add('on');clearTimeout(vortexTimer);vortexTimer=setTimeout(()=>{if(mode==='vortex')mode='cloud'},2600)});
-go.addEventListener('click',async()=>{const q=qEl.value.trim()||'idle';go.disabled=true;portal.classList.remove('show');ensureAudio();const spec=core.encode(q);vortexStrength=0.5+Math.min(2.4,spec.entropy/3);mode='vortex';startHum(spec.entropy);entEl.textContent='H = '+spec.entropy.toFixed(3)+' bit';ans.textContent='…ищу ответ…';srcEl.textContent='src …';let payload;try{payload=await resolveAnswer(q)}catch(e){payload={source:'error',text:'Ошибка: '+(e&&e.message?e.message:e),cite:null}}haptic();stopHum(true);const col=core.collapse();const shape=shapeFromIndex(col.index);setShapeTargets(shape);mode='collapse';collapseT=0;shapeEl.textContent=shape;shapeEl.classList.add('on');srcEl.textContent=payload.source;srcEl.classList.add('on');const text=composeAnswer(q,col,shape,payload);typeWriter(ans,text,()=>{go.disabled=false;portal.href=portalFor(shape);portal.textContent='ВОЙТИ В КВАНТОВЫЙ КОНТУР · '+shape.toUpperCase();portal.classList.add('show')});bits.textContent='|'+col.bitstring+'⟩ · '+payload.source+' · '+shape;savePermit(col,shape,q,text)});
 </script>
 </body>
 </html>
