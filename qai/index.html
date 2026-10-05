@@ -3,151 +3,95 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Q-Mind v2.5 — Density Matrix LM</title>
+<title>Q-Mind v2.6 — Русский QI-учитель</title>
 <link rel="canonical" href="https://milana808.github.io/qai/"/>
 <meta name="theme-color" content="#05060a"/>
 <style>
-:root{--bg:#05060a;--p:#0c1018;--l:#1e2a3a;--t:#e8f0ff;--m:#8090a8;--a:#5eead4;--q:#c4b5fd;--b:#38bdf8;--ok:#34d399;--warn:#fbbf24}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 system-ui,sans-serif}
-.w{max-width:860px;margin:0 auto;padding:12px 12px 36px}
+:root{--bg:#05060a;--p:#0c1018;--l:#1e2a3a;--t:#e8f0ff;--m:#8a9bb0;--a:#5eead4;--q:#c4b5fd;--ok:#34d399}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}
+.w{max-width:720px;margin:0 auto;padding:14px 12px 40px}
 .tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--q)}
-h1{font-size:1.22rem;margin:4px 0;background:linear-gradient(90deg,var(--a),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{color:var(--m);font-size:12px;margin:0 0 10px}
-.grid{display:grid;gap:10px}@media(min-width:760px){.grid-2{grid-template-columns:1.15fr .85fr}}
-.box{background:var(--p);border:1px solid var(--l);border-radius:12px;padding:10px}
-#chat{height:260px;overflow:auto;display:flex;flex-direction:column;gap:6px}
-.msg{max-width:94%;padding:8px 11px;border-radius:10px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+h1{font-size:1.3rem;margin:6px 0 4px;background:linear-gradient(90deg,var(--a),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px}
+.box{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px}
+#chat{height:380px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:95%;padding:10px 12px;border-radius:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--l)}
-.msg.bot{align-self:flex-start;background:#0e1620;border:1px solid rgba(94,234,212,.22)}
-.msg .meta{font-size:10px;color:var(--m);margin-top:3px}
+.msg.bot{align-self:flex-start;background:#0e1620;border:1px solid rgba(94,234,212,.28)}
+.msg .meta{font-size:10px;color:var(--m);margin-top:5px}
 .row{display:flex;gap:8px;margin-top:8px}
-textarea{flex:1;min-height:44px;border-radius:8px;border:1px solid var(--l);background:#070a10;color:var(--t);padding:8px;font:inherit}
-button{border:0;border-radius:8px;padding:9px 12px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016}
+textarea{flex:1;min-height:56px;border-radius:10px;border:1px solid var(--l);background:#070a10;color:var(--t);padding:10px;font:inherit}
+button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016}
 button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
-.ex button{font-size:11px;padding:4px 8px;margin:2px;background:#121a26;color:var(--t);border:1px solid var(--l);border-radius:7px}
-.chips span{display:inline-block;font-size:10px;padding:2px 7px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 3px 0 0}
+.ex button{font-size:12px;padding:6px 10px;margin:2px;background:#121a26;color:var(--t);border:1px solid var(--l);border-radius:8px}
+.chips span{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 0 0}
 .chips span.on{border-color:var(--a);color:var(--a)}
-.chips span.warn{border-color:var(--warn);color:var(--warn)}
-canvas.heat{width:100%;height:160px;border-radius:8px;background:#06080e;border:1px solid var(--l)}
-.log{font:10px/1.35 ui-monospace,monospace;color:var(--m);max-height:110px;overflow:auto;white-space:pre-wrap}
-.log .ok{color:var(--ok)}.log .q{color:var(--q)}.log .info{color:var(--b)}
-footer{font-size:11px;color:var(--m);margin-top:10px}footer a{color:var(--a);margin-right:8px}
-label{font-size:10px;color:var(--m)}input[type=range]{width:100%}
+canvas{width:100%;height:44px;margin-top:8px;border-radius:8px;background:#06080e;border:1px solid var(--l)}
+footer{font-size:12px;color:var(--m);margin-top:12px}footer a{color:var(--a);margin-right:8px}
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="tag">AKSI · Q-Mind v2.5 · Density Matrix LM</div>
-  <h1>ρ-память · ⟨Q|ρ|ψ⟩ · Collapse</h1>
-  <p class="lead">ρ←α·ρ+(1−α)|ψ⟩⟨ψ| · P(t)=⟨Q|ρ|ψ_t⟩ · p∝|P|² · O(D²)/token · offline</p>
-  <div class="grid grid-2">
-    <div class="box">
-      <div class="chips"><span class="on" id="cD">D</span><span class="on" id="cV">V</span><span id="cPur">Tr(ρ²)=—</span><span id="cTurn">turns:0</span></div>
-      <div id="chat"></div>
-      <div class="row"><textarea id="inp" placeholder="Вопрос…"></textarea><button type="button" id="go">Коллапс</button></div>
-      <div class="ex">
-        <button type="button" data-q="привет">привет</button>
-        <button type="button" data-q="кто ты?">кто ты</button>
-        <button type="button" data-q="что такое кубит?">кубит</button>
-        <button type="button" data-q="что такое матрица плотности?">ρ</button>
-        <button type="button" data-q="объясни суперпозицию">суперпозиция</button>
-        <button type="button" data-q="что такое алгоритм Гровера?">Гровер</button>
-        <button type="button" class="sec" id="clr">сброс ρ</button>
-      </div>
-      <div style="margin-top:8px"><label>α forget <span id="aVal">0.85</span></label><input type="range" id="alpha" min="50" max="98" value="85"/></div>
-    </div>
-    <div class="box">
-      <div class="tag">Heatmap |ρ_ij| · Receipts</div>
-      <canvas class="heat" id="heat" width="280" height="160"></canvas>
-      <div class="log" id="log"></div>
+  <div class="tag">AKSI · Q-Mind v2.6</div>
+  <h1>Ответы на нормальном русском</h1>
+  <p class="lead">Связные предложения по квантовой информатике. Без каши из случайных слов.</p>
+  <div class="box">
+    <div class="chips"><span class="on">RU</span><span id="cT">turns:0</span><span id="cP">Tr(ρ²)=—</span></div>
+    <div id="chat"></div>
+    <canvas id="cv" width="640" height="44"></canvas>
+    <div class="row"><textarea id="inp" placeholder="Что такое кубит?"></textarea><button type="button" id="go">Ответить</button></div>
+    <div class="ex">
+      <button type="button" data-q="привет">привет</button>
+      <button type="button" data-q="кто ты?">кто ты</button>
+      <button type="button" data-q="что такое кубит?">кубит</button>
+      <button type="button" data-q="что такое суперпозиция?">суперпозиция</button>
+      <button type="button" data-q="что такое запутанность?">запутанность</button>
+      <button type="button" data-q="объясни алгоритм Гровера">Гровер</button>
+      <button type="button" data-q="что такое матрица плотности?">ρ</button>
+      <button type="button" data-q="как ты работаешь?">как работаешь</button>
+      <button type="button" class="sec" id="clr">сброс</button>
     </div>
   </div>
-  <footer><a href="/">home</a><a href="/math/">math</a><a href="/permit/">permit</a></footer>
+  <footer><a href="/">home</a><a href="/generate/">generate</a><a href="/math/">math</a></footer>
 </div>
-<script src="/qai/qm25-data.js"></script>
+<script src="/qai/qm26-data.js"></script>
 <script>
 (function(){
 "use strict";
-if(!window.QM25_V){document.getElementById("chat").textContent="Load qm25-data.js";return;}
-var VOCAB=window.QM25_V,TEACH=window.QM25_TEACH,MAP=window.QM25_MAP;
-var D=VOCAB[0].re.length,byTok=Object.create(null);
-for(var i=0;i<VOCAB.length;i++)byTok[VOCAB[i].t]=VOCAB[i];
-document.getElementById("cD").textContent="D="+D;
-document.getElementById("cV").textContent="V="+VOCAB.length;
-function zerosRho(){return{re:new Float64Array(D*D),im:new Float64Array(D*D)};}
-function pureProjector(psi){
-  var rho=zerosRho();
-  for(var i=0;i<D;i++)for(var j=0;j<D;j++){
-    var idx=i*D+j;
-    rho.re[idx]=psi.re[i]*psi.re[j]+psi.im[i]*psi.im[j];
-    rho.im[idx]=psi.im[i]*psi.re[j]-psi.re[i]*psi.im[j];
-  }
-  return rho;
-}
-function mixRho(rho,proj,alpha){var b=1-alpha;for(var k=0;k<D*D;k++){rho.re[k]=alpha*rho.re[k]+b*proj.re[k];rho.im[k]=alpha*rho.im[k]+b*proj.im[k];}}
-function purity(rho){var s=0;for(var i=0;i<D;i++)for(var j=0;j<D;j++){var a=i*D+j,b=j*D+i;s+=rho.re[a]*rho.re[b]-rho.im[a]*rho.im[b];}return s;}
-function applyRho(rho,psi){var out={re:new Float64Array(D),im:new Float64Array(D)};
-  for(var i=0;i<D;i++){var sr=0,si=0;for(var j=0;j<D;j++){var idx=i*D+j;sr+=rho.re[idx]*psi.re[j]-rho.im[idx]*psi.im[j];si+=rho.re[idx]*psi.im[j]+rho.im[idx]*psi.re[j];}out.re[i]=sr;out.im[i]=si;}return out;}
-function braket(a,b){var re=0,im=0;for(var i=0;i<D;i++){re+=a.re[i]*b.re[i]+a.im[i]*b.im[i];im+=a.re[i]*b.im[i]-a.im[i]*b.re[i];}return{re:re,im:im};}
-function cAbs2(z){return z.re*z.re+z.im*z.im;}
-function normPsi(psi){var s=0,i;for(i=0;i<D;i++)s+=psi.re[i]*psi.re[i]+psi.im[i]*psi.im[i];s=Math.sqrt(s)||1;for(i=0;i<D;i++){psi.re[i]/=s;psi.im[i]/=s;}return psi;}
-function fromTok(t){var e=byTok[t];return e?{re:Float64Array.from(e.re),im:Float64Array.from(e.im)}:null;}
-function phaseRotate(psi,phi){var c=Math.cos(phi),s=Math.sin(phi);for(var i=0;i<D;i++){var r=psi.re[i],im=psi.im[i];psi.re[i]=r*c-im*s;psi.im[i]=r*s+im*c;}}
-function tokenize(text){var s=String(text||"").toLowerCase().replace(/[?!.,;:«»"']/g," ").replace(/\s+/g," ").trim();if(!s)return[];
-  var raw=s.split(" "),out=[];for(var i=0;i<raw.length;i++){var w=raw[i];if(byTok[w]){out.push(w);continue;}
-    var hit=null,best=0;for(var t in byTok){if(w.indexOf(t)===0&&t.length>=3&&t.length>best){hit=t;best=t.length;}
-      else if(t.indexOf(w)===0&&w.length>=3&&w.length>best){hit=t;best=w.length;}}if(hit)out.push(hit);}return out;}
-function encodePhrase(tokens){var acc={re:new Float64Array(D),im:new Float64Array(D)};
-  if(!tokens.length){for(var i=0;i<D;i++)acc.re[i]=1/Math.sqrt(D);return acc;}
-  for(var i=0;i<tokens.length;i++){var v=fromTok(tokens[i]);if(!v)continue;v={re:Float64Array.from(v.re),im:Float64Array.from(v.im)};phaseRotate(v,i*0.28);
-    for(var k=0;k<D;k++){acc.re[k]+=v.re[k];acc.im[k]+=v.im[k];}}return normPsi(acc);}
-function DensityMemory(alpha){this.alpha=alpha==null?0.85:alpha;this.rho=zerosRho();this.rho.re[0]=1;this.turns=0;}
-DensityMemory.prototype.update=function(psi){mixRho(this.rho,pureProjector(psi),this.alpha);this.turns++;};
-DensityMemory.prototype.purity=function(){return purity(this.rho);};
-function scoreVocab(Q,rho){var scores=new Float64Array(VOCAB.length);
-  for(var k=0;k<VOCAB.length;k++){var psi=fromTok(VOCAB[k].t);var rpsi=applyRho(rho,psi);scores[k]=cAbs2(braket(Q,rpsi));}return scores;}
-function sampleToken(scores,temperature){temperature=temperature||0.7;
-  var idx=[];for(var i=0;i<scores.length;i++)idx.push(i);idx.sort(function(a,b){return scores[b]-scores[a];});idx=idx.slice(0,18);
-  var max=scores[idx[0]]||1e-15,probs=[],sum=0;
-  for(var i=0;i<idx.length;i++){var p=Math.exp((Math.log(scores[idx[i]]+1e-15)-Math.log(max+1e-15))/temperature);probs.push(p);sum+=p;}
-  var r=Math.random()*sum,acc=0,pick=idx[0];for(var i=0;i<idx.length;i++){acc+=probs[i];if(r<=acc){pick=idx[i];break;}}
-  return{token:VOCAB[pick].t,score:scores[pick]};}
-function generateTokens(Q,mem,n,logFn){n=n||12;var out=[],q={re:Float64Array.from(Q.re),im:Float64Array.from(Q.im)};
-  for(var t=0;t<n;t++){var sc=scoreVocab(q,mem.rho);
-    for(var i=0;i<out.length;i++)for(var k=0;k<VOCAB.length;k++)if(VOCAB[k].t===out[i])sc[k]*=0.12;
-    var samp=sampleToken(sc,0.65+0.1*Math.random());out.push(samp.token);
-    if(logFn&&t<5){var order=[];for(var k=0;k<sc.length;k++)order.push(k);order.sort(function(a,b){return sc[b]-sc[a];});
-      logFn("[collapse t="+t+"] «"+samp.token+"» top "+order.slice(0,3).map(function(i){return VOCAB[i].t;}).join(","),"q");}
-    var psi=fromTok(samp.token);if(psi){mem.update(psi);for(var i=0;i<D;i++){q.re[i]=0.55*q.re[i]+0.45*psi.re[i];q.im[i]=0.55*q.im[i]+0.45*psi.im[i];}normPsi(q);}
-    if(t>=5&&(samp.token==="пока"||samp.token==="готов"))break;}return out;}
-function findTeach(text){var s=String(text).toLowerCase();for(var i=0;i<MAP.length;i++){try{if(new RegExp(MAP[i][0],"i").test(s))return TEACH[MAP[i][1]];}catch(e){}}return null;}
-var mem=new DensityMemory(0.85);
-var chat=document.getElementById("chat"),logEl=document.getElementById("log"),inp=document.getElementById("inp");
-var heat=document.getElementById("heat"),hctx=heat.getContext("2d");
-function log(m,c){var d=document.createElement("div");if(c)d.className=c;d.textContent=m;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
-function addMsg(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function drawHeat(){var rho=mem.rho,w=heat.width,h=heat.height;hctx.clearRect(0,0,w,h);var cell=Math.min(w,h)/D,max=1e-12;
-  for(var i=0;i<D*D;i++){var a=Math.sqrt(rho.re[i]*rho.re[i]+rho.im[i]*rho.im[i]);if(a>max)max=a;}
-  for(var i=0;i<D;i++)for(var j=0;j<D;j++){var idx=i*D+j,a=Math.sqrt(rho.re[idx]*rho.re[idx]+rho.im[idx]*rho.im[idx])/max;
-    hctx.fillStyle="rgb("+Math.floor(30+a*90)+","+Math.floor(40+a*180)+","+Math.floor(80+a*140)+")";
-    hctx.fillRect(j*cell,i*cell,cell+0.5,cell+0.5);}}
-function updatePur(){var p=mem.purity();var el=document.getElementById("cPur");el.textContent="Tr(ρ²)="+p.toFixed(3);el.className=p>0.7?"on":(p<0.25?"warn":"");}
-document.getElementById("alpha").oninput=function(){var v=(+this.value)/100;document.getElementById("aVal").textContent=v.toFixed(2);mem.alpha=v;};
-function ask(){var text=(inp.value||"").trim();if(!text)return;inp.value="";logEl.textContent="";addMsg("user",text);
-  var tokens=tokenize(text),Q=encodePhrase(tokens.length?tokens:["вопрос"]);
-  log("[A] ["+tokens.join(", ")+"] → |Q⟩","info");mem.update(Q);updatePur();document.getElementById("cTurn").textContent="turns:"+mem.turns;drawHeat();
-  var lesson=findTeach(text),t0=performance.now();
-  var gen=generateTokens(Q,mem,lesson?3:12,log);var ms=Math.round(performance.now()-t0);updatePur();drawHeat();
-  var answer=lesson||(gen.join(" "));if(!lesson&&answer.length)answer=answer.charAt(0).toUpperCase()+answer.slice(1);
-  if(!lesson&&!gen.length)answer="Нет устойчивого резонанса. Спроси про кубит / ρ / Гровера.";
-  if(lesson)log("[Teach] card","ok");
-  addMsg("bot",answer,"ρ-LM · "+ms+"ms · purity "+mem.purity().toFixed(3));}
+if(!window.QM_KB){document.getElementById("chat").textContent="Нет базы знаний";return;}
+var KB=window.QM_KB,PH=window.QM_PH||[],V=window.QM_V||[{t:"я",re:[1,0,0,0,0,0,0,0,0,0,0,0],im:[0,0,0,0,0,0,0,0,0,0,0,0]}];
+var D=V[0].re.length;
+var by={};for(var i=0;i<V.length;i++)by[V[i].t]=V[i];
+function psi(t){var e=by[t];return e?{re:Float64Array.from(e.re),im:Float64Array.from(e.im)}:null;}
+function norm(p){var s=0,i;for(i=0;i<D;i++)s+=p.re[i]*p.re[i]+p.im[i]*p.im[i];s=Math.sqrt(s)||1;for(i=0;i<D;i++){p.re[i]/=s;p.im[i]/=s;}return p;}
+function tok(text){var s=String(text||"").toLowerCase().replace(/[?!.,;:«»"']/g," ").replace(/\s+/g," ").trim();if(!s)return[];
+  var r=s.split(" "),o=[];for(var i=0;i<r.length;i++){if(by[r[i]])o.push(r[i]);
+    else{for(var t in by){if(r[i].indexOf(t)===0&&t.length>=3){o.push(t);break;}}}}return o;}
+function enc(tokens){var a={re:new Float64Array(D),im:new Float64Array(D)};if(!tokens.length){for(var i=0;i<D;i++)a.re[i]=1/Math.sqrt(D);return a;}
+  for(var i=0;i<tokens.length;i++){var v=psi(tokens[i]);if(!v)continue;for(var k=0;k<D;k++){a.re[k]+=v.re[k];a.im[k]+=v.im[k];}}return norm(a);}
+function zR(){return{re:new Float64Array(D*D),im:new Float64Array(D*D)};}
+function proj(p){var r=zR();for(var i=0;i<D;i++)for(var j=0;j<D;j++){var id=i*D+j;r.re[id]=p.re[i]*p.re[j]+p.im[i]*p.im[j];r.im[id]=p.im[i]*p.re[j]-p.re[i]*p.im[j];}return r;}
+function mix(rho,pr,a){var b=1-a;for(var k=0;k<D*D;k++){rho.re[k]=a*rho.re[k]+b*pr.re[k];rho.im[k]=a*rho.im[k]+b*pr.im[k];}}
+function pur(rho){var s=0;for(var i=0;i<D;i++)for(var j=0;j<D;j++){var a=i*D+j,b=j*D+i;s+=rho.re[a]*rho.re[b]-rho.im[a]*rho.im[b];}return s;}
+function Mem(){this.rho=zR();this.rho.re[0]=1;this.turns=0;this.a=0.88;}
+Mem.prototype.up=function(p){mix(this.rho,proj(p),this.a);this.turns++;};
+function find(text){var s=String(text).toLowerCase();for(var i=0;i<KB.length;i++){try{if(new RegExp(KB[i][0],"i").test(s))return KB[i][1];}catch(e){}}return null;}
+var mem=new Mem(),chat=document.getElementById("chat"),inp=document.getElementById("inp"),cv=document.getElementById("cv"),ctx=cv.getContext("2d");
+function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+function draw(){var w=cv.width,h=cv.height;ctx.clearRect(0,0,w,h);var bw=w/D;for(var i=0;i<D;i++){var a=0;for(var j=0;j<D;j++){var id=i*D+j;a+=Math.sqrt(mem.rho.re[id]*mem.rho.re[id]+mem.rho.im[id]*mem.rho.im[id]);}a=a/D;var bar=Math.min(h-2,a*(h-2)*4);ctx.fillStyle="#5eead4";ctx.fillRect(i*bw+1,h-bar,Math.max(bw-2,1),bar);}}
+function upd(){document.getElementById("cT").textContent="turns:"+mem.turns;document.getElementById("cP").textContent="Tr(ρ²)="+pur(mem.rho).toFixed(3);document.getElementById("cP").className="on";}
+function ask(){var text=(inp.value||"").trim();if(!text)return;inp.value="";add("user",text);
+  var Q=enc(tok(text));mem.up(Q);upd();draw();
+  var ans=find(text);
+  if(ans){mem.up(enc(tok(ans)));add("bot",ans,"русский ответ · turn "+mem.turns);}
+  else{var fb=(PH[Math.floor(Math.random()*PH.length)]||"Уточни вопрос: что такое кубит?");add("bot",fb,"уточни вопрос · turn "+mem.turns);}
+  upd();draw();}
 document.getElementById("go").onclick=ask;
 inp.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask();}});
 document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){inp.value=b.getAttribute("data-q");ask();};});
-document.getElementById("clr").onclick=function(){mem=new DensityMemory((+document.getElementById("alpha").value)/100);chat.innerHTML="";logEl.textContent="";document.getElementById("cTurn").textContent="turns:0";updatePur();drawHeat();addMsg("bot","ρ → |0⟩⟨0|.","system");};
-updatePur();drawHeat();
-addMsg("bot","Q-Mind v2.5 — density-matrix LM.\nПамять ρ (D×D), внимание ⟨Q|ρ|ψ⟩, коллапс. Спроси кубит / ρ / Гровер.","system");
+document.getElementById("clr").onclick=function(){mem=new Mem();chat.innerHTML="";upd();draw();add("bot","Память сброшена. Спроси по-русски.","system");};
+upd();draw();
+add("bot","Привет. Пиши по-русски — отвечу нормальными предложениями.\nПример: «что такое кубит?», «что такое суперпозиция?», «как ты работаешь?»","system");
 })();
 </script>
 </body>
