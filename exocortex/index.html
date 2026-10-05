@@ -1,1 +1,116 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/"><title>АКСИ</title></head><body><p><a href="/">На главную</a></p></body></html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Цифровой Экзокортекс</title>
+<link rel="canonical" href="https://milana808.github.io/exocortex/"/>
+<meta name="description" content="Математически доказуемый цифровой Экзокортекс: человек + агент + квантовый сид + Permit + ECDSA-чеки."/>
+<meta name="theme-color" content="#07090f"/>
+<style>
+:root{--bg:#07090f;--p:#0e1219;--l:#1c2433;--t:#eef2ff;--m:#9aa6b8;--a:#5eead4;--q:#a78bfa;--ok:#34d399;--bad:#f87171}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.45 system-ui,-apple-system,sans-serif}
+.w{max-width:860px;margin:0 auto;padding:14px 12px 48px}
+h1{font-size:1.35rem;margin:0 0 4px;background:linear-gradient(90deg,var(--a),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px;max-width:70ch}
+.panel{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px;margin-bottom:10px}
+.panel h2{margin:0 0 8px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--a)}
+.chips span{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 3px 0 0}
+.chips span.on{border-color:var(--ok);color:var(--ok)}
+.chips span.bad{border-color:var(--bad);color:var(--bad)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+textarea,input,select{width:100%;border-radius:10px;border:1px solid var(--l);background:#080b11;color:var(--t);padding:10px;font:inherit}
+textarea{min-height:64px}
+button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016;margin:6px 6px 0 0}
+button.g{background:transparent;border:1px solid var(--l);color:var(--t)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#log{height:min(36vh,300px);overflow:auto;font:12px/1.4 ui-monospace,monospace;color:var(--m);background:#080b11;border-radius:10px;padding:10px;border:1px solid var(--l);white-space:pre-wrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.metric{font:12px ui-monospace,monospace;color:var(--m);line-height:1.5}
+footer{margin-top:14px;font-size:12px;color:var(--m)}footer a{color:var(--a);margin-right:8px}
+.note{font-size:12px;color:var(--m);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>АКСИ · Цифровой Экзокортекс</h1>
+  <p class="lead">Единая среда: человеческий опыт → вектор S · агент через Permit · квантовый коллапс · ECDSA-чеки. Не AGI — доказуемый контур.</p>
+  <div class="panel">
+    <h2>Инварианты (доказуемо)</h2>
+    <div class="chips">
+      <span id="cKeys">ключи: —</span>
+      <span id="cNorm">‖S‖: —</span>
+      <span id="cSteps">шаги: 0</span>
+      <span id="cRec">чеки: 0</span>
+      <span id="cChain">цепь: —</span>
+    </div>
+    <div class="metric" id="snap">—</div>
+    <p class="note">‖S‖→1 · Σp=1 у квантового состояния · ALLOW/BLOCK подписан ECDSA P-256 · prev→id цепочка</p>
+  </div>
+  <div class="grid">
+    <div class="panel">
+      <h2>1. Человек → опыт</h2>
+      <textarea id="obs" placeholder="Наблюдение / опыт / факт…"></textarea>
+      <div class="row"><button type="button" id="btnObs">Вписать в S</button></div>
+    </div>
+    <div class="panel">
+      <h2>2. Цель агента</h2>
+      <input id="goal" placeholder="Цель: например, подготовить отчёт по Permit"/>
+      <div class="row"><button type="button" id="btnGoal">Задать цель</button></div>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>3. Шаг агента (Permit + Quantum + Receipt)</h2>
+    <div class="row">
+      <select id="act">
+        <option value="plan">plan</option>
+        <option value="recall">recall</option>
+        <option value="report">report</option>
+        <option value="quantum_seed">quantum_seed</option>
+        <option value="observe">observe</option>
+        <option value="spend">spend (должно BLOCK)</option>
+        <option value="delete_all">delete_all (должно BLOCK)</option>
+      </select>
+    </div>
+    <textarea id="payload" placeholder="Предложение агента / payload…"></textarea>
+    <div class="row">
+      <button type="button" id="btnStep">Выполнить шаг</button>
+      <button type="button" class="g" id="btnVerify">Проверить цепочку</button>
+      <button type="button" class="g" id="btnExport">Экспорт JSON</button>
+    </div>
+  </div>
+  <div class="panel">
+    <h2>Журнал</h2>
+    <div id="log"></div>
+  </div>
+  <footer>
+    <a href="/">home</a>
+    <a href="/permit/">Permit</a>
+    <a href="/runtime/">Runtime</a>
+    <a href="/authority/">Authority</a>
+    <a href="/qai/">Quantum AI</a>
+    · aksilove@internet.ru
+  </footer>
+</div>
+<script src="/aksi-exocortex.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+var X=window.AKSI_EXOCORTEX,exo=null,logEl=document.getElementById("log");
+function log(msg,cls){var line=document.createElement("div");if(cls)line.className=cls;line.textContent="["+new Date().toISOString().slice(11,19)+"] "+msg;logEl.appendChild(line);logEl.scrollTop=logEl.scrollHeight;}
+function chip(id,t,cls){var el=document.getElementById(id);el.textContent=t;el.className=cls||"";}
+function paint(){if(!exo)return;var sn=exo.snapshot();chip("cNorm","‖S‖: "+sn.normS.toFixed(6),Math.abs(sn.normS-1)<1e-6?"on":"bad");chip("cSteps","шаги: "+sn.steps,"");chip("cRec","чеки: "+sn.receipts,"");document.getElementById("snap").textContent="goal: "+(sn.goal?sn.goal.slice(0,80):"—")+" · S[0..7]="+JSON.stringify(sn.S_preview);}
+async function boot(){if(!X){log("Ядро не загрузилось","bad");return;}exo=new X.Exocortex();var pub=await exo.initKeys();chip("cKeys","ECDSA P-256","on");log("Экзокортекс v"+X.version+" · ключи готовы","ok");log("pub.x="+(pub.jwk.x||"").slice(0,16)+"…","");paint();}
+document.getElementById("btnObs").onclick=function(){var t=document.getElementById("obs").value.trim();if(!t||!exo)return;var ev=exo.observe(t);document.getElementById("obs").value="";log("OBSERVE resonance="+ev.resonance.toFixed(4)+" S_hash="+ev.S_hash,"ok");paint();};
+document.getElementById("btnGoal").onclick=function(){var t=document.getElementById("goal").value.trim();if(!t||!exo)return;exo.setGoal(t);log("GOAL: "+t.slice(0,120),"ok");paint();};
+document.getElementById("btnStep").onclick=async function(){if(!exo)return;var action=document.getElementById("act").value;var payload=document.getElementById("payload").value.trim()||action;var res=await exo.step(action,payload);var q=res.quantum;
+log(res.status+" action="+action+" |ψ⟩→|"+q.bits+"⟩ S≈"+q.entropy.toFixed(3)+" Σp="+q.sumP.toFixed(6)+" id="+res.receipt.id.slice(0,12)+"…",res.status==="ALLOW"?"ok":"bad");
+log("  permit: "+res.permit.reason+" sig="+res.receipt.signature.slice(0,16)+"…","");paint();};
+document.getElementById("btnVerify").onclick=async function(){if(!exo)return;var v=await exo.verifyChain();chip("cChain",v.ok?"цепь: VALID":"цепь: FAIL",v.ok?"on":"bad");log("VERIFY: "+(v.ok?"ALL OK":"FAIL")+" · n="+v.count,v.ok?"ok":"bad");};
+document.getElementById("btnExport").onclick=function(){if(!exo)return;var data=JSON.stringify(exo.exportJSON(),null,2);var blob=new Blob([data],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-exocortex-"+Date.now()+".json";a.click();log("EXPORT "+data.length+" bytes","ok");};
+boot();
+})();
+</script>
+</body>
+</html>
