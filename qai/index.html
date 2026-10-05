@@ -3,95 +3,115 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Q-Mind v2.6 — Русский QI-учитель</title>
+<title>АКСИ · Quantum AI — симулятор → ответ</title>
 <link rel="canonical" href="https://milana808.github.io/qai/"/>
-<meta name="theme-color" content="#05060a"/>
+<meta name="description" content="Квантово-симулированный ИИ АКСИ: суперпозиция, запутывание, коллапс → ответ. Offline."/>
+<meta name="theme-color" content="#07090f"/>
 <style>
-:root{--bg:#05060a;--p:#0c1018;--l:#1e2a3a;--t:#e8f0ff;--m:#8a9bb0;--a:#5eead4;--q:#c4b5fd;--ok:#34d399}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}
-.w{max-width:720px;margin:0 auto;padding:14px 12px 40px}
+:root{--bg:#07090f;--p:#0e1219;--l:#1c2433;--t:#e8eef8;--m:#8b97ab;--a:#5eead4;--q:#a78bfa;--b:#38bdf8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.45 system-ui,sans-serif;min-height:100vh}
+.w{max-width:780px;margin:0 auto;padding:14px 12px 40px}
 .tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--q)}
-h1{font-size:1.3rem;margin:6px 0 4px;background:linear-gradient(90deg,var(--a),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{color:var(--m);font-size:13px;margin:0 0 12px}
-.box{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px}
-#chat{height:380px;overflow:auto;display:flex;flex-direction:column;gap:8px}
-.msg{max-width:95%;padding:10px 12px;border-radius:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-.msg.user{align-self:flex-end;background:#152033;border:1px solid var(--l)}
-.msg.bot{align-self:flex-start;background:#0e1620;border:1px solid rgba(94,234,212,.28)}
-.msg .meta{font-size:10px;color:var(--m);margin-top:5px}
-.row{display:flex;gap:8px;margin-top:8px}
-textarea{flex:1;min-height:56px;border-radius:10px;border:1px solid var(--l);background:#070a10;color:var(--t);padding:10px;font:inherit}
-button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016}
-button.sec{background:transparent;border:1px solid var(--l);color:var(--t)}
-.ex button{font-size:12px;padding:6px 10px;margin:2px;background:#121a26;color:var(--t);border:1px solid var(--l);border-radius:8px}
-.chips span{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 4px 0 0}
+h1{font-size:1.35rem;margin:6px 0 4px;background:linear-gradient(90deg,var(--a),var(--q),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px;max-width:62ch}
+.panel{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips span{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--l);color:var(--m)}
 .chips span.on{border-color:var(--a);color:var(--a)}
-canvas{width:100%;height:44px;margin-top:8px;border-radius:8px;background:#06080e;border:1px solid var(--l)}
-footer{font-size:12px;color:var(--m);margin-top:12px}footer a{color:var(--a);margin-right:8px}
+#amps{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;height:72px;align-items:end;margin:8px 0}
+#amps i{display:block;background:linear-gradient(180deg,var(--q),var(--a));border-radius:3px 3px 0 0;min-height:2px;transition:height .15s}
+.meta{font:12px ui-monospace,monospace;color:var(--m);line-height:1.5}
+#log{height:min(42vh,340px);overflow:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word}
+.msg.u{align-self:flex-end;background:#152033;border:1px solid var(--l)}
+.msg.b{align-self:flex-start;background:#0c1420;border:1px solid rgba(94,234,212,.25)}
+.msg .s{font-size:10px;color:var(--m);margin-top:5px}
+textarea{width:100%;min-height:52px;border-radius:10px;border:1px solid var(--l);background:#080b11;color:var(--t);padding:10px;font:inherit;margin-top:8px}
+button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016;margin:6px 6px 0 0}
+button.g{background:transparent;border:1px solid var(--l);color:var(--t)}
+.ex button{font-size:12px;padding:6px 10px;background:#121a26;color:var(--t);border:1px solid var(--l);border-radius:8px;font-weight:500}
+footer{margin-top:14px;font-size:12px;color:var(--m)}footer a{color:var(--a);margin-right:8px;text-decoration:none}
+.note{font-size:12px;color:var(--m);margin-top:8px;line-height:1.4}
 </style>
 </head>
 <body>
 <div class="w">
-  <div class="tag">AKSI · Q-Mind v2.6</div>
-  <h1>Ответы на нормальном русском</h1>
-  <p class="lead">Связные предложения по квантовой информатике. Без каши из случайных слов.</p>
-  <div class="box">
-    <div class="chips"><span class="on">RU</span><span id="cT">turns:0</span><span id="cP">Tr(ρ²)=—</span></div>
-    <div id="chat"></div>
-    <canvas id="cv" width="640" height="44"></canvas>
-    <div class="row"><textarea id="inp" placeholder="Что такое кубит?"></textarea><button type="button" id="go">Ответить</button></div>
-    <div class="ex">
-      <button type="button" data-q="привет">привет</button>
+  <div class="tag">AKSI Quantum AI · simulator runtime</div>
+  <h1>Квантовый симулятор → ответ</h1>
+  <p class="lead">Вопрос → суперпозиция → запутывание → коллапс → текст. Statevector в браузере (не QPU IBM/Google).</p>
+  <div class="panel">
+    <div class="chips row">
+      <span class="on">n=6 · 64 состояния</span>
+      <span id="cEnt">S≈—</span>
+      <span id="cCol">коллапс: —</span>
+    </div>
+    <div id="amps"></div>
+    <div class="meta" id="trace">Ожидание запроса…</div>
+  </div>
+  <div class="panel">
+    <div id="log"></div>
+    <textarea id="q" placeholder="Спроси (по-русски)…"></textarea>
+    <div class="row">
+      <button type="button" id="go">Коллапс → ответ</button>
+      <button type="button" class="g" id="clr">Сброс</button>
+    </div>
+    <div class="ex row">
       <button type="button" data-q="кто ты?">кто ты</button>
-      <button type="button" data-q="что такое кубит?">кубит</button>
       <button type="button" data-q="что такое суперпозиция?">суперпозиция</button>
+      <button type="button" data-q="как работает этот квантовый ИИ?">как работает</button>
       <button type="button" data-q="что такое запутанность?">запутанность</button>
       <button type="button" data-q="объясни алгоритм Гровера">Гровер</button>
-      <button type="button" data-q="что такое матрица плотности?">ρ</button>
-      <button type="button" data-q="как ты работаешь?">как работаешь</button>
-      <button type="button" class="sec" id="clr">сброс</button>
     </div>
+    <p class="note">hash(вопрос)→RY/RZ→H→CNOT→энтропия→collapse→ответ. Offline.</p>
   </div>
-  <footer><a href="/">home</a><a href="/generate/">generate</a><a href="/math/">math</a></footer>
+  <footer><a href="/">home</a><a href="/llm/">чат+WebLLM</a><a href="/runtime/">runtime</a> · симулятор, не QPU</footer>
 </div>
-<script src="/qai/qm26-data.js"></script>
 <script>
 (function(){
 "use strict";
-if(!window.QM_KB){document.getElementById("chat").textContent="Нет базы знаний";return;}
-var KB=window.QM_KB,PH=window.QM_PH||[],V=window.QM_V||[{t:"я",re:[1,0,0,0,0,0,0,0,0,0,0,0],im:[0,0,0,0,0,0,0,0,0,0,0,0]}];
-var D=V[0].re.length;
-var by={};for(var i=0;i<V.length;i++)by[V[i].t]=V[i];
-function psi(t){var e=by[t];return e?{re:Float64Array.from(e.re),im:Float64Array.from(e.im)}:null;}
-function norm(p){var s=0,i;for(i=0;i<D;i++)s+=p.re[i]*p.re[i]+p.im[i]*p.im[i];s=Math.sqrt(s)||1;for(i=0;i<D;i++){p.re[i]/=s;p.im[i]/=s;}return p;}
-function tok(text){var s=String(text||"").toLowerCase().replace(/[?!.,;:«»"']/g," ").replace(/\s+/g," ").trim();if(!s)return[];
-  var r=s.split(" "),o=[];for(var i=0;i<r.length;i++){if(by[r[i]])o.push(r[i]);
-    else{for(var t in by){if(r[i].indexOf(t)===0&&t.length>=3){o.push(t);break;}}}}return o;}
-function enc(tokens){var a={re:new Float64Array(D),im:new Float64Array(D)};if(!tokens.length){for(var i=0;i<D;i++)a.re[i]=1/Math.sqrt(D);return a;}
-  for(var i=0;i<tokens.length;i++){var v=psi(tokens[i]);if(!v)continue;for(var k=0;k<D;k++){a.re[k]+=v.re[k];a.im[k]+=v.im[k];}}return norm(a);}
-function zR(){return{re:new Float64Array(D*D),im:new Float64Array(D*D)};}
-function proj(p){var r=zR();for(var i=0;i<D;i++)for(var j=0;j<D;j++){var id=i*D+j;r.re[id]=p.re[i]*p.re[j]+p.im[i]*p.im[j];r.im[id]=p.im[i]*p.re[j]-p.re[i]*p.im[j];}return r;}
-function mix(rho,pr,a){var b=1-a;for(var k=0;k<D*D;k++){rho.re[k]=a*rho.re[k]+b*pr.re[k];rho.im[k]=a*rho.im[k]+b*pr.im[k];}}
-function pur(rho){var s=0;for(var i=0;i<D;i++)for(var j=0;j<D;j++){var a=i*D+j,b=j*D+i;s+=rho.re[a]*rho.re[b]-rho.im[a]*rho.im[b];}return s;}
-function Mem(){this.rho=zR();this.rho.re[0]=1;this.turns=0;this.a=0.88;}
-Mem.prototype.up=function(p){mix(this.rho,proj(p),this.a);this.turns++;};
-function find(text){var s=String(text).toLowerCase();for(var i=0;i<KB.length;i++){try{if(new RegExp(KB[i][0],"i").test(s))return KB[i][1];}catch(e){}}return null;}
-var mem=new Mem(),chat=document.getElementById("chat"),inp=document.getElementById("inp"),cv=document.getElementById("cv"),ctx=cv.getContext("2d");
-function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.textContent=text;if(meta){var m=document.createElement("div");m.className="meta";m.textContent=meta;d.appendChild(m);}chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
-function draw(){var w=cv.width,h=cv.height;ctx.clearRect(0,0,w,h);var bw=w/D;for(var i=0;i<D;i++){var a=0;for(var j=0;j<D;j++){var id=i*D+j;a+=Math.sqrt(mem.rho.re[id]*mem.rho.re[id]+mem.rho.im[id]*mem.rho.im[id]);}a=a/D;var bar=Math.min(h-2,a*(h-2)*4);ctx.fillStyle="#5eead4";ctx.fillRect(i*bw+1,h-bar,Math.max(bw-2,1),bar);}}
-function upd(){document.getElementById("cT").textContent="turns:"+mem.turns;document.getElementById("cP").textContent="Tr(ρ²)="+pur(mem.rho).toFixed(3);document.getElementById("cP").className="on";}
-function ask(){var text=(inp.value||"").trim();if(!text)return;inp.value="";add("user",text);
-  var Q=enc(tok(text));mem.up(Q);upd();draw();
-  var ans=find(text);
-  if(ans){mem.up(enc(tok(ans)));add("bot",ans,"русский ответ · turn "+mem.turns);}
-  else{var fb=(PH[Math.floor(Math.random()*PH.length)]||"Уточни вопрос: что такое кубит?");add("bot",fb,"уточни вопрос · turn "+mem.turns);}
-  upd();draw();}
-document.getElementById("go").onclick=ask;
-inp.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();ask();}});
-document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){inp.value=b.getAttribute("data-q");ask();};});
-document.getElementById("clr").onclick=function(){mem=new Mem();chat.innerHTML="";upd();draw();add("bot","Память сброшена. Спроси по-русски.","system");};
-upd();draw();
-add("bot","Привет. Пиши по-русски — отвечу нормальными предложениями.\nПример: «что такое кубит?», «что такое суперпозиция?», «как ты работаешь?»","system");
+var N=6,DIM=1<<N;
+function zeros(){var a=new Float64Array(DIM*2);a[0]=1;return a;}
+function norm(s){var sum=0,i;for(i=0;i<DIM;i++)sum+=s[2*i]*s[2*i]+s[2*i+1]*s[2*i+1];sum=Math.sqrt(sum)||1;for(i=0;i<DIM;i++){s[2*i]/=sum;s[2*i+1]/=sum;}return s;}
+function ry(s,q,theta){var c=Math.cos(theta/2),si=Math.sin(theta/2),step=1<<q,out=new Float64Array(s);
+for(var base=0;base<DIM;base+=(step<<1)){for(var i=0;i<step;i++){var i0=base+i,i1=base+i+step;var a0r=s[2*i0],a0i=s[2*i0+1],a1r=s[2*i1],a1i=s[2*i1+1];
+out[2*i0]=c*a0r-si*a1r;out[2*i0+1]=c*a0i-si*a1i;out[2*i1]=si*a0r+c*a1r;out[2*i1+1]=si*a0i+c*a1i;}}return out;}
+function rz(s,q,phi){var out=new Float64Array(s),step=1<<q;for(var i=0;i<DIM;i++){if(i&step){var re=s[2*i],im=s[2*i+1],cr=Math.cos(phi/2),sr=Math.sin(phi/2);
+out[2*i]=re*cr+im*sr;out[2*i+1]=im*cr-re*sr;}}return out;}
+function h(s,q){var inv=Math.SQRT1_2,step=1<<q,out=new Float64Array(s);
+for(var base=0;base<DIM;base+=(step<<1)){for(var i=0;i<step;i++){var i0=base+i,i1=base+i+step;var a0r=s[2*i0],a0i=s[2*i0+1],a1r=s[2*i1],a1i=s[2*i1+1];
+out[2*i0]=inv*(a0r+a1r);out[2*i0+1]=inv*(a0i+a1i);out[2*i1]=inv*(a0r-a1r);out[2*i1+1]=inv*(a0i-a1i);}}return out;}
+function cnot(s,c,t){var out=new Float64Array(s),seen=new Uint8Array(DIM),cm=1<<c,tm=1<<t;
+for(var i=0;i<DIM;i++){if(seen[i])continue;if(i&cm){var j=i^tm;out[2*i]=s[2*j];out[2*i+1]=s[2*j+1];out[2*j]=s[2*i];out[2*j+1]=s[2*i+1];seen[i]=seen[j]=1;}}return out;}
+function probs(s){var p=new Float64Array(DIM);for(var i=0;i<DIM;i++)p[i]=s[2*i]*s[2*i]+s[2*i+1]*s[2*i+1];return p;}
+function entropy(p){var e=0;for(var i=0;i<DIM;i++)if(p[i]>1e-15)e-=p[i]*Math.log2(p[i]);return e;}
+function collapse(p){var r=Math.random(),acc=0;for(var i=0;i<DIM;i++){acc+=p[i];if(r<=acc)return i;}return DIM-1;}
+function hashAngles(text){var h=2166136261>>>0,s=String(text);for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+var angles=[];for(var q=0;q<N;q++){var x=((h>>>(q*5))^(h*(q+3)))>>>0;angles.push({ry:((x%1000)/1000)*Math.PI,rz:(((x>>>10)%1000)/1000)*Math.PI*2-Math.PI});}
+return{seed:h>>>0,angles:angles};}
+var KB=[[/кто\s*ты|что\s*ты|о\s*себе/i,"Я Quantum AI контур АКСИ: вопрос идёт через 6-кубитный statevector (суперпозиция → CNOT → коллапс), затем собирается ответ. Не облачный GPT и не физический QPU."],[/как\s*(ты\s*)?работа|как\s*устроен|pipeline/i,"Pipeline:\n1) hash(текст) → RY/RZ\n2) H + CNOT\n3) энтропия по |α|²\n4) collapse (1 shot)\n5) номер состояния → ветка текста.\nВсё в JS на устройстве."],[/суперпозиц/i,"Суперпозиция здесь — 64 комплексные амплитуды. Пока нет измерения, ответ размазан по базисам. Коллапс фиксирует исход; текст строится от него и смысла вопроса."],[/запутанн|entangl/i,"Запутанность — цепочка CNOT после поворотов. Состояние не факторизуется на независимые кубиты; энтропия растёт. Это модель корреляций."],[/коллапс|измерен/i,"Коллапс — выбор базиса с вероятностью |амплитуда|² (shots=1). Дальше — семантическая ветка + соль из номера состояния."],[/кубит|qubit/i,"Кубит симулятора: α|0⟩+β|1⟩. Шесть кубитов → 2⁶=64. Классическая симуляция квантовой схемы."],[/гровер|grover/i,"Гровер: амплитудная амплификация. В MVP коллапс выбирает ветку; полный оракул можно нарастить на том же statevector."],[/акси|permit|runtime/i,"АКСИ: этот симулятор + Runtime + Permit + receipt. Quantum AI — как считаем; Permit — можно ли действовать."],[/привет|здравствуй|hello/i,"Привет. Задай вопрос — увидишь амплитуды, энтропию, коллапс и текст."]];
+var BRANCH=["Ветка смысла: определение.","Ветка: механизм / как устроено.","Ветка: отличие от классики.","Ветка: ограничения симулятора.","Ветка: pipeline АКСИ.","Ветка: вероятности измерения.","Ветка: Runtime / Permit.","Ветка: offline-вычисление."];
+function kbMatch(q){for(var i=0;i<KB.length;i++)if(KB[i][0].test(q))return KB[i][1];return null;}
+function synthesize(q,stateIdx,ent){var base=kbMatch(q),branch=BRANCH[stateIdx%BRANCH.length],bits=stateIdx.toString(2).padStart(N,"0");
+if(base)return base+"\n\n— "+branch+"\n— |ψ⟩→|"+bits+"⟩ · S≈"+ent.toFixed(3)+" бит";
+return "Симулятор обработал: «"+q.slice(0,120)+"».\n\nКоллапс: |"+bits+"⟩ ("+stateIdx+"/63), S≈"+ent.toFixed(3)+" бит.\n"+branch+"\n\nЧестно: это не гигантский LLM. Ценность — измеримый путь суперпозиция→запутывание→коллапс→текст. Свободный LLM: /llm/.";}
+var logEl=document.getElementById("log"),ampsEl=document.getElementById("amps");
+for(var i=0;i<32;i++){var b=document.createElement("i");b.style.height="4%";ampsEl.appendChild(b);}
+function add(role,text,sub){var d=document.createElement("div");d.className="msg "+(role==="user"?"u":"b");d.textContent=text;if(sub){var s=document.createElement("div");s.className="s";s.textContent=sub;d.appendChild(s);}logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+function drawAmps(p){var bars=ampsEl.children;for(var i=0;i<32;i++){var v=Math.max(p[i*2]||0,p[i*2+1]||0);bars[i].style.height=Math.max(3,Math.round(Math.sqrt(v)*100))+"%";}}
+function run(text){text=String(text||"").trim();if(!text)return;add("user",text);
+var t0=performance.now(),ha=hashAngles(text),s=zeros();
+for(var q=0;q<N;q++){s=h(s,q);s=ry(s,q,ha.angles[q].ry);s=rz(s,q,ha.angles[q].rz);}
+for(var q=0;q<N-1;q++)s=cnot(s,q,q+1);s=norm(s);var p=probs(s),ent=entropy(p),idx=collapse(p),ms=(performance.now()-t0).toFixed(1);
+drawAmps(p);document.getElementById("cEnt").textContent="S≈"+ent.toFixed(3)+" бит";document.getElementById("cEnt").className="on";
+document.getElementById("cCol").textContent="коллапс: |"+idx.toString(2).padStart(N,"0")+"⟩";document.getElementById("cCol").className="on";
+document.getElementById("trace").textContent="seed="+ha.seed.toString(16)+" · "+ms+"ms · Σp="+p.reduce(function(a,b){return a+b;},0).toFixed(6);
+add("bot",synthesize(text,idx,ent),"quantum-sim · state "+idx+" · "+ms+"ms");
+try{localStorage.setItem("aksi_matrix_permit",JSON.stringify({ts:Date.now(),bits:idx.toString(2).padStart(N,"0"),state:idx,S:ent}));}catch(e){}}
+document.getElementById("go").onclick=function(){var q=document.getElementById("q").value;document.getElementById("q").value="";run(q);};
+document.getElementById("q").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("go").click();}});
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){run(b.getAttribute("data-q"));};});
+document.getElementById("clr").onclick=function(){logEl.innerHTML="";document.getElementById("trace").textContent="Ожидание…";add("bot","Симулятор сброшен.","system");};
+add("bot","Quantum AI АКСИ готов.\nНажми пример или введи вопрос → амплитуды, энтропия, коллапс, текст.","system");
 })();
 </script>
 </body>
