@@ -3,231 +3,113 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>АКСИ ИИ — локальный мозг</title>
-<meta name="description" content="АКСИ: WebLLM + Neuro SEED + quantum seed + receipt. Единый ИИ-контур."/>
+<title>АКСИ — рабочий ИИ</title>
 <link rel="canonical" href="https://milana808.github.io/llm/"/>
 <meta name="theme-color" content="#0a0a0b"/>
 <style>
-:root{--bg:#0a0a0b;--panel:#121214;--line:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--g:#5eead4;--bad:#f87171}
+:root{--bg:#0a0a0b;--p:#141418;--l:rgba(255,255,255,.1);--t:#f4f4f5;--m:#a1a1aa;--a:#a78bfa;--g:#34d399;--bad:#f87171}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.45 system-ui,sans-serif}
-.shell{max-width:720px;margin:0 auto;padding:16px 14px 48px}
-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap;gap:8px}
-.logo{font-weight:800;letter-spacing:.08em;font-size:12px;text-transform:uppercase}
-.logo b{opacity:.45}
-nav a{color:var(--m);font-size:12px;text-decoration:none;margin-left:10px}
-h1{font-size:1.25rem;margin:0 0 6px}
-.lead{color:var(--m);font-size:13px;margin:0 0 14px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
-.panel h2{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--m);margin:0 0 8px}
-.chips span{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--m);margin:2px 4px 0 0}
+.w{max-width:720px;margin:0 auto;padding:14px 12px 40px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.logo{font-weight:800;letter-spacing:.06em;font-size:13px}
+nav a{color:var(--m);text-decoration:none;margin-left:10px;font-size:12px}
+h1{font-size:1.25rem;margin:0 0 4px}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px}
+.panel{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px;margin-bottom:10px}
+.chips span{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 3px 0 0}
 .chips span.on{border-color:var(--g);color:var(--g)}
 .chips span.bad{border-color:var(--bad);color:var(--bad)}
-.bar{height:6px;background:#1a1a1e;border-radius:4px;overflow:hidden;margin:8px 0}
-.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--g),var(--a));transition:width .2s}
-.meta{font-size:12px;color:var(--m);min-height:1.2em}
-#log{height:min(48vh,380px);overflow:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
-.msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word}
-.msg.user{align-self:flex-end;background:#1a1a22;border:1px solid var(--line)}
-.msg.bot{align-self:flex-start;background:#0e1620;border:1px solid rgba(94,234,212,.2)}
-.msg .sub{font-size:10px;color:var(--m);margin-top:5px}
-textarea{width:100%;min-height:52px;border-radius:10px;border:1px solid var(--line);background:#08080a;color:var(--t);padding:10px;font:inherit}
+.bar{height:5px;background:#1c1c22;border-radius:4px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--g),var(--a));transition:width .2s}
+#st{font-size:12px;color:var(--m);min-height:1.2em}
+#log{height:min(50vh,400px);overflow:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:92%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word}
+.msg.u{align-self:flex-end;background:#1a1a24;border:1px solid var(--l)}
+.msg.b{align-self:flex-start;background:#0e1620;border:1px solid rgba(167,139,250,.25)}
+.msg .s{font-size:10px;color:var(--m);margin-top:5px}
+textarea{width:100%;min-height:54px;border-radius:10px;border:1px solid var(--l);background:#08080c;color:var(--t);padding:10px;font:inherit;margin-top:8px}
 button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),#7eb6ff);color:#0a0a0b;margin:6px 6px 0 0}
 button:disabled{opacity:.4;cursor:not-allowed}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--t)}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
-.ex button{font-size:12px;padding:6px 10px;background:#1a1a22;color:var(--t);border:1px solid var(--line);border-radius:8px;font-weight:500}
-footer{font-size:12px;color:var(--m);margin-top:16px}
-footer a{color:var(--a);margin-right:8px}
+button.g{background:transparent;border:1px solid var(--l);color:var(--t)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ex button{font-size:12px;padding:6px 10px;background:#1a1a24;color:var(--t);border:1px solid var(--l);border-radius:8px;font-weight:500}
+footer{margin-top:14px;font-size:12px;color:var(--m)}footer a{color:var(--a);margin-right:8px}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="w">
 <header>
-  <div class="logo">AKSI <b>ИИ</b></div>
-  <nav>
-    <a href="/">Главная</a>
-    <a href="/runtime/">Runtime</a>
-    <a href="/permit/">Permit</a>
-    <a href="/matrix/">MATRIX</a>
-    <a href="/whole/">Whole</a>
-  </nav>
+  <div class="logo">АКСИ · ИИ</div>
+  <nav><a href="/">Главная</a><a href="/runtime/">Runtime</a><a href="/permit/">Permit</a><a href="/qai/">Q-Mind</a></nav>
 </header>
-<h1>Локальный ИИ АКСИ</h1>
-<p class="lead">WebLLM + Neuro SEED + quantum seed + receipt. Один контур с остальным сайтом.</p>
+<h1>Рабочий чат</h1>
+<p class="lead">Сразу отвечает из базы. Для свободного диалога — загрузи модель (WebGPU).</p>
 
 <div class="panel">
-  <h2>Статус</h2>
   <div class="chips">
-    <span id="bReady">idle</span>
-    <span id="bGpu">gpu?</span>
-    <span id="bModel">—</span>
-    <span id="bSeed">Q-seed: —</span>
+    <span id="cBase" class="on">база: on</span>
+    <span id="cGpu">gpu?</span>
+    <span id="cModel">модель: —</span>
+    <span id="cReady">idle</span>
   </div>
   <div class="bar"><i id="bar"></i></div>
-  <div class="meta" id="msg">Нажми «Загрузить» или дождись автозагрузки.</div>
+  <div id="st">База знаний готова. Модель — опционально.</div>
   <div class="row">
-    <button type="button" id="btnLoad">Загрузить</button>
-    <button type="button" class="ghost" id="btnSkip">Не грузить авто</button>
+    <button type="button" id="load">Загрузить модель</button>
+    <button type="button" class="g" id="skip">Не грузить авто</button>
   </div>
 </div>
 
 <div class="panel">
-  <h2>Чат</h2>
   <div id="log"></div>
-  <textarea id="q" placeholder="Вопрос на русском…"></textarea>
+  <textarea id="q" placeholder="Напиши любой вопрос…"></textarea>
   <div class="row">
-    <button type="button" id="send" disabled>Спросить</button>
-    <button type="button" class="ghost" id="clr">Очистить</button>
+    <button type="button" id="send">Ответить</button>
+    <button type="button" class="g" id="clr">Очистить</button>
   </div>
   <div class="ex row">
-    <button type="button" data-q="Кто ты и как связан с АКСИ?">кто ты</button>
-    <button type="button" data-q="Объясни суперпозицию простыми словами">суперпозиция</button>
-    <button type="button" data-q="Чем Permit в АКСИ отличается от обычного чата?">Permit</button>
+    <button type="button" data-q="привет">привет</button>
+    <button type="button" data-q="кто ты?">кто ты</button>
+    <button type="button" data-q="что такое АКСИ?">АКСИ</button>
+    <button type="button" data-q="что такое кубит?">кубит</button>
+    <button type="button" data-q="как ты работаешь?">как работаешь</button>
   </div>
 </div>
-
-<footer>
-  <a href="/">home</a><a href="/runtime/">runtime</a><a href="/qai/">q-mind</a><a href="/permit/">permit</a>
-  · aksilove@internet.ru · не AGI
-</footer>
+<footer><a href="/">home</a><a href="/runtime/">runtime</a> · aksilove@internet.ru</footer>
 </div>
 
-<script src="/aksi-webllm.js?v=5"></script>
+<script src="/aksi-webllm.js?v=6"></script>
 <script src="/aksi-neuro.js?v=10"></script>
 <script>
+window.AKSI_KB=[["привет|здравствуй|добрый\\s*(день|вечер)|hello|\\bhi\\b","Привет! Я АКСИ — локальный помощник на этом сайте. Могу ответить из базы знаний сразу или через локальную нейросеть (WebLLM), если загружена."],["кто\\s*ты|что\\s*ты\\s*такое|представься|о\\s*себе","Я АКСИ: суверенный контур на milana808.github.io. Offline-база + опционально WebLLM в браузере. Не облачный ChatGPT и не AGI. Контакт: aksilove@internet.ru."],["как\\s*ты\\s*работа|как\\s*устроен","Сначала ищу ответ в локальной базе. Если базы мало и загружен WebLLM (WebGPU) — генерирую текст нейросетью на твоём устройстве. Данные не уходят на чужой сервер."],["что\\s*такое\\s*акси|\\bакси\\b","АКСИ — продукт: локальный ИИ, runtime решений, Permit (допуск действий), proof/receipt. Сайт: milana808.github.io. Цель — технология служит человеку, с аудитом действий."],["кубит|qubit","Кубит — квантовый бит. Состояние |ψ⟩=α|0⟩+β|1⟩, |α|²+|β|²=1. До измерения может быть в суперпозиции. После измерения — 0 или 1 с вероятностями |α|² и |β|²."],["суперпозиц","Суперпозиция — описание системы как суммы базисных состояний с комплексными амплитудами. Конкретный исход появляется при измерении."],["запутанн|entangl","Запутанность — корреляция квантовых систем, которую нельзя свести к независимым состояниям частей. Не даёт сверхсветовой передачи информации."],["гровер|grover","Алгоритм Гровера ищет в неструктурированной базе примерно за O(√N) обращений к оракулу за счёт амплитудной амплификации."],["шора|shor","Алгоритм Шора эффективно факторизует большие числа на идеальном квантовом компьютере (квантовое Фурье + поиск периода)."],["матриц[а-яё]*\\s*плотност|\\brho\\b","Матрица плотности ρ описывает чистые и смешанные состояния. Для чистого Tr(ρ²)=1, для смешанного Tr(ρ²)<1."],["webllm|веб\\s*ллм|локальн[а-я]*\\s*модель","WebLLM — движок MLC: нейросеть прямо в браузере через WebGPU. Нажми «Загрузить модель». Нужен Chrome/Edge или Safari 18+."],["permit|пермит|допуск","Permit в АКСИ — слой допуска: действие не выполняется без проверки мандата; при ALLOW выдаётся крипто-чек (receipt)."],["что\\s*ты\\s*умеешь|что\\s*можешь|помощь|help","Могу: объяснить АКСИ и QI-термины из базы; если модель загружена — отвечать свободным текстом на любые вопросы. Напиши вопрос или нажми «Загрузить модель»."],["спасибо|благодар","Пожалуйста. Если нужен свободный диалог — загрузи модель (кнопка выше)."]];
+</script>
+<script>
 (function(){
-  "use strict";
-  var W = window.AKSI_WEBLLM;
-  var history = [];
-  var logEl = document.getElementById("log");
-  function chip(id, text, on, bad) {
-    var el = document.getElementById(id);
-    el.textContent = text;
-    el.className = bad ? "bad" : (on ? "on" : "");
-  }
-  function add(role, text, sub) {
-    var d = document.createElement("div");
-    d.className = "msg " + role;
-    d.textContent = text;
-    if (sub) {
-      var s = document.createElement("div");
-      s.className = "sub";
-      s.textContent = sub;
-      d.appendChild(s);
-    }
-    logEl.appendChild(d);
-    logEl.scrollTop = logEl.scrollHeight;
-    return d;
-  }
-  function qseed(t) {
-    var h = 2166136261 >>> 0, s = String(t || "");
-    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-    h ^= (performance.now() | 0);
-    return (h >>> 0) / 4294967295;
-  }
-  function receipt(q, a, seed, model) {
-    var payload = "AKSI|" + seed.toFixed(6) + "|" + (q||"").length + "|" + (a||"").length + "|" + (model||"");
-    var h = 2166136261 >>> 0;
-    for (var i = 0; i < payload.length; i++) { h ^= payload.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return "receipt aksi1:" + (h >>> 0).toString(16) + " · seed " + seed.toFixed(4);
-  }
-  function paint(st) {
-    if (!W) return;
-    st = st || W.status();
-    var p = st.progress || 0;
-    document.getElementById("bar").style.width = (p > 1 ? Math.round(p) : Math.round(p * 100)) + "%";
-    document.getElementById("msg").textContent = st.message || "";
-    chip("bReady", st.ready ? "ready" : (st.loading ? "loading" : "idle"), !!st.ready, !!st.error);
-    chip("bGpu", st.webgpu === true ? "WebGPU" : (st.webgpu === false ? "no GPU" : "gpu?"), st.webgpu === true, st.webgpu === false);
-    chip("bModel", st.model ? String(st.model).slice(0, 32) : "—", !!st.model);
-    document.getElementById("send").disabled = !st.ready;
-  }
-  if (!W) {
-    document.getElementById("msg").textContent = "aksi-webllm.js не загрузился";
-    add("bot", "Модуль WebLLM не найден. Проверь /aksi-webllm.js", "error");
-    return;
-  }
-  window.addEventListener("aksi-webllm-progress", function (e) { paint(e.detail); });
-  window.addEventListener("aksi:webllm-ready", function () {
-    paint();
-    add("bot", "Модель готова: " + (W.status().model || ""), "system");
-  });
-  document.getElementById("btnLoad").onclick = function () {
-    try { localStorage.removeItem("aksi_webllm_skip"); } catch (e) {}
-    W.load(null, paint).then(paint).catch(function (e) {
-      add("bot", String(e.message || e), "error");
-      paint();
-    });
-  };
-  document.getElementById("btnSkip").onclick = function () {
-    try { localStorage.setItem("aksi_webllm_skip", "1"); } catch (e) {}
-    document.getElementById("msg").textContent = "авто отключено";
-  };
-  document.getElementById("clr").onclick = function () {
-    history = [];
-    logEl.innerHTML = "";
-    add("bot", "Чат очищен. Модель в кэше браузера.", "system");
-  };
-  document.getElementById("send").onclick = async function () {
-    var q = document.getElementById("q").value.trim();
-    if (!q || !W.ready()) return;
-    document.getElementById("q").value = "";
-    add("user", q);
-    var seed = qseed(q);
-    chip("bSeed", "Q-seed: " + seed.toFixed(4), true);
-    document.getElementById("send").disabled = true;
-    var bot = add("bot", "…", "генерация");
-    try {
-      var r = await W.complete(q, {
-        history: history,
-        temperature: 0.4 + seed * 0.35,
-        max_tokens: 600
-      });
-      if (r.error && !r.text) {
-        bot.textContent = r.error;
-        bot.querySelector(".sub").textContent = "error";
-      } else {
-        var text = String(r.text || "").trim() || "(пусто)";
-        history.push({ role: "user", content: q });
-        history.push({ role: "assistant", content: text });
-        if (history.length > 20) history = history.slice(-20);
-        bot.textContent = text;
-        bot.querySelector(".sub").textContent = receipt(q, text, seed, r.model || W.status().model);
-      }
-    } catch (e) {
-      bot.textContent = String(e.message || e);
-      bot.querySelector(".sub").textContent = "error";
-    }
-    document.getElementById("send").disabled = !W.ready();
-  };
-  document.querySelectorAll("[data-q]").forEach(function (b) {
-    b.onclick = function () {
-      document.getElementById("q").value = b.getAttribute("data-q");
-      if (W.ready()) document.getElementById("send").click();
-    };
-  });
-  document.getElementById("q").addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      document.getElementById("send").click();
-    }
-  });
-  paint();
-  add("bot", "Единый ИИ-контур АКСИ.\nЗагрузка модели → любой вопрос.\nСвязан с Runtime, Permit, MATRIX с главной.", "system");
-  setTimeout(function () {
-    try {
-      if (localStorage.getItem("aksi_webllm_skip") === "1") {
-        document.getElementById("msg").textContent = "авто отключено — нажми Загрузить";
-        return;
-      }
-    } catch (e) {}
-    if (!W.ready() && !W.loading()) {
-      W.autoLoad({ onProgress: paint }).catch(function (e) {
-        add("bot", "Авто: " + (e.message || e) + " — нажми Загрузить", "system");
-        paint();
-      });
-    }
-  }, 300);
+"use strict";
+var KB=window.AKSI_KB||[];
+var W=window.AKSI_WEBLLM;
+var history=[];
+var logEl=document.getElementById("log");
+var busy=false;
+function chip(id,t,on,bad){var el=document.getElementById(id);el.textContent=t;el.className=bad?"bad":(on?"on":"");}
+function add(role,text,sub){var d=document.createElement("div");d.className="msg "+(role==="user"?"u":"b");d.textContent=text;if(sub){var s=document.createElement("div");s.className="s";s.textContent=sub;d.appendChild(s);}logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;return d;}
+function findKB(text){var s=String(text).toLowerCase();for(var i=0;i<KB.length;i++){try{if(new RegExp(KB[i][0],"i").test(s))return KB[i][1];}catch(e){}}
+try{if(window.AKSI_NEURO&&typeof window.AKSI_NEURO.query==="function"){var r=window.AKSI_NEURO.query(text);if(r&&(r.answer||r.text)&&String(r.answer||r.text).length>20)return String(r.answer||r.text);}}catch(e){}return null;}
+function paint(){if(!W){chip("cGpu","no webllm",false,true);chip("cReady","база only",true);return;}var st=W.status();var p=st.progress||0;document.getElementById("bar").style.width=(p>1?Math.round(p):Math.round(p*100))+"%";document.getElementById("st").textContent=st.message||(st.ready?"Модель готова — свободный диалог.":"База on. Модель опциональна.");chip("cGpu",st.webgpu===true?"WebGPU":(st.webgpu===false?"no GPU":"gpu?"),st.webgpu===true,st.webgpu===false);chip("cModel",st.model?String(st.model).slice(0,28):"модель: —",!!st.model);chip("cReady",st.ready?"модель ready":(st.loading?"loading…":"idle"),!!st.ready,!!st.error);}
+async function answer(text){if(!text||busy)return;busy=true;document.getElementById("send").disabled=true;add("user",text);
+var kb=findKB(text);if(kb){add("bot",kb,"база знаний · offline");history.push({role:"user",content:text});history.push({role:"assistant",content:kb});busy=false;document.getElementById("send").disabled=false;return;}
+if(W&&W.ready&&W.ready()){var bot=add("bot","…","модель");try{var r=await W.complete(text,{history:history,temperature:0.5,max_tokens:600});if(r.error&&!r.text){bot.textContent="Модель: "+r.error+"\n\nПока из базы: «кто ты», «кубит», «АКСИ».";bot.querySelector(".s").textContent="error";}else{var t=String(r.text||"").trim()||"(пусто)";bot.textContent=t;bot.querySelector(".s").textContent="WebLLM · "+(r.model||"");history.push({role:"user",content:text});history.push({role:"assistant",content:t});if(history.length>20)history=history.slice(-20);}}catch(e){bot.textContent=String(e.message||e);bot.querySelector(".s").textContent="error";}busy=false;document.getElementById("send").disabled=false;return;}
+add("bot","В базе нет точного ответа.\n\n• «Загрузить модель» — Chrome/Edge + WebGPU\n• Или спроси: кто ты, АКСИ, кубит, суперпозиция, Гровер, Permit","нет совпадения · модель не готова");busy=false;document.getElementById("send").disabled=false;}
+document.getElementById("send").onclick=function(){var q=document.getElementById("q").value.trim();document.getElementById("q").value="";answer(q);};
+document.getElementById("q").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();document.getElementById("send").click();}});
+document.querySelectorAll("[data-q]").forEach(function(b){b.onclick=function(){answer(b.getAttribute("data-q"));};});
+document.getElementById("clr").onclick=function(){history=[];logEl.innerHTML="";add("bot","Чат очищен. База знаний на месте.","system");};
+document.getElementById("load").onclick=function(){if(!W){add("bot","aksi-webllm.js не загрузился.","error");return;}try{localStorage.removeItem("aksi_webllm_skip");}catch(e){}document.getElementById("st").textContent="Загрузка модели…";W.load(null,paint).then(function(){paint();add("bot","Модель загружена: "+(W.status().model||"")+". Можно спрашивать свободно.","system");}).catch(function(e){paint();add("bot","Не удалось: "+(e.message||e)+"\nБаза всё равно работает.","error");});};
+document.getElementById("skip").onclick=function(){try{localStorage.setItem("aksi_webllm_skip","1");}catch(e){}document.getElementById("st").textContent="Автозагрузка отключена. База работает.";};
+if(W){window.addEventListener("aksi-webllm-progress",function(e){paint(e.detail);});window.addEventListener("aksi:webllm-ready",function(){paint();});}
+paint();
+add("bot","Готово. Пиши вопрос — отвечу из базы сразу.\nДля любых тем: «Загрузить модель» (WebGPU).","system");
+setTimeout(function(){try{if(localStorage.getItem("aksi_webllm_skip")==="1")return;}catch(e){}if(W&&!W.ready()&&!W.loading()){W.autoLoad({onProgress:paint}).then(paint).catch(function(){paint();});}},400);
 })();
 </script>
 </body>
