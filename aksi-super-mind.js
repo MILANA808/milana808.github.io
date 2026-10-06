@@ -1,7 +1,7 @@
-/** AKSI Super Mind v3.2 — любой вопрос на русском: wiki + KB + math + WebLLM */
+/** AKSI Super Mind v3.3 — любой вопрос на русском: wiki + KB + math + WebLLM */
 (function (G) {
   "use strict";
-  var VERSION = "mind-3.2.0";
+  var VERSION = "mind-3.3.0";
   function hash(s) {
     var h = 2166136261 >>> 0, t = String(s), i;
     for (i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -48,29 +48,29 @@
     { re: /permit|пермит|допуск/i, title: "Permit",
       text: "Permit — default-deny: действие агента только после ALLOW. Отделяет текст ответа от опасного действия. При ALLOW выдаётся крипто-чек (receipt)." },
     { re: /экзокортекс|exocortex/i, title: "Экзокортекс",
-      text: "Экзокортекс АКСИ: вектор состояния S, цель, опыт, Permit, ECDSA-цепочка чеков. Проверяемые инварианты вместо «поверьте модели»." },
+      text: "Экзокортекс АКСИ: вектор состояния S, цель, опыт, Permit, ECDSA-цепочка чеков." },
     { re: /\bакси\b|aksi|кто ты|что ты/i, title: "АКСИ",
-      text: "АКСИ — суверенный offline-first контур: Super fabric, quantum seed, Mind/WebLLM, Permit, чеки. Технология служит человеку: шаги видны, действие контролируется." },
+      text: "АКСИ — суверенный offline-first контур: Super fabric, quantum seed, Mind/WebLLM, Permit, чеки. Технология служит человеку." },
     { re: /энтропи/i, title: "Энтропия",
-      text: "S=−Σ pᵢ log₂ pᵢ. Высокая энтропия — больше неопределённости до коллапса; низкая — распределение сжато." },
+      text: "S=−Σ pᵢ log₂ pᵢ. Высокая энтропия — больше неопределённости до коллапса." },
     { re: /коллапс|измерен/i, title: "Коллапс",
-      text: "Коллапс в симуляторе — выбор базиса с вероятностью |амплитуда|². Результат становится сидом следующих стадий pipeline." },
+      text: "Коллапс — выбор базиса с вероятностью |амплитуда|². Результат — сид следующих стадий." },
     { re: /суперкомпьютер|fabric|gpu/i, title: "Super Fabric",
-      text: "Виртуальный кластер в браузере: очередь jobs, ноды, matmul, quantum, mind. Оркестратор, а не склад серверных FLOPS." },
+      text: "Виртуальный кластер в браузере: jobs, ноды, matmul, quantum, mind." },
     { re: /webllm|веб\s*ллм|языков\w+\s*модел/i, title: "WebLLM",
-      text: "WebLLM — сжатые веса (q4) настоящей модели в браузере через WebGPU. Практический путь «язык на устройстве»." },
+      text: "WebLLM — сжатые веса (q4) модели в браузере через WebGPU." },
     { re: /небо.*голуб|голуб.*небо|рассеян.*рэле|rayleigh/i, title: "Почему небо голубое",
-      text: "Небо кажется голубым из‑за рассеяния солнечного света в атмосфере (рассеяние Рэлея): синяя часть спектра рассеивается сильнее красной. На закате путь лучей длиннее — больше красных тонов." },
+      text: "Небо голубое из‑за рассеяния Рэлея: синяя часть спектра рассеивается сильнее. На закате больше красных тонов." },
     { re: /фотосинтез/i, title: "Фотосинтез",
-      text: "Фотосинтез: растения превращают свет, воду и CO₂ в органику и кислород. Упрощённо: свет + CO₂ + H₂O → сахар + O₂." },
+      text: "Фотосинтез: свет + CO₂ + H₂O → сахар + O₂." },
     { re: /относительн.*эйнштейн|теория относительн/i, title: "Теория относительности",
-      text: "СТО (1905): скорость света постоянна, время и пространство зависят от системы отсчёта. ОТО — гравитация как искривление пространства-времени." },
+      text: "СТО: скорость света постоянна. ОТО: гравитация как искривление пространства-времени." },
     { re: /днк|генетич.*код/i, title: "ДНК",
-      text: "ДНК — носитель генетической информации, двойная спираль (A, T, G, C). Последовательность кодирует белки через РНК." },
+      text: "ДНК — двойная спираль (A,T,G,C), носитель генетической информации." },
     { re: /искусственн.*интеллект|\bии\b|\bai\b/i, title: "Искусственный интеллект",
-      text: "ИИ выполняет задачи вроде распознавания, языка, планирования. LLM предсказывают токены; АКСИ добавляет прозрачный допуск и доказательства шагов." },
+      text: "ИИ — системы для распознавания, языка, планирования. АКСИ добавляет допуск и доказательства шагов." },
     { re: /блокчейн|bitcoin|биткоин/i, title: "Блокчейн",
-      text: "Блокчейн — цепочка блоков с криптографической связью. Каждый блок ссылается на хэш предыдущего." }
+      text: "Блокчейн — цепочка блоков, каждый ссылается на хэш предыдущего." }
   ];
   function extractKeys(q) {
     var stop = /^(и|в|на|по|что|как|это|для|или|при|про|не|ли|же|бы|от|до|из|за|со|об|the|a|an|is|are|what|how|why|who|can|does)$/i;
@@ -153,17 +153,9 @@
       lines.push("");
     }
     if (kb.length) {
-      kb.forEach(function (t) {
-        lines.push(t.title);
-        lines.push(t.text);
-        lines.push("");
-      });
+      kb.forEach(function (t) { lines.push(t.title); lines.push(t.text); lines.push(""); });
     }
-    if (extra.neuro) {
-      lines.push("Локальная память / Neuro");
-      lines.push(extra.neuro);
-      lines.push("");
-    }
+    if (extra.neuro) { lines.push("Локальная память / Neuro"); lines.push(extra.neuro); lines.push(""); }
     if (extra.wiki) {
       lines.push("Факт из открытых источников (Википедия)");
       lines.push(extra.wiki.title + ": " + extra.wiki.extract);
@@ -171,27 +163,18 @@
       lines.push("");
     }
     lines.push("Разбор");
-    if (keys.length) lines.push("Ключевые элементы запроса: " + keys.slice(0, 10).join(", ") + ".");
-    if (math && math.ok) {
-      lines.push("Задача сведена к прямому вычислению; ответ проверен.");
-    } else if (extra.wiki) {
-      lines.push("Объяснение опирается на найденный факт и логику вопроса.");
-      lines.push("По теме «" + (extra.wiki.title || keys[0] || "…") + "»: " + String(extra.wiki.extract).split(".")[0] + ".");
-      lines.push("Вывод: ответ фактологический, без претензии на всезнание. Уточните аспект — углублю.");
-    } else if (kb.length) {
-      lines.push("Тема закрыта локальным знанием АКСИ. Можно спросить «как устроено» или «зачем».");
-    } else if (extra.neuro) {
-      lines.push("Сработал локальный резонанс. При необходимости переформулируйте короче.");
-    } else {
-      lines.push("Готового узла мало. Честная граница: без WebLLM и без статьи не выдумываю энциклопедию.");
-      lines.push("1) Вы спрашиваете о «" + (keys.slice(0, 4).join(" ") || "теме") + "».");
-      lines.push("2) Нажмите «Загрузить WebLLM» для живой генерации на устройстве — или уточните вопрос.");
-      lines.push("3) Прямые запросы работают сразу: «посчитай…», «что такое Permit?», «почему небо голубое?».");
+    if (keys.length) lines.push("Ключевые элементы: " + keys.slice(0, 10).join(", ") + ".");
+    if (math && math.ok) lines.push("Задача вычислена и проверена.");
+    else if (extra.wiki) lines.push("Ответ опирается на найденный факт. Уточните аспект — углублю.");
+    else if (kb.length) lines.push("Тема из локальной базы АКСИ.");
+    else if (extra.neuro) lines.push("Сработал локальный резонанс.");
+    else {
+      lines.push("Точного узла мало. Можно: уточнить вопрос или нажать «Загрузить WebLLM».");
+      lines.push("Примеры: «посчитай 12*12», «что такое Permit?», «почему небо голубое?».");
     }
     lines.push("");
     lines.push("Как получен ответ");
     lines.push("Путь: Super → quantum |" + bits + "⟩ → mind" + (source === "webllm" ? " → WebLLM" : "") + (extra.wiki ? " → wiki" : "") + " → Permit.");
-    lines.push("Стадии видны в журнале. Технология служит вам.");
     lines.push("");
     lines.push("— АКСИ Super Mind " + VERSION + " · " + source + " · path " + path + " —");
     return { text: lines.join("\n"), math: math, topics: kb.map(function (t) { return t.title; }), keys: keys, path: path, source: source, wiki: extra.wiki || null };
@@ -202,8 +185,11 @@
     var W = G.AKSI_WEBLLM;
     if (W && typeof W.complete === "function" && W.status && W.status().ready) {
       try {
-        var sys = "Ты АКСИ — локальный помощник. Отвечай только на русском, полно и понятно. Если не знаешь точно — скажи прямо. С примерами. Не выдумывай источники.";
-        var r = await W.complete(q, { system: sys, max_tokens: 450 });
+        var sys = "Ты АКСИ. Отвечай только на русском, полно и понятно. Если не знаешь — скажи прямо. Не выдумывай источники.";
+        var r = await Promise.race([
+          W.complete(q, { system: sys, max_tokens: 450 }),
+          new Promise(function (resolve) { setTimeout(function () { resolve({ text: "" }); }, 20000); })
+        ]);
         var text = (r && r.text) ? String(r.text).trim() : "";
         if (text.length > 25) {
           return {
@@ -219,7 +205,12 @@
     var math0 = tryMath(q);
     var wiki = null;
     if (!(math0 && math0.ok)) {
-      try { wiki = await wikiFacts(q); } catch (e) { wiki = null; }
+      try {
+        wiki = await Promise.race([
+          wikiFacts(q),
+          new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 3500); })
+        ]);
+      } catch (e) { wiki = null; }
     }
     return buildAnswer(q, quantum, { neuro: neuro, wiki: wiki, source: wiki ? "mind+wiki" : (neuro ? "mind+neuro" : "mind") });
   }
