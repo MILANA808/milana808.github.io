@@ -2,241 +2,83 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ Super</title>
-<link rel="canonical" href="https://milana808.github.io/super/"/>
-<meta name="theme-color" content="#05070d"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ</title>
+<meta name="theme-color" content="#0a0c10"/>
 <style>
-:root{
-  --bg:#05070d;--card:#0b1019;--line:#1a2233;--text:#eef3fb;--muted:#8490a6;
-  --a:#2dd4bf;--b:#818cf8;--ok:#34d399;--bad:#f87171;--gpu:#38bdf8;
-  --glow:rgba(45,212,191,.15);
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-  font:15px/1.45 Inter,system-ui,-apple-system,sans-serif}
-body{background:
-  radial-gradient(1200px 600px at 10% -10%,rgba(45,212,191,.08),transparent 50%),
-  radial-gradient(900px 500px at 100% 0%,rgba(129,140,248,.08),transparent 45%),
-  var(--bg)}
-.shell{max-width:880px;margin:0 auto;height:100%;display:flex;flex-direction:column}
-header{padding:14px 16px 10px;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);
-  background:rgba(5,7,13,.75);position:sticky;top:0;z-index:10}
-.brand{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-.brand h1{margin:0;font-size:1.15rem;font-weight:700;letter-spacing:.02em;
-  background:linear-gradient(100deg,var(--a),var(--b),var(--gpu));
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.pill{font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:rgba(255,255,255,.02)}
-.pill.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
-.pill.gpu{border-color:rgba(56,189,248,.4);color:var(--gpu);background:rgba(56,189,248,.08)}
-.pill.bad{border-color:rgba(248,113,113,.4);color:var(--bad)}
-.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
-  border-radius:11px;padding:9px 12px;font:12px/1 system-ui;font-weight:600;cursor:pointer}
-.btn:hover{border-color:#2a3548}
-.btn.primary{border:0;background:linear-gradient(135deg,var(--a),var(--b));color:#041016;font-weight:700}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.prog{height:3px;background:#111827;border-radius:3px;overflow:hidden;margin-top:10px}
-.prog>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gpu),var(--a));transition:width .25s}
-.stage{font-size:11px;color:var(--muted);margin-top:6px;min-height:16px}
-.grid{display:none;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(11,16,25,.6)}
-.grid.on{display:block}
-.nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}
-.node{border:1px solid var(--line);border-radius:10px;padding:6px 4px;text-align:center;background:var(--card)}
-.node .id{font-size:9px;color:var(--muted)}
-.node .u{font-size:11px;font-weight:700;color:var(--gpu);margin-top:2px}
-.node.hot{border-color:rgba(45,212,191,.5);box-shadow:0 0 12px var(--glow)}
-.stats{font:11px/1.4 ui-monospace,monospace;color:var(--muted);margin-top:8px;white-space:pre-wrap}
-#chat{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:min(92%,640px);padding:12px 14px;border-radius:16px;white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.55}
-.msg.user{align-self:flex-end;background:linear-gradient(160deg,#15233a,#101a2b);border:1px solid #243147}
-.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
-.msg.sys{align-self:center;background:transparent;border:0;color:var(--muted);font-size:12.5px;padding:2px 8px}
-.msg .src{display:block;margin-top:8px;font-size:11px;color:var(--muted);opacity:.9}
-.msg.thinking{opacity:.75;border-style:dashed}
-.composer{padding:12px 16px 16px;border-top:1px solid var(--line);background:rgba(5,7,13,.9)}
-.box{display:flex;gap:10px;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px 8px 8px 12px}
-.box:focus-within{border-color:#2a3a55;box-shadow:0 0 0 3px rgba(45,212,191,.08)}
-.box textarea{flex:1;border:0;outline:0;resize:none;background:transparent;color:var(--text);
-  font:inherit;min-height:44px;max-height:130px;padding:8px 0}
-.box button{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;
-  background:linear-gradient(135deg,var(--a),var(--b));color:#041016;white-space:nowrap}
-.box button:disabled{opacity:.4}
-.foot{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:#0a0c10;color:#e8ecf4;font:15px/1.45 system-ui,sans-serif}
+.wrap{max-width:720px;margin:0 auto;height:100%;display:flex;flex-direction:column}
+header{padding:12px 14px;border-bottom:1px solid #1c2230;display:flex;justify-content:space-between;align-items:center;gap:8px}
+header b{background:linear-gradient(90deg,#2dd4bf,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+header a{color:#7d8799;font-size:12px;text-decoration:none}
+#log{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:90%;padding:10px 12px;border-radius:14px;white-space:pre-wrap;word-break:break-word}
+.u{align-self:flex-end;background:#152033}
+.a{align-self:flex-start;background:#121820;border:1px solid #1c2230}
+.s{align-self:center;color:#7d8799;font-size:12px;background:0;padding:2px}
+footer{padding:10px 12px 14px;border-top:1px solid #1c2230;display:flex;gap:8px}
+input{flex:1;border:1px solid #1c2230;border-radius:12px;background:#121820;color:inherit;padding:12px;font:inherit}
+button{border:0;border-radius:12px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#2dd4bf,#818cf8);color:#041016}
+button:disabled{opacity:.4}
 </style>
 </head>
 <body>
-<div class="shell">
-  <header>
-    <div class="brand"><h1>АКСИ Super</h1></div>
-    <div class="pills">
-      <span class="pill" id="cBoot">boot…</span>
-      <span class="pill" id="cCluster">cluster</span>
-      <span class="pill" id="cLlm">llm</span>
-      <span class="pill" id="cMind">mind</span>
-      <span class="pill" id="cExo">exo</span>
-    </div>
-    <div class="actions">
-      <button type="button" class="btn primary" id="loadLlm">Загрузить модель</button>
-      <button type="button" class="btn" id="toggleGrid">Кластер</button>
-      <button type="button" class="btn" id="bench">Bench</button>
-      <button type="button" class="btn" id="verify">Проверить</button>
-      <button type="button" class="btn" id="clear">Очистить</button>
-    </div>
-    <div class="prog"><i id="bar"></i></div>
-    <div class="stage" id="stage"></div>
-  </header>
-  <div class="grid" id="grid">
-    <div class="nodes" id="nodes"></div>
-    <div class="stats" id="cstats"></div>
-  </div>
-  <div id="chat"></div>
-  <div class="composer">
-    <div class="box">
-      <textarea id="q" rows="1" placeholder="Спросите АКСИ…"></textarea>
-      <button type="button" id="send">Отправить</button>
-    </div>
-    <div class="foot">plan → quantum → compute → mind/WebLLM → permit → receipt</div>
-  </div>
+<div class="wrap">
+<header><b>АКСИ</b> <a href="/super/full/">полная версия</a></header>
+<div id="log"></div>
+<footer>
+<input id="q" placeholder="Вопрос…" autocomplete="off"/>
+<button id="go">→</button>
+</footer>
 </div>
-<script src="/aksi-exocortex.js?v=1"></script>
-<script src="/aksi-webllm.js?v=44"></script>
-<script src="/aksi-super-mind.js?v=6"></script>
-<script src="/aksi-super.js?v=30"></script>
 <script>
 (function(){
 "use strict";
-var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, W=window.AKSI_WEBLLM;
-var fabric=null, history=[], busy=false;
-function $(id){return document.getElementById(id);}
-function pill(id,t,cls){var el=$(id);if(!el)return;el.textContent=t;el.className="pill"+(cls?" "+cls:"");}
-function add(role,text){
-  var d=document.createElement("div");d.className="msg "+role;d.textContent=text;
-  $("chat").appendChild(d);$("chat").scrollTop=$("chat").scrollHeight;return d;
+var L=document.getElementById("log"),Q=document.getElementById("q"),G=document.getElementById("go");
+function add(cls,t){var d=document.createElement("div");d.className="m "+cls;d.textContent=t;L.appendChild(d);L.scrollTop=L.scrollHeight;return d}
+function hash(s){var h=2166136261>>>0,i;for(i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function math(q){
+  var s=String(q).toLowerCase().replace(/,/g,".").replace(/\s+/g," ").trim(),m,n,r,expr,val;
+  m=s.match(/x\s*\^\s*2\s*=\s*([0-9.]+)|x\s*\*\*\s*2\s*=\s*([0-9.]+)|x²\s*=\s*([0-9.]+)/);
+  if(m){n=parseFloat(m[1]||m[2]||m[3]);r=Math.sqrt(n);return "x = ±"+r+" (проверка: "+r+"² = "+(r*r)+")"}
+  m=s.match(/(?:корень|sqrt)\s*(?:из\s*)?([0-9.]+)/i);
+  if(m){n=parseFloat(m[1]);r=Math.sqrt(n);return "√"+n+" ≈ "+r}
+  m=s.match(/([0-9.]+)\s*%\s*(?:от\s*)?([0-9.]+)/);
+  if(m){return m[1]+"% от "+m[2]+" = "+(+m[2]*+m[1]/100)}
+  m=s.match(/([0-9.]+\s*[+\-*/^]\s*[0-9.]+(?:\s*[+\-*/^]\s*[0-9.]+)*)/);
+  if(m){try{expr=m[1].replace(/\^/g,"**").replace(/\s+/g,"");if(!/^[\d.+\-*/()]+$/.test(expr.replace(/\*\*/g,"")))return null;val=Function('"use strict";return('+expr+")")();if(typeof val==="number"&&isFinite(val))return m[1].trim()+" = "+val}catch(e){}}
+  return null;
 }
-function setStage(t){$("stage").textContent=t||"";}
-function llmReady(){try{if(!W)return false;if(typeof W.ready==="function")return!!W.ready();var st=W.status&&W.status();return!!(st&&st.ready);}catch(e){return false;}}
-function paintLlm(detail){
-  var st=null;try{st=W&&W.status&&W.status();}catch(e){}
-  var prog=(detail&&typeof detail.progress==="number")?detail.progress:(st&&st.progress)||0;
-  if(prog>1)prog=prog/100;
-  $("bar").style.width=Math.min(100,Math.round(prog*100))+"%";
-  if(llmReady()){pill("cLlm","llm ON","on");setStage("Модель готова");}
-  else if(st&&st.loading){pill("cLlm","llm…","gpu");setStage((detail&&detail.message)||st.message||"Загрузка модели");}
-  else if(!W){pill("cLlm","llm нет","bad");}
-  else{pill("cLlm","llm off","");if(!busy)setStage("Mind активен · модель опциональна");}
+var KB=[
+  [/привет|здравствуй|добрый/i,"Привет. Я АКСИ — локальный агент. Спросите пример (12*12) или тему: Permit, кубит, ИИ."],
+  [/что\s*умеешь|что\s*ты\s*можешь/i,"Считаю, объясняю базовые темы, работаю без сервера. Живая LLM — в полной версии."],
+  [/permit|пермит/i,"Permit — default-deny: действие только после ALLOW, затем крипто-чек (receipt)."],
+  [/кубит|qubit|суперпозиц/i,"Кубит: α|0⟩+β|1⟩. Суперпозиция — несколько амплитуд до измерения."],
+  [/акси|aksi|кто ты/i,"АКСИ — offline-first агент: быстрый Mind прямо в странице."],
+  [/небо.*голуб|голуб.*небо/i,"Небо голубое из‑за рассеяния Рэлея: короткие волны рассеиваются сильнее."],
+  [/ии|искусственн|нейросет/i,"ИИ — модели для текста и решений. АКСИ — локальный быстрый контур."],
+  [/энтропи/i,"Энтропия S=−Σ p log p — мера неопределённости распределения."]
+];
+function answer(q){
+  q=String(q||"").trim();
+  if(!q)return "Напишите вопрос.";
+  var bits=((hash(q)%16).toString(2)).padStart(4,"0");
+  var m=math(q);
+  if(m)return m+"\n· |"+bits+"⟩";
+  for(var i=0;i<KB.length;i++)if(KB[i][0].test(q))return KB[i][1]+"\n· |"+bits+"⟩";
+  var words=q.toLowerCase().split(/[^a-zа-яё0-9]+/i).filter(function(w){return w.length>2}).slice(0,6);
+  return "По «"+(words.join(" ")||q.slice(0,40))+"» точного узла в быстрой базе нет.\nПопробуйте: 12*12, Permit, кубит, почему небо голубое.\nПолная версия (кластер + WebLLM): /super/full/\n· |"+bits+"⟩";
 }
-function paint(){
-  if(!fabric)return;
-  var sn=fabric.snapshot();
-  pill("cBoot",sn.booted?"ONLINE":"off",sn.booted?"on":"");
-  pill("cCluster",sn.nodes+"×"+Math.round(sn.gpus/Math.max(1,sn.nodes))+" · "+sn.avg_util.toFixed(0)+"%",sn.avg_util>8?"gpu":"on");
-  pill("cExo",sn.exo?"exo ON":"exo off",sn.exo?"on":"bad");
-  pill("cMind",M?"mind "+(M.version||"").replace("mind-",""):"mind","on");
-  paintLlm();
-  if(!$("grid").classList.contains("on"))return;
-  var box=$("nodes");box.innerHTML="";
-  (sn.nodes_detail||[]).forEach(function(n){
-    var avg=n.gpus.reduce(function(a,g){return a+g.util;},0)/Math.max(1,n.gpus.length);
-    var el=document.createElement("div");
-    el.className="node"+(avg>15?" hot":"");
-    el.innerHTML="<div class=\"id\">"+n.id.replace("node-","n")+"</div><div class=\"u\">"+avg.toFixed(0)+"%</div>";
-    box.appendChild(el);
-  });
-  $("cstats").textContent=(fabric.clusterReport?fabric.clusterReport():"")+"\nqueue "+sn.queue+" · run "+sn.running+" · done "+sn.done;
+function send(){
+  var t=Q.value.trim();if(!t)return;
+  Q.value="";add("u",t);G.disabled=true;
+  var a=answer(t);
+  setTimeout(function(){add("a",a);G.disabled=false;Q.focus()},0);
 }
-async function ensure(){
-  if(!S){add("sys","Super не загружен — Ctrl+Shift+R");return null;}
-  if(!fabric){
-    fabric=new S.SuperFabric();fabric.loadMemory();fabric.onTick=paint;
-    fabric.onEvent=function(ev){
-      if(ev.stage==="stage"&&ev.detail&&ev.detail.name){
-        var n=ev.detail.name;
-        var map={plan:"план",quantum:"quantum",compute:"compute",mind:"mind",permit:"permit",receipt:"receipt",done:"готово"};
-        setStage("стадия: "+(map[n]||n));
-      }
-      if(ev.stage==="error")add("sys","ошибка: "+(ev.detail&&ev.detail.error));
-    };
-  }
-  if(!fabric.booted){
-    fabric.boot(12,4);fabric.startScheduler(140);
-    try{await fabric.attachExocortex();}catch(e){}
-    add("sys","Кластер "+S.version+" · 12×4 GPU · Mind "+(M&&M.version||"—"));
-  }
-  paint();return fabric;
-}
-$("toggleGrid").onclick=function(){$("grid").classList.toggle("on");paint();};
-$("clear").onclick=function(){history=[];$("chat").innerHTML="";add("sys","Чат очищен");};
-$("loadLlm").onclick=async function(){
-  if(!W){add("sys","WebLLM недоступен");return;}
-  $("loadLlm").disabled=true;add("sys","Загрузка локальной модели…");
-  try{
-    await (W.load||W.loadModel||W.autoLoad).call(W,null,function(p,msg){
-      var progress=typeof p==="number"?p:(p&&p.progress)||0;
-      paintLlm({progress:progress,message:msg||(p&&p.text)});
-    });
-    add("sys",llmReady()?"Модель онлайн: "+((W.status&&W.status().model)||"ok"):"Модель не стартовала — Mind работает");
-  }catch(e){add("sys","WebLLM: "+(e.message||e));}
-  $("loadLlm").disabled=false;paint();
-};
-$("bench").onclick=async function(){
-  var f=await ensure();if(!f)return;setStage("bench…");
-  var d=await f.waitJob(f.submit({type:"cluster_bench",size:64}),20000);
-  var r=d&&d.result;
-  add("sys",r?"Bench: "+r.flops+" flops · "+Math.round(r.ms||0)+" ms · "+r.nodes+" nodes":"Bench fail");
-  paint();
-};
-$("verify").onclick=async function(){
-  var f=await ensure();if(!f)return;setStage("verify…");
-  var d=await f.waitJob(f.submit({type:"agent",prompt:"12*12",size:16}),25000);
-  var ans=(d&&d.result&&(d.result.answer||d.result.report))||"";
-  var ok=ans.indexOf("144")>=0;
-  var chain=null;try{chain=await f.verifyExoChain();}catch(e){}
-  add("sys",(ok?"✓ PASS":"✗ FAIL")+" · "+(d&&d.stages||[]).map(function(s){return s.name;}).join(" → ")+" · chain "+(chain&&chain.ok?"OK":"—"));
-  setStage("");
-};
-async function send(){
-  var text=$("q").value.trim();if(!text||busy)return;
-  busy=true;$("send").disabled=true;$("q").value="";
-  add("user",text);history.push({role:"user",content:text});
-  var f=await ensure();if(!f){busy=false;$("send").disabled=false;return;}
-  var wait=add("bot thinking",llmReady()?"Думаю через модель…":"Считаю в кластере…");
-  if(llmReady()&&W&&W.complete){
-    try{
-      setStage("webllm…");
-      var r=await Promise.race([
-        W.complete(text,{system:"Ты АКСИ — сильный русскоязычный агент. Отвечай ясно, структурированно, без воды. Если не уверен — скажи прямо.",history:history.slice(-14),max_tokens:560}),
-        new Promise(function(res){setTimeout(function(){res({text:""});},50000);})
-      ]);
-      var t=(r&&r.text)?String(r.text).trim():"";
-      if(t.length>20){
-        wait.className="msg bot";wait.textContent=t;
-        var s=document.createElement("span");s.className="src";s.textContent="webllm · cluster";wait.appendChild(s);
-        history.push({role:"assistant",content:t});
-        f.submit({type:"agent",prompt:text,size:12});
-        busy=false;$("send").disabled=false;setStage("");paint();return;
-      }
-    }catch(e){}
-  }
-  setStage("agent pipeline…");
-  var job=f.submit({type:"agent",prompt:text,size:40});
-  var done=await f.waitJob(job,90000);
-  busy=false;$("send").disabled=false;setStage("");paint();
-  wait.className="msg bot";
-  if(done&&done.result){
-    var ans=done.result.answer||done.result.report||done.result.error||"Пусто";
-    wait.textContent=ans;
-    var s=document.createElement("span");s.className="src";
-    s.textContent=(done.result.source||done.status)+" · "+(done.stages||[]).map(function(x){return x.name;}).join(" → ");
-    wait.appendChild(s);history.push({role:"assistant",content:ans});
-  }else wait.textContent="Таймаут. Попробуйте ещё раз.";
-}
-$("send").onclick=send;
-$("q").addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}});
-$("q").addEventListener("input",function(){this.style.height="auto";this.style.height=Math.min(130,this.scrollHeight)+"px";});
-if(W)window.addEventListener("aksi-webllm-progress",function(e){paintLlm(e.detail||{});});
-ensure().then(function(){add("sys","Готов. Спросите что угодно — или загрузите модель для живого диалога.");paint();});
+G.onclick=send;
+Q.addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});
+add("s","Готов · ~5KB · без сети");
+Q.focus();
 })();
 </script>
 </body>
