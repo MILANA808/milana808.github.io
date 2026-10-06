@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Supercomputer Simulator</title>
+<link rel="canonical" href="https://milana808.github.io/super/"/>
+<meta name="description" content="Симулятор суперкомпьютера АКСИ: кластер GPU, очередь задач, память-ledger, quantum seed."/>
+<meta name="theme-color" content="#07090f"/>
+<style>
+:root{--bg:#06080e;--p:#0c1018;--l:#1a2233;--t:#e8eef8;--m:#8b97ab;--a:#5eead4;--q:#a78bfa;--ok:#34d399;--bad:#f87171;--warn:#fbbf24;--gpu:#38bdf8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.45 system-ui,-apple-system,sans-serif}
+.w{max-width:980px;margin:0 auto;padding:14px 12px 48px}
+h1{font-size:1.4rem;margin:0 0 4px;background:linear-gradient(90deg,var(--a),var(--q),var(--gpu));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--m);font-size:13px;margin:0 0 12px;max-width:72ch}
+.warn{font-size:12px;color:var(--warn);border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.08);padding:8px 10px;border-radius:10px;margin-bottom:12px}
+.panel{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:12px;margin-bottom:10px}
+.panel h2{margin:0 0 8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--a)}
+.chips span{display:inline-block;font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--l);color:var(--m);margin:2px 3px 0 0}
+.chips span.on{border-color:var(--ok);color:var(--ok)}
+.chips span.gpu{border-color:var(--gpu);color:var(--gpu)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+.nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.node{background:#080c14;border:1px solid var(--l);border-radius:10px;padding:8px;font-size:11px}
+.node .id{font-weight:700;color:var(--gpu)}
+.gpus{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.gpu{width:28px;height:28px;border-radius:6px;background:#122;border:1px solid var(--l);position:relative;overflow:hidden}
+.gpu>i{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,var(--a),var(--gpu));opacity:.85}
+button{border:0;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016;margin:4px 4px 0 0}
+button.g{background:transparent;border:1px solid var(--l);color:var(--t)}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+select,input{background:#080b11;color:var(--t);border:1px solid var(--l);border-radius:10px;padding:9px;font:inherit}
+#log{height:min(28vh,240px);overflow:auto;font:11px/1.4 ui-monospace,monospace;color:var(--m);background:#080b11;border:1px solid var(--l);border-radius:10px;padding:8px;white-space:pre-wrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.meta{font:12px ui-monospace,monospace;color:var(--m)}
+footer{margin-top:14px;font-size:12px;color:var(--m)}footer a{color:var(--a);margin-right:8px}
+.bar{height:6px;background:#121820;border-radius:4px;overflow:hidden;margin:6px 0}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gpu),var(--a));transition:width .25s}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>АКСИ · Supercomputer Simulator</h1>
+  <p class="lead">Виртуальный кластер: GPU-ноды, очередь задач, память-ledger, quantum seed, связь с Экзокортексом.</p>
+  <div class="warn">Честно: симулятор в браузере. Не физический суперкомпьютер. Живой конвейер: submit → schedule → compute → memory → export.</div>
+
+  <div class="panel">
+    <h2>Fabric status</h2>
+    <div class="chips">
+      <span id="cBoot">offline</span>
+      <span id="cNodes" class="gpu">nodes: 0</span>
+      <span id="cGpus" class="gpu">gpus: 0</span>
+      <span id="cUtil">util: 0%</span>
+      <span id="cQ">queue: 0</span>
+      <span id="cR">running: 0</span>
+      <span id="cMem">mem: 0</span>
+      <span id="cFlops">flops: 0</span>
+    </div>
+    <div class="bar"><i id="utilBar"></i></div>
+    <div class="meta" id="meta">—</div>
+    <div class="row">
+      <button type="button" id="boot">Запустить кластер 8×4 GPU</button>
+      <button type="button" class="g" id="bootBig">16×8 (heavy)</button>
+      <button type="button" class="g" id="stop">Стоп scheduler</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Nodes</h2>
+    <div class="nodes" id="nodes"></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Submit job</h2>
+      <div class="row">
+        <select id="jtype">
+          <option value="matmul">matmul (GEMM)</option>
+          <option value="ai_train">ai_train (virtual)</option>
+          <option value="gpu_batch">gpu_batch</option>
+          <option value="quantum">quantum collapse</option>
+          <option value="memory_scan">memory_scan</option>
+          <option value="exocortex_link">exocortex_link</option>
+        </select>
+        <select id="jsize">
+          <option value="32">32²</option>
+          <option value="48" selected>48²</option>
+          <option value="64">64²</option>
+          <option value="80">80²</option>
+        </select>
+      </div>
+      <input id="jprompt" placeholder="prompt / label (optional)" style="width:100%;margin-top:8px"/>
+      <div class="row">
+        <button type="button" id="submit">Поставить в очередь</button>
+        <button type="button" class="g" id="burst">×8 burst</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>Actions</h2>
+      <div class="row">
+        <button type="button" class="g" id="export">Export JSON</button>
+        <a class="g" href="/exocortex/?v=1" style="display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid var(--l);color:var(--t);text-decoration:none;margin:4px 4px 0 0">→ Exocortex</a>
+        <a class="g" href="/qai/" style="display:inline-block;padding:10px 14px;border-radius:10px;border:1px solid var(--l);color:var(--t);text-decoration:none;margin:4px 4px 0 0">→ Quantum AI</a>
+      </div>
+      <p class="meta" style="margin-top:10px">Память append-only в localStorage. Задачи реально считают matmul/quantum в JS.</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Event log</h2>
+    <div id="log"></div>
+  </div>
+
+  <footer>
+    <a href="/">home</a>
+    <a href="/exocortex/">exocortex</a>
+    <a href="/permit/">permit</a>
+    <a href="/runtime/">runtime</a>
+    · aksilove@internet.ru · simulator
+  </footer>
+</div>
+
+<script src="/aksi-super.js?v=1"></script>
+<script>
+(function(){
+"use strict";
+var S=window.AKSI_SUPER,fabric=null,logEl=document.getElementById("log");
+function log(msg,cls){var d=document.createElement("div");if(cls)d.className=cls;d.textContent="["+new Date().toISOString().slice(11,19)+"] "+msg;logEl.appendChild(d);logEl.scrollTop=logEl.scrollHeight;}
+function chip(id,t,cls){var el=document.getElementById(id);el.textContent=t;el.className=cls||"";}
+function paintNodes(sn){var root=document.getElementById("nodes");root.innerHTML="";(sn.nodes_detail||[]).forEach(function(n){var div=document.createElement("div");div.className="node";var gpus=document.createElement("div");gpus.className="gpus";n.gpus.forEach(function(g){var gdiv=document.createElement("div");gdiv.className="gpu";gdiv.title=g.id+" util="+g.util.toFixed(0)+"% T="+g.temp.toFixed(0);var fill=document.createElement("i");fill.style.height=Math.min(100,g.util)+"%";gdiv.appendChild(fill);gpus.appendChild(gdiv);});div.innerHTML="<div class='id'>"+n.id+"</div><div>"+n.rack+" · load "+n.load.toFixed(0)+"%</div>";div.appendChild(gpus);root.appendChild(div);});}
+function paint(sn){if(!sn)return;chip("cBoot",sn.booted?"ONLINE":"offline",sn.booted?"on":"");chip("cNodes","nodes: "+sn.nodes,"gpu");chip("cGpus","gpus: "+sn.gpus,"gpu");chip("cUtil","util: "+sn.avg_util.toFixed(0)+"%",sn.avg_util>50?"on":"");chip("cQ","queue: "+sn.queue,"");chip("cR","running: "+sn.running,sn.running?"on":"");chip("cMem","mem: "+sn.mem_entries,"");chip("cFlops","flops: "+Math.round(sn.stats.flops).toLocaleString(),"gpu");document.getElementById("utilBar").style.width=Math.min(100,sn.avg_util)+"%";document.getElementById("meta").textContent="done="+sn.done+" · compute_ms="+Math.round(sn.stats.ms)+" · ledger≈"+Math.round(sn.mem_bytes/1024)+"KB";paintNodes(sn);}
+function ensure(){if(!S){log("aksi-super.js не загрузился","bad");return null;}if(!fabric){fabric=new S.SuperFabric({maxMem:5000});fabric.loadMemory();fabric.onTick=function(sn){paint(sn);};}return fabric;}
+document.getElementById("boot").onclick=function(){var f=ensure();if(!f)return;f.boot(8,4);f.startScheduler(350);log("BOOT 8×4 = 32 virtual GPUs","ok");paint(f.snapshot());};
+document.getElementById("bootBig").onclick=function(){var f=ensure();if(!f)return;f.boot(16,8);f.startScheduler(300);log("BOOT 16×8 = 128 virtual GPUs","ok");paint(f.snapshot());};
+document.getElementById("stop").onclick=function(){if(!fabric)return;fabric.stopScheduler();log("scheduler stopped","");};
+document.getElementById("submit").onclick=function(){var f=ensure();if(!f||!f.booted){log("Сначала Boot","bad");return;}var job=f.submit({type:document.getElementById("jtype").value,size:parseInt(document.getElementById("jsize").value,10),prompt:document.getElementById("jprompt").value});log("QUEUED "+job.id+" type="+job.type,"ok");paint(f.snapshot());};
+document.getElementById("burst").onclick=function(){var f=ensure();if(!f||!f.booted){log("Сначала Boot","bad");return;}var t=document.getElementById("jtype").value,s=parseInt(document.getElementById("jsize").value,10);for(var i=0;i<8;i++)f.submit({type:t,size:s,prompt:"burst-"+i});log("BURST 8 jobs","ok");paint(f.snapshot());};
+document.getElementById("export").onclick=function(){var f=ensure();if(!f)return;var data=JSON.stringify(f.exportJSON(),null,2);var blob=new Blob([data],{type:"application/json"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aksi-super-"+Date.now()+".json";a.click();log("EXPORT "+data.length+" bytes","ok");};
+if(!S)log("Модуль AKSI_SUPER отсутствует","bad");else{log("Simulator "+S.version+" ready. Жми Boot.","ok");ensure();}
+})();
+</script>
+</body>
+</html>
