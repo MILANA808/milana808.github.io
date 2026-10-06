@@ -6,15 +6,14 @@
 <title>АКСИ · один контур</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
 <meta name="theme-color" content="#06080e"/>
-<meta name="description" content="АКСИ: вопрос → Super → Mind → Permit → чек. Всё на одной странице."/>
 <style>
-:root{--bg:#06080e;--p:#0c1018;--l:#1a2233;--t:#e8eef8;--m:#8b97ab;--a:#5eead4;--q:#a78bfa;--ok:#34d399;--bad:#f87171;--warn:#fbbf24;--gpu:#38bdf8}
+:root{--bg:#06080e;--p:#0c1018;--l:#1a2233;--t:#e8eef8;--m:#8b97ab;--a:#5eead4;--q:#a78bfa;--ok:#34d399;--bad:#f87171;--gpu:#38bdf8}
 *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,-apple-system,sans-serif}
 .w{max-width:720px;margin:0 auto;padding:12px 12px 40px}
 h1{font-size:1.25rem;margin:8px 0 4px;background:linear-gradient(90deg,var(--a),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{color:var(--m);font-size:13px;margin:0 0 12px}
+.sub{color:var(--m);font-size:13px;margin:0 0 10px}
 .tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.tabs button{flex:1;min-width:90px;padding:10px;border-radius:10px;border:1px solid var(--l);background:transparent;color:var(--m);font:inherit;font-weight:600;cursor:pointer}
+.tabs button{flex:1;min-width:88px;padding:10px;border-radius:10px;border:1px solid var(--l);background:transparent;color:var(--m);font:inherit;font-weight:600;cursor:pointer}
 .tabs button.on{border-color:var(--a);color:var(--a);background:rgba(94,234,212,.08)}
 .panel{display:none;background:var(--p);border:1px solid var(--l);border-radius:14px;padding:14px;margin-bottom:10px}
 .panel.on{display:block}
@@ -22,229 +21,158 @@ h1{font-size:1.25rem;margin:8px 0 4px;background:linear-gradient(90deg,var(--a),
 .chips span{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--l);color:var(--m)}
 .chips span.on{border-color:var(--ok);color:var(--ok)}
 .chips span.bad{border-color:var(--bad);color:var(--bad)}
+.chips span.gpu{border-color:var(--gpu);color:var(--gpu)}
 textarea{width:100%;min-height:80px;background:#080b11;color:var(--t);border:1px solid var(--l);border-radius:10px;padding:12px;font:inherit;resize:vertical}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
 button.act{border:0;border-radius:10px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),var(--q));color:#041016}
 button.g{background:transparent;border:1px solid var(--l);color:var(--t);border-radius:10px;padding:12px 16px;font:inherit;font-weight:600;cursor:pointer}
 button:disabled{opacity:.45}
-#answer,#vlog{white-space:pre-wrap;font:13px/1.5 system-ui,sans-serif;background:#080b11;border:1px solid var(--l);border-radius:10px;padding:12px;min-height:100px;margin-top:10px;max-height:45vh;overflow:auto}
-#vlog{font:12px/1.45 ui-monospace,monospace}
+#answer,#vlog,#slog{white-space:pre-wrap;background:#080b11;border:1px solid var(--l);border-radius:10px;padding:12px;min-height:100px;margin-top:10px;max-height:42vh;overflow:auto}
+#answer{font:13px/1.5 system-ui,sans-serif}
+#vlog,#slog{font:12px/1.45 ui-monospace,monospace;color:var(--m)}
 .ok{color:var(--ok)}.bad{color:var(--bad)}.st{color:var(--gpu)}.muted{color:var(--m)}
 #hash{word-break:break-all;font:11px ui-monospace,monospace;color:var(--gpu);margin-top:8px}
-footer{margin-top:14px;font-size:12px;color:var(--m)}
 .hint{font-size:12px;color:var(--m);margin-top:8px}
+.bar{height:6px;background:#121820;border-radius:4px;overflow:hidden;margin:8px 0 0}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gpu),var(--a));transition:width .2s}
+footer{margin-top:14px;font-size:12px;color:var(--m)}
 </style>
 </head>
 <body>
 <div class="w">
   <h1>АКСИ · один контур</h1>
-  <p class="sub">Вопрос → Super → Mind → Permit → чек. Всё здесь, без других страниц.</p>
-  <div class="chips" id="chips">
+  <p class="sub">Вопрос → Super → Mind / WebLLM → Permit → чек. Всё на одной странице.</p>
+  <div class="chips">
     <span id="cBoot">offline</span>
     <span id="cExo">exo: —</span>
     <span id="cMind">mind: —</span>
+    <span id="cLlm">llm: —</span>
     <span id="cVer">verify: —</span>
   </div>
   <div class="tabs">
-    <button type="button" class="on" data-tab="ask" id="tAsk">Спросить</button>
-    <button type="button" data-tab="verify" id="tVer">Проверить всё</button>
-    <button type="button" data-tab="log" id="tLog">Журнал</button>
+    <button type="button" class="on" id="tAsk">Спросить</button>
+    <button type="button" id="tLlm">WebLLM</button>
+    <button type="button" id="tVer">Проверить</button>
+    <button type="button" id="tLog">Журнал</button>
   </div>
   <div class="panel on" id="pAsk">
-    <textarea id="q" placeholder="Любой вопрос… 12*12 · что такое Permit? · почему небо голубое?"></textarea>
+    <textarea id="q" placeholder="Любой вопрос… 12*12 · что такое Permit? · расскажи про кванты"></textarea>
     <div class="row">
       <button type="button" class="act" id="ask">▶ Спросить</button>
-      <button type="button" class="g" id="exportAns">Export ответа</button>
+      <button type="button" class="g" id="exportAns">Export</button>
     </div>
     <div id="answer">Ответ появится здесь…</div>
-    <p class="hint">Стадии: quantum → compute → mind → permit → receipt</p>
+    <p class="hint">Если WebLLM загружен — живой ответ с модели. Иначе Mind + wiki.</p>
+  </div>
+  <div class="panel" id="pLlm">
+    <p class="hint" style="margin-top:0">Нужен <b>WebGPU</b> (Chrome/Edge Android или ПК). На старом iPhone WebGPU часто нет — тогда работает Mind.</p>
+    <div class="row">
+      <button type="button" class="act" id="loadLlm">▶ Загрузить WebLLM</button>
+      <button type="button" class="g" id="unloadLlm">Выгрузить</button>
+    </div>
+    <div class="bar"><i id="llmBar"></i></div>
+    <p class="hint" id="llmHint">Статус: ожидание</p>
+    <p class="hint" id="llmModel">Модель: —</p>
   </div>
   <div class="panel" id="pVerify">
-    <p class="hint" style="margin-top:0">Один прогон: модули + 5 тестов + ECDSA-цепочка + SHA-256 audit.</p>
     <div class="row">
-      <button type="button" class="act" id="runVerify">▶ Запустить проверку</button>
+      <button type="button" class="act" id="runVerify">▶ Проверить контур</button>
       <button type="button" class="g" id="exportVer" disabled>Export JSON</button>
     </div>
-    <div id="vlog">Нажмите «Запустить проверку»…</div>
+    <div id="vlog">Нажмите «Проверить контур»…</div>
     <div id="hash">audit sha256: —</div>
   </div>
   <div class="panel" id="pLog">
-    <div id="slog" style="white-space:pre-wrap;font:12px/1.45 ui-monospace,monospace;color:var(--m);min-height:120px"></div>
+    <div id="slog"></div>
   </div>
   <footer>aksi · aksilove@internet.ru · один runtime</footer>
 </div>
 <script src="/aksi-exocortex.js?v=1"></script>
-<script src="/aksi-super-mind.js?v=4"></script>
+<script src="/aksi-webllm.js?v=43"></script>
+<script src="/aksi-super-mind.js?v=5"></script>
 <script src="/aksi-super.js?v=23"></script>
 <script>
 (function(){
 "use strict";
-var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, X=window.AKSI_EXOCORTEX;
+var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, X=window.AKSI_EXOCORTEX, W=window.AKSI_WEBLLM;
 var fabric=null, lastReport=null;
 function $(id){return document.getElementById(id);}
-function slog(msg,cls){
-  var d=document.createElement("div");
-  if(cls)d.className=cls;
-  d.textContent="["+new Date().toISOString().slice(11,19)+"] "+msg;
-  $("slog").appendChild(d);
-  $("slog").scrollTop=$("slog").scrollHeight;
-}
-function vline(msg,cls){
-  var d=document.createElement("div");
-  if(cls)d.className=cls;
-  d.textContent=msg;
-  $("vlog").appendChild(d);
-  $("vlog").scrollTop=$("vlog").scrollHeight;
-}
+function slog(msg,cls){var d=document.createElement("div");if(cls)d.className=cls;d.textContent="["+new Date().toISOString().slice(11,19)+"] "+msg;$("slog").appendChild(d);$("slog").scrollTop=$("slog").scrollHeight;}
+function vline(msg,cls){var d=document.createElement("div");if(cls)d.className=cls;d.textContent=msg;$("vlog").appendChild(d);$("vlog").scrollTop=$("vlog").scrollHeight;}
 function chip(id,t,cls){var el=$(id);if(!el)return;el.textContent=t;el.className=cls||"";}
-function paint(){
-  var sn=fabric?fabric.snapshot():null;
-  chip("cBoot",sn&&sn.booted?"ONLINE":"offline",sn&&sn.booted?"on":"");
-  chip("cExo",sn&&sn.exo?"exo: ON":"exo: off",sn&&sn.exo?"on":"bad");
-  chip("cMind",M?"mind "+(M.version||""):"mind: off",M?"on":"bad");
+function llmReady(){try{if(!W)return false;if(typeof W.ready==="function")return !!W.ready();var st=W.status&&W.status();return !!(st&&st.ready);}catch(e){return false;}}
+function llmLoading(){try{if(!W)return false;if(typeof W.loading==="function")return !!W.loading();var st=W.status&&W.status();return !!(st&&st.loading);}catch(e){return false;}}
+function paintLlm(detail){
+  var st=null;try{st=W&&W.status&&W.status();}catch(e){}
+  var prog=(detail&&typeof detail.progress==="number")?detail.progress:(st&&st.progress)||0;
+  if(prog>1)prog=prog/100;
+  $("llmBar").style.width=Math.min(100,Math.round(prog*100))+"%";
+  var msg=(detail&&detail.message)||(st&&st.message)||"";
+  if(llmReady()){chip("cLlm","llm: ON","on");$("llmHint").textContent="Готово. Следующий вопрос через WebLLM.";$("llmModel").textContent="Модель: "+((st&&st.model)||"loaded");}
+  else if(llmLoading()){chip("cLlm","llm: loading…","gpu");$("llmHint").textContent=msg||("Загрузка "+Math.round(prog*100)+"%");}
+  else if(!W){chip("cLlm","llm: нет скрипта","bad");$("llmHint").textContent="aksi-webllm.js не загрузился — Ctrl+Shift+R";}
+  else{chip("cLlm","llm: off","");$("llmHint").textContent=msg||(st&&st.error)||"Нажмите «Загрузить WebLLM» (нужен WebGPU)";$("llmModel").textContent="Модель: —";}
 }
-function tab(name){
-  ["ask","verify","log"].forEach(function(n){
-    $("p"+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle("on", n===name);
-    var btn=n==="ask"?$("tAsk"):n==="verify"?$("tVer"):$("tLog");
-    btn.classList.toggle("on", n===name);
-  });
-}
-$("tAsk").onclick=function(){tab("ask");};
-$("tVer").onclick=function(){tab("verify");};
-$("tLog").onclick=function(){tab("log");};
+function paint(){var sn=fabric?fabric.snapshot():null;chip("cBoot",sn&&sn.booted?"ONLINE":"offline",sn&&sn.booted?"on":"");chip("cExo",sn&&sn.exo?"exo: ON":"exo: off",sn&&sn.exo?"on":"bad");chip("cMind",M?"mind "+(M.version||""):"mind: off",M?"on":"bad");paintLlm();}
+function tab(name){["Ask","Llm","Verify","Log"].forEach(function(n){$("p"+n).classList.toggle("on",n.toLowerCase()===name);});$("tAsk").classList.toggle("on",name==="ask");$("tLlm").classList.toggle("on",name==="llm");$("tVer").classList.toggle("on",name==="verify");$("tLog").classList.toggle("on",name==="log");}
+$("tAsk").onclick=function(){tab("ask");};$("tLlm").onclick=function(){tab("llm");};$("tVer").onclick=function(){tab("verify");};$("tLog").onclick=function(){tab("log");};
 async function ensure(){
-  if(!S){slog("Super не загружен — Ctrl+Shift+R","bad");return null;}
-  if(!fabric){
-    fabric=new S.SuperFabric();
-    fabric.loadMemory();
-    fabric.onEvent=function(ev){
-      if(ev.stage==="stage")slog(" · "+ev.detail.name+(ev.detail.data&&ev.detail.data.source?" ["+ev.detail.data.source+"]":""),"st");
-      if(ev.stage==="error")slog("error "+(ev.detail&&ev.detail.error),"bad");
-    };
-  }
-  if(!fabric.booted){
-    fabric.boot(6,2);
-    fabric.startScheduler(200);
-    try{await fabric.attachExocortex();}catch(e){slog("exo: "+(e.message||e),"bad");}
-    slog("контур запущен · Super "+S.version+" · Mind "+(M&&M.version),"ok");
-  }
-  paint();
-  return fabric;
+  if(!S){slog("Super не загружен","bad");return null;}
+  if(!fabric){fabric=new S.SuperFabric();fabric.loadMemory();fabric.onEvent=function(ev){if(ev.stage==="stage")slog(" · "+ev.detail.name+(ev.detail.data&&ev.detail.data.source?" ["+ev.detail.data.source+"]":""),"st");if(ev.stage==="error")slog("error "+(ev.detail&&ev.detail.error),"bad");};}
+  if(!fabric.booted){fabric.boot(6,2);fabric.startScheduler(200);try{await fabric.attachExocortex();}catch(e){slog("exo: "+(e.message||e),"bad");}slog("контур · Super "+S.version+" · Mind "+(M&&M.version)+" · WebLLM "+(W?"v"+(W.version||"?"):"нет"),"ok");}
+  paint();return fabric;
 }
-ensure().then(paint);
+$("loadLlm").onclick=async function(){
+  if(!W||(!W.load&&!W.loadModel&&!W.autoLoad)){slog("WebLLM API нет","bad");$("llmHint").textContent="Скрипт не загрузился";return;}
+  $("loadLlm").disabled=true;tab("llm");slog("загрузка WebLLM…","st");paintLlm({progress:0.02,message:"старт…"});
+  var loadFn=W.load||W.loadModel||W.autoLoad;
+  try{
+    await loadFn.call(W,null,function(p,msg){var progress=typeof p==="number"?p:(p&&p.progress)||0;paintLlm({progress:progress,message:msg||(p&&p.text)||"loading"});});
+    slog("WebLLM готов: "+((W.status&&W.status().model)||"ok"),"ok");paintLlm();
+  }catch(e){slog("WebLLM fail: "+(e.message||e),"bad");$("llmHint").textContent=String(e.message||e);chip("cLlm","llm: fail","bad");}
+  $("loadLlm").disabled=false;paint();
+};
+$("unloadLlm").onclick=function(){try{if(W&&W.unload)W.unload();}catch(e){}paintLlm();slog("WebLLM выгружен","");};
+if(W){window.addEventListener("aksi-webllm-progress",function(e){paintLlm(e.detail||{});});window.addEventListener("aksi:webllm-ready",function(){paintLlm();slog("event: webllm ready","ok");});}
 $("ask").onclick=async function(){
-  var text=$("q").value.trim();
-  if(!text){slog("пустой вопрос","bad");return;}
-  $("ask").disabled=true;
-  var f=await ensure();
-  if(!f){$("ask").disabled=false;return;}
-  $("answer").textContent="Считаю…";
-  slog("вопрос: "+text.slice(0,80),"ok");
-  var job=f.submit({type:"mind",prompt:text,size:32});
-  var t0=Date.now();
+  var text=$("q").value.trim();if(!text){slog("пустой вопрос","bad");return;}
+  $("ask").disabled=true;var f=await ensure();if(!f){$("ask").disabled=false;return;}
+  $("answer").textContent=llmReady()?"Считаю через WebLLM…":"Считаю через Mind…";
+  slog("вопрос: "+text.slice(0,80)+(llmReady()?" [llm]":" [mind]"),"ok");
+  var job=f.submit({type:"mind",prompt:text,size:32});var t0=Date.now();
   var iv=setInterval(function(){
     var done=f.done.find(function(j){return j.id===job.id;});
-    if(done||Date.now()-t0>90000){
-      clearInterval(iv);
-      $("ask").disabled=false;
-      paint();
-      if(done&&done.result){
-        var ans=done.result.answer||done.result.report||done.result.error||"";
-        $("answer").textContent=ans;
-        slog((done.status==="error"?"ошибка":"готово")+" · "+(done.result.source||done.status)+" · "+(done.stages||[]).map(function(s){return s.name;}).join(" → "),done.status==="error"?"bad":"ok");
-      }else{
-        $("answer").textContent="Таймаут. Ещё раз.";
-        slog("timeout","bad");
-      }
+    if(done||Date.now()-t0>120000){
+      clearInterval(iv);$("ask").disabled=false;paint();
+      if(done&&done.result){var ans=done.result.answer||done.result.report||done.result.error||"";$("answer").textContent=ans;slog("готово · "+(done.result.source||done.status)+" · "+(done.stages||[]).map(function(s){return s.name;}).join("→"),"ok");}
+      else{$("answer").textContent="Таймаут. Ещё раз.";slog("timeout","bad");}
     }
-  },70);
+  },80);
 };
-$("exportAns").onclick=function(){
-  var t=$("answer").textContent||"";
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"}));
-  a.download="aksi-answer-"+Date.now()+".txt";
-  a.click();
-};
-async function sha256hex(text){
-  var dig=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(text)));
-  return Array.from(new Uint8Array(dig)).map(function(b){return ("0"+b.toString(16)).slice(-2);}).join("");
-}
+$("exportAns").onclick=function(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([$("answer").textContent||""],{type:"text/plain"}));a.download="aksi-answer-"+Date.now()+".txt";a.click();};
+async function sha256hex(text){var dig=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(String(text)));return Array.from(new Uint8Array(dig)).map(function(b){return ("0"+b.toString(16)).slice(-2);}).join("");}
 $("runVerify").onclick=async function(){
-  $("runVerify").disabled=true;
-  $("exportVer").disabled=true;
-  $("vlog").textContent="";
-  chip("cVer","verify: run","");
-  var report={t:new Date().toISOString(), versions:{}, tests:[], ok:true, chain:null};
+  $("runVerify").disabled=true;$("exportVer").disabled=true;$("vlog").textContent="";chip("cVer","verify: run","");
+  var report={t:new Date().toISOString(),versions:{},tests:[],ok:true,chain:null,llm:llmReady()};
   vline("1) Модули","muted");
-  if(!S||!M){vline("FAIL модули","bad");report.ok=false;finishV(report);return;}
-  vline("  Super "+S.version,"ok");
-  vline("  Mind "+M.version,"ok");
-  vline("  Exo "+(X&&X.version||"—"),X?"ok":"bad");
-  report.versions={super:S.version,mind:M.version,exo:X&&X.version};
-  var f=await ensure();
-  vline("2) Fabric + exo: "+!!(f&&f.exo),f&&f.exo?"ok":"bad");
-  async function runQ(q){
-    var job=f.submit({type:"mind",prompt:q,size:16});
-    var t0=Date.now();
-    return await new Promise(function(res){
-      var iv=setInterval(function(){
-        var d=f.done.find(function(j){return j.id===job.id;});
-        if(d||Date.now()-t0>20000){clearInterval(iv);res(d||null);}
-      },50);
-    });
-  }
+  if(!S||!M){vline("FAIL","bad");report.ok=false;finishV(report);return;}
+  vline("  Super "+S.version,"ok");vline("  Mind "+M.version,"ok");vline("  Exo "+(X&&X.version||"—"),X?"ok":"bad");
+  vline("  WebLLM "+(W?(llmReady()?"READY":"script-ok"):"MISSING"),llmReady()?"ok":"muted");
+  report.versions={super:S.version,mind:M.version,exo:X&&X.version,webllm:W&&W.version};
+  var f=await ensure();vline("2) fabric+exo "+!!(f&&f.exo),f&&f.exo?"ok":"bad");
+  async function runQ(q){var job=f.submit({type:"mind",prompt:q,size:16});var t0=Date.now();return await new Promise(function(res){var iv=setInterval(function(){var d=f.done.find(function(j){return j.id===job.id;});if(d||Date.now()-t0>25000){clearInterval(iv);res(d||null);}},50);});}
   vline("3) Тесты","muted");
-  var cases=[
-    {n:"math",q:"12*12",p:function(t){return t.indexOf("144")>=0;}},
-    {n:"permit",q:"что такое Permit?",p:function(t){return /Permit|ALLOW|default/i.test(t);}},
-    {n:"sky",q:"почему небо голубое?",p:function(t){return /Рэле|небо|голуб|рассеян/i.test(t);}},
-    {n:"aksi",q:"кто ты?",p:function(t){return /АКСИ|aksi/i.test(t);}},
-    {n:"eq",q:"x^2=9",p:function(t){return /3/.test(t);}}
-  ];
-  for(var i=0;i<cases.length;i++){
-    var c=cases[i];
-    vline("  → "+c.q,"muted");
-    var d=await runQ(c.q);
-    var ans=(d&&d.result&&(d.result.answer||d.result.report||""))||"";
-    var st=(d&&d.stages||[]).map(function(s){return s.name;});
-    var pass=!!(d&&d.status==="done"&&c.p(ans)&&st.indexOf("quantum")>=0&&st.indexOf("mind")>=0);
-    report.tests.push({name:c.n,q:c.q,pass:pass,stages:st,source:d&&d.result&&d.result.source});
-    if(!pass)report.ok=false;
-    vline("  "+(pass?"PASS":"FAIL")+" · "+st.join(">"),pass?"ok":"bad");
-  }
-  vline("4) ECDSA chain","muted");
-  try{
-    var chain=await f.verifyExoChain();
-    report.chain=chain;
-    if(chain&&chain.ok)vline("  PASS count="+chain.count,"ok");
-    else{vline("  "+JSON.stringify(chain),"bad");report.ok=false;}
-  }catch(e){vline("  "+(e.message||e),"bad");report.ok=false;}
-  var payload=JSON.stringify({versions:report.versions,tests:report.tests.map(function(t){return{name:t.name,pass:t.pass,stages:t.stages};}),chain:report.chain&&{ok:report.chain.ok,count:report.chain.count},t:report.t});
-  report.audit_sha256=await sha256hex(payload);
-  vline("5) audit "+report.audit_sha256,"ok");
-  vline(report.ok?"ИТОГ: ВСЁ В ЕДИНОМ КОНТУРЕ — PASS":"ИТОГ: FAIL",report.ok?"ok":"bad");
-  finishV(report);
+  var cases=[{n:"math",q:"12*12",p:function(t){return t.indexOf("144")>=0;}},{n:"permit",q:"что такое Permit?",p:function(t){return /Permit|ALLOW|default/i.test(t);}},{n:"sky",q:"почему небо голубое?",p:function(t){return /Рэле|небо|голуб|рассеян/i.test(t);}},{n:"aksi",q:"кто ты?",p:function(t){return /АКСИ|aksi/i.test(t);}},{n:"eq",q:"x^2=9",p:function(t){return /3/.test(t);}}];
+  for(var i=0;i<cases.length;i++){var c=cases[i];vline("  → "+c.q,"muted");var d=await runQ(c.q);var ans=(d&&d.result&&(d.result.answer||d.result.report||""))||"";var st=(d&&d.stages||[]).map(function(s){return s.name;});var pass=!!(d&&d.status==="done"&&c.p(ans)&&st.indexOf("quantum")>=0&&st.indexOf("mind")>=0);report.tests.push({name:c.n,pass:pass,stages:st,source:d&&d.result&&d.result.source});if(!pass)report.ok=false;vline("  "+(pass?"PASS":"FAIL")+" · "+st.join(">"),pass?"ok":"bad");}
+  vline("4) ECDSA","muted");
+  try{var chain=await f.verifyExoChain();report.chain=chain;if(chain&&chain.ok)vline("  PASS count="+chain.count,"ok");else{vline("  fail","bad");report.ok=false;}}catch(e){vline("  "+(e.message||e),"bad");report.ok=false;}
+  var payload=JSON.stringify({versions:report.versions,tests:report.tests,chain:report.chain&&{ok:report.chain.ok,count:report.chain.count},llm:report.llm,t:report.t});
+  report.audit_sha256=await sha256hex(payload);vline("5) "+report.audit_sha256,"ok");vline(report.ok?"ИТОГ PASS":"ИТОГ FAIL",report.ok?"ok":"bad");finishV(report);
 };
-function finishV(report){
-  lastReport=report;
-  $("runVerify").disabled=false;
-  $("exportVer").disabled=false;
-  chip("cVer",report.ok?"verify: PASS":"verify: FAIL",report.ok?"on":"bad");
-  $("hash").textContent="audit sha256: "+(report.audit_sha256||"—");
-  paint();
-}
-$("exportVer").onclick=function(){
-  if(!lastReport)return;
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"}));
-  a.download="aksi-one-verify-"+Date.now()+".json";
-  a.click();
-};
-slog("единый контур · Mind="+(M&&M.version)+" Super="+(S&&S.version),"ok");
-if(!S||!M)slog("скрипты не загрузились","bad");
-if(location.hash==="#verify")tab("verify");
+function finishV(report){lastReport=report;$("runVerify").disabled=false;$("exportVer").disabled=false;chip("cVer",report.ok?"verify: PASS":"verify: FAIL",report.ok?"on":"bad");$("hash").textContent="audit sha256: "+(report.audit_sha256||"—");paint();}
+$("exportVer").onclick=function(){if(!lastReport)return;var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"}));a.download="aksi-verify-"+Date.now()+".json";a.click();};
+ensure().then(function(){slog("единый контур готов","ok");paint();});
+if(location.hash==="#verify")tab("verify");if(location.hash==="#llm")tab("llm");
 })();
 </script>
 </body>
