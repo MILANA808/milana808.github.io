@@ -1,7 +1,7 @@
-/** AKSI Super Mind v3.3 — любой вопрос на русском: wiki + KB + math + WebLLM */
+/** AKSI Super Mind v3.4 — любой вопрос на русском: wiki + KB + math + WebLLM */
 (function (G) {
   "use strict";
-  var VERSION = "mind-3.3.0";
+  var VERSION = "mind-3.4.0";
   function hash(s) {
     var h = 2166136261 >>> 0, t = String(s), i;
     for (i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -42,25 +42,25 @@
   }
   var KB = [
     { re: /суперпозиц/i, title: "Суперпозиция",
-      text: "Суперпозиция — описание квантовой системы несколькими состояниями сразу, пока не сделано измерение. Кубит: |ψ⟩=α|0⟩+β|1⟩, вероятности |α|² и |β|². В АКСИ это statevector и коллапс одного shot." },
+      text: "Суперпозиция — описание квантовой системы несколькими состояниями сразу, пока не сделано измерение. Кубит: |ψ⟩=α|0⟩+β|1⟩, вероятности |α|² и |β|²." },
     { re: /кубит|qubit/i, title: "Кубит",
-      text: "Кубит хранит α|0⟩+β|1⟩. n кубитов дают 2ⁿ амплитуд. Super fabric использует компактный 4-кубитный сид." },
+      text: "Кубит хранит α|0⟩+β|1⟩. n кубитов дают 2ⁿ амплитуд. Super fabric использует 4-кубитный сид." },
     { re: /permit|пермит|допуск/i, title: "Permit",
-      text: "Permit — default-deny: действие агента только после ALLOW. Отделяет текст ответа от опасного действия. При ALLOW выдаётся крипто-чек (receipt)." },
+      text: "Permit — default-deny: действие только после ALLOW. При ALLOW выдаётся receipt." },
     { re: /экзокортекс|exocortex/i, title: "Экзокортекс",
-      text: "Экзокортекс АКСИ: вектор состояния S, цель, опыт, Permit, ECDSA-цепочка чеков." },
+      text: "Экзокортекс АКСИ: вектор S, цель, опыт, Permit, ECDSA-цепочка чеков." },
     { re: /\bакси\b|aksi|кто ты|что ты/i, title: "АКСИ",
-      text: "АКСИ — суверенный offline-first контур: Super fabric, quantum seed, Mind/WebLLM, Permit, чеки. Технология служит человеку." },
+      text: "АКСИ — offline-first контур: Super, quantum seed, Mind/WebLLM, Permit, чеки." },
     { re: /энтропи/i, title: "Энтропия",
       text: "S=−Σ pᵢ log₂ pᵢ. Высокая энтропия — больше неопределённости до коллапса." },
     { re: /коллапс|измерен/i, title: "Коллапс",
-      text: "Коллапс — выбор базиса с вероятностью |амплитуда|². Результат — сид следующих стадий." },
+      text: "Коллапс — выбор базиса с вероятностью |амплитуда|²." },
     { re: /суперкомпьютер|fabric|gpu/i, title: "Super Fabric",
       text: "Виртуальный кластер в браузере: jobs, ноды, matmul, quantum, mind." },
     { re: /webllm|веб\s*ллм|языков\w+\s*модел/i, title: "WebLLM",
       text: "WebLLM — сжатые веса (q4) модели в браузере через WebGPU." },
     { re: /небо.*голуб|голуб.*небо|рассеян.*рэле|rayleigh/i, title: "Почему небо голубое",
-      text: "Небо голубое из‑за рассеяния Рэлея: синяя часть спектра рассеивается сильнее. На закате больше красных тонов." },
+      text: "Небо голубое из‑за рассеяния Рэлея: синяя часть спектра рассеивается сильнее." },
     { re: /фотосинтез/i, title: "Фотосинтез",
       text: "Фотосинтез: свет + CO₂ + H₂O → сахар + O₂." },
     { re: /относительн.*эйнштейн|теория относительн/i, title: "Теория относительности",
@@ -68,7 +68,7 @@
     { re: /днк|генетич.*код/i, title: "ДНК",
       text: "ДНК — двойная спираль (A,T,G,C), носитель генетической информации." },
     { re: /искусственн.*интеллект|\bии\b|\bai\b/i, title: "Искусственный интеллект",
-      text: "ИИ — системы для распознавания, языка, планирования. АКСИ добавляет допуск и доказательства шагов." },
+      text: "ИИ — системы для языка, распознавания, планирования. АКСИ добавляет допуск и чеки." },
     { re: /блокчейн|bitcoin|биткоин/i, title: "Блокчейн",
       text: "Блокчейн — цепочка блоков, каждый ссылается на хэш предыдущего." }
   ];
@@ -165,12 +165,12 @@
     lines.push("Разбор");
     if (keys.length) lines.push("Ключевые элементы: " + keys.slice(0, 10).join(", ") + ".");
     if (math && math.ok) lines.push("Задача вычислена и проверена.");
-    else if (extra.wiki) lines.push("Ответ опирается на найденный факт. Уточните аспект — углублю.");
+    else if (extra.wiki) lines.push("Ответ опирается на найденный факт.");
     else if (kb.length) lines.push("Тема из локальной базы АКСИ.");
     else if (extra.neuro) lines.push("Сработал локальный резонанс.");
     else {
-      lines.push("Точного узла мало. Можно: уточнить вопрос или нажать «Загрузить WebLLM».");
-      lines.push("Примеры: «посчитай 12*12», «что такое Permit?», «почему небо голубое?».");
+      lines.push("Точного узла мало. Загрузите WebLLM на вкладке WebLLM или уточните вопрос.");
+      lines.push("Примеры: «12*12», «что такое Permit?», «почему небо голубое?».");
     }
     lines.push("");
     lines.push("Как получен ответ");
@@ -183,12 +183,19 @@
     q = String(q || "").trim();
     if (!q) return { text: "Напишите вопрос — отвечу по-русски через Super.", source: "mind", path: 0 };
     var W = G.AKSI_WEBLLM;
-    if (W && typeof W.complete === "function" && W.status && W.status().ready) {
+    var llmOn = false;
+    try {
+      if (W && typeof W.complete === "function") {
+        if (typeof W.ready === "function") llmOn = !!W.ready();
+        else if (W.status) llmOn = !!(W.status().ready);
+      }
+    } catch (e) { llmOn = false; }
+    if (llmOn) {
       try {
         var sys = "Ты АКСИ. Отвечай только на русском, полно и понятно. Если не знаешь — скажи прямо. Не выдумывай источники.";
         var r = await Promise.race([
           W.complete(q, { system: sys, max_tokens: 450 }),
-          new Promise(function (resolve) { setTimeout(function () { resolve({ text: "" }); }, 20000); })
+          new Promise(function (resolve) { setTimeout(function () { resolve({ text: "" }); }, 25000); })
         ]);
         var text = (r && r.text) ? String(r.text).trim() : "";
         if (text.length > 25) {
