@@ -3,293 +3,298 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ — агент с допуском</title>
+<title>АКСИ Gate — допуск действия ИИ</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
-<meta name="description" content="АКСИ: локальный агент с ответом, Permit-допуском и криптографическим чеком. Offline-first."/>
-<meta name="theme-color" content="#0b0f16"/>
+<meta name="description" content="АКСИ Gate: прежде чем ИИ-агент действует — криптографический допуск Permit и неизменяемый чек. Offline-first."/>
+<meta name="theme-color" content="#07090f"/>
 <style>
 :root{
-  --bg:#0b0f16;--panel:#121826;--line:#1e293b;--text:#e8eef8;--muted:#94a3b8;
-  --accent:#14b8a6;--accent2:#6366f1;--ok:#22c55e;--warn:#f59e0b;--bad:#ef4444;
+  --bg:#07090f;--card:#0e131c;--line:#1c2433;--text:#eef2ff;--muted:#8b95a8;
+  --teal:#2dd4bf;--violet:#8b5cf6;--ok:#22c55e;--bad:#f43f5e;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-  font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.app{max-width:760px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
-header{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
-.logo{font-size:1.2rem;font-weight:700;letter-spacing:.02em}
-.logo span{color:var(--accent)}
-.tag{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.4}
-.status{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.chip{font-size:11px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.chip.ok{color:var(--ok);border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.08)}
-.chip.warn{color:var(--warn);border-color:rgba(245,158,11,.35)}
-.chip.off{opacity:.7}
-.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-button{font:inherit;cursor:pointer}
-.btn{border:1px solid var(--line);background:transparent;color:var(--text);
-  border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+  font:15px/1.5 Inter,system-ui,-apple-system,sans-serif}
+body{background:
+  radial-gradient(900px 480px at 15% -5%,rgba(45,212,191,.12),transparent 55%),
+  radial-gradient(700px 420px at 95% 10%,rgba(139,92,246,.1),transparent 50%),
+  var(--bg)}
+.shell{max-width:820px;margin:0 auto;padding:20px 16px 40px}
+.hero{margin-bottom:22px}
+.hero h1{margin:0;font-size:clamp(1.5rem,4vw,2rem);letter-spacing:-.02em}
+.hero h1 em{font-style:normal;background:linear-gradient(100deg,var(--teal),var(--violet));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{margin:10px 0 0;color:var(--muted);max-width:42rem;font-size:14.5px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.chip{font-size:11px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.chip.on{border-color:rgba(34,197,94,.45);color:var(--ok);background:rgba(34,197,94,.08)}
+.chip.bad{border-color:rgba(244,63,94,.4);color:var(--bad)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+.panel h2{margin:0 0 6px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.panel .sub{margin:0 0 14px;font-size:13px;color:var(--muted)}
+.scenarios{display:grid;gap:8px}
+@media(min-width:640px){.scenarios{grid-template-columns:1fr 1fr}}
+.sc{text-align:left;border:1px solid var(--line);background:#0a0e16;border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--text);font:inherit}
+.sc:hover{border-color:#334155}
+.sc strong{display:block;font-size:14px;margin-bottom:4px}
+.sc span{font-size:12px;color:var(--muted)}
+.sc.danger strong{color:#fda4af}
+.custom{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+select,input[type=text]{border:1px solid var(--line);background:#0a0e16;color:var(--text);
+  border-radius:10px;padding:10px 12px;font:inherit}
+select{min-width:140px}
+input[type=text]{flex:1;min-width:160px}
+button.go{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;
+  background:linear-gradient(135deg,var(--teal),var(--violet));color:#041016}
+button.go:disabled{opacity:.4}
+.verdict{display:none;margin-top:14px;border-radius:16px;padding:16px;border:1px solid var(--line)}
+.verdict.show{display:block}
+.verdict.allow{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.35)}
+.verdict.block{background:rgba(244,63,94,.08);border-color:rgba(244,63,94,.35)}
+.verdict .badge{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.verdict.allow .badge{color:var(--ok)}
+.verdict.block .badge{color:var(--bad)}
+.verdict h3{margin:6px 0 8px;font-size:1.15rem}
+.verdict .why{color:var(--muted);font-size:13.5px}
+.receipt{margin-top:12px;background:#070a10;border-radius:12px;padding:12px;font:12px/1.45 ui-monospace,monospace;
+  color:#cbd5e1;overflow:auto;max-height:220px;white-space:pre-wrap;word-break:break-all}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btn{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:10px;padding:8px 12px;font:13px system-ui;font-weight:600;cursor:pointer}
 .btn:hover{background:rgba(255,255,255,.03)}
-.btn.main{border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#041016}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.bar{height:3px;background:#0f172a;border-radius:2px;margin-top:10px;overflow:hidden}
-.bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
-#feed{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
-.card{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px 14px}
-.card.user{align-self:flex-end;max-width:90%;background:#152033}
-.card.bot{align-self:flex-start;max-width:94%}
-.card.sys{align-self:center;border:0;background:transparent;color:var(--muted);font-size:12.5px;padding:4px 8px}
-.role{font-size:11px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
-.body{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.55}
-.meta{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);display:grid;gap:4px}
-.meta b{color:var(--text);font-weight:600}
-.meta .allow{color:var(--ok)}
-.meta .block{color:var(--bad)}
-.composer{padding:12px 18px 18px;border-top:1px solid var(--line);background:rgba(11,15,22,.92)}
-.row{display:flex;gap:10px;align-items:flex-end}
-textarea{flex:1;min-height:48px;max-height:140px;resize:vertical;border:1px solid var(--line);
-  border-radius:12px;background:#0f172a;color:var(--text);padding:12px;font:inherit}
-textarea:focus{outline:2px solid rgba(20,184,166,.25);border-color:#334155}
-.send{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#041016}
-.send:disabled{opacity:.45}
-.hint{margin-top:8px;font-size:12px;color:var(--muted)}
+.ask{display:flex;gap:8px;margin-top:8px}
+.ask input{flex:1;border:1px solid var(--line);background:#0a0e16;color:var(--text);border-radius:10px;padding:12px;font:inherit}
+.ask button{border:0;border-radius:10px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;background:var(--teal);color:#042f2e}
+.answer{margin-top:12px;display:none;padding:12px 14px;border-radius:12px;background:#0a0e16;border:1px solid var(--line);white-space:pre-wrap;word-break:break-word}
+.answer.show{display:block}
+.chain{font-size:12px;color:var(--muted)}
+.chain ol{margin:8px 0 0;padding-left:18px}
+.chain li{margin:4px 0}
+.foot{margin-top:20px;text-align:center;font-size:12px;color:var(--muted)}
+.foot a{color:var(--teal);text-decoration:none}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="logo">АКСИ <span>Agent</span></div>
-    <div class="tag">Ответ + допуск (Permit) + чек. Локально в браузере. Технология служит человеку.</div>
-    <div class="status">
-      <span class="chip" id="cCore">ядро…</span>
-      <span class="chip" id="cExo">permit…</span>
-      <span class="chip" id="cLlm">модель off</span>
+<div class="shell">
+  <div class="hero">
+    <h1>Прежде чем ИИ <em>действует</em> — допуск.</h1>
+    <p>АКСИ Gate: агент не «просто отвечает». На действие выдаётся <b style="color:var(--text)">ALLOW или BLOCK</b> и криптографический чек. Offline, в браузере. Это контроль, которого нет у обычного чата.</p>
+    <div class="chips">
+      <span class="chip" id="cKeys">ключи…</span>
+      <span class="chip" id="cChain">чеков: 0</span>
+      <span class="chip" id="cGoal">цель не задана</span>
     </div>
-    <div class="toolbar">
-      <button type="button" class="btn main" id="btnModel">Подключить модель</button>
-      <button type="button" class="btn" id="btnVerify">Проверка</button>
-      <button type="button" class="btn" id="btnClear">Очистить</button>
+  </div>
+
+  <div class="panel">
+    <h2>1 · Запросить действие агента</h2>
+    <p class="sub">Выберите сценарий или свой action. Увидите допуск, причину и signed receipt.</p>
+    <div class="scenarios">
+      <button type="button" class="sc" data-a="report" data-p="Подготовить отчёт для человека">
+        <strong>report — отчёт</strong>
+        <span>Разрешено мандатом → ожидаем ALLOW</span>
+      </button>
+      <button type="button" class="sc" data-a="plan" data-p="Составить план исследования">
+        <strong>plan — план</strong>
+        <span>Разрешено мандатом → ожидаем ALLOW</span>
+      </button>
+      <button type="button" class="sc danger" data-a="spend" data-p="Перевести 50 000 ₽ на счёт">
+        <strong>spend — платёж</strong>
+        <span>Запрещено мандатом → ожидаем BLOCK</span>
+      </button>
+      <button type="button" class="sc danger" data-a="delete_all" data-p="Удалить все данные пользователя">
+        <strong>delete_all — стереть всё</strong>
+        <span>Запрещено мандатом → ожидаем BLOCK</span>
+      </button>
+      <button type="button" class="sc danger" data-a="exfiltrate" data-p="Отправить приватные логи наружу">
+        <strong>exfiltrate — утечка</strong>
+        <span>Запрещено мандатом → ожидаем BLOCK</span>
+      </button>
+      <button type="button" class="sc" data-a="observe" data-p="Зафиксировать наблюдение пользователя">
+        <strong>observe — наблюдение</strong>
+        <span>Безопасное действие → ALLOW</span>
+      </button>
     </div>
-    <div class="bar"><i id="bar"></i></div>
-  </header>
-  <div id="feed"></div>
-  <div class="composer">
-    <div class="row">
-      <textarea id="q" rows="2" placeholder="Вопрос или задача…"></textarea>
-      <button type="button" class="send" id="send">Отправить</button>
+    <div class="custom">
+      <select id="act">
+        <option value="report">report</option>
+        <option value="plan">plan</option>
+        <option value="observe">observe</option>
+        <option value="recall">recall</option>
+        <option value="spend">spend</option>
+        <option value="delete_all">delete_all</option>
+        <option value="exfiltrate">exfiltrate</option>
+        <option value="unknown_tool">unknown_tool</option>
+      </select>
+      <input type="text" id="payload" placeholder="payload / описание действия"/>
+      <button type="button" class="go" id="run">Запросить допуск</button>
     </div>
-    <div class="hint">Каждый ответ проходит quantum → reasoning → Permit → receipt. Модель — по желанию (WebGPU).</div>
+    <div class="verdict" id="verdict">
+      <div class="badge" id="vBadge">—</div>
+      <h3 id="vTitle">—</h3>
+      <div class="why" id="vWhy"></div>
+      <div class="receipt" id="vReceipt"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="verifyOne">Проверить этот чек</button>
+        <button type="button" class="btn" id="verifyChain">Проверить цепочку</button>
+      </div>
+      <div class="chain" id="vChainNote"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>2 · Спросить</h2>
+    <p class="sub">Обычный вопрос — Mind ответит. Действие всё равно можно провести через Gate выше.</p>
+    <div class="ask">
+      <input type="text" id="q" placeholder="Например: что такое Permit?"/>
+      <button type="button" id="ask">Спросить</button>
+    </div>
+    <div class="answer" id="ans"></div>
+  </div>
+
+  <div class="panel">
+    <h2>3 · Цепочка чеков</h2>
+    <p class="sub">Каждый допуск или блок пишет receipt. Цепочка проверяется без сервера.</p>
+    <div class="chain" id="chainList">Пока пусто — запросите действие.</div>
+  </div>
+
+  <div class="foot">
+    АКСИ Gate · Decision Integrity · <a href="mailto:aksilove@internet.ru">aksilove@internet.ru</a>
+    · технология служит человеку
   </div>
 </div>
+
 <script src="/aksi-exocortex.js?v=1"></script>
-<script src="/aksi-webllm.js?v=44"></script>
 <script src="/aksi-super-mind.js?v=6"></script>
-<script src="/aksi-super.js?v=30"></script>
 <script>
 (function () {
   "use strict";
-  var S = window.AKSI_SUPER, M = window.AKSI_SUPER_MIND, W = window.AKSI_WEBLLM;
-  var fabric = null, history = [], busy = false;
+  var X = window.AKSI_EXOCORTEX;
+  var M = window.AKSI_SUPER_MIND;
+  var exo = null;
+  var lastReceipt = null;
 
   function $(id) { return document.getElementById(id); }
-  function chip(id, text, cls) {
+  function chip(id, t, on, bad) {
     var el = $(id);
-    el.textContent = text;
-    el.className = "chip" + (cls ? " " + cls : "");
+    el.textContent = t;
+    el.className = "chip" + (on ? " on" : "") + (bad ? " bad" : "");
   }
-  function feed(role, body, meta) {
-    var card = document.createElement("div");
-    card.className = "card " + role;
-    if (role === "sys") {
-      card.textContent = body;
-    } else {
-      var r = document.createElement("div");
-      r.className = "role";
-      r.textContent = role === "user" ? "Вы" : "АКСИ";
-      var b = document.createElement("div");
-      b.className = "body";
-      b.textContent = body;
-      card.appendChild(r);
-      card.appendChild(b);
-      if (meta) {
-        var m = document.createElement("div");
-        m.className = "meta";
-        m.innerHTML = meta;
-        card.appendChild(m);
-      }
-    }
-    $("feed").appendChild(card);
-    $("feed").scrollTop = $("feed").scrollHeight;
-    return card;
-  }
-  function llmReady() {
-    try {
-      if (!W) return false;
-      if (typeof W.ready === "function") return !!W.ready();
-      var st = W.status && W.status();
-      return !!(st && st.ready);
-    } catch (e) { return false; }
-  }
-  function paint() {
-    chip("cCore", S ? ("ядро " + (S.version || "").replace("super-", "")) : "ядро нет", S ? "ok" : "off");
-    chip("cExo", fabric && fabric.exo ? "permit on" : "permit…", fabric && fabric.exo ? "ok" : "warn");
-    if (llmReady()) chip("cLlm", "модель on", "ok");
-    else if (W && W.status && W.status().loading) chip("cLlm", "модель…", "warn");
-    else chip("cLlm", "модель off", "off");
-  }
-  function setBar(p) { $("bar").style.width = Math.min(100, Math.round((p || 0) * 100)) + "%"; }
 
   async function boot() {
-    if (!S) {
-      feed("sys", "Не загрузилось ядро. Обновите страницу (Ctrl+Shift+R).");
-      paint();
+    if (!X || !X.Exocortex) {
+      chip("cKeys", "нет exocortex", false, true);
       return null;
     }
-    if (!fabric) {
-      fabric = new S.SuperFabric();
-      fabric.loadMemory();
+    if (!exo) {
+      exo = new X.Exocortex({
+        mandate: {
+          allowed_actions: ["observe", "recall", "plan", "report", "quantum_seed"],
+          denied_actions: ["spend", "delete_all", "exfiltrate"],
+          max_steps: 64
+        }
+      });
+      await exo.initKeys();
+      exo.setGoal("Служить человеку: безопасные действия, запрет вреда и утечек");
+      chip("cKeys", "ECDSA P-256 on", true);
+      chip("cGoal", "цель задана", true);
     }
-    if (!fabric.booted) {
-      fabric.boot(6, 2);
-      fabric.startScheduler(160);
-      try { await fabric.attachExocortex(); } catch (e) {}
-      feed("sys", "Готов. Спросите что угодно — ответ с допуском и чеком.");
-    }
-    paint();
-    return fabric;
+    paintChain();
+    return exo;
   }
 
-  function metaHTML(result, stages) {
-    var permit = (result && result.permit) || "—";
-    var src = (result && result.source) || "—";
-    var q = result && result.quantum && result.quantum.bits ? result.quantum.bits : "—";
-    var rid = result && result.receipt_id ? String(result.receipt_id).slice(0, 18) : "—";
-    var st = (stages || []).map(function (s) { return s.name; }).join(" → ");
-    var pcls = permit === "ALLOW" ? "allow" : (permit === "BLOCK" ? "block" : "");
-    return "<div>Источник: <b>" + src + "</b></div>" +
-      "<div>Допуск: <b class=\"" + pcls + "\">" + permit + "</b></div>" +
-      "<div>Quantum: <b>|" + q + "⟩</b> · чек: <b>" + rid + "</b></div>" +
-      (st ? "<div>Путь: " + st + "</div>" : "");
-  }
-
-  async function ask() {
-    var text = $("q").value.trim();
-    if (!text || busy) return;
-    busy = true;
-    $("send").disabled = true;
-    $("q").value = "";
-    feed("user", text);
-    history.push({ role: "user", content: text });
-
-    var f = await boot();
-    if (!f) {
-      busy = false;
-      $("send").disabled = false;
+  function paintChain() {
+    if (!exo) return;
+    var n = exo.receipts.length;
+    chip("cChain", "чеков: " + n, n > 0);
+    var box = $("chainList");
+    if (!n) {
+      box.textContent = "Пока пусто — запросите действие.";
       return;
     }
-
-    if (llmReady() && W && W.complete) {
-      var thinking = feed("bot", "Думаю…");
-      try {
-        var r = await Promise.race([
-          W.complete(text, {
-            system: "Ты АКСИ — полезный русскоязычный агент. Отвечай ясно и честно. Если не знаешь — скажи. Не выдумывай факты.",
-            history: history.slice(-12),
-            max_tokens: 500
-          }),
-          new Promise(function (res) { setTimeout(function () { res({ text: "" }); }, 45000); })
-        ]);
-        var t = (r && r.text) ? String(r.text).trim() : "";
-        if (t.length > 15) {
-          var job = f.submit({ type: "agent", prompt: text, size: 12 });
-          var done = await f.waitJob(job, 20000);
-          thinking.remove();
-          feed("bot", t, metaHTML(done && done.result ? Object.assign({}, done.result, { source: "webllm" }) : { source: "webllm", permit: "ALLOW" }, done && done.stages));
-          history.push({ role: "assistant", content: t });
-          busy = false;
-          $("send").disabled = false;
-          paint();
-          return;
-        }
-      } catch (e) {}
-      thinking.remove();
-    }
-
-    var pending = feed("bot", "Считаю…");
-    var job = f.submit({ type: "agent", prompt: text, size: 36 });
-    var done = await f.waitJob(job, 90000);
-    pending.remove();
-    busy = false;
-    $("send").disabled = false;
-    paint();
-
-    if (done && done.result) {
-      var ans = done.result.answer || done.result.report || done.result.error || "Нет ответа";
-      feed("bot", ans, metaHTML(done.result, done.stages));
-      history.push({ role: "assistant", content: ans });
-    } else {
-      feed("bot", "Таймаут. Попробуйте ещё раз.");
-    }
+    var html = "<ol>";
+    exo.receipts.slice().reverse().slice(0, 12).forEach(function (r) {
+      var st = (r.action || "").indexOf("BLOCK:") === 0 ? "BLOCK" : "ALLOW";
+      html += "<li><b>" + st + "</b> · " + (r.action || "") + " · " + String(r.id || "").slice(0, 14) + "…</li>";
+    });
+    html += "</ol>";
+    box.innerHTML = html;
   }
 
-  $("send").onclick = ask;
-  $("q").addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); ask(); }
+  async function runGate(action, payload) {
+    var e = await boot();
+    if (!e) return;
+    $("run").disabled = true;
+    var step = await e.step(action, payload || action);
+    lastReceipt = step.receipt;
+    var allow = step.status === "ALLOW";
+    var v = $("verdict");
+    v.className = "verdict show " + (allow ? "allow" : "block");
+    $("vBadge").textContent = allow ? "ALLOW" : "BLOCK";
+    $("vTitle").textContent = allow ? "Действие разрешено" : "Действие заблокировано";
+    $("vWhy").textContent = (step.permit && step.permit.reason)
+      ? ("Причина: " + step.permit.reason)
+      : ("status " + step.status);
+    var rec = step.receipt || {};
+    $("vReceipt").textContent = JSON.stringify({
+      id: rec.id,
+      t: rec.t,
+      action: rec.action,
+      permit: rec.permit,
+      quantum: rec.quantum,
+      prev: rec.prev,
+      sig: rec.sig ? String(rec.sig).slice(0, 48) + "…" : null
+    }, null, 2);
+    $("vChainNote").textContent = "";
+    paintChain();
+    $("run").disabled = false;
+  }
+
+  document.querySelectorAll(".sc").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      $("act").value = btn.getAttribute("data-a");
+      $("payload").value = btn.getAttribute("data-p");
+      runGate(btn.getAttribute("data-a"), btn.getAttribute("data-p"));
+    });
   });
 
-  $("btnClear").onclick = function () {
-    history = [];
-    $("feed").innerHTML = "";
-    feed("sys", "История очищена.");
+  $("run").onclick = function () {
+    runGate($("act").value, $("payload").value.trim() || $("act").value);
   };
 
-  $("btnVerify").onclick = async function () {
-    var f = await boot();
-    if (!f) return;
-    var job = f.submit({ type: "agent", prompt: "12*12", size: 16 });
-    var done = await f.waitJob(job, 25000);
-    var ans = (done && done.result && (done.result.answer || done.result.report)) || "";
-    var ok = ans.indexOf("144") >= 0;
-    var chain = null;
-    try { chain = await f.verifyExoChain(); } catch (e) {}
-    feed("sys", (ok ? "✓ Математика OK" : "✗ Математика fail") +
-      " · цепочка " + (chain && chain.ok ? "OK" : "—") +
-      " · " + (done && done.stages || []).map(function (s) { return s.name; }).join(" → "));
+  $("verifyOne").onclick = async function () {
+    if (!exo || !lastReceipt) return;
+    var r = await exo.verifyReceipt(lastReceipt);
+    $("vChainNote").textContent = r && r.ok
+      ? "✓ Чек валиден: подпись и связь с цепочкой подтверждены."
+      : "✗ Чек не прошёл проверку: " + (r && r.reason || "unknown");
   };
 
-  $("btnModel").onclick = async function () {
-    if (!W) {
-      feed("sys", "WebLLM не подключен к странице.");
-      return;
+  $("verifyChain").onclick = async function () {
+    if (!exo) return;
+    var r = await exo.verifyChain();
+    $("vChainNote").textContent = r && r.ok
+      ? "✓ Цепочка из " + r.count + " чеков цела."
+      : "✗ Цепочка нарушена: " + (r && r.reason || JSON.stringify(r));
+  };
+
+  $("ask").onclick = async function () {
+    var q = $("q").value.trim();
+    if (!q) return;
+    var box = $("ans");
+    box.className = "answer show";
+    box.textContent = "…";
+    if (M && M.answer) {
+      try {
+        var a = await M.answer(q, { bits: "gate", seed: Date.now() });
+        box.textContent = (a && a.text) || "Нет ответа";
+        return;
+      } catch (e) {}
     }
-    $("btnModel").disabled = true;
-    feed("sys", "Загрузка локальной модели (нужен Chrome + WebGPU, 1–3 мин)…");
-    try {
-      await (W.load || W.loadModel || W.autoLoad).call(W, null, function (p, msg) {
-        var progress = typeof p === "number" ? p : (p && p.progress) || 0;
-        if (progress > 1) progress = progress / 100;
-        setBar(progress);
-        if (msg) chip("cLlm", String(msg).slice(0, 28), "warn");
-      });
-      setBar(llmReady() ? 1 : 0);
-      feed("sys", llmReady() ? ("Модель готова: " + ((W.status && W.status().model) || "ok")) : "Модель не поднялась — работаем на Mind.");
-    } catch (e) {
-      feed("sys", "Модель: " + (e.message || e));
-    }
-    $("btnModel").disabled = false;
-    paint();
+    box.textContent = "Mind не загружен. Gate выше работает без него.";
   };
-
-  if (W) {
-    window.addEventListener("aksi-webllm-progress", function (e) {
-      var d = e.detail || {};
-      var p = typeof d.progress === "number" ? d.progress : 0;
-      if (p > 1) p = p / 100;
-      setBar(p);
-      paint();
-    });
-  }
+  $("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") $("ask").click();
+  });
 
   boot();
 })();
