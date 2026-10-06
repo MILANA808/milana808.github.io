@@ -1,7 +1,7 @@
-/** AKSI Super Mind v3.4 — любой вопрос на русском: wiki + KB + math + WebLLM */
+/** AKSI Super Mind v3.5 — cleaner Russian answers: wiki + KB + math + WebLLM */
 (function (G) {
   "use strict";
-  var VERSION = "mind-3.4.0";
+  var VERSION = "mind-3.5.0";
   function hash(s) {
     var h = 2166136261 >>> 0, t = String(s), i;
     for (i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -41,6 +41,12 @@
     return null;
   }
   var KB = [
+    { re: /привет|здравствуй|добрый\s*(день|вечер)/i, title: "Приветствие",
+      text: "Привет. Я АКСИ — агент на Super-кластере. Спросите задачу: посчитать, объяснить термин, или загрузите WebLLM для живого диалога." },
+    { re: /что\s*умеешь|твои\s*возможн|что\s*ты\s*можешь/i, title: "Возможности",
+      text: "Считаю примеры, объясняю темы из базы (Permit, кванты, ИИ), подтягиваю факты из Википедии, при WebGPU — отвечаю локальной LLM. Каждый ответ проходит quantum → mind → Permit." },
+    { re: /как\s*работа/i, title: "Как работаю",
+      text: "Запрос попадает в Super Fabric: план, quantum-сид, вычисления, Mind или WebLLM, затем Permit и чек. Это не облачный датацентр — кластер симулируется в вашем браузере." },
     { re: /суперпозиц/i, title: "Суперпозиция",
       text: "Суперпозиция — описание квантовой системы несколькими состояниями сразу, пока не сделано измерение. Кубит: |ψ⟩=α|0⟩+β|1⟩, вероятности |α|² и |β|²." },
     { re: /кубит|qubit/i, title: "Кубит",
@@ -142,9 +148,7 @@
     var kb = matchKB(q);
     var lines = [];
     var source = extra.source || "mind";
-    lines.push("АКСИ отвечает на ваш вопрос.");
-    lines.push("");
-    lines.push("Вопрос: «" + String(q).trim().slice(0, 240) + "».");
+    lines.push("—");
     lines.push("");
     if (math && math.ok) {
       lines.push("Математика");
@@ -162,21 +166,12 @@
       if (extra.wiki.url) lines.push("Источник: " + extra.wiki.url);
       lines.push("");
     }
-    lines.push("Разбор");
-    if (keys.length) lines.push("Ключевые элементы: " + keys.slice(0, 10).join(", ") + ".");
-    if (math && math.ok) lines.push("Задача вычислена и проверена.");
-    else if (extra.wiki) lines.push("Ответ опирается на найденный факт.");
-    else if (kb.length) lines.push("Тема из локальной базы АКСИ.");
-    else if (extra.neuro) lines.push("Сработал локальный резонанс.");
-    else {
-      lines.push("Точного узла мало. Загрузите WebLLM на вкладке WebLLM или уточните вопрос.");
+    if (!(math && math.ok) && !kb.length && !extra.wiki && !extra.neuro) {
+      lines.push("Пока нет точного факта в локальной базе. Сформулируйте конкретнее или загрузите WebLLM для свободного ответа.");
       lines.push("Примеры: «12*12», «что такое Permit?», «почему небо голубое?».");
+      lines.push("");
     }
-    lines.push("");
-    lines.push("Как получен ответ");
-    lines.push("Путь: Super → quantum |" + bits + "⟩ → mind" + (source === "webllm" ? " → WebLLM" : "") + (extra.wiki ? " → wiki" : "") + " → Permit.");
-    lines.push("");
-    lines.push("— АКСИ Super Mind " + VERSION + " · " + source + " · path " + path + " —");
+    lines.push("· " + source + " · |" + bits + "⟩ · " + VERSION);
     return { text: lines.join("\n"), math: math, topics: kb.map(function (t) { return t.title; }), keys: keys, path: path, source: source, wiki: extra.wiki || null };
   }
   async function answer(q, quantum) {
