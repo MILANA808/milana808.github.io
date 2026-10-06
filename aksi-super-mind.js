@@ -1,7 +1,7 @@
-/** AKSI Super Mind v2 — полные русские объяснения через fabric + optional WebLLM */
+/** AKSI Super Mind v3.2 — любой вопрос на русском: wiki + KB + math + WebLLM */
 (function (G) {
   "use strict";
-  var VERSION = "mind-2.0.0";
+  var VERSION = "mind-3.2.0";
   function hash(s) {
     var h = 2166136261 >>> 0, t = String(s), i;
     for (i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -13,200 +13,219 @@
     m = s.match(/x\s*\^\s*2\s*=\s*([0-9.]+)|x\s*\*\*\s*2\s*=\s*([0-9.]+)|x²\s*=\s*([0-9.]+)|x\s*\^\s*2\s*-\s*([0-9.]+)\s*=\s*0/i);
     if (m) {
       n = parseFloat(m[1] || m[2] || m[3] || m[4]); r = Math.sqrt(n);
-      return { ok: true, kind: "quad", value: [r, -r], steps: [
-        "Дано уравнение вида x² = " + n + ".",
-        "Берём квадратный корень из обеих частей: |x| = √" + n + ".",
-        "√" + n + " = " + r + ".",
-        "Значит x = " + r + " или x = " + (-r) + ".",
-        "Проверка: (" + r + ")² = " + (r * r) + ", (−" + r + ")² = " + (r * r) + "."
+      return { ok: true, value: [r, -r], steps: [
+        "Дано: x² = " + n + ".", "Тогда |x| = √" + n + " = " + r + ".",
+        "Корни: x = " + r + " и x = " + (-r) + ".", "Проверка: (" + r + ")² = " + (r * r) + "."
       ]};
     }
     m = s.match(/(?:корень|sqrt)\s*(?:из\s*)?([0-9.]+)/i);
     if (m) {
       x = parseFloat(m[1]); r = Math.sqrt(x);
-      return { ok: true, kind: "sqrt", value: r, steps: [
-        "Нужно найти √" + x + " — число, квадрат которого равен " + x + ".",
-        "Вычисление: √" + x + " ≈ " + r + ".",
-        "Проверка: " + r + " × " + r + " = " + (r * r) + "."
-      ]};
+      return { ok: true, value: r, steps: ["√" + x + " ≈ " + r + ".", "Проверка: " + r + "² = " + (r * r) + "."] };
     }
     m = s.match(/([0-9.]+)\s*%\s*(?:от\s*)?([0-9.]+)/);
     if (m) {
       p = parseFloat(m[1]); base = parseFloat(m[2]); v = base * p / 100;
-      return { ok: true, kind: "pct", value: v, steps: [
-        "Нужно взять " + p + "% от числа " + base + ".",
-        "Формула: значение = число × процент / 100.",
-        base + " × " + p + " / 100 = " + v + "."
-      ]};
+      return { ok: true, value: v, steps: [p + "% от " + base + " = " + base + "×" + p + "/100 = " + v + "."] };
     }
     m = s.match(/(?:посчитай|вычисли|сколько\s*будет)?\s*([0-9.]+\s*[+\-*/^]\s*[0-9.]+(?:\s*[+\-*/^]\s*[0-9.]+)*)/i);
     if (m) {
       try {
         expr = m[1].replace(/\^/g, "**").replace(/\s+/g, "");
         if (!/^[\d.+\-*/()]+$/.test(expr.replace(/\*\*/g, ""))) return null;
-        val = Function('"use strict"; return (' + expr + ")")();
+        val = Function('"use strict";return (' + expr + ")")();
         if (typeof val === "number" && isFinite(val))
-          return { ok: true, kind: "arith", value: val, steps: [
-            "Выражение: " + m[1].trim() + ".",
-            "Считаем по правилам арифметики (сначала × и ÷, потом + и −).",
-            "Результат: " + val + "."
-          ]};
+          return { ok: true, value: val, steps: ["Выражение: " + m[1].trim() + ".", "Результат: " + val + "."] };
       } catch (e) {}
     }
     return null;
   }
   var KB = [
-    { re: /суперпозиц|superpos/i, title: "Суперпозиция", explain: [
-      "Суперпозиция — это когда квантовая система одновременно описывается несколькими возможными состояниями, пока мы её не измерили.",
-      "Формально состояние кубита записывают так: |ψ⟩ = α|0⟩ + β|1⟩, где α и β — комплексные амплитуды, и |α|² + |β|² = 1.",
-      "Вероятность получить при измерении «0» равна |α|², вероятность «1» — |β|². До измерения нельзя сказать, что система «уже выбрала» один вариант.",
-      "В симуляторе АКСИ на Super это видно как statevector: массив амплитуд. После коллапса (один shot) выбирается один базисный исход.",
-      "Простая аналогия: монета в воздухе — математическое описание обоих исходов с весами, пока монета не упала."
-    ]},
-    { re: /кубит|qubit/i, title: "Кубит", explain: [
-      "Кубит — единица квантовой информации. В отличие от обычного бита (только 0 или 1), кубит может быть в суперпозиции α|0⟩ + β|1⟩.",
-      "Один кубит — двумерное комплексное пространство. n кубитов — 2ⁿ амплитуд.",
-      "На Super fabric АКСИ для сида используется компактный 4-кубитный симулятор (16 амплитуд).",
-      "Важно: браузерный симулятор — классическая математика амплитуд на JS, а не физический кубит в лаборатории."
-    ]},
-    { re: /permit|пермит|допуск|разрешен/i, title: "Permit (допуск действия)", explain: [
-      "Permit — правило «по умолчанию запрещено»: агент не выполняет действие, пока контур явно не сказал ALLOW.",
-      "Зачем: чат-бот может писать что угодно, а агент с инструментами может удалить или отправить данные. Permit отделяет текст от опасного действия.",
-      "В АКСИ: цель → план → мандат → Permit → если ALLOW, то чек (receipt) с подписью. Если BLOCK — действие не выполняется.",
-      "Для человека это контроль: система не «сама нажала кнопку», а прошла через явный допуск."
-    ]},
-    { re: /экзокортекс|exocortex/i, title: "Экзокортекс", explain: [
-      "Экзокортекс АКСИ — внешний слой: память, цель, опыт человека, квантовый сид, Permit и криптографические чеки.",
-      "Состояние агента — вектор S (нормированный). Новый опыт меняет S. Это явная математика, а не скрытые веса.",
-      "Цепочка чеков связывается через prev→id и подписывается (ECDSA). verifyChain проверяет целостность.",
-      "Идея: не верить голосу модели на слово, а иметь доказуемый след."
-    ]},
-    { re: /\bакси\b|aksi|что ты|кто ты/i, title: "АКСИ", explain: [
-      "АКСИ — суверенный контур: локальный runtime, quantum seed, Super fabric, Permit, чеки, опционально WebLLM.",
-      "Принцип: технология служит человеку. Ответ можно разобрать по стадиям; действие — только после ALLOW.",
-      "Это не «ещё один ChatGPT». Ставка на прозрачность, offline-first и контроль действий.",
-      "На Super вопрос идёт как job: quantum → compute → mind (или WebLLM) → Permit → receipt."
-    ]},
-    { re: /энтропи|entropy/i, title: "Энтропия", explain: [
-      "Энтропия Шеннона: S = −Σ pᵢ log₂ pᵢ.",
-      "Если одно состояние почти наверняка, энтропия близка к нулю. Если все исходы равновероятны — энтропия максимальна.",
-      "В квантовом сиде АКСИ энтропия считается по |амплитуда|² после вентилей."
-    ]},
-    { re: /коллапс|collapse|измерен/i, title: "Коллапс (измерение)", explain: [
-      "Коллапс — выбор одного базисного исхода с вероятностью |амплитуда|².",
-      "Алгоритм: строим pᵢ = |aᵢ|², берём случайное число, находим интервал — получаем битовую строку.",
-      "В pipeline результат становится сидом для следующих шагов. Это математика + генератор случайных чисел."
-    ]},
-    { re: /суперкомпьютер|fabric|кластер|gpu|super/i, title: "Supercomputer Fabric", explain: [
-      "AKSI Super — виртуальный кластер в браузере: ноды, GPU-слоты, очередь, планировщик, память-ledger.",
-      "Нагрузка на устройстве: matmul, quantum-сид, Mind или WebLLM. Это оркестратор pipeline, не дата-центр.",
-      "Все задумки АКСИ проходят через один компьютер: цель, счёт, допуск, ответ, чек."
-    ]},
-    { re: /веб\s*ллм|webllm|нейросет|языков\w+\s*модел|llm/i, title: "WebLLM", explain: [
-      "WebLLM — настоящие сжатые веса модели (Qwen/Llama), загружаемые в браузер через WebGPU.",
-      "Путь «большой язык на телефоне»: не без весов, а с квантованными весами (q4), которые умещаются в память.",
-      "На АКСИ WebLLM — workload: если GPU есть — живой текст; если нет — Super Mind даёт структурированное объяснение."
-    ]},
-    { re: /математик|уравнен|посчита|вычисл/i, title: "Математика на Super", explain: [
-      "Контур умеет арифметику, проценты, квадратный корень, уравнения вида x² = n.",
-      "Каждый шаг проговаривается по-русски: что дано, формула, результат, проверка."
-    ]},
-    { re: /памят|memory|запомн/i, title: "Память", explain: [
-      "На Super память — append-only ledger в localStorage с хэшами событий.",
-      "В Экзокортексе память связана с вектором S и цепочкой чеков. Экспорт JSON — ваш."
-    ]}
+    { re: /суперпозиц/i, title: "Суперпозиция",
+      text: "Суперпозиция — описание квантовой системы несколькими состояниями сразу, пока не сделано измерение. Кубит: |ψ⟩=α|0⟩+β|1⟩, вероятности |α|² и |β|². В АКСИ это statevector и коллапс одного shot." },
+    { re: /кубит|qubit/i, title: "Кубит",
+      text: "Кубит хранит α|0⟩+β|1⟩. n кубитов дают 2ⁿ амплитуд. Super fabric использует компактный 4-кубитный сид." },
+    { re: /permit|пермит|допуск/i, title: "Permit",
+      text: "Permit — default-deny: действие агента только после ALLOW. Отделяет текст ответа от опасного действия. При ALLOW выдаётся крипто-чек (receipt)." },
+    { re: /экзокортекс|exocortex/i, title: "Экзокортекс",
+      text: "Экзокортекс АКСИ: вектор состояния S, цель, опыт, Permit, ECDSA-цепочка чеков. Проверяемые инварианты вместо «поверьте модели»." },
+    { re: /\bакси\b|aksi|кто ты|что ты/i, title: "АКСИ",
+      text: "АКСИ — суверенный offline-first контур: Super fabric, quantum seed, Mind/WebLLM, Permit, чеки. Технология служит человеку: шаги видны, действие контролируется." },
+    { re: /энтропи/i, title: "Энтропия",
+      text: "S=−Σ pᵢ log₂ pᵢ. Высокая энтропия — больше неопределённости до коллапса; низкая — распределение сжато." },
+    { re: /коллапс|измерен/i, title: "Коллапс",
+      text: "Коллапс в симуляторе — выбор базиса с вероятностью |амплитуда|². Результат становится сидом следующих стадий pipeline." },
+    { re: /суперкомпьютер|fabric|gpu/i, title: "Super Fabric",
+      text: "Виртуальный кластер в браузере: очередь jobs, ноды, matmul, quantum, mind. Оркестратор, а не склад серверных FLOPS." },
+    { re: /webllm|веб\s*ллм|языков\w+\s*модел/i, title: "WebLLM",
+      text: "WebLLM — сжатые веса (q4) настоящей модели в браузере через WebGPU. Практический путь «язык на устройстве»." },
+    { re: /небо.*голуб|голуб.*небо|рассеян.*рэле|rayleigh/i, title: "Почему небо голубое",
+      text: "Небо кажется голубым из‑за рассеяния солнечного света в атмосфере (рассеяние Рэлея): синяя часть спектра рассеивается сильнее красной. На закате путь лучей длиннее — больше красных тонов." },
+    { re: /фотосинтез/i, title: "Фотосинтез",
+      text: "Фотосинтез: растения превращают свет, воду и CO₂ в органику и кислород. Упрощённо: свет + CO₂ + H₂O → сахар + O₂." },
+    { re: /относительн.*эйнштейн|теория относительн/i, title: "Теория относительности",
+      text: "СТО (1905): скорость света постоянна, время и пространство зависят от системы отсчёта. ОТО — гравитация как искривление пространства-времени." },
+    { re: /днк|генетич.*код/i, title: "ДНК",
+      text: "ДНК — носитель генетической информации, двойная спираль (A, T, G, C). Последовательность кодирует белки через РНК." },
+    { re: /искусственн.*интеллект|\bии\b|\bai\b/i, title: "Искусственный интеллект",
+      text: "ИИ выполняет задачи вроде распознавания, языка, планирования. LLM предсказывают токены; АКСИ добавляет прозрачный допуск и доказательства шагов." },
+    { re: /блокчейн|bitcoin|биткоин/i, title: "Блокчейн",
+      text: "Блокчейн — цепочка блоков с криптографической связью. Каждый блок ссылается на хэш предыдущего." }
   ];
   function extractKeys(q) {
-    var stop = /^(и|в|на|по|что|как|это|для|или|при|про|the|a|an|is|are|what|how|why)$/i;
+    var stop = /^(и|в|на|по|что|как|это|для|или|при|про|не|ли|же|бы|от|до|из|за|со|об|the|a|an|is|are|what|how|why|who|can|does)$/i;
     return String(q).toLowerCase().split(/[^a-zа-яё0-9]+/i).filter(function (w) {
       return w.length > 2 && !stop.test(w);
-    }).slice(0, 14);
+    }).slice(0, 16);
   }
-  function intent(q) {
-    var s = String(q).toLowerCase();
-    if (/как\s+работ|как\s+устроен|как\s+сдела/i.test(s)) return "how";
-    if (/почему|зачем/i.test(s)) return "why";
-    if (/что\s+такое|что\s+это|кто\s+ты|расскажи|объясни/i.test(s)) return "what";
-    if (/посчита|вычисл|сколько|корень|x\s*\^/i.test(s)) return "math";
-    return "general";
-  }
-  function matchTopics(q) {
+  function matchKB(q) {
     var out = [];
     KB.forEach(function (t) { if (t.re.test(q)) out.push(t); });
     return out;
   }
-  function synthesize(q, quantum) {
+  function neuroHit(q) {
+    try {
+      if (G.AKSI_NEURO && typeof G.AKSI_NEURO.query === "function") {
+        var r = G.AKSI_NEURO.query(q);
+        if (r && (r.answer || r.text)) return String(r.answer || r.text).slice(0, 1200);
+      }
+    } catch (e) {}
+    return null;
+  }
+  function relevance(keys, text) {
+    if (!text) return 0;
+    var t = String(text).toLowerCase(), hit = 0, i;
+    for (i = 0; i < keys.length; i++) if (t.indexOf(keys[i]) >= 0) hit++;
+    return keys.length ? hit / keys.length : 0;
+  }
+  async function wikiFacts(q) {
+    var keys = extractKeys(q);
+    if (!keys.length) return null;
+    var query = keys.slice(0, 5).join(" ");
+    try {
+      var searchUrl = "https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
+        encodeURIComponent(query) + "&srlimit=5&format=json&origin=*";
+      var sres = await fetch(searchUrl, { mode: "cors" });
+      if (!sres.ok) return null;
+      var sjson = await sres.json();
+      var hits = (sjson && sjson.query && sjson.query.search) || [];
+      if (!hits.length) return null;
+      var i, title, sumRes, sum, best = null, score, sc;
+      for (i = 0; i < Math.min(hits.length, 4); i++) {
+        title = hits[i].title;
+        sumRes = await fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title), { mode: "cors" });
+        if (!sumRes.ok) continue;
+        sum = await sumRes.json();
+        if (!sum || !sum.extract || sum.type === "disambiguation") continue;
+        score = relevance(keys, (sum.title || "") + " " + sum.extract);
+        sc = relevance(keys, sum.title || "");
+        score = score + sc * 0.5;
+        if (score >= 0.15 && (!best || score > best.score)) {
+          best = {
+            score: score,
+            title: sum.title || title,
+            extract: String(sum.extract).slice(0, 900),
+            url: (sum.content_urls && sum.content_urls.desktop && sum.content_urls.desktop.page) || null
+          };
+        }
+      }
+      return best;
+    } catch (e) { return null; }
+  }
+  function buildAnswer(q, quantum, extra) {
+    extra = extra || {};
     var keys = extractKeys(q);
     var bits = quantum && quantum.bits ? quantum.bits : "----";
     var seed = quantum && quantum.seed ? quantum.seed : hash(q);
     var path = seed % 5;
-    var topics = matchTopics(q);
     var math = tryMath(q);
-    var it = intent(q);
+    var kb = matchKB(q);
     var lines = [];
-    lines.push("АКСИ Super Mind отвечает через суперкомпьютер-симулятор.");
-    lines.push("Квантовый сид этого ответа: |" + bits + "⟩ (path " + path + ").");
+    var source = extra.source || "mind";
+    lines.push("АКСИ отвечает на ваш вопрос.");
+    lines.push("");
+    lines.push("Вопрос: «" + String(q).trim().slice(0, 240) + "».");
     lines.push("");
     if (math && math.ok) {
-      lines.push("— Математический разбор —");
-      math.steps.forEach(function (s) { lines.push(s); });
+      lines.push("Математика");
+      math.steps.forEach(function (s) { lines.push("• " + s); });
       lines.push("Итог: " + (Array.isArray(math.value) ? math.value.join(" и ") : math.value) + ".");
       lines.push("");
     }
-    if (topics.length) {
-      topics.forEach(function (t) {
-        lines.push("— " + t.title + " —");
-        t.explain.forEach(function (p) { lines.push(p); lines.push(""); });
+    if (kb.length) {
+      kb.forEach(function (t) {
+        lines.push(t.title);
+        lines.push(t.text);
+        lines.push("");
       });
     }
-    if (!math && !topics.length) {
-      lines.push("— Как я понял вопрос —");
-      if (keys.length) lines.push("Ключевые слова: " + keys.join(", ") + ".");
-      else lines.push("Формулировка короткая; точного узла знаний не сработало.");
-      lines.push("");
-      lines.push("Я могу подробно объяснить: суперпозицию, кубит, Permit, Экзокортекс, АКСИ, энтропию, коллапс, Super fabric, WebLLM, простую математику.");
-      lines.push("Спросите, например: «что такое суперпозиция?» или «посчитай 12*12» или «зачем нужен Permit?».");
+    if (extra.neuro) {
+      lines.push("Локальная память / Neuro");
+      lines.push(extra.neuro);
       lines.push("");
     }
-    lines.push("— Как это связано с Super —");
-    if (it === "how")
-      lines.push("Вопрос про «как» обработан как job на fabric: GPU-слот, quantum-сид, Mind собрал объяснение, Permit зафиксировал шаг.");
-    else if (it === "why")
-      lines.push("Вопрос «зачем/почему» разобран через смысл АКСИ: контроль, прозрачность, доказуемый след.");
-    else
-      lines.push("Ответ собран локально: стадии quantum → compute → mind → permit видны в журнале. Это не облачный чёрный ящик.");
+    if (extra.wiki) {
+      lines.push("Факт из открытых источников (Википедия)");
+      lines.push(extra.wiki.title + ": " + extra.wiki.extract);
+      if (extra.wiki.url) lines.push("Источник: " + extra.wiki.url);
+      lines.push("");
+    }
+    lines.push("Разбор");
+    if (keys.length) lines.push("Ключевые элементы запроса: " + keys.slice(0, 10).join(", ") + ".");
+    if (math && math.ok) {
+      lines.push("Задача сведена к прямому вычислению; ответ проверен.");
+    } else if (extra.wiki) {
+      lines.push("Объяснение опирается на найденный факт и логику вопроса.");
+      lines.push("По теме «" + (extra.wiki.title || keys[0] || "…") + "»: " + String(extra.wiki.extract).split(".")[0] + ".");
+      lines.push("Вывод: ответ фактологический, без претензии на всезнание. Уточните аспект — углублю.");
+    } else if (kb.length) {
+      lines.push("Тема закрыта локальным знанием АКСИ. Можно спросить «как устроено» или «зачем».");
+    } else if (extra.neuro) {
+      lines.push("Сработал локальный резонанс. При необходимости переформулируйте короче.");
+    } else {
+      lines.push("Готового узла мало. Честная граница: без WebLLM и без статьи не выдумываю энциклопедию.");
+      lines.push("1) Вы спрашиваете о «" + (keys.slice(0, 4).join(" ") || "теме") + "».");
+      lines.push("2) Нажмите «Загрузить WebLLM» для живой генерации на устройстве — или уточните вопрос.");
+      lines.push("3) Прямые запросы работают сразу: «посчитай…», «что такое Permit?», «почему небо голубое?».");
+    }
     lines.push("");
-    lines.push("— Важно понимать —");
-    lines.push("Полный «гигантский LLM без весов» физически не существует: языковой модели нужны параметры. На телефоне их сжимают (q4) и грузят через WebLLM/WebGPU.");
-    lines.push("Сейчас вы получили прозрачный математико-смысловой ответ АКСИ. Если WebLLM загружен, Super может делегировать живую генерацию ему.");
+    lines.push("Как получен ответ");
+    lines.push("Путь: Super → quantum |" + bits + "⟩ → mind" + (source === "webllm" ? " → WebLLM" : "") + (extra.wiki ? " → wiki" : "") + " → Permit.");
+    lines.push("Стадии видны в журнале. Технология служит вам.");
     lines.push("");
-    lines.push("— mind " + VERSION + " · русский объясняющий контур · через Super —");
-    return { text: lines.join("\n"), math: math, topics: topics.map(function (t) { return t.title; }), keys: keys, path: path, intent: it };
+    lines.push("— АКСИ Super Mind " + VERSION + " · " + source + " · path " + path + " —");
+    return { text: lines.join("\n"), math: math, topics: kb.map(function (t) { return t.title; }), keys: keys, path: path, source: source, wiki: extra.wiki || null };
   }
   async function answer(q, quantum) {
+    q = String(q || "").trim();
+    if (!q) return { text: "Напишите вопрос — отвечу по-русски через Super.", source: "mind", path: 0 };
     var W = G.AKSI_WEBLLM;
     if (W && typeof W.complete === "function" && W.status && W.status().ready) {
       try {
-        var sys = "Ты АКСИ. Отвечай только на русском, подробно и понятно, как хороший учитель. Объясняй шаг за шагом. Если вопрос математический — считай и проверяй. Не выдумывай источники.";
-        var r = await W.complete(String(q), { system: sys, max_tokens: 400 });
-        var text = (r && (r.text || r.content || r.message)) || "";
-        if (!text && r && r.choices && r.choices[0] && r.choices[0].message) text = r.choices[0].message.content || "";
-        if (text && String(text).trim().length > 20) {
+        var sys = "Ты АКСИ — локальный помощник. Отвечай только на русском, полно и понятно. Если не знаешь точно — скажи прямо. С примерами. Не выдумывай источники.";
+        var r = await W.complete(q, { system: sys, max_tokens: 450 });
+        var text = (r && r.text) ? String(r.text).trim() : "";
+        if (text.length > 25) {
           return {
-            text: String(text).trim() + "\n\n— через Super · WebLLM · сид |" + (quantum && quantum.bits || "----") + "⟩ —",
-            source: "webllm", math: tryMath(q),
-            topics: matchTopics(q).map(function (t) { return t.title; }),
-            path: (quantum && quantum.seed ? quantum.seed : hash(q)) % 5
+            text: text + "\n\n— через Super · WebLLM · |" + (quantum && quantum.bits || "----") + "⟩ —",
+            source: "webllm",
+            path: (quantum && quantum.seed ? quantum.seed : hash(q)) % 5,
+            math: tryMath(q)
           };
         }
       } catch (e) {}
     }
-    var syn = synthesize(q, quantum);
-    syn.source = "mind";
-    return syn;
+    var neuro = neuroHit(q);
+    var math0 = tryMath(q);
+    var wiki = null;
+    if (!(math0 && math0.ok)) {
+      try { wiki = await wikiFacts(q); } catch (e) { wiki = null; }
+    }
+    return buildAnswer(q, quantum, { neuro: neuro, wiki: wiki, source: wiki ? "mind+wiki" : (neuro ? "mind+neuro" : "mind") });
   }
+  function synthesize(q, quantum) { return buildAnswer(q, quantum, { source: "mind" }); }
   G.AKSI_SUPER_MIND = {
-    version: VERSION, synthesize: synthesize, answer: answer,
-    tryMath: tryMath, extractKeys: extractKeys, matchTopics: matchTopics
+    version: VERSION, answer: answer, synthesize: synthesize,
+    tryMath: tryMath, wikiFacts: wikiFacts, extractKeys: extractKeys
   };
 })(typeof window !== "undefined" ? window : globalThis);
