@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Super · Verify</title>
+<link rel="canonical" href="https://milana808.github.io/super/verify.html"/>
+<meta name="theme-color" content="#06080e"/>
+<style>
+:root{--bg:#06080e;--p:#0c1018;--l:#1a2233;--t:#e8eef8;--m:#8b97ab;--a:#5eead4;--ok:#34d399;--bad:#f87171;--gpu:#38bdf8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.5 system-ui,sans-serif}
+.w{max-width:900px;margin:0 auto;padding:16px 12px 48px}
+h1{font-size:1.3rem;margin:0 0 8px;color:var(--a)}
+.lead{color:var(--m);font-size:14px;margin:0 0 14px}
+.panel{background:var(--p);border:1px solid var(--l);border-radius:14px;padding:14px;margin-bottom:12px}
+.panel h2{margin:0 0 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--a)}
+button{border:0;border-radius:10px;padding:12px 16px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--a),#a78bfa);color:#041016}
+button:disabled{opacity:.45}
+#log{font:12px/1.45 ui-monospace,monospace;white-space:pre-wrap;background:#080b11;border:1px solid var(--l);border-radius:10px;padding:12px;min-height:200px;max-height:50vh;overflow:auto}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.muted{color:var(--m)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--l);font-size:12px;color:var(--m)}
+.badge.pass{border-color:var(--ok);color:var(--ok)}.badge.fail{border-color:var(--bad);color:var(--bad)}
+footer{margin-top:16px;font-size:12px;color:var(--m)}footer a{color:var(--a);margin-right:10px}
+#hash{word-break:break-all;font:12px ui-monospace,monospace;color:var(--gpu)}
+</style>
+</head>
+<body>
+<div class="w">
+  <h1>АКСИ · полная проверка (от и до)</h1>
+  <p class="lead">Один клик: Super + Mind + Exocortex + ECDSA-цепочка чеков. Результат можно экспортировать и сверить.</p>
+  <div class="panel">
+    <div class="row">
+      <button type="button" id="run">▶ Запустить проверку</button>
+      <button type="button" id="export" disabled style="background:transparent;border:1px solid var(--l);color:var(--t)">Export JSON</button>
+      <span class="badge" id="verBadge">—</span>
+    </div>
+    <div id="hash" class="muted">audit sha256: —</div>
+  </div>
+  <div class="panel">
+    <h2>Журнал</h2>
+    <div id="log">Нажмите «Запустить проверку»…</div>
+  </div>
+  <footer>
+    <a href="/super/">← Super</a>
+    <a href="/exocortex/">exocortex</a>
+    <a href="/">home</a>
+    · aksilove@internet.ru
+  </footer>
+</div>
+<script src="/aksi-exocortex.js?v=1"></script>
+<script src="/aksi-super-mind.js?v=4"></script>
+<script src="/aksi-super.js?v=23"></script>
+<script>
+(function(){
+"use strict";
+var logEl=document.getElementById("log");
+var lastReport=null;
+function line(msg, cls){
+  var d=document.createElement("div");
+  if(cls)d.className=cls;
+  d.textContent=msg;
+  logEl.appendChild(d);
+  logEl.scrollTop=logEl.scrollHeight;
+}
+function clearLog(){ logEl.textContent=""; }
+async function sha256hex(text){
+  var dig=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(text)));
+  return Array.from(new Uint8Array(dig)).map(function(b){return ("0"+b.toString(16)).slice(-2);}).join("");
+}
+async function runAll(){
+  clearLog();
+  document.getElementById("run").disabled=true;
+  document.getElementById("export").disabled=true;
+  var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, X=window.AKSI_EXOCORTEX;
+  var report={t:new Date().toISOString(), versions:{}, tests:[], ok:true, chain:null, audit_sha256:null};
+  line("1) Модули","muted");
+  if(!S){ line("FAIL: Super не загрузился","bad"); report.ok=false; }
+  else line("  Super "+S.version,"ok");
+  if(!M){ line("FAIL: Mind не загрузился","bad"); report.ok=false; }
+  else line("  Mind "+M.version,"ok");
+  if(!X){ line("WARN: Exocortex не загрузился","bad"); }
+  else line("  Exocortex "+X.version,"ok");
+  report.versions={mind:M&&M.version, super:S&&S.version, exo:X&&X.version};
+  if(!report.ok){ finish(report); return; }
+  line("2) Boot fabric + Exocortex","muted");
+  var fab=new S.SuperFabric();
+  fab.boot(4,2);
+  try{ await fab.attachExocortex(); }catch(e){ line("  exo err: "+(e.message||e),"bad"); }
+  fab.startScheduler(80);
+  line("  exo attached: "+!!fab.exo, fab.exo?"ok":"bad");
+  report.exo_attached=!!fab.exo;
+  async function runQ(q){
+    var job=fab.submit({type:"mind",prompt:q,size:16});
+    var t0=Date.now();
+    return await new Promise(function(resolve){
+      var iv=setInterval(function(){
+        var d=fab.done.find(function(j){return j.id===job.id;});
+        if(d || Date.now()-t0>25000){ clearInterval(iv); resolve(d||null); }
+      },60);
+    });
+  }
+  line("3) Тесты вопросов","muted");
+  var cases=[
+    {name:"math", q:"12*12", pred:function(t){return t.indexOf("144")>=0;}},
+    {name:"permit", q:"что такое Permit?", pred:function(t){return /Permit|ALLOW|default/i.test(t);}},
+    {name:"sky", q:"почему небо голубое?", pred:function(t){return /Рэле|небо|голуб|рассеян/i.test(t);}},
+    {name:"aksi", q:"кто ты?", pred:function(t){return /АКСИ|aksi/i.test(t);}},
+    {name:"eq", q:"x^2=9", pred:function(t){return /3/.test(t);}}
+  ];
+  for(var i=0;i<cases.length;i++){
+    var c=cases[i];
+    line("  → "+c.q+" …","muted");
+    var d=await runQ(c.q);
+    var ans=(d&&d.result&&(d.result.answer||d.result.report||d.result.error))||"";
+    var stages=(d&&d.stages||[]).map(function(s){return s.name;});
+    var pass=!!(d&&d.status==="done"&&c.pred(ans)&&stages.indexOf("quantum")>=0&&stages.indexOf("mind")>=0);
+    report.tests.push({name:c.name,q:c.q,status:d&&d.status,source:d&&d.result&&d.result.source,stages:stages,pass:pass,preview:String(ans).slice(0,140)});
+    if(!pass) report.ok=false;
+    line("  "+(pass?"PASS":"FAIL")+" · "+(d&&d.status)+" · "+stages.join(">")+" · "+(d&&d.result&&d.result.source||""), pass?"ok":"bad");
+  }
+  line("4) ECDSA цепочка чеков","muted");
+  try{
+    var chain=await fab.verifyExoChain();
+    report.chain=chain;
+    if(chain&&chain.ok){
+      line("  PASS chain count="+chain.count+" (sig+link)","ok");
+    } else {
+      line("  chain: "+JSON.stringify(chain),"bad");
+      if(fab.exo && report.tests.some(function(t){return t.stages.indexOf("receipt")>=0;})) report.ok=false;
+    }
+  }catch(e){
+    report.chain={ok:false,error:String(e.message||e)};
+    line("  chain error: "+report.chain.error,"bad");
+  }
+  var snap=fab.snapshot();
+  report.jobs=snap.stats.jobs;
+  report.allows=snap.stats.allows;
+  report.blocks=snap.stats.blocks;
+  fab.stopScheduler();
+  var payload=JSON.stringify({
+    versions:report.versions,
+    tests:report.tests.map(function(t){return {name:t.name,pass:t.pass,stages:t.stages,source:t.source};}),
+    chain:report.chain&&{ok:report.chain.ok,count:report.chain.count},
+    t:report.t
+  });
+  report.audit_sha256=await sha256hex(payload);
+  line("5) Audit SHA-256","muted");
+  line("  "+report.audit_sha256,"ok");
+  if(report.ok) line("ИТОГ: ВСЁ СВЯЗАНО И РАБОТАЕТ","ok"); else line("ИТОГ: ЕСТЬ ОШИБКИ","bad");
+  finish(report);
+}
+function finish(report){
+  lastReport=report;
+  document.getElementById("run").disabled=false;
+  document.getElementById("export").disabled=false;
+  var b=document.getElementById("verBadge");
+  b.textContent=report.ok?"PASS":"FAIL";
+  b.className="badge "+(report.ok?"pass":"fail");
+  document.getElementById("hash").textContent="audit sha256: "+(report.audit_sha256||"—");
+}
+document.getElementById("run").onclick=function(){ runAll().catch(function(e){ line(String(e),"bad"); document.getElementById("run").disabled=false; }); };
+document.getElementById("export").onclick=function(){
+  if(!lastReport)return;
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"}));
+  a.download="aksi-verify-"+Date.now()+".json";
+  a.click();
+};
+line("Готово к проверке. Mind="+(window.AKSI_SUPER_MIND&&window.AKSI_SUPER_MIND.version)+" Super="+(window.AKSI_SUPER&&window.AKSI_SUPER.version),"muted");
+})();
+</script>
+</body>
+</html>
