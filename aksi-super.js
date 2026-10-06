@@ -1,6 +1,6 @@
-/** AKSI Super Fabric v2 */
+/** AKSI Super Fabric v2.1 + mind jobs */
 (function(G){"use strict";
-var VERSION="super-2.0.0",MEM_KEY="aksi_super_mem_v2";
+var VERSION="super-2.1.0",MEM_KEY="aksi_super_mem_v2";
 function now(){return Date.now()}
 function uid(p){return (p||"job")+"_"+now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
 function hashStr(s){var h=2166136261>>>0,t=String(s),i;for(i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return ("00000000"+(h>>>0).toString(16)).slice(-8)}
@@ -26,7 +26,20 @@ SuperFabric.prototype._pickGpu=function(){var best=null,i,j,g,score;for(i=0;i<th
 SuperFabric.prototype._stage=function(job,name,data){job.stages.push({name:name,t:now(),data:data});this.emit("stage",{job:job.id,name:name,data:data})};
 SuperFabric.prototype._runJob=function(job){var self=this,pick=this._pickGpu();if(!pick){job.status="queued";return null}job.status="running";job.started=now();job.node=pick.node.id;job.gpu=pick.gpu.id;pick.gpu.util=Math.min(100,pick.gpu.util+35+Math.random()*40);pick.gpu.temp=Math.min(92,(pick.gpu.temp||45)+5);pick.gpu.jobs+=1;pick.node.load=pick.node.gpus.reduce(function(a,g){return a+g.util},0)/pick.node.gpus.length;this.running.push(job);this.queue=this.queue.filter(function(x){return x.id!==job.id});
 return new Promise(function(resolve){setTimeout(async function(){try{var q=quantumCollapse(job.id+"|"+job.type+"|"+(job.prompt||self.goal||""));job.quantum=q;self._stage(job,"quantum",{bits:q.bits,S:q.entropy,sumP:q.sumP});var result={};
-if(job.type==="pipeline"||job.type==="full"){self._stage(job,"plan",{goal:self.goal||job.prompt});var mm=matMul(job.size||48);self.stats.flops+=mm.flops;self.stats.ms+=mm.ms;self._stage(job,"compute",{flops:mm.flops,ms:mm.ms,checksum:mm.checksum});
+if(job.type==="mind"||job.type==="ask"){
+  var Mind=G.AKSI_SUPER_MIND;
+  var mm0=matMul(Math.min(job.size||32,40));
+  self.stats.flops+=mm0.flops;self.stats.ms+=mm0.ms;
+  self._stage(job,"compute",{flops:mm0.flops,ms:mm0.ms,mind:true});
+  var syn=Mind?Mind.synthesize(job.prompt||self.goal||"",q):{text:"(mind module missing)",path:0};
+  self._stage(job,"mind",{path:syn.path,topics:syn.topics,hasMath:!!(syn.math&&syn.math.ok)});
+  var payloadM=(job.prompt||"").slice(0,400);
+  var permitStatus="ALLOW",permitReason="OK",receipt=null;
+  if(self.exo){var step=await self.exo.step("report",payloadM+" |mind|"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1;}
+  else {self.stats.allows+=1;self._stage(job,"permit",{status:"ALLOW",reason:"NO_EXO"});}
+  result={kind:"mind",report:syn.text,answer:syn.text,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q,math:syn.math||null};
+  job.receipt=receipt;self.stats.pipelines+=1;self.remember("mind",{id:job.id,path:syn.path,permit:permitStatus});
+}else if(job.type==="pipeline"||job.type==="full"){self._stage(job,"plan",{goal:self.goal||job.prompt});var mm=matMul(job.size||48);self.stats.flops+=mm.flops;self.stats.ms+=mm.ms;self._stage(job,"compute",{flops:mm.flops,ms:mm.ms,checksum:mm.checksum});
 var payload=(self.goal||job.prompt||"pipeline").slice(0,500),permitStatus="ALLOW",permitReason="OK",receipt=null;
 if(self.exo){var step=await self.exo.step("report",payload+" |Q:"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null,sig:receipt&&receipt.signature?receipt.signature.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1}
 else{if(/spend|delete|exfiltrate/i.test(payload)){permitStatus="BLOCK";permitReason="LOCAL_DENY";self.stats.blocks+=1}else self.stats.allows+=1;var body={v:VERSION,t:new Date().toISOString(),action:"report",payload:payload,quantum:q,prev:self.done.length?self.done[0].id:"GENESIS"};var id=await sha256(JSON.stringify(body));body.id=id;body.signature=hashStr(id+q.bits);receipt=body;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:id.slice(0,16),local:true})}
