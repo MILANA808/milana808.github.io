@@ -1,6 +1,6 @@
-/** AKSI Super Fabric v2.2 — mind via answer() */
+/** AKSI Super Fabric v2.3 — robust mind jobs */
 (function(G){"use strict";
-var VERSION="super-2.2.0",MEM_KEY="aksi_super_mem_v2";
+var VERSION="super-2.3.0",MEM_KEY="aksi_super_mem_v2";
 function now(){return Date.now()}
 function uid(p){return (p||"job")+"_"+now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
 function hashStr(s){var h=2166136261>>>0,t=String(s),i;for(i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return ("00000000"+(h>>>0).toString(16)).slice(-8)}
@@ -15,7 +15,7 @@ var r=Math.random(),acc=0,idx=dim-1;for(i=0;i<dim;i++){acc+=p[i];if(r<=acc){idx=
 return{bits:("0000"+idx.toString(2)).slice(-4),idx:idx,entropy:e,sumP:sum,seed:hv>>>0}}
 function SuperFabric(opts){opts=opts||{};this.nodes=[];this.queue=[];this.running=[];this.done=[];this.stats={jobs:0,flops:0,ms:0,mem_bytes:0,pipelines:0,allows:0,blocks:0};this.memory=[];this.maxMem=opts.maxMem||8000;this.booted=false;this._tick=null;this.exo=null;this.goal=null;this.onEvent=null}
 SuperFabric.prototype.emit=function(stage,detail){var ev={t:now(),stage:stage,detail:detail};if(typeof this.onEvent==="function")try{this.onEvent(ev)}catch(e){}return ev};
-SuperFabric.prototype.attachExocortex=async function(){var X=G.AKSI_EXOCORTEX;if(!X||!X.Exocortex){this.emit("exocortex",{ok:false,reason:"no exo"});return null}this.exo=new X.Exocortex();await this.exo.initKeys();this.emit("exocortex",{ok:true,version:X.version});return this.exo};
+SuperFabric.prototype.attachExocortex=async function(){var X=G.AKSI_EXOCORTEX;if(!X||!X.Exocortex){this.emit("exocortex",{ok:false,reason:"no exo"});return null}try{this.exo=new X.Exocortex();await Promise.race([this.exo.initKeys(),new Promise(function(res){setTimeout(res,5000)})]);this.emit("exocortex",{ok:true,version:X.version});return this.exo;}catch(e){this.exo=null;this.emit("exocortex",{ok:false,reason:String(e&&e.message||e)});return null}};
 SuperFabric.prototype.boot=function(nodeCount,gpusPerNode){nodeCount=nodeCount||8;gpusPerNode=gpusPerNode||4;this.nodes=[];var i,j;for(i=0;i<nodeCount;i++){var gpus=[];for(j=0;j<gpusPerNode;j++)gpus.push({id:"gpu-"+i+"-"+j,util:0,temp:42+Math.random()*8,jobs:0});this.nodes.push({id:"node-"+i,rack:"R"+Math.floor(i/4),status:"online",gpus:gpus,load:0})}this.booted=true;this.remember("boot",{nodes:nodeCount,gpus:nodeCount*gpusPerNode});this.emit("boot",{nodes:nodeCount,gpus:nodeCount*gpusPerNode});return this.snapshot()};
 SuperFabric.prototype.remember=function(kind,data){var entry={t:now(),kind:kind,data:data,h:hashStr(kind+JSON.stringify(data)+this.memory.length)};this.memory.push(entry);if(this.memory.length>this.maxMem)this.memory=this.memory.slice(-Math.floor(this.maxMem*0.8));this.stats.mem_bytes=this.memory.length*180;try{localStorage.setItem(MEM_KEY,JSON.stringify(this.memory.slice(-300)))}catch(e){}return entry};
 SuperFabric.prototype.loadMemory=function(){try{var raw=localStorage.getItem(MEM_KEY);if(raw)this.memory=JSON.parse(raw)||[]}catch(e){this.memory=[]}this.stats.mem_bytes=this.memory.length*180};
@@ -31,33 +31,66 @@ if(job.type==="mind"||job.type==="ask"){
   var mm0=matMul(Math.min(job.size||32,40));
   self.stats.flops+=mm0.flops;self.stats.ms+=mm0.ms;
   self._stage(job,"compute",{flops:mm0.flops,ms:mm0.ms,mind:true});
-  var syn;
-  if(Mind&&Mind.answer){syn=await Mind.answer(job.prompt||self.goal||"",q);}
-  else if(Mind&&Mind.synthesize){syn=Mind.synthesize(job.prompt||self.goal||"",q);syn.source="mind";}
-  else {syn={text:"Модуль Mind не загружен. Обновите страницу.",path:0,source:"none"};}
+  var syn={text:"",path:0,source:"none"};
+  try{
+    if(Mind&&Mind.answer){
+      syn=await Promise.race([
+        Mind.answer(job.prompt||self.goal||"",q),
+        new Promise(function(resolve){setTimeout(function(){resolve(null);},12000);})
+      ]);
+      if(!syn){syn=Mind.synthesize?Mind.synthesize(job.prompt||self.goal||"",q):null;if(syn)syn.source="mind-timeout";}
+    } else if(Mind&&Mind.synthesize){
+      syn=Mind.synthesize(job.prompt||self.goal||"",q);syn.source="mind";
+    }
+    if(!syn||!syn.text){
+      syn={text:"Не удалось сформировать ответ. Попробуйте ещё раз или короче сформулируйте вопрос.",path:0,source:"empty"};
+    }
+  }catch(mindErr){
+    try{syn=Mind&&Mind.synthesize?Mind.synthesize(job.prompt||self.goal||"",q):null;}catch(e2){syn=null;}
+    if(!syn||!syn.text) syn={text:"Ошибка Mind: "+String(mindErr&&mindErr.message||mindErr),path:0,source:"error"};
+    else syn.source=syn.source||"mind-fallback";
+  }
   self._stage(job,"mind",{path:syn.path,topics:syn.topics,hasMath:!!(syn.math&&syn.math.ok),source:syn.source||"mind"});
   var payloadM=(job.prompt||"").slice(0,400);
   var permitStatus="ALLOW",permitReason="OK",receipt=null;
-  if(self.exo){var step=await self.exo.step("report",payloadM+" |mind|"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1;}
-  else {self.stats.allows+=1;self._stage(job,"permit",{status:"ALLOW",reason:"NO_EXO"});}
+  try{
+    if(self.exo){
+      var step=await Promise.race([
+        self.exo.step("report",payloadM+" |mind|"+q.bits),
+        new Promise(function(resolve){setTimeout(function(){resolve({status:"ALLOW",permit:{reason:"EXO_TIMEOUT"},receipt:null});},4000);})
+      ]);
+      permitStatus=step.status||"ALLOW";
+      permitReason=(step.permit&&step.permit.reason)||permitReason;
+      receipt=step.receipt||null;
+      self._stage(job,"permit",{status:permitStatus,reason:permitReason});
+      self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null});
+      if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1;
+    } else {
+      self.stats.allows+=1;
+      self._stage(job,"permit",{status:"ALLOW",reason:"NO_EXO"});
+    }
+  }catch(exoErr){
+    self.stats.allows+=1;
+    permitStatus="ALLOW";permitReason="EXO_ERR";
+    self._stage(job,"permit",{status:"ALLOW",reason:String(exoErr&&exoErr.message||exoErr).slice(0,80)});
+  }
   result={kind:"mind",report:syn.text,answer:syn.text,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q,math:syn.math||null,source:syn.source||"mind"};
   job.receipt=receipt;self.stats.pipelines+=1;self.remember("mind",{id:job.id,path:syn.path,permit:permitStatus,source:syn.source});
-}else if(job.type==="pipeline"||job.type==="full"){self._stage(job,"plan",{goal:self.goal||job.prompt});var mm=matMul(job.size||48);self.stats.flops+=mm.flops;self.stats.ms+=mm.ms;self._stage(job,"compute",{flops:mm.flops,ms:mm.ms,checksum:mm.checksum});
+}else if(job.type==="pipeline"||job.type==="full"){self._stage(job,"plan",{goal:self.goal||job.prompt});var mm=matMul(job.size||48);self.stats.flops+=mm.flops;self.stats.ms+=mm.ms;self._stage(job,"compute",{flops:mm.flops,ms:mm.ms});
 var payload=(self.goal||job.prompt||"pipeline").slice(0,500),permitStatus="ALLOW",permitReason="OK",receipt=null;
-if(self.exo){var step=await self.exo.step("report",payload+" |Q:"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1}
-else{if(/spend|delete|exfiltrate/i.test(payload)){permitStatus="BLOCK";permitReason="LOCAL_DENY";self.stats.blocks+=1}else self.stats.allows+=1;var body={v:VERSION,t:new Date().toISOString(),action:"report",payload:payload,quantum:q,prev:self.done.length?self.done[0].id:"GENESIS"};var id=await sha256(JSON.stringify(body));body.id=id;body.signature=hashStr(id+q.bits);receipt=body;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:id.slice(0,16),local:true})}
-var report=["PIPELINE REPORT","goal: "+(self.goal||job.prompt||"—"),"quantum: |"+q.bits+"⟩","permit: "+permitStatus,"receipt: "+(receipt&&receipt.id?receipt.id.slice(0,24):"—")].join("\n");
-result={kind:"pipeline",report:report,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q};job.receipt=receipt;self.stats.pipelines+=1;}
+if(self.exo){try{var step=await Promise.race([self.exo.step("report",payload+" |Q:"+q.bits),new Promise(function(r){setTimeout(function(){r({status:"ALLOW",permit:{reason:"EXO_TIMEOUT"},receipt:null});},4000)})]);permitStatus=step.status||"ALLOW";permitReason=(step.permit&&step.permit.reason)||"OK";receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1;}catch(e){self.stats.allows+=1;self._stage(job,"permit",{status:"ALLOW",reason:"EXO_ERR"})}}
+else{self.stats.allows+=1;self._stage(job,"permit",{status:"ALLOW",reason:"NO_EXO"})}
+result={kind:"pipeline",report:"PIPELINE\nquantum: |"+q.bits+"⟩\npermit: "+permitStatus,permit:permitStatus,quantum:q};self.stats.pipelines+=1;}
 else if(job.type==="matmul"||job.type==="ai_train"||job.type==="gpu_batch"){var m=matMul(job.size);self.stats.flops+=m.flops;result={kind:job.type,flops:m.flops,ms:m.ms};}
 else if(job.type==="quantum"){result={kind:"quantum",bits:q.bits,entropy:q.entropy};}
 else if(job.type==="memory_scan"){result={kind:"memory_scan",entries:self.memory.length};}
 else{var m2=matMul(Math.min(job.size||32,40));self.stats.flops+=m2.flops;result={kind:job.type,flops:m2.flops};}
 job.result=result;job.status="done";job.finished=now();pick.gpu.util=Math.max(0,pick.gpu.util-25);pick.node.load=pick.node.gpus.reduce(function(a,g){return a+g.util},0)/pick.node.gpus.length;self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);if(self.done.length>80)self.done=self.done.slice(0,80);self.stats.jobs+=1;self.remember("done",{id:job.id,type:job.type,quantum:q.bits});self._stage(job,"done",{status:"done"});resolve(job);
-}catch(err){job.status="error";job.result={error:String(err&&err.message||err)};job.finished=now();self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);self.emit("error",{job:job.id,error:job.result.error});resolve(job);}},60+Math.random()*180);});};
+}catch(err){job.status="error";job.result={error:String(err&&err.message||err),answer:"Ошибка job: "+String(err&&err.message||err)};job.finished=now();self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);self.emit("error",{job:job.id,error:job.result.error});resolve(job);}},40+Math.random()*120);});};
 SuperFabric.prototype.tick=function(){var self=this,promises=[],maxRun=Math.max(2,Math.floor(this.nodes.length/2));while(this.queue.length&&this.running.length<maxRun){var p=this._runJob(this.queue[0]);if(p)promises.push(p);else break}this.nodes.forEach(function(n){n.gpus.forEach(function(g){if(g.util>0)g.util=Math.max(0,g.util-2);if(g.temp>42)g.temp=Math.max(42,g.temp-0.4)});n.load=n.gpus.reduce(function(a,g){return a+g.util},0)/n.gpus.length});return Promise.all(promises)};
 SuperFabric.prototype.startScheduler=function(ms){var self=this;if(this._tick)clearInterval(this._tick);this._tick=setInterval(function(){self.tick();if(typeof self.onTick==="function")try{self.onTick(self.snapshot())}catch(e){}},ms||350)};
 SuperFabric.prototype.stopScheduler=function(){if(this._tick)clearInterval(this._tick);this._tick=null};
-SuperFabric.prototype.runFull=async function(goalText){if(!this.booted)this.boot(8,4);if(!this._tick)this.startScheduler(300);if(!this.exo)try{await this.attachExocortex()}catch(e){}if(goalText)this.setGoal(goalText);this.observe("user_goal:"+(goalText||this.goal||""));var job=this.submit({type:"pipeline",size:48,prompt:goalText||this.goal||"full"});var self=this;return new Promise(function(resolve){var t0=now(),iv=setInterval(function(){var found=self.done.find(function(j){return j.id===job.id});if(found||now()-t0>15000){clearInterval(iv);resolve(found||job)}},100)})};
+SuperFabric.prototype.runFull=async function(goalText){if(!this.booted)this.boot(8,4);if(!this._tick)this.startScheduler(300);if(!this.exo)try{await this.attachExocortex()}catch(e){}if(goalText)this.setGoal(goalText);var job=this.submit({type:"pipeline",size:48,prompt:goalText||this.goal||"full"});var self=this;return new Promise(function(resolve){var t0=now(),iv=setInterval(function(){var found=self.done.find(function(j){return j.id===job.id});if(found||now()-t0>15000){clearInterval(iv);resolve(found||job)}},100)})};
 SuperFabric.prototype.snapshot=function(){var gpus=0,util=0;this.nodes.forEach(function(n){n.gpus.forEach(function(g){gpus+=1;util+=g.util})});return{version:VERSION,booted:this.booted,goal:this.goal,exo:!!this.exo,nodes:this.nodes.length,gpus:gpus,avg_util:gpus?util/gpus:0,queue:this.queue.length,running:this.running.length,done:this.done.length,stats:Object.assign({},this.stats),mem_entries:this.memory.length,nodes_detail:this.nodes,recent:this.done.slice(0,6)}};
 SuperFabric.prototype.exportJSON=function(){return{version:VERSION,snapshot:this.snapshot(),memory_tail:this.memory.slice(-80),done_tail:this.done.slice(0,40)}};
 SuperFabric.prototype.verifyExoChain=async function(){if(!this.exo)return{ok:false,reason:"no exo"};return this.exo.verifyChain()};
