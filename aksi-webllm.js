@@ -1,26 +1,25 @@
 /**
- * AKSI WebLLM v4.3 — wider practical context
- * Multi-turn + memory + Neuro. Not 128k cloud.
+ * AKSI WebLLM v4.4 — stronger defaults, multi-turn agent context
+ * Not cloud-scale. Browser WebGPU quantized models.
  * aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VERSION = "4.3.0";
+  var VERSION = "4.4.0";
   var WEBLLM_VERSION = "0.2.79";
   var CDNS = [
     "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@" + WEBLLM_VERSION + "/+esm",
     "https://esm.sh/@mlc-ai/web-llm@" + WEBLLM_VERSION
   ];
   var MODELS = [
-    { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 0.5B · mobile · ~2–4k ctx", mobile: true },
-    { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B · ~4k ctx", mobile: true },
-    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · desktop · wider", mobile: false },
-    { id: "Phi-3.5-mini-instruct-q4f16_1-MLC", label: "Phi 3.5 mini · heavy", mobile: false }
+    { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B · mobile/desktop", mobile: true },
+    { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 0.5B · light mobile", mobile: true },
+    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · desktop", mobile: false },
+    { id: "Phi-3.5-mini-instruct-q4f16_1-MLC", label: "Phi 3.5 mini · heavy desktop", mobile: false }
   ];
   var BASE_SYS =
-    "Ты АКСИ — локальный помощник. Используй ВЕСЬ переданный контекст (память, история, SEED). " +
-    "Отвечай на языке пользователя. Если в контексте есть ответ — опирайся на него. " +
-    "Различай факт и догадку. Не выдумывай источники. Не AGI.";
+    "Ты АКСИ — локальный агент. Используй весь переданный контекст. " +
+    "Отвечай на языке пользователя полно и по делу. Различай факт и догадку. Не выдумывай источники.";
 
   var engine = null, currentModel = null, loading = false, progress = 0;
   var message = "ожидание", lastError = null, webgpu = null, loadPromise = null, adaptedHint = "";
@@ -38,10 +37,17 @@
   function modelsForDevice() {
     return isMobile() ? MODELS.filter(function (m) { return m.mobile; }) : MODELS.slice();
   }
-  function defaultModel() { return modelsForDevice()[0].id; }
+  function defaultModel() {
+    var list = modelsForDevice();
+    if (!isMobile()) {
+      for (var i = 0; i < list.length; i++) if (list[i].id.indexOf("1.5B") >= 0) return list[i].id;
+    }
+    for (var j = 0; j < list.length; j++) if (list[j].id.indexOf("1B") >= 0) return list[j].id;
+    return list[0].id;
+  }
   function budgets() {
-    if (isMobile()) return { sys: 3500, hist: 2500, user: 1500, max_tokens: 256, turns: 6 };
-    return { sys: 9000, hist: 8000, user: 4000, max_tokens: 512, turns: 16 };
+    if (isMobile()) return { sys: 3500, hist: 2500, user: 1500, max_tokens: 384, turns: 8 };
+    return { sys: 9000, hist: 8000, user: 4000, max_tokens: 640, turns: 20 };
   }
   function status() {
     var b = budgets();
@@ -147,7 +153,7 @@
     loadPromise = detectWebGPU().then(function (gpu) {
       if (!gpu) {
         throw new Error(isIOS()
-          ? "WebGPU нет на этом iPhone. Большой контекст: Memory+Neuro в Chat."
+          ? "WebGPU нет на этом iPhone. Работает Mind без большой модели."
           : "WebGPU недоступен.");
       }
       setProgress(5, "библиотека…");
@@ -172,7 +178,7 @@
       loading = false; loadPromise = null; engine = null; currentModel = null;
       lastError = String((err && err.message) || err);
       message = "ошибка: " + lastError.slice(0, 200); progress = 0; emit();
-      return status();
+      throw err;
     });
     return loadPromise;
   }
