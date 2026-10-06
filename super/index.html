@@ -35,9 +35,9 @@ footer{margin-top:16px;font-size:12px;color:var(--m)}footer a{color:var(--a);mar
 </head>
 <body>
 <div class="w">
-  <h1>АКСИ Super · объяснения на русском</h1>
-  <p class="lead">Вопрос → job на суперкомпьютере → quantum → mind (или WebLLM) → Permit → полный ответ.</p>
-  <div class="note">Без весов «гигантский LLM» не существует. Здесь: подробный русский Mind всегда; живая генерация — если загрузите WebLLM (WebGPU). Оба пути идут через Super.</div>
+  <h1>АКСИ Super · любой вопрос</h1>
+  <p class="lead">Вопрос → Super → quantum → mind (wiki / KB / math) или WebLLM → Permit → ответ на русском.</p>
+  <div class="note">Простой путь: пишете что угодно. Система сама тянет факт (Википедия), считает математику, или использует WebLLM если загружен.</div>
   <div class="panel">
     <h2>Состояние</h2>
     <div class="chips">
@@ -53,16 +53,16 @@ footer{margin-top:16px;font-size:12px;color:var(--m)}footer a{color:var(--a);mar
       <button type="button" class="g" id="loadLlm">Загрузить WebLLM</button>
       <button type="button" class="g" id="stop">Стоп</button>
     </div>
-    <p class="hint" id="llmHint">WebLLM опционален: на телефоне с WebGPU даёт живой текст. Без него Mind подробно отвечает по-русски.</p>
+    <p class="hint" id="llmHint">Без WebLLM тоже отвечает: математика, KB, Википедия. WebLLM — для свободного живого текста (нужен WebGPU).</p>
   </div>
   <div class="panel">
     <h2>Ваш вопрос</h2>
-    <textarea id="q" placeholder="Например: что такое суперпозиция? · зачем нужен Permit? · x^2=4 · как работает Super?"></textarea>
+    <textarea id="q" placeholder="Любой вопрос… например: почему небо голубое? · что такое ДНК? · 15*8 · что такое Permit?"></textarea>
     <div class="row">
-      <button type="button" id="ask">▶ Объясни через Super</button>
+      <button type="button" id="ask">▶ Спросить</button>
       <button type="button" class="g" id="export">Export</button>
     </div>
-    <div style="margin-top:12px" id="answer">Здесь появится подробный ответ на русском…</div>
+    <div style="margin-top:12px" id="answer">Здесь появится ответ…</div>
   </div>
   <div class="panel">
     <h2>Журнал стадий</h2>
@@ -77,7 +77,7 @@ footer{margin-top:16px;font-size:12px;color:var(--m)}footer a{color:var(--a);mar
 </div>
 <script src="/aksi-exocortex.js?v=1"></script>
 <script src="/aksi-webllm.js?v=43"></script>
-<script src="/aksi-super-mind.js?v=2"></script>
+<script src="/aksi-super-mind.js?v=3"></script>
 <script src="/aksi-super.js?v=22"></script>
 <script>
 (function(){
@@ -88,13 +88,13 @@ function log(msg,cls){var d=document.createElement("div");if(cls)d.className=cls
 function chip(id,t,cls){var el=document.getElementById(id);if(!el)return;el.textContent=t;el.className=cls||"";}
 function llmState(){try{if(!W||!W.status)return{ready:false};return W.status();}catch(e){return{ready:false};}}
 function paint(sn){if(!sn)return;chip("cBoot",sn.booted?"ONLINE":"offline",sn.booted?"on":"");chip("cExo",sn.exo?"exo: ON":"exo: off",sn.exo?"on":"bad");chip("cMind",M?"mind: ON":"mind: off",M?"on":"bad");var st=llmState();chip("cLlm",st.ready?"llm: ON":(st.loading?"llm: loading":"llm: off"),st.ready?"on":"");chip("cUtil","util: "+sn.avg_util.toFixed(0)+"%","gpu");document.getElementById("utilBar").style.width=Math.min(100,sn.avg_util)+"%";}
-async function ensure(){if(!S){log("Super не загрузился","bad");return null;}if(!fabric){fabric=new S.SuperFabric();fabric.loadMemory();fabric.onTick=paint;fabric.onEvent=function(ev){if(ev.stage==="stage")log(" · "+ev.detail.name+(ev.detail.data&&ev.detail.data.source?" ["+ev.detail.data.source+"]":""),"st");};}if(!fabric.booted){fabric.boot(8,4);fabric.startScheduler(300);await fabric.attachExocortex();log("Super запущен, Exocortex подключён","ok");paint(fabric.snapshot());}return fabric;}
+async function ensure(){if(!S){log("Super не загрузился","bad");return null;}if(!fabric){fabric=new S.SuperFabric();fabric.loadMemory();fabric.onTick=paint;fabric.onEvent=function(ev){if(ev.stage==="stage")log(" · "+ev.detail.name+(ev.detail.data&&ev.detail.data.source?" ["+ev.detail.data.source+"]":""),"st");};}if(!fabric.booted){fabric.boot(8,4);fabric.startScheduler(300);await fabric.attachExocortex();log("Super запущен","ok");paint(fabric.snapshot());}return fabric;}
 document.getElementById("boot").onclick=async function(){await ensure();};
-document.getElementById("stop").onclick=function(){if(fabric)fabric.stopScheduler();log("планировщик остановлен","");};
-document.getElementById("loadLlm").onclick=async function(){if(!W||!W.loadModel){log("WebLLM модуль недоступен","bad");return;}document.getElementById("loadLlm").disabled=true;document.getElementById("llmHint").textContent="Загрузка модели… это может занять минуты.";log("загрузка WebLLM…","st");try{await W.loadModel(null,function(p,msg){document.getElementById("llmHint").textContent=(msg||"loading")+" "+Math.round((p||0)*100)+"%";paint(fabric?fabric.snapshot():{booted:false,exo:false,avg_util:0});});log("WebLLM готов","ok");document.getElementById("llmHint").textContent="WebLLM готов. Следующий вопрос может использовать живую генерацию.";}catch(e){log("WebLLM: "+(e.message||e),"bad");document.getElementById("llmHint").textContent="WebLLM не загрузился (нужен WebGPU). Mind всё равно объяснит по-русски.";}document.getElementById("loadLlm").disabled=false;paint(fabric?fabric.snapshot():{booted:false,exo:false,avg_util:0});};
-document.getElementById("ask").onclick=async function(){var text=document.getElementById("q").value.trim();if(!text){log("Введите вопрос","bad");return;}document.getElementById("ask").disabled=true;var f=await ensure();log("вопрос: "+text.slice(0,100),"ok");document.getElementById("answer").textContent="Считаю на Super…";var job=f.submit({type:"mind",prompt:text,size:32});var t0=Date.now();var iv=setInterval(function(){var done=f.done.find(function(j){return j.id===job.id;});if(done||Date.now()-t0>60000){clearInterval(iv);document.getElementById("ask").disabled=false;paint(f.snapshot());if(done&&done.result){document.getElementById("answer").textContent=done.result.answer||done.result.report||"";log("готово · источник="+(done.result.source||"mind")+" · permit="+done.result.permit+" · "+done.stages.map(function(s){return s.name}).join(" → "),"ok");}else{document.getElementById("answer").textContent="Не успел завершить job. Нажмите ещё раз.";log("timeout","bad");}}},80);};
-document.getElementById("export").onclick=async function(){var f=await ensure();var data=JSON.stringify(f.exportJSON(),null,2);var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="aksi-super-mind-"+Date.now()+".json";a.click();};
-log("Mind "+(M&&M.version||"?")+" · Super "+(S&&S.version||"?")+" · WebLLM "+(W?"есть":"нет"),"ok");
+document.getElementById("stop").onclick=function(){if(fabric)fabric.stopScheduler();};
+document.getElementById("loadLlm").onclick=async function(){if(!W||!W.loadModel){log("WebLLM недоступен","bad");return;}document.getElementById("loadLlm").disabled=true;document.getElementById("llmHint").textContent="Загрузка модели…";log("загрузка WebLLM…","st");try{await W.loadModel(null,function(p,msg){document.getElementById("llmHint").textContent=(msg||"loading")+" "+Math.round((p||0)*100)+"%";});log("WebLLM готов","ok");document.getElementById("llmHint").textContent="WebLLM готов — следующий вопрос может идти через живую модель.";}catch(e){log("WebLLM: "+(e.message||e),"bad");document.getElementById("llmHint").textContent="WebLLM не загрузился. Mind+wiki всё равно отвечают.";}document.getElementById("loadLlm").disabled=false;paint(fabric?fabric.snapshot():{booted:false,exo:false,avg_util:0});};
+document.getElementById("ask").onclick=async function(){var text=document.getElementById("q").value.trim();if(!text){log("Введите вопрос","bad");return;}document.getElementById("ask").disabled=true;var f=await ensure();log("вопрос: "+text.slice(0,100),"ok");document.getElementById("answer").textContent="Считаю…";var job=f.submit({type:"mind",prompt:text,size:32});var t0=Date.now();var iv=setInterval(function(){var done=f.done.find(function(j){return j.id===job.id;});if(done||Date.now()-t0>90000){clearInterval(iv);document.getElementById("ask").disabled=false;paint(f.snapshot());if(done&&done.result){document.getElementById("answer").textContent=done.result.answer||done.result.report||"";log("готово · "+(done.result.source||"mind")+" · "+done.stages.map(function(s){return s.name}).join(" → "),"ok");}else{document.getElementById("answer").textContent="Не успел. Нажмите ещё раз.";log("timeout","bad");}}},80);};
+document.getElementById("export").onclick=async function(){var f=await ensure();var data=JSON.stringify(f.exportJSON(),null,2);var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download="aksi-super-"+Date.now()+".json";a.click();};
+log("Mind "+(M&&M.version||"?")+" · Super "+(S&&S.version||"?"),"ok");
 })();
 </script>
 </body>
