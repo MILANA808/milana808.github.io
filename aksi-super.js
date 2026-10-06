@@ -1,6 +1,6 @@
-/** AKSI Super Fabric v2.1 + mind jobs */
+/** AKSI Super Fabric v2.2 — mind via answer() */
 (function(G){"use strict";
-var VERSION="super-2.1.0",MEM_KEY="aksi_super_mem_v2";
+var VERSION="super-2.2.0",MEM_KEY="aksi_super_mem_v2";
 function now(){return Date.now()}
 function uid(p){return (p||"job")+"_"+now().toString(36)+"_"+Math.random().toString(36).slice(2,8)}
 function hashStr(s){var h=2166136261>>>0,t=String(s),i;for(i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}return ("00000000"+(h>>>0).toString(16)).slice(-8)}
@@ -31,32 +31,33 @@ if(job.type==="mind"||job.type==="ask"){
   var mm0=matMul(Math.min(job.size||32,40));
   self.stats.flops+=mm0.flops;self.stats.ms+=mm0.ms;
   self._stage(job,"compute",{flops:mm0.flops,ms:mm0.ms,mind:true});
-  var syn=Mind?Mind.synthesize(job.prompt||self.goal||"",q):{text:"(mind module missing)",path:0};
-  self._stage(job,"mind",{path:syn.path,topics:syn.topics,hasMath:!!(syn.math&&syn.math.ok)});
+  var syn;
+  if(Mind&&Mind.answer){syn=await Mind.answer(job.prompt||self.goal||"",q);}
+  else if(Mind&&Mind.synthesize){syn=Mind.synthesize(job.prompt||self.goal||"",q);syn.source="mind";}
+  else {syn={text:"Модуль Mind не загружен. Обновите страницу.",path:0,source:"none"};}
+  self._stage(job,"mind",{path:syn.path,topics:syn.topics,hasMath:!!(syn.math&&syn.math.ok),source:syn.source||"mind"});
   var payloadM=(job.prompt||"").slice(0,400);
   var permitStatus="ALLOW",permitReason="OK",receipt=null;
   if(self.exo){var step=await self.exo.step("report",payloadM+" |mind|"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1;}
   else {self.stats.allows+=1;self._stage(job,"permit",{status:"ALLOW",reason:"NO_EXO"});}
-  result={kind:"mind",report:syn.text,answer:syn.text,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q,math:syn.math||null};
-  job.receipt=receipt;self.stats.pipelines+=1;self.remember("mind",{id:job.id,path:syn.path,permit:permitStatus});
+  result={kind:"mind",report:syn.text,answer:syn.text,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q,math:syn.math||null,source:syn.source||"mind"};
+  job.receipt=receipt;self.stats.pipelines+=1;self.remember("mind",{id:job.id,path:syn.path,permit:permitStatus,source:syn.source});
 }else if(job.type==="pipeline"||job.type==="full"){self._stage(job,"plan",{goal:self.goal||job.prompt});var mm=matMul(job.size||48);self.stats.flops+=mm.flops;self.stats.ms+=mm.ms;self._stage(job,"compute",{flops:mm.flops,ms:mm.ms,checksum:mm.checksum});
 var payload=(self.goal||job.prompt||"pipeline").slice(0,500),permitStatus="ALLOW",permitReason="OK",receipt=null;
-if(self.exo){var step=await self.exo.step("report",payload+" |Q:"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null,sig:receipt&&receipt.signature?receipt.signature.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1}
+if(self.exo){var step=await self.exo.step("report",payload+" |Q:"+q.bits);permitStatus=step.status;permitReason=step.permit&&step.permit.reason;receipt=step.receipt;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:receipt&&receipt.id?receipt.id.slice(0,16):null});if(permitStatus==="ALLOW")self.stats.allows+=1;else self.stats.blocks+=1}
 else{if(/spend|delete|exfiltrate/i.test(payload)){permitStatus="BLOCK";permitReason="LOCAL_DENY";self.stats.blocks+=1}else self.stats.allows+=1;var body={v:VERSION,t:new Date().toISOString(),action:"report",payload:payload,quantum:q,prev:self.done.length?self.done[0].id:"GENESIS"};var id=await sha256(JSON.stringify(body));body.id=id;body.signature=hashStr(id+q.bits);receipt=body;self._stage(job,"permit",{status:permitStatus,reason:permitReason});self._stage(job,"receipt",{id:id.slice(0,16),local:true})}
-var report=["PIPELINE REPORT","goal: "+(self.goal||job.prompt||"—"),"quantum: |"+q.bits+"⟩ S≈"+q.entropy.toFixed(3),"compute: "+mm.flops+" flops in "+mm.ms.toFixed(1)+"ms","permit: "+permitStatus+" ("+permitReason+")","receipt: "+(receipt&&receipt.id?receipt.id.slice(0,24):"—"),"node: "+job.node+" / "+job.gpu].join("\n");
-result={kind:"pipeline",report:report,flops:mm.flops,ms:mm.ms,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q};job.receipt=receipt;self.stats.pipelines+=1;self.remember("pipeline",{id:job.id,permit:permitStatus,receipt:receipt&&receipt.id,quantum:q.bits})}
-else if(job.type==="matmul"||job.type==="ai_train"||job.type==="gpu_batch"){var m=matMul(job.size);self.stats.flops+=m.flops;self.stats.ms+=m.ms;result={kind:job.type,n:m.n,ms:m.ms,flops:m.flops,checksum:m.checksum};self._stage(job,"compute",result)}
-else if(job.type==="quantum"){result={kind:"quantum",bits:q.bits,entropy:q.entropy,sumP:q.sumP}}
-else if(job.type==="memory_scan"){result={kind:"memory_scan",entries:self.memory.length,last_h:self.memory.length?self.memory[self.memory.length-1].h:null};self._stage(job,"memory",result)}
-else if(job.type==="exocortex_link"){if(self.exo){var st=await self.exo.step("plan",job.prompt||self.goal||"link");result={kind:"exocortex",status:st.status,receipt:st.receipt&&st.receipt.id};job.receipt=st.receipt}else result={kind:"exocortex_link",note:"load exocortex",url:"/exocortex/"}}
-else{var m2=matMul(Math.min(job.size,40));self.stats.flops+=m2.flops;result={kind:job.type,ms:m2.ms,flops:m2.flops}}
-job.result=result;job.status="done";job.finished=now();pick.gpu.util=Math.max(0,pick.gpu.util-25);pick.node.load=pick.node.gpus.reduce(function(a,g){return a+g.util},0)/pick.node.gpus.length;self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);if(self.done.length>80)self.done=self.done.slice(0,80);self.stats.jobs+=1;self.remember("done",{id:job.id,type:job.type,quantum:q.bits,node:job.node});self._stage(job,"done",{status:"done"});resolve(job)
-}catch(err){job.status="error";job.result={error:String(err&&err.message||err)};job.finished=now();self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);self.emit("error",{job:job.id,error:job.result.error});resolve(job)}},60+Math.random()*180)});
-};
+var report=["PIPELINE REPORT","goal: "+(self.goal||job.prompt||"—"),"quantum: |"+q.bits+"⟩","permit: "+permitStatus,"receipt: "+(receipt&&receipt.id?receipt.id.slice(0,24):"—")].join("\n");
+result={kind:"pipeline",report:report,permit:permitStatus,receipt_id:receipt&&receipt.id,quantum:q};job.receipt=receipt;self.stats.pipelines+=1;}
+else if(job.type==="matmul"||job.type==="ai_train"||job.type==="gpu_batch"){var m=matMul(job.size);self.stats.flops+=m.flops;result={kind:job.type,flops:m.flops,ms:m.ms};}
+else if(job.type==="quantum"){result={kind:"quantum",bits:q.bits,entropy:q.entropy};}
+else if(job.type==="memory_scan"){result={kind:"memory_scan",entries:self.memory.length};}
+else{var m2=matMul(Math.min(job.size||32,40));self.stats.flops+=m2.flops;result={kind:job.type,flops:m2.flops};}
+job.result=result;job.status="done";job.finished=now();pick.gpu.util=Math.max(0,pick.gpu.util-25);pick.node.load=pick.node.gpus.reduce(function(a,g){return a+g.util},0)/pick.node.gpus.length;self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);if(self.done.length>80)self.done=self.done.slice(0,80);self.stats.jobs+=1;self.remember("done",{id:job.id,type:job.type,quantum:q.bits});self._stage(job,"done",{status:"done"});resolve(job);
+}catch(err){job.status="error";job.result={error:String(err&&err.message||err)};job.finished=now();self.running=self.running.filter(function(x){return x.id!==job.id});self.done.unshift(job);self.emit("error",{job:job.id,error:job.result.error});resolve(job);}},60+Math.random()*180);});};
 SuperFabric.prototype.tick=function(){var self=this,promises=[],maxRun=Math.max(2,Math.floor(this.nodes.length/2));while(this.queue.length&&this.running.length<maxRun){var p=this._runJob(this.queue[0]);if(p)promises.push(p);else break}this.nodes.forEach(function(n){n.gpus.forEach(function(g){if(g.util>0)g.util=Math.max(0,g.util-2);if(g.temp>42)g.temp=Math.max(42,g.temp-0.4)});n.load=n.gpus.reduce(function(a,g){return a+g.util},0)/n.gpus.length});return Promise.all(promises)};
 SuperFabric.prototype.startScheduler=function(ms){var self=this;if(this._tick)clearInterval(this._tick);this._tick=setInterval(function(){self.tick();if(typeof self.onTick==="function")try{self.onTick(self.snapshot())}catch(e){}},ms||350)};
 SuperFabric.prototype.stopScheduler=function(){if(this._tick)clearInterval(this._tick);this._tick=null};
-SuperFabric.prototype.runFull=async function(goalText){if(!this.booted)this.boot(8,4);if(!this._tick)this.startScheduler(300);if(!this.exo)try{await this.attachExocortex()}catch(e){}if(goalText)this.setGoal(goalText);this.observe("user_goal:"+(goalText||this.goal||""));var job=this.submit({type:"pipeline",size:48,prompt:goalText||this.goal||"full pipeline"});this.emit("full",{job:job.id,goal:this.goal});var self=this;return new Promise(function(resolve){var t0=now(),iv=setInterval(function(){var found=self.done.find(function(j){return j.id===job.id});if(found||now()-t0>15000){clearInterval(iv);resolve(found||job)}},100)})};
+SuperFabric.prototype.runFull=async function(goalText){if(!this.booted)this.boot(8,4);if(!this._tick)this.startScheduler(300);if(!this.exo)try{await this.attachExocortex()}catch(e){}if(goalText)this.setGoal(goalText);this.observe("user_goal:"+(goalText||this.goal||""));var job=this.submit({type:"pipeline",size:48,prompt:goalText||this.goal||"full"});var self=this;return new Promise(function(resolve){var t0=now(),iv=setInterval(function(){var found=self.done.find(function(j){return j.id===job.id});if(found||now()-t0>15000){clearInterval(iv);resolve(found||job)}},100)})};
 SuperFabric.prototype.snapshot=function(){var gpus=0,util=0;this.nodes.forEach(function(n){n.gpus.forEach(function(g){gpus+=1;util+=g.util})});return{version:VERSION,booted:this.booted,goal:this.goal,exo:!!this.exo,nodes:this.nodes.length,gpus:gpus,avg_util:gpus?util/gpus:0,queue:this.queue.length,running:this.running.length,done:this.done.length,stats:Object.assign({},this.stats),mem_entries:this.memory.length,nodes_detail:this.nodes,recent:this.done.slice(0,6)}};
 SuperFabric.prototype.exportJSON=function(){return{version:VERSION,snapshot:this.snapshot(),memory_tail:this.memory.slice(-80),done_tail:this.done.slice(0,40)}};
 SuperFabric.prototype.verifyExoChain=async function(){if(!this.exo)return{ok:false,reason:"no exo"};return this.exo.verifyChain()};
