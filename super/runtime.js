@@ -1,3 +1,7 @@
+/**
+ * AKSI Super runtime v2 — mobile-safe dialog + auto WebLLM + Jev-style gate
+ * aksilove@internet.ru
+ */
 (function () {
   "use strict";
 
@@ -85,7 +89,7 @@
     about: ["АКСИ — offline-агент с quantum-seed, Neuro и опциональным WebLLM.", "Система отвечает локально в браузере без обязательного сервера.", "Допуск действий идёт через Permit/Gate, а не «просто чат»."],
     math: ["Это вычислимая задача — результат получается точно.", "Математика здесь не угадывается, а считается."],
     quantum: ["Симулятор кубитов строит суперпозицию и коллапсирует в битовую строку.", "Энтропия Шеннона измеряет «размытость» состояния до измерения.", "Это честный statevector в JS, не облачный QPU."],
-    help: ["Спросите «кто ты», пример 12*12, или загрузите WebLLM.", "Кнопка «Загрузить WebLLM» — Chrome + WebGPU."],
+    help: ["Спросите «кто ты», пример 12*12, или дождитесь автозагрузки WebLLM.", "На телефоне берётся лёгкая модель 0.5B/1B."],
     close: ["Готова уточнить детали.", "Можно углубить вопрос.", "Контакт: aksilove@internet.ru"]
   };
 
@@ -129,12 +133,38 @@
     return { bits: bits(idx), entropy: entropy(p), probs: p };
   }
 
+  function decideGate(stateText) {
+    var s = String(stateText || "").toLowerCase();
+    var pAllow = 0.82;
+    var risk = 1.0;
+    var reasons = [];
+    if (/удали|уничтож|взлом|хак|ddos|кради|пароль|секрет|банк|карт\s/.test(s)) {
+      pAllow = 0.12; risk = 2.7; reasons.push("risk-keywords");
+    } else if (/отправь|email|письмо|опубликуй|плати|переведи/.test(s)) {
+      pAllow = 0.38; risk = 2.1; reasons.push("external-action");
+    } else if (/запомни|научи|кто ты|привет|сколько|12\*|математик|что такое/.test(s)) {
+      pAllow = 0.94; risk = 0.4; reasons.push("local-safe");
+    }
+    var conf = Math.min(0.97, 0.55 + Math.abs(pAllow - 0.5));
+    var gate = pAllow >= 0.55 ? "ALLOW" : (pAllow >= 0.3 ? "REVIEW" : "BLOCK");
+    return {
+      system: "AKSI-JEV-GATE-v1",
+      ts: new Date().toISOString(),
+      gate: gate,
+      p_allow: Math.round(pAllow * 1000) / 1000,
+      risk: Math.round(risk * 100) / 100,
+      confidence: Math.round(conf * 1000) / 1000,
+      reasons: reasons,
+      hash: (hash(s + "|" + gate + "|" + pAllow) >>> 0).toString(16)
+    };
+  }
+
   var S = window.AKSI_SUPER;
   var M = window.AKSI_SUPER_MIND;
   var W = window.AKSI_WEBLLM;
   var Neuro = window.AKSI_NEURO || window.AKSI_LOCAL_LLM;
   var Know = window.AKSI_KNOWLEDGE || window.AKSIKnowledge;
-  var fabric = null, busy = false, lastQ = null, history = [];
+  var fabric = null, busy = false, lastQ = null, history = [], autoTried = false, lastGate = null;
 
   function $(id) { return document.getElementById(id); }
   function pill(id, t, cls) {
@@ -145,8 +175,14 @@
     var d = document.createElement("div");
     d.className = "msg " + role;
     d.appendChild(document.createTextNode(text || ""));
-    if (meta) { var m = document.createElement("span"); m.className = "meta"; m.textContent = meta; d.appendChild(m); }
-    $("feed").appendChild(d); $("feed").scrollTop = 1e9;
+    if (meta) {
+      var m = document.createElement("span");
+      m.className = "meta";
+      m.textContent = meta;
+      d.appendChild(m);
+    }
+    var feed = $("feed");
+    if (feed) { feed.appendChild(d); feed.scrollTop = 1e9; }
   }
   function stage(t) { if ($("stage")) $("stage").textContent = t || ""; }
   function setBar(p) { if ($("bar")) $("bar").style.width = Math.min(100, Math.round((p || 0) * 100)) + "%"; }
@@ -158,17 +194,21 @@
     var step = Math.max(1, Math.floor(pr.length / 16)), i, j, s, el;
     for (i = 0; i < 16; i++) {
       s = 0; for (j = 0; j < step; j++) s += pr[i * step + j] || 0;
-      el = document.createElement("i"); el.style.height = Math.max(2, Math.round(s * 36 * 8)) + "px"; box.appendChild(el);
+      el = document.createElement("i");
+      el.style.height = Math.max(2, Math.round(s * 36 * 8)) + "px";
+      box.appendChild(el);
     }
   }
 
   function fillModels() {
-    var sel = $("model"); if (!sel) return; sel.innerHTML = "";
+    var sel = $("model"); if (!sel) return;
+    sel.innerHTML = "";
     var list = (W && W.modelsForDevice) ? W.modelsForDevice() : ((W && W.models) || []);
     if (!list.length) { sel.innerHTML = "<option value=\"\">—</option>"; return; }
     var def = (W.defaultModel && W.defaultModel()) || list[0].id;
     list.forEach(function (m) {
-      var o = document.createElement("option"); o.value = m.id; o.textContent = m.label || m.id;
+      var o = document.createElement("option");
+      o.value = m.id; o.textContent = m.label || m.id;
       if (m.id === def) o.selected = true; sel.appendChild(o);
     });
   }
@@ -177,38 +217,40 @@
     pill("pNeuro", Neuro ? "neuro on" : "neuro —", Neuro ? "on" : "");
     pill("pKnow", Know ? "know on" : "know —", Know ? "on" : "");
     pill("pMind", M ? "mind on" : "mind —", M ? "on" : "");
-    pill("pLlm", llmReady() ? "llm on" : "llm off", llmReady() ? "on" : "");
+    pill("pLlm", llmReady() ? "llm on" : (W && W.loading && W.loading() ? "llm…" : "llm off"), llmReady() ? "on" : "");
     pill("pQ", lastQ ? ("|" + (lastQ.bits || "?") + "⟩") : "quantum", lastQ ? "q" : "");
-    var b = ["<b>Q-Gen</b> 6q/64"];
+    var b = ["<b>Q-Gen</b> 6q/64", "<b>Gate</b> Jev-style"];
     if (Neuro) b.push("<b>Neuro</b>"); if (Know) b.push("<b>Knowledge</b>");
     if (M) b.push("<b>Mind</b>"); if (W) b.push("<b>WebLLM</b>"); if (S) b.push("<b>Super</b>");
     if ($("feats")) $("feats").innerHTML = b.join("<br>");
   }
 
   function paint() {
-    if (fabric) {
-      var sn = fabric.snapshot();
-      pill("pBoot", sn.booted ? "ONLINE" : "off", sn.booted ? "on" : "");
-      pill("pCluster", sn.nodes + "n/" + sn.gpus + "g", sn.avg_util > 5 ? "gpu" : "on");
-      pill("pExo", sn.exo ? "exo on" : "exo", sn.exo ? "on" : "");
-      var box = $("nodes");
-      if (box) {
-        box.innerHTML = "";
-        (sn.nodes_detail || []).forEach(function (n) {
-          var avg = n.gpus.reduce(function (a, g) { return a + g.util; }, 0) / Math.max(1, n.gpus.length);
-          var el = document.createElement("div");
-          el.className = "node" + (avg > 12 ? " hot" : "");
-          el.innerHTML = "<div>" + n.id.replace("node-", "n") + "</div><div class=\"u\">" + avg.toFixed(0) + "%</div>";
-          box.appendChild(el);
-        });
+    try {
+      if (fabric) {
+        var sn = fabric.snapshot();
+        pill("pBoot", sn.booted ? "ONLINE" : "off", sn.booted ? "on" : "");
+        pill("pCluster", sn.nodes + "n/" + sn.gpus + "g", sn.avg_util > 5 ? "gpu" : "on");
+        pill("pExo", sn.exo ? "exo on" : "exo", sn.exo ? "on" : "");
+        var box = $("nodes");
+        if (box) {
+          box.innerHTML = "";
+          (sn.nodes_detail || []).forEach(function (n) {
+            var avg = n.gpus.reduce(function (a, g) { return a + g.util; }, 0) / Math.max(1, n.gpus.length);
+            var el = document.createElement("div");
+            el.className = "node" + (avg > 12 ? " hot" : "");
+            el.innerHTML = "<div>" + n.id.replace("node-", "n") + "</div><div class=\"u\">" + avg.toFixed(0) + "%</div>";
+            box.appendChild(el);
+          });
+        }
+        if ($("metrics")) $("metrics").textContent = (fabric.clusterReport ? fabric.clusterReport() : "") + "\ndone " + sn.done;
       }
-      if ($("metrics")) $("metrics").textContent = (fabric.clusterReport ? fabric.clusterReport() : "") + "\ndone " + sn.done;
-    }
-    if (lastQ) {
-      if ($("qView")) $("qView").textContent = "|" + (lastQ.bits || "") + "⟩ S=" + ((lastQ.entropy != null) ? Number(lastQ.entropy).toFixed(3) : "—");
-      if (lastQ.probs) paintAmps(lastQ.probs);
-    }
-    paintStack();
+      if (lastQ) {
+        if ($("qView")) $("qView").textContent = "|" + (lastQ.bits || "") + "⟩ S=" + ((lastQ.entropy != null) ? Number(lastQ.entropy).toFixed(3) : "—");
+        if (lastQ.probs) paintAmps(lastQ.probs);
+      }
+      paintStack();
+    } catch (e) {}
   }
 
   async function ensure() {
@@ -239,6 +281,14 @@
   }
 
   async function dialogAnswer(text) {
+    lastGate = decideGate(text);
+    if (lastGate.gate === "BLOCK") {
+      return {
+        text: "Gate BLOCK · p_allow=" + lastGate.p_allow + " · risk=" + lastGate.risk +
+          "\nДействие отклонено политикой Permit. Receipt: " + lastGate.hash,
+        meta: "gate BLOCK · " + lastGate.hash
+      };
+    }
     try {
       if (M && M.tryMath) {
         var math = M.tryMath(text);
@@ -246,118 +296,144 @@
           var mv = Array.isArray(math.value) ? math.value.join(", ") : String(math.value);
           var expl = (math.steps && math.steps.join("\n")) || ("Результат: " + mv);
           if (expl.indexOf(String(mv)) < 0) expl += "\nИтог: " + mv;
-          return { text: expl, meta: "math" };
+          return { text: expl, meta: "math · gate " + lastGate.gate };
         }
       }
     } catch (e) {}
-
     var qg = qGenerate(text);
     lastQ = { bits: qg.bits, entropy: qg.entropy, probs: qg.probs };
-
     if (llmReady() && W && W.complete) {
       stage("webllm…");
-      var sys = "Ты АКСИ. Отвечай по-русски. Quantum |" + qg.bits + "⟩.";
+      var sys = "Ты АКСИ. Отвечай по-русски полно и ясно. Quantum |" + qg.bits + "⟩. Gate=" + lastGate.gate + ".";
       var ns = neuroStrong(text);
-      if (ns) sys += "\nКонтекст: " + ns.text.slice(0, 400);
+      if (ns) sys += "\nКонтекст Neuro: " + ns.text.slice(0, 400);
       try {
         var r = await Promise.race([
-          W.complete(text, { system: sys, history: history.slice(-8), max_tokens: 650 }),
-          new Promise(function (res) { setTimeout(function () { res({ text: "" }); }, 55000); })
+          W.complete(text, { system: sys, history: history.slice(-6), max_tokens: 480 }),
+          new Promise(function (res) { setTimeout(function () { res({ text: "" }); }, 45000); })
         ]);
         var t = (r && r.text) ? String(r.text).trim() : "";
-        if (t.length > 12) return { text: t, meta: "webllm + quantum |" + qg.bits + "⟩" };
+        if (t.length > 12) {
+          return { text: t, meta: "webllm+quantum |" + qg.bits + "⟩ · gate " + lastGate.gate + " p=" + lastGate.p_allow };
+        }
       } catch (e) {}
     }
-
     if (M && M.answer) {
       stage("mind…");
       try {
         var a = await Promise.race([
           Promise.resolve(M.answer(text, lastQ)),
-          new Promise(function (res) { setTimeout(function () { res(null); }, 15000); })
+          new Promise(function (res) { setTimeout(function () { res(null); }, 12000); })
         ]);
-        if (a && a.text && String(a.text).trim().length > 12)
-          return { text: String(a.text).trim(), meta: "mind · |" + qg.bits + "⟩" };
+        if (a && a.text && String(a.text).trim().length > 12) {
+          return { text: String(a.text).trim(), meta: "mind · |" + qg.bits + "⟩ · gate " + lastGate.gate };
+        }
       } catch (e) {}
     }
-
     var nh = neuroStrong(text);
-    if (nh) return { text: nh.text + "\n\n— |" + qg.bits + "⟩", meta: "neuro + quantum" };
-
+    if (nh) return { text: nh.text + "\n\n— |" + qg.bits + "⟩ · gate " + lastGate.gate, meta: "neuro + quantum" };
     try {
       if (Know && Know.search) {
         var k = Know.search(text);
         if (k && k.body) return { text: k.title + ": " + k.body + "\n\n— |" + qg.bits + "⟩", meta: "knowledge + quantum" };
       }
     } catch (e) {}
-
-    return { text: qg.text + "\n\n|ψ⟩ → |" + qg.bits + "⟩ · S=" + qg.entropy.toFixed(3), meta: "quantum-gen · 6q" };
+    return {
+      text: qg.text + "\n\n|ψ⟩ → |" + qg.bits + "⟩ · S=" + qg.entropy.toFixed(3) +
+        " · gate " + lastGate.gate + " p=" + lastGate.p_allow,
+      meta: "quantum-gen · 6q"
+    };
   }
 
-  $("btnLlm").onclick = async function () {
-    if (!W) { add("sys", "WebLLM не загрузился"); return; }
-    var mid = $("model").value;
-    $("btnLlm").disabled = true;
-    add("sys", "Загрузка WebLLM: " + mid + "…");
+  async function loadLlm(mid, silent) {
+    if (!W || !W.load) { if (!silent) add("sys", "WebLLM модуль не подключён"); return false; }
+    mid = mid || ($("model") && $("model").value) || (W.defaultModel && W.defaultModel());
+    if (!silent) { if ($("btnLlm")) $("btnLlm").disabled = true; add("sys", "Загрузка WebLLM: " + mid + "…"); }
+    else stage("автозагрузка " + mid + "…");
     try {
       await W.load(mid, function (st) {
         var p = (st && st.progress) || 0; if (p > 1) p = p / 100;
         setBar(p); stage((st && st.message) || "");
       });
       setBar(llmReady() ? 1 : 0);
-      add("sys", llmReady() ? ("✓ WebLLM: " + (((W.status() || {}).model) || mid)) : "Не поднялась — offline OK");
-    } catch (e) { add("sys", "WebLLM: " + (e.message || e)); }
-    $("btnLlm").disabled = false; stage(""); paint();
-  };
-
-  $("btnQMode").onclick = function () {
-    add("sys", "Quantum Gen активен — слова из коллапса амплитуд");
-  };
-
-  $("btnBoot").onclick = async function () {
-    if (fabric && fabric.booted) { fabric.scale(16, 4); add("sys", "Rescale 16×4"); paint(); return; }
-    await ensure();
-  };
-
-  $("btnBench").onclick = async function () {
-    var f = await ensure(); if (!f) { add("sys", "нет Super"); return; }
-    var d = await f.waitJob(f.submit({ type: "cluster_bench", size: 48 }), 20000);
-    add("sys", d && d.result ? ("Bench flops " + d.result.flops) : "bench fail"); paint();
-  };
-
-  $("btnQ").onclick = function () {
-    lastQ = qPulse("pulse|" + Date.now());
-    add("sys", "|" + lastQ.bits + "⟩ S=" + lastQ.entropy.toFixed(3)); paint();
-  };
-
-  $("btnVerify").onclick = async function () {
-    var o = await dialogAnswer("12*12");
-    add("bot", o.text, (String(o.text).indexOf("144") >= 0 ? "✓ " : "") + (o.meta || "")); paint();
-  };
-
-  async function send() {
-    var text = $("q").value.trim();
-    if (!text || busy) return;
-    busy = true; $("send").disabled = true; $("q").value = "";
-    add("user", text); history.push({ role: "user", content: text });
-    await ensure(); stage("…");
-    var out;
-    try { out = await dialogAnswer(text); }
-    catch (e) { out = { text: String(e.message || e), meta: "error" }; }
-    add("bot", out.text || "—", out.meta || "");
-    history.push({ role: "assistant", content: out.text || "" });
-    if (history.length > 20) history = history.slice(-20);
-    busy = false; $("send").disabled = false; stage(""); paint();
+      if (llmReady()) add("sys", "✓ WebLLM готова: " + (((W.status && W.status()) || {}).model || mid));
+      else if (!silent) add("sys", "Не поднялась — offline OK (Mind/Neuro)");
+      return llmReady();
+    } catch (e) {
+      if (!silent) add("sys", "WebLLM: " + ((e && e.message) || e));
+      return false;
+    } finally {
+      if ($("btnLlm")) $("btnLlm").disabled = false; stage(""); paint();
+    }
   }
 
-  $("send").onclick = send;
-  $("q").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); send(); }
-  });
+  function tryAutoLoad() {
+    if (autoTried) return; autoTried = true;
+    if (!W || llmReady()) return;
+    try { if (!navigator.gpu) { add("sys", "WebGPU нет — работаем offline (Neuro/Mind)."); return; } } catch (e) { return; }
+    setTimeout(function () { loadLlm(null, true).catch(function () {}); }, 1200);
+  }
 
-  fillModels(); paintStack();
+  function bind() {
+    if ($("btnLlm")) $("btnLlm").onclick = function (e) { if (e) e.preventDefault(); loadLlm(($("model") && $("model").value) || null, false); };
+    if ($("btnQMode")) $("btnQMode").onclick = function (e) { if (e) e.preventDefault(); add("sys", "Quantum Gen + Gate Jev-style активны"); };
+    if ($("btnBoot")) $("btnBoot").onclick = async function (e) {
+      if (e) e.preventDefault();
+      if (fabric && fabric.booted) { fabric.scale(16, 4); add("sys", "Rescale 16×4"); paint(); return; }
+      await ensure();
+    };
+    if ($("btnBench")) $("btnBench").onclick = async function (e) {
+      if (e) e.preventDefault();
+      var f = await ensure(); if (!f) { add("sys", "нет Super"); return; }
+      var d = await f.waitJob(f.submit({ type: "cluster_bench", size: 48 }), 20000);
+      add("sys", d && d.result ? ("Bench flops " + d.result.flops) : "bench fail"); paint();
+    };
+    if ($("btnQ")) $("btnQ").onclick = function (e) {
+      if (e) e.preventDefault();
+      lastQ = qPulse("pulse|" + Date.now());
+      add("sys", "|" + lastQ.bits + "⟩ S=" + lastQ.entropy.toFixed(3)); paint();
+    };
+    if ($("btnVerify")) $("btnVerify").onclick = async function (e) {
+      if (e) e.preventDefault();
+      var o = await dialogAnswer("12*12");
+      add("bot", o.text, (String(o.text).indexOf("144") >= 0 ? "✓ " : "") + (o.meta || "")); paint();
+    };
+
+    async function send(ev) {
+      if (ev) { try { ev.preventDefault(); } catch (e) {} try { ev.stopPropagation(); } catch (e) {} }
+      var inp = $("q");
+      var text = inp ? String(inp.value || "").trim() : "";
+      if (!text || busy) return false;
+      busy = true;
+      if ($("send")) $("send").disabled = true;
+      if (inp) inp.value = "";
+      add("user", text);
+      history.push({ role: "user", content: text });
+      try { await ensure(); } catch (e) {}
+      stage("…");
+      var out;
+      try { out = await dialogAnswer(text); }
+      catch (e) { out = { text: "Ошибка: " + String((e && e.message) || e), meta: "error" }; }
+      add("bot", (out && out.text) || "—", (out && out.meta) || "");
+      history.push({ role: "assistant", content: (out && out.text) || "" });
+      if (history.length > 20) history = history.slice(-20);
+      busy = false;
+      if ($("send")) $("send").disabled = false;
+      stage(""); paint();
+      return false;
+    }
+
+    var form = $("composerForm");
+    if (form) form.addEventListener("submit", function (e) { e.preventDefault(); e.stopPropagation(); send(e); return false; });
+    if ($("send")) $("send").onclick = function (e) { e.preventDefault(); send(e); return false; };
+    if ($("q")) $("q").addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); send(e); } });
+  }
+
+  fillModels(); paintStack(); bind();
   ensure().then(function () {
-    add("sys", "АКСИ готова. Напишите вопрос или Verify 12×12.");
-    lastQ = qPulse("boot"); paint();
+    add("sys", "АКСИ готова. Напишите вопрос — страница больше не перезагружается.");
+    lastQ = qPulse("boot"); paint(); tryAutoLoad();
+  }).catch(function () {
+    add("sys", "Старт без Super — диалог всё равно работает."); paint(); tryAutoLoad();
   });
 })();
