@@ -6,24 +6,29 @@
 <title>АКСИ Quantum AI</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
 <meta name="theme-color" content="#04060a"/>
+<meta name="description" content="АКСИ — offline Quantum AI: gate, WebLLM, Neuro, cluster, decision receipts"/>
 <style>
 :root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--gpu:#38bdf8}
-*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,sans-serif}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,sans-serif}
 body{background:radial-gradient(1000px 520px at 10% -10%,rgba(45,212,191,.12),transparent 55%),radial-gradient(800px 400px at 100% 0%,rgba(244,114,182,.1),transparent 50%),var(--bg)}
 .app{max-width:1000px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
 header{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
-h1{margin:0;font-size:1.2rem;font-weight:800}h1 em{font-style:normal;background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+h1{margin:0;font-size:1.2rem;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{margin:4px 0 0;font-size:12px;color:var(--muted)}
 .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .pill{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .pill.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
-.pill.gpu{color:var(--gpu);border-color:rgba(56,189,248,.4)}.pill.q{color:var(--q);border-color:rgba(244,114,182,.4)}
+.pill.gpu{color:var(--gpu);border-color:rgba(56,189,248,.4)}
+.pill.q{color:var(--q);border-color:rgba(244,114,182,.4)}
 .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
-.btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);border-radius:9px;padding:7px 10px;font:12px system-ui;font-weight:600;cursor:pointer}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);border-radius:9px;padding:7px 10px;font:12px system-ui;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .btn.pri{border:0;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
-.btn.qbtn{border-color:rgba(244,114,182,.4);color:var(--q)}.btn:disabled{opacity:.4}
+.btn.qbtn{border-color:rgba(244,114,182,.4);color:var(--q)}
+.btn:disabled{opacity:.4}
 select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);border-radius:9px;padding:7px 8px;font:12px system-ui;max-width:240px}
-.bar{height:3px;background:#0a0e16;border-radius:2px;margin-top:8px;overflow:hidden}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--q));transition:width .2s}
+.bar{height:3px;background:#0a0e16;border-radius:2px;margin-top:8px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--q));transition:width .2s}
 .main{flex:1;display:grid;grid-template-columns:1fr}
 @media(min-width:860px){.main{grid-template-columns:280px 1fr}}
 .side{padding:12px;border-bottom:1px solid var(--line);background:rgba(12,17,26,.55)}
@@ -31,33 +36,37 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
 .side h2{margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .node{border:1px solid var(--line);border-radius:7px;padding:4px 2px;text-align:center;background:var(--panel);font-size:10px}
-.node.hot{border-color:rgba(45,212,191,.5)}.node .u{font-weight:700;color:var(--gpu);font-size:11px}
+.node.hot{border-color:rgba(45,212,191,.5)}
+.node .u{font-weight:700;color:var(--gpu);font-size:11px}
 .metrics{margin-top:10px;font:11px/1.45 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
 .qbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}.qbox .qv{font:12px ui-monospace,monospace;margin-top:4px}
+.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}
+.qbox .qv{font:12px ui-monospace,monospace;margin-top:4px}
 .amps{display:flex;align-items:flex-end;gap:2px;height:36px;margin-top:8px}
 .amps i{flex:1;background:linear-gradient(180deg,var(--q),var(--v));border-radius:2px 2px 0 0;min-height:2px;opacity:.85}
-.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.55}.feats b{color:var(--text)}
+.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.55}
+.feats b{color:var(--text)}
 .chat{display:flex;flex-direction:column;min-height:440px;flex:1}
-#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;max-height:58vh}
+#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;max-height:58vh;-webkit-overflow-scrolling:touch}
 .msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
 .msg.sys{align-self:center;background:0;border:0;color:var(--muted);font-size:12px;padding:2px}
 .msg .meta{display:block;margin-top:6px;font-size:10px;color:var(--muted)}
 #stage{padding:0 14px;font-size:11px;color:var(--muted);min-height:16px}
-.composer{padding:10px 12px 12px;border-top:1px solid var(--line);display:flex;gap:8px}
-.composer input{flex:1;border:1px solid var(--line);border-radius:10px;background:#0a0e16;color:var(--text);padding:12px;font:inherit}
-.composer button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
+.composer{padding:10px 12px 12px;border-top:1px solid var(--line);display:flex;gap:8px;margin:0}
+.composer input{flex:1;border:1px solid var(--line);border-radius:10px;background:#0a0e16;color:var(--text);padding:12px;font:inherit;font-size:16px}
+.composer button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016;-webkit-tap-highlight-color:transparent}
 .composer button:disabled{opacity:.4}
-.hint{font-size:11px;color:var(--muted);padding:0 14px 12px}.hint a{color:var(--c)}
+.hint{font-size:11px;color:var(--muted);padding:0 14px 12px}
+.hint a{color:var(--c)}
 </style>
 </head>
 <body>
 <div class="app">
 <header>
   <h1><em>АКСИ Quantum AI</em></h1>
-  <div class="sub">Симулятор кубитов · WebLLM · Neuro · Cluster · Permit</div>
+  <div class="sub">Симулятор кубитов · WebLLM auto · Neuro · Cluster · Jev-Gate</div>
   <div class="pills">
     <span class="pill" id="pBoot">boot</span>
     <span class="pill" id="pCluster">cluster</span>
@@ -69,9 +78,9 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
     <span class="pill" id="pExo">exo</span>
   </div>
   <div class="tools">
-    <select id="model"></select>
+    <select id="model" aria-label="Модель WebLLM"></select>
     <button type="button" class="btn pri" id="btnLlm">Загрузить WebLLM</button>
-    <button type="button" class="btn qbtn" id="btnQMode">Режим: Quantum Gen</button>
+    <button type="button" class="btn qbtn" id="btnQMode">Режим: Quantum+Gate</button>
     <button type="button" class="btn" id="btnBoot">Boot 16×4</button>
     <button type="button" class="btn" id="btnBench">Bench</button>
     <button type="button" class="btn" id="btnQ">Quantum pulse</button>
@@ -84,17 +93,21 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
     <h2>Cluster nodes</h2>
     <div class="nodes" id="nodes"></div>
     <div class="metrics" id="metrics">…</div>
-    <div class="qbox"><div class="ql">Quantum state</div><div class="qv" id="qView">—</div><div class="amps" id="amps"></div></div>
+    <div class="qbox">
+      <div class="ql">Quantum state</div>
+      <div class="qv" id="qView">—</div>
+      <div class="amps" id="amps"></div>
+    </div>
     <div class="feats" id="feats">…</div>
   </aside>
   <div class="chat">
     <div id="feed"></div>
     <div id="stage"></div>
-    <div class="composer">
-      <input id="q" placeholder="Вопрос или задача…" autocomplete="off"/>
-      <button type="button" id="send">Отправить</button>
-    </div>
-    <div class="hint">Math → Quantum → Neuro → Mind → WebLLM · <a href="/super/gate/">Gate</a></div>
+    <form class="composer" id="composerForm" action="javascript:void(0)" method="post" onsubmit="return false;">
+      <input id="q" name="q" placeholder="Вопрос или задача…" autocomplete="off" enterkeyhint="send" inputmode="text"/>
+      <button type="submit" id="send">Отправить</button>
+    </form>
+    <div class="hint">Math → Gate → Quantum → Neuro → Mind → WebLLM · <a href="/super/gate/">Gate</a> · aksilove@internet.ru</div>
   </div>
 </div>
 </div>
@@ -102,9 +115,9 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
 <script src="/aksi-neuro.js?v=10"></script>
 <script src="/aksi-knowledge.js?v=3"></script>
 <script src="/aksi-algorithm.js?v=40"></script>
-<script src="/aksi-webllm.js?v=50"></script>
+<script src="/aksi-webllm.js?v=51"></script>
 <script src="/aksi-super-mind.js?v=6"></script>
 <script src="/aksi-super.js?v=30"></script>
-<script src="/super/runtime.js?v=1"></script>
+<script src="/super/runtime.js?v=2"></script>
 </body>
 </html>
