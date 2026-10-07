@@ -3,269 +3,311 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ Super · Cluster</title>
+<title>АКСИ Super · Full Stack</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
-<meta name="description" content="АКСИ Super: браузерный кластер, quantum seed, Mind/WebLLM, Permit. Offline-first command center."/>
+<meta name="description" content="АКСИ Super: cluster + quantum + Neuro + Knowledge + ADIA + WebLLM 3B + Permit"/>
 <meta name="theme-color" content="#04060a"/>
 <style>
-:root{
-  --bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;
-  --c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--bad:#f87171;--gpu:#38bdf8;
-}
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--text);
-  font:14px/1.45 system-ui,-apple-system,sans-serif}
-body{background:
-  radial-gradient(1000px 500px at 0% 0%,rgba(45,212,191,.1),transparent 50%),
-  radial-gradient(800px 400px at 100% 0%,rgba(129,140,248,.1),transparent 45%),
-  var(--bg)}
-.app{max-width:960px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
-header{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:-.02em}
-h1 span{background:linear-gradient(100deg,var(--c),var(--v),var(--q));
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{margin:4px 0 0;font-size:12px;color:var(--muted)}
-.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+:root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--gpu:#38bdf8}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,sans-serif}
+body{background:radial-gradient(900px 480px at 0% 0%,rgba(45,212,191,.1),transparent 50%),radial-gradient(700px 400px at 100% 0%,rgba(129,140,248,.1),transparent 45%),var(--bg)}
+.app{max-width:980px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+header{padding:12px 14px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:1.15rem;font-weight:800}h1 span{background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .pill{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .pill.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
-.pill.gpu{border-color:rgba(56,189,248,.4);color:var(--gpu)}
-.pill.q{border-color:rgba(244,114,182,.4);color:var(--q)}
-.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);
-  border-radius:9px;padding:7px 10px;font:12px system-ui;font-weight:600;cursor:pointer}
-.btn:hover{background:rgba(255,255,255,.06)}
+.pill.gpu{color:var(--gpu);border-color:rgba(56,189,248,.4)}
+.pill.q{color:var(--q);border-color:rgba(244,114,182,.4)}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);border-radius:9px;padding:7px 10px;font:12px system-ui;font-weight:600;cursor:pointer}
 .btn.pri{border:0;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
 .btn:disabled{opacity:.4}
-.main{flex:1;display:grid;grid-template-columns:1fr;gap:0}
-@media(min-width:800px){.main{grid-template-columns:280px 1fr}}
-.side{border-bottom:1px solid var(--line);padding:12px;background:rgba(12,17,26,.6)}
-@media(min-width:800px){.side{border-bottom:0;border-right:1px solid var(--line)}}
-.side h2{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
-.node{border:1px solid var(--line);border-radius:8px;padding:5px 3px;text-align:center;background:var(--panel)}
-.node.hot{border-color:rgba(45,212,191,.5);box-shadow:0 0 10px rgba(45,212,191,.15)}
-.node .id{font-size:9px;color:var(--muted)}
-.node .u{font-size:11px;font-weight:700;color:var(--gpu)}
-.metrics{margin-top:12px;font:11px/1.5 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
-.qbox{margin-top:12px;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--panel)}
-.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase;letter-spacing:.06em}
-.qbox .qv{font:13px ui-monospace,monospace;margin-top:4px;color:var(--text)}
-.chat-wrap{display:flex;flex-direction:column;min-height:420px}
-#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;max-height:55vh}
-.msg{max-width:92%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
+select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);border-radius:9px;padding:7px 8px;font:12px system-ui;max-width:220px}
+.bar{height:3px;background:#0a0e16;border-radius:2px;margin-top:8px;overflow:hidden}.bar>i{display:block;height:100%;width:0;background:var(--c);transition:width .2s}
+.main{flex:1;display:grid;grid-template-columns:1fr}
+@media(min-width:820px){.main{grid-template-columns:270px 1fr}}
+.side{padding:12px;border-bottom:1px solid var(--line);background:rgba(12,17,26,.55)}
+@media(min-width:820px){.side{border-bottom:0;border-right:1px solid var(--line)}}
+.side h2{margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.node{border:1px solid var(--line);border-radius:7px;padding:4px 2px;text-align:center;background:var(--panel);font-size:10px}
+.node.hot{border-color:rgba(45,212,191,.5)}
+.node .u{font-weight:700;color:var(--gpu);font-size:11px}
+.metrics{margin-top:10px;font:11px/1.45 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
+.qbox{margin-top:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}
+.qbox .qv{font:12px ui-monospace,monospace;margin-top:3px}
+.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6}
+.feats b{color:var(--text)}
+#feed{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px;max-height:52vh}
+.chat{display:flex;flex-direction:column;min-height:400px}
+.msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
-.msg.sys{align-self:center;border:0;background:0;color:var(--muted);font-size:12px;padding:2px}
+.msg.sys{align-self:center;background:0;border:0;color:var(--muted);font-size:12px;padding:2px}
 .msg .meta{display:block;margin-top:6px;font-size:10px;color:var(--muted)}
-.stage-line{padding:0 14px 6px;font-size:11px;color:var(--muted);min-height:16px}
-.composer{padding:10px 12px 14px;border-top:1px solid var(--line);display:flex;gap:8px}
+#stage{padding:0 12px;font-size:11px;color:var(--muted);min-height:16px}
+.composer{padding:10px 12px 12px;border-top:1px solid var(--line);display:flex;gap:8px}
 .composer input{flex:1;border:1px solid var(--line);border-radius:10px;background:#0a0e16;color:var(--text);padding:11px;font:inherit}
-.composer button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;
-  background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
+.composer button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
 .composer button:disabled{opacity:.4}
-.hint{font-size:11px;color:var(--muted);padding:0 14px 10px}
-.hint a{color:var(--c);text-decoration:none}
+.hint{font-size:11px;color:var(--muted);padding:0 12px 10px}.hint a{color:var(--c)}
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <div class="brand">
-      <div>
-        <h1><span>АКСИ Super</span></h1>
-        <div class="sub">Кластер · Quantum · Mind/WebLLM · Permit — в браузере</div>
-      </div>
+<header>
+  <h1><span>АКСИ Super</span></h1>
+  <div class="sub">Cluster + Quantum + Neuro + Knowledge + ADIA + WebLLM 3B + Permit</div>
+  <div class="pills">
+    <span class="pill" id="pBoot">boot</span>
+    <span class="pill" id="pCluster">cluster</span>
+    <span class="pill" id="pQ">quantum</span>
+    <span class="pill" id="pNeuro">neuro</span>
+    <span class="pill" id="pKnow">knowledge</span>
+    <span class="pill" id="pAdia">adia</span>
+    <span class="pill" id="pMind">mind</span>
+    <span class="pill" id="pLlm">llm</span>
+    <span class="pill" id="pExo">exo</span>
+  </div>
+  <div class="tools">
+    <select id="model" title="Модель"></select>
+    <button type="button" class="btn pri" id="btnLlm">Загрузить модель</button>
+    <button type="button" class="btn" id="btnBoot">Boot 16×4</button>
+    <button type="button" class="btn" id="btnBench">Bench</button>
+    <button type="button" class="btn" id="btnQ">Quantum</button>
+    <button type="button" class="btn" id="btnVerify">Verify</button>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+</header>
+<div class="main">
+  <aside class="side">
+    <h2>Nodes</h2>
+    <div class="nodes" id="nodes"></div>
+    <div class="metrics" id="metrics">…</div>
+    <div class="qbox"><div class="ql">Quantum</div><div class="qv" id="qView">—</div></div>
+    <div class="feats" id="feats">stack loading…</div>
+  </aside>
+  <div class="chat">
+    <div id="feed"></div>
+    <div id="stage"></div>
+    <div class="composer">
+      <input id="q" placeholder="Вопрос / задача кластеру…" autocomplete="off"/>
+      <button type="button" id="send">Run</button>
     </div>
-    <div class="pills">
-      <span class="pill" id="pBoot">boot…</span>
-      <span class="pill" id="pCluster">cluster</span>
-      <span class="pill" id="pQ">quantum</span>
-      <span class="pill" id="pMind">mind</span>
-      <span class="pill" id="pLlm">llm</span>
-      <span class="pill" id="pExo">exo</span>
-    </div>
-    <div class="tools">
-      <button type="button" class="btn pri" id="btnBoot">Boot 16×4</button>
-      <button type="button" class="btn" id="btnBench">Bench</button>
-      <button type="button" class="btn" id="btnQ">Quantum pulse</button>
-      <button type="button" class="btn" id="btnLlm">Загрузить LLM</button>
-      <button type="button" class="btn" id="btnVerify">Verify</button>
-      <button type="button" class="btn" id="btnClear">Clear</button>
-    </div>
-  </header>
-  <div class="main">
-    <aside class="side">
-      <h2>Nodes</h2>
-      <div class="nodes" id="nodes"></div>
-      <div class="metrics" id="metrics">ожидание boot…</div>
-      <div class="qbox">
-        <div class="ql">Last quantum</div>
-        <div class="qv" id="qView">—</div>
-      </div>
-    </aside>
-    <div class="chat-wrap">
-      <div id="feed"></div>
-      <div class="stage-line" id="stage"></div>
-      <div class="composer">
-        <input id="q" placeholder="Задача кластеру / вопрос ИИ…" autocomplete="off"/>
-        <button type="button" id="send">Run</button>
-      </div>
-      <div class="hint">pipeline: plan → quantum → compute → mind/WebLLM → permit → receipt · <a href="/super/gate.html">Gate</a></div>
-    </div>
+    <div class="hint">Каскад: Neuro → Knowledge → ADIA → Quantum → LLM/Mind → Permit · <a href="/super/gate/">Gate</a></div>
   </div>
 </div>
+</div>
 <script src="/aksi-exocortex.js?v=1"></script>
-<script src="/aksi-webllm.js?v=44"></script>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-knowledge.js?v=3"></script>
+<script src="/aksi-algorithm.js?v=40"></script>
+<script src="/aksi-webllm.js?v=50"></script>
 <script src="/aksi-super-mind.js?v=6"></script>
 <script src="/aksi-super.js?v=30"></script>
 <script>
 (function(){
 "use strict";
 var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, W=window.AKSI_WEBLLM;
-var fabric=null, busy=false, lastQ=null;
+var Neuro=window.AKSI_NEURO||window.AKSI_LOCAL_LLM;
+var Know=window.AKSI_KNOWLEDGE||window.AKSIKnowledge;
+var Adia=window.AKSI_ADIA||window.AKSI_ALGORITHM;
+var fabric=null, busy=false, lastQ=null, history=[];
 function $(id){return document.getElementById(id);}
-function pill(id,t,cls){var el=$(id);el.textContent=t;el.className="pill"+(cls?" "+cls:"");}
+function pill(id,t,cls){var el=$(id);if(!el)return;el.textContent=t;el.className="pill"+(cls?" "+cls:"");}
 function add(role,text,meta){
   var d=document.createElement("div");d.className="msg "+role;d.textContent=text;
   if(meta){var m=document.createElement("span");m.className="meta";m.textContent=meta;d.appendChild(m);}
   $("feed").appendChild(d);$("feed").scrollTop=$("feed").scrollHeight;return d;
 }
-function setStage(t){$("stage").textContent=t||"";}
-function llmReady(){
-  try{if(!W)return false;if(W.ready)return!!W.ready();var st=W.status&&W.status();return!!(st&&st.ready);}catch(e){return false;}
+function stage(t){$("stage").textContent=t||"";}
+function setBar(p){$("bar").style.width=Math.min(100,Math.round((p||0)*100))+"%";}
+function llmReady(){try{return !!(W&&W.ready&&W.ready());}catch(e){return false;}}
+function fillModels(){
+  var sel=$("model");sel.innerHTML="";
+  var list=(W&&W.modelsForDevice)?W.modelsForDevice():(W&&W.models)||[];
+  if(!list.length){sel.innerHTML="<option>нет моделей</option>";return;}
+  var def=(W.defaultModel&&W.defaultModel())||list[0].id;
+  list.forEach(function(m){
+    var o=document.createElement("option");o.value=m.id;o.textContent=m.label||m.id;
+    if(m.id===def)o.selected=true;sel.appendChild(o);
+  });
+}
+function paintStack(){
+  pill("pNeuro",Neuro?(Neuro.status?("neuro "+(Neuro.status().version||"").replace(/-.*/,"")): "neuro"):"neuro —",Neuro?"on":"");
+  pill("pKnow",Know?("know "+(Know.count||Know.version||"")):"know —",Know?"on":"");
+  pill("pAdia",Adia?("adia "+(Adia.version||"")):"adia —",Adia?"on":"");
+  pill("pMind",M?("mind "+(M.version||"").replace("mind-","")):"mind",M?"on":"");
+  pill("pLlm",llmReady()?("llm "+(((W.status&&W.status().model)||"").split("-")[0]||"on")):(W?"llm off":"llm —"),llmReady()?"on":"");
+  var bits=[];
+  if(Neuro)bits.push("<b>Neuro</b> SEED");
+  if(Know)bits.push("<b>Knowledge</b> "+(Know.count||""));
+  if(Adia)bits.push("<b>ADIA</b> "+(Adia.version||""));
+  if(W)bits.push("<b>WebLLM</b> "+(W.version||""));
+  if(S)bits.push("<b>Super</b> "+(S.version||""));
+  $("feats").innerHTML=bits.join("<br>")||"—";
 }
 function paint(){
   if(!fabric)return;
   var sn=fabric.snapshot();
   pill("pBoot",sn.booted?"ONLINE":"off",sn.booted?"on":"");
-  pill("pCluster",sn.nodes+"n/"+sn.gpus+"gpu · "+sn.avg_util.toFixed(0)+"%",sn.avg_util>5?"gpu":"on");
-  pill("pExo",sn.exo?"exo on":"exo off",sn.exo?"on":"");
-  pill("pMind",M?"mind "+(M.version||"").replace("mind-",""):"mind","on");
-  pill("pLlm",llmReady()?"llm on":(W?"llm off":"llm —"),llmReady()?"on":"");
-  if(lastQ){pill("pQ","|"+(lastQ.bits||"????")+"⟩ S="+(lastQ.entropy!=null?lastQ.entropy.toFixed(2):"—"),"q");
-    $("qView").textContent="|"+(lastQ.bits||"")+"⟩  entropy "+(lastQ.entropy!=null?lastQ.entropy.toFixed(3):"—")+"  sumP "+(lastQ.sumP!=null?lastQ.sumP.toFixed(4):"—");
+  pill("pCluster",sn.nodes+"n/"+sn.gpus+"g · "+sn.avg_util.toFixed(0)+"%",sn.avg_util>5?"gpu":"on");
+  pill("pExo",sn.exo?"exo on":"exo",sn.exo?"on":"");
+  if(lastQ){
+    pill("pQ","|"+(lastQ.bits||"?")+"⟩", "q");
+    $("qView").textContent="|"+(lastQ.bits||"")+"⟩ S="+((lastQ.entropy!=null)?lastQ.entropy.toFixed(3):"—");
   }
   var box=$("nodes");box.innerHTML="";
   (sn.nodes_detail||[]).forEach(function(n){
     var avg=n.gpus.reduce(function(a,g){return a+g.util;},0)/Math.max(1,n.gpus.length);
-    var el=document.createElement("div");
-    el.className="node"+(avg>12?" hot":"");
-    el.innerHTML="<div class=\"id\">"+n.id.replace("node-","n")+"</div><div class=\"u\">"+avg.toFixed(0)+"%</div>";
+    var el=document.createElement("div");el.className="node"+(avg>12?" hot":"");
+    el.innerHTML="<div>"+n.id.replace("node-","n")+"</div><div class=\"u\">"+avg.toFixed(0)+"%</div>";
     box.appendChild(el);
   });
-  $("metrics").textContent=(fabric.clusterReport?fabric.clusterReport():"")
-    +"\nflops "+sn.stats.flops+" · agents "+(sn.stats.agents||0)
-    +"\nqueue "+sn.queue+" run "+sn.running+" done "+sn.done;
+  $("metrics").textContent=(fabric.clusterReport?fabric.clusterReport():"")+"\nflops "+sn.stats.flops+" · done "+sn.done;
+  paintStack();
 }
-async function ensure(nodes,gpus){
-  if(!S){add("sys","Super не загружен — Ctrl+Shift+R");return null;}
+async function ensure(){
+  if(!S){add("sys","Super offline — hard refresh");return null;}
   if(!fabric){
-    fabric=new S.SuperFabric();
-    fabric.loadMemory();
-    fabric.onTick=paint;
-    fabric.onEvent=function(ev){
-      if(ev.stage==="stage"&&ev.detail&&ev.detail.name){
-        var map={plan:"plan",quantum:"quantum",compute:"compute",mind:"mind",permit:"permit",receipt:"receipt",done:"done"};
-        setStage("stage · "+(map[ev.detail.name]||ev.detail.name));
-      }
-    };
+    fabric=new S.SuperFabric();fabric.loadMemory();fabric.onTick=paint;
+    fabric.onEvent=function(ev){if(ev.stage==="stage"&&ev.detail&&ev.detail.name)stage("· "+ev.detail.name);};
   }
   if(!fabric.booted){
-    fabric.boot(nodes||16,gpus||4);
-    fabric.startScheduler(120);
+    fabric.boot(16,4);fabric.startScheduler(120);
     try{await fabric.attachExocortex();}catch(e){}
-    add("sys","Кластер "+S.version+" · "+(nodes||16)+"×"+(gpus||4)+" · Mind "+(M&&M.version||"—"));
+    add("sys","Cluster "+S.version+" · 16×4 · stack online");
   }
-  paint();
-  return fabric;
+  paint();return fabric;
 }
+function gatherContext(q){
+  var parts=[];
+  try{
+    if(Neuro&&Neuro.think){
+      var n=Neuro.think(q);
+      var txt=(n&&(n.answer||n.text||n.out))||(typeof n==="string"?n:"");
+      if(txt&&String(txt).length>20) parts.push("Neuro: "+String(txt).slice(0,600));
+    } else if(Neuro&&Neuro.retrieve){
+      var hits=Neuro.retrieve(q);
+      if(hits&&hits.length) parts.push("Neuro: "+String(hits[0].answer||hits[0].text||hits[0]).slice(0,500));
+    }
+  }catch(e){}
+  try{
+    if(Know&&Know.search){
+      var k=Know.search(q);
+      if(k&&k.body) parts.push("Knowledge «"+k.title+"»: "+k.body.slice(0,500));
+    }
+  }catch(e){}
+  return parts.join("\n\n");
+}
+function adiaWrap(q, answer){
+  try{
+    if(!Adia||!Adia.process) return null;
+    return Adia.process({query:q, answer:answer, text:answer});
+  }catch(e){return null;}
+}
+$("btnLlm").onclick=async function(){
+  if(!W){add("sys","WebLLM отсутствует");return;}
+  var mid=$("model").value;
+  $("btnLlm").disabled=true;add("sys","Загрузка "+mid+" …");
+  try{
+    await W.load(mid, function(st){
+      var p=(st&&st.progress)||0; if(p>1)p=p/100;
+      setBar(p); stage((st&&st.message)||"loading");
+    });
+    setBar(llmReady()?1:0);
+    add("sys",llmReady()?"✓ Модель: "+((W.status()||{}).model||mid):"Модель не поднялась");
+  }catch(e){add("sys","LLM: "+(e.message||e));}
+  $("btnLlm").disabled=false;stage("");paintStack();
+};
 $("btnBoot").onclick=async function(){
   if(fabric&&fabric.booted){fabric.scale(16,4);add("sys","Rescale 16×4");paint();return;}
-  await ensure(16,4);
+  await ensure();
 };
 $("btnBench").onclick=async function(){
-  var f=await ensure(16,4);if(!f)return;
-  setStage("bench…");
+  var f=await ensure();if(!f)return;
   var d=await f.waitJob(f.submit({type:"cluster_bench",size:64}),25000);
-  var r=d&&d.result;
-  add("sys",r?"Bench OK · flops "+r.flops+" · "+Math.round(r.ms||0)+"ms · nodes "+r.nodes:"Bench fail");
-  setStage("");paint();
+  add("sys",d&&d.result?"Bench flops "+d.result.flops+" · "+Math.round(d.result.ms||0)+"ms":"bench fail");paint();
 };
 $("btnQ").onclick=async function(){
-  var f=await ensure(16,4);if(!f)return;
-  if(S.quantumCollapse){lastQ=S.quantumCollapse("pulse|"+Date.now());}
-  else {
-    var d=await f.waitJob(f.submit({type:"quantum",prompt:"pulse-"+Date.now()}),10000);
-    if(d&&d.result)lastQ={bits:d.result.bits,entropy:d.result.entropy,sumP:d.result.sumP};
-    else if(d&&d.quantum) lastQ=d.quantum;
-  }
-  add("sys","Quantum |"+((lastQ&&lastQ.bits)||"?")+"⟩ S="+((lastQ&&lastQ.entropy)!=null?lastQ.entropy.toFixed(3):"—"));
-  paint();
-};
-$("btnLlm").onclick=async function(){
-  if(!W){add("sys","WebLLM нет");return;}
-  $("btnLlm").disabled=true;add("sys","Загрузка LLM (WebGPU)…");
-  try{
-    await (W.load||W.loadModel||W.autoLoad).call(W,null,function(p){
-      var pr=typeof p==="number"?p:(p&&p.progress)||0;
-      setStage("llm "+Math.round((pr>1?pr:pr*100))+"%");
-    });
-    add("sys",llmReady()?"LLM online: "+((W.status&&W.status().model)||"ok"):"LLM не поднялась — Mind работает");
-  }catch(e){add("sys","LLM: "+(e.message||e));}
-  $("btnLlm").disabled=false;setStage("");paint();
+  await ensure();
+  lastQ=(S&&S.quantumCollapse)?S.quantumCollapse("pulse|"+Date.now()):null;
+  add("sys","Quantum |"+(lastQ&&lastQ.bits||"?")+"⟩");paint();
 };
 $("btnVerify").onclick=async function(){
-  var f=await ensure(16,4);if(!f)return;
+  var f=await ensure();if(!f)return;
   var d=await f.waitJob(f.submit({type:"agent",prompt:"12*12",size:16}),25000);
-  var ans=(d&&d.result&&(d.result.answer||d.result.report))||"";
-  var ok=ans.indexOf("144")>=0;
+  var ans=(d&&d.result&&(d.result.answer||""))||"";
   if(d&&d.quantum)lastQ=d.quantum;
-  var chain=null;try{chain=await f.verifyExoChain();}catch(e){}
-  add("sys",(ok?"✓ math":"✗ math")+" · "+(d&&d.stages||[]).map(function(s){return s.name;}).join("→")+" · chain "+(chain&&chain.ok?"OK":"—"));
+  add("sys",(ans.indexOf("144")>=0?"✓":"✗")+" math · "+(d&&d.stages||[]).map(function(s){return s.name;}).join("→"));
   paint();
 };
-$("btnClear").onclick=function(){$("feed").innerHTML="";add("sys","cleared");};
 async function send(){
   var text=$("q").value.trim();if(!text||busy)return;
   busy=true;$("send").disabled=true;$("q").value="";
-  add("user",text);
-  var f=await ensure(16,4);if(!f){busy=false;$("send").disabled=false;return;}
+  add("user",text);history.push({role:"user",content:text});
+  var f=await ensure();
+  stage("context…");
+  var ctx=gatherContext(text);
+  if(S&&S.quantumCollapse) lastQ=S.quantumCollapse(text);
   if(llmReady()&&W&&W.complete){
-    var think=add("bot","cluster + LLM…");
+    stage("webllm…");
+    var sys="Ты АКСИ Super — локальный агент. Русский, ясно, по делу. Не выдумывай факты.";
+    if(ctx) sys+="\n\nЛокальный контекст:\n"+ctx;
+    if(lastQ&&lastQ.bits) sys+="\nQuantum seed |"+lastQ.bits+"⟩";
     try{
       var r=await Promise.race([
-        W.complete(text,{system:"Ты АКСИ Super — умный агент кластера. Русский, ясно, по делу.",max_tokens:480}),
-        new Promise(function(res){setTimeout(function(){res({text:""});},45000);})
+        W.complete(text,{system:sys,history:history.slice(-10),max_tokens:700}),
+        new Promise(function(res){setTimeout(function(){res({text:""});},60000);})
       ]);
       var t=(r&&r.text)?String(r.text).trim():"";
-      if(t.length>15){
-        think.textContent=t;
-        var s=document.createElement("span");s.className="meta";s.textContent="webllm · fabric";think.appendChild(s);
-        f.submit({type:"agent",prompt:text,size:12});
-        busy=false;$("send").disabled=false;setStage("");paint();return;
+      if(t.length>12){
+        var ad=adiaWrap(text,t);
+        var meta="webllm · "+(((W.status()||{}).model)||"").slice(0,28);
+        if(ad&&(ad.gate||ad.EQS||ad.aksi)) meta+=" · ADIA "+(ad.gate||ad.EQS||"");
+        if(lastQ) meta+=" · |"+lastQ.bits+"⟩";
+        add("bot",t,meta);
+        history.push({role:"assistant",content:t});
+        if(f) f.submit({type:"agent",prompt:text,size:8});
+        busy=false;$("send").disabled=false;stage("");paint();return;
       }
     }catch(e){}
-    think.remove();
   }
-  setStage("agent pipeline…");
-  var job=f.submit({type:"agent",prompt:text,size:40});
-  var done=await f.waitJob(job,90000);
-  busy=false;$("send").disabled=false;setStage("");
-  if(done&&done.quantum)lastQ=done.quantum;
-  paint();
-  if(done&&done.result){
-    var ans=done.result.answer||done.result.report||done.result.error||"пусто";
-    var meta=(done.result.source||"")+" · "+(done.stages||[]).map(function(x){return x.name;}).join("→")+" · "+(done.node||"");
-    add("bot",ans,meta);
-  }else add("bot","timeout");
+  stage("mind pipeline…");
+  var answer="";
+  if(ctx&&ctx.length>40){
+    try{
+      if(Neuro&&Neuro.think){
+        var n=Neuro.think(text);
+        answer=(n&&(n.answer||n.text))||"";
+      }
+    }catch(e){}
+  }
+  if((!answer||answer.length<20)&&f){
+    var job=f.submit({type:"agent",prompt:text,size:40});
+    var done=await f.waitJob(job,90000);
+    if(done&&done.quantum)lastQ=done.quantum;
+    answer=(done&&done.result&&(done.result.answer||done.result.report))||answer||"пусто";
+    var meta2=(done&&done.result&&done.result.source)||"mind";
+    meta2+=" · "+(done&&done.stages||[]).map(function(x){return x.name;}).join("→");
+    var ad2=adiaWrap(text,answer);
+    if(ad2&&ad2.gate) meta2+=" · gate "+ad2.gate;
+    add("bot",answer,meta2);
+  } else {
+    var ad3=adiaWrap(text,answer);
+    add("bot",answer||"Нет ответа — загрузите модель",ad3?"neuro/knowledge · ADIA":"neuro/knowledge");
+  }
+  history.push({role:"assistant",content:answer||""});
+  busy=false;$("send").disabled=false;stage("");paint();
 }
 $("send").onclick=send;
 $("q").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send();}});
-ensure(16,4).then(function(){
-  add("sys","Super Cluster готов. Задача → quantum → compute → mind → permit.");
-  paint();
-});
+fillModels();
+paintStack();
+ensure().then(function(){add("sys","Full stack: Neuro · Knowledge · ADIA · Quantum · WebLLM · Cluster · Permit");});
 })();
 </script>
 </body>
