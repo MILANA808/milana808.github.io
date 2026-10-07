@@ -3,17 +3,19 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ Super</title>
+<title>АКСИ Quantum AI</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
+<meta name="description" content="АКСИ: quantum-sim word generation + WebLLM + Neuro + Cluster + Permit. Offline-first."/>
 <meta name="theme-color" content="#04060a"/>
 <style>
 :root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--gpu:#38bdf8}
-*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,sans-serif}
-body{background:radial-gradient(900px 480px at 0% 0%,rgba(45,212,191,.1),transparent 50%),radial-gradient(700px 400px at 100% 0%,rgba(129,140,248,.1),transparent 45%),var(--bg)}
-.app{max-width:980px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
-header{padding:12px 14px;border-bottom:1px solid var(--line)}
-h1{margin:0;font-size:1.15rem;font-weight:800}h1 span{background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sub{font-size:12px;color:var(--muted);margin-top:3px}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,sans-serif}
+body{background:radial-gradient(1000px 520px at 10% -10%,rgba(45,212,191,.12),transparent 55%),radial-gradient(800px 400px at 100% 0%,rgba(244,114,182,.1),transparent 50%),var(--bg)}
+.app{max-width:1000px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+header{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:1.2rem;font-weight:800;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:4px 0 0;font-size:12px;color:var(--muted)}
 .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .pill{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .pill.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
@@ -21,78 +23,89 @@ h1{margin:0;font-size:1.15rem;font-weight:800}h1 span{background:linear-gradient
 .pill.q{color:var(--q);border-color:rgba(244,114,182,.4)}
 .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
 .btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);border-radius:9px;padding:7px 10px;font:12px system-ui;font-weight:600;cursor:pointer}
+.btn:hover{background:rgba(255,255,255,.06)}
 .btn.pri{border:0;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
-.btn:disabled{opacity:.4}
-select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);border-radius:9px;padding:7px 8px;font:12px system-ui;max-width:220px}
-.bar{height:3px;background:#0a0e16;border-radius:2px;margin-top:8px;overflow:hidden}.bar>i{display:block;height:100%;width:0;background:var(--c);transition:width .2s}
+.btn.qbtn{border-color:rgba(244,114,182,.4);color:var(--q)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);border-radius:9px;padding:7px 8px;font:12px system-ui;max-width:240px}
+.bar{height:3px;background:#0a0e16;border-radius:2px;margin-top:8px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--q));transition:width .2s}
 .main{flex:1;display:grid;grid-template-columns:1fr}
-@media(min-width:820px){.main{grid-template-columns:270px 1fr}}
+@media(min-width:860px){.main{grid-template-columns:280px 1fr}}
 .side{padding:12px;border-bottom:1px solid var(--line);background:rgba(12,17,26,.55)}
-@media(min-width:820px){.side{border-bottom:0;border-right:1px solid var(--line)}}
+@media(min-width:860px){.side{border-bottom:0;border-right:1px solid var(--line)}}
 .side h2{margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .node{border:1px solid var(--line);border-radius:7px;padding:4px 2px;text-align:center;background:var(--panel);font-size:10px}
 .node.hot{border-color:rgba(45,212,191,.5)}.node .u{font-weight:700;color:var(--gpu);font-size:11px}
 .metrics{margin-top:10px;font:11px/1.45 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
-.qbox{margin-top:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}.qbox .qv{font:12px ui-monospace,monospace;margin-top:3px}
-.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6}.feats b{color:var(--text)}
-.chat{display:flex;flex-direction:column;min-height:420px;flex:1}
-#feed{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px;max-height:55vh}
+.qbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase;letter-spacing:.06em}
+.qbox .qv{font:12px ui-monospace,monospace;margin-top:4px}
+.amps{display:flex;align-items:flex-end;gap:2px;height:36px;margin-top:8px}
+.amps i{flex:1;background:linear-gradient(180deg,var(--q),var(--v));border-radius:2px 2px 0 0;min-height:2px;opacity:.85}
+.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.55}.feats b{color:var(--text)}
+.chat{display:flex;flex-direction:column;min-height:440px;flex:1}
+#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;max-height:58vh}
 .msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
 .msg.sys{align-self:center;background:0;border:0;color:var(--muted);font-size:12px;padding:2px}
 .msg .meta{display:block;margin-top:6px;font-size:10px;color:var(--muted)}
-#stage{padding:0 12px;font-size:11px;color:var(--muted);min-height:16px}
+#stage{padding:0 14px;font-size:11px;color:var(--muted);min-height:16px}
 .composer{padding:10px 12px 12px;border-top:1px solid var(--line);display:flex;gap:8px}
-.composer input{flex:1;border:1px solid var(--line);border-radius:10px;background:#0a0e16;color:var(--text);padding:11px;font:inherit}
-.composer button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
+.composer input{flex:1;border:1px solid var(--line);border-radius:10px;background:#0a0e16;color:var(--text);padding:12px;font:inherit}
+.composer button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
 .composer button:disabled{opacity:.4}
-.hint{font-size:11px;color:var(--muted);padding:0 12px 10px}.hint a{color:var(--c)}
+.hint{font-size:11px;color:var(--muted);padding:0 14px 12px}.hint a{color:var(--c)}
 </style>
 </head>
 <body>
 <div class="app">
 <header>
-  <h1><span>АКСИ Super</span></h1>
-  <div class="sub">Диалог · Cluster · Quantum · Neuro · Mind · WebLLM · Permit</div>
+  <h1><em>АКСИ Quantum AI</em></h1>
+  <div class="sub">Симулятор кубитов → генерация слов · WebLLM · Neuro · Cluster · Permit</div>
   <div class="pills">
     <span class="pill" id="pBoot">boot</span>
     <span class="pill" id="pCluster">cluster</span>
     <span class="pill" id="pQ">quantum</span>
     <span class="pill" id="pNeuro">neuro</span>
-    <span class="pill" id="pKnow">knowledge</span>
-    <span class="pill" id="pAdia">adia</span>
+    <span class="pill" id="pKnow">know</span>
     <span class="pill" id="pMind">mind</span>
     <span class="pill" id="pLlm">llm</span>
     <span class="pill" id="pExo">exo</span>
   </div>
   <div class="tools">
-    <select id="model"></select>
-    <button type="button" class="btn pri" id="btnLlm">Загрузить модель</button>
+    <select id="model" title="Модель WebLLM"></select>
+    <button type="button" class="btn pri" id="btnLlm">Загрузить WebLLM</button>
+    <button type="button" class="btn qbtn" id="btnQMode">Режим: Quantum Gen</button>
     <button type="button" class="btn" id="btnBoot">Boot 16×4</button>
-    <button type="button" class="btn" id="btnQ">Quantum</button>
-    <button type="button" class="btn" id="btnVerify">Verify</button>
+    <button type="button" class="btn" id="btnBench">Bench</button>
+    <button type="button" class="btn" id="btnQ">Quantum pulse</button>
+    <button type="button" class="btn" id="btnVerify">Verify 12×12</button>
   </div>
   <div class="bar"><i id="bar"></i></div>
 </header>
 <div class="main">
   <aside class="side">
-    <h2>Nodes</h2>
+    <h2>Cluster nodes</h2>
     <div class="nodes" id="nodes"></div>
     <div class="metrics" id="metrics">…</div>
-    <div class="qbox"><div class="ql">Quantum</div><div class="qv" id="qView">—</div></div>
-    <div class="feats" id="feats">…</div>
+    <div class="qbox">
+      <div class="ql">Quantum state</div>
+      <div class="qv" id="qView">—</div>
+      <div class="amps" id="amps"></div>
+    </div>
+    <div class="feats" id="feats">loading modules…</div>
   </aside>
   <div class="chat">
     <div id="feed"></div>
     <div id="stage"></div>
     <div class="composer">
-      <input id="q" placeholder="Напишите сообщение…" autocomplete="off"/>
+      <input id="q" placeholder="Вопрос или задача…" autocomplete="off"/>
       <button type="button" id="send">Отправить</button>
     </div>
-    <div class="hint">math → Mind → Neuro → WebLLM · <a href="/super/gate/">Gate</a></div>
+    <div class="hint">Каскад: Quantum-Gen → Math → Neuro → Mind → WebLLM → Permit · <a href="/super/gate/">Gate</a></div>
   </div>
 </div>
 </div>
@@ -103,215 +116,8 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
 <script src="/aksi-webllm.js?v=50"></script>
 <script src="/aksi-super-mind.js?v=6"></script>
 <script src="/aksi-super.js?v=30"></script>
-<script>
-(function(){
-"use strict";
-var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, W=window.AKSI_WEBLLM;
-var Neuro=window.AKSI_NEURO||window.AKSI_LOCAL_LLM;
-var Know=window.AKSI_KNOWLEDGE||window.AKSIKnowledge;
-var fabric=null, busy=false, lastQ=null, history=[];
-
-function $(id){return document.getElementById(id);}
-function pill(id,t,cls){var el=$(id);if(!el)return;el.textContent=t;el.className="pill"+(cls?" "+cls:"");}
-function add(role,text,meta){
-  var d=document.createElement("div");d.className="msg "+role;
-  d.appendChild(document.createTextNode(text||""));
-  if(meta){var m=document.createElement("span");m.className="meta";m.textContent=meta;d.appendChild(m);}
-  $("feed").appendChild(d);$("feed").scrollTop=$("feed").scrollHeight;return d;
-}
-function stage(t){var el=$("stage");if(el)el.textContent=t||"";}
-function setBar(p){var el=$("bar");if(el)el.style.width=Math.min(100,Math.round((p||0)*100))+"%";}
-function llmReady(){try{return !!(W&&W.ready&&W.ready());}catch(e){return false;}}
-
-function fillModels(){
-  var sel=$("model");if(!sel)return;sel.innerHTML="";
-  var list=(W&&W.modelsForDevice)?W.modelsForDevice():(W&&W.models)||[];
-  if(!list.length){sel.innerHTML="<option value=\"\">—</option>";return;}
-  var def=(W.defaultModel&&W.defaultModel())||list[0].id;
-  list.forEach(function(m){
-    var o=document.createElement("option");o.value=m.id;o.textContent=m.label||m.id;
-    if(m.id===def)o.selected=true;sel.appendChild(o);
-  });
-}
-function paintStack(){
-  pill("pNeuro",Neuro?"neuro on":"neuro —",Neuro?"on":"");
-  pill("pKnow",Know?"know on":"know —",Know?"on":"");
-  pill("pMind",M?"mind on":"mind —",M?"on":"");
-  pill("pLlm",llmReady()?"llm on":"llm off",llmReady()?"on":"");
-  pill("pAdia",window.AKSI_ADIA||window.AKSI_ALGORITHM?"adia on":"adia —",(window.AKSI_ADIA||window.AKSI_ALGORITHM)?"on":"");
-  var bits=[];
-  if(Neuro)bits.push("<b>Neuro</b>");
-  if(Know)bits.push("<b>Knowledge</b>");
-  if(M)bits.push("<b>Mind</b>");
-  if(W)bits.push("<b>WebLLM</b> "+(W.version||""));
-  if(S)bits.push("<b>Super</b> "+(S.version||""));
-  if($("feats"))$("feats").innerHTML=bits.join("<br>")||"—";
-}
-function paint(){
-  if(!fabric){paintStack();return;}
-  var sn=fabric.snapshot();
-  pill("pBoot",sn.booted?"ONLINE":"off",sn.booted?"on":"");
-  pill("pCluster",sn.nodes+"n/"+sn.gpus+"g",sn.avg_util>5?"gpu":"on");
-  pill("pExo",sn.exo?"exo on":"exo",sn.exo?"on":"");
-  if(lastQ){
-    pill("pQ","|"+(lastQ.bits||"?")+"⟩","q");
-    if($("qView"))$("qView").textContent="|"+(lastQ.bits||"")+"⟩";
-  }
-  var box=$("nodes");
-  if(box){
-    box.innerHTML="";
-    (sn.nodes_detail||[]).forEach(function(n){
-      var avg=n.gpus.reduce(function(a,g){return a+g.util;},0)/Math.max(1,n.gpus.length);
-      var el=document.createElement("div");el.className="node"+(avg>12?" hot":"");
-      el.innerHTML="<div>"+n.id.replace("node-","n")+"</div><div class=\"u\">"+avg.toFixed(0)+"%</div>";
-      box.appendChild(el);
-    });
-  }
-  if($("metrics"))$("metrics").textContent=(fabric.clusterReport?fabric.clusterReport():"")+"\ndone "+sn.done;
-  paintStack();
-}
-async function ensure(){
-  if(!S){add("sys","Super offline — hard refresh");return null;}
-  if(!fabric){
-    fabric=new S.SuperFabric();
-    try{fabric.loadMemory();}catch(e){}
-    fabric.onTick=paint;
-  }
-  if(!fabric.booted){
-    fabric.boot(16,4);fabric.startScheduler(100);
-    try{await fabric.attachExocortex();}catch(e){}
-    add("sys","Cluster online · 16×4");
-  }
-  paint();return fabric;
-}
-
-function neuroStrong(q){
-  try{
-    if(!Neuro||!Neuro.think)return null;
-    var n=Neuro.think(q);
-    if(!n||n.mode==="fallback")return null;
-    if((Number(n.score)||0)<0.45)return null;
-    var t=String(n.answer||n.text||"").trim();
-    if(t.length<8)return null;
-    return {text:t,score:n.score};
-  }catch(e){return null;}
-}
-
-async function dialogAnswer(text){
-  try{
-    if(M&&M.tryMath){
-      var math=M.tryMath(text);
-      if(math&&math.ok){
-        var mv=Array.isArray(math.value)?math.value.join(", "):String(math.value);
-        var expl=math.explain||(math.steps&&math.steps.length?math.steps.join("\n"):("Результат: "+mv));
-        if(String(expl).indexOf(String(mv))<0) expl=expl+"\nИтог: "+mv;
-        return {text:expl,meta:"math"};
-      }
-    }
-  }catch(e){}
-
-  if(llmReady()&&W&&W.complete){
-    stage("webllm…");
-    var sys="Ты АКСИ. Отвечай по-русски, ясно. Не выдумывай.";
-    var ns=neuroStrong(text);
-    if(ns)sys+="\nКонтекст: "+ns.text.slice(0,400);
-    try{
-      var r=await Promise.race([
-        W.complete(text,{system:sys,history:history.slice(-8),max_tokens:600}),
-        new Promise(function(res){setTimeout(function(){res({text:""});},50000);})
-      ]);
-      var t=(r&&r.text)?String(r.text).trim():"";
-      if(t.length>12)return {text:t,meta:"webllm"};
-    }catch(e){}
-  }
-
-  if(M&&M.answer){
-    stage("mind…");
-    try{
-      var a=await Promise.race([
-        Promise.resolve(M.answer(text,lastQ||{})),
-        new Promise(function(res){setTimeout(function(){res(null);},18000);})
-      ]);
-      if(a&&a.text&&String(a.text).trim().length>8)
-        return {text:String(a.text).trim(),meta:"mind · "+(a.source||"")};
-    }catch(e){}
-  }
-
-  if(fabric){
-    stage("agent…");
-    try{
-      var job=fabric.submit({type:"agent",prompt:text,size:32});
-      var done=await fabric.waitJob(job,50000);
-      if(done&&done.quantum)lastQ=done.quantum;
-      var ans=done&&done.result&&(done.result.answer||done.result.report);
-      if(ans&&String(ans).trim().length>5)
-        return {text:String(ans).trim(),meta:"agent"};
-    }catch(e){}
-  }
-
-  var nh=neuroStrong(text);
-  if(nh)return {text:nh.text,meta:"neuro"};
-
-  try{
-    if(Know&&Know.search){
-      var k=Know.search(text);
-      if(k&&k.body)return {text:k.title+": "+k.body,meta:"knowledge"};
-    }
-  }catch(e){}
-
-  return {text:"Спросите «кто ты», «12*12», «что такое Gate» — или загрузите модель сверху.",meta:"hint"};
-}
-
-$("btnLlm").onclick=async function(){
-  if(!W){add("sys","WebLLM нет");return;}
-  $("btnLlm").disabled=true;
-  var mid=$("model").value;
-  add("sys","Загрузка "+mid+"…");
-  try{
-    await W.load(mid,function(st){
-      var p=(st&&st.progress)||0;if(p>1)p=p/100;setBar(p);stage((st&&st.message)||"");
-    });
-    add("sys",llmReady()?"✓ "+((W.status()||{}).model||"ok"):"Модель не поднялась");
-  }catch(e){add("sys","LLM: "+(e.message||e));}
-  $("btnLlm").disabled=false;stage("");paintStack();
-};
-$("btnBoot").onclick=function(){ensure();};
-$("btnQ").onclick=async function(){
-  await ensure();
-  lastQ=S&&S.quantumCollapse?S.quantumCollapse("p|"+Date.now()):null;
-  add("sys","|"+(lastQ&&lastQ.bits||"?")+"⟩");paint();
-};
-$("btnVerify").onclick=async function(){
-  await ensure();
-  var o=await dialogAnswer("12*12");
-  add("bot",o.text,(o.text.indexOf("144")>=0?"✓ ":"")+(o.meta||""));
-};
-
-async function send(){
-  var text=$("q").value.trim();
-  if(!text||busy)return;
-  busy=true;$("send").disabled=true;$("q").value="";
-  add("user",text);
-  history.push({role:"user",content:text});
-  await ensure();
-  if(S&&S.quantumCollapse)lastQ=S.quantumCollapse(text+"|"+Date.now());
-  stage("…");
-  var out;
-  try{out=await dialogAnswer(text);}
-  catch(e){out={text:String(e.message||e),meta:"error"};}
-  var meta=out.meta||"";
-  if(lastQ&&lastQ.bits)meta+=(meta?" · ":"")+"|"+lastQ.bits+"⟩";
-  add("bot",out.text||"—",meta);
-  history.push({role:"assistant",content:out.text||""});
-  if(history.length>20)history=history.slice(-20);
-  busy=false;$("send").disabled=false;stage("");paint();
-}
-$("send").onclick=send;
-$("q").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send();}});
-
-fillModels();paintStack();
-ensure().then(function(){add("sys","Пишите в чат — отвечу offline (math/Neuro/Mind). Модель — по желанию.");});
-})();
-</script>
+<script src="/aksi-quantum.js?v=1"></script>
+<script src="/super/qgen.js?v=1"></script>
+<script src="/super/app.js?v=1"></script>
 </body>
 </html>
