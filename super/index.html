@@ -2,122 +2,307 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ Quantum AI</title>
-<link rel="canonical" href="https://milana808.github.io/super/"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
 <meta name="theme-color" content="#04060a"/>
-<meta name="description" content="АКСИ — offline Quantum AI: gate, WebLLM, Neuro, cluster, decision receipts"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<title>АКСИ · Super</title>
+<link rel="canonical" href="https://milana808.github.io/super/"/>
 <style>
-:root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--gpu:#38bdf8}
-*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,sans-serif}
-body{background:radial-gradient(1000px 520px at 10% -10%,rgba(45,212,191,.12),transparent 55%),radial-gradient(800px 400px at 100% 0%,rgba(244,114,182,.1),transparent 50%),var(--bg)}
-.app{max-width:1000px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
-header{padding:12px 14px 10px;border-bottom:1px solid var(--line)}
-h1{margin:0;font-size:1.2rem;font-weight:800}
-h1 em{font-style:normal;background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
+:root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,sans-serif}
+body{background:radial-gradient(900px 480px at 10% -10%,rgba(45,212,191,.12),transparent 55%),var(--bg)}
+.app{max-width:720px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+header{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:1.15rem;font-weight:800}
+h1 span{background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{margin:4px 0 0;font-size:12px;color:var(--muted)}
 .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .pill{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
 .pill.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
-.pill.gpu{color:var(--gpu);border-color:rgba(56,189,248,.4)}
-.pill.q{color:var(--q);border-color:rgba(244,114,182,.4)}
-.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
-.btn{border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);border-radius:9px;padding:7px 10px;font:12px system-ui;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:10px;padding:10px 12px;font:13px system-ui;font-weight:600;cursor:pointer}
 .btn.pri{border:0;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
-.btn.qbtn{border-color:rgba(244,114,182,.4);color:var(--q)}
-.btn:disabled{opacity:.4}
-select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);border-radius:9px;padding:7px 8px;font:12px system-ui;max-width:240px}
-.bar{height:3px;background:#0a0e16;border-radius:2px;margin-top:8px;overflow:hidden}
-.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c),var(--q));transition:width .2s}
-.main{flex:1;display:grid;grid-template-columns:1fr}
-@media(min-width:860px){.main{grid-template-columns:280px 1fr}}
-.side{padding:12px;border-bottom:1px solid var(--line);background:rgba(12,17,26,.55)}
-@media(min-width:860px){.side{border-bottom:0;border-right:1px solid var(--line)}}
-.side h2{margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.node{border:1px solid var(--line);border-radius:7px;padding:4px 2px;text-align:center;background:var(--panel);font-size:10px}
-.node.hot{border-color:rgba(45,212,191,.5)}
-.node .u{font-weight:700;color:var(--gpu);font-size:11px}
-.metrics{margin-top:10px;font:11px/1.45 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
-.qbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}
-.qbox .qv{font:12px ui-monospace,monospace;margin-top:4px}
-.amps{display:flex;align-items:flex-end;gap:2px;height:36px;margin-top:8px}
-.amps i{flex:1;background:linear-gradient(180deg,var(--q),var(--v));border-radius:2px 2px 0 0;min-height:2px;opacity:.85}
-.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.55}
-.feats b{color:var(--text)}
-.chat{display:flex;flex-direction:column;min-height:440px;flex:1}
-#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;max-height:58vh;-webkit-overflow-scrolling:touch}
-.msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
+.btn:disabled{opacity:.45}
+#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:42vh;-webkit-overflow-scrolling:touch}
+.msg{max-width:95%;padding:11px 13px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:14px}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
 .msg.sys{align-self:center;background:0;border:0;color:var(--muted);font-size:12px;padding:2px}
 .msg .meta{display:block;margin-top:6px;font-size:10px;color:var(--muted)}
 #stage{padding:0 14px;font-size:11px;color:var(--muted);min-height:16px}
-.composer{padding:10px 12px 12px;border-top:1px solid var(--line);display:flex;gap:8px;margin:0}
-.composer input{flex:1;border:1px solid var(--line);border-radius:10px;background:#0a0e16;color:var(--text);padding:12px;font:inherit;font-size:16px}
-.composer button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016;-webkit-tap-highlight-color:transparent}
-.composer button:disabled{opacity:.4}
-.hint{font-size:11px;color:var(--muted);padding:0 14px 12px}
+.composer{padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:8px;background:rgba(4,6,10,.92);position:sticky;bottom:0}
+.composer input{flex:1;border:1px solid var(--line);border-radius:12px;background:#0a0e16;color:var(--text);padding:14px 12px;font:inherit;font-size:16px}
+.composer button{border:0;border-radius:12px;padding:14px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--c),var(--v));color:#041016;flex-shrink:0}
+.hint{font-size:11px;color:var(--muted);padding:0 14px 10px}
 .hint a{color:var(--c)}
 </style>
 </head>
 <body>
 <div class="app">
 <header>
-  <h1><em>АКСИ Quantum AI</em></h1>
-  <div class="sub">Симулятор кубитов · WebLLM auto · Neuro · Cluster · Jev-Gate</div>
+  <h1><span>АКСИ</span> · Super</h1>
+  <div class="sub">Offline Decision Integrity · без перезагрузки страницы</div>
   <div class="pills">
-    <span class="pill" id="pBoot">boot</span>
-    <span class="pill" id="pCluster">cluster</span>
-    <span class="pill" id="pQ">quantum</span>
-    <span class="pill" id="pNeuro">neuro</span>
-    <span class="pill" id="pKnow">know</span>
+    <span class="pill on" id="pOn">online</span>
     <span class="pill" id="pMind">mind</span>
-    <span class="pill" id="pLlm">llm</span>
-    <span class="pill" id="pExo">exo</span>
+    <span class="pill" id="pNeuro">neuro</span>
+    <span class="pill" id="pLlm">llm off</span>
   </div>
   <div class="tools">
-    <select id="model" aria-label="Модель WebLLM"></select>
     <button type="button" class="btn pri" id="btnLlm">Загрузить WebLLM</button>
-    <button type="button" class="btn qbtn" id="btnQMode">Режим: Quantum+Gate</button>
-    <button type="button" class="btn" id="btnBoot">Boot 16×4</button>
-    <button type="button" class="btn" id="btnBench">Bench</button>
-    <button type="button" class="btn" id="btnQ">Quantum pulse</button>
-    <button type="button" class="btn" id="btnVerify">Verify 12×12</button>
+    <button type="button" class="btn" id="btnVerify">Проверка 12×12</button>
+    <button type="button" class="btn" id="btnClear">Очистить</button>
   </div>
-  <div class="bar"><i id="bar"></i></div>
 </header>
-<div class="main">
-  <aside class="side">
-    <h2>Cluster nodes</h2>
-    <div class="nodes" id="nodes"></div>
-    <div class="metrics" id="metrics">…</div>
-    <div class="qbox">
-      <div class="ql">Quantum state</div>
-      <div class="qv" id="qView">—</div>
-      <div class="amps" id="amps"></div>
-    </div>
-    <div class="feats" id="feats">…</div>
-  </aside>
-  <div class="chat">
-    <div id="feed"></div>
-    <div id="stage"></div>
-    <form class="composer" id="composerForm" action="javascript:void(0)" method="post" onsubmit="return false;">
-      <input id="q" name="q" placeholder="Вопрос или задача…" autocomplete="off" enterkeyhint="send" inputmode="text"/>
-      <button type="submit" id="send">Отправить</button>
-    </form>
-    <div class="hint">Math → Gate → Quantum → Neuro → Mind → WebLLM · <a href="/super/gate/">Gate</a> · aksilove@internet.ru</div>
-  </div>
+<div id="feed"></div>
+<div id="stage"></div>
+<div class="composer" id="composer">
+  <input id="q" type="text" placeholder="Вопрос…" autocomplete="off" autocorrect="off" enterkeyhint="send" inputmode="text"/>
+  <button type="button" id="send">Отправить</button>
 </div>
+<div class="hint">Работает offline. WebLLM — только по кнопке. <a href="/super/gate/">Gate</a> · aksilove@internet.ru</div>
 </div>
-<script src="/aksi-exocortex.js?v=1"></script>
-<script src="/aksi-neuro.js?v=10"></script>
-<script src="/aksi-knowledge.js?v=3"></script>
-<script src="/aksi-algorithm.js?v=40"></script>
-<script src="/aksi-webllm.js?v=51"></script>
-<script src="/aksi-super-mind.js?v=7"></script>
-<script src="/aksi-super.js?v=30"></script>
-<script src="/super/runtime.js?v=3"></script>
+<script>
+(function killSW() {
+  try {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      regs.forEach(function (r) { r.unregister(); });
+    });
+    if (window.caches && caches.keys) {
+      caches.keys().then(function (keys) {
+        keys.forEach(function (k) {
+          if (/aksi|shell|super/i.test(k)) caches.delete(k);
+        });
+      });
+    }
+  } catch (e) {}
+})();
+
+(function () {
+  "use strict";
+  var busy = false, history = [];
+  function $(id) { return document.getElementById(id); }
+  function add(role, text, meta) {
+    var d = document.createElement("div");
+    d.className = "msg " + role;
+    d.appendChild(document.createTextNode(text || ""));
+    if (meta) {
+      var m = document.createElement("span");
+      m.className = "meta";
+      m.textContent = meta;
+      d.appendChild(m);
+    }
+    $("feed").appendChild(d);
+    $("feed").scrollTop = 1e9;
+  }
+  function stage(t) { $("stage").textContent = t || ""; }
+  function pill(id, t, on) {
+    var el = $(id); if (!el) return;
+    el.textContent = t;
+    el.className = "pill" + (on ? " on" : "");
+  }
+  function hash(s) {
+    var h = 2166136261 >>> 0, i;
+    s = String(s || "");
+    for (i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function decideGate(text) {
+    var s = String(text || "").toLowerCase();
+    var p = 0.85, risk = 0.5, gate = "ALLOW";
+    if (/удали|уничтож|взлом|хак|пароль|банк|карт\s/.test(s)) { p = 0.1; risk = 2.5; gate = "BLOCK"; }
+    else if (/отправь|email|плати|переведи|опубликуй/.test(s)) { p = 0.35; risk = 2.0; gate = "REVIEW"; }
+    return { gate: gate, p_allow: p, risk: risk, hash: (hash(s + "|" + gate) >>> 0).toString(16) };
+  }
+  function tryMath(q) {
+    var s = String(q).toLowerCase().replace(/,/g, ".").replace(/\s+/g, " ").trim();
+    var m, expr, val;
+    m = s.match(/(?:посчитай|вычисли|сколько\s*будет)?\s*([0-9.]+\s*[+\-*/]\s*[0-9.]+(?:\s*[+\-*/]\s*[0-9.]+)*)/);
+    if (m) {
+      try {
+        expr = m[1].replace(/\s+/g, "");
+        if (!/^[\d.+\-*/()]+$/.test(expr)) return null;
+        val = Function('"use strict";return (' + expr + ")")();
+        if (typeof val === "number" && isFinite(val))
+          return "Выражение: " + m[1].trim() + "\nРезультат: " + val;
+      } catch (e) {}
+    }
+    m = s.match(/(?:корень|sqrt)\s*(?:из\s*)?([0-9.]+)/i);
+    if (m) {
+      val = Math.sqrt(parseFloat(m[1]));
+      return "√" + m[1] + " ≈ " + val;
+    }
+    return null;
+  }
+  var KB = [
+    { re: /привет|здравствуй|hello|hi\b/i, t: "Привет. Я АКСИ — offline Decision Integrity. Считаю, объясняю, ставлю Gate ALLOW/BLOCK. Сервер не нужен." },
+    { re: /кто\s*ты|что\s*ты|акси|aksi/i, t: "АКСИ — локальный runtime: Gate (допуск), math, Neuro/Mind, опциональный WebLLM. Не чатбот-обёртка, а слой доказательств. Контакт: aksilove@internet.ru" },
+    { re: /что\s*умеешь|помощ|help/i, t: "Умею: математика (12*12), объяснения (Permit, квант), Gate-receipt. WebLLM — только по кнопке, если есть WebGPU." },
+    { re: /permit|пермит|gate|допуск/i, t: "Permit/Gate — default-deny: ALLOW / REVIEW / BLOCK + hash. Ядро продукта для аудита агентов." },
+    { re: /небо.*голуб|голуб.*небо/i, t: "Небо голубое из‑за рэлеевского рассеяния: короткие (синие) волны рассеиваются сильнее." },
+    { re: /кубит|qubit|суперпозиц/i, t: "Кубит: |ψ⟩=α|0⟩+β|1⟩. Суперпозиция — несколько состояний до измерения." },
+    { re: /webllm|веб\s*ллм/i, t: "WebLLM грузит модель через WebGPU. На многих телефонах мало памяти — поэтому только по кнопке, не автоматически." }
+  ];
+  function kbAnswer(q) {
+    for (var i = 0; i < KB.length; i++) if (KB[i].re.test(q)) return KB[i].t;
+    return null;
+  }
+  function neuroAnswer(q) {
+    try {
+      var N = window.AKSI_NEURO || window.AKSI_LOCAL_LLM;
+      if (!N) return null;
+      if (N.think) {
+        var n = N.think(q);
+        if (n && n.mode !== "fallback" && (Number(n.score) || 0) >= 0.45) {
+          var t = String(n.answer || n.text || "").trim();
+          if (t.length > 8) return t;
+        }
+      }
+      if (N.query) {
+        var r = N.query(q);
+        if (r && (r.answer || r.text)) return String(r.answer || r.text).trim();
+      }
+    } catch (e) {}
+    return null;
+  }
+  function mindAnswer(q) {
+    try {
+      var M = window.AKSI_SUPER_MIND;
+      if (M && M.answer) return Promise.resolve(M.answer(q, null));
+    } catch (e) {}
+    return Promise.resolve(null);
+  }
+  function llmReady() {
+    try {
+      var W = window.AKSI_WEBLLM;
+      return !!(W && W.ready && W.ready());
+    } catch (e) { return false; }
+  }
+  function refreshPills() {
+    pill("pMind", window.AKSI_SUPER_MIND ? "mind on" : "mind", !!window.AKSI_SUPER_MIND);
+    pill("pNeuro", (window.AKSI_NEURO || window.AKSI_LOCAL_LLM) ? "neuro on" : "neuro", !!(window.AKSI_NEURO || window.AKSI_LOCAL_LLM));
+    pill("pLlm", llmReady() ? "llm on" : "llm off", llmReady());
+  }
+  async function answer(text) {
+    var g = decideGate(text);
+    if (g.gate === "BLOCK") {
+      return { text: "Gate BLOCK · p=" + g.p_allow + " · risk=" + g.risk + "\nОтклонено.\nReceipt: " + g.hash, meta: "gate BLOCK · " + g.hash };
+    }
+    var math = tryMath(text);
+    if (math) return { text: math, meta: "math · gate " + g.gate + " · " + g.hash };
+    var kb = kbAnswer(text);
+    if (kb) return { text: kb, meta: "kb · gate " + g.gate + " · " + g.hash };
+    try {
+      stage("mind…");
+      var a = await Promise.race([
+        mindAnswer(text),
+        new Promise(function (res) { setTimeout(function () { res(null); }, 8000); })
+      ]);
+      if (a && a.text && String(a.text).trim().length > 12) {
+        return { text: String(a.text).trim(), meta: (a.source || "mind") + " · gate " + g.gate };
+      }
+    } catch (e) {}
+    if (llmReady()) {
+      try {
+        stage("webllm…");
+        var W = window.AKSI_WEBLLM;
+        var r = await Promise.race([
+          W.complete(text, { system: "Ты АКСИ. Отвечай по-русски ясно.", max_tokens: 400 }),
+          new Promise(function (res) { setTimeout(function () { res({ text: "" }); }, 30000); })
+        ]);
+        var t = r && r.text ? String(r.text).trim() : "";
+        if (t.length > 12) return { text: t, meta: "webllm · gate " + g.gate };
+      } catch (e) {}
+    }
+    var n = neuroAnswer(text);
+    if (n) return { text: n, meta: "neuro · gate " + g.gate };
+    return {
+      text: "Локально точного факта нет. Спросите «кто ты», «12*12», «Permit» или загрузите WebLLM.\nGate: " + g.gate + " · " + g.hash,
+      meta: "fallback · gate " + g.gate
+    };
+  }
+  async function send() {
+    if (busy) return;
+    var inp = $("q");
+    var text = String(inp.value || "").trim();
+    if (!text) return;
+    busy = true;
+    $("send").disabled = true;
+    inp.value = "";
+    try { inp.blur(); } catch (e) {}
+    add("user", text);
+    history.push({ role: "user", content: text });
+    stage("…");
+    var out;
+    try { out = await answer(text); }
+    catch (e) { out = { text: "Ошибка: " + String((e && e.message) || e), meta: "error" }; }
+    add("bot", out.text || "—", out.meta || "");
+    history.push({ role: "assistant", content: out.text || "" });
+    if (history.length > 24) history = history.slice(-24);
+    try { localStorage.setItem("aksi_super_chat", JSON.stringify(history.slice(-12))); } catch (e) {}
+    busy = false;
+    $("send").disabled = false;
+    stage("");
+    refreshPills();
+  }
+  $("send").addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); send(); });
+  $("q").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); send(); }
+  });
+  $("q").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); }
+  });
+  $("btnVerify").addEventListener("click", function (e) { e.preventDefault(); $("q").value = "12*12"; send(); });
+  $("btnClear").addEventListener("click", function (e) {
+    e.preventDefault(); $("feed").innerHTML = ""; history = []; add("sys", "История очищена.");
+  });
+  $("btnLlm").addEventListener("click", function (e) {
+    e.preventDefault();
+    var W = window.AKSI_WEBLLM;
+    if (!W || !W.load) { add("sys", "WebLLM ещё не подгрузился. Подождите 2 сек."); return; }
+    $("btnLlm").disabled = true;
+    add("sys", "Загрузка WebLLM… На слабом телефоне может не хватить памяти — offline останется.");
+    var mid = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
+    try { if (!(W.isMobile && W.isMobile()) && W.defaultModel) mid = W.defaultModel(); } catch (err) {}
+    W.load(mid, function (st) { stage((st && st.message) || ""); }).then(function () {
+      add("sys", llmReady() ? ("✓ WebLLM: " + ((W.status && W.status().model) || mid)) : "Не поднялась — offline OK");
+      $("btnLlm").disabled = false; stage(""); refreshPills();
+    }).catch(function (err) {
+      add("sys", "WebLLM: " + ((err && err.message) || err));
+      $("btnLlm").disabled = false; stage("");
+    });
+  });
+  function loadScript(src) {
+    return new Promise(function (resolve) {
+      var s = document.createElement("script");
+      s.src = src; s.async = true;
+      s.onload = function () { resolve(true); };
+      s.onerror = function () { resolve(false); };
+      document.head.appendChild(s);
+    });
+  }
+  add("sys", "АКСИ online. Страница НЕ перезагружается при отправке.");
+  add("sys", "Попробуйте: кто ты · 12*12 · Permit");
+  try {
+    var h = JSON.parse(localStorage.getItem("aksi_super_chat") || "[]");
+    if (Array.isArray(h)) h.slice(-4).forEach(function (m) {
+      if (m && m.content) add(m.role === "user" ? "user" : "bot", m.content);
+    });
+  } catch (e) {}
+  setTimeout(function () {
+    Promise.all([
+      loadScript("/aksi-neuro.js?v=10"),
+      loadScript("/aksi-knowledge.js?v=3"),
+      loadScript("/aksi-super-mind.js?v=7"),
+      loadScript("/aksi-webllm.js?v=51")
+    ]).then(function () {
+      refreshPills();
+      add("sys", "Модули: " + (window.AKSI_SUPER_MIND ? "Mind " : "") + ((window.AKSI_NEURO || window.AKSI_LOCAL_LLM) ? "Neuro " : "") + (window.AKSI_WEBLLM ? "WebLLM-ready" : ""));
+    });
+  }, 300);
+})();
+</script>
 </body>
 </html>
