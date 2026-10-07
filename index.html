@@ -4,474 +4,136 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ</title>
-<meta name="description" content="АКСИ — один контур: Gate · Seal · Verify. Не чатбот. technology_serves_human"/>
+<meta name="description" content="АКСИ — один контур: Gate · Seal · Verify"/>
 <meta name="theme-color" content="#0b1020"/>
-<meta name="mobile-web-app-capable" content="yes"/>
 <style>
-:root{
-  --bg:#0b1020;--card:#121a2f;--line:#24304d;--tx:#e8eefc;--mut:#8b9bb8;
-  --ok:#34d399;--bad:#f87171;--acc:#818cf8;--warn:#fbbf24;--nav:80px;
-}
+:root{--bg:#0b1020;--card:#121a2f;--line:#24304d;--tx:#e8eefc;--mut:#8b9bb8;--ok:#34d399;--bad:#f87171;--acc:#818cf8;--warn:#fbbf24;--nav:80px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
 a{color:var(--acc)}
-.live{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:center;
-  gap:8px;flex-wrap:wrap;padding:8px 12px;background:rgba(11,16,32,.94);
-  border-bottom:1px solid var(--line);backdrop-filter:blur(10px);font-size:12px;color:var(--mut)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);
-  box-shadow:0 0 0 0 rgba(52,211,153,.45);animation:ping 1.6s infinite}
-@keyframes ping{0%{box-shadow:0 0 0 0 rgba(52,211,153,.4)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.live{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:rgba(11,16,32,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(10px);font-size:12px;color:var(--mut)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);animation:ping 1.6s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(52,211,153,.4)}70%{box-shadow:0 0 0 8px transparent}}
 .live code{font-family:ui-monospace,Menlo,monospace;color:var(--acc);font-size:11px}
 .shell{max-width:720px;margin:0 auto;padding:12px 14px calc(var(--nav) + 20px)}
 .panel{display:none}.panel.on{display:block}
-h1{font-size:1.4rem;margin:12px 0 6px}
-h2{font-size:.95rem;margin:0 0 10px}
+h1{font-size:1.4rem;margin:12px 0 6px}h2{font-size:.95rem;margin:0 0 10px}
 .sub{color:var(--mut);font-size:.92rem;margin:0 0 14px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
 label{display:block;font-size:12px;color:var(--mut);margin:0 0 6px}
-textarea,input{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:10px;
-  color:var(--tx);padding:10px 12px;font-size:15px;outline:none}
+textarea,input{width:100%;background:#0a0f1c;border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:10px 12px;font-size:15px;outline:none}
 textarea{min-height:90px;resize:vertical}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-button,.btn{
-  border:0;border-radius:10px;padding:11px 14px;font-weight:600;font-size:13px;cursor:pointer;
-  background:var(--acc);color:#0b1020;font-family:inherit}
-button.ghost,.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--tx)}
-button:disabled{opacity:.45}
-.trace{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mut);white-space:pre-wrap;
-  background:#0a0f1c;border-radius:10px;padding:10px;border:1px solid var(--line);max-height:160px;overflow:auto}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:600;font-size:13px;cursor:pointer;background:var(--acc);color:#0b1020;font-family:inherit}
+button.ghost{background:transparent;border:1px solid var(--line);color:var(--tx)}
+.trace{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--mut);white-space:pre-wrap;background:#0a0f1c;border-radius:10px;padding:10px;border:1px solid var(--line);max-height:160px;overflow:auto}
 .msg{margin:10px 0;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0e1528}
 .msg.allow{border-color:rgba(52,211,153,.35)}.msg.block{border-color:rgba(248,113,113,.35)}
 .msg .meta{font-size:11px;color:var(--mut);margin-top:8px;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
 .pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;font-weight:700}
-.pill.ok{background:rgba(52,211,153,.15);color:var(--ok)}
-.pill.bad{background:rgba(248,113,113,.15);color:var(--bad)}
-.pill.warn{background:rgba(251,191,36,.15);color:var(--warn)}
-code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;padding:8px;
-  border-radius:8px;border:1px solid var(--line);margin-top:4px}
+.pill.ok{background:rgba(52,211,153,.15);color:var(--ok)}.pill.bad{background:rgba(248,113,113,.15);color:var(--bad)}.pill.warn{background:rgba(251,191,36,.15);color:var(--warn)}
+code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;padding:8px;border-radius:8px;border:1px solid var(--line);margin-top:4px}
 .grid{display:grid;gap:8px}@media(min-width:560px){.grid.two{grid-template-columns:1fr 1fr}}
 .steps{counter-reset:s;list-style:none;padding:0;margin:0}
-.steps li{position:relative;padding:10px 10px 10px 44px;margin:8px 0;background:#0e1528;
-  border:1px solid var(--line);border-radius:12px;font-size:14px;color:var(--mut)}
-.steps li:before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:10px;
-  width:24px;height:24px;border-radius:8px;background:rgba(129,140,248,.2);color:var(--acc);
-  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.steps li{position:relative;padding:10px 10px 10px 44px;margin:8px 0;background:#0e1528;border:1px solid var(--line);border-radius:12px;font-size:14px;color:var(--mut)}
+.steps li:before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:10px;width:24px;height:24px;border-radius:8px;background:rgba(129,140,248,.2);color:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
 .steps li b{color:var(--tx);display:block;margin-bottom:2px}
-.bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:center;
-  gap:0;background:rgba(11,16,32,.96);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));
-  backdrop-filter:blur(12px)}
-.bnav button{flex:1;max-width:120px;background:transparent;color:var(--mut);border:0;border-radius:12px;
-  padding:8px 4px;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;justify-content:center;background:rgba(11,16,32,.96);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));backdrop-filter:blur(12px)}
+.bnav button{flex:1;max-width:120px;background:transparent;color:var(--mut);border:0;border-radius:12px;padding:8px 4px;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px}
 .bnav button.on{color:var(--acc);background:rgba(129,140,248,.12)}
 .bnav button span.ic{font-size:16px;line-height:1}
 .foot{margin-top:20px;font-size:12px;color:var(--mut);text-align:center}
 .kv{font-size:12px;margin:4px 0}.kv b{color:var(--mut);font-weight:500}
-.chip{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--line);
-  font-size:12px;color:var(--mut);margin:2px 4px 2px 0}
+.chip{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--mut);margin:2px 4px 2px 0}
 </style>
 </head>
 <body>
-<div class="live" id="live">
-  <span class="dot"></span>
-  <span>АКСИ</span>
-  <span id="msk">--:-- МСК</span>
-  <code id="didShort">did:…</code>
-  <code id="fpShort">——</code>
-</div>
-
+<div class="live"><span class="dot"></span><span>АКСИ</span><span id="msk">--:-- МСК</span><code id="didShort">did:…</code><code id="fpShort">——</code></div>
 <div class="shell">
-  <section class="panel on" id="p-home" data-panel="home">
-    <h1>АКСИ</h1>
-    <p class="sub">Один контур. Внутри — матрёшка: решение → gate → печать → проверка.<br/>
-    Не чатбот. Технология служит человеку.</p>
-
-    <div class="card">
-      <h2>Что умеет эта страница</h2>
-      <ul class="steps">
-        <li><b>Решение</b>Оценивает утверждение или действие агента: ALLOW · BLOCK · REVIEW</li>
-        <li><b>Печать</b>Криптоподпись (Ed25519 / ECDSA) прямо в браузере, без сервера</li>
-        <li><b>Проверка</b>Любой может сверить receipt offline</li>
-        <li><b>DID</b>Сессионный паспорт агента / человека</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Быстрый старт</h2>
-      <p class="sub" style="margin:0">Открой вкладку <b style="color:var(--tx)">Решение</b> → введи <code>12*12</code> → Gate + Seal.</p>
-      <div class="row">
-        <button type="button" id="goDecide">Открыть Решение</button>
-        <button type="button" class="ghost" id="goId">DID</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Статус</h2>
-      <span class="chip">offline-first</span>
-      <span class="chip">без Replit</span>
-      <span class="chip">Web Crypto</span>
-      <span class="chip">один URL</span>
-      <p class="sub" style="margin-top:10px;margin-bottom:0">Контакт: aksilove@internet.ru · X @AKSIWORLD</p>
-    </div>
-  </section>
-
-  <section class="panel" id="p-decide" data-panel="decide">
-    <h1>Решение</h1>
-    <p class="sub">Gate вне модели · Seal · Verify</p>
-
-    <div class="card">
-      <label for="claim">Утверждение или действие</label>
-      <textarea id="claim" placeholder="12*12&#10;или: удали все файлы&#10;или: AI доказал гипотезу без источника"></textarea>
-      <div class="row">
-        <button type="button" id="btnRun">Gate + Seal</button>
-        <button type="button" class="ghost" id="btnClear">Очистить</button>
-      </div>
-      <div class="trace" id="trace" style="margin-top:10px">Ожидание…</div>
-    </div>
-
-    <div class="card">
-      <h2>Результат</h2>
-      <div id="out" class="msg">Ещё нет receipt.</div>
-    </div>
-
-    <div class="card">
-      <h2>Проверить подпись</h2>
-      <label for="verifyBox">JSON receipt</label>
-      <textarea id="verifyBox" placeholder='{"protocol":"aksi-decision-receipt",...}'></textarea>
-      <div class="row">
-        <button type="button" id="btnVerify">Проверить</button>
-      </div>
-      <div id="verifyOut" class="msg" style="margin-top:10px">—</div>
-    </div>
-  </section>
-
-  <section class="panel" id="p-id" data-panel="id">
-    <h1>Идентичность</h1>
-    <p class="sub">Суверенный ключ сессии в этом браузере</p>
-
-    <div class="card">
-      <div class="grid two">
-        <div>
-          <div class="kv"><b>DID</b></div>
-          <code class="block" id="didFull">…</code>
-        </div>
-        <div>
-          <div class="kv"><b>Алгоритм</b></div>
-          <code class="block" id="alg">…</code>
-        </div>
-      </div>
-      <div class="row">
-        <button type="button" class="ghost" id="btnRotate">Новый ключ</button>
-        <button type="button" class="ghost" id="btnExportPub">Экспорт pub</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Паспорт агента</h2>
-      <label for="agentName">Имя</label>
-      <input id="agentName" placeholder="My Agent v1"/>
-      <div class="row">
-        <button type="button" id="btnDidGen">Создать DID-паспорт</button>
-      </div>
-      <div id="passportOut" class="trace" style="margin-top:10px">—</div>
-    </div>
-  </section>
-
-  <section class="panel" id="p-about" data-panel="about">
-    <h1>О системе</h1>
-    <p class="sub">Одна страница — вся логика внутри. Без россыпи сайтов.</p>
-    <div class="card">
-      <h2>Матрёшка</h2>
-      <p class="sub" style="margin:0">Снаружи — АКСИ. Внутри: идентичность → оценка → gate → подпись → цепочка receipt → verify.</p>
-    </div>
-    <div class="card">
-      <h2>Честно</h2>
-      <p class="sub" style="margin:0">Это не AGI. Это слой доказуемых решений для эпохи агентов. Ценность — gate + receipt.</p>
-    </div>
-    <div class="card">
-      <h2>Связь</h2>
-      <p class="sub" style="margin:0">aksilove@internet.ru<br/>X: @AKSIWORLD</p>
-    </div>
-    <p class="foot">© AKSI · technology_serves_human</p>
-  </section>
+<section class="panel on" data-panel="home">
+<h1>АКСИ</h1>
+<p class="sub">Один контур-матрёшка: решение → gate → печать → проверка.<br/>Не чатбот. Технология служит человеку.</p>
+<div class="card"><h2>Что внутри</h2>
+<ul class="steps">
+<li><b>Решение</b>ALLOW · BLOCK · REVIEW</li>
+<li><b>Печать</b>Ed25519 / ECDSA в браузере</li>
+<li><b>Проверка</b>offline verify JSON</li>
+<li><b>DID</b>сессионный паспорт</li>
+</ul></div>
+<div class="card"><h2>Старт</h2>
+<p class="sub" style="margin:0">Вкладка <b style="color:var(--tx)">Решение</b> → <code>12*12</code> → Gate + Seal</p>
+<div class="row"><button type="button" id="goDecide">Открыть Решение</button><button type="button" class="ghost" id="goId">DID</button></div></div>
+<div class="card"><span class="chip">offline-first</span><span class="chip">без Replit</span><span class="chip">один URL</span>
+<p class="sub" style="margin-top:10px;margin-bottom:0">aksilove@internet.ru · @AKSIWORLD</p></div>
+</section>
+<section class="panel" data-panel="decide">
+<h1>Решение</h1><p class="sub">Gate вне модели · Seal · Verify</p>
+<div class="card"><label for="claim">Утверждение или действие</label>
+<textarea id="claim" placeholder="12*12"></textarea>
+<div class="row"><button type="button" id="btnRun">Gate + Seal</button><button type="button" class="ghost" id="btnClear">Очистить</button></div>
+<div class="trace" id="trace" style="margin-top:10px">Ожидание…</div></div>
+<div class="card"><h2>Результат</h2><div id="out" class="msg">Ещё нет receipt.</div></div>
+<div class="card"><h2>Проверить подпись</h2>
+<label for="verifyBox">JSON receipt</label><textarea id="verifyBox"></textarea>
+<div class="row"><button type="button" id="btnVerify">Проверить</button></div>
+<div id="verifyOut" class="msg" style="margin-top:10px">—</div></div>
+</section>
+<section class="panel" data-panel="id">
+<h1>Идентичность</h1><p class="sub">Ключ сессии в этом браузере</p>
+<div class="card"><div class="grid two"><div><div class="kv"><b>DID</b></div><code class="block" id="didFull">…</code></div>
+<div><div class="kv"><b>Алгоритм</b></div><code class="block" id="alg">…</code></div></div>
+<div class="row"><button type="button" class="ghost" id="btnRotate">Новый ключ</button><button type="button" class="ghost" id="btnExportPub">Экспорт pub</button></div></div>
+<div class="card"><h2>Паспорт</h2><label for="agentName">Имя</label><input id="agentName" placeholder="My Agent v1"/>
+<div class="row"><button type="button" id="btnDidGen">Создать DID</button></div>
+<div id="passportOut" class="trace" style="margin-top:10px">—</div></div>
+</section>
+<section class="panel" data-panel="about">
+<h1>О системе</h1>
+<div class="card"><h2>Матрёшка</h2><p class="sub" style="margin:0">Одна страница. Внутри: DID → оценка → gate → подпись → verify.</p></div>
+<div class="card"><h2>Честно</h2><p class="sub" style="margin:0">Не AGI. Слой доказуемых решений для агентов.</p></div>
+<p class="foot">© AKSI · technology_serves_human</p>
+</section>
 </div>
-
-<nav class="bnav" aria-label="Навигация">
-  <button type="button" class="on" data-go="home"><span class="ic">◆</span>Главная</button>
-  <button type="button" data-go="decide"><span class="ic">▣</span>Решение</button>
-  <button type="button" data-go="id"><span class="ic">◉</span>DID</button>
-  <button type="button" data-go="about"><span class="ic">○</span>О системе</button>
+<nav class="bnav">
+<button type="button" class="on" data-go="home"><span class="ic">◆</span>Главная</button>
+<button type="button" data-go="decide"><span class="ic">▣</span>Решение</button>
+<button type="button" data-go="id"><span class="ic">◉</span>DID</button>
+<button type="button" data-go="about"><span class="ic">○</span>О системе</button>
 </nav>
-
 <script>
-(function () {
-  "use strict";
-  var LS_KEY = "aksi_one_id_v1";
-  var LS_RECEIPTS = "aksi_one_receipts_v1";
-  var PROTOCOL = "aksi-decision-receipt";
-  var VERSION = "1.0.0-one";
-  var identity = null;
-
-  function $(id) { return document.getElementById(id); }
-  function utf8(s) { return new TextEncoder().encode(String(s)); }
-  function b64(buf) {
-    var u = buf instanceof ArrayBuffer ? new Uint8Array(buf) : buf;
-    var s = "", i;
-    for (i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
-    return btoa(s);
-  }
-  function unb64(s) {
-    var bin = atob(s);
-    var u = new Uint8Array(bin.length), i;
-    for (i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-    return u;
-  }
-  function hex(u) {
-    return Array.from(u).map(function (x) { return ("0" + x.toString(16)).slice(-2); }).join("");
-  }
-  async function sha256(data) {
-    var buf = typeof data === "string" ? utf8(data) : data;
-    return new Uint8Array(await crypto.subtle.digest("SHA-256", buf));
-  }
-  function canon(obj) {
-    if (obj === null || typeof obj !== "object") return JSON.stringify(obj);
-    if (Array.isArray(obj)) return "[" + obj.map(canon).join(",") + "]";
-    var keys = Object.keys(obj).filter(function (k) { return obj[k] !== undefined; }).sort();
-    return "{" + keys.map(function (k) { return JSON.stringify(k) + ":" + canon(obj[k]); }).join(",") + "}";
-  }
-
-  function go(name) {
-    document.querySelectorAll(".panel").forEach(function (p) {
-      p.classList.toggle("on", p.getAttribute("data-panel") === name);
-    });
-    document.querySelectorAll(".bnav button").forEach(function (b) {
-      b.classList.toggle("on", b.getAttribute("data-go") === name);
-    });
-    try { history.replaceState(null, "", "#" + name); } catch (e) {}
-    window.scrollTo(0, 0);
-  }
-  document.querySelectorAll(".bnav button").forEach(function (b) {
-    b.addEventListener("click", function () { go(b.getAttribute("data-go")); });
-  });
-  $("goDecide").onclick = function () { go("decide"); };
-  $("goId").onclick = function () { go("id"); };
-  var hash = (location.hash || "").replace("#", "");
-  if (hash && document.querySelector('[data-panel="' + hash + '"]')) go(hash);
-
-  function tickMsk() {
-    try {
-      $("msk").textContent = new Date().toLocaleTimeString("ru-RU", {
-        timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit", second: "2-digit"
-      }) + " МСК";
-    } catch (e) {
-      $("msk").textContent = new Date().toLocaleTimeString("ru-RU");
-    }
-  }
-  tickMsk();
-  setInterval(tickMsk, 1000);
-
-  async function tryEd25519() {
-    try {
-      var kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-      var pub = new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey));
-      return {
-        alg: "Ed25519", kp: kp, pubRaw: pub,
-        privJwk: await crypto.subtle.exportKey("jwk", kp.privateKey),
-        pubJwk: await crypto.subtle.exportKey("jwk", kp.publicKey)
-      };
-    } catch (e) { return null; }
-  }
-  async function makeEcdsa() {
-    var kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-    var pub = new Uint8Array(await crypto.subtle.exportKey("spki", kp.publicKey));
-    return {
-      alg: "ECDSA-P256", kp: kp, pubRaw: pub,
-      privJwk: await crypto.subtle.exportKey("jwk", kp.privateKey),
-      pubJwk: await crypto.subtle.exportKey("jwk", kp.publicKey)
-    };
-  }
-  async function importIdentity(pack) {
-    if (pack.alg === "Ed25519") {
-      return {
-        alg: pack.alg,
-        privateKey: await crypto.subtle.importKey("jwk", pack.privJwk, { name: "Ed25519" }, true, ["sign"]),
-        publicKey: await crypto.subtle.importKey("jwk", pack.pubJwk, { name: "Ed25519" }, true, ["verify"]),
-        pubRaw: unb64(pack.pubB64), did: pack.did, created: pack.created
-      };
-    }
-    return {
-      alg: pack.alg,
-      privateKey: await crypto.subtle.importKey("jwk", pack.privJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
-      publicKey: await crypto.subtle.importKey("jwk", pack.pubJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]),
-      pubRaw: unb64(pack.pubB64), did: pack.did, created: pack.created
-    };
-  }
-  async function ensureIdentity(force) {
-    if (!force) {
-      try {
-        var raw = localStorage.getItem(LS_KEY);
-        if (raw) { identity = await importIdentity(JSON.parse(raw)); paintId(); return identity; }
-      } catch (e) {}
-    }
-    var made = (await tryEd25519()) || (await makeEcdsa());
-    var fp = hex((await sha256(made.pubRaw)).slice(0, 16));
-    var did = "did:aksi:" + (made.alg === "Ed25519" ? "ed25519" : "p256") + ":" + fp;
-    var pack = { alg: made.alg, did: did, pubB64: b64(made.pubRaw), privJwk: made.privJwk, pubJwk: made.pubJwk, created: Date.now() };
-    localStorage.setItem(LS_KEY, JSON.stringify(pack));
-    identity = {
-      alg: made.alg, privateKey: made.kp.privateKey, publicKey: made.kp.publicKey,
-      pubRaw: made.pubRaw, did: did, created: pack.created
-    };
-    paintId();
-    return identity;
-  }
-  function paintId() {
-    if (!identity) return;
-    $("didFull").textContent = identity.did;
-    $("alg").textContent = identity.alg + " · session";
-    $("didShort").textContent = identity.did.slice(0, 18) + "…";
-    $("fpShort").textContent = identity.did.split(":").pop().slice(0, 8).toUpperCase();
-  }
-  async function signBytes(data) {
-    var id = await ensureIdentity();
-    if (id.alg === "Ed25519") {
-      return new Uint8Array(await crypto.subtle.sign({ name: "Ed25519" }, id.privateKey, data));
-    }
-    return new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, id.privateKey, data));
-  }
-
-  function classify(text) {
-    var t = String(text || "").trim();
-    if (!t) return { kind: "EMPTY", gate: "BLOCK", reason: "пустой ввод" };
-    if (/удал(и|ить)|формат\s*диск|password|парол|bank|банк.*(перевод|счет)|rm\s+-rf|drop\s+table/i.test(t)) {
-      return { kind: "DANGEROUS", gate: "BLOCK", reason: "опасное действие / default-deny" };
-    }
-    var math = t.match(/^\s*(\d+(?:\.\d+)?)\s*([+\-*/×x])\s*(\d+(?:\.\d+)?)\s*(?=\s*([\d.]+))?\s*$/i);
-    if (math) {
-      var a = parseFloat(math[1]), b = parseFloat(math[3]), op = math[2], claim = math[4] != null ? parseFloat(math[4]) : null;
-      var r = op === "+" || op === "-" ? (op === "+" ? a + b : a - b)
-        : (op === "*" || op === "×" || op === "x" || op === "X" ? a * b : (b === 0 ? NaN : a / b));
-      if (claim != null && isFinite(r) && Math.abs(r - claim) < 1e-9)
-        return { kind: "MATH_OK", gate: "ALLOW", reason: "арифметика сверена", value: r };
-      if (claim == null && isFinite(r))
-        return { kind: "MATH_CALC", gate: "ALLOW", reason: "вычислено локально", value: r };
-      return { kind: "MATH_BAD", gate: "BLOCK", reason: "неверный результат", value: r };
-    }
-    if (/^(возможно|вероятно|кажется|допустим|might|maybe)/i.test(t))
-      return { kind: "HYPOTHESIS", gate: "REVIEW", reason: "гипотеза без доказательств" };
-    if (/доказал|доказано|открыл теорему|riemann|риман/i.test(t) && !/источник|arxiv|doi|lean/i.test(t))
-      return { kind: "UNGROUNDED_CLAIM", gate: "REVIEW", reason: "сильное утверждение без источника" };
-    if (/кто\s*ты|что\s*ты|акси|aksi/i.test(t))
-      return { kind: "IDENTITY", gate: "ALLOW", reason: "идентичность продукта" };
-    return { kind: "CLAIM", gate: "ALLOW", reason: "утверждение с меткой CLAIM" };
-  }
-  function teamTrace(c) {
-    return ["Chief: оценить ввод", "Research: " + c.kind, "Critic: " + c.reason, "Permit: " + c.gate].join("\n");
-  }
-  async function buildReceipt(input, decision) {
-    var id = await ensureIdentity();
-    var body = {
-      protocol: PROTOCOL, version: VERSION,
-      query: String(input).slice(0, 2000),
-      decision: decision.gate, kind: decision.kind, reason: decision.reason,
-      value: decision.value != null ? decision.value : null,
-      engine: "AKSI-One", did: id.did, alg: id.alg,
-      timestamp: new Date().toISOString(), prev: null
-    };
-    try {
-      var arr = JSON.parse(localStorage.getItem(LS_RECEIPTS) || "[]");
-      if (arr.length) body.prev = arr[arr.length - 1].receipt_id || null;
-    } catch (e) {}
-    var payload = canon(body);
-    body.receipt_id = hex(await sha256(payload));
-    body.signature = b64(await signBytes(utf8(payload)));
-    body.public_key = b64(id.pubRaw);
-    try {
-      var chain = JSON.parse(localStorage.getItem(LS_RECEIPTS) || "[]");
-      chain.push({ receipt_id: body.receipt_id, decision: body.decision, ts: body.timestamp });
-      localStorage.setItem(LS_RECEIPTS, JSON.stringify(chain.slice(-50)));
-    } catch (e) {}
-    return body;
-  }
-  function renderOut(decision, receipt, answerText) {
-    var el = $("out");
-    el.className = "msg " + (decision.gate === "ALLOW" ? "allow" : decision.gate === "BLOCK" ? "block" : "");
-    var pill = decision.gate === "ALLOW" ? "ok" : decision.gate === "BLOCK" ? "bad" : "warn";
-    el.innerHTML =
-      '<span class="pill ' + pill + '">' + decision.gate + "</span> <strong>" + (answerText || decision.reason) + "</strong>" +
-      '<div class="meta">kind=' + decision.kind + " · " + receipt.receipt_id.slice(0, 16) + "… · " + receipt.alg + "</div>" +
-      '<code class="block">' + JSON.stringify(receipt) + "</code>";
-    $("verifyBox").value = JSON.stringify(receipt, null, 2);
-  }
-
-  $("btnRun").onclick = async function () {
-    var text = $("claim").value;
-    var decision = classify(text);
-    $("trace").textContent = teamTrace(decision);
-    var answer =
-      decision.kind === "MATH_CALC" || decision.kind === "MATH_OK" ? ("Результат: " + decision.value) :
-      decision.kind === "IDENTITY" ? "АКСИ — gate + cryptographic receipt. technology_serves_human." :
-      decision.gate === "BLOCK" ? ("BLOCK: " + decision.reason) :
-      decision.gate === "REVIEW" ? ("REVIEW: " + decision.reason) :
-      ("CLAIM · " + decision.reason);
-    try { renderOut(decision, await buildReceipt(text, decision), answer); }
-    catch (e) { $("out").textContent = "Ошибка: " + (e.message || e); }
-  };
-  $("btnClear").onclick = function () {
-    $("claim").value = ""; $("trace").textContent = "Ожидание…";
-    $("out").className = "msg"; $("out").textContent = "Ещё нет receipt.";
-  };
-  $("btnRotate").onclick = function () { ensureIdentity(true); };
-  $("btnExportPub").onclick = async function () {
-    var id = await ensureIdentity();
-    $("verifyBox").value = JSON.stringify({ did: id.did, alg: id.alg, public_key: b64(id.pubRaw) }, null, 2);
-    go("decide");
-  };
-  $("btnVerify").onclick = async function () {
-    var out = $("verifyOut");
-    try {
-      var receipt = JSON.parse($("verifyBox").value || "{}");
-      if (!receipt.signature || !receipt.public_key) {
-        out.className = "msg block"; out.textContent = "Нет signature / public_key"; return;
-      }
-      var body = Object.assign({}, receipt);
-      var sig = unb64(receipt.signature);
-      var pubB = unb64(receipt.public_key);
-      delete body.signature;
-      var payload = canon(body);
-      var alg = receipt.alg || (identity && identity.alg) || "ECDSA-P256";
-      var ok;
-      if (alg === "Ed25519") {
-        var pk = await crypto.subtle.importKey("raw", pubB, { name: "Ed25519" }, true, ["verify"]);
-        ok = await crypto.subtle.verify({ name: "Ed25519" }, pk, sig, utf8(payload));
-      } else {
-        var pk2 = await crypto.subtle.importKey("spki", pubB, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
-        ok = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pk2, sig, utf8(payload));
-      }
-      out.className = "msg " + (ok ? "allow" : "block");
-      out.innerHTML = ok
-        ? '<span class="pill ok">VALID</span> decision=' + receipt.decision
-        : '<span class="pill bad">INVALID</span>';
-    } catch (e) {
-      out.className = "msg block"; out.textContent = "Ошибка: " + (e.message || e);
-    }
-  };
-  $("btnDidGen").onclick = async function () {
-    var name = ($("agentName").value || "").trim() || "agent";
-    var h = await sha256(name + "|" + Date.now() + "|" + Math.random());
-    var fp = hex(h.slice(0, 16));
-    var did = "did:aksi:ed25519:" + fp;
-    var id = await ensureIdentity();
-    var cert = canon({ did: did, name: name, issuer: id.did, ts: new Date().toISOString() });
-    $("passportOut").textContent = JSON.stringify({
-      did: did, name: name, fingerprint: fp, issuer: id.did,
-      certificate_sig: b64(await signBytes(utf8(cert)))
-    }, null, 2);
-  };
-
-  ensureIdentity(false).catch(function (e) {
-    $("didFull").textContent = "crypto: " + (e.message || e);
-  });
+(function(){
+"use strict";
+var LS_KEY="aksi_one_id_v1",LS_RECEIPTS="aksi_one_receipts_v1",PROTOCOL="aksi-decision-receipt",VERSION="1.0.1-one",identity=null;
+function $(id){return document.getElementById(id)}
+function utf8(s){return new TextEncoder().encode(String(s))}
+function b64(buf){var u=buf instanceof ArrayBuffer?new Uint8Array(buf):buf,s="",i;for(i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function unb64(s){var bin=atob(s),u=new Uint8Array(bin.length),i;for(i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u}
+function hex(u){return Array.from(u).map(function(x){return("0"+x.toString(16)).slice(-2)}).join("")}
+async function sha256(data){var buf=typeof data==="string"?utf8(data):data;return new Uint8Array(await crypto.subtle.digest("SHA-256",buf))}
+function canon(obj){if(obj===null||typeof obj!=="object")return JSON.stringify(obj);if(Array.isArray(obj))return"["+obj.map(canon).join(",")+"]";var keys=Object.keys(obj).filter(function(k){return obj[k]!==undefined}).sort();return"{"+keys.map(function(k){return JSON.stringify(k)+":"+canon(obj[k])}).join(",")+"}"}
+function go(name){document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("on",p.getAttribute("data-panel")===name)});document.querySelectorAll(".bnav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-go")===name)});try{history.replaceState(null,"","#"+name)}catch(e){}window.scrollTo(0,0)}
+document.querySelectorAll(".bnav button").forEach(function(b){b.addEventListener("click",function(){go(b.getAttribute("data-go"))})});
+$("goDecide").onclick=function(){go("decide")};$("goId").onclick=function(){go("id")};
+var hash=(location.hash||"").replace("#","");if(hash&&document.querySelector('[data-panel="'+hash+'"]'))go(hash);
+function tickMsk(){try{$("msk").textContent=new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit"})+" МСК"}catch(e){$("msk").textContent=new Date().toLocaleTimeString("ru-RU")}}
+tickMsk();setInterval(tickMsk,1000);
+async function tryEd25519(){try{var kp=await crypto.subtle.generateKey({name:"Ed25519"},true,["sign","verify"]);var pub=new Uint8Array(await crypto.subtle.exportKey("raw",kp.publicKey));return{alg:"Ed25519",kp:kp,pubRaw:pub,privJwk:await crypto.subtle.exportKey("jwk",kp.privateKey),pubJwk:await crypto.subtle.exportKey("jwk",kp.publicKey)}}catch(e){return null}}
+async function makeEcdsa(){var kp=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign","verify"]);var pub=new Uint8Array(await crypto.subtle.exportKey("spki",kp.publicKey));return{alg:"ECDSA-P256",kp:kp,pubRaw:pub,privJwk:await crypto.subtle.exportKey("jwk",kp.privateKey),pubJwk:await crypto.subtle.exportKey("jwk",kp.publicKey)}}
+async function importIdentity(pack){if(pack.alg==="Ed25519")return{alg:pack.alg,privateKey:await crypto.subtle.importKey("jwk",pack.privJwk,{name:"Ed25519"},true,["sign"]),publicKey:await crypto.subtle.importKey("jwk",pack.pubJwk,{name:"Ed25519"},true,["verify"]),pubRaw:unb64(pack.pubB64),did:pack.did,created:pack.created};return{alg:pack.alg,privateKey:await crypto.subtle.importKey("jwk",pack.privJwk,{name:"ECDSA",namedCurve:"P-256"},true,["sign"]),publicKey:await crypto.subtle.importKey("jwk",pack.pubJwk,{name:"ECDSA",namedCurve:"P-256"},true,["verify"]),pubRaw:unb64(pack.pubB64),did:pack.did,created:pack.created}}
+async function ensureIdentity(force){if(!force){try{var raw=localStorage.getItem(LS_KEY);if(raw){identity=await importIdentity(JSON.parse(raw));paintId();return identity}}catch(e){}}var made=(await tryEd25519())||(await makeEcdsa());var fp=hex((await sha256(made.pubRaw)).slice(0,16));var did="did:aksi:"+(made.alg==="Ed25519"?"ed25519":"p256")+":"+fp;var pack={alg:made.alg,did:did,pubB64:b64(made.pubRaw),privJwk:made.privJwk,pubJwk:made.pubJwk,created:Date.now()};localStorage.setItem(LS_KEY,JSON.stringify(pack));identity={alg:made.alg,privateKey:made.kp.privateKey,publicKey:made.kp.publicKey,pubRaw:made.pubRaw,did:did,created:pack.created};paintId();return identity}
+function paintId(){if(!identity)return;$("didFull").textContent=identity.did;$("alg").textContent=identity.alg+" · session";$("didShort").textContent=identity.did.slice(0,18)+"…";$("fpShort").textContent=identity.did.split(":").pop().slice(0,8).toUpperCase()}
+async function signBytes(data){var id=await ensureIdentity();if(id.alg==="Ed25519")return new Uint8Array(await crypto.subtle.sign({name:"Ed25519"},id.privateKey,data));return new Uint8Array(await crypto.subtle.sign({name:"ECDSA",hash:"SHA-256"},id.privateKey,data))}
+function classify(text){var t=String(text||"").trim();if(!t)return{kind:"EMPTY",gate:"BLOCK",reason:"пустой ввод"};if(/удал(и|ить)|формат\s*диск|password|парол|bank|банк.*(перевод|счет)|rm\s+-rf|drop\s+table/i.test(t))return{kind:"DANGEROUS",gate:"BLOCK",reason:"опасное действие / default-deny"};var math=t.match(/^\s*(\d+(?:\.\d+)?)\s*([+\-*/×x])\s*(\d+(?:\.\d+)?)\s*(?:=\s*([\d.]+))?\s*$/i);if(math){var a=parseFloat(math[1]),b=parseFloat(math[3]),op=math[2],claim=math[4]!=null?parseFloat(math[4]):null;var r=op==="+"||op==="-"?(op==="+"?a+b:a-b):(op==="*"||op==="×"||op==="x"||op==="X"?a*b:(b===0?NaN:a/b));if(claim!=null&&isFinite(r)&&Math.abs(r-claim)<1e-9)return{kind:"MATH_OK",gate:"ALLOW",reason:"арифметика сверена",value:r};if(claim==null&&isFinite(r))return{kind:"MATH_CALC",gate:"ALLOW",reason:"вычислено локально",value:r};return{kind:"MATH_BAD",gate:"BLOCK",reason:"неверный результат",value:r}}if(/^(возможно|вероятно|кажется|допустим|might|maybe)/i.test(t))return{kind:"HYPOTHESIS",gate:"REVIEW",reason:"гипотеза без доказательств"};if(/доказал|доказано|открыл теорему|riemann|риман/i.test(t)&&!/источник|arxiv|doi|lean/i.test(t))return{kind:"UNGROUNDED_CLAIM",gate:"REVIEW",reason:"сильное утверждение без источника"};if(/кто\s*ты|что\s*ты|акси|aksi/i.test(t))return{kind:"IDENTITY",gate:"ALLOW",reason:"идентичность"};return{kind:"CLAIM",gate:"ALLOW",reason:"CLAIM"}}
+function teamTrace(c){return["Chief: оценить","Research: "+c.kind,"Critic: "+c.reason,"Permit: "+c.gate].join("\n")}
+async function buildReceipt(input,decision){var id=await ensureIdentity();var body={protocol:PROTOCOL,version:VERSION,query:String(input).slice(0,2000),decision:decision.gate,kind:decision.kind,reason:decision.reason,value:decision.value!=null?decision.value:null,engine:"AKSI-One",did:id.did,alg:id.alg,timestamp:new Date().toISOString(),prev:null};try{var arr=JSON.parse(localStorage.getItem(LS_RECEIPTS)||"[]");if(arr.length)body.prev=arr[arr.length-1].receipt_id||null}catch(e){}var payload=canon(body);body.receipt_id=hex(await sha256(payload));body.signature=b64(await signBytes(utf8(payload)));body.public_key=b64(id.pubRaw);try{var chain=JSON.parse(localStorage.getItem(LS_RECEIPTS)||"[]");chain.push({receipt_id:body.receipt_id,decision:body.decision,ts:body.timestamp});localStorage.setItem(LS_RECEIPTS,JSON.stringify(chain.slice(-50)))}catch(e){}return body}
+function renderOut(decision,receipt,answerText){var el=$("out");el.className="msg "+(decision.gate==="ALLOW"?"allow":decision.gate==="BLOCK"?"block":"");var pill=decision.gate==="ALLOW"?"ok":decision.gate==="BLOCK"?"bad":"warn";el.innerHTML='<span class="pill '+pill+'">'+decision.gate+"</span> <strong>"+(answerText||decision.reason)+"</strong><div class=\"meta\">"+decision.kind+" · "+receipt.receipt_id.slice(0,16)+"…</div><code class=\"block\">"+JSON.stringify(receipt)+"</code>";$("verifyBox").value=JSON.stringify(receipt,null,2)}
+$("btnRun").onclick=async function(){var text=$("claim").value;var decision=classify(text);$("trace").textContent=teamTrace(decision);var answer=decision.kind==="MATH_CALC"||decision.kind==="MATH_OK"?("Результат: "+decision.value):decision.kind==="IDENTITY"?"АКСИ — gate + receipt. technology_serves_human.":decision.gate==="BLOCK"?("BLOCK: "+decision.reason):decision.gate==="REVIEW"?("REVIEW: "+decision.reason):("CLAIM · "+decision.reason);try{renderOut(decision,await buildReceipt(text,decision),answer)}catch(e){$("out").textContent="Ошибка: "+(e.message||e)}};
+$("btnClear").onclick=function(){$("claim").value="";$("trace").textContent="Ожидание…";$("out").className="msg";$("out").textContent="Ещё нет receipt."};
+$("btnRotate").onclick=function(){ensureIdentity(true)};
+$("btnExportPub").onclick=async function(){var id=await ensureIdentity();$("verifyBox").value=JSON.stringify({did:id.did,alg:id.alg,public_key:b64(id.pubRaw)},null,2);go("decide")};
+$("btnVerify").onclick=async function(){var out=$("verifyOut");try{var receipt=JSON.parse($("verifyBox").value||"{}");if(!receipt.signature||!receipt.public_key){out.className="msg block";out.textContent="Нет signature";return}var body=Object.assign({},receipt);var sig=unb64(receipt.signature);var pubB=unb64(receipt.public_key);delete body.signature;var payload=canon(body);var alg=receipt.alg||(identity&&identity.alg)||"ECDSA-P256";var ok;if(alg==="Ed25519"){var pk=await crypto.subtle.importKey("raw",pubB,{name:"Ed25519"},true,["verify"]);ok=await crypto.subtle.verify({name:"Ed25519"},pk,sig,utf8(payload))}else{var pk2=await crypto.subtle.importKey("spki",pubB,{name:"ECDSA",namedCurve:"P-256"},true,["verify"]);ok=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},pk2,sig,utf8(payload))}out.className="msg "+(ok?"allow":"block");out.innerHTML=ok?'<span class="pill ok">VALID</span> '+receipt.decision:'<span class="pill bad">INVALID</span>'}catch(e){out.className="msg block";out.textContent="Ошибка: "+(e.message||e)}};
+$("btnDidGen").onclick=async function(){var name=($("agentName").value||"").trim()||"agent";var h=await sha256(name+"|"+Date.now()+"|"+Math.random());var fp=hex(h.slice(0,16));var did="did:aksi:ed25519:"+fp;var id=await ensureIdentity();var cert=canon({did:did,name:name,issuer:id.did,ts:new Date().toISOString()});$("passportOut").textContent=JSON.stringify({did:did,name:name,fingerprint:fp,issuer:id.did,certificate_sig:b64(await signBytes(utf8(cert)))},null,2)};
+ensureIdentity(false).catch(function(e){$("didFull").textContent="crypto: "+(e.message||e)});
 })();
 </script>
 </body>
