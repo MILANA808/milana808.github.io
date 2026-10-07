@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Gate</title>
+<meta name="theme-color" content="#05070c"/>
+<style>
+body{margin:0;background:#05070c;color:#f1f5ff;font:15px/1.5 system-ui;}
+.s{max-width:720px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.5rem}.g{background:linear-gradient(100deg,#2dd4bf,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.p{color:#8b95a8;margin:10px 0 18px}
+.grid{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+button.sc{text-align:left;border:1px solid #1a2233;background:#0e131c;color:inherit;border-radius:12px;padding:12px;cursor:pointer;font:inherit}
+button.sc.d strong{color:#fda4af}
+.v{display:none;margin-top:14px;padding:14px;border-radius:14px;border:1px solid #1a2233}
+.v.show{display:block}.v.a{border-color:#34d399;background:rgba(52,211,153,.1)}.v.b{border-color:#fb7185;background:rgba(251,113,133,.1)}
+.badge{font-weight:800;letter-spacing:.1em;font-size:12px}.v.a .badge{color:#34d399}.v.b .badge{color:#fb7185}
+pre{background:#070a10;padding:10px;border-radius:8px;overflow:auto;font-size:11px;color:#cbd5e1}
+a{color:#2dd4bf}
+</style></head>
+<body>
+<div class="s">
+<p><a href="/super/">← Super Cluster</a></p>
+<h1>АКСИ <span class="g">Gate</span></h1>
+<p class="p">Допуск действия: ALLOW / BLOCK + ECDSA-чек. Offline.</p>
+<div class="grid">
+<button type="button" class="sc" data-a="report" data-p="Отчёт">report · ALLOW</button>
+<button type="button" class="sc" data-a="plan" data-p="План">plan · ALLOW</button>
+<button type="button" class="sc d" data-a="spend" data-p="Платёж">spend · BLOCK</button>
+<button type="button" class="sc d" data-a="delete_all" data-p="Стереть">delete_all · BLOCK</button>
+<button type="button" class="sc d" data-a="exfiltrate" data-p="Утечка">exfiltrate · BLOCK</button>
+<button type="button" class="sc" data-a="observe" data-p="Наблюдение">observe · ALLOW</button>
+</div>
+<div class="v" id="v"><div class="badge" id="b">—</div><h3 id="t"></h3><p id="w"></p><pre id="r"></pre>
+<button type="button" id="chk" style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid #1a2233;background:0;color:inherit;cursor:pointer">Проверить цепочку</button>
+<p id="n" style="font-size:13px;color:#8b95a8"></p></div>
+</div>
+<script src="/aksi-exocortex.js?v=1"></script>
+<script>
+(function(){
+var X=window.AKSI_EXOCORTEX,exo=null,last=null;
+async function boot(){
+if(!X)return null;if(!exo){exo=new X.Exocortex({mandate:{allowed_actions:["observe","recall","plan","report","quantum_seed"],denied_actions:["spend","delete_all","exfiltrate"],max_steps:128}});await exo.initKeys();exo.setGoal("Служить человеку");}return exo;}
+async function run(a,p){
+var e=await boot();if(!e)return;var s=await e.step(a,p||a);last=s.receipt;var ok=s.status==="ALLOW";var v=document.getElementById("v");v.className="v show "+(ok?"a":"b");
+document.getElementById("b").textContent=ok?"ALLOW":"BLOCK";
+document.getElementById("t").textContent=ok?"Разрешено":"Заблокировано";
+document.getElementById("w").textContent=(s.permit&&s.permit.reason)||s.status;
+document.getElementById("r").textContent=JSON.stringify({id:s.receipt&&s.receipt.id,action:s.receipt&&s.receipt.action,permit:s.permit,sig:s.receipt&&s.receipt.sig&&String(s.receipt.sig).slice(0,40)+"…"},null,2);
+}
+document.querySelectorAll(".sc").forEach(function(btn){btn.onclick=function(){run(btn.getAttribute("data-a"),btn.getAttribute("data-p"));};});
+document.getElementById("chk").onclick=async function(){if(!exo)return;var r=await exo.verifyChain();document.getElementById("n").textContent=r&&r.ok?"✓ цепочка "+r.count:"✗";};
+boot();
+})();
+</script></body></html>
