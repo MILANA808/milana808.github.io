@@ -1,12 +1,16 @@
-/** AKSI Super Mind v3.5 — cleaner Russian answers: wiki + KB + math + WebLLM */
+/** AKSI Super Mind v3.6 — useful Russian answers: math + KB + filtered wiki + Neuro
+ * Offline-first. No junk wiki. aksilove@internet.ru
+ */
 (function (G) {
   "use strict";
-  var VERSION = "mind-3.5.0";
+  var VERSION = "mind-3.6.0";
+
   function hash(s) {
     var h = 2166136261 >>> 0, t = String(s), i;
     for (i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
     return h >>> 0;
   }
+
   function tryMath(q) {
     var s = String(q).toLowerCase().replace(/,/g, ".").replace(/\s+/g, " ").trim();
     var m, n, r, x, p, base, v, expr, val;
@@ -14,8 +18,10 @@
     if (m) {
       n = parseFloat(m[1] || m[2] || m[3] || m[4]); r = Math.sqrt(n);
       return { ok: true, value: [r, -r], steps: [
-        "Дано: x² = " + n + ".", "Тогда |x| = √" + n + " = " + r + ".",
-        "Корни: x = " + r + " и x = " + (-r) + ".", "Проверка: (" + r + ")² = " + (r * r) + "."
+        "Дано: x² = " + n + ".",
+        "Тогда |x| = √" + n + " = " + r + ".",
+        "Корни: x = " + r + " и x = " + (-r) + ".",
+        "Проверка: (" + r + ")² = " + (r * r) + "."
       ]};
     }
     m = s.match(/(?:корень|sqrt)\s*(?:из\s*)?([0-9.]+)/i);
@@ -40,57 +46,76 @@
     }
     return null;
   }
+
   var KB = [
-    { re: /привет|здравствуй|добрый\s*(день|вечер)/i, title: "Приветствие",
-      text: "Привет. Я АКСИ — агент на Super-кластере. Спросите задачу: посчитать, объяснить термин, или загрузите WebLLM для живого диалога." },
-    { re: /что\s*умеешь|твои\s*возможн|что\s*ты\s*можешь/i, title: "Возможности",
-      text: "Считаю примеры, объясняю темы из базы (Permit, кванты, ИИ), подтягиваю факты из Википедии, при WebGPU — отвечаю локальной LLM. Каждый ответ проходит quantum → mind → Permit." },
-    { re: /как\s*работа/i, title: "Как работаю",
-      text: "Запрос попадает в Super Fabric: план, quantum-сид, вычисления, Mind или WebLLM, затем Permit и чек. Это не облачный датацентр — кластер симулируется в вашем браузере." },
+    { re: /привет|здравствуй|добрый\s*(день|вечер)|hello|hi\b/i, title: "Приветствие",
+      text: "Привет. Я АКСИ — локальный агент Decision Integrity. Считаю, объясняю, пропускаю ответы через Gate (ALLOW/BLOCK) и quantum-seed. Сервер не обязателен." },
+    { re: /что\s*умеешь|твои\s*возможн|что\s*ты\s*можешь|help|помощь/i, title: "Возможности",
+      text: "1) Математика на устройстве. 2) Локальная база (Permit, кванты, ИИ). 3) При WebGPU — WebLLM. 4) Gate + receipt на каждый ответ. 5) Cluster 16×4 в браузере. Спросите «12*12», «что такое Permit», «почему небо голубое»." },
+    { re: /как\s*работа|как\s*ты\s*работа/i, title: "Как работаю",
+      text: "Запрос → Gate (вероятность допуска) → Math/Neuro/Mind/WebLLM → quantum-метка → ответ. Всё в браузере. Нет обязательного облака." },
+    { re: /\bакси\b|aksi|кто\s*ты|что\s*ты\s*такое|представ/i, title: "АКСИ",
+      text: "АКСИ — offline-first Decision Integrity Runtime: quantum-seed, Neuro, Mind, опциональный WebLLM, Permit/Gate, подписанные receipts. Не чатбот-обёртка, а слой допуска и доказательств. Контакт: aksilove@internet.ru" },
+    { re: /permit|пермит|допуск|gate|гейт/i, title: "Permit / Gate",
+      text: "Permit — default-deny: действие или ответ получают ALLOW / REVIEW / BLOCK с вероятностью и receipt-hash. Это ядро продукта для аудита и агентов." },
     { re: /суперпозиц/i, title: "Суперпозиция",
-      text: "Суперпозиция — описание квантовой системы несколькими состояниями сразу, пока не сделано измерение. Кубит: |ψ⟩=α|0⟩+β|1⟩, вероятности |α|² и |β|²." },
+      text: "Суперпозиция — система одновременно в нескольких состояниях до измерения. Кубит: |ψ⟩ = α|0⟩ + β|1⟩, вероятности |α|² и |β|²." },
     { re: /кубит|qubit/i, title: "Кубит",
-      text: "Кубит хранит α|0⟩+β|1⟩. n кубитов дают 2ⁿ амплитуд. Super fabric использует 4-кубитный сид." },
-    { re: /permit|пермит|допуск/i, title: "Permit",
-      text: "Permit — default-deny: действие только после ALLOW. При ALLOW выдаётся receipt." },
-    { re: /экзокортекс|exocortex/i, title: "Экзокортекс",
-      text: "Экзокортекс АКСИ: вектор S, цель, опыт, Permit, ECDSA-цепочка чеков." },
-    { re: /\bакси\b|aksi|кто ты|что ты/i, title: "АКСИ",
-      text: "АКСИ — offline-first контур: Super, quantum seed, Mind/WebLLM, Permit, чеки." },
+      text: "Кубит хранит α|0⟩+β|1⟩. n кубитов → 2ⁿ амплитуд. В АКСИ — 6-кубитный statevector в JS (64 состояния)." },
     { re: /энтропи/i, title: "Энтропия",
-      text: "S=−Σ pᵢ log₂ pᵢ. Высокая энтропия — больше неопределённости до коллапса." },
+      text: "S = −Σ pᵢ log₂ pᵢ. Высокая S — больше неопределённости до коллапса. На экране Super видна энтропия после pulse." },
     { re: /коллапс|измерен/i, title: "Коллапс",
-      text: "Коллапс — выбор базиса с вероятностью |амплитуда|²." },
-    { re: /суперкомпьютер|fabric|gpu/i, title: "Super Fabric",
-      text: "Виртуальный кластер в браузере: jobs, ноды, matmul, quantum, mind." },
+      text: "Коллапс — выбор базисного состояния с вероятностью |амплитуда|². В UI это битовая строка |bits⟩." },
+    { re: /экзокортекс|exocortex/i, title: "Экзокортекс",
+      text: "Экзокортекс АКСИ: локальная память сессии, цель, опыт, цепочка Permit-чеков." },
+    { re: /суперкомпьютер|fabric|кластер/i, title: "Super Fabric",
+      text: "Виртуальный кластер 16×4 в браузере: jobs, ноды, scheduler, quantum, mind. Не заменяет реальный HPC — демонстрирует pipeline агента." },
     { re: /webllm|веб\s*ллм|языков\w+\s*модел/i, title: "WebLLM",
-      text: "WebLLM — сжатые веса (q4) модели в браузере через WebGPU." },
+      text: "WebLLM — квантованные модели (q4) через WebGPU в браузере. На телефоне — 0.5B/1B. Без WebGPU работают Neuro и Mind." },
     { re: /небо.*голуб|голуб.*небо|рассеян.*рэле|rayleigh/i, title: "Почему небо голубое",
-      text: "Небо голубое из‑за рассеяния Рэлея: синяя часть спектра рассеивается сильнее." },
+      text: "Из‑за рэлеевского рассеяния: короткие (синие) волны рассеиваются в атмосфере сильнее длинных. Поэтому днём небо кажется голубым." },
     { re: /фотосинтез/i, title: "Фотосинтез",
-      text: "Фотосинтез: свет + CO₂ + H₂O → сахар + O₂." },
+      text: "Свет + CO₂ + H₂O → углеводы + O₂. Хлорофилл поглощает свет; энергия идёт на синтез органики." },
     { re: /относительн.*эйнштейн|теория относительн/i, title: "Теория относительности",
-      text: "СТО: скорость света постоянна. ОТО: гравитация как искривление пространства-времени." },
+      text: "СТО: c постоянна, время и длина зависят от системы отсчёта. ОТО: гравитация — кривизна пространства-времени." },
     { re: /днк|генетич.*код/i, title: "ДНК",
-      text: "ДНК — двойная спираль (A,T,G,C), носитель генетической информации." },
-    { re: /искусственн.*интеллект|\bии\b|\bai\b/i, title: "Искусственный интеллект",
-      text: "ИИ — системы для языка, распознавания, планирования. АКСИ добавляет допуск и чеки." },
+      text: "ДНК — двойная спираль (A–T, G–C), носитель генетической информации клеток." },
+    { re: /искусственн.*интеллект|\bии\b(?!\w)|\bai\b/i, title: "Искусственный интеллект",
+      text: "ИИ — алгоритмы для языка, зрения, планирования. АКСИ добавляет слой допуска (Gate) и проверяемые receipts, а не только генерацию текста." },
     { re: /блокчейн|bitcoin|биткоин/i, title: "Блокчейн",
-      text: "Блокчейн — цепочка блоков, каждый ссылается на хэш предыдущего." }
+      text: "Цепочка блоков с хэшами: история транзакций устойчива к незаметной подмене. Биткоин — первая массовая реализация." },
+    { re: /квантов\w+\s*(компьютер|вычисл)|quantum\s*comput/i, title: "Квантовые вычисления",
+      text: "Используют суперпозицию и запутанность. Полезны для отдельных задач (факторизация, симуляция). АКСИ симулирует малый statevector локально." },
+    { re: /безопасн|security|ciso|комплаенс|аудит/i, title: "Безопасность решений",
+      text: "Ценность АКСИ для мира: не «ещё LLM», а Decision Integrity — каждый ответ/действие с gate, вероятностью и receipt для аудита агентов." },
+    { re: /запомни|научи|память/i, title: "Память",
+      text: "Факты можно учить локально (запомни: …) в других поверхностях АКСИ. Super использует Neuro SEED и session history в браузере." },
+    { re: /контакт|связ|email|почта/i, title: "Контакт",
+      text: "Публичный контакт автора: aksilove@internet.ru · X @AKSILOVE" }
   ];
+
   function extractKeys(q) {
-    var stop = /^(и|в|на|по|что|как|это|для|или|при|про|не|ли|же|бы|от|до|из|за|со|об|the|a|an|is|are|what|how|why|who|can|does)$/i;
+    var stop = /^(и|в|на|по|что|как|это|для|или|при|про|не|ли|же|бы|от|до|из|за|со|об|кто|ты|the|a|an|is|are|what|how|why|who|can|does)$/i;
     return String(q).toLowerCase().split(/[^a-zа-яё0-9]+/i).filter(function (w) {
       return w.length > 2 && !stop.test(w);
     }).slice(0, 16);
   }
+
   function matchKB(q) {
     var out = [];
     KB.forEach(function (t) { if (t.re.test(q)) out.push(t); });
     return out;
   }
+
   function neuroHit(q) {
     try {
+      if (G.AKSI_NEURO && typeof G.AKSI_NEURO.think === "function") {
+        var n = G.AKSI_NEURO.think(q);
+        if (n && n.mode !== "fallback" && (Number(n.score) || 0) >= 0.45) {
+          var t = String(n.answer || n.text || "").trim();
+          if (t.length > 8) return t.slice(0, 1200);
+        }
+      }
       if (G.AKSI_NEURO && typeof G.AKSI_NEURO.query === "function") {
         var r = G.AKSI_NEURO.query(q);
         if (r && (r.answer || r.text)) return String(r.answer || r.text).slice(0, 1200);
@@ -98,16 +123,19 @@
     } catch (e) {}
     return null;
   }
+
   function relevance(keys, text) {
-    if (!text) return 0;
+    if (!text || !keys.length) return 0;
     var t = String(text).toLowerCase(), hit = 0, i;
     for (i = 0; i < keys.length; i++) if (t.indexOf(keys[i]) >= 0) hit++;
-    return keys.length ? hit / keys.length : 0;
+    return hit / keys.length;
   }
+
   async function wikiFacts(q) {
     var keys = extractKeys(q);
-    if (!keys.length) return null;
-    var query = keys.slice(0, 5).join(" ");
+    if (keys.length < 1) return null;
+    if (/^(кто ты|привет|hello|что умеешь|как дела)[\s?!.]*$/i.test(String(q).trim())) return null;
+    var query = keys.slice(0, 4).join(" ");
     try {
       var searchUrl = "https://ru.wikipedia.org/w/api.php?action=query&list=search&srsearch=" +
         encodeURIComponent(query) + "&srlimit=5&format=json&origin=*";
@@ -125,12 +153,12 @@
         if (!sum || !sum.extract || sum.type === "disambiguation") continue;
         score = relevance(keys, (sum.title || "") + " " + sum.extract);
         sc = relevance(keys, sum.title || "");
-        score = score + sc * 0.5;
-        if (score >= 0.15 && (!best || score > best.score)) {
+        score = score + sc * 0.8;
+        if (score >= 0.35 && (!best || score > best.score)) {
           best = {
             score: score,
             title: sum.title || title,
-            extract: String(sum.extract).slice(0, 900),
+            extract: String(sum.extract).slice(0, 700),
             url: (sum.content_urls && sum.content_urls.desktop && sum.content_urls.desktop.page) || null
           };
         }
@@ -138,18 +166,15 @@
       return best;
     } catch (e) { return null; }
   }
+
   function buildAnswer(q, quantum, extra) {
     extra = extra || {};
-    var keys = extractKeys(q);
-    var bits = quantum && quantum.bits ? quantum.bits : "----";
-    var seed = quantum && quantum.seed ? quantum.seed : hash(q);
-    var path = seed % 5;
+    var bits = quantum && quantum.bits ? quantum.bits : "------";
     var math = tryMath(q);
     var kb = matchKB(q);
     var lines = [];
     var source = extra.source || "mind";
-    lines.push("—");
-    lines.push("");
+
     if (math && math.ok) {
       lines.push("Математика");
       math.steps.forEach(function (s) { lines.push("• " + s); });
@@ -157,26 +182,48 @@
       lines.push("");
     }
     if (kb.length) {
-      kb.forEach(function (t) { lines.push(t.title); lines.push(t.text); lines.push(""); });
+      kb.forEach(function (t) {
+        lines.push(t.title);
+        lines.push(t.text);
+        lines.push("");
+      });
     }
-    if (extra.neuro) { lines.push("Локальная память / Neuro"); lines.push(extra.neuro); lines.push(""); }
-    if (extra.wiki) {
-      lines.push("Факт из открытых источников (Википедия)");
+    if (extra.neuro && !kb.length) {
+      lines.push(extra.neuro);
+      lines.push("");
+    }
+    if (extra.wiki && extra.wiki.score >= 0.35) {
+      lines.push("Справка (Википедия)");
       lines.push(extra.wiki.title + ": " + extra.wiki.extract);
-      if (extra.wiki.url) lines.push("Источник: " + extra.wiki.url);
+      if (extra.wiki.url) lines.push(extra.wiki.url);
       lines.push("");
     }
     if (!(math && math.ok) && !kb.length && !extra.wiki && !extra.neuro) {
-      lines.push("Пока нет точного факта в локальной базе. Сформулируйте конкретнее или загрузите WebLLM для свободного ответа.");
-      lines.push("Примеры: «12*12», «что такое Permit?», «почему небо голубое?».");
+      lines.push("Локально точного факта нет. Уточните вопрос или нажмите «Загрузить WebLLM» (нужен WebGPU).");
+      lines.push("Работают всегда: математика, Gate, quantum-метка, база АКСИ.");
       lines.push("");
     }
     lines.push("· " + source + " · |" + bits + "⟩ · " + VERSION);
-    return { text: lines.join("\n"), math: math, topics: kb.map(function (t) { return t.title; }), keys: keys, path: path, source: source, wiki: extra.wiki || null };
+    return {
+      text: lines.join("\n").trim(),
+      math: math,
+      topics: kb.map(function (t) { return t.title; }),
+      source: source,
+      wiki: extra.wiki || null
+    };
   }
+
   async function answer(q, quantum) {
     q = String(q || "").trim();
-    if (!q) return { text: "Напишите вопрос — отвечу по-русски через Super.", source: "mind", path: 0 };
+    if (!q) return { text: "Напишите вопрос — отвечу по-русски.", source: "mind" };
+
+    var kb = matchKB(q);
+    var math0 = tryMath(q);
+
+    if ((math0 && math0.ok) || kb.length) {
+      return buildAnswer(q, quantum, { source: math0 && math0.ok ? "mind+math" : "mind+kb" });
+    }
+
     var W = G.AKSI_WEBLLM;
     var llmOn = false;
     try {
@@ -185,9 +232,10 @@
         else if (W.status) llmOn = !!(W.status().ready);
       }
     } catch (e) { llmOn = false; }
+
     if (llmOn) {
       try {
-        var sys = "Ты АКСИ. Отвечай только на русском, полно и понятно. Если не знаешь — скажи прямо. Не выдумывай источники.";
+        var sys = "Ты АКСИ — локальный Decision Integrity агент. Отвечай по-русски ясно и по делу. Не выдумывай источники.";
         var r = await Promise.race([
           W.complete(q, { system: sys, max_tokens: 450 }),
           new Promise(function (resolve) { setTimeout(function () { resolve({ text: "" }); }, 25000); })
@@ -195,30 +243,38 @@
         var text = (r && r.text) ? String(r.text).trim() : "";
         if (text.length > 25) {
           return {
-            text: text + "\n\n— через Super · WebLLM · |" + (quantum && quantum.bits || "----") + "⟩ —",
+            text: text + "\n\n· webllm · |" + (quantum && quantum.bits || "------") + "⟩ · " + VERSION,
             source: "webllm",
-            path: (quantum && quantum.seed ? quantum.seed : hash(q)) % 5,
             math: tryMath(q)
           };
         }
       } catch (e) {}
     }
+
     var neuro = neuroHit(q);
-    var math0 = tryMath(q);
     var wiki = null;
-    if (!(math0 && math0.ok)) {
-      try {
-        wiki = await Promise.race([
-          wikiFacts(q),
-          new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 3500); })
-        ]);
-      } catch (e) { wiki = null; }
-    }
-    return buildAnswer(q, quantum, { neuro: neuro, wiki: wiki, source: wiki ? "mind+wiki" : (neuro ? "mind+neuro" : "mind") });
+    try {
+      wiki = await Promise.race([
+        wikiFacts(q),
+        new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 3200); })
+      ]);
+    } catch (e) { wiki = null; }
+
+    return buildAnswer(q, quantum, {
+      neuro: neuro,
+      wiki: wiki,
+      source: wiki ? "mind+wiki" : (neuro ? "mind+neuro" : "mind")
+    });
   }
+
   function synthesize(q, quantum) { return buildAnswer(q, quantum, { source: "mind" }); }
+
   G.AKSI_SUPER_MIND = {
-    version: VERSION, answer: answer, synthesize: synthesize,
-    tryMath: tryMath, wikiFacts: wikiFacts, extractKeys: extractKeys
+    version: VERSION,
+    answer: answer,
+    synthesize: synthesize,
+    tryMath: tryMath,
+    wikiFacts: wikiFacts,
+    extractKeys: extractKeys
   };
 })(typeof window !== "undefined" ? window : globalThis);
