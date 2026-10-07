@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ Диалог</title>
+<meta name="theme-color" content="#04060a"/>
+<style>
+body{margin:0;background:#04060a;color:#eef3fb;font:15px/1.45 system-ui,sans-serif}
+.app{max-width:720px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+header{padding:14px 16px;border-bottom:1px solid #1a2332}
+h1{margin:0;font-size:1.2rem}h1 span{color:#2dd4bf}.sub{font-size:12px;color:#8490a3;margin-top:4px}
+#feed{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:50vh}
+.msg{max-width:92%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word}
+.user{align-self:flex-end;background:#152033;border:1px solid #1a2332}
+.bot{align-self:flex-start;background:#0c111a;border:1px solid #1a2332}
+.sys{align-self:center;color:#8490a3;font-size:12px}
+.meta{display:block;margin-top:6px;font-size:10px;color:#8490a3}
+.composer{display:flex;gap:8px;padding:12px 16px 18px;border-top:1px solid #1a2332}
+input{flex:1;border:1px solid #1a2332;border-radius:10px;background:#0a0e16;color:#eef3fb;padding:12px;font:inherit}
+button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,#2dd4bf,#818cf8);color:#041016}
+button:disabled{opacity:.4}a{color:#2dd4bf}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<h1><span>АКСИ</span> Диалог</h1>
+<div class="sub">Offline chat · math · Mind · Neuro · <a href="/super/">Cluster</a></div>
+</header>
+<div id="feed"></div>
+<div class="composer">
+<input id="q" placeholder="Напишите сообщение…" autocomplete="off"/>
+<button type="button" id="send">Отправить</button>
+</div>
+</div>
+<script src="/aksi-neuro.js?v=10"></script>
+<script src="/aksi-knowledge.js?v=3"></script>
+<script src="/aksi-super-mind.js?v=6"></script>
+<script>
+(function(){
+var M=window.AKSI_SUPER_MIND, Neuro=window.AKSI_NEURO, Know=window.AKSI_KNOWLEDGE||window.AKSIKnowledge, busy=false;
+function add(role,text,meta){
+var d=document.createElement("div");d.className="msg "+role;
+d.appendChild(document.createTextNode(text||""));
+if(meta){var m=document.createElement("span");m.className="meta";m.textContent=meta;d.appendChild(m);}
+document.getElementById("feed").appendChild(d);
+document.getElementById("feed").scrollTop=1e9;
+}
+function neuroStrong(q){
+try{if(!Neuro||!Neuro.think)return null;var n=Neuro.think(q);
+if(!n||n.mode==="fallback"||(Number(n.score)||0)<0.45)return null;
+var t=String(n.answer||n.text||"").trim();return t.length>8?{text:t}:null;}catch(e){return null;}
+}
+async function answer(text){
+try{if(M&&M.tryMath){var math=M.tryMath(text);if(math&&math.ok){
+var mv=Array.isArray(math.value)?math.value.join(", "):String(math.value);
+var expl=(math.steps&&math.steps.join("\n"))||("Результат: "+mv);
+if(expl.indexOf(String(mv))<0)expl+="\nИтог: "+mv;return {text:expl,meta:"math"};}}}catch(e){}
+if(M&&M.answer){try{var a=await Promise.resolve(M.answer(text,{}));
+if(a&&a.text&&String(a.text).trim().length>8)return {text:String(a.text).trim(),meta:"mind · "+(a.source||"")};}catch(e){}}
+var nh=neuroStrong(text);if(nh)return {text:nh.text,meta:"neuro"};
+try{if(Know&&Know.search){var k=Know.search(text);if(k&&k.body)return {text:k.title+": "+k.body,meta:"knowledge"};}}catch(e){}
+return {text:"Попробуйте: кто ты · 12*12 · что такое Gate",meta:"hint"};
+}
+async function send(){
+var text=document.getElementById("q").value.trim();if(!text||busy)return;
+busy=true;document.getElementById("send").disabled=true;document.getElementById("q").value="";
+add("user",text);var out;try{out=await answer(text);}catch(e){out={text:String(e.message||e),meta:"error"};}
+add("bot",out.text||"—",out.meta||"");busy=false;document.getElementById("send").disabled=false;
+}
+document.getElementById("send").onclick=send;
+document.getElementById("q").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send();}});
+add("sys","Диалог готов. Напишите сообщение.");
+})();
+</script>
+</body>
+</html>
