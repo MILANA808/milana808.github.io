@@ -1,21 +1,24 @@
 /**
- * AKSI WebLLM v4.4 — stronger defaults, multi-turn agent context
+ * AKSI WebLLM v5.0 — stronger browser models (Qwen2.5-3B default desktop)
  * Not cloud-scale. Browser WebGPU quantized models.
  * aksilove@internet.ru
  */
 (function (G) {
   "use strict";
-  var VERSION = "4.4.0";
+  var VERSION = "5.0.0";
   var WEBLLM_VERSION = "0.2.79";
   var CDNS = [
     "https://cdn.jsdelivr.net/npm/@mlc-ai/web-llm@" + WEBLLM_VERSION + "/+esm",
     "https://esm.sh/@mlc-ai/web-llm@" + WEBLLM_VERSION
   ];
   var MODELS = [
-    { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B · mobile/desktop", mobile: true },
-    { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 0.5B · light mobile", mobile: true },
-    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · desktop", mobile: false },
-    { id: "Phi-3.5-mini-instruct-q4f16_1-MLC", label: "Phi 3.5 mini · heavy desktop", mobile: false }
+    { id: "Qwen2.5-3B-Instruct-q4f16_1-MLC", label: "Qwen2.5 3B · best desktop", mobile: false, tier: "top" },
+    { id: "Llama-3.2-3B-Instruct-q4f16_1-MLC", label: "Llama 3.2 3B · strong desktop", mobile: false, tier: "top" },
+    { id: "Phi-3.5-mini-instruct-q4f16_1-MLC", label: "Phi 3.5 mini · dense reasoning", mobile: false, tier: "top" },
+    { id: "Qwen2.5-1.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 1.5B · balanced", mobile: false, tier: "mid" },
+    { id: "SmolLM2-1.7B-Instruct-q4f16_1-MLC", label: "SmolLM2 1.7B · compact", mobile: false, tier: "mid" },
+    { id: "Llama-3.2-1B-Instruct-q4f16_1-MLC", label: "Llama 3.2 1B · mobile+", mobile: true, tier: "light" },
+    { id: "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", label: "Qwen2.5 0.5B · light mobile", mobile: true, tier: "light" }
   ];
   var BASE_SYS =
     "Ты АКСИ — локальный агент. Используй весь переданный контекст. " +
@@ -39,15 +42,21 @@
   }
   function defaultModel() {
     var list = modelsForDevice();
+    var saved = null;
+    try { saved = G.localStorage.getItem("aksi_webllm_model"); } catch (e) {}
+    if (saved) {
+      for (var s = 0; s < list.length; s++) if (list[s].id === saved) return saved;
+    }
     if (!isMobile()) {
-      for (var i = 0; i < list.length; i++) if (list[i].id.indexOf("1.5B") >= 0) return list[i].id;
+      for (var i = 0; i < list.length; i++) if (list[i].id.indexOf("3B") >= 0) return list[i].id;
+      for (var k = 0; k < list.length; k++) if (list[k].id.indexOf("1.5B") >= 0) return list[k].id;
     }
     for (var j = 0; j < list.length; j++) if (list[j].id.indexOf("1B") >= 0) return list[j].id;
     return list[0].id;
   }
   function budgets() {
     if (isMobile()) return { sys: 3500, hist: 2500, user: 1500, max_tokens: 384, turns: 8 };
-    return { sys: 9000, hist: 8000, user: 4000, max_tokens: 640, turns: 20 };
+    return { sys: 10000, hist: 9000, user: 4500, max_tokens: 768, turns: 24 };
   }
   function status() {
     var b = budgets();
@@ -215,7 +224,7 @@
   G.AKSI_WEBLLM = {
     version: VERSION, status: status, load: loadModel, autoLoad: loadModel, unload: unload,
     complete: complete, think: complete, ask: complete, adapt: adapt, packMessages: packMessages,
-    models: MODELS, modelsForDevice: modelsForDevice,
+    models: MODELS, modelsForDevice: modelsForDevice, defaultModel: defaultModel,
     ready: function () { return !!engine && !loading; },
     loading: function () { return loading; },
     isMobile: isMobile
