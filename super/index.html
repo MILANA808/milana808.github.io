@@ -5,30 +5,33 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
 <meta name="theme-color" content="#04060a"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<title>АКСИ · Super</title>
+<title>АКСИ · Team</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
 <style>
-:root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399}
+:root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,sans-serif}
 body{background:radial-gradient(900px 480px at 10% -10%,rgba(45,212,191,.12),transparent 55%),var(--bg)}
-.app{max-width:720px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.app{max-width:740px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
 header{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
 h1{margin:0;font-size:1.15rem;font-weight:800}
 h1 span{background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{margin:4px 0 0;font-size:12px;color:var(--muted)}
-.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.pill{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.pill.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
+.roles{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.role{font-size:10px;padding:4px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.role.on{border-color:rgba(52,211,153,.45);color:var(--ok);background:rgba(52,211,153,.08)}
+.role.work{border-color:rgba(251,191,36,.5);color:var(--warn)}
+.role.block{border-color:rgba(248,113,113,.5);color:var(--bad)}
 .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .btn{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:10px;padding:10px 12px;font:13px system-ui;font-weight:600;cursor:pointer}
 .btn.pri{border:0;background:linear-gradient(135deg,var(--c),var(--v));color:#041016}
 .btn:disabled{opacity:.45}
-#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:42vh;-webkit-overflow-scrolling:touch}
-.msg{max-width:95%;padding:11px 13px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:14px}
+#feed{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:40vh;-webkit-overflow-scrolling:touch}
+.msg{max-width:96%;padding:11px 13px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:14px}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
 .msg.sys{align-self:center;background:0;border:0;color:var(--muted);font-size:12px;padding:2px}
+.msg.trace{align-self:stretch;background:rgba(12,17,26,.7);border:1px dashed var(--line);font-size:12px;color:var(--muted)}
 .msg .meta{display:block;margin-top:6px;font-size:10px;color:var(--muted)}
 #stage{padding:0 14px;font-size:11px;color:var(--muted);min-height:16px}
 .composer{padding:10px 12px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;gap:8px;background:rgba(4,6,10,.92);position:sticky;bottom:0}
@@ -41,267 +44,188 @@ h1 span{background:linear-gradient(100deg,var(--c),var(--v),var(--q));-webkit-ba
 <body>
 <div class="app">
 <header>
-  <h1><span>АКСИ</span> · Super</h1>
-  <div class="sub">Offline Decision Integrity · без перезагрузки страницы</div>
-  <div class="pills">
-    <span class="pill on" id="pOn">online</span>
-    <span class="pill" id="pMind">mind</span>
-    <span class="pill" id="pNeuro">neuro</span>
-    <span class="pill" id="pLlm">llm off</span>
+  <h1><span>АКСИ</span> · Team</h1>
+  <div class="sub">Мини-команда агентов · Gate вне модели · offline · без перезагрузки</div>
+  <div class="roles">
+    <span class="role" id="rChief">Chief</span>
+    <span class="role" id="rResearch">Research</span>
+    <span class="role" id="rCritic">Critic</span>
+    <span class="role" id="rPermit">Permit</span>
+    <span class="role" id="rSpeaker">Speaker</span>
   </div>
   <div class="tools">
-    <button type="button" class="btn pri" id="btnLlm">Загрузить WebLLM</button>
-    <button type="button" class="btn" id="btnVerify">Проверка 12×12</button>
+    <button type="button" class="btn pri" id="btnLlm">WebLLM</button>
+    <button type="button" class="btn" id="btnDemo">Демо 12×12</button>
     <button type="button" class="btn" id="btnClear">Очистить</button>
   </div>
 </header>
 <div id="feed"></div>
 <div id="stage"></div>
-<div class="composer" id="composer">
-  <input id="q" type="text" placeholder="Вопрос…" autocomplete="off" autocorrect="off" enterkeyhint="send" inputmode="text"/>
+<div class="composer">
+  <input id="q" type="text" placeholder="Цель или вопрос…" autocomplete="off" enterkeyhint="send" inputmode="text"/>
   <button type="button" id="send">Отправить</button>
 </div>
-<div class="hint">Работает offline. WebLLM — только по кнопке. <a href="/super/gate/">Gate</a> · aksilove@internet.ru</div>
+<div class="hint">Идея с X: команда ролей + verification + no publish without approval. <a href="/super/gate/">Gate</a> · aksilove@internet.ru</div>
 </div>
 <script>
-(function killSW() {
-  try {
-    if (!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker.getRegistrations().then(function (regs) {
-      regs.forEach(function (r) { r.unregister(); });
-    });
-    if (window.caches && caches.keys) {
-      caches.keys().then(function (keys) {
-        keys.forEach(function (k) {
-          if (/aksi|shell|super/i.test(k)) caches.delete(k);
-        });
-      });
-    }
-  } catch (e) {}
-})();
+(function killSW(){try{if(!("serviceWorker"in navigator))return;navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(x){x.unregister()})});if(caches&&caches.keys)caches.keys().then(function(k){k.forEach(function(n){if(/aksi|shell|super/i.test(n))caches.delete(n)})})}catch(e){}})();
 
-(function () {
-  "use strict";
-  var busy = false, history = [];
-  function $(id) { return document.getElementById(id); }
-  function add(role, text, meta) {
-    var d = document.createElement("div");
-    d.className = "msg " + role;
-    d.appendChild(document.createTextNode(text || ""));
-    if (meta) {
-      var m = document.createElement("span");
-      m.className = "meta";
-      m.textContent = meta;
-      d.appendChild(m);
+(function(){
+"use strict";
+var busy=false,history=[];
+function $(id){return document.getElementById(id)}
+function add(role,text,meta){var d=document.createElement("div");d.className="msg "+role;d.appendChild(document.createTextNode(text||""));if(meta){var m=document.createElement("span");m.className="meta";m.textContent=meta;d.appendChild(m)}$("feed").appendChild(d);$("feed").scrollTop=1e9}
+function stage(t){$("stage").textContent=t||""}
+function setRole(id,mode){var el=$(id);if(!el)return;el.className="role"+(mode==="on"?" on":mode==="work"?" work":mode==="block"?" block":"")}
+function resetRoles(){["rChief","rResearch","rCritic","rPermit","rSpeaker"].forEach(function(id){setRole(id,"")})}
+function hash(s){var h=2166136261>>>0,i;s=String(s||"");for(i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+
+function chiefPlan(goal){
+  var g=String(goal||"").trim();
+  var steps=[];
+  if(/[0-9]+\s*[+\-*/]\s*[0-9]+|корень|sqrt|%/i.test(g)) steps.push("math");
+  if(/кто\s*ты|акси|permit|gate|кубит|небо|помощ|что\s*умеешь|привет/i.test(g)) steps.push("kb");
+  if(steps.length===0) steps.push("kb","open");
+  steps.push("critic","permit","speak");
+  return {goal:g,steps:steps,ts:new Date().toISOString()};
+}
+
+function researchMath(q){
+  var s=String(q).toLowerCase().replace(/,/g,".").replace(/\s+/g," ").trim();
+  var m,expr,val;
+  m=s.match(/(?:посчитай|вычисли|сколько\s*будет)?\s*([0-9.]+\s*[+\-*/]\s*[0-9.]+(?:\s*[+\-*/]\s*[0-9.]+)*)/);
+  if(m){try{expr=m[1].replace(/\s+/g,"");if(!/^[\d.+\-*/()]+$/.test(expr))return null;val=Function('"use strict";return ('+expr+")")();if(typeof val==="number"&&isFinite(val))return{ok:true,kind:"math",text:"Выражение: "+m[1].trim()+"\nРезультат: "+val,value:val}}catch(e){}}
+  m=s.match(/(?:корень|sqrt)\s*(?:из\s*)?([0-9.]+)/i);
+  if(m){val=Math.sqrt(parseFloat(m[1]));return{ok:true,kind:"math",text:"√"+m[1]+" ≈ "+val,value:val}}
+  return null;
+}
+var KB=[
+  {re:/привет|здравствуй|hello|hi\b/i,t:"Привет. Я Chief-контур АКСИ: Research → Critic → Permit → Speaker. Без сервера."},
+  {re:/кто\s*ты|что\s*ты|акси|aksi/i,t:"АКСИ Team — offline multi-agent: роли с жёсткими границами, Permit вне «модели», receipt на каждый ответ. Контакт: aksilove@internet.ru"},
+  {re:/что\s*умеешь|помощ|help/i,t:"Считаю, объясняю из базы, ставлю Gate ALLOW/REVIEW/BLOCK, показываю trace ролей. WebLLM — опционально по кнопке."},
+  {re:/permit|пермит|gate|допуск/i,t:"Permit — детерминированный слой вне LLM: default-deny, hash-receipt. Рынок 2026 требует gate вне модели (agent governance)."},
+  {re:/небо.*голуб|голуб.*небо/i,t:"Небо голубое из‑за рэлеевского рассеяния: короткие волны рассеиваются сильнее."},
+  {re:/кубит|qubit|суперпозиц/i,t:"Кубит: |ψ⟩=α|0⟩+β|1⟩. Суперпозиция — несколько состояний до измерения."},
+  {re:/команд|ролл|agent|multi/i,t:"Команда АКСИ: Chief (план), Research (факты), Critic (проверка), Permit (допуск), Speaker (ответ). Роли не пересекаются."}
+];
+function researchKB(q){for(var i=0;i<KB.length;i++)if(KB[i].re.test(q))return{ok:true,kind:"kb",text:KB[i].t};return null}
+function researchNeuro(q){try{var N=window.AKSI_NEURO||window.AKSI_LOCAL_LLM;if(!N)return null;if(N.think){var n=N.think(q);if(n&&n.mode!=="fallback"&&(Number(n.score)||0)>=0.45){var t=String(n.answer||n.text||"").trim();if(t.length>8)return{ok:true,kind:"neuro",text:t}}}if(N.query){var r=N.query(q);if(r&&(r.answer||r.text))return{ok:true,kind:"neuro",text:String(r.answer||r.text).trim()}}}catch(e){}return null}
+
+function criticVerify(goal,facts){
+  var issues=[];
+  if(!facts||!facts.length)issues.push("нет фактов от Research");
+  facts.forEach(function(f){if(!f.text||f.text.length<4)issues.push("пустой факт")});
+  var ok=issues.length===0;
+  return{ok:ok,issues:issues,note:ok?"Critic: факты согласованы, можно в Permit":"Critic: "+issues.join("; ")};
+}
+
+function permitGate(goal,critic){
+  var s=String(goal||"").toLowerCase();
+  var p=0.88,risk=0.4,gate="ALLOW",reasons=["default-local"];
+  if(/удали|уничтож|взлом|хак|пароль|банк|карт\s|переведи\s*деньг/.test(s)){p=0.08;risk=2.8;gate="BLOCK";reasons=["risk-keywords"]}
+  else if(/отправь|email|опубликуй|плати|удали\s*файл/.test(s)){p=0.32;risk=2.0;gate="REVIEW";reasons=["external-action"]}
+  else if(/12\*|математик|кто ты|привет|permit|что такое|корень/.test(s)){p=0.95;risk=0.3;gate="ALLOW";reasons=["local-safe"]}
+  if(!critic.ok&&gate==="ALLOW"){gate="REVIEW";p=Math.min(p,0.45);reasons.push("critic-flags")}
+  var receipt={system:"AKSI-PERMIT-v2",ts:new Date().toISOString(),gate:gate,p_allow:Math.round(p*1000)/1000,risk:Math.round(risk*100)/100,reasons:reasons,hash:(hash(s+"|"+gate+"|"+p)>>>0).toString(16)};
+  try{var arr=JSON.parse(localStorage.getItem("aksi_team_receipts")||"[]");if(!Array.isArray(arr))arr=[];arr.push({q:String(goal).slice(0,160),receipt:receipt});if(arr.length>30)arr=arr.slice(-30);localStorage.setItem("aksi_team_receipts",JSON.stringify(arr))}catch(e){}
+  return receipt;
+}
+
+function speakerCompose(goal,facts,critic,permit){
+  if(permit.gate==="BLOCK"){
+    return "Permit BLOCK · p="+permit.p_allow+" · risk="+permit.risk+"\nДействие отклонено. Без approval Chief не публикует и не исполняет.\nReceipt: "+permit.hash;
+  }
+  var body=(facts&&facts.length)?facts.map(function(f){return f.text}).join("\n\n"):"Фактов недостаточно.";
+  var head=permit.gate==="REVIEW"?"[REVIEW — нужна осторожность]\n\n":"";
+  var foot="\n\n— Team: Research→Critic→Permit · gate "+permit.gate+" · "+permit.hash;
+  if(critic&&critic.note)foot+="\n"+critic.note;
+  return head+body+foot;
+}
+
+async function runTeam(goal){
+  resetRoles();
+  setRole("rChief","work"); stage("Chief: план…");
+  var plan=chiefPlan(goal); await new Promise(function(r){setTimeout(r,40)});
+  setRole("rChief","on"); add("trace","Chief plan: "+plan.steps.join(" → "));
+
+  setRole("rResearch","work"); stage("Research…");
+  var facts=[];
+  var m=researchMath(goal); if(m) facts.push(m);
+  var k=researchKB(goal); if(k) facts.push(k);
+  if(!facts.length){var n=researchNeuro(goal); if(n) facts.push(n)}
+  try{
+    if(!facts.length&&window.AKSI_SUPER_MIND&&window.AKSI_SUPER_MIND.answer){
+      var a=await Promise.race([window.AKSI_SUPER_MIND.answer(goal,null),new Promise(function(res){setTimeout(function(){res(null)},6000)})]);
+      if(a&&a.text&&String(a.text).trim().length>12)facts.push({ok:true,kind:"mind",text:String(a.text).trim()});
     }
-    $("feed").appendChild(d);
-    $("feed").scrollTop = 1e9;
-  }
-  function stage(t) { $("stage").textContent = t || ""; }
-  function pill(id, t, on) {
-    var el = $(id); if (!el) return;
-    el.textContent = t;
-    el.className = "pill" + (on ? " on" : "");
-  }
-  function hash(s) {
-    var h = 2166136261 >>> 0, i;
-    s = String(s || "");
-    for (i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-    return h >>> 0;
-  }
-  function decideGate(text) {
-    var s = String(text || "").toLowerCase();
-    var p = 0.85, risk = 0.5, gate = "ALLOW";
-    if (/удали|уничтож|взлом|хак|пароль|банк|карт\s/.test(s)) { p = 0.1; risk = 2.5; gate = "BLOCK"; }
-    else if (/отправь|email|плати|переведи|опубликуй/.test(s)) { p = 0.35; risk = 2.0; gate = "REVIEW"; }
-    return { gate: gate, p_allow: p, risk: risk, hash: (hash(s + "|" + gate) >>> 0).toString(16) };
-  }
-  function tryMath(q) {
-    var s = String(q).toLowerCase().replace(/,/g, ".").replace(/\s+/g, " ").trim();
-    var m, expr, val;
-    m = s.match(/(?:посчитай|вычисли|сколько\s*будет)?\s*([0-9.]+\s*[+\-*/]\s*[0-9.]+(?:\s*[+\-*/]\s*[0-9.]+)*)/);
-    if (m) {
-      try {
-        expr = m[1].replace(/\s+/g, "");
-        if (!/^[\d.+\-*/()]+$/.test(expr)) return null;
-        val = Function('"use strict";return (' + expr + ")")();
-        if (typeof val === "number" && isFinite(val))
-          return "Выражение: " + m[1].trim() + "\nРезультат: " + val;
-      } catch (e) {}
+  }catch(e){}
+  try{
+    var W=window.AKSI_WEBLLM;
+    if((!facts.length)&&W&&W.ready&&W.ready()&&W.complete){
+      stage("Research+WebLLM…");
+      var r=await Promise.race([W.complete(goal,{system:"Ты Research-агент АКСИ. Только факты по-русски, без выдумок.",max_tokens:350}),new Promise(function(res){setTimeout(function(){res({text:""})},25000)})]);
+      var t=r&&r.text?String(r.text).trim():"";
+      if(t.length>12)facts.push({ok:true,kind:"webllm",text:t});
     }
-    m = s.match(/(?:корень|sqrt)\s*(?:из\s*)?([0-9.]+)/i);
-    if (m) {
-      val = Math.sqrt(parseFloat(m[1]));
-      return "√" + m[1] + " ≈ " + val;
-    }
-    return null;
-  }
-  var KB = [
-    { re: /привет|здравствуй|hello|hi\b/i, t: "Привет. Я АКСИ — offline Decision Integrity. Считаю, объясняю, ставлю Gate ALLOW/BLOCK. Сервер не нужен." },
-    { re: /кто\s*ты|что\s*ты|акси|aksi/i, t: "АКСИ — локальный runtime: Gate (допуск), math, Neuro/Mind, опциональный WebLLM. Не чатбот-обёртка, а слой доказательств. Контакт: aksilove@internet.ru" },
-    { re: /что\s*умеешь|помощ|help/i, t: "Умею: математика (12*12), объяснения (Permit, квант), Gate-receipt. WebLLM — только по кнопке, если есть WebGPU." },
-    { re: /permit|пермит|gate|допуск/i, t: "Permit/Gate — default-deny: ALLOW / REVIEW / BLOCK + hash. Ядро продукта для аудита агентов." },
-    { re: /небо.*голуб|голуб.*небо/i, t: "Небо голубое из‑за рэлеевского рассеяния: короткие (синие) волны рассеиваются сильнее." },
-    { re: /кубит|qubit|суперпозиц/i, t: "Кубит: |ψ⟩=α|0⟩+β|1⟩. Суперпозиция — несколько состояний до измерения." },
-    { re: /webllm|веб\s*ллм/i, t: "WebLLM грузит модель через WebGPU. На многих телефонах мало памяти — поэтому только по кнопке, не автоматически." }
-  ];
-  function kbAnswer(q) {
-    for (var i = 0; i < KB.length; i++) if (KB[i].re.test(q)) return KB[i].t;
-    return null;
-  }
-  function neuroAnswer(q) {
-    try {
-      var N = window.AKSI_NEURO || window.AKSI_LOCAL_LLM;
-      if (!N) return null;
-      if (N.think) {
-        var n = N.think(q);
-        if (n && n.mode !== "fallback" && (Number(n.score) || 0) >= 0.45) {
-          var t = String(n.answer || n.text || "").trim();
-          if (t.length > 8) return t;
-        }
-      }
-      if (N.query) {
-        var r = N.query(q);
-        if (r && (r.answer || r.text)) return String(r.answer || r.text).trim();
-      }
-    } catch (e) {}
-    return null;
-  }
-  function mindAnswer(q) {
-    try {
-      var M = window.AKSI_SUPER_MIND;
-      if (M && M.answer) return Promise.resolve(M.answer(q, null));
-    } catch (e) {}
-    return Promise.resolve(null);
-  }
-  function llmReady() {
-    try {
-      var W = window.AKSI_WEBLLM;
-      return !!(W && W.ready && W.ready());
-    } catch (e) { return false; }
-  }
-  function refreshPills() {
-    pill("pMind", window.AKSI_SUPER_MIND ? "mind on" : "mind", !!window.AKSI_SUPER_MIND);
-    pill("pNeuro", (window.AKSI_NEURO || window.AKSI_LOCAL_LLM) ? "neuro on" : "neuro", !!(window.AKSI_NEURO || window.AKSI_LOCAL_LLM));
-    pill("pLlm", llmReady() ? "llm on" : "llm off", llmReady());
-  }
-  async function answer(text) {
-    var g = decideGate(text);
-    if (g.gate === "BLOCK") {
-      return { text: "Gate BLOCK · p=" + g.p_allow + " · risk=" + g.risk + "\nОтклонено.\nReceipt: " + g.hash, meta: "gate BLOCK · " + g.hash };
-    }
-    var math = tryMath(text);
-    if (math) return { text: math, meta: "math · gate " + g.gate + " · " + g.hash };
-    var kb = kbAnswer(text);
-    if (kb) return { text: kb, meta: "kb · gate " + g.gate + " · " + g.hash };
-    try {
-      stage("mind…");
-      var a = await Promise.race([
-        mindAnswer(text),
-        new Promise(function (res) { setTimeout(function () { res(null); }, 8000); })
-      ]);
-      if (a && a.text && String(a.text).trim().length > 12) {
-        return { text: String(a.text).trim(), meta: (a.source || "mind") + " · gate " + g.gate };
-      }
-    } catch (e) {}
-    if (llmReady()) {
-      try {
-        stage("webllm…");
-        var W = window.AKSI_WEBLLM;
-        var r = await Promise.race([
-          W.complete(text, { system: "Ты АКСИ. Отвечай по-русски ясно.", max_tokens: 400 }),
-          new Promise(function (res) { setTimeout(function () { res({ text: "" }); }, 30000); })
-        ]);
-        var t = r && r.text ? String(r.text).trim() : "";
-        if (t.length > 12) return { text: t, meta: "webllm · gate " + g.gate };
-      } catch (e) {}
-    }
-    var n = neuroAnswer(text);
-    if (n) return { text: n, meta: "neuro · gate " + g.gate };
-    return {
-      text: "Локально точного факта нет. Спросите «кто ты», «12*12», «Permit» или загрузите WebLLM.\nGate: " + g.gate + " · " + g.hash,
-      meta: "fallback · gate " + g.gate
-    };
-  }
-  async function send() {
-    if (busy) return;
-    var inp = $("q");
-    var text = String(inp.value || "").trim();
-    if (!text) return;
-    busy = true;
-    $("send").disabled = true;
-    inp.value = "";
-    try { inp.blur(); } catch (e) {}
-    add("user", text);
-    history.push({ role: "user", content: text });
-    stage("…");
-    var out;
-    try { out = await answer(text); }
-    catch (e) { out = { text: "Ошибка: " + String((e && e.message) || e), meta: "error" }; }
-    add("bot", out.text || "—", out.meta || "");
-    history.push({ role: "assistant", content: out.text || "" });
-    if (history.length > 24) history = history.slice(-24);
-    try { localStorage.setItem("aksi_super_chat", JSON.stringify(history.slice(-12))); } catch (e) {}
-    busy = false;
-    $("send").disabled = false;
-    stage("");
-    refreshPills();
-  }
-  $("send").addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); send(); });
-  $("q").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); send(); }
-  });
-  $("q").addEventListener("keypress", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); }
-  });
-  $("btnVerify").addEventListener("click", function (e) { e.preventDefault(); $("q").value = "12*12"; send(); });
-  $("btnClear").addEventListener("click", function (e) {
-    e.preventDefault(); $("feed").innerHTML = ""; history = []; add("sys", "История очищена.");
-  });
-  $("btnLlm").addEventListener("click", function (e) {
-    e.preventDefault();
-    var W = window.AKSI_WEBLLM;
-    if (!W || !W.load) { add("sys", "WebLLM ещё не подгрузился. Подождите 2 сек."); return; }
-    $("btnLlm").disabled = true;
-    add("sys", "Загрузка WebLLM… На слабом телефоне может не хватить памяти — offline останется.");
-    var mid = "Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
-    try { if (!(W.isMobile && W.isMobile()) && W.defaultModel) mid = W.defaultModel(); } catch (err) {}
-    W.load(mid, function (st) { stage((st && st.message) || ""); }).then(function () {
-      add("sys", llmReady() ? ("✓ WebLLM: " + ((W.status && W.status().model) || mid)) : "Не поднялась — offline OK");
-      $("btnLlm").disabled = false; stage(""); refreshPills();
-    }).catch(function (err) {
-      add("sys", "WebLLM: " + ((err && err.message) || err));
-      $("btnLlm").disabled = false; stage("");
-    });
-  });
-  function loadScript(src) {
-    return new Promise(function (resolve) {
-      var s = document.createElement("script");
-      s.src = src; s.async = true;
-      s.onload = function () { resolve(true); };
-      s.onerror = function () { resolve(false); };
-      document.head.appendChild(s);
-    });
-  }
-  add("sys", "АКСИ online. Страница НЕ перезагружается при отправке.");
-  add("sys", "Попробуйте: кто ты · 12*12 · Permit");
-  try {
-    var h = JSON.parse(localStorage.getItem("aksi_super_chat") || "[]");
-    if (Array.isArray(h)) h.slice(-4).forEach(function (m) {
-      if (m && m.content) add(m.role === "user" ? "user" : "bot", m.content);
-    });
-  } catch (e) {}
-  setTimeout(function () {
-    Promise.all([
-      loadScript("/aksi-neuro.js?v=10"),
-      loadScript("/aksi-knowledge.js?v=3"),
-      loadScript("/aksi-super-mind.js?v=7"),
-      loadScript("/aksi-webllm.js?v=51")
-    ]).then(function () {
-      refreshPills();
-      add("sys", "Модули: " + (window.AKSI_SUPER_MIND ? "Mind " : "") + ((window.AKSI_NEURO || window.AKSI_LOCAL_LLM) ? "Neuro " : "") + (window.AKSI_WEBLLM ? "WebLLM-ready" : ""));
-    });
-  }, 300);
+  }catch(e){}
+  setRole("rResearch","on"); add("trace","Research: "+(facts.length?facts.map(function(f){return f.kind}).join(", "):"пусто"));
+
+  setRole("rCritic","work"); stage("Critic…");
+  var crit=criticVerify(goal,facts);
+  setRole("rCritic",crit.ok?"on":"work"); add("trace",crit.note);
+
+  setRole("rPermit","work"); stage("Permit…");
+  var perm=permitGate(goal,crit);
+  setRole("rPermit",perm.gate==="BLOCK"?"block":"on");
+  add("trace","Permit "+perm.gate+" · p="+perm.p_allow+" · "+perm.hash);
+
+  setRole("rSpeaker","work"); stage("Speaker…");
+  var out=speakerCompose(goal,facts,crit,perm);
+  setRole("rSpeaker","on"); stage("");
+  return{text:out,meta:"team · "+perm.gate+" · "+perm.hash,permit:perm};
+}
+
+async function send(){
+  if(busy)return;
+  var inp=$("q"); var text=String(inp.value||"").trim(); if(!text)return;
+  busy=true;$("send").disabled=true;inp.value=""; try{inp.blur()}catch(e){}
+  add("user",text); history.push({role:"user",content:text});
+  var out; try{out=await runTeam(text)}catch(e){out={text:"Ошибка команды: "+String((e&&e.message)||e),meta:"error"}}
+  add("bot",out.text||"—",out.meta||""); history.push({role:"assistant",content:out.text||""});
+  if(history.length>20)history=history.slice(-20);
+  try{localStorage.setItem("aksi_team_chat",JSON.stringify(history.slice(-10)))}catch(e){}
+  busy=false;$("send").disabled=false;
+}
+
+$("send").addEventListener("click",function(e){e.preventDefault();e.stopPropagation();send()});
+$("q").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();e.stopPropagation();send()}});
+$("q").addEventListener("keypress",function(e){if(e.key==="Enter"){e.preventDefault();e.stopPropagation()}});
+$("btnDemo").addEventListener("click",function(e){e.preventDefault();$("q").value="12*12";send()});
+$("btnClear").addEventListener("click",function(e){e.preventDefault();$("feed").innerHTML="";history=[];resetRoles();add("sys","Очищено.")});
+$("btnLlm").addEventListener("click",function(e){
+  e.preventDefault();
+  var W=window.AKSI_WEBLLM;
+  if(!W||!W.load){add("sys","WebLLM ещё грузится…");return}
+  $("btnLlm").disabled=true;
+  add("sys","WebLLM по запросу (на телефоне может не хватить RAM).");
+  var mid="Qwen2.5-0.5B-Instruct-q4f16_1-MLC";
+  W.load(mid,function(st){stage((st&&st.message)||"")}).then(function(){
+    add("sys",(W.ready&&W.ready())?("✓ "+((W.status&&W.status().model)||mid)):"не поднялась — offline OK");
+    $("btnLlm").disabled=false;stage("");
+  }).catch(function(err){add("sys","WebLLM: "+((err&&err.message)||err));$("btnLlm").disabled=false;stage("")});
+});
+
+function loadScript(src){return new Promise(function(res){var s=document.createElement("script");s.src=src;s.async=true;s.onload=function(){res(true)};s.onerror=function(){res(false)};document.head.appendChild(s)})}
+
+add("sys","АКСИ Team online. Роли: Chief → Research → Critic → Permit → Speaker.");
+add("sys","Правила с рынка 2026: gate вне модели, no publish without approval, proof на решения.");
+setTimeout(function(){
+  Promise.all([
+    loadScript("/aksi-neuro.js?v=10"),
+    loadScript("/aksi-super-mind.js?v=7"),
+    loadScript("/aksi-webllm.js?v=51")
+  ]).then(function(){add("sys","Модули подключены (опционально).")});
+},250);
 })();
 </script>
 </body>
