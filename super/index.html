@@ -3,9 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ Super · Full Stack</title>
+<title>АКСИ Super</title>
 <link rel="canonical" href="https://milana808.github.io/super/"/>
-<meta name="description" content="АКСИ Super: cluster + quantum + Neuro + Knowledge + ADIA + WebLLM 3B + Permit"/>
 <meta name="theme-color" content="#04060a"/>
 <style>
 :root{--bg:#04060a;--panel:#0c111a;--line:#1a2332;--text:#eef3fb;--muted:#8490a3;--c:#2dd4bf;--v:#818cf8;--q:#f472b6;--ok:#34d399;--gpu:#38bdf8}
@@ -33,16 +32,13 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
 .side h2{margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .nodes{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
 .node{border:1px solid var(--line);border-radius:7px;padding:4px 2px;text-align:center;background:var(--panel);font-size:10px}
-.node.hot{border-color:rgba(45,212,191,.5)}
-.node .u{font-weight:700;color:var(--gpu);font-size:11px}
+.node.hot{border-color:rgba(45,212,191,.5)}.node .u{font-weight:700;color:var(--gpu);font-size:11px}
 .metrics{margin-top:10px;font:11px/1.45 ui-monospace,monospace;color:var(--muted);white-space:pre-wrap}
 .qbox{margin-top:10px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}
-.qbox .qv{font:12px ui-monospace,monospace;margin-top:3px}
-.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6}
-.feats b{color:var(--text)}
-#feed{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px;max-height:52vh}
-.chat{display:flex;flex-direction:column;min-height:400px}
+.qbox .ql{font-size:10px;color:var(--q);text-transform:uppercase}.qbox .qv{font:12px ui-monospace,monospace;margin-top:3px}
+.feats{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.6}.feats b{color:var(--text)}
+.chat{display:flex;flex-direction:column;min-height:420px;flex:1}
+#feed{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px;max-height:55vh}
 .msg{max-width:94%;padding:10px 12px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:13.5px}
 .msg.user{align-self:flex-end;background:#152033;border:1px solid var(--line)}
 .msg.bot{align-self:flex-start;background:var(--panel);border:1px solid var(--line)}
@@ -60,7 +56,7 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
 <div class="app">
 <header>
   <h1><span>АКСИ Super</span></h1>
-  <div class="sub">Cluster + Quantum + Neuro + Knowledge + ADIA + WebLLM 3B + Permit</div>
+  <div class="sub">Диалог · Cluster · Quantum · Neuro · Mind · WebLLM · Permit</div>
   <div class="pills">
     <span class="pill" id="pBoot">boot</span>
     <span class="pill" id="pCluster">cluster</span>
@@ -73,10 +69,9 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
     <span class="pill" id="pExo">exo</span>
   </div>
   <div class="tools">
-    <select id="model" title="Модель"></select>
+    <select id="model"></select>
     <button type="button" class="btn pri" id="btnLlm">Загрузить модель</button>
     <button type="button" class="btn" id="btnBoot">Boot 16×4</button>
-    <button type="button" class="btn" id="btnBench">Bench</button>
     <button type="button" class="btn" id="btnQ">Quantum</button>
     <button type="button" class="btn" id="btnVerify">Verify</button>
   </div>
@@ -88,16 +83,16 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
     <div class="nodes" id="nodes"></div>
     <div class="metrics" id="metrics">…</div>
     <div class="qbox"><div class="ql">Quantum</div><div class="qv" id="qView">—</div></div>
-    <div class="feats" id="feats">stack loading…</div>
+    <div class="feats" id="feats">…</div>
   </aside>
   <div class="chat">
     <div id="feed"></div>
     <div id="stage"></div>
     <div class="composer">
-      <input id="q" placeholder="Вопрос / задача кластеру…" autocomplete="off"/>
-      <button type="button" id="send">Run</button>
+      <input id="q" placeholder="Напишите сообщение…" autocomplete="off"/>
+      <button type="button" id="send">Отправить</button>
     </div>
-    <div class="hint">Каскад: Neuro → Knowledge → ADIA → Quantum → LLM/Mind → Permit · <a href="/super/gate/">Gate</a></div>
+    <div class="hint">math → Mind → Neuro → WebLLM · <a href="/super/gate/">Gate</a></div>
   </div>
 </div>
 </div>
@@ -114,22 +109,24 @@ select#model{border:1px solid var(--line);background:#0a0e16;color:var(--text);b
 var S=window.AKSI_SUPER, M=window.AKSI_SUPER_MIND, W=window.AKSI_WEBLLM;
 var Neuro=window.AKSI_NEURO||window.AKSI_LOCAL_LLM;
 var Know=window.AKSI_KNOWLEDGE||window.AKSIKnowledge;
-var Adia=window.AKSI_ADIA||window.AKSI_ALGORITHM;
 var fabric=null, busy=false, lastQ=null, history=[];
+
 function $(id){return document.getElementById(id);}
 function pill(id,t,cls){var el=$(id);if(!el)return;el.textContent=t;el.className="pill"+(cls?" "+cls:"");}
 function add(role,text,meta){
-  var d=document.createElement("div");d.className="msg "+role;d.textContent=text;
+  var d=document.createElement("div");d.className="msg "+role;
+  d.appendChild(document.createTextNode(text||""));
   if(meta){var m=document.createElement("span");m.className="meta";m.textContent=meta;d.appendChild(m);}
   $("feed").appendChild(d);$("feed").scrollTop=$("feed").scrollHeight;return d;
 }
-function stage(t){$("stage").textContent=t||"";}
-function setBar(p){$("bar").style.width=Math.min(100,Math.round((p||0)*100))+"%";}
+function stage(t){var el=$("stage");if(el)el.textContent=t||"";}
+function setBar(p){var el=$("bar");if(el)el.style.width=Math.min(100,Math.round((p||0)*100))+"%";}
 function llmReady(){try{return !!(W&&W.ready&&W.ready());}catch(e){return false;}}
+
 function fillModels(){
-  var sel=$("model");sel.innerHTML="";
+  var sel=$("model");if(!sel)return;sel.innerHTML="";
   var list=(W&&W.modelsForDevice)?W.modelsForDevice():(W&&W.models)||[];
-  if(!list.length){sel.innerHTML="<option>нет моделей</option>";return;}
+  if(!list.length){sel.innerHTML="<option value=\"\">—</option>";return;}
   var def=(W.defaultModel&&W.defaultModel())||list[0].id;
   list.forEach(function(m){
     var o=document.createElement("option");o.value=m.id;o.textContent=m.label||m.id;
@@ -137,177 +134,183 @@ function fillModels(){
   });
 }
 function paintStack(){
-  pill("pNeuro",Neuro?(Neuro.status?("neuro "+(Neuro.status().version||"").replace(/-.*/,"")): "neuro"):"neuro —",Neuro?"on":"");
-  pill("pKnow",Know?("know "+(Know.count||Know.version||"")):"know —",Know?"on":"");
-  pill("pAdia",Adia?("adia "+(Adia.version||"")):"adia —",Adia?"on":"");
-  pill("pMind",M?("mind "+(M.version||"").replace("mind-","")):"mind",M?"on":"");
-  pill("pLlm",llmReady()?("llm "+(((W.status&&W.status().model)||"").split("-")[0]||"on")):(W?"llm off":"llm —"),llmReady()?"on":"");
+  pill("pNeuro",Neuro?"neuro on":"neuro —",Neuro?"on":"");
+  pill("pKnow",Know?"know on":"know —",Know?"on":"");
+  pill("pMind",M?"mind on":"mind —",M?"on":"");
+  pill("pLlm",llmReady()?"llm on":"llm off",llmReady()?"on":"");
+  pill("pAdia",window.AKSI_ADIA||window.AKSI_ALGORITHM?"adia on":"adia —",(window.AKSI_ADIA||window.AKSI_ALGORITHM)?"on":"");
   var bits=[];
-  if(Neuro)bits.push("<b>Neuro</b> SEED");
-  if(Know)bits.push("<b>Knowledge</b> "+(Know.count||""));
-  if(Adia)bits.push("<b>ADIA</b> "+(Adia.version||""));
+  if(Neuro)bits.push("<b>Neuro</b>");
+  if(Know)bits.push("<b>Knowledge</b>");
+  if(M)bits.push("<b>Mind</b>");
   if(W)bits.push("<b>WebLLM</b> "+(W.version||""));
   if(S)bits.push("<b>Super</b> "+(S.version||""));
-  $("feats").innerHTML=bits.join("<br>")||"—";
+  if($("feats"))$("feats").innerHTML=bits.join("<br>")||"—";
 }
 function paint(){
-  if(!fabric)return;
+  if(!fabric){paintStack();return;}
   var sn=fabric.snapshot();
   pill("pBoot",sn.booted?"ONLINE":"off",sn.booted?"on":"");
-  pill("pCluster",sn.nodes+"n/"+sn.gpus+"g · "+sn.avg_util.toFixed(0)+"%",sn.avg_util>5?"gpu":"on");
+  pill("pCluster",sn.nodes+"n/"+sn.gpus+"g",sn.avg_util>5?"gpu":"on");
   pill("pExo",sn.exo?"exo on":"exo",sn.exo?"on":"");
   if(lastQ){
-    pill("pQ","|"+(lastQ.bits||"?")+"⟩", "q");
-    $("qView").textContent="|"+(lastQ.bits||"")+"⟩ S="+((lastQ.entropy!=null)?lastQ.entropy.toFixed(3):"—");
+    pill("pQ","|"+(lastQ.bits||"?")+"⟩","q");
+    if($("qView"))$("qView").textContent="|"+(lastQ.bits||"")+"⟩";
   }
-  var box=$("nodes");box.innerHTML="";
-  (sn.nodes_detail||[]).forEach(function(n){
-    var avg=n.gpus.reduce(function(a,g){return a+g.util;},0)/Math.max(1,n.gpus.length);
-    var el=document.createElement("div");el.className="node"+(avg>12?" hot":"");
-    el.innerHTML="<div>"+n.id.replace("node-","n")+"</div><div class=\"u\">"+avg.toFixed(0)+"%</div>";
-    box.appendChild(el);
-  });
-  $("metrics").textContent=(fabric.clusterReport?fabric.clusterReport():"")+"\nflops "+sn.stats.flops+" · done "+sn.done;
+  var box=$("nodes");
+  if(box){
+    box.innerHTML="";
+    (sn.nodes_detail||[]).forEach(function(n){
+      var avg=n.gpus.reduce(function(a,g){return a+g.util;},0)/Math.max(1,n.gpus.length);
+      var el=document.createElement("div");el.className="node"+(avg>12?" hot":"");
+      el.innerHTML="<div>"+n.id.replace("node-","n")+"</div><div class=\"u\">"+avg.toFixed(0)+"%</div>";
+      box.appendChild(el);
+    });
+  }
+  if($("metrics"))$("metrics").textContent=(fabric.clusterReport?fabric.clusterReport():"")+"\ndone "+sn.done;
   paintStack();
 }
 async function ensure(){
   if(!S){add("sys","Super offline — hard refresh");return null;}
   if(!fabric){
-    fabric=new S.SuperFabric();fabric.loadMemory();fabric.onTick=paint;
-    fabric.onEvent=function(ev){if(ev.stage==="stage"&&ev.detail&&ev.detail.name)stage("· "+ev.detail.name);};
+    fabric=new S.SuperFabric();
+    try{fabric.loadMemory();}catch(e){}
+    fabric.onTick=paint;
   }
   if(!fabric.booted){
-    fabric.boot(16,4);fabric.startScheduler(120);
+    fabric.boot(16,4);fabric.startScheduler(100);
     try{await fabric.attachExocortex();}catch(e){}
-    add("sys","Cluster "+S.version+" · 16×4 · stack online");
+    add("sys","Cluster online · 16×4");
   }
   paint();return fabric;
 }
-function gatherContext(q){
-  var parts=[];
+
+function neuroStrong(q){
   try{
-    if(Neuro&&Neuro.think){
-      var n=Neuro.think(q);
-      var txt=(n&&(n.answer||n.text||n.out))||(typeof n==="string"?n:"");
-      if(txt&&String(txt).length>20) parts.push("Neuro: "+String(txt).slice(0,600));
-    } else if(Neuro&&Neuro.retrieve){
-      var hits=Neuro.retrieve(q);
-      if(hits&&hits.length) parts.push("Neuro: "+String(hits[0].answer||hits[0].text||hits[0]).slice(0,500));
-    }
-  }catch(e){}
-  try{
-    if(Know&&Know.search){
-      var k=Know.search(q);
-      if(k&&k.body) parts.push("Knowledge «"+k.title+"»: "+k.body.slice(0,500));
-    }
-  }catch(e){}
-  return parts.join("\n\n");
-}
-function adiaWrap(q, answer){
-  try{
-    if(!Adia||!Adia.process) return null;
-    return Adia.process({query:q, answer:answer, text:answer});
+    if(!Neuro||!Neuro.think)return null;
+    var n=Neuro.think(q);
+    if(!n||n.mode==="fallback")return null;
+    if((Number(n.score)||0)<0.45)return null;
+    var t=String(n.answer||n.text||"").trim();
+    if(t.length<8)return null;
+    return {text:t,score:n.score};
   }catch(e){return null;}
 }
-$("btnLlm").onclick=async function(){
-  if(!W){add("sys","WebLLM отсутствует");return;}
-  var mid=$("model").value;
-  $("btnLlm").disabled=true;add("sys","Загрузка "+mid+" …");
+
+async function dialogAnswer(text){
   try{
-    await W.load(mid, function(st){
-      var p=(st&&st.progress)||0; if(p>1)p=p/100;
-      setBar(p); stage((st&&st.message)||"loading");
+    if(M&&M.tryMath){
+      var math=M.tryMath(text);
+      if(math&&math.ok){
+        var mv=Array.isArray(math.value)?math.value.join(", "):String(math.value);
+        var expl=math.explain||(math.steps&&math.steps.length?math.steps.join("\n"):("Результат: "+mv));
+        if(String(expl).indexOf(String(mv))<0) expl=expl+"\nИтог: "+mv;
+        return {text:expl,meta:"math"};
+      }
+    }
+  }catch(e){}
+
+  if(llmReady()&&W&&W.complete){
+    stage("webllm…");
+    var sys="Ты АКСИ. Отвечай по-русски, ясно. Не выдумывай.";
+    var ns=neuroStrong(text);
+    if(ns)sys+="\nКонтекст: "+ns.text.slice(0,400);
+    try{
+      var r=await Promise.race([
+        W.complete(text,{system:sys,history:history.slice(-8),max_tokens:600}),
+        new Promise(function(res){setTimeout(function(){res({text:""});},50000);})
+      ]);
+      var t=(r&&r.text)?String(r.text).trim():"";
+      if(t.length>12)return {text:t,meta:"webllm"};
+    }catch(e){}
+  }
+
+  if(M&&M.answer){
+    stage("mind…");
+    try{
+      var a=await Promise.race([
+        Promise.resolve(M.answer(text,lastQ||{})),
+        new Promise(function(res){setTimeout(function(){res(null);},18000);})
+      ]);
+      if(a&&a.text&&String(a.text).trim().length>8)
+        return {text:String(a.text).trim(),meta:"mind · "+(a.source||"")};
+    }catch(e){}
+  }
+
+  if(fabric){
+    stage("agent…");
+    try{
+      var job=fabric.submit({type:"agent",prompt:text,size:32});
+      var done=await fabric.waitJob(job,50000);
+      if(done&&done.quantum)lastQ=done.quantum;
+      var ans=done&&done.result&&(done.result.answer||done.result.report);
+      if(ans&&String(ans).trim().length>5)
+        return {text:String(ans).trim(),meta:"agent"};
+    }catch(e){}
+  }
+
+  var nh=neuroStrong(text);
+  if(nh)return {text:nh.text,meta:"neuro"};
+
+  try{
+    if(Know&&Know.search){
+      var k=Know.search(text);
+      if(k&&k.body)return {text:k.title+": "+k.body,meta:"knowledge"};
+    }
+  }catch(e){}
+
+  return {text:"Спросите «кто ты», «12*12», «что такое Gate» — или загрузите модель сверху.",meta:"hint"};
+}
+
+$("btnLlm").onclick=async function(){
+  if(!W){add("sys","WebLLM нет");return;}
+  $("btnLlm").disabled=true;
+  var mid=$("model").value;
+  add("sys","Загрузка "+mid+"…");
+  try{
+    await W.load(mid,function(st){
+      var p=(st&&st.progress)||0;if(p>1)p=p/100;setBar(p);stage((st&&st.message)||"");
     });
-    setBar(llmReady()?1:0);
-    add("sys",llmReady()?"✓ Модель: "+((W.status()||{}).model||mid):"Модель не поднялась");
+    add("sys",llmReady()?"✓ "+((W.status()||{}).model||"ok"):"Модель не поднялась");
   }catch(e){add("sys","LLM: "+(e.message||e));}
   $("btnLlm").disabled=false;stage("");paintStack();
 };
-$("btnBoot").onclick=async function(){
-  if(fabric&&fabric.booted){fabric.scale(16,4);add("sys","Rescale 16×4");paint();return;}
-  await ensure();
-};
-$("btnBench").onclick=async function(){
-  var f=await ensure();if(!f)return;
-  var d=await f.waitJob(f.submit({type:"cluster_bench",size:64}),25000);
-  add("sys",d&&d.result?"Bench flops "+d.result.flops+" · "+Math.round(d.result.ms||0)+"ms":"bench fail");paint();
-};
+$("btnBoot").onclick=function(){ensure();};
 $("btnQ").onclick=async function(){
   await ensure();
-  lastQ=(S&&S.quantumCollapse)?S.quantumCollapse("pulse|"+Date.now()):null;
-  add("sys","Quantum |"+(lastQ&&lastQ.bits||"?")+"⟩");paint();
+  lastQ=S&&S.quantumCollapse?S.quantumCollapse("p|"+Date.now()):null;
+  add("sys","|"+(lastQ&&lastQ.bits||"?")+"⟩");paint();
 };
 $("btnVerify").onclick=async function(){
-  var f=await ensure();if(!f)return;
-  var d=await f.waitJob(f.submit({type:"agent",prompt:"12*12",size:16}),25000);
-  var ans=(d&&d.result&&(d.result.answer||""))||"";
-  if(d&&d.quantum)lastQ=d.quantum;
-  add("sys",(ans.indexOf("144")>=0?"✓":"✗")+" math · "+(d&&d.stages||[]).map(function(s){return s.name;}).join("→"));
-  paint();
+  await ensure();
+  var o=await dialogAnswer("12*12");
+  add("bot",o.text,(o.text.indexOf("144")>=0?"✓ ":"")+(o.meta||""));
 };
+
 async function send(){
-  var text=$("q").value.trim();if(!text||busy)return;
+  var text=$("q").value.trim();
+  if(!text||busy)return;
   busy=true;$("send").disabled=true;$("q").value="";
-  add("user",text);history.push({role:"user",content:text});
-  var f=await ensure();
-  stage("context…");
-  var ctx=gatherContext(text);
-  if(S&&S.quantumCollapse) lastQ=S.quantumCollapse(text);
-  if(llmReady()&&W&&W.complete){
-    stage("webllm…");
-    var sys="Ты АКСИ Super — локальный агент. Русский, ясно, по делу. Не выдумывай факты.";
-    if(ctx) sys+="\n\nЛокальный контекст:\n"+ctx;
-    if(lastQ&&lastQ.bits) sys+="\nQuantum seed |"+lastQ.bits+"⟩";
-    try{
-      var r=await Promise.race([
-        W.complete(text,{system:sys,history:history.slice(-10),max_tokens:700}),
-        new Promise(function(res){setTimeout(function(){res({text:""});},60000);})
-      ]);
-      var t=(r&&r.text)?String(r.text).trim():"";
-      if(t.length>12){
-        var ad=adiaWrap(text,t);
-        var meta="webllm · "+(((W.status()||{}).model)||"").slice(0,28);
-        if(ad&&(ad.gate||ad.EQS||ad.aksi)) meta+=" · ADIA "+(ad.gate||ad.EQS||"");
-        if(lastQ) meta+=" · |"+lastQ.bits+"⟩";
-        add("bot",t,meta);
-        history.push({role:"assistant",content:t});
-        if(f) f.submit({type:"agent",prompt:text,size:8});
-        busy=false;$("send").disabled=false;stage("");paint();return;
-      }
-    }catch(e){}
-  }
-  stage("mind pipeline…");
-  var answer="";
-  if(ctx&&ctx.length>40){
-    try{
-      if(Neuro&&Neuro.think){
-        var n=Neuro.think(text);
-        answer=(n&&(n.answer||n.text))||"";
-      }
-    }catch(e){}
-  }
-  if((!answer||answer.length<20)&&f){
-    var job=f.submit({type:"agent",prompt:text,size:40});
-    var done=await f.waitJob(job,90000);
-    if(done&&done.quantum)lastQ=done.quantum;
-    answer=(done&&done.result&&(done.result.answer||done.result.report))||answer||"пусто";
-    var meta2=(done&&done.result&&done.result.source)||"mind";
-    meta2+=" · "+(done&&done.stages||[]).map(function(x){return x.name;}).join("→");
-    var ad2=adiaWrap(text,answer);
-    if(ad2&&ad2.gate) meta2+=" · gate "+ad2.gate;
-    add("bot",answer,meta2);
-  } else {
-    var ad3=adiaWrap(text,answer);
-    add("bot",answer||"Нет ответа — загрузите модель",ad3?"neuro/knowledge · ADIA":"neuro/knowledge");
-  }
-  history.push({role:"assistant",content:answer||""});
+  add("user",text);
+  history.push({role:"user",content:text});
+  await ensure();
+  if(S&&S.quantumCollapse)lastQ=S.quantumCollapse(text+"|"+Date.now());
+  stage("…");
+  var out;
+  try{out=await dialogAnswer(text);}
+  catch(e){out={text:String(e.message||e),meta:"error"};}
+  var meta=out.meta||"";
+  if(lastQ&&lastQ.bits)meta+=(meta?" · ":"")+"|"+lastQ.bits+"⟩";
+  add("bot",out.text||"—",meta);
+  history.push({role:"assistant",content:out.text||""});
+  if(history.length>20)history=history.slice(-20);
   busy=false;$("send").disabled=false;stage("");paint();
 }
 $("send").onclick=send;
 $("q").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send();}});
-fillModels();
-paintStack();
-ensure().then(function(){add("sys","Full stack: Neuro · Knowledge · ADIA · Quantum · WebLLM · Cluster · Permit");});
+
+fillModels();paintStack();
+ensure().then(function(){add("sys","Пишите в чат — отвечу offline (math/Neuro/Mind). Модель — по желанию.");});
 })();
 </script>
 </body>
