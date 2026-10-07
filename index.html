@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ · Whole</title>
-<meta name="description" content="АКСИ: квант · алгоритм · мир · gate · seal — один контур"/>
+<meta name="description" content="АКСИ: квант · алгоритм · мир · gate · seal — связанные контуры"/>
 <meta name="theme-color" content="#0b1020"/>
 <style>
 :root{--bg:#0b1020;--card:#121a2f;--line:#24304d;--tx:#e8eefc;--mut:#8b9bb8;--ok:#34d399;--bad:#f87171;--acc:#818cf8;--warn:#fbbf24;--nav:72px;--cyan:#22d3ee;--mag:#e879f9}
@@ -37,7 +37,6 @@ textarea{min-height:72px;resize:vertical}
 .bars{display:flex;align-items:flex-end;gap:3px;height:100px;padding:8px;background:#0a0f1c;border-radius:10px;border:1px solid var(--line)}
 .bars i{flex:1;background:linear-gradient(180deg,var(--cyan),var(--acc));border-radius:3px 3px 0 0;min-height:2px;opacity:.9}
 canvas.world{width:100%;height:220px;display:block;background:#05010f;border-radius:12px;border:1px solid var(--line)}
-.chip{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--mut);margin:2px}
 .mod{display:block;padding:12px;border-radius:12px;border:1px solid var(--line);background:#0e1528;color:var(--tx);text-decoration:none;margin:6px 0}
 .mod b{display:block;color:var(--cyan);font-size:13px}.mod span{font-size:12px;color:var(--mut)}
 .bnav{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;background:rgba(11,16,32,.97);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom));backdrop-filter:blur(12px)}
@@ -57,29 +56,34 @@ code.block{display:block;font-size:9px;word-break:break-all;background:#0a0f1c;p
   <code id="didShort">did:…</code>
   <code id="qEnt">H=—</code>
   <code id="eqsLive">EQS=—</code>
+  <code id="gateLive">gate=—</code>
 </div>
 <div class="shell">
 <section class="panel on" data-p="home">
-  <h1>АКСИ · всё вместе</h1>
-  <p class="sub">Один адрес. Квант, алгоритм, мир, gate и печать связаны общей сессией.</p>
+  <h1>АКСИ · всё связано</h1>
+  <p class="sub">Квант → мир → алгоритм → gate → seal. Одна сессия, общая шина событий.</p>
   <div class="card">
-    <h2>Общее состояние</h2>
+    <h2>Состояние сессии</h2>
     <div class="shared" id="sharedBox">квант ещё не запущен · EQS — · gate —</div>
     <div class="row">
-      <button type="button" class="cyan" data-jump="quantum">Квант</button>
-      <button type="button" class="mag" data-jump="world">Мир</button>
-      <button type="button" data-jump="algo">Алгоритм</button>
-      <button type="button" data-jump="decide">Решение</button>
+      <button type="button" id="btnLinkAll" class="cyan">Связать всё → pipeline</button>
+    </div>
+    <div class="trace" id="chainLog" style="margin-top:8px">цепочка связей…</div>
+    <div class="row">
+      <button type="button" class="ghost" data-jump="quantum">Квант</button>
+      <button type="button" class="ghost" data-jump="world">Мир</button>
+      <button type="button" class="ghost" data-jump="algo">Алго</button>
+      <button type="button" class="ghost" data-jump="decide">Gate</button>
     </div>
   </div>
   <div class="card">
-    <h2>Как связано</h2>
-    <p class="sub" style="margin:0">Квант → H и биты · Алгоритм → EQS · Мир → визуал от H · Решение → gate+seal с H и EQS в receipt</p>
+    <h2>Связи</h2>
+    <p class="sub" style="margin:0">H и биты коллапса → EQS (резонанс/consistency)<br/>EQS<45 → gate REVIEW<br/>gate ALLOW/BLOCK → цвет мира<br/>всё в receipt.links + quantum + algorithm</p>
   </div>
 </section>
 <section class="panel" data-p="quantum">
   <h1>Квант</h1>
-  <p class="sub">Statevector 4 кубита · H / CNOT · коллапс · энтропия</p>
+  <p class="sub">4 кубита · H · Bell · коллапс → шина</p>
   <div class="card">
     <div class="row">
       <button type="button" class="cyan" id="qInit">|0…0⟩</button>
@@ -98,7 +102,7 @@ code.block{display:block;font-size:9px;word-break:break-all;background:#0a0f1c;p
 </section>
 <section class="panel" data-p="world">
   <h1>Мир</h1>
-  <p class="sub">3D-облако точек; дрейф от квантовой энтропии</p>
+  <p class="sub">3D-облако; цвет от gate, дрейф от H</p>
   <div class="card">
     <canvas class="world" id="worldC" width="720" height="220"></canvas>
     <div class="row">
@@ -109,7 +113,7 @@ code.block{display:block;font-size:9px;word-break:break-all;background:#0a0f1c;p
 </section>
 <section class="panel" data-p="algo">
   <h1>Алгоритм</h1>
-  <p class="sub">5 осей → EQS (эвристики + резонанс с H)</p>
+  <p class="sub">EQS ← текст + H + bits</p>
   <div class="card">
     <label for="algoIn">Текст</label>
     <textarea id="algoIn" placeholder="текст для EQS"></textarea>
@@ -123,7 +127,7 @@ code.block{display:block;font-size:9px;word-break:break-all;background:#0a0f1c;p
 </section>
 <section class="panel" data-p="decide">
   <h1>Решение</h1>
-  <p class="sub">Gate · Seal · Verify (+ H, EQS в receipt)</p>
+  <p class="sub">Gate ← EQS · Seal · Verify</p>
   <div class="card">
     <label for="claim">Утверждение</label>
     <textarea id="claim" placeholder="12*12"></textarea>
@@ -147,8 +151,8 @@ code.block{display:block;font-size:9px;word-break:break-all;background:#0a0f1c;p
   </div>
 </section>
 <section class="panel" data-p="more">
-  <h1>Модули (живые)</h1>
-  <p class="sub">Полные страницы репо — часть системы</p>
+  <h1>Модули</h1>
+  <p class="sub">Живые страницы репо</p>
   <a class="mod" href="/super/" target="_blank" rel="noopener"><b>Super / Team</b><span>роли · gate</span></a>
   <a class="mod" href="/matrix/" target="_blank" rel="noopener"><b>MATRIX</b><span>WebLLM · RAG</span></a>
   <a class="mod" href="/hdc/" target="_blank" rel="noopener"><b>HDC</b><span>Phase-HRR</span></a>
@@ -168,6 +172,6 @@ code.block{display:block;font-size:9px;word-break:break-all;background:#0a0f1c;p
   <button type="button" data-go="decide"><span class="ic">▣</span>Gate</button>
   <button type="button" data-go="more"><span class="ic">⋯</span>Ещё</button>
 </nav>
-<script src="/aksi-whole.js?v=2"></script>
+<script src="/aksi-whole.js?v=3"></script>
 </body>
 </html>
