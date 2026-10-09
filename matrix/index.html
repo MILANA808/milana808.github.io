@@ -4,109 +4,90 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ MATRIX · QBM / H_eff</title>
-<meta name="description" content="АКСИ MATRIX — client-side quantum-thermodynamic simulator. QBM · H_eff · Gershgorin · Pro proof."/>
+<meta name="description" content="АКСИ MATRIX — client-side QBM · H_eff · Gershgorin · Pro proof"/>
 <meta name="theme-color" content="#ffffff"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#fff;--ink:#000;--mut:#555;--line:#000;--ok:#059669;--bad:#b91c1c;--pad:16px}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;line-height:1.45;font-size:14px}
-a{color:var(--ink);text-decoration:underline}
-.wrap{max-width:720px;margin:0 auto;padding:20px var(--pad) 48px}
-header{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
-header h1{margin:0;font-size:1.15rem;font-weight:700;letter-spacing:.04em}
-header p{margin:6px 0 0;color:var(--mut);font-size:12px}
+*{box-sizing:border-box}html,body{margin:0;background:#fff;color:#000;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;line-height:1.45;font-size:14px}
+a{color:#000}.wrap{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+header{border-bottom:1px solid #000;padding-bottom:14px;margin-bottom:18px}
+h1{margin:0;font-size:1.15rem;letter-spacing:.04em}
+header p{margin:6px 0 0;color:#555;font-size:12px}
 .nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px}
-.grid{display:grid;gap:14px}
-@media(min-width:640px){.grid.two{grid-template-columns:1fr 1fr}}
-.box{border:1px solid var(--line);padding:12px}
-.box h2{margin:0 0 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-canvas#starCanvas{width:100%;height:min(58vw,320px);display:block;background:#fff;border:1px solid #000}
-svg#gershSvg{width:100%;height:160px;border:1px solid #000;background:#fff}
-label{display:block;font-size:11px;margin-bottom:4px;color:var(--mut)}
-textarea{width:100%;min-height:88px;border:1px solid #000;padding:10px;font:inherit;resize:vertical;background:#fff;color:#000}
+.grid{display:grid;gap:14px}@media(min-width:640px){.grid.two{grid-template-columns:1fr 1fr}}
+.box{border:1px solid #000;padding:12px}.box h2{margin:0 0 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+canvas#starCanvas{width:100%;height:min(58vw,320px);display:block;border:1px solid #000}
+svg#gershSvg{width:100%;height:160px;border:1px solid #000}
+label{display:block;font-size:11px;margin-bottom:4px;color:#555}
+textarea{width:100%;min-height:88px;border:1px solid #000;padding:10px;font:inherit;resize:vertical}
 button{font:inherit;border:1px solid #000;background:#000;color:#fff;padding:10px 14px;cursor:pointer;font-weight:600}
-button.ghost{background:#fff;color:#000}
-button:disabled{opacity:.45}
+button.ghost{background:#fff;color:#000}button:disabled{opacity:.45}
 .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-.kv{font-size:12px;margin:4px 0}.kv b{color:var(--mut);font-weight:400}
-code{font-size:11px}
-.tiers{display:grid;gap:10px}
-@media(min-width:560px){.tiers{grid-template-columns:1fr 1fr}}
-.tier{border:1px solid #000;padding:12px}
-.tier h3{margin:0 0 6px;font-size:13px}
-.tier ul{margin:0;padding-left:18px;font-size:12px;color:var(--mut)}
+.kv{font-size:12px;margin:4px 0}.kv b{color:#555;font-weight:400}
+.tiers{display:grid;gap:10px}@media(min-width:560px){.tiers{grid-template-columns:1fr 1fr}}
+.tier{border:1px solid #000;padding:12px}.tier h3{margin:0 0 6px;font-size:13px}.tier ul{margin:0;padding-left:18px;font-size:12px;color:#555}
 .badge{display:inline-block;border:1px solid #000;padding:2px 8px;font-size:10px;font-weight:700}
-.proof-ok{color:var(--ok);font-weight:700;margin-bottom:6px}
-footer{margin-top:28px;border-top:1px solid #000;padding-top:12px;font-size:11px;color:var(--mut)}
+.proof-ok{color:#059669;font-weight:700;margin-bottom:6px}
+footer{margin-top:28px;border-top:1px solid #000;padding-top:12px;font-size:11px;color:#555}
 .check{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>АКСИ MATRIX</h1>
-    <p>Client-side · QBM · H_eff · Gershgorin · D₄ star · Pro proof · no server</p>
-    <div class="nav">
-      <a href="/">Whole</a>
-      <a href="/super/">Super</a>
-      <a href="/authority/">Authority</a>
-      <a href="/hdc/">HDC</a>
-      <span class="badge" id="proBadge">FREE</span>
-    </div>
-  </header>
-  <div class="grid two">
-    <div class="box">
-      <h2>Граф АКСИ · 8-луч · D₄</h2>
-      <canvas id="starCanvas" width="640" height="320" aria-label="АКСИ star graph"></canvas>
-      <p style="font-size:11px;color:var(--mut);margin:8px 0 0">Красный 0° вход · 225° память · 45° аномалии · шины 0/90°</p>
-    </div>
-    <div class="box">
-      <h2>Круги Гершгорина</h2>
-      <svg id="gershSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="kv" id="outGersh">—</div>
-    </div>
-  </div>
-  <div class="box" style="margin-top:14px">
-    <h2>Намерение / ввод</h2>
-    <label for="mxInput">Текст → хэш → QBM / H_eff</label>
-    <textarea id="mxInput" placeholder="Введите намерение…">АКСИ: проверь когерентность контура</textarea>
-    <div class="row">
-      <button type="button" id="btnAnalyze">Считать матрицу</button>
-      <button type="button" class="ghost" onclick="document.getElementById('mxInput').value='';document.getElementById('btnAnalyze').click()">Сброс</button>
-    </div>
-  </div>
-  <div class="grid two" style="margin-top:14px">
-    <div class="box">
-      <h2>QBM · энергия</h2>
-      <div class="kv"><b>E</b> <span id="outEnergy">—</span></div>
-      <div class="kv"><b>⟨m⟩</b> <span id="outMag">—</span></div>
-    </div>
-    <div class="box">
-      <h2>H_eff · CCE</h2>
-      <div class="kv"><b>H_eff</b> <span id="outHeff">—</span></div>
-      <div class="kv"><b>S</b> <span id="outS">—</span></div>
-      <div class="kv"><b>статус</b> <span id="outStatus">—</span></div>
-    </div>
-  </div>
-  <div class="box" style="margin-top:14px">
-    <h2>Тарифы · Web3</h2>
-    <div class="tiers">
-      <div class="tier"><h3>Free · демо</h3><ul><li>QBM + H_eff</li><li>Gershgorin</li><li>Граф D₄</li></ul></div>
-      <div class="tier"><h3>Pro · ключ</h3><ul><li>Крипто-proof</li><li>localStorage</li><li>MetaMask или mock</li></ul></div>
-    </div>
-    <div class="check">
-      <input type="checkbox" id="proMock" checked/>
-      <label for="proMock" style="margin:0">Mock-транзакция (без кошелька)</label>
-    </div>
-    <div class="row"><button type="button" id="btnPro">Активировать Pro-Доступ</button></div>
-    <div id="proProof" style="margin-top:12px;font-size:12px">Pro не активен. Free-демо доступен.</div>
-  </div>
-  <footer>АКСИ MATRIX · offline · aksilove@internet.ru · technology_serves_human</footer>
+<header>
+<h1>АКСИ MATRIX</h1>
+<p>Client-side · QBM · H_eff · Gershgorin · D₄ star · Pro proof · no server</p>
+<div class="nav">
+<a href="/">Whole</a>
+<a href="/super/">Super</a>
+<a href="/authority/">Authority</a>
+<a href="/hdc/">HDC</a>
+<span class="badge" id="proBadge">FREE</span>
 </div>
-<script src="/matrix.js?v=2"></script>
-<script>if(!window.AKSIMatrix){var s=document.createElement('script');s.src='matrix.js?v=2';document.body.appendChild(s);}</script>
+</header>
+<div class="grid two">
+<div class="box">
+<h2>Граф АКСИ · 8-луч · D₄</h2>
+<canvas id="starCanvas" width="640" height="320"></canvas>
+<p style="font-size:11px;color:#555;margin:8px 0 0">Красный 0° вход · 225° память · 45° аномалии</p>
+</div>
+<div class="box">
+<h2>Круги Гершгорина</h2>
+<svg id="gershSvg" viewBox="0 0 100 100"></svg>
+<div class="kv" id="outGersh">—</div>
+</div>
+</div>
+<div class="box" style="margin-top:14px">
+<h2>Намерение / ввод</h2>
+<label for="mxInput">Текст → QBM / H_eff</label>
+<textarea id="mxInput">АКСИ: проверь когерентность контура</textarea>
+<div class="row">
+<button type="button" id="btnAnalyze">Считать матрицу</button>
+<button type="button" class="ghost" onclick="document.getElementById('mxInput').value='';document.getElementById('btnAnalyze').click()">Сброс</button>
+</div>
+</div>
+<div class="grid two" style="margin-top:14px">
+<div class="box"><h2>QBM · энергия</h2>
+<div class="kv"><b>E</b> <span id="outEnergy">—</span></div>
+<div class="kv"><b>⟨m⟩</b> <span id="outMag">—</span></div></div>
+<div class="box"><h2>H_eff · CCE</h2>
+<div class="kv"><b>H_eff</b> <span id="outHeff">—</span></div>
+<div class="kv"><b>S</b> <span id="outS">—</span></div>
+<div class="kv"><b>статус</b> <span id="outStatus">—</span></div></div>
+</div>
+<div class="box" style="margin-top:14px">
+<h2>Тарифы · Web3</h2>
+<div class="tiers">
+<div class="tier"><h3>Free</h3><ul><li>QBM + H_eff</li><li>Gershgorin</li><li>Граф D₄</li></ul></div>
+<div class="tier"><h3>Pro</h3><ul><li>Крипто-proof</li><li>localStorage</li><li>MetaMask / mock</li></ul></div>
+</div>
+<div class="check"><input type="checkbox" id="proMock" checked/><label for="proMock" style="margin:0">Mock без кошелька</label></div>
+<div class="row"><button type="button" id="btnPro">Активировать Pro-Доступ</button></div>
+<div id="proProof" style="margin-top:12px;font-size:12px">Pro не активен.</div>
+</div>
+<footer>АКСИ MATRIX · offline · связка с Whole · aksilove@internet.ru</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/gh/MILANA808/milana808.github.io@main/matrix.js"></script>
+<script src="/matrix.js?v=3" onerror=""></script>
 </body>
 </html>
