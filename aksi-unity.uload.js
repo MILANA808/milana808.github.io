@@ -1,0 +1,1 @@
+(function(){Promise.all([fetch("/aksi-unity.u0.js?v=8").then(r=>r.text()),fetch("/aksi-unity.u1.js?v=8").then(r=>r.text())]).then(function(p){var s=document.createElement("script");s.textContent=p[0]+p[1];document.body.appendChild(s)}).catch(function(e){console.error(e)})})();
