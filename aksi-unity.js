@@ -1,7 +1,8 @@
 (function(){"use strict";
-var S={entropy:null,bits:null,eqs:null,lastGate:null,did:null,chain:[],T:1.2,mag:null,Cv:null,phase:"—",Tc:2,spins:null,N:16,H_eff:null,energy:null},bus={},_booted=0,W={pts:[],gate:null},Q={state:null},_dc=null,J=1;
-function $(i){return document.getElementById(i)}
-function set(i,t){var e=$(i);if(e)e.textContent=t}
-/* FULL FILE LOADED FROM ARTIFACTS - SEE NEXT */
-console.error("INCOMPLETE_PUSH");
+var parts=["/aksi-p0.js?v=10","/aksi-p1.js?v=10","/aksi-p2.js?v=10"], i=0, code="";
+function next(){
+  if(i>=parts.length){ try{ (0,eval)(code+"\n//# sourceURL=aksi-unity.js"); }catch(e){ console.error(e); } return; }
+  fetch(parts[i++]).then(function(r){return r.text()}).then(function(t){ code+=t; next(); }).catch(function(e){ console.error(e); });
+}
+next();
 })();
