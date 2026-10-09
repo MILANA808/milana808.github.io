@@ -3,101 +3,163 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ</title>
+<title>АКСИ · Q-Thermo</title>
 <meta name="theme-color" content="#0b1020"/>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif;line-height:1.45}
 .top{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid #24304d;font-size:12px;color:#8b9bb8;background:#0b1020}
-.dot{width:8px;height:8px;border-radius:50%;background:#34d399}
-.shell{max-width:720px;margin:0 auto;padding:12px 14px 28px}
-h1{font-size:1.25rem;margin:8px 0 4px}
-.sub{color:#8b9bb8;font-size:.88rem;margin:0 0 10px}
+.dot{width:8px;height:8px;border-radius:50%;background:#22d3ee;box-shadow:0 0 8px #22d3ee}
+.shell{max-width:740px;margin:0 auto;padding:12px 14px 32px}
+h1{font-size:1.2rem;margin:8px 0 4px}
+.sub{color:#8b9bb8;font-size:.86rem;margin:0 0 10px}
 .card{background:#121a2f;border:1px solid #24304d;border-radius:14px;padding:12px;margin:10px 0}
-#log{max-height:min(55vh,500px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:120px}
+#log{max-height:min(50vh,460px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:140px}
 .msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;font-size:14px}
 .u{background:#0a0f1c;border:1px solid #24304d;align-self:flex-end;max-width:92%}
-.a{background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.35);align-self:flex-start;max-width:95%}
+.a{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.3);align-self:flex-start;max-width:96%}
 .tag{font-size:10px;color:#8b9bb8;margin-bottom:3px}
 .composer{display:flex;gap:8px;margin-top:10px}
 input{flex:1;background:#0a0f1c;border:1px solid #24304d;border-radius:10px;color:#e8eefc;padding:12px;font-size:15px}
-button{border:0;border-radius:10px;padding:11px 13px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
-button.ghost{background:transparent;border:1px solid #24304d;color:#e8eefc;font-weight:600}
+button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.chips button{padding:7px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.meta{font-size:11px;color:#8b9bb8;margin-top:8px}
+.chips button{padding:7px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d;font-weight:600}
+.meta{font-size:11px;color:#8b9bb8;margin-top:8px;font-family:ui-monospace,monospace}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.m{background:#0a0f1c;border:1px solid #24304d;border-radius:10px;padding:8px;text-align:center}
+.m b{display:block;font-size:1.05rem;color:#22d3ee}
+.m span{font-size:10px;color:#8b9bb8}
+canvas{width:100%;height:72px;border-radius:8px;background:#0a0f1c;border:1px solid #24304d;margin-top:8px}
 </style>
 </head>
 <body>
-<div class="top"><span class="dot"></span><strong style="color:#e8eefc">АКСИ · wiki-mind</strong><span id="msk">—</span><span id="st">wiki 0</span></div>
+<div class="top"><span class="dot"></span><strong style="color:#e8eefc">АКСИ · Q-Thermo</strong><span id="msk">—</span></div>
 <div class="shell">
-<h1>Агент с растущей памятью</h1>
-<p class="sub">Сначала wiki → потом факты из сети → ответ пишется обратно в wiki. Не один и тот же шаблон.</p>
+<h1>Термодинамический квантовый ответчик</h1>
+<p class="sub">Симулятор 6 кубитов → коллапс → Больцман-сэмплинг фраз. Каждый ответ уникален. Не шаблонный чат.</p>
+<div class="card">
+<div class="meters">
+<div class="m"><b id="mH">—</b><span>энтропия H</span></div>
+<div class="m"><b id="mE">—</b><span>энергия E</span></div>
+<div class="m"><b id="mB">—</b><span>состояние</span></div>
+</div>
+<canvas id="cv" width="640" height="72"></canvas>
+<div class="meta" id="trace">ожидание импульса…</div>
+</div>
 <div class="card">
 <div id="log"></div>
 <div class="chips">
 <button type="button" data-q="кто ты">кто ты</button>
 <button type="button" data-q="12*12">12*12</button>
-<button type="button" data-q="что такое нейронная сеть">нейронная сеть</button>
-<button type="button" data-q="что такое квантовый компьютер">квантовый ПК</button>
-<button type="button" data-q="покажи wiki">wiki</button>
+<button type="button" data-q="объясни свободу воли">свобода воли</button>
+<button type="button" data-q="что думаешь про будущее ии">будущее ИИ</button>
+<button type="button" data-q="расскажи про любовь">любовь</button>
 </div>
 <div class="composer">
-<input id="in" type="text" placeholder="Любой вопрос · 2+2 · запомни: ключ = значение" autocomplete="off"/>
-<button type="button" id="send">Отправить</button>
+<input id="in" type="text" placeholder="Любой вопрос — ответ из коллапса + термодинамики" autocomplete="off"/>
+<button type="button" id="send">Коллапс</button>
 </div>
-<div class="row">
-<button type="button" class="ghost" id="btnWiki">Показать wiki</button>
-<button type="button" class="ghost" id="btnClearChat">Очистить чат</button>
-</div>
-<div class="meta">wiki в localStorage · aksilove@internet.ru</div>
+<div class="meta">β-сэмплинг · 64 амплитуды · aksilove@internet.ru</div>
 </div>
 </div>
 <script>
 (function(){
 "use strict";
-var WIKI_KEY="aksi_wiki_v2", MEM_KEY="aksi_facts_v2";
-var wiki={}, facts={};
-try{wiki=JSON.parse(localStorage.getItem(WIKI_KEY)||"{}")||{}}catch(e){wiki={}}
-try{facts=JSON.parse(localStorage.getItem(MEM_KEY)||"{}")||{}}catch(e){facts={}}
+var NQ=6, DIM=64;
 
 function $(id){return document.getElementById(id)}
 function msk(){
   try{return new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})+" МСК"}
   catch(e){return"—"}
 }
-function paint(){
-  var a=$("msk");if(a)a.textContent=msk();
-  var b=$("st");if(b)b.textContent="wiki "+Object.keys(wiki).length+" · facts "+Object.keys(facts).length;
-}
-setInterval(paint,1000);paint();
+setInterval(function(){var e=$("msk");if(e)e.textContent=msk()},1000);
+$("msk").textContent=msk();
 
-function saveWiki(){try{localStorage.setItem(WIKI_KEY,JSON.stringify(wiki))}catch(e){}paint()}
-function saveFacts(){try{localStorage.setItem(MEM_KEY,JSON.stringify(facts))}catch(e){}paint()}
+function zeros(){var a=new Float64Array(DIM*2);a[0]=1;return a}
+function norm2(st){var s=0,i;for(i=0;i<DIM;i++)s+=st[2*i]*st[2*i]+st[2*i+1]*st[2*i+1];return s}
+function normalize(st){var n=Math.sqrt(norm2(st))||1,i;for(i=0;i<st.length;i++)st[i]/=n}
+function hadamard(st,q){
+  var step=1<<q, out=new Float64Array(st.length), i,j,s=Math.SQRT1_2;
+  out=new Float64Array(st.length);
+  for(i=0;i<DIM;i++){
+    if(((i>>q)&1)===0){
+      j=i|(1<<q);
+      var ar=st[2*i],ai=st[2*i+1],br=st[2*j],bi=st[2*j+1];
+      out[2*i]=s*(ar+br); out[2*i+1]=s*(ai+bi);
+      out[2*j]=s*(ar-br); out[2*j+1]=s*(ai-bi);
+    }
+  }
+  return out;
+}
+function phase(st,q,theta){
+  var out=new Float64Array(st);
+  var c=Math.cos(theta),s=Math.sin(theta),i,r,im;
+  for(i=0;i<DIM;i++)if((i>>q)&1){
+    r=out[2*i];im=out[2*i+1];
+    out[2*i]=r*c-im*s; out[2*i+1]=r*s+im*c;
+  }
+  return out;
+}
+function entropy(st){
+  var H=0,i,p;
+  for(i=0;i<DIM;i++){
+    p=st[2*i]*st[2*i]+st[2*i+1]*st[2*i+1];
+    if(p>1e-15)H-=p*Math.log2(p);
+  }
+  return H;
+}
+function energy(st){
+  var e=0,i,q,p;
+  for(q=0;q<NQ;q++){
+    var z=0;
+    for(i=0;i<DIM;i++){
+      p=st[2*i]*st[2*i]+st[2*i+1]*st[2*i+1];
+      z+=((i>>q)&1)?-p:p;
+    }
+    e+=z;
+  }
+  return e;
+}
+function measure(st){
+  var r=Math.random(),acc=0,i,p;
+  for(i=0;i<DIM;i++){
+    p=st[2*i]*st[2*i]+st[2*i+1]*st[2*i+1];
+    acc+=p;if(r<=acc)return i;
+  }
+  return DIM-1;
+}
+function hashAngles(text){
+  var s=String(text), angles=[],i,h=2166136261;
+  for(i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+  for(i=0;i<NQ;i++){
+    h^=(h>>>13);h=Math.imul(h,0x5bd1e995);h^=(h>>>15);
+    angles.push(((h>>>0)%6283)/1000 - Math.PI);
+  }
+  return angles;
+}
+function evolve(query){
+  var st=zeros(), angles=hashAngles(query), q;
+  for(q=0;q<NQ;q++)st=hadamard(st,q);
+  for(q=0;q<NQ;q++)st=phase(st,q,angles[q]);
+  for(q=0;q<NQ-1;q++)st=phase(st,q+1,angles[q]*0.37);
+  for(q=0;q<NQ;q++)st=hadamard(st,q);
+  normalize(st);
+  return st;
+}
+function drawAmps(st){
+  var cv=$("cv");if(!cv)return;
+  var ctx=cv.getContext("2d"),w=cv.width,h=cv.height,i,p,x,bar;
+  ctx.clearRect(0,0,w,h);
+  for(i=0;i<DIM;i++){
+    p=st[2*i]*st[2*i]+st[2*i+1]*st[2*i+1];
+    bar=Math.max(1,p*h*3.2);
+    x=(i+0.1)*(w/DIM);
+    ctx.fillStyle="rgba(34,211,238,"+(0.25+p*2)+")";
+    ctx.fillRect(x,h-bar,w/DIM*0.8,bar);
+  }
+}
 
-function norm(s){
-  return String(s||"").toLowerCase()
-    .replace(/[«»"'`]/g,"")
-    .replace(/[?!.,;:()]/g," ")
-    .replace(/\s+/g," ")
-    .trim();
-}
-function tokens(s){
-  return norm(s).split(" ").filter(function(w){
-    return w.length>2 && !/^(что|это|как|для|или|the|and|для|про|есть|быть|какой|какая|какие|почему|когда|где|who|what|how)$/.test(w);
-  });
-}
-function slug(s){
-  var t=tokens(s).slice(0,6).join("-");
-  return t || ("p_"+Date.now());
-}
-
-function fmt(x){
-  if(x==null||!isFinite(x))return"—";
-  if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));
-  return String(parseFloat(x.toFixed(10)));
-}
+function fmt(x){if(!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(10)))}
 function evalExpr(s){
   s=String(s).toLowerCase().replace(/,/g,".").replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-");
   s=s.replace(/π/g,"Math.PI").replace(/\bpi\b/g,"Math.PI");
@@ -120,138 +182,102 @@ function solveEq(raw){
   if(m){b=(m[1]===""||m[1]==="+")?1:(m[1]==="-"?-1:parseFloat(m[1]));e=e.replace(m[0],"")}
   e.replace(/([+-]?\d+\.?\d*)/g,function(n){c+=parseFloat(n);return""});c-=rN;
   if(Math.abs(a)<1e-12){if(Math.abs(b)<1e-12)return"Нет решения";return"Корень: "+fmt(-c/b)}
-  var d=b*b-4*a*c;
-  if(d<-1e-12)return"Нет действительных корней";
+  var d=b*b-4*a*c;if(d<-1e-12)return"Нет действительных корней";
   if(Math.abs(d)<1e-12)return"Корень: "+fmt(-b/(2*a));
-  var s2=Math.sqrt(d);
-  return"Корни: "+fmt((-b+s2)/(2*a))+", "+fmt((-b-s2)/(2*a));
+  var s2=Math.sqrt(d);return"Корни: "+fmt((-b+s2)/(2*a))+", "+fmt((-b-s2)/(2*a));
 }
 function mathAnswer(q){
   var raw=String(q).trim(),low=raw.toLowerCase();
   var pm=low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
   if(pm)return pm[1]+"% от "+pm[2]+" = "+fmt((+pm[1].replace(",","."))/100*(+pm[2].replace(",",".")));
   var fm=low.match(/(\d+)\s*!/);
-  if(fm){var n=+fm[1],f=1,i;if(n>20)return"n! слишком велико";for(i=2;i<=n;i++)f*=i;return n+"! = "+f}
-  if(/=/.test(raw)&&/[xх]/i.test(raw)){var eq=solveEq(raw);if(eq)return"Уравнение: "+raw+"\n"+eq}
+  if(fm){var n=+fm[1],f=1,i;if(n>20)return"n! велико";for(i=2;i<=n;i++)f*=i;return n+"! = "+f}
+  if(/=/.test(raw)&&/[xх]/i.test(raw)){var eq=solveEq(raw);if(eq)return eq}
   var expr=raw.replace(/^посчитай\s*/i,"").replace(/^вычисли\s*/i,"");
   if(!/=/.test(expr)||!/[xх]/i.test(expr)){var v=evalExpr(expr);if(v!=null)return"Результат: "+fmt(v)}
   return null;
 }
 
-function teach(q){
-  var m=String(q).match(/^(?:запомни|remember)\s*[:\-]?\s*(.+)$/i);
-  if(!m)return null;
-  var body=m[1].trim();
-  var kv=body.match(/^([^=:]+)[=:]\s*(.+)$/);
-  if(kv){
-    var k=kv[1].trim().toLowerCase(),v=kv[2].trim();
-    facts[k]=v;saveFacts();
-    wikiWrite(k,v,"user");
-    return"Запомнила и записала в wiki: «"+k+"» = «"+v+"»";
-  }
-  facts["note_"+Date.now()]=body;saveFacts();
-  wikiWrite("note-"+Date.now(),body,"user");
-  return"Записала в память и wiki";
-}
+var OPEN=[
+  "С точки зрения термодинамики смысла",
+  "Если смотреть через коллапс состояния",
+  "В рамках квантово-статистического взгляда",
+  "Исходя из текущего фазового портрета",
+  "При ненулевой температуре смысла",
+  "Когда система уходит из равновесия",
+  "В языке свободной энергии",
+  "Через призму наблюдаемой АКСИ"
+];
+var BRIDGE=[
+  "вопрос про «{K}» задаёт ненулевой ток в пространстве состояний",
+  "тема «{K}» связывается с несколькими аттракторами сразу",
+  "слово «{K}» смещает фазу и открывает ветку рассуждения",
+  "интерес к «{K}» повышает энтропию до поиска структуры",
+  "запрос о «{K}» нельзя свести к одной заученной формуле"
+];
+var BODY=[
+  "Ответ не фиксирован заранее: он выбирается Больцман-весами из набора траекторий.",
+  "Низкая температура дала бы один жёсткий шаблон; здесь температура держит разнообразие.",
+  "Коллапс зафиксировал конкретную ветку, но соседние амплитуды всё ещё влияют на формулировку.",
+  "Это не нейросеть с миллиардами весов, а явный симулятор: амплитуды, энергия, сэмплинг.",
+  "Полезность ответа измеряется согласованностью с вопросом и честностью границ модели.",
+  "АКСИ не притворяется всезнанием: она показывает, из какого состояния собран текст.",
+  "Свобода выбора здесь — это ненулевая температура, а не магия.",
+  "Если повторить вопрос, коллапс может выдать другую ветку — это свойство, не баг."
+];
+var CLOSE=[
+  "Итог: «{K}» осмысляется как процесс, а не как готовая цитата.",
+  "Так «{K}» остаётся открытым понятием, связанным с твоим запросом здесь и сейчас.",
+  "Поэтому про «{K}» лучше говорить траекторией, а не одной заученной фразой.",
+  "Фиксация: состояние измерено, текст собран, дальше можно углубить вопрос про «{K}»."
+];
+var ID_LINES=[
+  "Я АКСИ Q-Thermo: 6-кубитный симулятор + термодинамический выбор фраз.",
+  "Я не ChatGPT. Я собираю ответ из коллапса амплитуд и Больцман-сэмплинга.",
+  "Мой «разум» здесь — явная математика состояния, а не скрытые веса облака."
+];
 
-function wikiWrite(title, body, source){
-  var id=slug(title);
-  var prev=wiki[id];
-  var page={
-    id:id,
-    title:String(title).slice(0,120),
-    body:String(body).slice(0,1200),
-    source:source||"agent",
-    hits:(prev&&prev.hits?prev.hits:0),
-    updated:new Date().toISOString()
-  };
-  if(prev&&prev.body&&prev.body!==page.body){
-    page.history=Array.isArray(prev.history)?prev.history.slice(-4):[];
-    page.history.push({body:prev.body.slice(0,300),at:prev.updated||""});
+function keywords(q){
+  var stop={что:1,это:1,как:1,для:1,или:1,про:1,есть:1,быть:1,какой:1,какая:1,какие:1,почему:1,когда:1,где:1,кто:1,ты:1,мне:1,the:1,and:1,расскажи:1,объясни:1,подумай:1,скажи:1};
+  return String(q).toLowerCase().replace(/[^\wа-яёa-z0-9\s]/gi," ").split(/\s+/).filter(function(w){return w.length>2&&!stop[w]}).slice(0,6);
+}
+function boltzPick(arr, seed, beta){
+  var weights=[],i,s=0,e,r;
+  for(i=0;i<arr.length;i++){
+    e=(i*1.17+(seed%(i+3))*0.31)%5;
+    weights[i]=Math.exp(-beta*e);
+    s+=weights[i];
   }
-  wiki[id]=page;
-  saveWiki();
-  return id;
+  r=(seed%10000)/10000*s;
+  for(i=0;i<arr.length;i++){r-=weights[i];if(r<=0)return arr[i]}
+  return arr[arr.length-1];
 }
-function wikiSearch(q){
-  var toks=tokens(q);
-  if(!toks.length)return null;
-  var best=null,bestScore=0;
-  for(var id in wiki){
-    if(!Object.prototype.hasOwnProperty.call(wiki,id))continue;
-    var p=wiki[id];
-    var hay=norm(p.title+" "+p.body+" "+id);
-    var score=0;
-    for(var i=0;i<toks.length;i++){
-      if(hay.indexOf(toks[i])>=0)score+=1;
-      if(norm(p.title).indexOf(toks[i])>=0)score+=2;
-    }
-    if(score>bestScore){bestScore=score;best=p}
+function permute(arr, seed){
+  var a=arr.slice(),i,j,t;
+  for(i=a.length-1;i>0;i--){
+    j=Math.abs((seed*1103515245+i*12345)>>i)%(i+1);
+    t=a[i];a[i]=a[j];a[j]=t;
   }
-  if(best&&bestScore>=Math.min(2,toks.length)){
-    best.hits=(best.hits||0)+1;
-    wiki[best.id]=best;saveWiki();
-    return best;
+  return a;
+}
+function generateThermo(q, measured, H, E){
+  var keys=keywords(q);
+  var kstr=keys.length?keys.join(", "):"этот запрос";
+  var beta=Math.max(0.15, 1.4-H/6);
+  var seed=measured*9973+Math.floor(H*1000)+String(q).length*13;
+  var open=boltzPick(permute(OPEN,seed), seed, beta);
+  var bridge=boltzPick(permute(BRIDGE,seed+3), seed+7, beta).replace(/\{K\}/g,kstr);
+  var body1=boltzPick(permute(BODY,seed+11), seed+11, beta);
+  var body2=boltzPick(permute(BODY,seed+29), seed+29, beta*0.9);
+  if(body2===body1)body2=BODY[(seed+5)%BODY.length];
+  var close=boltzPick(permute(CLOSE,seed+41), seed+41, beta).replace(/\{K\}/g,kstr);
+  var bits=measured.toString(2).padStart(NQ,"0");
+  var head="";
+  if(/кто ты|что ты|представься/i.test(q)){
+    head=boltzPick(permute(ID_LINES,seed),seed,0.8)+"\n\n";
   }
-  return null;
-}
-function listWiki(){
-  var keys=Object.keys(wiki);
-  if(!keys.length)return"Wiki пуста. После ответов страницы появятся сами.";
-  keys.sort(function(a,b){return (wiki[b].hits||0)-(wiki[a].hits||0)});
-  var lines=["Wiki ("+keys.length+" стр.):"];
-  for(var i=0;i<Math.min(keys.length,15);i++){
-    var p=wiki[keys[i]];
-    lines.push("• "+p.title+" ["+(p.source||"?")+", hits "+(p.hits||0)+"]");
-  }
-  return lines.join("\n");
-}
-
-function wikiAnswer(q){
-  var page=wikiSearch(q);
-  if(!page)return null;
-  return{
-    text:"Из wiki «"+page.title+"»:\n"+page.body+(page.source==="wikipedia"?"\n\n(источник: Wikipedia, сохранено локально)":""),
-    src:"wiki",
-    page:page
-  };
-}
-
-function wikiApi(lang, title){
-  var url="https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title);
-  return fetch(url,{headers:{"Accept":"application/json"}}).then(function(r){
-    if(!r.ok)throw new Error("wiki "+r.status);
-    return r.json();
-  }).then(function(j){
-    if(!j||j.type==="disambiguation")throw new Error("disambiguation");
-    var extract=(j.extract||"").trim();
-    if(!extract||extract.length<40)throw new Error("short");
-    return{title:j.title||title,extract:extract.slice(0,900),lang:lang,url:j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page};
-  });
-}
-function extractTopic(q){
-  var s=String(q).trim()
-    .replace(/^(что\s+такое|кто\s+такой|кто\s+такая|расскажи\s+про|объясни|what\s+is|who\s+is)\s+/i,"")
-    .replace(/[?!.]+$/,"")
-    .trim();
-  return s.slice(0,80);
-}
-function fetchFact(q){
-  var topic=extractTopic(q);
-  if(topic.length<2)return Promise.reject(new Error("no topic"));
-  return wikiApi("ru",topic).catch(function(){return wikiApi("en",topic)});
-}
-
-function identity(q){
-  var low=q.toLowerCase();
-  if(/кто ты|что ты|представься/.test(low)){
-    return"Я АКСИ — агент с wiki-памятью (идея: raw→wiki→ответ→запись обратно).\nСначала ищу в локальной wiki, иначе тяну краткий факт, потом сохраняю.\nНе шаблонный чат: база растёт после каждого вопроса.\naksilove@internet.ru";
-  }
-  if(/привет|здравств|hello/.test(low))return"Привет. Спроси что угодно — ответ попадёт в wiki и в следующий раз будет богаче.";
-  if(/время|мск|час/.test(low))return msk();
-  if(/покажи\s*wiki|wiki$|страницы/.test(low))return listWiki();
-  if(/помощ|умеешь|help/.test(low))return"• math и уравнения\n• wiki-память (растёт)\n• факты из Wikipedia при онлайне\n• запомни: ключ = значение";
-  return null;
+  return head+open+". "+bridge+". "+body1+" "+body2+" "+close+
+    "\n\n[коллапс "+bits+" · H="+H.toFixed(3)+" · E="+E.toFixed(3)+" · β="+beta.toFixed(2)+"]";
 }
 
 function append(role,text,src){
@@ -263,18 +289,23 @@ function append(role,text,src){
   box.appendChild(d);box.scrollTop=box.scrollHeight;
 }
 
-function finish(q,ans,src){
-  append("a",ans,src);
-  if(src==="wikipedia"||src==="wiki"||src==="seed"){
-    var topic=extractTopic(q);
-    if(topic)wikiWrite(topic,ans,src);
-  }
-  try{
-    localStorage.setItem("aksi_unity_last",JSON.stringify({
-      system:"AKSI-WIKI-v2",claim:q,answer:String(ans).slice(0,700),src:src,ts:new Date().toISOString(),
-      wiki_n:Object.keys(wiki).length
-    }));
-  }catch(e){}
+function respond(q){
+  q=String(q||"").trim();
+  if(!q)return{text:"Задай вопрос — запущу эволюцию и коллапс.",src:"core"};
+  var math=mathAnswer(q);
+  if(math)return{text:math,src:"math"};
+
+  var st=evolve(q);
+  var H=entropy(st), E=energy(st);
+  var m=measure(st);
+  drawAmps(st);
+  $("mH").textContent=H.toFixed(3);
+  $("mE").textContent=E.toFixed(2);
+  $("mB").textContent=m.toString(2).padStart(NQ,"0");
+  $("trace").textContent="эволюция · H="+H.toFixed(3)+" → коллапс "+m.toString(2).padStart(NQ,"0");
+
+  var text=generateThermo(q,m,H,E);
+  return{text:text,src:"q-thermo"};
 }
 
 function send(){
@@ -282,44 +313,24 @@ function send(){
   var q=inp.value.trim();if(!q)return;
   inp.value="";
   append("u",q);
-
-  var t=teach(q);if(t){finish(q,t,"memory");return}
-  var m=mathAnswer(q);if(m){finish(q,m,"math");return}
-  var id=identity(q);if(id){finish(q,id,"core");return}
-
-  var w=wikiAnswer(q);
-  if(w){
-    if(w.page&&w.page.body&&w.page.body.length>80){finish(q,w.text,"wiki");return}
-  }
-
-  append("a","Ищу факт…","net");
-  fetchFact(q).then(function(f){
-    var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-    var text=f.title+":\n"+f.extract+(f.url?"\n\n"+f.url:"");
-    wikiWrite(f.title,f.extract,"wikipedia");
-    finish(q,text,"wikipedia");
-  }).catch(function(){
-    var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-    if(w){finish(q,w.text,"wiki");return}
-    for(var k in facts){
-      if(Object.prototype.hasOwnProperty.call(facts,k)&&norm(q).indexOf(k)>=0){
-        finish(q,facts[k]+" (факт)","memory");return;
-      }
-    }
-    finish(q,"Не нашла готовый факт по сети и в wiki.\nУточни тему (например: «что такое градиентный спуск») или: запомни: тема = …","core");
-  });
+  var r=respond(q);
+  append("a",r.text,r.src);
+  try{
+    localStorage.setItem("aksi_unity_last",JSON.stringify({
+      system:"AKSI-QTHERMO-v1",claim:q,answer:String(r.text).slice(0,800),src:r.src,ts:new Date().toISOString()
+    }));
+  }catch(e){}
 }
 
 $("send").onclick=send;
 $("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});
-$("btnWiki").onclick=function(){append("a",listWiki(),"wiki")};
-$("btnClearChat").onclick=function(){$("log").innerHTML="";append("a","Чат очищен. Wiki на месте ("+Object.keys(wiki).length+").","core")};
 var chips=document.querySelectorAll("[data-q]");
 for(var i=0;i<chips.length;i++){(function(btn){
   btn.onclick=function(){var el=$("in");if(el)el.value=btn.getAttribute("data-q")||"";send()};
 })(chips[i])}
 
-append("a","Онлайн · "+msk()+"\nWiki-mind: вопрос → wiki → факт → запись. База умнеет после каждого ответа.","core");
+append("a","Онлайн · "+msk()+"\nЗадай любой вопрос. Ответ соберётся из коллапса 64 амплитуд и термодинамического выбора фраз — каждый раз по-новому.","core");
+drawAmps(evolve("aksi-init"));
 })();
 </script>
 </body>
