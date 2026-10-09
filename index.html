@@ -3,245 +3,257 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ · Интеллект</title>
-<meta name="description" content="АКСИ гибридный интеллект: offline ядро + локальная WebLLM нейросеть в браузере"/>
+<title>АКСИ</title>
 <meta name="theme-color" content="#0b1020"/>
 <style>
-:root{--bg:#0b1020;--card:#121a2f;--line:#24304d;--tx:#e8eefc;--mut:#8b9bb8;--ok:#34d399;--bad:#f87171;--acc:#818cf8;--cyan:#22d3ee;--warn:#fbbf24}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
-a{color:var(--acc)}
-.top{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:rgba(11,16,32,.96);border-bottom:1px solid var(--line);font-size:12px;color:var(--mut);backdrop-filter:blur(10px)}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
-.dot.off{background:var(--mut);box-shadow:none}
-.shell{max-width:760px;margin:0 auto;padding:12px 14px 32px}
-h1{font-size:1.3rem;margin:8px 0 4px}
-.sub{color:var(--mut);font-size:.88rem;margin:0 0 12px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
-#log{max-height:min(52vh,460px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:140px}
+*{box-sizing:border-box}
+body{margin:0;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif;line-height:1.45}
+.top{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:#0b1020;border-bottom:1px solid #24304d;font-size:12px;color:#8b9bb8}
+.dot{width:8px;height:8px;border-radius:50%;background:#34d399}
+.shell{max-width:720px;margin:0 auto;padding:12px 14px 28px}
+h1{font-size:1.25rem;margin:8px 0 4px}
+.sub{color:#8b9bb8;font-size:.88rem;margin:0 0 12px}
+.card{background:#121a2f;border:1px solid #24304d;border-radius:14px;padding:12px;margin:10px 0}
+#log{max-height:min(55vh,480px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:100px}
 .msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;font-size:14px}
-.u{background:#0a0f1c;border:1px solid var(--line);align-self:flex-end;max-width:92%}
+.u{background:#0a0f1c;border:1px solid #24304d;align-self:flex-end;max-width:92%}
 .a{background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.35);align-self:flex-start;max-width:95%}
-.tag{font-size:10px;color:var(--mut);margin-bottom:4px}
 .composer{display:flex;gap:8px;margin-top:10px}
-.composer input{flex:1;background:#0a0f1c;border:1px solid var(--line);border-radius:10px;color:var(--tx);padding:12px;font-size:15px;outline:none}
-button{border:0;border-radius:10px;padding:11px 13px;font-weight:700;font-size:13px;cursor:pointer;background:var(--cyan);color:#06202a;font-family:inherit}
-button:disabled{opacity:.5;cursor:wait}
-button.ghost{background:transparent;border:1px solid var(--line);color:var(--tx);font-weight:600}
-button.acc{background:var(--acc);color:#0b1020}
+input{flex:1;background:#0a0f1c;border:1px solid #24304d;border-radius:10px;color:#e8eefc;padding:12px;font-size:15px}
+button{border:0;border-radius:10px;padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.chips button{padding:7px 10px;font-size:12px;background:#0e1528;color:var(--tx);border:1px solid var(--line);font-weight:600}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.meta{font-size:11px;color:var(--mut);margin-top:8px}
-.bar{height:6px;background:#0a0f1c;border-radius:99px;overflow:hidden;margin-top:8px;display:none}
-.bar.on{display:block}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--acc));transition:width .2s}
+.chips button{padding:8px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d;font-weight:600}
+.meta{font-size:11px;color:#8b9bb8;margin-top:8px}
 </style>
 </head>
 <body>
-<div class="top">
-  <span class="dot off" id="dot"></span>
-  <strong style="color:var(--tx)">АКСИ интеллект</strong>
-  <span id="msk">—</span>
-  <span id="st">ядро · LLM выкл</span>
-</div>
+<div class="top"><span class="dot"></span><strong style="color:#e8eefc">АКСИ</strong><span id="msk">—</span><span id="st">online</span></div>
 <div class="shell">
-  <h1>Гибридный интеллект</h1>
-  <p class="sub">Ядро всегда онлайн (math · память · gate). Нейросеть — по желанию, прямо в браузере (WebGPU), без сервера АКСИ.</p>
-  <div class="card">
-    <div class="row">
-      <button type="button" class="acc" id="btnLLM">Загрузить нейросеть</button>
-      <button type="button" class="ghost" id="btnMem">Память</button>
-      <button type="button" class="ghost" id="btnExport">Receipt</button>
-    </div>
-    <div class="bar" id="bar"><i id="barI"></i></div>
-    <div class="meta" id="llmMsg">Модель не загружена. Offline-ядро уже отвечает.</div>
-  </div>
-  <div class="card">
-    <div id="log"></div>
-    <div class="chips">
-      <button type="button" data-q="кто ты">кто ты</button>
-      <button type="button" data-q="12*12">12*12</button>
-      <button type="button" data-q="x^2-4=0">уравнение</button>
-      <button type="button" data-q="запомни: проект = АКСИ">запомни</button>
-      <button type="button" data-q="объясни что такое суверенитет данных">LLM-вопрос</button>
-    </div>
-    <div class="composer">
-      <input id="in" type="text" placeholder="Вопрос · пример · запомни: ключ = значение" autocomplete="off"/>
-      <button type="button" id="send">Отправить</button>
-    </div>
-    <div class="meta">Каскад: math → память → WebLLM → ядро · aksilove@internet.ru</div>
-  </div>
+<h1>Твой агент</h1>
+<p class="sub">Считает · помнит · отвечает. Без перезагрузки страницы.</p>
+<div class="card">
+<div id="log"></div>
+<div class="chips">
+<button type="button" data-q="кто ты">кто ты</button>
+<button type="button" data-q="12*12">12*12</button>
+<button type="button" data-q="x^2-4=0">x^2-4=0</button>
+<button type="button" data-q="запомни: город = Москва">запомни</button>
+<button type="button" data-q="что помнишь">память</button>
 </div>
-<script type="module">
-const MEM_KEY="aksi_intel_mem_v1", REC_KEY="aksi_intel_rec_v1";
-let mem=loadMem(), engine=null, llmReady=false, llmLoading=false, lastGate="—";
-const $=id=>document.getElementById(id);
-const msk=()=>{try{return new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})+" МСК"}catch(e){return"—"}};
-const paint=()=>{$("msk").textContent=msk();$("st").textContent=(llmReady?"LLM · ":"ядро · ")+"mem "+Object.keys(mem).length+" · gate "+lastGate;$("dot").className="dot"+(llmReady?"":" off")};
-setInterval(paint,1000);paint();
-function loadMem(){try{return JSON.parse(localStorage.getItem(MEM_KEY)||"{}")||{}}catch(e){return{}}}
-function saveMem(){try{localStorage.setItem(MEM_KEY,JSON.stringify(mem))}catch(e){}paint()}
-function fmt(x){if(x==null||!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(10)))}
-function evalExpr(s){
-  s=String(s).toLowerCase().replace(/,/g,".").replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-");
-  s=s.replace(/π/g,"Math.PI").replace(/\bpi\b/g,"Math.PI");
-  s=s.replace(/корень(?:\s*из)?\s*\(?\s*([\d.]+)\s*\)?/g,"Math.sqrt($1)");
-  s=s.replace(/√\s*\(?\s*([\d.]+)\s*\)?/g,"Math.sqrt($1)");
-  s=s.replace(/\^/g,"**");
-  s=s.replace(/[^0-9+\-*/().\sMathsqrtPI]/g,"");
-  if(!s.trim())return null;
-  try{const v=Function('"use strict";return ('+s+')')();return typeof v==="number"&&isFinite(v)?v:null}catch(e){return null}
+<div class="composer">
+<input id="in" type="text" placeholder="12*12 · запомни: имя = … · кто ты" autocomplete="off"/>
+<button type="button" id="send">Отправить</button>
+</div>
+<div class="meta">aksilove@internet.ru</div>
+</div>
+</div>
+<script>
+(function(){
+"use strict";
+var MEM_KEY = "aksi_ok_mem_v1";
+var mem = {};
+try { mem = JSON.parse(localStorage.getItem(MEM_KEY) || "{}") || {}; } catch (e) { mem = {}; }
+
+function $(id) { return document.getElementById(id); }
+function msk() {
+  try {
+    return new Date().toLocaleTimeString("ru-RU", {
+      timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+    }) + " МСК";
+  } catch (e) { return "—"; }
 }
-function solveEq(raw){
-  let s=String(raw).toLowerCase().replace(/,/g,".").replace(/\s/g,"").replace(/х/g,"x").replace(/\*/g,"");
-  if(s.indexOf("=")<0)return null;
-  const L=s.split("=")[0],R=s.split("=")[1],rN=parseFloat(R);
-  if(!isFinite(rN)||/[x]/.test(R))return null;
-  let a=0,b=0,c=0,e=L,m;
-  m=e.match(/([+-]?\d*\.?\d*)x\^2/);if(m){a=m[1]===""||m[1]==="+"?1:m[1]==="-"?-1:parseFloat(m[1]);e=e.replace(m[0],"")}
-  m=e.match(/([+-]?\d*\.?\d*)x/);if(m){b=m[1]===""||m[1]==="+"?1:m[1]==="-"?-1:parseFloat(m[1]);e=e.replace(m[0],"")}
-  e.replace(/([+-]?\d+\.?\d*)/g,n=>{c+=parseFloat(n);return""});c-=rN;
-  if(Math.abs(a)<1e-12){if(Math.abs(b)<1e-12)return"Нет решения";return"Корень: "+fmt(-c/b)}
-  const d=b*b-4*a*c;if(d<-1e-12)return"Нет действительных корней";
-  if(Math.abs(d)<1e-12)return"Корень: "+fmt(-b/(2*a));
-  const s2=Math.sqrt(d);return"Корни: "+fmt((-b+s2)/(2*a))+", "+fmt((-b-s2)/(2*a));
+function paint() {
+  var a = $("msk"); if (a) a.textContent = msk();
+  var b = $("st"); if (b) b.textContent = "mem " + Object.keys(mem).length;
 }
-function mathAnswer(q){
-  const raw=String(q).trim(),low=raw.toLowerCase();
-  const pm=low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
-  if(pm)return pm[1]+"% от "+pm[2]+" = "+fmt((+pm[1].replace(",","."))/100*(+pm[2].replace(",",".")));
-  const fm=low.match(/(\d+)\s*!/);
-  if(fm){let n=+fm[1],f=1;if(n>20)return"n! слишком велико";for(let i=2;i<=n;i++)f*=i;return n+"! = "+f}
-  if(/=/.test(raw)&&/[xх]/i.test(raw)){const eq=solveEq(raw);if(eq)return"Уравнение: "+raw+"\n"+eq}
-  const expr=raw.replace(/^посчитай\s*/i,"").replace(/^вычисли\s*/i,"");
-  if(!/=/.test(expr)||!/[xх]/i.test(expr)){const v=evalExpr(expr);if(v!=null)return"Результат: "+fmt(v)}
-  return null;
+setInterval(paint, 1000); paint();
+
+function saveMem() {
+  try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) {}
+  paint();
 }
-function teach(q){
-  const m=String(q).match(/^(?:запомни|remember)\s*[:\-]?\s*(.+)$/i);if(!m)return null;
-  const body=m[1].trim(),kv=body.match(/^([^=:]+)[=:]\s*(.+)$/);
-  if(kv){const k=kv[1].trim().toLowerCase(),v=kv[2].trim();mem[k]=v;saveMem();return"Запомнила: «"+k+"» = «"+v+"»"}
-  mem["note_"+Date.now()]=body;saveMem();return"Записала в память";
+
+function fmt(x) {
+  if (x == null || !isFinite(x)) return "—";
+  if (Math.abs(x - Math.round(x)) < 1e-10) return String(Math.round(x));
+  return String(parseFloat(x.toFixed(10)));
 }
-function recall(q){
-  const low=q.toLowerCase();
-  if(/что\s+помнишь|покажи\s+память|факты/.test(low)){
-    const keys=Object.keys(mem);if(!keys.length)return"Память пуста. Напиши: запомни: ключ = значение";
-    return"Память:\n"+keys.map(k=>"• "+k+" = "+mem[k]).join("\n");
+
+function evalExpr(s) {
+  s = String(s).toLowerCase().replace(/,/g, ".").replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+  s = s.replace(/π/g, "Math.PI").replace(/\bpi\b/g, "Math.PI");
+  s = s.replace(/корень(?:\s*из)?\s*\(?\s*([\d.]+)\s*\)?/g, "Math.sqrt($1)");
+  s = s.replace(/√\s*\(?\s*([\d.]+)\s*\)?/g, "Math.sqrt($1)");
+  s = s.replace(/\^/g, "**");
+  s = s.replace(/[^0-9+\-*/().\sMathsqrtPI]/g, "");
+  if (!s.trim()) return null;
+  try {
+    var v = Function('"use strict";return (' + s + ')')();
+    return (typeof v === "number" && isFinite(v)) ? v : null;
+  } catch (e) { return null; }
+}
+
+function solveEq(raw) {
+  var s = String(raw).toLowerCase().replace(/,/g, ".").replace(/\s/g, "").replace(/х/g, "x").replace(/\*/g, "");
+  if (s.indexOf("=") < 0) return null;
+  var parts = s.split("=");
+  var L = parts[0], R = parts[1], rN = parseFloat(R);
+  if (!isFinite(rN) || /[x]/.test(R)) return null;
+  var a = 0, b = 0, c = 0, e = L, m;
+  m = e.match(/([+-]?\d*\.?\d*)x\^2/);
+  if (m) {
+    a = (m[1] === "" || m[1] === "+") ? 1 : (m[1] === "-" ? -1 : parseFloat(m[1]));
+    e = e.replace(m[0], "");
   }
-  for(const k of Object.keys(mem)){if(low.indexOf(k)>=0)return mem[k]+" (память: "+k+")"}
+  m = e.match(/([+-]?\d*\.?\d*)x/);
+  if (m) {
+    b = (m[1] === "" || m[1] === "+") ? 1 : (m[1] === "-" ? -1 : parseFloat(m[1]));
+    e = e.replace(m[0], "");
+  }
+  e.replace(/([+-]?\d+\.?\d*)/g, function (n) { c += parseFloat(n); return ""; });
+  c -= rN;
+  if (Math.abs(a) < 1e-12) {
+    if (Math.abs(b) < 1e-12) return "Нет решения";
+    return "Корень: " + fmt(-c / b);
+  }
+  var d = b * b - 4 * a * c;
+  if (d < -1e-12) return "Нет действительных корней";
+  if (Math.abs(d) < 1e-12) return "Корень: " + fmt(-b / (2 * a));
+  var s2 = Math.sqrt(d);
+  return "Корни: " + fmt((-b + s2) / (2 * a)) + ", " + fmt((-b - s2) / (2 * a));
+}
+
+function mathAnswer(q) {
+  var raw = String(q).trim();
+  var low = raw.toLowerCase();
+  var pm = low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
+  if (pm) {
+    return pm[1] + "% от " + pm[2] + " = " + fmt((+pm[1].replace(",", ".")) / 100 * (+pm[2].replace(",", ".")));
+  }
+  var fm = low.match(/(\d+)\s*!/);
+  if (fm) {
+    var n = +fm[1], f = 1, i;
+    if (n > 20) return "n! слишком велико";
+    for (i = 2; i <= n; i++) f *= i;
+    return n + "! = " + f;
+  }
+  if (/=/.test(raw) && /[xх]/i.test(raw)) {
+    var eq = solveEq(raw);
+    if (eq) return "Уравнение: " + raw + "\n" + eq;
+  }
+  var expr = raw.replace(/^посчитай\s*/i, "").replace(/^вычисли\s*/i, "");
+  if (!/=/.test(expr) || !/[xх]/i.test(expr)) {
+    var v = evalExpr(expr);
+    if (v != null) return "Результат: " + fmt(v);
+  }
   return null;
 }
-function coreRespond(q){
-  const t=teach(q);if(t)return{text:t,src:"memory"};
-  const m=mathAnswer(q);if(m)return{text:m,src:"math"};
-  const r=recall(q);if(r)return{text:r,src:"memory"};
-  const low=q.toLowerCase();
-  if(/кто ты|что ты|представься/.test(low))
-    return{text:"Я АКСИ — гибридный интеллект на твоём сайте.\n1) Ядро: math, память, gate (всегда).\n2) Опционально: локальная нейросеть WebLLM в браузере (не облако АКСИ).\nНе AGI. Технология служит тебе.\naksilove@internet.ru",src:"core"};
-  if(/привет|здравств|hello/.test(low))return{text:"Привет. Ядро готово. Для свободного текста нажми «Загрузить нейросеть» (нужен WebGPU).",src:"core"};
-  if(/время|мск|час/.test(low))return{text:msk(),src:"core"};
-  if(/что умеешь|помощ|help/.test(low))return{text:"• точные расчёты и уравнения\n• запомни: ключ = значение\n• свободный диалог после загрузки WebLLM\n• gate + receipt",src:"core"};
-  if(/акси|миссия/.test(low))return{text:"АКСИ — суверенный слой: решения и память у человека, модели — сменный инструмент.",src:"core"};
-  return null;
+
+function teach(q) {
+  var m = String(q).match(/^(?:запомни|remember)\s*[:\-]?\s*(.+)$/i);
+  if (!m) return null;
+  var body = m[1].trim();
+  var kv = body.match(/^([^=:]+)[=:]\s*(.+)$/);
+  if (kv) {
+    var k = kv[1].trim().toLowerCase();
+    var v = kv[2].trim();
+    mem[k] = v;
+    saveMem();
+    return "Запомнила: «" + k + "» = «" + v + "»";
+  }
+  mem["note_" + Date.now()] = body;
+  saveMem();
+  return "Записала в память";
 }
-async function loadLLM(){
-  if(llmReady||llmLoading)return;
-  llmLoading=true;$("btnLLM").disabled=true;$("bar").classList.add("on");$("llmMsg").textContent="Импорт WebLLM…";
-  try{
-    const mod=await import("https://esm.run/@mlc-ai/web-llm");
-    const CreateMLCEngine=mod.CreateMLCEngine||(mod.default&&mod.default.CreateMLCEngine);
-    if(!CreateMLCEngine)throw new Error("CreateMLCEngine не найден");
-    const models=["SmolLM2-360M-Instruct-q4f16_1-MLC","Qwen2.5-0.5B-Instruct-q4f16_1-MLC","TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC"];
-    let lastErr=null;
-    for(const mid of models){
-      try{
-        $("llmMsg").textContent="Загрузка "+mid+"…";
-        engine=await CreateMLCEngine(mid,{
-          initProgressCallback:(p)=>{
-            const pr=typeof p.progress==="number"?p.progress:0;
-            $("barI").style.width=Math.round(pr*100)+"%";
-            $("llmMsg").textContent=(p.text||mid).slice(0,120);
-          }
-        });
-        llmReady=true;llmLoading=false;$("btnLLM").textContent="Нейросеть готова";
-        $("llmMsg").textContent="Готово: "+mid+" · ответы генерируются локально";
-        $("barI").style.width="100%";paint();
-        append("a","Нейросеть подключена ("+mid+"). Можно спрашивать свободно.","webllm");
-        return;
-      }catch(e){lastErr=e;$("llmMsg").textContent="Пробую другую модель…"}
+
+function recall(q) {
+  var low = q.toLowerCase();
+  if (/что\s+помнишь|покажи\s+память|факты/.test(low)) {
+    var keys = Object.keys(mem);
+    if (!keys.length) return "Память пуста. Напиши: запомни: ключ = значение";
+    var lines = [];
+    for (var i = 0; i < keys.length; i++) lines.push("• " + keys[i] + " = " + mem[keys[i]]);
+    return "Память:\n" + lines.join("\n");
+  }
+  for (var k in mem) {
+    if (Object.prototype.hasOwnProperty.call(mem, k) && low.indexOf(k) >= 0) {
+      return mem[k] + " (память: " + k + ")";
     }
-    throw lastErr||new Error("не удалось");
-  }catch(e){
-    llmLoading=false;$("btnLLM").disabled=false;
-    $("llmMsg").textContent="WebLLM недоступна: "+(e&&e.message||e)+". Ядро работает. Нужен Chrome/Edge с WebGPU.";
-    append("a","Нейросеть не загрузилась. Ядро (math/память) продолжает работать.","core");
   }
+  return null;
 }
-async function llmChat(q){
-  if(!engine)throw new Error("no engine");
-  const sys="Ты АКСИ — суверенный помощник. Отвечай по-русски, кратко и по делу. Не выдумывай факты. Если не знаешь — скажи прямо.";
-  const memHint=Object.keys(mem).slice(0,12).map(k=>k+"="+mem[k]).join("; ");
-  const messages=[
-    {role:"system",content:sys+(memHint?"\nФакты пользователя: "+memHint:"")},
-    {role:"user",content:q}
-  ];
-  const out=await engine.chat.completions.create({messages,temperature:0.7,max_tokens:400});
-  const text=out&&out.choices&&out.choices[0]&&out.choices[0].message&&out.choices[0].message.content;
-  return (text||"").trim()||"Пустой ответ модели";
-}
-function gateOf(q,ans,src){
-  const math=!!mathAnswer(q), taught=/^запомни/i.test(q);
-  const known=src==="math"||src==="memory"||src==="core"||src==="webllm";
-  const dec=math||taught||known?"ALLOW":"REVIEW";
-  lastGate=dec;
-  const body={system:"AKSI-INTEL-v1",claim:q,answer:String(ans).slice(0,800),decision:dec,src:src||"?",ts:new Date().toISOString(),llm:llmReady};
-  try{
-    const arr=JSON.parse(localStorage.getItem(REC_KEY)||"[]");
-    arr.push(body);localStorage.setItem(REC_KEY,JSON.stringify(arr.slice(-40)));
-    localStorage.setItem("aksi_unity_last",JSON.stringify(body));
-  }catch(e){}
-  paint();return dec;
-}
-function append(role,text,src){
-  const box=$("log");const d=document.createElement("div");
-  d.className="msg "+(role==="u"?"u":"a");
-  if(src){const t=document.createElement("div");t.className="tag";t.textContent=src;d.appendChild(t)}
-  d.appendChild(document.createTextNode((role==="u"?"Вы: ":"АКСИ: ")+text));
-  box.appendChild(d);box.scrollTop=box.scrollHeight;
-}
-async function send(){
-  const inp=$("in");const q=inp.value.trim();if(!q)return;inp.value="";
-  append("u",q);
-  const core=coreRespond(q);
-  if(core){
-    append("a",core.text,core.src);
-    append("a","[gate "+gateOf(q,core.text,core.src)+"]","gate");
-    return;
+
+function respond(q) {
+  q = String(q || "").trim();
+  if (!q) return "Напиши вопрос или пример.";
+  var t = teach(q); if (t) return t;
+  var m = mathAnswer(q); if (m) return m;
+  var r = recall(q); if (r) return r;
+  var low = q.toLowerCase();
+  if (/кто ты|что ты|представься/.test(low)) {
+    return "Я АКСИ — твой offline-агент на этом сайте.\nСчитаю, помню факты у тебя в браузере.\nНе AGI. Технология служит тебе.\naksilove@internet.ru";
   }
-  if(llmReady&&engine){
-    append("a","Думаю локальной моделью…","webllm");
-    try{
-      const text=await llmChat(q);
-      const log=$("log");if(log.lastChild)log.removeChild(log.lastChild);
-      append("a",text,"webllm");
-      append("a","[gate "+gateOf(q,text,"webllm)+"]","gate");
-    }catch(e){
-      append("a","Ошибка LLM: "+(e&&e.message||e)+"\nЯдро: загрузите нейросеть снова или задайте расчёт/запомни.","core");
-    }
-    return;
+  if (/привет|здравств|hello/.test(low)) {
+    return "Привет. Попробуй: 12*12 · x^2-4=0 · запомни: город = Москва";
   }
-  append("a","Для свободного ответа нажми «Загрузить нейросеть» (WebGPU).\nПока доступны: math, запомни, кто ты.","core");
-  append("a","[gate "+gateOf(q,"need-llm","core)+"]","gate");
+  if (/время|мск|час/.test(low)) return msk();
+  if (/помощ|умеешь|help/.test(low)) {
+    return "• математика и уравнения\n• запомни: ключ = значение\n• что помнишь";
+  }
+  if (/акси|миссия/.test(low)) {
+    return "АКСИ — суверенный слой: память и ответы у тебя, не в чужом облаке.";
+  }
+  return "Не распознала команду.\nПримеры: 17*19 · корень из 49 · запомни: проект = АКСИ · кто ты";
 }
-$("send").onclick=()=>send();
-$("in").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();send()}});
-$("btnLLM").onclick=()=>loadLLM();
-$("btnMem").onclick=()=>append("a",coreRespond("что помнишь").text,"memory");
-$("btnExport").onclick=()=>{try{append("a",localStorage.getItem("aksi_unity_last")||"{}","receipt")}catch(e){}};
-document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{$("in").value=b.getAttribute("data-q");send()});
-append("a","Онлайн · "+msk()+"\nЯдро готово. Для генеративного диалога — «Загрузить нейросеть».","core");
+
+function append(role, text) {
+  var box = $("log");
+  if (!box) return;
+  var d = document.createElement("div");
+  d.className = "msg " + (role === "u" ? "u" : "a");
+  d.textContent = (role === "u" ? "Вы: " : "АКСИ: ") + text;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+function send() {
+  var inp = $("in");
+  if (!inp) return;
+  var q = inp.value.trim();
+  if (!q) return;
+  inp.value = "";
+  append("u", q);
+  var ans = respond(q);
+  append("a", ans);
+  try {
+    localStorage.setItem("aksi_unity_last", JSON.stringify({
+      system: "AKSI-OK-v1", claim: q, answer: String(ans).slice(0, 500),
+      ts: new Date().toISOString()
+    }));
+  } catch (e) {}
+}
+
+var sendBtn = $("send");
+if (sendBtn) sendBtn.onclick = send;
+var inpEl = $("in");
+if (inpEl) {
+  inpEl.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); send(); }
+  });
+}
+var chips = document.querySelectorAll("[data-q]");
+for (var i = 0; i < chips.length; i++) {
+  (function (btn) {
+    btn.onclick = function () {
+      var el = $("in");
+      if (el) el.value = btn.getAttribute("data-q") || "";
+      send();
+    };
+  })(chips[i]);
+}
+
+append("a", "Онлайн · " + msk() + "\nНапиши 12*12 или «кто ты».");
+})();
 </script>
 </body>
 </html>
