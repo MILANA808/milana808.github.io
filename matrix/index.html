@@ -1,133 +1,135 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>АКСИ MATRIX ONE</title>
-<meta name="description" content="Kernel · HRR · FAQ · WebLLM · offline">
-<meta name="theme-color" content="#ebe4d7">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>АКСИ MATRIX · QBM / H_eff</title>
+<meta name="description" content="АКСИ MATRIX — client-side quantum-thermodynamic simulator. QBM · H_eff · Gershgorin · Pro proof."/>
+<meta name="theme-color" content="#ffffff"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--bg:#ebe4d7;--bg2:#e2d9c8;--ink:#1a1814;--muted:#6b6560;--line:#cfc6b6;--panel:#f7f3ea;--acc:#2f2a26;--ok:#2f6b4f;--mono:ui-monospace,Consolas,monospace;--sans:system-ui,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font:15px/1.45 var(--sans);background:var(--bg);color:var(--ink);min-height:100vh}
-.shell{max-width:1100px;margin:0 auto;padding:18px 16px 56px}
-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
-.logo{font-weight:800;letter-spacing:.12em;font-size:12px;text-transform:uppercase}
-.logo b{opacity:.5;font-weight:600}
-nav a{color:var(--muted);font-size:12px;text-decoration:none;margin-left:10px}
-h1{font-size:clamp(1.3rem,3vw,1.7rem);font-weight:650;margin-bottom:6px}
-.lead{color:var(--muted);font-size:14px;max-width:60ch;margin-bottom:12px}
-.badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.badge{font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--line);padding:4px 9px;color:var(--muted)}
-.badge.on{border-color:var(--ok);color:var(--ok)}
-.grid{display:grid;grid-template-columns:1.05fr .95fr;gap:12px}
-@media(max-width:860px){.grid{grid-template-columns:1fr}}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px;margin-bottom:12px}
-.panel h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;font-weight:650}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.m{background:var(--bg2);border:1px solid var(--line);padding:8px;border-radius:3px;text-align:center}
-.m b{display:block;font-family:var(--mono);font-size:13px}
-.m span{font-size:10px;color:var(--muted);text-transform:uppercase}
-.m.ok b{color:var(--ok)}
-canvas#wave,canvas#chaos{width:100%;height:100px;display:block;border-radius:3px;border:1px solid var(--line)}
-canvas#wave{background:#1a1814}
-canvas#chaos{background:#f0ebe0;margin-top:8px}
-.chat{min-height:180px;max-height:300px;overflow:auto;font-family:var(--mono);font-size:12px;background:var(--bg2);border:1px solid var(--line);padding:10px;border-radius:3px;white-space:pre-wrap;word-break:break-word}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
-input[type=text],input[type=password],select{flex:1;min-width:120px;font:inherit;padding:10px 12px;border:1px solid var(--line);background:#fff;border-radius:3px}
-button{font:inherit;font-size:13px;padding:10px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;border-radius:3px;font-weight:650}
-button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-button:disabled{opacity:.4;cursor:not-allowed}
-.bar{height:8px;background:var(--bg2);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
-.bar>i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
-.barlabel{font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono)}
-.log{font-family:var(--mono);font-size:11px;color:var(--muted);max-height:180px;overflow:auto;line-height:1.5}
-.log .e{color:var(--ink)}
-.hint{font-size:12px;color:var(--muted);margin-top:8px}
-footer{margin-top:16px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+:root{--bg:#fff;--ink:#000;--mut:#555;--line:#000;--ok:#059669;--bad:#b91c1c;--pad:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;line-height:1.45;font-size:14px}
+a{color:var(--ink);text-decoration:underline}
+.wrap{max-width:720px;margin:0 auto;padding:20px var(--pad) 48px}
+header{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:18px}
+header h1{margin:0;font-size:1.15rem;font-weight:700;letter-spacing:.04em}
+header p{margin:6px 0 0;color:var(--mut);font-size:12px}
+.nav{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px}
+.grid{display:grid;gap:14px}
+@media(min-width:640px){.grid.two{grid-template-columns:1fr 1fr}}
+.box{border:1px solid var(--line);padding:12px}
+.box h2{margin:0 0 10px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+canvas#starCanvas{width:100%;height:min(58vw,320px);display:block;background:#fff;border:1px solid #000}
+svg#gershSvg{width:100%;height:160px;border:1px solid #000;background:#fff}
+label{display:block;font-size:11px;margin-bottom:4px;color:var(--mut)}
+textarea{width:100%;min-height:88px;border:1px solid #000;padding:10px;font:inherit;resize:vertical;background:#fff;color:#000}
+button{font:inherit;border:1px solid #000;background:#000;color:#fff;padding:10px 14px;cursor:pointer;font-weight:600}
+button.ghost{background:#fff;color:#000}
+button:disabled{opacity:.45}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.kv{font-size:12px;margin:4px 0}.kv b{color:var(--mut);font-weight:400}
+code{font-size:11px}
+.tiers{display:grid;gap:10px}
+@media(min-width:560px){.tiers{grid-template-columns:1fr 1fr}}
+.tier{border:1px solid #000;padding:12px}
+.tier h3{margin:0 0 6px;font-size:13px}
+.tier ul{margin:0;padding-left:18px;font-size:12px;color:var(--mut)}
+.badge{display:inline-block;border:1px solid #000;padding:2px 8px;font-size:10px;font-weight:700}
+.proof-ok{color:var(--ok);font-weight:700;margin-bottom:6px}
+footer{margin-top:28px;border-top:1px solid #000;padding-top:12px;font-size:11px;color:var(--mut)}
+.check{display:flex;align-items:center;gap:6px;font-size:11px;margin-top:8px}
 </style>
 </head>
 <body>
-<div class="shell">
-<header>
-  <div class="logo">AKSI <b>MATRIX ONE</b></div>
-  <nav><a href="/">След</a><a href="/local-ai.html">Local AI</a><a href="/quantum-chip.html">Q-Chip</a><a href="/capsule.html">Capsule</a></nav>
-</header>
-<h1>Единый runtime</h1>
-<p class="lead">Offline FAQ · HRR память · WebLLM (опционально, нужен GPU) · TrustVault.</p>
-<div class="badges">
-  <span class="badge" id="bStatus">cold</span>
-  <span class="badge" id="bGpu">webgpu ?</span>
-  <span class="badge" id="bCrypto">crypto ?</span>
-  <span class="badge" id="bLlm">llm off</span>
-</div>
-<div class="grid">
-<div>
-  <div class="panel"><h2>Monitor</h2>
-    <div class="metrics">
-      <div class="m ok"><b id="stReady">—</b><span>ready</span></div>
-      <div class="m"><b id="stMem">0</b><span>memory</span></div>
-      <div class="m"><b id="stRoute">—</b><span>route</span></div>
-      <div class="m"><b id="stQcli">—</b><span>QCLI</span></div>
+<div class="wrap">
+  <header>
+    <h1>АКСИ MATRIX</h1>
+    <p>Client-side · QBM · H_eff · Gershgorin · D₄ star · Pro proof · no server</p>
+    <div class="nav">
+      <a href="/">Whole</a>
+      <a href="/super/">Super</a>
+      <a href="/authority/">Authority</a>
+      <a href="/hdc/">HDC</a>
+      <span class="badge" id="proBadge">FREE</span>
     </div>
-  </div>
-  <div class="panel"><h2>Model</h2>
-    <div class="row">
-      <select id="modelSel" disabled>
-        <option value="webllm">WebLLM в чате (нужен GPU)</option>
-        <option value="bonsai">Bonsai 27B (embed)</option>
-      </select>
-      <button type="button" id="loadModel" disabled>Загрузить ИИ</button>
-    </div>
-    <div class="bar"><i id="pbar"></i></div>
-    <div class="barlabel" id="ptext">idle</div>
-    <p class="hint" id="modelHint">Чат работает без GPU (FAQ + память). WebLLM — если есть Chrome/Edge + GPU.</p>
-  </div>
-  <div class="panel"><h2>Prompt</h2>
-    <div class="chat" id="chat">boot…</div>
-    <div class="row">
-      <input type="text" id="qin" placeholder="вопрос · помощь · запомни: факт" autocomplete="off">
-      <button type="button" id="send" disabled>Send</button>
-    </div>
-    <div class="row">
-      <input type="password" id="pw" placeholder="пароль vault" autocomplete="new-password">
-      <button type="button" class="ghost" id="exp" disabled>Export .aksi</button>
-      <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;border:1px solid var(--line);padding:8px 10px;border-radius:3px">Import <input type="file" id="imp" accept=".aksi,.json" style="display:none"></label>
-    </div>
-  </div>
-</div>
-<div>
-  <div class="panel"><h2>State-vector · Lorenz</h2>
-    <canvas id="wave" width="640" height="100"></canvas>
-    <canvas id="chaos" width="640" height="100"></canvas>
-  </div>
-  <div class="panel"><h2>Event stream</h2><div class="log" id="log"></div></div>
-</div>
-</div>
-<footer>aksilove@internet.ru · offline FAQ всегда · WebLLM при наличии GPU</footer>
-</div>
-<script type="module">
-import { AksiKernel } from './kernel/kernel.js?v=44';
-import { mountLorenz } from './chaos/lorenz.js?v=44';
-import { localFaqAnswer } from './llm/local-faq.js?v=44';
+  </header>
 
-const chat=document.getElementById('chat'),logEl=document.getElementById('log'),wave=document.getElementById('wave'),wctx=wave.getContext('2d');
-const pbar=document.getElementById('pbar'),ptext=document.getElementById('ptext');
-function appendChat(line){chat.textContent+=(chat.textContent&&!chat.textContent.endsWith('\n')?'\n':'')+line;chat.scrollTop=chat.scrollHeight;}
-function logLine(type,payload){const div=document.createElement('div');div.className='e';const t=new Date().toISOString().slice(11,19);let extra='';try{if(payload&&typeof payload==='object'){if(payload.route)extra=' '+payload.route;else if(payload.msg)extra=' '+payload.msg;else if(payload.version)extra=' v'+payload.version;else if(payload.hits!=null)extra=' hits='+payload.hits;else if(payload.error)extra=' '+String(payload.error).slice(0,90);else if(payload.provider)extra=' '+payload.provider;else if(payload.chars!=null)extra=' chars='+payload.chars;}}catch(e){}div.textContent=t+'  '+type+extra;logEl.insertBefore(div,logEl.firstChild);while(logEl.children.length>100)logEl.removeChild(logEl.lastChild);}
-function setProgress(pct,text){const p=Math.max(0,Math.min(1,Number(pct)||0));pbar.style.width=Math.round(p*100)+'%';ptext.textContent=text||Math.round(p*100)+'%';}
-function drawWave(amps){const w=wave.width,h=wave.height;wctx.fillStyle='#1a1814';wctx.fillRect(0,0,w,h);if(!amps||!amps.length)return;wctx.strokeStyle='#ebe4d7';wctx.lineWidth=1.25;wctx.beginPath();for(let i=0;i<amps.length;i++){const x=(i/(amps.length-1))*(w-8)+4,y=h/2-amps[i]*(h*0.42);if(i===0)wctx.moveTo(x,y);else wctx.lineTo(x,y);}wctx.stroke();}
-const kernel=new AksiKernel();
-kernel.subscribe((evt)=>{logLine(evt.type,evt.payload);if((evt.type==='ask:vector'||evt.type==='ask:circuit')&&kernel.router)drawWave(kernel.router.getAmplitudes());if(evt.type==='ask:gate'&&evt.payload){document.getElementById('stRoute').textContent=evt.payload.route||'—';document.getElementById('stQcli').textContent=evt.payload.QCLI!=null?Number(evt.payload.QCLI).toFixed(3):'—';}if(evt.type==='memory:store'||evt.type==='vault:import'||evt.type==='boot:ready')document.getElementById('stMem').textContent=String(kernel.state.memoryCount||0);if(evt.type==='llm:load_done'){document.getElementById('bLlm').textContent='llm on';document.getElementById('bLlm').classList.add('on');}});
-document.getElementById('qin').addEventListener('input',(e)=>{if(!kernel.ready||!kernel.router)return;drawWave(kernel.router.applyCircuit(kernel.router.textToState(e.target.value||''),e.target.value||''));});
-document.getElementById('modelSel').onchange=()=>{const v=document.getElementById('modelSel').value;kernel.setLLMProvider(v);document.getElementById('modelHint').textContent=v==='bonsai'?'Bonsai 27B: отдельный runtime.':'WebLLM: ответ в этом чате при наличии GPU.';};
-async function boot(){try{await kernel.boot();document.getElementById('bStatus').textContent='ready';document.getElementById('bStatus').classList.add('on');document.getElementById('stReady').textContent='yes';document.getElementById('stMem').textContent=String(kernel.state.memoryCount);document.getElementById('bGpu').textContent='webgpu '+(kernel.capabilities.webgpu?'yes':'no');if(kernel.capabilities.webgpu)document.getElementById('bGpu').classList.add('on');document.getElementById('bCrypto').textContent='crypto '+(kernel.capabilities.webCrypto?'yes':'no');if(kernel.capabilities.webCrypto)document.getElementById('bCrypto').classList.add('on');document.getElementById('send').disabled=false;document.getElementById('exp').disabled=false;document.getElementById('modelSel').disabled=false;document.getElementById('loadModel').disabled=false;chat.textContent='';appendChat('MATRIX ONE '+kernel.version);appendChat('memory: '+kernel.state.memoryCount+' · FAQ online');appendChat('Спроси: помощь · что такое AKSI · привет');appendChat('—');drawWave(kernel.router.textToState('aksi matrix one'));window.__aksiChaos=mountLorenz(document.getElementById('chaos'),document.getElementById('qin'),document.getElementById('stRoute'));}catch(e){document.getElementById('bStatus').textContent='error';appendChat('BOOT ERROR: '+(e.message||e));}}
-document.getElementById('loadModel').onclick=async()=>{const btn=document.getElementById('loadModel'),mode=document.getElementById('modelSel').value;btn.disabled=true;kernel.setLLMProvider(mode);try{if(mode==='bonsai'){appendChat('Bonsai path…');await kernel.prepareBonsai(({progress,text})=>setProgress(progress,text));appendChat('✓ Bonsai prepared');setProgress(1,'bonsai');}else{appendChat('Загрузка WebLLM…');await kernel.loadLocalLLM(({progress,text})=>setProgress(progress,text));appendChat('✓ WebLLM ready · '+((kernel.webllm&&kernel.webllm.model)||''));setProgress(1,'webllm ready');document.getElementById('bLlm').textContent='llm on';document.getElementById('bLlm').classList.add('on');}}catch(e){appendChat('Model: '+(e.message||e));appendChat('Чат всё равно работает через FAQ + память.');setProgress(0,'error');}btn.disabled=false;};
-async function send(){const raw=document.getElementById('qin').value.trim();if(!raw||!kernel.ready)return;document.getElementById('qin').value='';appendChat('> '+raw);if(window.__aksiChaos)window.__aksiChaos.pulseRoute();const teach=raw.match(/^(?:запомни|remember)\s*[:：]\s*(.+)$/i);if(teach){await kernel.remember(teach[1].trim());appendChat('✓ stored');appendChat('—');return;}const res=await kernel.ask(raw);appendChat(res.text||'(пусто)');appendChat('['+(res.source||'local')+' · '+(res.gate&&res.gate.route||'—')+']');appendChat('—');}
-document.getElementById('send').onclick=send;document.getElementById('qin').addEventListener('keydown',(e)=>{if(e.key==='Enter')send();});
-document.getElementById('exp').onclick=async()=>{const pw=document.getElementById('pw').value;if(!pw){appendChat('нужен пароль vault');return;}try{const blob=await kernel.exportCapsule(pw);kernel.vault.downloadBlob(blob,'matrix-one.aksi');appendChat('✓ exported ('+blob.size+' bytes)');}catch(e){appendChat('export error: '+(e.message||e));}};
-document.getElementById('imp').onchange=async(e)=>{const f=e.target.files&&e.target.files[0];if(!f)return;const pw=document.getElementById('pw').value;if(!pw){appendChat('нужен пароль vault');e.target.value='';return;}try{const n=await kernel.importCapsule(f,pw);appendChat('✓ imported: '+n);}catch(err){appendChat('import error: '+(err.message||err));}e.target.value='';};
-boot();
-</script>
+  <div class="grid two">
+    <div class="box">
+      <h2>Граф АКСИ · 8-луч · D₄</h2>
+      <canvas id="starCanvas" width="640" height="320" aria-label="АКСИ star graph"></canvas>
+      <p style="font-size:11px;color:var(--mut);margin:8px 0 0">Красный 0° вход · 225° память · 45° аномалии · шины 0/90°</p>
+    </div>
+    <div class="box">
+      <h2>Круги Гершгорина</h2>
+      <svg id="gershSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="kv" id="outGersh">—</div>
+    </div>
+  </div>
+
+  <div class="box" style="margin-top:14px">
+    <h2>Намерение / ввод</h2>
+    <label for="mxInput">Текст → хэш → QBM / H_eff</label>
+    <textarea id="mxInput" placeholder="Введите намерение или утверждение…">АКСИ: проверь когерентность контура</textarea>
+    <div class="row">
+      <button type="button" id="btnAnalyze">Считать матрицу</button>
+      <button type="button" class="ghost" onclick="document.getElementById('mxInput').value='';document.getElementById('btnAnalyze').click()">Сброс</button>
+    </div>
+  </div>
+
+  <div class="grid two" style="margin-top:14px">
+    <div class="box">
+      <h2>QBM · энергия</h2>
+      <div class="kv"><b>E</b> <span id="outEnergy">—</span></div>
+      <div class="kv"><b>⟨m⟩</b> <span id="outMag">—</span></div>
+    </div>
+    <div class="box">
+      <h2>H_eff · CCE</h2>
+      <div class="kv"><b>H_eff</b> <span id="outHeff">—</span></div>
+      <div class="kv"><b>S</b> <span id="outS">—</span></div>
+      <div class="kv"><b>статус</b> <span id="outStatus">—</span></div>
+    </div>
+  </div>
+
+  <div class="box" style="margin-top:14px">
+    <h2>Тарифы · Web3</h2>
+    <div class="tiers">
+      <div class="tier">
+        <h3>Free · демо</h3>
+        <ul>
+          <li>QBM + H_eff</li>
+          <li>Gershgorin</li>
+          <li>Граф D₄</li>
+        </ul>
+      </div>
+      <div class="tier">
+        <h3>Pro · ключ</h3>
+        <ul>
+          <li>Крипто-proof</li>
+          <li>fingerprint в localStorage</li>
+          <li>MetaMask или mock</li>
+        </ul>
+      </div>
+    </div>
+    <div class="check">
+      <input type="checkbox" id="proMock" checked/>
+      <label for="proMock" style="margin:0">Mock-транзакция (без кошелька)</label>
+    </div>
+    <div class="row">
+      <button type="button" id="btnPro">Активировать Pro-Доступ</button>
+    </div>
+    <div id="proProof" style="margin-top:12px;font-size:12px">Pro не активен. Free-демо доступен.</div>
+  </div>
+
+  <footer>
+    АКСИ MATRIX · offline на GitHub Pages · связка с Whole через localStorage<br/>
+    aksilove@internet.ru · technology_serves_human
+  </footer>
+</div>
+<script src="/matrix.js?v=1"></script>
 </body>
 </html>
