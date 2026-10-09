@@ -5,254 +5,405 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ</title>
 <meta name="theme-color" content="#0b1020"/>
+<meta http-equiv="Cache-Control" content="no-cache"/>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif;line-height:1.45}
 .top{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:#0b1020;border-bottom:1px solid #24304d;font-size:12px;color:#8b9bb8}
 .dot{width:8px;height:8px;border-radius:50%;background:#34d399}
+.dot.off{background:#64748b}
 .shell{max-width:720px;margin:0 auto;padding:12px 14px 28px}
 h1{font-size:1.25rem;margin:8px 0 4px}
 .sub{color:#8b9bb8;font-size:.88rem;margin:0 0 12px}
 .card{background:#121a2f;border:1px solid #24304d;border-radius:14px;padding:12px;margin:10px 0}
-#log{max-height:min(55vh,480px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:100px}
+#log{max-height:min(52vh,460px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:100px}
 .msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;font-size:14px}
 .u{background:#0a0f1c;border:1px solid #24304d;align-self:flex-end;max-width:92%}
 .a{background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.35);align-self:flex-start;max-width:95%}
+.tag{font-size:10px;color:#8b9bb8;margin-bottom:3px}
 .composer{display:flex;gap:8px;margin-top:10px}
 input{flex:1;background:#0a0f1c;border:1px solid #24304d;border-radius:10px;color:#e8eefc;padding:12px;font-size:15px}
-button{border:0;border-radius:10px;padding:12px 14px;font-weight:700;font-size:14px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
+button{border:0;border-radius:10px;padding:11px 13px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
+button:disabled{opacity:.55;cursor:wait}
+button.ghost{background:transparent;border:1px solid #24304d;color:#e8eefc;font-weight:600}
+button.acc{background:#818cf8;color:#0b1020}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.chips button{padding:8px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d;font-weight:600}
+.chips button{padding:7px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d;font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .meta{font-size:11px;color:#8b9bb8;margin-top:8px}
+.bar{height:6px;background:#0a0f1c;border-radius:99px;overflow:hidden;margin-top:8px;display:none}
+.bar.on{display:block}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#818cf8);transition:width .25s}
 </style>
 </head>
 <body>
-<div class="top"><span class="dot"></span><strong style="color:#e8eefc">АКСИ</strong><span id="msk">—</span><span id="st">online</span></div>
+<div class="top">
+  <span class="dot off" id="dot"></span>
+  <strong style="color:#e8eefc">АКСИ</strong>
+  <span id="msk">—</span>
+  <span id="st">ядро</span>
+</div>
 <div class="shell">
-<h1>Твой агент</h1>
-<p class="sub">Считает · помнит · отвечает. Без перезагрузки страницы.</p>
-<div class="card">
-<div id="log"></div>
-<div class="chips">
-<button type="button" data-q="кто ты">кто ты</button>
-<button type="button" data-q="12*12">12*12</button>
-<button type="button" data-q="x^2-4=0">x^2-4=0</button>
-<button type="button" data-q="запомни: город = Москва">запомни</button>
-<button type="button" data-q="что помнишь">память</button>
-</div>
-<div class="composer">
-<input id="in" type="text" placeholder="12*12 · запомни: имя = … · кто ты" autocomplete="off"/>
-<button type="button" id="send">Отправить</button>
-</div>
-<div class="meta">aksilove@internet.ru</div>
-</div>
+  <h1>Агент АКСИ</h1>
+  <p class="sub">Ядро всегда отвечает. Нейросеть — готовая открытая модель в браузере (не обучение с нуля).</p>
+  <div class="card">
+    <div class="row">
+      <button type="button" class="acc" id="btnLLM">Подключить нейросеть</button>
+      <button type="button" class="ghost" id="btnMem">Память</button>
+    </div>
+    <div class="bar" id="bar"><i id="barI"></i></div>
+    <div class="meta" id="llmMsg">Без нейросети: math и память. С нейросетью: свободный текст (нужен WebGPU).</div>
+  </div>
+  <div class="card">
+    <div id="log"></div>
+    <div class="chips">
+      <button type="button" data-q="кто ты">кто ты</button>
+      <button type="button" data-q="12*12">12*12</button>
+      <button type="button" data-q="x^2-4=0">уравнение</button>
+      <button type="button" data-q="запомни: проект = АКСИ">запомни</button>
+      <button type="button" data-q="что такое суверенитет данных">свободный вопрос</button>
+    </div>
+    <div class="composer">
+      <input id="in" type="text" placeholder="Вопрос · 12*12 · запомни: ключ = значение" autocomplete="off"/>
+      <button type="button" id="send">Отправить</button>
+    </div>
+    <div class="meta">aksilove@internet.ru</div>
+  </div>
 </div>
 <script>
-(function(){
-"use strict";
-var MEM_KEY = "aksi_ok_mem_v1";
-var mem = {};
-try { mem = JSON.parse(localStorage.getItem(MEM_KEY) || "{}") || {}; } catch (e) { mem = {}; }
+(function () {
+  "use strict";
+  var MEM_KEY = "aksi_brain_mem_v1";
+  var mem = {};
+  try { mem = JSON.parse(localStorage.getItem(MEM_KEY) || "{}") || {}; } catch (e) { mem = {}; }
+  var engine = null;
+  var llmReady = false;
+  var llmLoading = false;
+  var modelName = "";
 
-function $(id) { return document.getElementById(id); }
-function msk() {
-  try {
-    return new Date().toLocaleTimeString("ru-RU", {
-      timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
-    }) + " МСК";
-  } catch (e) { return "—"; }
-}
-function paint() {
-  var a = $("msk"); if (a) a.textContent = msk();
-  var b = $("st"); if (b) b.textContent = "mem " + Object.keys(mem).length;
-}
-setInterval(paint, 1000); paint();
-
-function saveMem() {
-  try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) {}
+  function $(id) { return document.getElementById(id); }
+  function msk() {
+    try {
+      return new Date().toLocaleTimeString("ru-RU", {
+        timeZone: "Europe/Moscow", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+      }) + " МСК";
+    } catch (e) { return "—"; }
+  }
+  function paint() {
+    var a = $("msk"); if (a) a.textContent = msk();
+    var b = $("st"); if (b) b.textContent = (llmReady ? ("LLM · " + modelName) : "ядро") + " · mem " + Object.keys(mem).length;
+    var d = $("dot"); if (d) d.className = "dot" + (llmReady ? "" : " off");
+  }
+  setInterval(paint, 1000);
   paint();
-}
 
-function fmt(x) {
-  if (x == null || !isFinite(x)) return "—";
-  if (Math.abs(x - Math.round(x)) < 1e-10) return String(Math.round(x));
-  return String(parseFloat(x.toFixed(10)));
-}
+  function saveMem() {
+    try { localStorage.setItem(MEM_KEY, JSON.stringify(mem)); } catch (e) {}
+    paint();
+  }
 
-function evalExpr(s) {
-  s = String(s).toLowerCase().replace(/,/g, ".").replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
-  s = s.replace(/π/g, "Math.PI").replace(/\bpi\b/g, "Math.PI");
-  s = s.replace(/корень(?:\s*из)?\s*\(?\s*([\d.]+)\s*\)?/g, "Math.sqrt($1)");
-  s = s.replace(/√\s*\(?\s*([\d.]+)\s*\)?/g, "Math.sqrt($1)");
-  s = s.replace(/\^/g, "**");
-  s = s.replace(/[^0-9+\-*/().\sMathsqrtPI]/g, "");
-  if (!s.trim()) return null;
-  try {
-    var v = Function('"use strict";return (' + s + ')')();
-    return (typeof v === "number" && isFinite(v)) ? v : null;
-  } catch (e) { return null; }
-}
+  function fmt(x) {
+    if (x == null || !isFinite(x)) return "—";
+    if (Math.abs(x - Math.round(x)) < 1e-10) return String(Math.round(x));
+    return String(parseFloat(x.toFixed(10)));
+  }
 
-function solveEq(raw) {
-  var s = String(raw).toLowerCase().replace(/,/g, ".").replace(/\s/g, "").replace(/х/g, "x").replace(/\*/g, "");
-  if (s.indexOf("=") < 0) return null;
-  var parts = s.split("=");
-  var L = parts[0], R = parts[1], rN = parseFloat(R);
-  if (!isFinite(rN) || /[x]/.test(R)) return null;
-  var a = 0, b = 0, c = 0, e = L, m;
-  m = e.match(/([+-]?\d*\.?\d*)x\^2/);
-  if (m) {
-    a = (m[1] === "" || m[1] === "+") ? 1 : (m[1] === "-" ? -1 : parseFloat(m[1]));
-    e = e.replace(m[0], "");
+  function evalExpr(s) {
+    s = String(s).toLowerCase().replace(/,/g, ".").replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+    s = s.replace(/π/g, "Math.PI").replace(/\bpi\b/g, "Math.PI");
+    s = s.replace(/корень(?:\s*из)?\s*\(?\s*([\d.]+)\s*\)?/g, "Math.sqrt($1)");
+    s = s.replace(/√\s*\(?\s*([\d.]+)\s*\)?/g, "Math.sqrt($1)");
+    s = s.replace(/\^/g, "**");
+    s = s.replace(/[^0-9+\-*/().\sMathsqrtPI]/g, "");
+    if (!s.trim()) return null;
+    try {
+      var v = Function('"use strict";return (' + s + ")")();
+      return (typeof v === "number" && isFinite(v)) ? v : null;
+    } catch (e) { return null; }
   }
-  m = e.match(/([+-]?\d*\.?\d*)x/);
-  if (m) {
-    b = (m[1] === "" || m[1] === "+") ? 1 : (m[1] === "-" ? -1 : parseFloat(m[1]));
-    e = e.replace(m[0], "");
-  }
-  e.replace(/([+-]?\d+\.?\d*)/g, function (n) { c += parseFloat(n); return ""; });
-  c -= rN;
-  if (Math.abs(a) < 1e-12) {
-    if (Math.abs(b) < 1e-12) return "Нет решения";
-    return "Корень: " + fmt(-c / b);
-  }
-  var d = b * b - 4 * a * c;
-  if (d < -1e-12) return "Нет действительных корней";
-  if (Math.abs(d) < 1e-12) return "Корень: " + fmt(-b / (2 * a));
-  var s2 = Math.sqrt(d);
-  return "Корни: " + fmt((-b + s2) / (2 * a)) + ", " + fmt((-b - s2) / (2 * a));
-}
 
-function mathAnswer(q) {
-  var raw = String(q).trim();
-  var low = raw.toLowerCase();
-  var pm = low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
-  if (pm) {
-    return pm[1] + "% от " + pm[2] + " = " + fmt((+pm[1].replace(",", ".")) / 100 * (+pm[2].replace(",", ".")));
-  }
-  var fm = low.match(/(\d+)\s*!/);
-  if (fm) {
-    var n = +fm[1], f = 1, i;
-    if (n > 20) return "n! слишком велико";
-    for (i = 2; i <= n; i++) f *= i;
-    return n + "! = " + f;
-  }
-  if (/=/.test(raw) && /[xх]/i.test(raw)) {
-    var eq = solveEq(raw);
-    if (eq) return "Уравнение: " + raw + "\n" + eq;
-  }
-  var expr = raw.replace(/^посчитай\s*/i, "").replace(/^вычисли\s*/i, "");
-  if (!/=/.test(expr) || !/[xх]/i.test(expr)) {
-    var v = evalExpr(expr);
-    if (v != null) return "Результат: " + fmt(v);
-  }
-  return null;
-}
-
-function teach(q) {
-  var m = String(q).match(/^(?:запомни|remember)\s*[:\-]?\s*(.+)$/i);
-  if (!m) return null;
-  var body = m[1].trim();
-  var kv = body.match(/^([^=:]+)[=:]\s*(.+)$/);
-  if (kv) {
-    var k = kv[1].trim().toLowerCase();
-    var v = kv[2].trim();
-    mem[k] = v;
-    saveMem();
-    return "Запомнила: «" + k + "» = «" + v + "»";
-  }
-  mem["note_" + Date.now()] = body;
-  saveMem();
-  return "Записала в память";
-}
-
-function recall(q) {
-  var low = q.toLowerCase();
-  if (/что\s+помнишь|покажи\s+память|факты/.test(low)) {
-    var keys = Object.keys(mem);
-    if (!keys.length) return "Память пуста. Напиши: запомни: ключ = значение";
-    var lines = [];
-    for (var i = 0; i < keys.length; i++) lines.push("• " + keys[i] + " = " + mem[keys[i]]);
-    return "Память:\n" + lines.join("\n");
-  }
-  for (var k in mem) {
-    if (Object.prototype.hasOwnProperty.call(mem, k) && low.indexOf(k) >= 0) {
-      return mem[k] + " (память: " + k + ")";
+  function solveEq(raw) {
+    var s = String(raw).toLowerCase().replace(/,/g, ".").replace(/\s/g, "").replace(/х/g, "x").replace(/\*/g, "");
+    if (s.indexOf("=") < 0) return null;
+    var parts = s.split("=");
+    var L = parts[0], R = parts[1], rN = parseFloat(R);
+    if (!isFinite(rN) || /[x]/.test(R)) return null;
+    var a = 0, b = 0, c = 0, e = L, m;
+    m = e.match(/([+-]?\d*\.?\d*)x\^2/);
+    if (m) {
+      a = (m[1] === "" || m[1] === "+") ? 1 : (m[1] === "-" ? -1 : parseFloat(m[1]));
+      e = e.replace(m[0], "");
     }
+    m = e.match(/([+-]?\d*\.?\d*)x/);
+    if (m) {
+      b = (m[1] === "" || m[1] === "+") ? 1 : (m[1] === "-" ? -1 : parseFloat(m[1]));
+      e = e.replace(m[0], "");
+    }
+    e.replace(/([+-]?\d+\.?\d*)/g, function (n) { c += parseFloat(n); return ""; });
+    c -= rN;
+    if (Math.abs(a) < 1e-12) {
+      if (Math.abs(b) < 1e-12) return "Нет решения";
+      return "Корень: " + fmt(-c / b);
+    }
+    var disc = b * b - 4 * a * c;
+    if (disc < -1e-12) return "Нет действительных корней";
+    if (Math.abs(disc) < 1e-12) return "Корень: " + fmt(-b / (2 * a));
+    var s2 = Math.sqrt(disc);
+    return "Корни: " + fmt((-b + s2) / (2 * a)) + ", " + fmt((-b - s2) / (2 * a));
   }
-  return null;
-}
 
-function respond(q) {
-  q = String(q || "").trim();
-  if (!q) return "Напиши вопрос или пример.";
-  var t = teach(q); if (t) return t;
-  var m = mathAnswer(q); if (m) return m;
-  var r = recall(q); if (r) return r;
-  var low = q.toLowerCase();
-  if (/кто ты|что ты|представься/.test(low)) {
-    return "Я АКСИ — твой offline-агент на этом сайте.\nСчитаю, помню факты у тебя в браузере.\nНе AGI. Технология служит тебе.\naksilove@internet.ru";
+  function mathAnswer(q) {
+    var raw = String(q).trim();
+    var low = raw.toLowerCase();
+    var pm = low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
+    if (pm) {
+      return pm[1] + "% от " + pm[2] + " = " + fmt((+pm[1].replace(",", ".")) / 100 * (+pm[2].replace(",", ".")));
+    }
+    var fm = low.match(/(\d+)\s*!/);
+    if (fm) {
+      var n = +fm[1], f = 1, i;
+      if (n > 20) return "n! слишком велико";
+      for (i = 2; i <= n; i++) f *= i;
+      return n + "! = " + f;
+    }
+    if (/=/.test(raw) && /[xх]/i.test(raw)) {
+      var eq = solveEq(raw);
+      if (eq) return "Уравнение: " + raw + "\n" + eq;
+    }
+    var expr = raw.replace(/^посчитай\s*/i, "").replace(/^вычисли\s*/i, "");
+    if (!/=/.test(expr) || !/[xх]/i.test(expr)) {
+      var v = evalExpr(expr);
+      if (v != null) return "Результат: " + fmt(v);
+    }
+    return null;
   }
-  if (/привет|здравств|hello/.test(low)) {
-    return "Привет. Попробуй: 12*12 · x^2-4=0 · запомни: город = Москва";
+
+  function teach(q) {
+    var m = String(q).match(/^(?:запомни|remember)\s*[:\-]?\s*(.+)$/i);
+    if (!m) return null;
+    var body = m[1].trim();
+    var kv = body.match(/^([^=:]+)[=:]\s*(.+)$/);
+    if (kv) {
+      var k = kv[1].trim().toLowerCase();
+      var val = kv[2].trim();
+      mem[k] = val;
+      saveMem();
+      return "Запомнила: «" + k + "» = «" + val + "»";
+    }
+    mem["note_" + Date.now()] = body;
+    saveMem();
+    return "Записала в память";
   }
-  if (/время|мск|час/.test(low)) return msk();
-  if (/помощ|умеешь|help/.test(low)) {
-    return "• математика и уравнения\n• запомни: ключ = значение\n• что помнишь";
+
+  function recall(q) {
+    var low = q.toLowerCase();
+    if (/что\s+помнишь|покажи\s+память|факты/.test(low)) {
+      var keys = Object.keys(mem);
+      if (!keys.length) return "Память пуста. Напиши: запомни: ключ = значение";
+      var lines = [];
+      for (var i = 0; i < keys.length; i++) lines.push("• " + keys[i] + " = " + mem[keys[i]]);
+      return "Память:\n" + lines.join("\n");
+    }
+    for (var k in mem) {
+      if (Object.prototype.hasOwnProperty.call(mem, k) && low.indexOf(k) >= 0) {
+        return mem[k] + " (память: " + k + ")";
+      }
+    }
+    return null;
   }
-  if (/акси|миссия/.test(low)) {
-    return "АКСИ — суверенный слой: память и ответы у тебя, не в чужом облаке.";
+
+  var SEED = [
+    { k: /суверенитет\s+данных|data\s+sovereignty/i, a: "Суверенитет данных — право человека или организации контролировать, где хранятся и кто обрабатывает их данные. АКСИ строится вокруг этого: память и решения — у тебя в браузере, а не обязательно в чужом облаке." },
+    { k: /что\s+такое\s+акси|зачем\s+акси/i, a: "АКСИ — суверенный слой агента: offline-ядро (расчёт, память), опциональная локальная нейросеть, прозрачные ответы. Технология служит человеку." },
+    { k: /webllm|веб\s*ллм/i, a: "WebLLM — движок MLC: запускает открытые языковые модели в браузере через WebGPU, без сервера АКСИ." },
+    { k: /оффлайн|offline/i, a: "Offline-first значит базовые функции (math, память, идентичность) работают без сети. Большая генерация текста может использовать локальную модель или внешний API по выбору." }
+  ];
+
+  function seedAnswer(q) {
+    for (var i = 0; i < SEED.length; i++) {
+      if (SEED[i].k.test(q)) return SEED[i].a;
+    }
+    return null;
   }
-  return "Не распознала команду.\nПримеры: 17*19 · корень из 49 · запомни: проект = АКСИ · кто ты";
-}
 
-function append(role, text) {
-  var box = $("log");
-  if (!box) return;
-  var d = document.createElement("div");
-  d.className = "msg " + (role === "u" ? "u" : "a");
-  d.textContent = (role === "u" ? "Вы: " : "АКСИ: ") + text;
-  box.appendChild(d);
-  box.scrollTop = box.scrollHeight;
-}
+  function coreRespond(q) {
+    q = String(q || "").trim();
+    if (!q) return { text: "Напиши вопрос или пример.", src: "core" };
+    var t = teach(q); if (t) return { text: t, src: "memory" };
+    var m = mathAnswer(q); if (m) return { text: m, src: "math" };
+    var r = recall(q); if (r) return { text: r, src: "memory" };
+    var s = seedAnswer(q); if (s) return { text: s, src: "seed" };
+    var low = q.toLowerCase();
+    if (/кто ты|что ты|представься/.test(low)) {
+      return {
+        text: "Я АКСИ — твой агент на этом сайте.\n• Ядро: math, память, факты (всегда)\n• Нейросеть: открытая модель в браузере по кнопке «Подключить»\nНе AGI и не «миллиарды параметров с нуля». Готовая модель + твои правила.\naksilove@internet.ru",
+        src: "core"
+      };
+    }
+    if (/привет|здравств|hello/.test(low)) {
+      return { text: "Привет. Ядро готово. Для свободного текста — «Подключить нейросеть» (Chrome/Edge + WebGPU).", src: "core" };
+    }
+    if (/время|мск|час/.test(low)) return { text: msk(), src: "core" };
+    if (/помощ|умеешь|help/.test(low)) {
+      return { text: "• 12*12, уравнения, %\n• запомни: ключ = значение\n• свободный диалог после подключения нейросети", src: "core" };
+    }
+    return null;
+  }
 
-function send() {
-  var inp = $("in");
-  if (!inp) return;
-  var q = inp.value.trim();
-  if (!q) return;
-  inp.value = "";
-  append("u", q);
-  var ans = respond(q);
-  append("a", ans);
-  try {
-    localStorage.setItem("aksi_unity_last", JSON.stringify({
-      system: "AKSI-OK-v1", claim: q, answer: String(ans).slice(0, 500),
-      ts: new Date().toISOString()
-    }));
-  } catch (e) {}
-}
+  function append(role, text, src) {
+    var box = $("log");
+    if (!box) return;
+    var d = document.createElement("div");
+    d.className = "msg " + (role === "u" ? "u" : "a");
+    if (src) {
+      var tag = document.createElement("div");
+      tag.className = "tag";
+      tag.textContent = src;
+      d.appendChild(tag);
+    }
+    d.appendChild(document.createTextNode((role === "u" ? "Вы: " : "АКСИ: ") + text));
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+  }
 
-var sendBtn = $("send");
-if (sendBtn) sendBtn.onclick = send;
-var inpEl = $("in");
-if (inpEl) {
-  inpEl.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); send(); }
-  });
-}
-var chips = document.querySelectorAll("[data-q]");
-for (var i = 0; i < chips.length; i++) {
-  (function (btn) {
-    btn.onclick = function () {
-      var el = $("in");
-      if (el) el.value = btn.getAttribute("data-q") || "";
-      send();
-    };
-  })(chips[i]);
-}
+  function loadLLM() {
+    if (llmReady || llmLoading) return;
+    llmLoading = true;
+    var btn = $("btnLLM");
+    if (btn) btn.disabled = true;
+    var bar = $("bar");
+    if (bar) bar.className = "bar on";
+    $("llmMsg").textContent = "Загрузка WebLLM…";
 
-append("a", "Онлайн · " + msk() + "\nНапиши 12*12 или «кто ты».");
+    import("https://esm.run/@mlc-ai/web-llm").then(function (mod) {
+      var CreateMLCEngine = mod.CreateMLCEngine || (mod.default && mod.default.CreateMLCEngine);
+      if (!CreateMLCEngine) throw new Error("CreateMLCEngine не найден");
+      var models = [
+        "Qwen2.5-0.5B-Instruct-q4f16_1-MLC",
+        "SmolLM2-360M-Instruct-q4f16_1-MLC",
+        "Qwen2.5-1.5B-Instruct-q4f16_1-MLC"
+      ];
+      function tryModel(i) {
+        if (i >= models.length) throw new Error("ни одна модель не загрузилась");
+        var mid = models[i];
+        $("llmMsg").textContent = "Модель: " + mid + "…";
+        return CreateMLCEngine(mid, {
+          initProgressCallback: function (p) {
+            var pr = typeof p.progress === "number" ? p.progress : 0;
+            var bi = $("barI");
+            if (bi) bi.style.width = Math.round(pr * 100) + "%";
+            $("llmMsg").textContent = (p.text || mid).slice(0, 140);
+          }
+        }).then(function (eng) {
+          engine = eng;
+          llmReady = true;
+          llmLoading = false;
+          modelName = mid.split("-")[0] + (mid.indexOf("1.5") >= 0 ? "1.5B" : mid.indexOf("0.5") >= 0 ? "0.5B" : "");
+          if (btn) { btn.disabled = true; btn.textContent = "Нейросеть готова"; }
+          $("llmMsg").textContent = "Готово: " + mid + " · генерация локально в браузере";
+          var bi = $("barI"); if (bi) bi.style.width = "100%";
+          paint();
+          append("a", "Нейросеть подключена (" + mid + "). Можно спрашивать свободно.", "webllm");
+        }).catch(function () {
+          return tryModel(i + 1);
+        });
+      }
+      return tryModel(0);
+    }).catch(function (err) {
+      llmLoading = false;
+      if (btn) btn.disabled = false;
+      $("llmMsg").textContent = "Не удалось: " + (err && err.message ? err.message : err) + ". Ядро работает. Нужен Chrome/Edge с WebGPU.";
+      append("a", "Нейросеть не загрузилась. Math и память доступны.", "core");
+    });
+  }
+
+  function llmChat(q) {
+    var sys = "Ты АКСИ — суверенный помощник на сайте milana808.github.io. Отвечай по-русски, кратко и по делу. Не выдумывай факты. Если не знаешь — скажи прямо. Ты не AGI.";
+    var keys = Object.keys(mem);
+    var hint = "";
+    if (keys.length) {
+      var parts = [];
+      for (var i = 0; i < Math.min(keys.length, 12); i++) parts.push(keys[i] + "=" + mem[keys[i]]);
+      hint = "\nФакты пользователя: " + parts.join("; ");
+    }
+    return engine.chat.completions.create({
+      messages: [
+        { role: "system", content: sys + hint },
+        { role: "user", content: q }
+      ],
+      temperature: 0.7,
+      max_tokens: 450
+    }).then(function (out) {
+      var text = out && out.choices && out.choices[0] && out.choices[0].message && out.choices[0].message.content;
+      return (text || "").trim() || "Пустой ответ модели";
+    });
+  }
+
+  function send() {
+    var inp = $("in");
+    if (!inp) return;
+    var q = inp.value.trim();
+    if (!q) return;
+    inp.value = "";
+    append("u", q);
+    var core = coreRespond(q);
+    if (core) {
+      append("a", core.text, core.src);
+      try {
+        localStorage.setItem("aksi_unity_last", JSON.stringify({
+          system: "AKSI-BRAIN-v1", claim: q, answer: String(core.text).slice(0, 600),
+          src: core.src, ts: new Date().toISOString()
+        }));
+      } catch (e) {}
+      return;
+    }
+    if (llmReady && engine) {
+      append("a", "Думаю…", "webllm");
+      llmChat(q).then(function (text) {
+        var log = $("log");
+        if (log && log.lastChild) log.removeChild(log.lastChild);
+        append("a", text, "webllm");
+        try {
+          localStorage.setItem("aksi_unity_last", JSON.stringify({
+            system: "AKSI-BRAIN-v1", claim: q, answer: String(text).slice(0, 600),
+            src: "webllm", ts: new Date().toISOString()
+          }));
+        } catch (e) {}
+      }).catch(function (err) {
+        append("a", "Ошибка модели: " + (err && err.message ? err.message : err), "core");
+      });
+      return;
+    }
+    append("a", "Для свободного ответа нажми «Подключить нейросеть» (WebGPU).\nПока: math, запомни, кто ты, суверенитет данных.", "core");
+  }
+
+  var sendBtn = $("send");
+  if (sendBtn) sendBtn.onclick = send;
+  var inpEl = $("in");
+  if (inpEl) {
+    inpEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); send(); }
+    });
+  }
+  var btnLLM = $("btnLLM");
+  if (btnLLM) btnLLM.onclick = loadLLM;
+  var btnMem = $("btnMem");
+  if (btnMem) btnMem.onclick = function () {
+    var r = coreRespond("что помнишь");
+    append("a", r.text, "memory");
+  };
+  var chips = document.querySelectorAll("[data-q]");
+  for (var i = 0; i < chips.length; i++) {
+    (function (btn) {
+      btn.onclick = function () {
+        var el = $("in");
+        if (el) el.value = btn.getAttribute("data-q") || "";
+        send();
+      };
+    })(chips[i]);
+  }
+
+  append("a", "Онлайн · " + msk() + "\nЯдро готово. Нейросеть — по кнопке (открытая модель, не обучение с нуля).", "core");
 })();
 </script>
 </body>
