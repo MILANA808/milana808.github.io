@@ -1,1 +1,91 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>АКСИ · Unity</title>
+<style>
+body{margin:0;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif}
+.live{padding:8px;border-bottom:1px solid #24304d;font-size:12px;color:#8b9bb8;display:flex;gap:8px;flex-wrap:wrap}
+.shell{max-width:640px;margin:0 auto;padding:12px}
+.card{background:#121a2f;border:1px solid #24304d;border-radius:12px;padding:12px;margin:10px 0}
+#chatLog{max-height:50vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.cmsg{padding:10px;border-radius:10px;white-space:pre-wrap}
+.cu{background:#0a0f1c;align-self:flex-end;border:1px solid #24304d}
+.ca{background:rgba(129,140,248,.12);align-self:flex-start;border:1px solid rgba(129,140,248,.35)}
+.composer{display:flex;gap:8px;margin-top:8px}
+input,button{font:inherit;padding:10px;border-radius:10px;border:1px solid #24304d}
+input{flex:1;background:#0a0f1c;color:#e8eefc}
+button{background:#22d3ee;color:#06202a;font-weight:700;border:0;cursor:pointer}
+a{color:#818cf8}
+</style></head><body>
+<div class="live"><span>АКСИ Unity v10</span><span id="msk">—</span><span id="status">EQS=— gate=—</span></div>
+<div class="shell">
+<h1>Чат · АКСИ</h1>
+<p style="color:#8b9bb8;font-size:14px">Math offline · gate · receipt. Примеры: 12*12 · x^2-4=0 · мир</p>
+<div class="card"><div id="chatLog"></div>
+<div class="composer"><input id="chatIn" placeholder="12*12 · кто ты · мир" autocomplete="off"/>
+<button type="button" id="btnChat">Отправить</button></div></div>
+<p style="font-size:12px;color:#8b9bb8"><a href="/matrix/">MATRIX</a> · <a href="/super/">Super</a> · aksilove@internet.ru</p>
+</div>
+<script>
+(function(){
+function msk(){try{return new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})+" МСК"}catch(e){return"—"}}
+function setM(){var e=document.getElementById("msk");if(e)e.textContent=msk()}
+setM();setInterval(setM,1000);
+function evalExpr(s){
+ s=String(s).toLowerCase().replace(/,/g,".").replace(/×/g,"*").replace(/÷/g,"/").replace(/корень(?:\s*из)?\s*([\d.]+)/g,"Math.sqrt($1)").replace(/√\s*([\d.]+)/g,"Math.sqrt($1)").replace(/\^/g,"**").replace(/π/g,"Math.PI");
+ try{var v=Function('"use strict";return('+s+')')();return typeof v==="number"&&isFinite(v)?v:null}catch(e){return null}
+}
+function fmt(x){if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(+x.toFixed(8))}
+function mathA(q){
+ var raw=String(q).trim(),low=raw.toLowerCase();
+ var pm=low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
+ if(pm)return pm[1]+"% от "+pm[2]+" = "+fmt((+pm[1].replace(",","."))/100*(+pm[2].replace(",",".")));
+ var fm=low.match(/(\d+)\s*!/);
+ if(fm){var n=+fm[1],f=1;if(n>20)return"n! слишком велико";for(var i=2;i<=n;i++)f*=i;return n+"! = "+f}
+ if(/=/.test(raw)&&/[xх]/i.test(raw)){
+  var s=raw.toLowerCase().replace(/х/g,"x").replace(/\s/g,"").replace(/\*/g,"");
+  var L=s.split("=")[0],R=s.split("=")[1],rN=parseFloat(R);if(!isFinite(rN))return null;
+  var a=0,b=0,c=0,e=L,m;
+  m=e.match(/([+-]?\d*\.?\d*)x\^2/);if(m){a=m[1]===""||m[1]==="+"?1:m[1]==="-"?-1:parseFloat(m[1]);e=e.replace(m[0],"")}
+  m=e.match(/([+-]?\d*\.?\d*)x/);if(m){b=m[1]===""||m[1]==="+"?1:m[1]==="-"?-1:parseFloat(m[1]);e=e.replace(m[0],"")}
+  e.replace(/([+-]?\d+\.?\d*)/g,function(n){c+=parseFloat(n);return""});c-=rN;
+  if(Math.abs(a)<1e-12){if(Math.abs(b)<1e-12)return"Нет корней";return"Корень: "+fmt(-c/b)}
+  var d=b*b-4*a*c;if(d<0)return"Нет действительных корней";
+  var s2=Math.sqrt(d);return"Корни: "+fmt((-b+s2)/(2*a))+", "+fmt((-b-s2)/(2*a));
+ }
+ var expr=raw.replace(/^посчитай\s*/i,"").replace(/^вычисли\s*/i,"");
+ var v=evalExpr(expr);if(v!=null)return"Результат: "+fmt(v);return null;
+}
+function respond(q){
+ q=String(q||"").trim();if(!q)return"Напиши 12*12 или «кто ты».";
+ var m=mathA(q);if(m)return m;
+ var low=q.toLowerCase();
+ if(/кто ты|что ты/.test(low))return"АКСИ Unity — offline math + gate/receipt. Один продукт на milana808.github.io.";
+ if(/привет|здравств/.test(low))return"Привет. Спроси 12*12 или x^2-4=0.";
+ if(/время|мск/.test(low))return msk();
+ if(/мир|explore/.test(low))return"Explore: zoom.earth · flightradar24 · arxiv.org · archive.org";
+ if(/акси|миссия/.test(low))return"Суверенный слой: считаем локально, gate+receipt. aksilove@internet.ru";
+ return"Не выражение. Примеры: 12*12 · sqrt(100) · x^2=9 · кто ты.";
+}
+function append(role,text){
+ var box=document.getElementById("chatLog");
+ var d=document.createElement("div");d.className="cmsg "+(role==="user"?"cu":"ca");
+ d.textContent=(role==="user"?"Вы: ":"АКСИ: ")+text;box.appendChild(d);box.scrollTop=box.scrollHeight;
+}
+function gate(q,ans){
+ var isMath=!!mathA(q);var dec=isMath?"ALLOW":(/акси|кто|привет|мир/.test(q.toLowerCase())?"ALLOW":"REVIEW");
+ var body={system:"AKSI-UNITY-v10-min",claim:q,decision:dec,answer:ans,ts:new Date().toISOString()};
+ try{localStorage.setItem("aksi_unity_last",JSON.stringify(body))}catch(e){}
+ document.getElementById("status").textContent="gate="+dec+" · saved";
+ return dec;
+}
+function send(){
+ var inp=document.getElementById("chatIn");var q=inp.value.trim();if(!q)return;inp.value="";
+ append("user",q);var ans=respond(q);append("aksi",ans);
+ var g=gate(q,ans);append("aksi","[gate "+g+"]");
+}
+document.getElementById("btnChat").onclick=send;
+document.getElementById("chatIn").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});
+append("aksi","Online · "+msk()+"\n12*12 · x^2-4=0 · кто ты");
+})();
+</script></body></html>
