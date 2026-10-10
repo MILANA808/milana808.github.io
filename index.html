@@ -8,91 +8,74 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif;line-height:1.45}
-.top{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;background:#0b1020;border-bottom:1px solid #24304d;font-size:12px;color:#8b9bb8}
-.dot{width:8px;height:8px;border-radius:50%;background:#34d399}
-.shell{max-width:720px;margin:0 auto;padding:12px 14px 28px}
-h1{font-size:1.25rem;margin:8px 0 4px}
-.sub{color:#8b9bb8;font-size:.88rem;margin:0 0 10px}
-.card{background:#121a2f;border:1px solid #24304d;border-radius:14px;padding:12px;margin:10px 0}
-#log{max-height:min(55vh,500px);overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:140px}
-.msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;font-size:14px}
-.u{background:#0a0f1c;border:1px solid #24304d;align-self:flex-end;max-width:92%}
-.a{background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.35);align-self:flex-start;max-width:96%}
-.tag{font-size:10px;color:#8b9bb8;margin-bottom:3px}
-.composer{display:flex;gap:8px;margin-top:10px}
-input{flex:1;background:#0a0f1c;border:1px solid #24304d;border-radius:10px;color:#e8eefc;padding:12px;font-size:15px}
-button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
-button:disabled{opacity:.55}
-button.ghost{background:transparent;border:1px solid #24304d;color:#e8eefc;font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.chips button{padding:7px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d;font-weight:600}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.meta{font-size:11px;color:#8b9bb8;margin-top:8px}
-.bar{height:6px;background:#0a0f1c;border-radius:99px;overflow:hidden;margin-top:8px;display:none}
-.bar.on{display:block}
-.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#818cf8)}
+body{margin:0;min-height:100dvh;background:#0b1020;color:#e8eefc;font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+header{padding:14px 16px;border-bottom:1px solid #24304d;display:flex;align-items:center;gap:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399}
+header strong{font-size:15px}
+header span{margin-left:auto;font-size:12px;color:#8b9bb8}
+main{flex:1;max-width:680px;width:100%;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:calc(100dvh - 180px)}
+.msg{padding:12px 14px;border-radius:14px;white-space:pre-wrap;font-size:15px;line-height:1.5;max-width:92%}
+.u{align-self:flex-end;background:#0a0f1c;border:1px solid #24304d}
+.a{align-self:flex-start;background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.3)}
+.tag{font-size:10px;color:#8b9bb8;margin-bottom:4px;letter-spacing:.02em}
+.bar{display:flex;gap:8px;padding-top:4px}
+input{flex:1;background:#121a2f;border:1px solid #24304d;border-radius:12px;color:#e8eefc;padding:14px 16px;font-size:16px;outline:none}
+input:focus{border-color:#818cf8}
+button{border:0;border-radius:12px;padding:14px 18px;font-weight:700;font-size:14px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
+button:disabled{opacity:.5}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{padding:8px 12px;font-size:12px;background:#121a2f;color:#c7d2fe;border:1px solid #24304d;font-weight:600}
+.foot{font-size:11px;color:#64748b;text-align:center;padding:4px 0 8px}
 </style>
 </head>
 <body>
-<div class="top"><span class="dot"></span><strong style="color:#e8eefc">АКСИ</strong><span id="msk">—</span><span id="st">автономно</span></div>
-<div class="shell">
-<h1>Агент АКСИ</h1>
-<p class="sub">Без внешних ключей. Math · память · факты Wikipedia · опционально WebLLM.</p>
-<div class="card">
-<div class="row">
-<button type="button" class="ghost" id="btnLLM">Загрузить WebLLM</button>
-<button type="button" class="ghost" id="btnWiki">Wiki</button>
-</div>
-<div class="bar" id="bar"><i id="barI"></i></div>
-<div class="meta" id="hint">Свободный вопрос → сначала локальная wiki, иначе Wikipedia RU/EN.</div>
-</div>
-<div class="card">
-<div id="log"></div>
-<div class="chips">
-<button type="button" data-q="кто ты">кто ты</button>
-<button type="button" data-q="12*12">12*12</button>
-<button type="button" data-q="что такое нейронная сеть">нейронная сеть</button>
-<button type="button" data-q="что такое энтропия">энтропия</button>
-<button type="button" data-q="запомни: проект = АКСИ">запомни</button>
-</div>
-<div class="composer">
-<input id="in" type="text" placeholder="Любой вопрос · 2+2 · запомни: ключ = значение" autocomplete="off"/>
-<button type="button" id="send">Отправить</button>
-</div>
-<div class="meta">aksilove@internet.ru</div>
-</div>
-</div>
+<header>
+  <span class="dot"></span>
+  <strong>АКСИ</strong>
+  <span id="msk">—</span>
+</header>
+<main>
+  <div id="log"></div>
+  <div class="chips">
+    <button type="button" data-q="кто ты">кто ты</button>
+    <button type="button" data-q="12*12">12×12</button>
+    <button type="button" data-q="что такое энтропия">энтропия</button>
+    <button type="button" data-q="что такое нейронная сеть">нейросеть</button>
+  </div>
+  <div class="bar">
+    <input id="in" type="text" placeholder="Спроси что угодно…" autocomplete="off" enterkeyhint="send"/>
+    <button type="button" id="send">→</button>
+  </div>
+  <div class="foot">aksilove@internet.ru</div>
+</main>
 <script>
 (function(){
 "use strict";
-var WIKI_KEY="aksi_wiki_v3", MEM_KEY="aksi_facts_v3";
-var wiki={}, facts={}, engine=null, llmReady=false, llmLoading=false, busy=false;
-try{wiki=JSON.parse(localStorage.getItem(WIKI_KEY)||"{}")||{}}catch(e){wiki={}}
-try{facts=JSON.parse(localStorage.getItem(MEM_KEY)||"{}")||{}}catch(e){facts={}}
+var WK="aksi_w4", FK="aksi_f4";
+var wiki={}, facts={}, busy=false;
+try{wiki=JSON.parse(localStorage.getItem(WK)||"{}")||{}}catch(e){}
+try{facts=JSON.parse(localStorage.getItem(FK)||"{}")||{}}catch(e){}
 
 function $(id){return document.getElementById(id)}
 function msk(){
-  try{return new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})+" МСК"}
+  try{return new Date().toLocaleTimeString("ru-RU",{timeZone:"Europe/Moscow",hour:"2-digit",minute:"2-digit",hour12:false})+" МСК"}
   catch(e){return"—"}
 }
-function paint(){
-  var a=$("msk");if(a)a.textContent=msk();
-  var b=$("st");if(b)b.textContent=(llmReady?"WebLLM · ":"")+"wiki "+Object.keys(wiki).length+" · mem "+Object.keys(facts).length;
-}
-setInterval(paint,1000);paint();
-function saveWiki(){try{localStorage.setItem(WIKI_KEY,JSON.stringify(wiki))}catch(e){}paint()}
-function saveFacts(){try{localStorage.setItem(MEM_KEY,JSON.stringify(facts))}catch(e){}paint()}
+setInterval(function(){var e=$("msk");if(e)e.textContent=msk()},1000);
+$("msk").textContent=msk();
 
-function norm(s){return String(s||"").toLowerCase().replace(/[«»"'`]/g,"").replace(/[?!.,;:()]/g," ").replace(/\s+/g," ").trim()}
-function tokens(s){
+function saveW(){try{localStorage.setItem(WK,JSON.stringify(wiki))}catch(e){}}
+function saveF(){try{localStorage.setItem(FK,JSON.stringify(facts))}catch(e){}}
+function norm(s){return String(s||"").toLowerCase().replace(/[«»"'`?!.,;:()]/g," ").replace(/\s+/g," ").trim()}
+function toks(s){
   return norm(s).split(" ").filter(function(w){
-    return w.length>2&&!/^(что|это|как|для|или|the|and|про|есть|быть|какой|какая|какие|почему|когда|где|who|what|how|расскажи|объясни)$/.test(w);
+    return w.length>2&&!/^(что|это|как|для|или|про|есть|быть|какой|какие|почему|когда|где|who|what|how|расскажи|объясни|the|and)$/.test(w);
   });
 }
-function slug(s){var t=tokens(s).slice(0,6).join("-");return t||("p_"+Date.now())}
+function slug(s){return toks(s).slice(0,5).join("-")||("n"+Date.now())}
+function fmt(x){if(!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(8)))}
 
-function fmt(x){if(x==null||!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(10)))}
 function evalExpr(s){
   s=String(s).toLowerCase().replace(/,/g,".").replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-");
   s=s.replace(/π/g,"Math.PI").replace(/\bpi\b/g,"Math.PI");
@@ -114,210 +97,121 @@ function solveEq(raw){
   m=e.match(/([+-]?\d*\.?\d*)x/);
   if(m){b=(m[1]===""||m[1]==="+")?1:(m[1]==="-"?-1:parseFloat(m[1]));e=e.replace(m[0],"")}
   e.replace(/([+-]?\d+\.?\d*)/g,function(n){c+=parseFloat(n);return""});c-=rN;
-  if(Math.abs(a)<1e-12){if(Math.abs(b)<1e-12)return"Нет решения";return"Корень: "+fmt(-c/b)}
+  if(Math.abs(a)<1e-12){if(Math.abs(b)<1e-12)return"Нет решения";return"x = "+fmt(-c/b)}
   var d=b*b-4*a*c;if(d<-1e-12)return"Нет действительных корней";
-  if(Math.abs(d)<1e-12)return"Корень: "+fmt(-b/(2*a));
-  var s2=Math.sqrt(d);return"Корни: "+fmt((-b+s2)/(2*a))+", "+fmt((-b-s2)/(2*a));
+  if(Math.abs(d)<1e-12)return"x = "+fmt(-b/(2*a));
+  var s2=Math.sqrt(d);return"x = "+fmt((-b+s2)/(2*a))+", "+fmt((-b-s2)/(2*a));
 }
-function mathAnswer(q){
+function mathA(q){
   var raw=String(q).trim(),low=raw.toLowerCase();
   var pm=low.match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);
   if(pm)return pm[1]+"% от "+pm[2]+" = "+fmt((+pm[1].replace(",","."))/100*(+pm[2].replace(",",".")));
   var fm=low.match(/(\d+)\s*!/);
-  if(fm){var n=+fm[1],f=1,i;if(n>20)return"n! велико";for(i=2;i<=n;i++)f*=i;return n+"! = "+f}
-  if(/=/.test(raw)&&/[xх]/i.test(raw)){var eq=solveEq(raw);if(eq)return"Уравнение: "+raw+"\n"+eq}
+  if(fm){var n=+fm[1],f=1,i;if(n>20)return"слишком большое n!";for(i=2;i<=n;i++)f*=i;return n+"! = "+f}
+  if(/=/.test(raw)&&/[xх]/i.test(raw)){var eq=solveEq(raw);if(eq)return eq}
   var expr=raw.replace(/^посчитай\s*/i,"").replace(/^вычисли\s*/i,"");
-  if(!/=/.test(expr)||!/[xх]/i.test(expr)){var v=evalExpr(expr);if(v!=null)return"Результат: "+fmt(v)}
+  if(!/=/.test(expr)||!/[xх]/i.test(expr)){var v=evalExpr(expr);if(v!=null)return fmt(v)}
   return null;
 }
 function teach(q){
   var m=String(q).match(/^(?:запомни|remember)\s*[:\-]?\s*(.+)$/i);
   if(!m)return null;
-  var body=m[1].trim();
-  var kv=body.match(/^([^=:]+)[=:]\s*(.+)$/);
-  if(kv){var k=kv[1].trim().toLowerCase(),v=kv[2].trim();facts[k]=v;saveFacts();wikiWrite(k,v,"user");return"Запомнила: «"+k+"» = «"+v+"»"}
-  facts["note_"+Date.now()]=body;saveFacts();return"Записала";
+  var body=m[1].trim(),kv=body.match(/^([^=:]+)[=:]\s*(.+)$/);
+  if(kv){var k=kv[1].trim().toLowerCase(),v=kv[2].trim();facts[k]=v;saveF();wWrite(k,v);return"Запомнила: "+k+" = "+v}
+  facts["n"+Date.now()]=body;saveF();return"Записала";
 }
 function recall(q){
   var low=q.toLowerCase();
-  if(/что\s+помнишь|покажи\s+память|факты/.test(low)){
-    var keys=Object.keys(facts);if(!keys.length)return"Память пуста";
-    return"Память:\n"+keys.map(function(k){return"• "+k+" = "+facts[k]}).join("\n");
+  if(/что\s+помнишь|память|факты/.test(low)){
+    var ks=Object.keys(facts);if(!ks.length)return"Память пуста. Напиши: запомни: ключ = значение";
+    return ks.map(function(k){return"• "+k+" = "+facts[k]}).join("\n");
   }
-  for(var k in facts){if(Object.prototype.hasOwnProperty.call(facts,k)&&low.indexOf(k)>=0)return facts[k]+" (память: "+k+")"}
+  for(var k in facts)if(Object.prototype.hasOwnProperty.call(facts,k)&&low.indexOf(k)>=0)return facts[k];
   return null;
 }
-
-function wikiWrite(title,body,source){
+function wWrite(title,body){
   var id=slug(title);
-  var prev=wiki[id];
-  wiki[id]={id:id,title:String(title).slice(0,120),body:String(body).slice(0,1200),source:source||"agent",hits:(prev&&prev.hits)||0,updated:new Date().toISOString()};
-  saveWiki();return id;
+  wiki[id]={t:String(title).slice(0,100),b:String(body).slice(0,1100),h:(wiki[id]&&wiki[id].h)||0};
+  saveW();
 }
-function wikiSearch(q){
-  var toks=tokens(q);if(!toks.length)return null;
-  var best=null,bestScore=0,id;
+function wFind(q){
+  var t=toks(q);if(!t.length)return null;
+  var best=null,sc=0,id;
   for(id in wiki){
-    if(!Object.prototype.hasOwnProperty.call(wiki,id))continue;
-    var p=wiki[id],hay=norm(p.title+" "+p.body+" "+id),score=0,i;
-    for(i=0;i<toks.length;i++){if(hay.indexOf(toks[i])>=0)score+=1;if(norm(p.title).indexOf(toks[i])>=0)score+=2}
-    if(score>bestScore){bestScore=score;best=p}
+    var p=wiki[id],hay=norm(p.t+" "+p.b),s=0,i;
+    for(i=0;i<t.length;i++){if(hay.indexOf(t[i])>=0)s++;if(norm(p.t).indexOf(t[i])>=0)s+=2}
+    if(s>sc){sc=s;best=p}
   }
-  if(best&&bestScore>=Math.min(2,toks.length)){best.hits=(best.hits||0)+1;wiki[best.id]=best;saveWiki();return best}
+  if(best&&sc>=Math.min(2,t.length)){best.h=(best.h||0)+1;saveW();return best}
   return null;
 }
-function listWiki(){
-  var keys=Object.keys(wiki);if(!keys.length)return"Wiki пуста — появится после ответов.";
-  keys.sort(function(a,b){return (wiki[b].hits||0)-(wiki[a].hits||0)});
-  return"Wiki ("+keys.length+"):\n"+keys.slice(0,15).map(function(k){var p=wiki[k];return"• "+p.title+" ["+p.source+", "+(p.hits||0)+"]"}).join("\n");
+function topic(q){
+  return String(q).trim().replace(/^(что\s+такое|кто\s+такой|кто\s+такая|расскажи\s+про|объясни|what\s+is)\s+/i,"").replace(/[?!.]+$/,"").trim().slice(0,70);
 }
-function extractTopic(q){
-  return String(q).trim().replace(/^(что\s+такое|кто\s+такой|кто\s+такая|расскажи\s+про|объясни|what\s+is|who\s+is)\s+/i,"").replace(/[?!.]+$/,"").trim().slice(0,80);
+function wikiGet(lang,title){
+  return fetch("https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title),{headers:{Accept:"application/json"}})
+    .then(function(r){if(!r.ok)throw new Error(String(r.status));return r.json()})
+    .then(function(j){
+      if(!j||j.type==="disambiguation")throw new Error("d");
+      var e=(j.extract||"").trim();if(e.length<40)throw new Error("s");
+      return{title:j.title||title,extract:e.slice(0,900),url:j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page};
+    });
 }
-function wikiApi(lang,title){
-  var url="https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(title);
-  return fetch(url,{headers:{"Accept":"application/json"}}).then(function(r){
-    if(!r.ok)throw new Error("wiki "+r.status);
-    return r.json();
-  }).then(function(j){
-    if(!j||j.type==="disambiguation")throw new Error("disambiguation");
-    var extract=(j.extract||"").trim();
-    if(extract.length<40)throw new Error("short");
-    return{title:j.title||title,extract:extract.slice(0,1000),url:j.content_urls&&j.content_urls.desktop&&j.content_urls.desktop.page};
-  });
+function fact(q){
+  var t=topic(q);if(t.length<2)return Promise.reject(new Error("t"));
+  return wikiGet("ru",t).catch(function(){return wikiGet("en",t)});
 }
-function fetchFact(q){
-  var topic=extractTopic(q);
-  if(topic.length<2)return Promise.reject(new Error("no topic"));
-  return wikiApi("ru",topic).catch(function(){return wikiApi("en",topic)});
-}
-
-function identity(q){
+function core(q){
   var low=q.toLowerCase();
-  if(/кто ты|что ты|представься/.test(low))return"Я АКСИ — автономный агент на этом сайте.\n• Math и память\n• Факты из Wikipedia (без ключей)\n• Локальная wiki растёт после ответов\n• WebLLM — по желанию\naksilove@internet.ru";
-  if(/привет|здравств|hello/.test(low))return"Привет. Спроси что угодно — отвечу фактом или расчётом.";
-  if(/время|мск|час/.test(low))return msk();
-  if(/покажи\s*wiki|wiki$/.test(low))return listWiki();
-  if(/помощ|умеешь|help/.test(low))return"• 12*12, уравнения\n• что такое … → факт\n• запомни: ключ = значение\n• WebLLM по кнопке";
+  if(/кто ты|что ты|представься/.test(low))return"Я АКСИ. Считаю, помню, ищу факты. Без ключей и лишнего — один вопрос, один ответ.\naksilove@internet.ru";
+  if(/привет|здравств|hello/.test(low))return"Привет. Спроси что угодно.";
+  if(/время|мск/.test(low))return msk();
+  if(/помощ|умеешь|help/.test(low))return"Примеры:\n• 12*12\n• что такое энтропия\n• запомни: имя = АКСИ";
   return null;
 }
 
-function memHint(){
-  var keys=Object.keys(facts);if(!keys.length)return"";
-  return"\nФакты: "+keys.slice(0,10).map(function(k){return k+"="+facts[k]}).join("; ");
-}
-
-function append(role,text,src){
-  var box=$("log");if(!box)return;
-  var d=document.createElement("div");
+function add(role,text,src){
+  var box=$("log"),d=document.createElement("div");
   d.className="msg "+(role==="u"?"u":"a");
   if(src){var t=document.createElement("div");t.className="tag";t.textContent=src;d.appendChild(t)}
-  d.appendChild(document.createTextNode((role==="u"?"Вы: ":"АКСИ: ")+text));
+  d.appendChild(document.createTextNode(text));
   box.appendChild(d);box.scrollTop=box.scrollHeight;
-}
-
-function loadWebLLM(){
-  if(llmReady||llmLoading)return;
-  llmLoading=true;var btn=$("btnLLM");if(btn)btn.disabled=true;
-  $("bar").className="bar on";$("hint").textContent="Загрузка WebLLM…";
-  import("https://esm.run/@mlc-ai/web-llm").then(function(mod){
-    var Create=mod.CreateMLCEngine||(mod.default&&mod.default.CreateMLCEngine);
-    if(!Create)throw new Error("нет CreateMLCEngine");
-    var models=["Qwen2.5-0.5B-Instruct-q4f16_1-MLC","SmolLM2-360M-Instruct-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC"];
-    function tryM(i){
-      if(i>=models.length)throw new Error("модели недоступны");
-      var mid=models[i];
-      return Create(mid,{initProgressCallback:function(p){
-        var pr=typeof p.progress==="number"?p.progress:0;
-        $("barI").style.width=Math.round(pr*100)+"%";
-        $("hint").textContent=(p.text||mid).slice(0,120);
-      }}).then(function(eng){
-        engine=eng;llmReady=true;llmLoading=false;
-        if(btn){btn.disabled=true;btn.textContent="WebLLM ✓"}
-        $("barI").style.width="100%";$("hint").textContent="Локально: "+mid;paint();
-        append("a","WebLLM готова: "+mid,"webllm");
-      }).catch(function(){return tryM(i+1)});
-    }
-    return tryM(0);
-  }).catch(function(err){
-    llmLoading=false;if(btn)btn.disabled=false;
-    $("hint").textContent="WebLLM: "+(err&&err.message?err.message:err);
-    append("a","WebLLM не загрузилась. Факты и math работают.","core");
-  });
-}
-
-function chatWebLLM(q){
-  return engine.chat.completions.create({
-    messages:[
-      {role:"system",content:"Ты АКСИ. Отвечай по-русски кратко и по делу."+memHint()},
-      {role:"user",content:q}
-    ],temperature:0.7,max_tokens:450
-  }).then(function(out){
-    var t=out&&out.choices&&out.choices[0]&&out.choices[0].message&&out.choices[0].message.content;
-    return (t||"").trim()||"Пустой ответ";
-  });
 }
 
 function send(){
   if(busy)return;
-  var inp=$("in");if(!inp)return;
-  var q=inp.value.trim();if(!q)return;
-  inp.value="";
-  append("u",q);
+  var inp=$("in"),q=(inp.value||"").trim();if(!q)return;
+  inp.value="";add("u",q);
 
-  var t=teach(q);if(t){append("a",t,"memory");return}
-  var m=mathAnswer(q);if(m){append("a",m,"math");return}
-  var id=identity(q);if(id){append("a",id,"core");return}
-  var r=recall(q);if(r){append("a",r,"memory");return}
+  var a=teach(q);if(a){add("a",a,"память");return}
+  a=mathA(q);if(a){add("a",a,"расчёт");return}
+  a=core(q);if(a){add("a",a,"");return}
+  a=recall(q);if(a){add("a",a,"память");return}
 
-  var page=wikiSearch(q);
-  if(page&&page.body&&page.body.length>80){
-    append("a","Из wiki «"+page.title+"»:\n"+page.body,"wiki");
-    return;
-  }
+  var p=wFind(q);
+  if(p&&p.b&&p.b.length>60){add("a",p.b,"память знаний");return}
 
-  if(llmReady&&engine){
-    busy=true;$("send").disabled=true;
-    append("a","Думаю…","webllm");
-    chatWebLLM(q).then(function(text){
-      busy=false;$("send").disabled=false;
-      var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-      append("a",text,"webllm");
-      wikiWrite(extractTopic(q)||q,text,"webllm");
-    }).catch(function(err){
-      busy=false;$("send").disabled=false;
-      var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-      append("a","WebLLM ошибка: "+(err&&err.message?err.message:err),"core");
-    });
-    return;
-  }
-
-  busy=true;$("send").disabled=true;
-  append("a","Ищу факт…","net");
-  fetchFact(q).then(function(f){
+  busy=true;$("send").disabled=true;add("a","…","поиск");
+  fact(q).then(function(f){
     busy=false;$("send").disabled=false;
-    var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-    var text=f.title+":\n"+f.extract+(f.url?"\n\n"+f.url:"");
-    wikiWrite(f.title,f.extract,"wikipedia");
-    append("a",text,"wikipedia");
+    var log=$("log");if(log.lastChild)log.removeChild(log.lastChild);
+    var text=f.extract+(f.url?"\n\n"+f.url:"");
+    wWrite(f.title,f.extract);
+    add("a",text,"факт");
   }).catch(function(){
     busy=false;$("send").disabled=false;
-    var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-    if(page){append("a","Из wiki «"+page.title+"»:\n"+page.body,"wiki");return}
-    append("a","Не нашла факт. Уточни тему («что такое …») или загрузи WebLLM.","core");
+    var log=$("log");if(log.lastChild)log.removeChild(log.lastChild);
+    if(p){add("a",p.b,"память знаний");return}
+    add("a","Не нашла. Попробуй «что такое …» или пример: 2+2.","подсказка");
   });
 }
 
 $("send").onclick=send;
 $("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});
-$("btnLLM").onclick=loadWebLLM;
-$("btnWiki").onclick=function(){append("a",listWiki(),"wiki")};
-var chips=document.querySelectorAll("[data-q]");
-for(var i=0;i<chips.length;i++){(function(btn){
-  btn.onclick=function(){var el=$("in");if(el)el.value=btn.getAttribute("data-q")||"";send()};
-})(chips[i])}
-
-append("a","Онлайн · "+msk()+"\nАвтономный режим: math, память, Wikipedia, wiki. Без ключей.","core");
+[].forEach.call(document.querySelectorAll("[data-q]"),function(b){
+  b.onclick=function(){$("in").value=b.getAttribute("data-q")||"";send()};
+});
+add("a","Спроси что угодно.\nСчитаю · помню · ищу факты.","");
 })();
 </script>
 </body>
