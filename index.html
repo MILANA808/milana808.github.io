@@ -3,153 +3,67 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>АКСИ</title>
-<meta name="theme-color" content="#0b1020"/>
+<title>Акси</title>
+<meta name="theme-color" content="#0c0f14"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif;display:flex;flex-direction:column}
-header{padding:10px 14px;border-bottom:1px solid #24304d;display:flex;align-items:center;gap:8px;font-size:13px}
-.dot{width:8px;height:8px;border-radius:50%;background:#34d399}
-#st{margin-left:auto;font-size:11px;color:#8b9bb8}
-main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:10px 14px 76px;display:flex;flex-direction:column;gap:8px}
-.board{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.metric{background:#121a2f;border:1px solid #24304d;border-radius:10px;padding:8px}
-.metric .k{font-size:9px;color:#8b9bb8}.metric .v{font-size:13px;font-weight:700;word-break:break-all}
-#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:160px;max-height:calc(100dvh - 280px)}
-.msg{padding:11px 13px;border-radius:12px;white-space:pre-wrap;font-size:14px;line-height:1.5;max-width:92%}
-.u{align-self:flex-end;background:#0a0f1c;border:1px solid #24304d}
-.a{align-self:flex-start;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25)}
-.bar{display:flex;gap:8px}
-input{flex:1;background:#121a2f;border:1px solid #24304d;border-radius:12px;color:#e8eefc;padding:12px;font-size:15px;outline:none}
-button#send{border:0;border-radius:12px;padding:12px 16px;background:#22d3ee;color:#06202a;font-weight:700;cursor:pointer}
-.chips{display:flex;flex-wrap:wrap;gap:5px}
-.chips button{padding:7px 10px;font-size:11px;background:#121a2f;color:#c7d2fe;border:1px solid #24304d;border-radius:9px;cursor:pointer}
-.panel[hidden]{display:none!important}
-.card{background:#121a2f;border:1px solid #24304d;border-radius:12px;padding:12px;font-size:13px;white-space:pre-wrap;line-height:1.4}
-#star{width:100%;max-width:260px;height:120px;background:#f8fafc;border-radius:12px;align-self:center}
-.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:5px}
-.map a{padding:9px;background:#121a2f;border:1px solid #24304d;border-radius:9px;color:#c7d2fe;text-decoration:none;font-size:11px}
-.map a:hover{border-color:#22d3ee}
-h3{margin:12px 0 6px;font-size:11px;color:#8b9bb8;text-transform:uppercase;letter-spacing:.05em}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:#0b1020f5;border-top:1px solid #24304d;display:flex;justify-content:center;gap:2px;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:40}
-.bnav button{flex:1;max-width:88px;background:transparent;color:#94a3b8;border:1px solid transparent;font-size:11px;padding:10px 2px;border-radius:10px;cursor:pointer}
-.bnav button.on{color:#e8eefc;border-color:#334155;background:#121a2f}
-.foot{font-size:10px;color:#64748b;text-align:center;padding:4px}
+body{margin:0;min-height:100dvh;background:#0c0f14;color:#e8eaed;font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
+header{padding:14px 16px;font-size:15px;font-weight:600;border-bottom:1px solid #1a1f2e}
+main{flex:1;max-width:640px;width:100%;margin:0 auto;padding:12px 14px 20px;display:flex;flex-direction:column;min-height:0}
+#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:8px 0;min-height:200px}
+.msg{padding:12px 14px;border-radius:14px;font-size:15px;line-height:1.55;white-space:pre-wrap;max-width:90%}
+.u{align-self:flex-end;background:#1a2332;border:1px solid #2a3548}
+.a{align-self:flex-start;background:#12181f;border:1px solid #1e2836}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips button{padding:8px 12px;font-size:12px;background:#151a24;color:#9aa3b5;border:1px solid #252b3a;border-radius:20px;cursor:pointer}
+.chips button:active{background:#1e2533}
+.bar{display:flex;gap:8px;padding-top:4px}
+input{flex:1;background:#151a24;border:1px solid #252b3a;border-radius:14px;color:#e8eaed;padding:14px 16px;font-size:16px;outline:none}
+input:focus{border-color:#3d4a63}
+button#send{border:0;border-radius:14px;padding:14px 18px;background:#5b8def;color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+footer{text-align:center;padding:10px;font-size:11px;color:#5a6375}
 </style>
 </head>
 <body>
-<header>
-  <span class="dot" id="dot"></span>
-  <strong>АКСИ</strong>
-  <span id="st">…</span>
-</header>
+<header>Акси</header>
 <main>
-  <div class="board">
-    <div class="metric"><div class="k">H_eff</div><div class="v" id="mH">—</div></div>
-    <div class="metric"><div class="k">Proof</div><div class="v" id="mP" style="font-family:monospace;font-size:12px;color:#a5b4fc">—</div></div>
-    <div class="metric"><div class="k">Модули</div><div class="v" id="mM">—</div></div>
+  <div id="log"></div>
+  <div class="chips">
+    <button type="button" data-q="кто ты">кто ты</button>
+    <button type="button" data-q="что такое энтропия">энтропия</button>
+    <button type="button" data-q="что такое ии">ИИ</button>
+    <button type="button" data-q="что такое сознание">сознание</button>
+    <button type="button" data-q="12*12">12×12</button>
   </div>
-  <div class="panel" data-panel="chat">
-    <div id="log"></div>
-    <div class="chips">
-      <button type="button" data-q="кто ты">кто ты</button>
-      <button type="button" data-q="что такое энтропия">энтропия</button>
-      <button type="button" data-q="что такое ии">ИИ</button>
-      <button type="button" data-q="что такое сознание">сознание</button>
-      <button type="button" data-q="12*12">12×12</button>
-    </div>
-    <div class="bar">
-      <input id="in" type="text" placeholder="Вопрос…" autocomplete="off" enterkeyhint="send"/>
-      <button type="button" id="send">→</button>
-    </div>
+  <div class="bar">
+    <input id="in" type="text" placeholder="Напиши вопрос…" autocomplete="off" enterkeyhint="send"/>
+    <button type="button" id="send">→</button>
   </div>
-  <div class="panel" data-panel="matrix" hidden>
-    <canvas id="star" width="260" height="120"></canvas>
-    <div class="card" id="matrixCard">ядро</div>
-    <button type="button" data-act="qrun" style="align-self:flex-start;margin-top:6px;background:#121a2f;color:#c7d2fe;border:1px solid #24304d;border-radius:9px;padding:8px 12px;cursor:pointer">коллапс</button>
-  </div>
-  <div class="panel" data-panel="memory" hidden>
-    <div class="card" id="memCard">память…</div>
-    <button type="button" data-act="clearMem" style="align-self:flex-start;margin-top:6px;background:#121a2f;color:#c7d2fe;border:1px solid #24304d;border-radius:9px;padding:8px 12px;cursor:pointer">очистить</button>
-  </div>
-  <div class="panel" data-panel="proof" hidden>
-    <div class="card" id="proofCard">чеки…</div>
-  </div>
-  <div class="panel" data-panel="map" hidden>
-    <h3>ИИ</h3>
-    <div class="map">
-      <a href="/llm/">LLM</a><a href="/generate/">Generate / Net</a>
-      <a href="/local-ai/">Local AI</a><a href="/zero/">Zero</a>
-    </div>
-    <h3>Доверие</h3>
-    <div class="map">
-      <a href="/authority/">Authority</a><a href="/dip/">DIP</a>
-      <a href="/receipt/">Receipt</a><a href="/protocol/">Protocol</a>
-    </div>
-    <h3>Matrix</h3>
-    <div class="map">
-      <a href="/matrix/">MATRIX</a><a href="/quantum/">Quantum</a>
-      <a href="/super/">Super</a><a href="/contour/">Contour</a>
-    </div>
-    <h3>Агент</h3>
-    <div class="map">
-      <a href="/agent/">Agent</a><a href="/bot.html">Bot</a>
-      <a href="/globe/">Globe</a><a href="/capsule.html">Capsule</a>
-    </div>
-    <div class="card" style="margin-top:10px">Backend: aksi/agent.py · api.py · memory · quantum · tools · globe</div>
-  </div>
-  <div class="foot">aksilove@internet.ru</div>
 </main>
-<nav class="bnav">
-  <button type="button" data-tab="chat" class="on">Chat</button>
-  <button type="button" data-tab="matrix">Matrix</button>
-  <button type="button" data-tab="memory">Memory</button>
-  <button type="button" data-tab="proof">Proof</button>
-  <button type="button" data-tab="map">Map</button>
-</nav>
-<script src="./aksi-seed.js?v=35"></script>
-<script src="./aksi-neuro.js?v=13"></script>
-<script src="./aksi-net.js?v=5"></script>
-<script src="./aksi-algorithm.js?v=43"></script>
+<footer>aksilove@internet.ru</footer>
+<script src="./aksi-seed.js?v=36"></script>
 <script>
 (function(){
 "use strict";
-var BUILD="AKSI-v2";
-var FK="aksi_cap_v2", RK="aksi_rcp_v2";
+var FK="aksi_mem";
 var facts={};
 try{facts=JSON.parse(localStorage.getItem(FK)||"{}")||{}}catch(e){}
 function $(id){return document.getElementById(id)}
-function saveF(){try{localStorage.setItem(FK,JSON.stringify(facts))}catch(e){}}
+function save(){try{localStorage.setItem(FK,JSON.stringify(facts))}catch(e){}}
 function norm(s){return String(s||"").toLowerCase().replace(/[«»"'`?!.,;:()]/g," ").replace(/\s+/g," ").trim()}
 function toks(s){return norm(s).split(" ").filter(function(w){return w.length>1})}
 function fmt(x){if(!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(6)))}
-function fnv(blob){var h=2166136261>>>0,i;for(i=0;i<blob.length;i++){h^=blob.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return (h>>>0).toString(16).padStart(8,"0").toUpperCase()}
-var Kernel=(function(){
-  function utf8(s){try{return new TextEncoder().encode(String(s))}catch(e){var a=[],i;for(i=0;i<s.length;i++)a.push(s.charCodeAt(i)&255);return new Uint8Array(a)}}
-  function unitVec(b,d){var v=new Float64Array(d),i,n=0;if(!b.length){for(i=0;i<d;i++)v[i]=1/Math.sqrt(d);return v}for(i=0;i<b.length;i++)v[i%d]+=(b[i]+1)/256;for(i=0;i<d;i++)n+=v[i]*v[i];n=Math.sqrt(n)||1;for(i=0;i<d;i++)v[i]/=n;return v}
-  function qbm(text){var dim=16,bytes=utf8(text),s=unitVec(bytes,dim),W=new Float64Array(dim*dim),i,j,seed=42;function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return (seed/0x7fffffff)*0.3-0.15}for(i=0;i<dim;i++)for(j=i+1;j<dim;j++){var w=rnd();W[i*dim+j]=w;W[j*dim+i]=w}var E=0;for(i=0;i<dim;i++){E-=(-0.1+0.2*(i/(dim-1)))*s[i];for(j=0;j<dim;j++)E-=0.5*s[i]*W[i*dim+j]*s[j]}var modes=new Float64Array(dim),local;for(i=0;i<dim;i++){local=0;for(j=0;j<dim;j++)local+=W[i*dim+j]*s[j];modes[i]=E+0.25*local+0.05*i}var mean=0,varr=0;for(i=0;i<dim;i++)mean+=modes[i];mean/=dim;for(i=0;i<dim;i++)varr+=(modes[i]-mean)*(modes[i]-mean);varr/=dim;return{H_eff:Math.max(0,Math.min(1,1/(1+varr)))}}
-  function gersh(text){var n=4,bytes=utf8(text||"x");if(!bytes.length)bytes=new Uint8Array([1]);var i,j,ok=0,sum=0;for(i=0;i<n;i++){var rad=0;for(j=0;j<n;j++)if(j!==i)rad+=Math.abs((bytes[(i*n+j)%bytes.length]/255)*2-1)*0.8;sum+=rad;if(rad<=2.5)ok++}var sc=Math.max(0,Math.min(1,(ok/n)*(1/(1+0.1*(sum/n)))));return{stable:sc>=0.7}}
-  function run(t){var q=qbm(t||"АКСИ"),g=gersh(t||"АКСИ");return{qbm:q,gersh:g,fp:fnv(["AKSI",t,q.H_eff.toFixed(4)].join("|"))}}
-  return{run:run}
-})();
-function paintKernel(text){var r=Kernel.run(text);if($("mH"))$("mH").textContent=r.qbm.H_eff.toFixed(3);if($("mP"))$("mP").textContent=r.fp;if($("matrixCard"))$("matrixCard").textContent="порядок "+r.qbm.H_eff.toFixed(2)+" · "+(r.gersh.stable?"стабильно":"слабо")+"\n"+r.fp;drawStar();return r}
-function drawStar(){var c=$("star");if(!c)return;var ctx=c.getContext("2d"),W=c.width,H=c.height,cx=W/2,cy=H/2,rad=Math.min(W,H)*0.38,i;ctx.clearRect(0,0,W,H);for(i=0;i<8;i++){var a=i*Math.PI/4-Math.PI/2;ctx.beginPath();ctx.arc(cx+rad*Math.cos(a),cy+rad*Math.sin(a),i===0?5:3,0,Math.PI*2);ctx.fillStyle=i===0?"#ef4444":"#0b1020";ctx.fill()}}
-function qCollapse(seed){var dim=16,amps=new Float64Array(dim),i,s=0,bytes=String(seed||"aksi");for(i=0;i<dim;i++){var h=0,j;for(j=0;j<bytes.length;j++)h=((h<<5)-h)+bytes.charCodeAt(j)+i*17;amps[i]=Math.abs(Math.sin(h*0.001));s+=amps[i]*amps[i]}s=Math.sqrt(s)||1;for(i=0;i<dim;i++)amps[i]/=s;var r=Math.random(),c=0,pick=0;for(i=0;i<dim;i++){c+=amps[i]*amps[i];if(r<=c){pick=i;break}}return pick.toString(2).padStart(4,"0")}
-function receipt(q,src,st){var body={ts:new Date().toISOString(),q:String(q).slice(0,100),source:src||"core",status:st||"ALLOW"};body.fp=fnv(JSON.stringify(body));try{var a=JSON.parse(localStorage.getItem(RK)||"[]");a.unshift(body);if(a.length>30)a=a.slice(0,30);localStorage.setItem(RK,JSON.stringify(a))}catch(e){}if($("mP"))$("mP").textContent=body.fp;return body}
-function seedA(q){var SEED=window.__AKSI_SEED||[],n=norm(q),t=toks(q),best=null,sc0=0,i,j;for(i=0;i<SEED.length;i++){var s=SEED[i],k=norm(s.q),sc=0;if(n===k)sc+=20;else if(n.indexOf(k)>=0||k.indexOf(n)>=0)sc+=12;for(j=0;j<t.length;j++){if(k.indexOf(t[j])>=0)sc+=5}if(sc>sc0){sc0=sc;best=s.a}}return sc0>=8?best:null}
-function neuroA(q){try{if(!window.AKSI_NEURO||!window.AKSI_NEURO.think)return null;var r=window.AKSI_NEURO.think(q);if(!r)return null;var text=r.text||r.answer||"";if(text.length<20)return null;var l=norm(q);if(/энтропи|сознан|ии|искусственн|небо|любов|счасть/.test(l)){if(/gate|eqs|tau|adia 2\.0|порог принятия/i.test(text))return null}if(r.score!=null&&r.score<0.02)return null;return text}catch(e){return null}}
+function seedA(q){var SEED=window.__AKSI_SEED||[],n=norm(q),t=toks(q),best=null,sc0=0,i,j;for(i=0;i<SEED.length;i++){var s=SEED[i],k=norm(s.q),sc=0;if(n===k)sc+=20;else if(n.indexOf(k)>=0||k.indexOf(n)>=0)sc+=12;for(j=0;j<t.length;j++)if(k.indexOf(t[j])>=0)sc+=5;if(sc>sc0){sc0=sc;best=s.a}}return sc0>=8?best:null}
 function mathA(q){var raw=String(q).trim();var expr=raw.replace(/[=?]/g,"").replace(/×/g,"*").replace(/÷/g,"/").replace(/,/g,".").trim();if(!/^[0-9+\-*/().\s]+$/.test(expr)||expr.length>40)return null;try{var v=Function('"use strict";return('+expr+")")();return typeof v==="number"&&isFinite(v)?fmt(v):null}catch(e){return null}}
-function identity(q){var l=norm(q);if(/^(кто ты|who are you|представься)$/.test(l)||l.indexOf("кто ты")===0)return"Я Акси — помощник в браузере. Отвечаю из локальных знаний, считаю, запоминаю. Контакт: aksilove@internet.ru";if(/что ты умеешь|помощь|help/.test(l))return"Спроси простым языком. Могу объяснить, посчитать, запомнить («запомни: ключ = значение»). Вкладки: Matrix, Memory, Proof, Map.";return null}
-function remember(q){var m=String(q).match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(!m)return null;var k=norm(m[1]),v=m[2].trim();if(!k)return null;facts[k]=v;saveF();return"Запомнила: "+k+" = "+v}
+function identity(q){var l=norm(q);if(/кто ты|who are|представься/.test(l))return"Я Акси — помощник в браузере. Отвечаю из локальных знаний, считаю, могу запомнить. Пиши как человеку.";if(/что ты умеешь|помощь|help/.test(l))return"Спроси что угодно простым языком. Могу объяснить, посчитать, запомнить факт: «запомни: ключ = значение».";return null}
+function remember(q){var m=String(q).match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(!m)return null;var k=norm(m[1]),v=m[2].trim();if(!k)return null;facts[k]=v;save();return"Запомнила: "+k+" = "+v}
 function recall(q){var l=norm(q),keys=Object.keys(facts),i;for(i=0;i<keys.length;i++)if(l.indexOf(keys[i])>=0||keys[i].indexOf(l)>=0)return facts[keys[i]];return null}
-function wiki(q,cb){var term=toks(q).slice(0,5).join(" ")||q;fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(term)).then(function(r){if(!r.ok)throw new Error();return r.json()}).then(function(j){cb(j&&j.extract?j.extract.slice(0,400):null)}).catch(function(){cb(null)})}
-function answer(q,cb){var a;a=identity(q);if(a){receipt(q,"id","ALLOW");cb(a);return}a=remember(q);if(a){receipt(q,"mem","ALLOW");cb(a);return}a=recall(q);if(a){receipt(q,"mem","ALLOW");cb(a);return}a=mathA(q);if(a){receipt(q,"math","ALLOW");cb(a);return}if(/коллапс|кубит|quantum/.test(norm(q))){var bits=qCollapse(q),r=paintKernel(q);receipt(q,"quantum","ALLOW");cb("Симуляция: |"+bits+"> · порядок "+r.qbm.H_eff.toFixed(2));return}a=seedA(q);if(a){receipt(q,"seed","ALLOW");cb(a);return}a=neuroA(q);if(a){receipt(q,"neuro","ALLOW");cb(a);return}if(/матриц|matrix|ядро/.test(norm(q))){var r=paintKernel(q);receipt(q,"kernel","ALLOW");cb("Ядро: порядок "+r.qbm.H_eff.toFixed(2));return}wiki(q,function(txt){if(txt){receipt(q,"wiki","ALLOW");cb(txt);return}receipt(q,"core","BLOCK");cb("Пока не знаю. Переформулируй или «запомни: тема = текст».")})}
-function add(role,text){var log=$("log");if(!log)return;var d=document.createElement("div");d.className="msg "+(role==="u"?"u":"a");d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight}
-function send(){var inp=$("in");if(!inp)return;var q=inp.value.trim();if(!q)return;inp.value="";add("u",q);answer(q,function(txt){add("a",txt||"…");paintKernel(q)})}
-function goTab(name){[].forEach.call(document.querySelectorAll("[data-panel]"),function(p){p.hidden=p.getAttribute("data-panel")!==name});[].forEach.call(document.querySelectorAll("[data-tab]"),function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name)});if(name==="matrix")paintKernel("АКСИ");if(name==="memory"){var k=Object.keys(facts);$("memCard").textContent=k.length?k.map(function(x){return x+" = "+facts[x]}).join("\n"):"пусто — «запомни: ключ = значение»"}if(name==="proof"){try{var a=JSON.parse(localStorage.getItem(RK)||"[]");$("proofCard").textContent=a.length?a.slice(0,12).map(function(r){return r.status+" · "+r.fp+" · "+r.q.slice(0,40)}).join("\n"):"пока нет"}catch(e){}}}
-function refresh(){var n=(window.__AKSI_SEED&&window.__AKSI_SEED.length)||0;var c=(n?1:0)+(window.AKSI_NEURO?1:0)+(window.AKSI_NET?1:0)+(window.AKSI_ADIA||window.AKSI_ALGORITHM?1:0);if($("mM"))$("mM").textContent=c+"/4";if($("st"))$("st").textContent="SEED "+n;if($("dot"))$("dot").style.background=c>=3?"#34d399":"#f59e0b"}
-function boot(){refresh();try{if(window.AKSI_NET&&window.AKSI_NET.autoPretrain)setTimeout(function(){try{window.AKSI_NET.autoPretrain();refresh()}catch(e){}},500)}catch(e){}$("send").onclick=send;$("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});document.addEventListener("click",function(ev){var t=ev.target;if(!t||!t.getAttribute)return;var q=t.getAttribute("data-q");if(q!=null){if($("in"))$("in").value=q;send();return}var tab=t.getAttribute("data-tab");if(tab){goTab(tab);return}var act=t.getAttribute("data-act");if(act==="clearMem"){facts={};saveF();goTab("memory");return}if(act==="qrun"){var bits=qCollapse("lab");paintKernel("lab");if($("matrixCard"))$("matrixCard").textContent="коллапс |"+bits+">\n"+($("matrixCard").textContent||"");goTab("matrix");return}});paintKernel("АКСИ");goTab("chat");add("a","Акси на связи.");setTimeout(refresh,600)}
+function wiki(q,cb){var term=toks(q).slice(0,5).join(" ")||q;fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(term)).then(function(r){if(!r.ok)throw new Error();return r.json()}).then(function(j){cb(j&&j.extract?j.extract.slice(0,380):null)}).catch(function(){cb(null)})}
+function answer(q,cb){var a;a=identity(q);if(a){cb(a);return}a=remember(q);if(a){cb(a);return}a=recall(q);if(a){cb(a);return}a=mathA(q);if(a){cb(a);return}a=seedA(q);if(a){cb(a);return}wiki(q,function(t){cb(t||"Пока не знаю. Попробуй другими словами или «запомни: тема = текст».")})}
+function add(role,text){var d=document.createElement("div");d.className="msg "+(role==="u"?"u":"a");d.textContent=text;$("log").appendChild(d);$("log").scrollTop=$("log").scrollHeight}
+function send(){var inp=$("in"),q=inp.value.trim();if(!q)return;inp.value="";add("u",q);answer(q,function(t){add("a",t||"…")})}
+function boot(){$("send").onclick=send;$("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});document.addEventListener("click",function(ev){var t=ev.target;if(t&&t.getAttribute&&t.getAttribute("data-q")){$("in").value=t.getAttribute("data-q");send()}});add("a","Привет. Я Акси. Спроси что-нибудь.")}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
