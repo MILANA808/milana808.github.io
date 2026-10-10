@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <title>АКСИ</title>
 <meta name="theme-color" content="#0b1020"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<script src="https://js.puter.com/v2/"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0b1020;color:#e8eefc;font-family:system-ui,sans-serif;line-height:1.45}
@@ -21,21 +23,19 @@ h1{font-size:1.25rem;margin:8px 0 4px}
 .a{background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.35);align-self:flex-start;max-width:96%}
 .tag{font-size:10px;color:#8b9bb8;margin-bottom:3px}
 .composer{display:flex;gap:8px;margin-top:10px}
-input,select{background:#0a0f1c;border:1px solid #24304d;border-radius:10px;color:#e8eefc;padding:11px 12px;font-size:14px;font-family:inherit}
-input[type=text],input[type=password]{flex:1}
+input,select{background:#0a0f1c;border:1px solid #24304d;border-radius:10px;color:#e8eefc;padding:11px 12px;font-size:14px;font-family:inherit;width:100%}
 button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
 button:disabled{opacity:.55;cursor:wait}
 button.ghost{background:transparent;border:1px solid #24304d;color:#e8eefc;font-weight:600}
 button.acc{background:#818cf8;color:#0b1020}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .chips button{padding:7px 10px;font-size:12px;background:#0e1528;color:#e8eefc;border:1px solid #24304d;font-weight:600}
-.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .meta{font-size:11px;color:#8b9bb8;margin-top:8px}
 .bar{height:6px;background:#0a0f1c;border-radius:99px;overflow:hidden;margin-top:8px;display:none}
 .bar.on{display:block}
 .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22d3ee,#818cf8)}
 label{font-size:12px;color:#8b9bb8;display:block;margin:6px 0 4px}
-.grid{display:grid;gap:8px}
 </style>
 </head>
 <body>
@@ -43,40 +43,27 @@ label{font-size:12px;color:#8b9bb8;display:block;margin:6px 0 4px}
   <span class="dot" id="dot"></span>
   <strong style="color:#e8eefc">АКСИ</strong>
   <span id="msk">—</span>
-  <span id="st">ядро</span>
+  <span id="st">старт</span>
 </div>
 <div class="shell">
   <h1>Агент АКСИ</h1>
-  <p class="sub">Ядро всегда. GPT-уровень — через <b>твой</b> API-ключ (OpenAI / Groq / OpenRouter / Ollama). Локальная модель — WebLLM в браузере.</p>
+  <p class="sub">Большие модели — через Puter (без твоего API-ключа). Запас: WebLLM локально. Ядро: math + память.</p>
 
   <div class="card">
-    <label>Режим ответа</label>
-    <select id="mode" style="width:100%">
-      <option value="auto">Авто: API → WebLLM → ядро</option>
-      <option value="api">Только API (GPT-класс)</option>
-      <option value="webllm">Только WebLLM (локально)</option>
-      <option value="core">Только ядро (math/память)</option>
+    <label>Модель Puter (GPT-класс без ключа разработчика)</label>
+    <select id="puterModel">
+      <option value="gpt-4.1-nano">gpt-4.1-nano</option>
+      <option value="gpt-4o-mini">gpt-4o-mini</option>
+      <option value="claude-sonnet-4">claude-sonnet-4</option>
+      <option value="claude-haiku-4.5">claude-haiku-4.5</option>
+      <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
     </select>
-    <div class="grid" style="margin-top:8px">
-      <div>
-        <label>API endpoint (OpenAI-compatible)</label>
-        <input id="apiUrl" type="text" placeholder="https://api.openai.com/v1/chat/completions" style="width:100%"/>
-      </div>
-      <div>
-        <label>Модель API</label>
-        <input id="apiModel" type="text" placeholder="gpt-4o-mini" style="width:100%"/>
-      </div>
-      <div>
-        <label>API ключ (только в твоём браузере)</label>
-        <input id="apiKey" type="password" placeholder="sk-... или gsk_..." style="width:100%"/>
-      </div>
-    </div>
     <div class="row">
-      <button type="button" class="ghost" id="btnSaveApi">Сохранить API</button>
-      <button type="button" class="acc" id="btnLLM">Загрузить WebLLM</button>
+      <button type="button" class="acc" id="btnPuter">Проверить Puter</button>
+      <button type="button" class="ghost" id="btnLLM">WebLLM</button>
     </div>
     <div class="bar" id="bar"><i id="barI"></i></div>
-    <div class="meta" id="hint">Без ключа: ядро + опционально WebLLM. С ключом: ответы уровня большой модели.</div>
+    <div class="meta" id="hint">Puter: user-pays — может попросить вход в аккаунт Puter. Данные не на сервере АКСИ.</div>
   </div>
 
   <div class="card">
@@ -84,23 +71,22 @@ label{font-size:12px;color:#8b9bb8;display:block;margin:6px 0 4px}
     <div class="chips">
       <button type="button" data-q="кто ты">кто ты</button>
       <button type="button" data-q="12*12">12*12</button>
-      <button type="button" data-q="Объясни простыми словами, что такое энтропия">энтропия</button>
+      <button type="button" data-q="Объясни энтропию простыми словами">энтропия</button>
       <button type="button" data-q="запомни: проект = АКСИ">запомни</button>
     </div>
     <div class="composer">
-      <input id="in" type="text" placeholder="Вопрос как в ChatGPT…" autocomplete="off"/>
+      <input id="in" type="text" placeholder="Спроси что угодно…" autocomplete="off" style="flex:1;width:auto"/>
       <button type="button" id="send">Отправить</button>
     </div>
-    <div class="meta">Ключ не уходит на сервер АКСИ · aksilove@internet.ru</div>
+    <div class="meta">aksilove@internet.ru</div>
   </div>
 </div>
 <script>
 (function(){
 "use strict";
-var CFG_KEY="aksi_api_cfg_v1";
-var MEM_KEY="aksi_mem_v3";
+var MEM_KEY="aksi_mem_v4";
 var mem={};
-var engine=null, llmReady=false, llmLoading=false, busy=false;
+var engine=null, llmReady=false, llmLoading=false, busy=false, puterOk=false;
 try{mem=JSON.parse(localStorage.getItem(MEM_KEY)||"{}")||{}}catch(e){mem={}}
 
 function $(id){return document.getElementById(id)}
@@ -110,37 +96,14 @@ function msk(){
 }
 function paint(){
   var a=$("msk");if(a)a.textContent=msk();
-  var mode=$("mode")?$("mode").value:"auto";
-  var api=loadCfg();
-  var label="ядро";
-  if(api.key&&(mode==="api"||mode==="auto"))label="API";
-  else if(llmReady&&(mode==="webllm"||mode==="auto"))label="WebLLM";
-  var b=$("st");if(b)b.textContent=label+" · mem "+Object.keys(mem).length;
-  var d=$("dot");if(d)d.className="dot"+(llmReady||(api.key)?" on":"");
+  var parts=[];
+  if(puterOk)parts.push("Puter");
+  if(llmReady)parts.push("WebLLM");
+  parts.push("ядро");
+  var b=$("st");if(b)b.textContent=parts.join("+")+" · mem "+Object.keys(mem).length;
+  var d=$("dot");if(d)d.className="dot"+(puterOk||llmReady?" on":"");
 }
-setInterval(paint,1000);
-
-function loadCfg(){
-  try{return JSON.parse(localStorage.getItem(CFG_KEY)||"{}")||{}}catch(e){return{}}
-}
-function saveCfgFromForm(){
-  var cfg={
-    url:($("apiUrl").value||"").trim()||"https://api.openai.com/v1/chat/completions",
-    model:($("apiModel").value||"").trim()||"gpt-4o-mini",
-    key:($("apiKey").value||"").trim()
-  };
-  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
-  $("hint").textContent=cfg.key?"API сохранён локально. Режим: большие модели.":"Ключ пуст — будет ядро/WebLLM.";
-  paint();
-  append("a","Настройки API сохранены только в этом браузере.","core");
-}
-function fillForm(){
-  var c=loadCfg();
-  $("apiUrl").value=c.url||"https://api.openai.com/v1/chat/completions";
-  $("apiModel").value=c.model||"gpt-4o-mini";
-  $("apiKey").value=c.key||"";
-}
-fillForm();paint();
+setInterval(paint,1000);paint();
 
 function saveMem(){try{localStorage.setItem(MEM_KEY,JSON.stringify(mem))}catch(e){}paint()}
 
@@ -205,65 +168,59 @@ function coreOnly(q){
   var r=recall(q);if(r)return{text:r,src:"memory"};
   var low=q.toLowerCase();
   if(/кто ты|что ты|представься/.test(low)){
-    return{text:"Я АКСИ — оболочка агента.\n• Ядро: math + память (всегда)\n• WebLLM: открытая модель в браузере\n• API: GPT-класс через твой ключ (OpenAI/Groq/OpenRouter/Ollama)\naksilove@internet.ru",src:"core"};
+    return{text:"Я АКСИ.\n1) Puter — большие модели без твоего API-ключа (может быть вход Puter)\n2) WebLLM — локально в браузере\n3) Ядро — math и память всегда\naksilove@internet.ru",src:"core"};
   }
-  if(/привет|здравств|hello/.test(low))return{text:"Привет. Для ответов как у GPT — вставь API-ключ выше и выбери режим API/Авто.",src:"core"};
+  if(/привет|здравств|hello/.test(low))return{text:"Привет. Спроси что угодно — попробую Puter, иначе WebLLM/ядро.",src:"core"};
   if(/время|мск/.test(low))return{text:msk(),src:"core"};
   return null;
 }
-
 function memHint(){
   var keys=Object.keys(mem);if(!keys.length)return"";
-  return"\nФакты пользователя: "+keys.slice(0,15).map(function(k){return k+"="+mem[k]}).join("; ");
+  return"\nФакты пользователя: "+keys.slice(0,12).map(function(k){return k+"="+mem[k]}).join("; ");
 }
 function systemPrompt(){
-  return"Ты АКСИ — суверенный помощник на milana808.github.io. Отвечай по-русски, ясно и по делу. Не выдумывай факты. Если не знаешь — скажи. Ты полезный ассистент, не AGI."+memHint();
+  return"Ты АКСИ — суверенный помощник на milana808.github.io. Отвечай по-русски, ясно и по делу. Не выдумывай. Если не знаешь — скажи."+memHint();
 }
 
-function chatAPI(q){
-  var cfg=loadCfg();
-  if(!cfg.key)return Promise.reject(new Error("Нет API-ключа"));
-  var url=cfg.url||"https://api.openai.com/v1/chat/completions";
-  return fetch(url,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+cfg.key
-    },
-    body:JSON.stringify({
-      model:cfg.model||"gpt-4o-mini",
-      messages:[
-        {role:"system",content:systemPrompt()},
-        {role:"user",content:q}
-      ],
-      temperature:0.7,
-      max_tokens:800
-    })
-  }).then(function(res){
-    return res.json().then(function(j){
-      if(!res.ok){
-        var msg=(j&&j.error&&j.error.message)||res.statusText||("HTTP "+res.status);
-        throw new Error(msg);
-      }
-      var t=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
-      if(!t)throw new Error("Пустой ответ API");
-      return String(t).trim();
-    });
+function extractPuterText(resp){
+  if(resp==null)return"";
+  if(typeof resp==="string")return resp.trim();
+  if(typeof resp==="object"){
+    if(typeof resp.message==="string")return resp.message.trim();
+    if(resp.message&&Array.isArray(resp.message.content)){
+      var parts=resp.message.content.map(function(c){return (c&&(c.text||c.content))||""}).join("");
+      if(parts)return parts.trim();
+    }
+    if(resp.message&&typeof resp.message.content==="string")return resp.message.content.trim();
+    if(typeof resp.text==="string")return resp.text.trim();
+    if(resp.choices&&resp.choices[0]&&resp.choices[0].message)return String(resp.choices[0].message.content||"").trim();
+    try{return JSON.stringify(resp).slice(0,500)}catch(e){return String(resp)}
+  }
+  return String(resp);
+}
+
+function chatPuter(q){
+  if(typeof puter==="undefined"||!puter||!puter.ai||!puter.ai.chat){
+    return Promise.reject(new Error("Puter.js не загружен"));
+  }
+  var model=($("puterModel")&&$("puterModel").value)||"gpt-4o-mini";
+  var prompt=systemPrompt()+"\n\nПользователь: "+q;
+  return puter.ai.chat(prompt,{model:model}).then(function(resp){
+    var t=extractPuterText(resp);
+    if(!t)throw new Error("Пустой ответ Puter");
+    puterOk=true;paint();
+    return t;
   });
 }
 
 function chatWebLLM(q){
   if(!engine)return Promise.reject(new Error("WebLLM не загружен"));
   return engine.chat.completions.create({
-    messages:[
-      {role:"system",content:systemPrompt()},
-      {role:"user",content:q}
-    ],
-    temperature:0.7,
-    max_tokens:500
+    messages:[{role:"system",content:systemPrompt()},{role:"user",content:q}],
+    temperature:0.7,max_tokens:500
   }).then(function(out){
     var t=out&&out.choices&&out.choices[0]&&out.choices[0].message&&out.choices[0].message.content;
-    return (t||"").trim()||"Пустой ответ модели";
+    return (t||"").trim()||"Пустой ответ";
   });
 }
 
@@ -275,30 +232,29 @@ function loadWebLLM(){
   $("hint").textContent="Загрузка WebLLM…";
   import("https://esm.run/@mlc-ai/web-llm").then(function(mod){
     var Create=mod.CreateMLCEngine||(mod.default&&mod.default.CreateMLCEngine);
-    if(!Create)throw new Error("CreateMLCEngine не найден");
+    if(!Create)throw new Error("CreateMLCEngine нет");
     var models=["Qwen2.5-0.5B-Instruct-q4f16_1-MLC","SmolLM2-360M-Instruct-q4f16_1-MLC","Qwen2.5-1.5B-Instruct-q4f16_1-MLC"];
     function tryM(i){
       if(i>=models.length)throw new Error("модели недоступны");
       var mid=models[i];
-      $("hint").textContent="Модель: "+mid;
       return Create(mid,{initProgressCallback:function(p){
         var pr=typeof p.progress==="number"?p.progress:0;
         $("barI").style.width=Math.round(pr*100)+"%";
-        $("hint").textContent=(p.text||mid).slice(0,140);
+        $("hint").textContent=(p.text||mid).slice(0,120);
       }}).then(function(eng){
         engine=eng;llmReady=true;llmLoading=false;
-        if(btn){btn.disabled=true;btn.textContent="WebLLM готов"}
+        if(btn){btn.disabled=true;btn.textContent="WebLLM ✓"}
         $("barI").style.width="100%";
-        $("hint").textContent="Локальная модель готова: "+mid;
+        $("hint").textContent="Локально: "+mid;
         paint();
-        append("a","WebLLM подключена: "+mid,"webllm");
+        append("a","WebLLM готова: "+mid,"webllm");
       }).catch(function(){return tryM(i+1)});
     }
     return tryM(0);
   }).catch(function(err){
     llmLoading=false;if(btn)btn.disabled=false;
-    $("hint").textContent="WebLLM: "+(err&&err.message?err.message:err)+". Для GPT-класса используй API-ключ.";
-    append("a","WebLLM не загрузилась. Используй API (ключ) или ядро.","core");
+    $("hint").textContent="WebLLM: "+(err&&err.message?err.message:err);
+    append("a","WebLLM не загрузилась. Puter или ядро.","core");
   });
 }
 
@@ -311,6 +267,18 @@ function append(role,text,src){
   box.appendChild(d);box.scrollTop=box.scrollHeight;
 }
 
+function testPuter(){
+  $("hint").textContent="Проверка Puter…";
+  chatPuter("Ответь одним словом: ок").then(function(t){
+    puterOk=true;paint();
+    $("hint").textContent="Puter работает.";
+    append("a","Puter OK: "+t.slice(0,200),"puter");
+  }).catch(function(err){
+    $("hint").textContent="Puter: "+(err&&err.message?err.message:err)+" — может нужен вход на puter.com";
+    append("a","Puter пока недоступен: "+(err&&err.message?err.message:err)+"\nОткрой puter.com или используй WebLLM.","core");
+  });
+}
+
 function send(){
   if(busy)return;
   var inp=$("in");if(!inp)return;
@@ -319,73 +287,44 @@ function send(){
   append("u",q);
 
   var core=coreOnly(q);
-  if(core){
-    append("a",core.text,core.src);
-    return;
-  }
+  if(core){append("a",core.text,core.src);return}
 
-  var mode=$("mode").value;
-  var cfg=loadCfg();
-  busy=true;
-  $("send").disabled=true;
-
-  function done(text,src){
-    busy=false;$("send").disabled=false;
-    append("a",text,src);
-    try{localStorage.setItem("aksi_unity_last",JSON.stringify({system:"AKSI-GPT-SHELL",claim:q,answer:String(text).slice(0,800),src:src,ts:new Date().toISOString()}))}catch(e){}
-  }
-  function fail(err){
-    busy=false;$("send").disabled=false;
-    append("a","Ошибка: "+(err&&err.message?err.message:err)+"\nПодсказка: проверь ключ/endpoint или включи WebLLM / ядро.","core");
-  }
-
+  busy=true;$("send").disabled=true;
   append("a","Думаю…","net");
 
-  function replaceThinking(text,src){
-    var log=$("log");
-    if(log&&log.lastChild)log.removeChild(log.lastChild);
-    done(text,src);
-  }
-
-  if(mode==="core"){
+  function finish(text,src){
+    busy=false;$("send").disabled=false;
     var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-    done("Нужен API или WebLLM для свободного текста. Сейчас режим «только ядро».","core");
-    return;
+    append("a",text,src);
+    try{localStorage.setItem("aksi_unity_last",JSON.stringify({system:"AKSI-IMPOSSIBLE",claim:q,answer:String(text).slice(0,800),src:src,ts:new Date().toISOString()}))}catch(e){}
+  }
+  function failAll(err){
+    busy=false;$("send").disabled=false;
+    var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
+    append("a","Не удалось через Puter/WebLLM: "+(err&&err.message?err.message:err)+"\nПопробуй «Проверить Puter», «WebLLM» или math/запомни.","core");
   }
 
-  if(mode==="api"||(mode==="auto"&&cfg.key)){
-    chatAPI(q).then(function(t){replaceThinking(t,"api")}).catch(function(err){
-      if(mode==="auto"&&llmReady){
-        return chatWebLLM(q).then(function(t){replaceThinking(t,"webllm")}).catch(fail);
-      }
-      fail(err);
-    });
-    return;
-  }
-
-  if(mode==="webllm"||mode==="auto"){
-    if(!llmReady){
-      var log=$("log");if(log&&log.lastChild)log.removeChild(log.lastChild);
-      busy=false;$("send").disabled=false;
-      append("a","Свободный текст: нажми «Загрузить WebLLM» или вставь API-ключ (GPT-класс).","core");
-      return;
+  chatPuter(q).then(function(t){finish(t,"puter")}).catch(function(e1){
+    if(llmReady){
+      return chatWebLLM(q).then(function(t){finish(t,"webllm")}).catch(function(e2){failAll(e2)});
     }
-    chatWebLLM(q).then(function(t){replaceThinking(t,"webllm")}).catch(fail);
-    return;
-  }
+    failAll(e1);
+  });
 }
 
 $("send").onclick=send;
 $("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});
-$("btnSaveApi").onclick=saveCfgFromForm;
+$("btnPuter").onclick=testPuter;
 $("btnLLM").onclick=loadWebLLM;
-$("mode").onchange=paint;
 var chips=document.querySelectorAll("[data-q]");
 for(var i=0;i<chips.length;i++){(function(btn){
   btn.onclick=function(){var el=$("in");if(el)el.value=btn.getAttribute("data-q")||"";send()};
 })(chips[i])}
 
-append("a","Онлайн · "+msk()+"\nЧтобы получить ответы уровня GPT: вставь ключ OpenAI/Groq/OpenRouter (или URL Ollama) → Сохранить API → режим Авто/API.\nБез ключа: math/память всегда; WebLLM — по кнопке.","core");
+if(typeof puter!=="undefined"&&puter&&puter.ai){puterOk=true;paint();$("hint").textContent="Puter.js загружен. Можно спрашивать."}
+else{$("hint").textContent="Ждём Puter.js… если нет — WebLLM или ядро."}
+
+append("a","Онлайн · "+msk()+"\nНевозможное: большие модели через Puter без твоего ключа. Напиши вопрос или «Проверить Puter».","core");
 })();
 </script>
 </body>
