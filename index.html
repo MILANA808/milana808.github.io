@@ -9,32 +9,37 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;min-height:100dvh;background:#0b1020;color:#e8eefc;font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column}
-header{padding:10px 14px;border-bottom:1px solid #24304d;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+header{padding:8px 12px;border-bottom:1px solid #24304d;display:flex;align-items:center;gap:8px;font-size:13px}
 .dot{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 8px #34d399}
-header strong{font-size:14px}
 #msk{margin-left:auto;color:#8b9bb8;font-size:11px}
-main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:10px 14px 18px;display:flex;flex-direction:column;gap:8px}
+main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:8px 12px 72px;display:flex;flex-direction:column;gap:8px}
 .board{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 @media(max-width:560px){.board{grid-template-columns:repeat(2,1fr)}}
-.metric{background:#121a2f;border:1px solid #24304d;border-radius:10px;padding:8px 10px}
-.metric .k{font-size:9px;color:#8b9bb8;text-transform:uppercase;letter-spacing:.04em}
-.metric .v{font-size:13px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;word-break:break-all}
-.metric .s{font-size:10px;color:#94a3b8;margin-top:1px}
-.seal{background:#0e1528;border:1px solid #334155;border-radius:10px;padding:8px 10px;font-size:11px;font-family:ui-monospace,monospace;color:#a5b4fc;line-height:1.4;white-space:pre-wrap;max-height:90px;overflow:auto}
-.seal.bad{border-color:#7f1d1d;color:#fca5a5}
+.metric{background:#121a2f;border:1px solid #24304d;border-radius:10px;padding:8px}
+.metric .k{font-size:9px;color:#8b9bb8;text-transform:uppercase}
+.metric .v{font-size:13px;font-weight:700;margin-top:2px;word-break:break-all}
+.metric .s{font-size:10px;color:#94a3b8}
+.seal{background:#0e1528;border:1px solid #334155;border-radius:10px;padding:8px;font-size:11px;font-family:ui-monospace,monospace;color:#a5b4fc;white-space:pre-wrap;line-height:1.35}
 .seal.good{border-color:#14532d;color:#86efac}
-#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:140px;max-height:calc(100dvh - 320px)}
+.seal.bad{border-color:#7f1d1d;color:#fca5a5}
+#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:120px;max-height:calc(100dvh - 360px)}
 .msg{padding:10px 12px;border-radius:12px;white-space:pre-wrap;font-size:14px;line-height:1.45;max-width:94%}
 .u{align-self:flex-end;background:#0a0f1c;border:1px solid #24304d}
 .a{align-self:flex-start;background:rgba(129,140,248,.12);border:1px solid rgba(129,140,248,.3)}
 .tag{font-size:10px;color:#8b9bb8;margin-bottom:3px}
 .bar{display:flex;gap:8px}
-input{flex:1;background:#121a2f;border:1px solid #24304d;border-radius:12px;color:#e8eefc;padding:12px 14px;font-size:15px;outline:none}
+input{flex:1;background:#121a2f;border:1px solid #24304d;border-radius:12px;color:#e8eefc;padding:12px;font-size:15px;outline:none}
 input:focus{border-color:#818cf8}
-button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
-button:disabled{opacity:.5}
+button{border:0;border-radius:12px;padding:12px 14px;font-weight:700;font-size:13px;cursor:pointer;background:#22d3ee;color:#06202a;font-family:inherit}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
-.chips button{padding:7px 10px;font-size:11px;background:#121a2f;color:#c7d2fe;border:1px solid #24304d;font-weight:600}
+.chips button{padding:7px 10px;font-size:11px;background:#121a2f;color:#c7d2fe;border:1px solid #24304d}
+.panel{display:flex;flex-direction:column;gap:8px;min-height:160px}
+.panel[hidden]{display:none!important}
+.card{background:#121a2f;border:1px solid #24304d;border-radius:12px;padding:12px;font-size:13px;white-space:pre-wrap;line-height:1.4}
+canvas#star{width:100%;max-width:320px;height:180px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;align-self:center}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#0b1020ee;border-top:1px solid #24304d;display:flex;justify-content:center;gap:4px;padding:8px 6px calc(8px + env(safe-area-inset-bottom));z-index:50;backdrop-filter:blur(8px)}
+.bnav button{flex:1;max-width:90px;background:transparent;color:#94a3b8;border:1px solid transparent;font-size:11px;padding:10px 4px;border-radius:10px}
+.bnav button.on{color:#e8eefc;border-color:#334155;background:#121a2f}
 .foot{font-size:10px;color:#64748b;text-align:center}
 </style>
 </head>
@@ -48,25 +53,49 @@ button:disabled{opacity:.5}
 <main>
   <div class="board">
     <div class="metric"><div class="k">H_eff</div><div class="v" id="mH">—</div><div class="s" id="mSt">QBM</div></div>
-    <div class="metric"><div class="k">Гершгорин</div><div class="v" id="mG">—</div><div class="s" id="mGs">стабильность</div></div>
+    <div class="metric"><div class="k">Гершгорин</div><div class="v" id="mG">—</div><div class="s" id="mGs">стаб.</div></div>
     <div class="metric"><div class="k">Proof</div><div class="v" id="mP" style="font-family:ui-monospace,monospace;font-size:12px;color:#a5b4fc">—</div><div class="s" id="mPs">seal</div></div>
     <div class="metric"><div class="k">Тесты</div><div class="v" id="mT">—</div><div class="s" id="mTs">авто</div></div>
   </div>
-  <div class="seal" id="sealBox">Инициализация аттестации…</div>
-  <div id="log"></div>
-  <div class="chips">
-    <button type="button" data-q="кто ты">кто ты</button>
-    <button type="button" data-q="12*12">12×12</button>
-    <button type="button" data-q="что такое энтропия">энтропия</button>
-    <button type="button" data-q="матрица">матрица</button>
-    <button type="button" data-act="retest">перетест</button>
+  <div class="seal" id="sealBox">Инициализация…</div>
+  <div class="panel" data-panel="chat" id="panel-chat">
+    <div id="log"></div>
+    <div class="chips">
+      <button type="button" data-q="кто ты">кто ты</button>
+      <button type="button" data-q="12*12">12×12</button>
+      <button type="button" data-q="что такое энтропия">энтропия</button>
+      <button type="button" data-q="матрица">матрица</button>
+      <button type="button" data-act="retest">перетест</button>
+    </div>
+    <div class="bar">
+      <input id="in" type="text" placeholder="Спроси что угодно…" autocomplete="off" enterkeyhint="send"/>
+      <button type="button" id="send">→</button>
+    </div>
   </div>
-  <div class="bar">
-    <input id="in" type="text" placeholder="Спроси что угодно…" autocomplete="off" enterkeyhint="send"/>
-    <button type="button" id="send">→</button>
+  <div class="panel" data-panel="matrix" id="panel-matrix" hidden>
+    <canvas id="star" width="320" height="180"></canvas>
+    <div class="card">D4-звезда MATRIX · QBM + Гершгорин · proof на каждый ввод</div>
   </div>
-  <div class="foot">aksilove@internet.ru · единая система · крипто-аттестация в localStorage</div>
+  <div class="panel" data-panel="trust" id="panel-trust" hidden>
+    <div class="card" id="trustList">Чеки Gate…</div>
+  </div>
+  <div class="panel" data-panel="memory" id="panel-memory" hidden>
+    <div class="card" id="memList">Память…</div>
+    <button type="button" data-act="clearMem" style="align-self:flex-start;background:#121a2f;color:#c7d2fe;border:1px solid #24304d">очистить память</button>
+  </div>
+  <div class="panel" data-panel="lab" id="panel-lab" hidden>
+    <div class="card" id="labOut">Lab…</div>
+    <button type="button" data-act="qrun" style="align-self:flex-start">коллапс / обновить</button>
+  </div>
+  <div class="foot">aksilove@internet.ru · WHOLE: Chat·Matrix·Trust·Memory·Lab</div>
 </main>
-<script src="./aksi-unity.js?v=2"></script>
+<nav class="bnav">
+  <button type="button" data-tab="chat" class="on">Chat</button>
+  <button type="button" data-tab="matrix">Matrix</button>
+  <button type="button" data-tab="trust">Trust</button>
+  <button type="button" data-tab="memory">Memory</button>
+  <button type="button" data-tab="lab">Lab</button>
+</nav>
+<script src="./aksi-unity.js?v=3"></script>
 </body>
 </html>
