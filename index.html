@@ -3,56 +3,62 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>AKSII MATRIX</title>
+<title>AKSII MATRIX · Full</title>
 <meta name="theme-color" content="#05070f"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;background:#05070f;color:#e6eaf2;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;display:flex;flex-direction:column}
-header{padding:10px 14px;border-bottom:1px solid #1c2438;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px}
-.badge{padding:3px 8px;border-radius:999px;border:1px solid #2a3550;color:#9fb0d0;font-size:10px}
-.badge.on{border-color:#14532d;color:#86efac;background:#052e1a}
-.badge.warn{border-color:#854d0e;color:#fde68a}
-main{flex:1;max-width:880px;width:100%;margin:0 auto;padding:10px 12px 80px;display:flex;flex-direction:column;gap:10px}
-.meta{background:#0b1020;border:1px solid #1c2438;border-radius:10px;padding:8px 10px;font-size:11px;color:#9fb0d0;line-height:1.5}
-.board{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-@media(max-width:640px){.board{grid-template-columns:repeat(3,1fr)}}
-.ch{background:#0b1020;border:1px solid #1c2438;border-radius:8px;padding:6px;text-align:center;font-size:9px;color:#7a8aab;cursor:pointer}
-.ch.on{border-color:#6366f1;color:#c7d2fe}
-.ch .n{display:block;font-size:14px;font-weight:700;color:#e6eaf2;margin-top:2px}
-#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px;min-height:180px;max-height:calc(100dvh - 280px)}
-.msg{padding:10px 12px;border-radius:10px;white-space:pre-wrap;font-size:13px;line-height:1.5;max-width:96%}
+body{margin:0;min-height:100dvh;background:#05070f;color:#e6eaf2;font-family:system-ui,sans-serif;display:flex;flex-direction:column}
+header{padding:8px 12px;border-bottom:1px solid #1c2438;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+.badge{padding:2px 7px;border-radius:999px;border:1px solid #2a3550;color:#9fb0d0;font-size:10px}
+.badge.on{border-color:#14532d;color:#86efac}
+main{flex:1;max-width:900px;width:100%;margin:0 auto;padding:8px 10px 78px;display:flex;flex-direction:column;gap:8px}
+.meta{background:#0b1020;border:1px solid #1c2438;border-radius:8px;padding:6px 8px;font-size:11px;color:#9fb0d0;font-family:ui-monospace,monospace}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+@media(max-width:520px){.board{grid-template-columns:1fr 1fr}}
+.metric{background:#0b1020;border:1px solid #1c2438;border-radius:8px;padding:6px}.metric .k{font-size:9px;color:#7a8aab}.metric .v{font-size:13px;font-weight:700;word-break:break-all}
+.chs{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.ch{background:#0b1020;border:1px solid #1c2438;border-radius:6px;padding:4px;text-align:center;font-size:9px;color:#7a8aab}
+.ch.on{border-color:#6366f1;color:#c7d2fe}.ch .n{display:block;font-weight:700;color:#e6eaf2;font-size:11px}
+#log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:140px;max-height:calc(100dvh - 320px)}
+.msg{padding:9px 11px;border-radius:10px;white-space:pre-wrap;font-size:13px;line-height:1.45;max-width:95%}
 .u{align-self:flex-end;background:#0a0f1c;border:1px solid #1c2438}
 .a{align-self:flex-start;background:#0d1424;border:1px solid #24304d}
-.tag{font-size:10px;color:#7a8aab;margin-bottom:4px}
-.bar{display:flex;gap:8px}
-input{flex:1;background:#0b1020;border:1px solid #1c2438;border-radius:10px;color:#e6eaf2;padding:12px;font-size:14px;outline:none;font-family:inherit}
-button#send{border:0;border-radius:10px;padding:12px 16px;background:#6366f1;color:#fff;font-weight:700;cursor:pointer;font-family:inherit}
+.tag{font-size:9px;color:#7a8aab;margin-bottom:3px}
+.bar{display:flex;gap:6px}
+input{flex:1;background:#0b1020;border:1px solid #1c2438;border-radius:10px;color:#e6eaf2;padding:11px;font-size:14px;outline:none}
+button#send{border:0;border-radius:10px;padding:11px 14px;background:#6366f1;color:#fff;font-weight:700;cursor:pointer}
 .chips{display:flex;flex-wrap:wrap;gap:4px}
-.chips button{padding:6px 9px;font-size:10px;background:#0b1020;color:#9fb0d0;border:1px solid #1c2438;border-radius:8px;cursor:pointer;font-family:inherit}
-.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px}
-.map a{padding:8px;background:#0b1020;border:1px solid #1c2438;border-radius:8px;color:#9fb0d0;text-decoration:none;font-size:10px}
-.map a:hover{border-color:#6366f1;color:#e6eaf2}
-h3{margin:12px 0 6px;font-size:10px;color:#7a8aab;text-transform:uppercase;letter-spacing:.08em}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:#05070fee;border-top:1px solid #1c2438;display:flex;justify-content:center;gap:2px;padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:40}
-.bnav button{flex:1;max-width:90px;background:transparent;color:#7a8aab;border:1px solid transparent;font-size:10px;padding:10px 2px;border-radius:8px;font-family:inherit;cursor:pointer}
-.bnav button.on{color:#e6eaf2;border-color:#2a3550;background:#0b1020}
+.chips button{padding:5px 8px;font-size:10px;background:#0b1020;color:#9fb0d0;border:1px solid #1c2438;border-radius:7px;cursor:pointer}
 .panel[hidden]{display:none!important}
-.card{background:#0b1020;border:1px solid #1c2438;border-radius:10px;padding:10px;font-size:12px;white-space:pre-wrap;line-height:1.45}
-#star{width:100%;max-width:280px;height:140px;background:#f8fafc;border-radius:10px;align-self:center}
+.card{background:#0b1020;border:1px solid #1c2438;border-radius:10px;padding:10px;font-size:12px;white-space:pre-wrap;line-height:1.4}
+#star{width:100%;max-width:280px;height:130px;background:#f8fafc;border-radius:10px;align-self:center}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:4px}
+.map a{padding:7px;background:#0b1020;border:1px solid #1c2438;border-radius:7px;color:#9fb0d0;text-decoration:none;font-size:10px}
+.map a:hover{border-color:#6366f1;color:#fff}
+h3{margin:10px 0 4px;font-size:10px;color:#7a8aab;text-transform:uppercase;letter-spacing:.06em}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#05070ff2;border-top:1px solid #1c2438;display:flex;justify-content:center;gap:1px;padding:5px 2px calc(5px + env(safe-area-inset-bottom));z-index:40}
+.bnav button{flex:1;max-width:72px;background:transparent;color:#7a8aab;border:1px solid transparent;font-size:9px;padding:9px 1px;border-radius:7px;cursor:pointer}
+.bnav button.on{color:#e6eaf2;border-color:#2a3550;background:#0b1020}
+.foot{font-size:10px;color:#64748b;text-align:center}
 </style>
 </head>
 <body>
 <header>
-  <strong style="letter-spacing:.04em">AKSII MATRIX</strong>
-  <span class="badge" id="bLocal">local-first</span>
-  <span class="badge" id="bQ">quantum</span>
-  <span class="badge" id="bDip">DIP</span>
+  <strong>AKSII MATRIX</strong>
+  <span class="badge on" id="bLocal">local-first</span>
+  <span class="badge on" id="bDip">DIP</span>
   <span class="badge" id="bMod">mods</span>
 </header>
 <main>
-  <div class="meta" id="metaStack">[Mode: local-first | Quantum: — | Integrity: —]</div>
+  <div class="meta" id="meta">[Mode: local-first | Quantum: idle | Integrity: —]</div>
   <div class="board">
+    <div class="metric"><div class="k">H_eff</div><div class="v" id="mH">—</div></div>
+    <div class="metric"><div class="k">EQS</div><div class="v" id="mE">—</div></div>
+    <div class="metric"><div class="k">Proof</div><div class="v" id="mP" style="font-family:monospace;font-size:11px;color:#a5b4fc">—</div></div>
+    <div class="metric"><div class="k">Modules</div><div class="v" id="mM">—</div></div>
+  </div>
+  <div class="chs">
     <div class="ch" data-ch="01"><span>01</span><span class="n">Memory</span></div>
     <div class="ch" data-ch="02"><span>02</span><span class="n">Proof</span></div>
     <div class="ch" data-ch="03"><span>03</span><span class="n">Models</span></div>
@@ -66,50 +72,89 @@ h3{margin:12px 0 6px;font-size:10px;color:#7a8aab;text-transform:uppercase;lette
       <button type="button" data-q="кто ты">кто ты</button>
       <button type="button" data-q="что такое энтропия">энтропия</button>
       <button type="button" data-q="что такое искусственный интеллект">ИИ</button>
+      <button type="button" data-q="что такое сознание">сознание</button>
       <button type="button" data-q="покажи статус DIP">DIP</button>
       <button type="button" data-q="коллапс кубита">quantum</button>
       <button type="button" data-q="12*12">12×12</button>
+      <button type="button" data-act="status">status</button>
     </div>
     <div class="bar">
-      <input id="in" type="text" placeholder="input → MATRIX…" autocomplete="off" enterkeyhint="send"/>
+      <input id="in" type="text" placeholder="input…" autocomplete="off" enterkeyhint="send"/>
       <button type="button" id="send">→</button>
     </div>
   </div>
   <div class="panel" data-panel="matrix" hidden>
-    <canvas id="star" width="280" height="140"></canvas>
+    <canvas id="star" width="280" height="130"></canvas>
     <div class="card" id="matrixCard">QBM · Gershgorin</div>
   </div>
-  <div class="panel" data-panel="proof" hidden>
-    <div class="card" id="proofCard">DIP receipts…</div>
+  <div class="panel" data-panel="trust" hidden>
+    <div class="card" id="trustCard">receipts…</div>
   </div>
   <div class="panel" data-panel="memory" hidden>
     <div class="card" id="memCard">capsule…</div>
-    <button type="button" data-act="clearMem" style="margin-top:6px;background:#0b1020;color:#9fb0d0;border:1px solid #1c2438;border-radius:8px;padding:8px;cursor:pointer;font-family:inherit">clear memory</button>
+    <button type="button" data-act="clearMem" style="margin-top:6px;background:#0b1020;color:#9fb0d0;border:1px solid #1c2438;border-radius:8px;padding:8px;cursor:pointer">clear</button>
+  </div>
+  <div class="panel" data-panel="lab" hidden>
+    <div class="card" id="labCard">lab…</div>
+    <button type="button" data-act="qrun" style="margin-top:6px;background:#0b1020;color:#9fb0d0;border:1px solid #1c2438;border-radius:8px;padding:8px;cursor:pointer">collapse</button>
+  </div>
+  <div class="panel" data-panel="net" hidden>
+    <div class="card" id="netCard">AKSI Net…</div>
+    <button type="button" data-act="train" style="margin-top:6px;background:#0b1020;color:#9fb0d0;border:1px solid #1c2438;border-radius:8px;padding:8px;cursor:pointer">train net</button>
   </div>
   <div class="panel" data-panel="map" hidden>
-    <h3>Surfaces</h3>
-    <div class="map" id="mapGrid"></div>
-    <h3 style="margin-top:14px">Backend (Milana-backend)</h3>
-    <div class="card">aksi/agent.py · aksi/api.py · aksi/memory/ · aksi/quantum/ · aksi/tools/
+    <h3>Ядро ИИ</h3>
+    <div class="map">
+      <a href="/llm/">LLM</a><a href="/generate/">Generate</a><a href="/local-ai/">Local AI</a>
+      <a href="/zero/">Zero</a><a href="/brain.html">Brain</a><a href="/aksi-neuro-lab.html">Neuro lab</a>
+    </div>
+    <h3>Доверие</h3>
+    <div class="map">
+      <a href="/authority/">Authority</a><a href="/dip/">DIP</a><a href="/receipt/">Receipt</a>
+      <a href="/proof/">Proof</a><a href="/trust/">Trust</a><a href="/protocol/">Protocol</a>
+      <a href="/verify/">Verify</a><a href="/integrity/">Integrity</a>
+    </div>
+    <h3>Matrix · Quantum</h3>
+    <div class="map">
+      <a href="/matrix/">MATRIX</a><a href="/quantum/">Quantum</a><a href="/super/">Super</a>
+      <a href="/superpose/">Superpose</a><a href="/contour/">Contour</a><a href="/hdc/">HDC</a>
+    </div>
+    <h3>Агент · Backend</h3>
+    <div class="map">
+      <a href="/agent/">Agent</a><a href="/bot.html">Bot</a><a href="/globe/">Globe</a>
+      <a href="/registry/">Registry</a><a href="/wall/">Wall</a><a href="/api/">API</a>
+    </div>
+    <h3>Память · Продукт</h3>
+    <div class="map">
+      <a href="/capsule.html">Capsule</a><a href="/whole/">WHOLE</a><a href="/one/">ONE</a>
+      <a href="/product/">Product</a><a href="/hub/">Hub</a><a href="/runtime/">Runtime</a>
+      <a href="/fir/">FIR</a><a href="/genesis/">Genesis</a>
+    </div>
+    <h3>Backend structure</h3>
+    <div class="card">Milana-backend:
+aksi/agent.py · api.py · memory/ · quantum/ · tools/
 aksi-globe/ · app/api/chat · web_agent · discovery</div>
   </div>
+  <div class="foot">aksilove@internet.ru · full stack · nothing stripped</div>
 </main>
 <nav class="bnav">
   <button type="button" data-tab="chat" class="on">Chat</button>
   <button type="button" data-tab="matrix">Matrix</button>
-  <button type="button" data-tab="proof">Proof</button>
+  <button type="button" data-tab="trust">Trust</button>
   <button type="button" data-tab="memory">Memory</button>
+  <button type="button" data-tab="lab">Lab</button>
+  <button type="button" data-tab="net">Net</button>
   <button type="button" data-tab="map">Map</button>
 </nav>
-<script src="./aksi-seed.js?v=33"></script>
-<script src="./aksi-neuro.js?v=11"></script>
-<script src="./aksi-net.js?v=3"></script>
-<script src="./aksi-algorithm.js?v=41"></script>
+<script src="./aksi-seed.js?v=34"></script>
+<script src="./aksi-neuro.js?v=12"></script>
+<script src="./aksi-net.js?v=4"></script>
+<script src="./aksi-algorithm.js?v=42"></script>
 <script>
 (function(){
 "use strict";
-var BUILD="AKSII-MATRIX-v1";
-var FK="aksi_matrix_capsule_v1", RK="aksi_matrix_receipts_v1";
+var BUILD="AKSII-FULL-v1";
+var FK="aksi_full_capsule", RK="aksi_full_receipts";
 var facts={}, lastCh=[], lastFp="—";
 try{facts=JSON.parse(localStorage.getItem(FK)||"{}")||{}}catch(e){}
 function $(id){return document.getElementById(id)}
@@ -118,37 +163,36 @@ function norm(s){return String(s||"").toLowerCase().replace(/[«»"'`?!.,;:()]/g
 function toks(s){return norm(s).split(" ").filter(function(w){return w.length>1})}
 function fmt(x){if(!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(6)))}
 function fnv(blob){var h=2166136261>>>0,i;for(i=0;i<blob.length;i++){h^=blob.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return (h>>>0).toString(16).padStart(8,"0").toUpperCase()}
-var MAP=[["/llm/","LLM"],["/generate/","Generate"],["/matrix/","MATRIX"],["/quantum/","Quantum"],["/authority/","Authority"],["/dip/","DIP"],["/receipt/","Receipt"],["/proof/","Proof"],["/agent/","Agent"],["/bot.html","Bot"],["/globe/","Globe"],["/capsule.html","Capsule"],["/whole/","WHOLE"],["/one/","ONE"],["/super/","Super"],["/contour/","Contour"],["/local-ai/","Local AI"],["/zero/","Zero"],["/protocol/","Protocol"],["/hub/","Hub"],["/product/","Product"],["/runtime/","Runtime"],["/fir/","FIR"],["/wall/","Wall"]];
 var Kernel=(function(){
   function utf8(s){try{return new TextEncoder().encode(String(s))}catch(e){var a=[],i;for(i=0;i<s.length;i++)a.push(s.charCodeAt(i)&255);return new Uint8Array(a)}}
-  function unitVec(bytes,dim){var v=new Float64Array(dim),i,n=0;if(!bytes.length){for(i=0;i<dim;i++)v[i]=1/Math.sqrt(dim);return v}for(i=0;i<bytes.length;i++)v[i%dim]+=(bytes[i]+1)/256;for(i=0;i<dim;i++)n+=v[i]*v[i];n=Math.sqrt(n)||1;for(i=0;i<dim;i++)v[i]/=n;return v}
-  function qbm(text){var dim=16,bytes=utf8(text),s=unitVec(bytes,dim),W=new Float64Array(dim*dim),i,j,seed=42;function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return (seed/0x7fffffff)*0.3-0.15}for(i=0;i<dim;i++)for(j=i+1;j<dim;j++){var w=rnd();W[i*dim+j]=w;W[j*dim+i]=w}var E=0;for(i=0;i<dim;i++){E-=(-0.1+0.2*(i/(dim-1)))*s[i];for(j=0;j<dim;j++)E-=0.5*s[i]*W[i*dim+j]*s[j]}var modes=new Float64Array(dim),local;for(i=0;i<dim;i++){local=0;for(j=0;j<dim;j++)local+=W[i*dim+j]*s[j];modes[i]=E+0.25*local+0.05*i}var mean=0,varr=0;for(i=0;i<dim;i++)mean+=modes[i];mean/=dim;for(i=0;i<dim;i++)varr+=(modes[i]-mean)*(modes[i]-mean);varr/=dim;var H=Math.max(0,Math.min(1,1/(1+varr)));return{H_eff:H}}
+  function unitVec(b,d){var v=new Float64Array(d),i,n=0;if(!b.length){for(i=0;i<d;i++)v[i]=1/Math.sqrt(d);return v}for(i=0;i<b.length;i++)v[i%d]+=(b[i]+1)/256;for(i=0;i<d;i++)n+=v[i]*v[i];n=Math.sqrt(n)||1;for(i=0;i<d;i++)v[i]/=n;return v}
+  function qbm(text){var dim=16,bytes=utf8(text),s=unitVec(bytes,dim),W=new Float64Array(dim*dim),i,j,seed=42;function rnd(){seed=(seed*1103515245+12345)&0x7fffffff;return (seed/0x7fffffff)*0.3-0.15}for(i=0;i<dim;i++)for(j=i+1;j<dim;j++){var w=rnd();W[i*dim+j]=w;W[j*dim+i]=w}var E=0;for(i=0;i<dim;i++){E-=(-0.1+0.2*(i/(dim-1)))*s[i];for(j=0;j<dim;j++)E-=0.5*s[i]*W[i*dim+j]*s[j]}var modes=new Float64Array(dim),local;for(i=0;i<dim;i++){local=0;for(j=0;j<dim;j++)local+=W[i*dim+j]*s[j];modes[i]=E+0.25*local+0.05*i}var mean=0,varr=0;for(i=0;i<dim;i++)mean+=modes[i];mean/=dim;for(i=0;i<dim;i++)varr+=(modes[i]-mean)*(modes[i]-mean);varr/=dim;return{H_eff:Math.max(0,Math.min(1,1/(1+varr)))}}
   function gersh(text){var n=4,bytes=utf8(text||"x");if(!bytes.length)bytes=new Uint8Array([1]);var i,j,ok=0,sum=0;for(i=0;i<n;i++){var rad=0;for(j=0;j<n;j++)if(j!==i)rad+=Math.abs((bytes[(i*n+j)%bytes.length]/255)*2-1)*0.8;sum+=rad;if(rad<=2.5)ok++}var sc=Math.max(0,Math.min(1,(ok/n)*(1/(1+0.1*(sum/n)))));return{stable:sc>=0.7,score:sc}}
   function run(t){var q=qbm(t||"AKSII"),g=gersh(t||"AKSII");return{qbm:q,gersh:g,fp:fnv(["AKSII",t,q.H_eff.toFixed(4)].join("|"))}}
   return{run:run}
 })();
-function classify(q){var l=norm(q),ch=[];if(/запомни|помни|памят|capsule|кто я/.test(l))ch.push("01");if(/dip|proof|integrity|провер|хэш|hash|аудит|статус dip/.test(l))ch.push("02");if(/модель|llm|webllm|нейро|gpt|ии\b|искусственн/.test(l))ch.push("03");if(/агент|backend|globe|инструмент|tool|выполни/.test(l))ch.push("04");if(/quantum|кубит|белл|bloch|коллапс|суперпоз|qbm|матриц/.test(l))ch.push("05");if(/verify|проверь|докажи|gate|allow|block/.test(l))ch.push("06");if(!ch.length){if(/кто ты|что такое|объясн|расскаж/.test(l))ch.push("03");else ch.push("03")}return ch}
-function setChannels(ch){lastCh=ch;[].forEach.call(document.querySelectorAll(".ch"),function(el){el.classList.toggle("on", ch.indexOf(el.getAttribute("data-ch"))>=0)})}
-function setMeta(integrity, quantum){var m="[Mode: local-first | Quantum: "+(quantum||"sim")+" | Integrity: "+(integrity||"local")+" | fp:"+lastFp+"]";if($("metaStack"))$("metaStack").textContent=m}
-function paintKernel(text){var r=Kernel.run(text);lastFp=r.fp;if($("matrixCard"))$("matrixCard").textContent="H_eff="+r.qbm.H_eff.toFixed(3)+" · Gershgorin "+(r.gersh.stable?"STABLE":"WEAK")+"\nfp "+r.fp;drawStar();return r}
+function classify(q){var l=norm(q),ch=[];if(/запомни|помни|памят|capsule/.test(l))ch.push("01");if(/dip|proof|integrity|хэш|hash|аудит|статус dip/.test(l))ch.push("02");if(/модель|llm|нейро|gpt|ии\b|искусственн|энтропи|сознан/.test(l))ch.push("03");if(/агент|backend|globe|tool|выполни/.test(l))ch.push("04");if(/quantum|кубит|белл|коллапс|суперпоз|qbm|матриц/.test(l))ch.push("05");if(/verify|проверь|gate|allow|block/.test(l))ch.push("06");if(!ch.length)ch.push("03");return ch}
+function setCh(ch){lastCh=ch;[].forEach.call(document.querySelectorAll(".ch"),function(el){el.classList.toggle("on",ch.indexOf(el.getAttribute("data-ch"))>=0)})}
+function setMeta(intg,q){if($("meta"))$("meta").textContent="[Mode: local-first | Quantum: "+(q||"idle")+" | Integrity: "+(intg||"—")+" | fp:"+lastFp+"]"}
+function paintKernel(text){var r=Kernel.run(text);lastFp=r.fp;if($("mH"))$("mH").textContent=r.qbm.H_eff.toFixed(3);if($("mP"))$("mP").textContent=r.fp;if($("matrixCard"))$("matrixCard").textContent="H_eff="+r.qbm.H_eff.toFixed(3)+" · "+(r.gersh.stable?"STABLE":"WEAK")+"\n"+r.fp;drawStar();return r}
 function drawStar(){var c=$("star");if(!c)return;var ctx=c.getContext("2d"),W=c.width,H=c.height,cx=W/2,cy=H/2,rad=Math.min(W,H)*0.38,i;ctx.clearRect(0,0,W,H);for(i=0;i<8;i++){var a=i*Math.PI/4-Math.PI/2;ctx.beginPath();ctx.arc(cx+rad*Math.cos(a),cy+rad*Math.sin(a),i===0?5:3,0,Math.PI*2);ctx.fillStyle=i===0?"#ef4444":"#0b1020";ctx.fill()}}
-function quantumCollapse(seed){var dim=16,amps=new Float64Array(dim),i,s=0,bytes=String(seed||"aksi");for(i=0;i<dim;i++){var h=0,j;for(j=0;j<bytes.length;j++)h=((h<<5)-h)+bytes.charCodeAt(j)+i*17;amps[i]=Math.abs(Math.sin(h*0.001));s+=amps[i]*amps[i]}s=Math.sqrt(s)||1;for(i=0;i<dim;i++)amps[i]/=s;var r=Math.random(),c=0,pick=0;for(i=0;i<dim;i++){c+=amps[i]*amps[i];if(r<=c){pick=i;break}}return{bits:pick.toString(2).padStart(4,"0"),state:"|"+pick.toString(2).padStart(4,"0")+"> (sim)"}}
-function gateReceipt(q,answer,source,status){var body={ts:new Date().toISOString(),q:String(q).slice(0,120),source:source||"core",status:status||"ALLOW",ch:lastCh.slice()};body.fp=fnv(JSON.stringify(body));lastFp=body.fp;try{var arr=JSON.parse(localStorage.getItem(RK)||"[]");arr.unshift(body);if(arr.length>40)arr=arr.slice(0,40);localStorage.setItem(RK,JSON.stringify(arr))}catch(e){}return body}
-function mathA(q){var raw=String(q).trim();var pm=raw.toLowerCase().match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);if(pm)return fmt((+pm[1].replace(",","."))/100*(+pm[2].replace(",",".")));var expr=raw.replace(/[=?]/g,"").replace(/×/g,"*").replace(/÷/g,"/").replace(/,/g,".").trim();if(!/^[0-9+\-*/().\s]+$/.test(expr)||expr.length>40)return null;try{var v=Function('"use strict";return('+expr+")")();return typeof v==="number"&&isFinite(v)?fmt(v):null}catch(e){return null}}
+function qCollapse(seed){var dim=16,amps=new Float64Array(dim),i,s=0,bytes=String(seed||"aksi");for(i=0;i<dim;i++){var h=0,j;for(j=0;j<bytes.length;j++)h=((h<<5)-h)+bytes.charCodeAt(j)+i*17;amps[i]=Math.abs(Math.sin(h*0.001));s+=amps[i]*amps[i]}s=Math.sqrt(s)||1;for(i=0;i<dim;i++)amps[i]/=s;var r=Math.random(),c=0,pick=0;for(i=0;i<dim;i++){c+=amps[i]*amps[i];if(r<=c){pick=i;break}}return{bits:pick.toString(2).padStart(4,"0")}}
+function receipt(q,ans,src,st){var body={ts:new Date().toISOString(),q:String(q).slice(0,120),source:src||"core",status:st||"ALLOW",ch:lastCh.slice()};body.fp=fnv(JSON.stringify(body));lastFp=body.fp;try{var a=JSON.parse(localStorage.getItem(RK)||"[]");a.unshift(body);if(a.length>40)a=a.slice(0,40);localStorage.setItem(RK,JSON.stringify(a))}catch(e){}return body}
+function mathA(q){var raw=String(q).trim(),pm=raw.toLowerCase().match(/(\d+(?:[.,]\d+)?)\s*%\s*(?:от)?\s*(\d+(?:[.,]\d+)?)/);if(pm)return fmt((+pm[1].replace(",","."))/100*(+pm[2].replace(",",".")));var expr=raw.replace(/[=?]/g,"").replace(/×/g,"*").replace(/÷/g,"/").replace(/,/g,".").trim();if(!/^[0-9+\-*/().\s]+$/.test(expr)||expr.length>40)return null;try{var v=Function('"use strict";return('+expr+")")();return typeof v==="number"&&isFinite(v)?fmt(v):null}catch(e){return null}}
 function seedA(q){var SEED=window.__AKSI_SEED||[],n=norm(q),t=toks(q),best=null,sc0=0,i,j;for(i=0;i<SEED.length;i++){var s=SEED[i],k=norm(s.q),sc=0;if(n===k||n.indexOf(k)>=0||k.indexOf(n)>=0)sc+=12;for(j=0;j<t.length;j++)if(k.indexOf(t[j])>=0)sc+=4;if(sc>sc0){sc0=sc;best=s.a}}return sc0>=4?best:null}
 function neuroA(q){try{if(window.AKSI_NEURO&&window.AKSI_NEURO.think){var r=window.AKSI_NEURO.think(q);if(r&&(r.text||r.answer)&&String(r.text||r.answer).length>8)return r.text||r.answer}}catch(e){}return null}
-function adia(q,text,src){try{if(window.AKSI_ADIA&&window.AKSI_ADIA.evaluate){return window.AKSI_ADIA.evaluate(q,text,{source:src||"local"})}}catch(e){}return null}
+function adia(q,text,src){try{if(window.AKSI_ADIA&&window.AKSI_ADIA.evaluate){var r=window.AKSI_ADIA.evaluate(q,text,{source:src||"local"});if(r&&r.metrics&&r.metrics.EQS!=null&&$("mE"))$("mE").textContent=Number(r.metrics.EQS).toFixed(2);return r}}catch(e){}return null}
 function remember(q){var m=String(q).match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(!m)return null;var k=norm(m[1]),v=m[2].trim();if(!k)return null;facts[k]=v;saveF();try{if(window.AKSI_NEURO&&window.AKSI_NEURO.learn)window.AKSI_NEURO.learn(k+" = "+v)}catch(e){}return"CAPSULE_WRITE: "+k+" = "+v}
 function recall(q){var l=norm(q),keys=Object.keys(facts),i;for(i=0;i<keys.length;i++)if(l.indexOf(keys[i])>=0||keys[i].indexOf(l)>=0)return"CAPSULE: "+keys[i]+" → "+facts[keys[i]];return null}
-function identity(q){var l=norm(q);if(/кто ты|who are|представься/.test(l))return"AKSII MATRIX core. Channels 01–06 online. Local-first Neuro/SEED/Net + ADIA gate. Backend plane: Milana-backend (agent/api/quantum/tools). Contact aksilove@internet.ru";if(/статус dip|dip status|покажи статус/.test(l)){var mods=["SEED:"+((window.__AKSI_SEED&&window.__AKSI_SEED.length)||0),"NEURO:"+(window.AKSI_NEURO?"ON":"OFF"),"NET:"+(window.AKSI_NET?"ON":"OFF"),"ADIA:"+(window.AKSI_ADIA||window.AKSI_ALGORITHM?"ON":"OFF")].join(" ");return"DIP_STATUS: READY\n"+mods+"\nlast_fp="+lastFp+"\nmode=local-first · quantum=browser-sim · agents=route-when-server"}return null}
+function identity(q){var l=norm(q);if(/кто ты|who are|представься/.test(l))return"AKSII MATRIX Full. Channels 01–06. Tabs: Chat Matrix Trust Memory Lab Net Map. Modules: Neuro+SEED+Net+ADIA. Backend: Milana-backend. aksilove@internet.ru";if(/статус dip|dip status|покажи статус/.test(l))return"DIP_STATUS: READY\nSEED:"+((window.__AKSI_SEED&&window.__AKSI_SEED.length)||0)+" NEURO:"+(window.AKSI_NEURO?"ON":"OFF")+" NET:"+(window.AKSI_NET?"ON":"OFF")+" ADIA:"+(window.AKSI_ADIA||window.AKSI_ALGORITHM?"ON":"OFF")+"\nfp="+lastFp;return null}
 function wiki(q,cb){var term=toks(q).slice(0,5).join(" ")||q;fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(term)).then(function(r){if(!r.ok)throw new Error();return r.json()}).then(function(j){cb(j&&j.extract?j.extract.slice(0,420):null)}).catch(function(){cb(null)})}
-function formatOut(direct, provenance, integrity){setMeta(integrity||"Verified", lastCh.indexOf("05")>=0?"sim-active":"idle");return direct+"\n\n—\nPROVENANCE: "+provenance}
-function answer(q,cb){var ch=classify(q);setChannels(ch);var a,src="core";a=identity(q);if(a){gateReceipt(q,a,"id","ALLOW");cb(formatOut(a,"identity path · local","Verified"));return}a=remember(q);if(a){gateReceipt(q,a,"mem","ALLOW");cb(formatOut(a,"capsule write · localStorage","Verified"));return}a=recall(q);if(a){gateReceipt(q,a,"mem","ALLOW");cb(formatOut(a,"capsule read · localStorage","Verified"));return}if(ch.indexOf("05")>=0&&/коллапс|кубит|белл|quantum|суперпоз/.test(norm(q))){var qc=quantumCollapse(q);var kr=paintKernel(q);a="QUANTUM_SIM\nstate "+qc.state+"\nbits "+qc.bits+"\nH_eff="+kr.qbm.H_eff.toFixed(3);gateReceipt(q,a,"quantum","ALLOW");cb(formatOut(a,"browser amplitude toy · not hardware QPU","Simulated"));return}a=mathA(q);if(a){gateReceipt(q,a,"math","ALLOW");cb(formatOut(a,"deterministic arithmetic","Verified"));return}a=neuroA(q);if(a){var ad=adia(q,a,"neuro");src="neuro";var prov="AKSI_NEURO resonance · "+(ad&&ad.metrics?"EQS="+Number(ad.metrics.EQS||0).toFixed(2):"no ADIA");gateReceipt(q,a,src,"ALLOW");cb(formatOut(a,prov,"Verified"));return}a=seedA(q);if(a){adia(q,a,"seed");gateReceipt(q,a,"seed","ALLOW");cb(formatOut(a,"SEED knowledge hit · local","Verified"));return}if(/матриц|matrix|qbm|ядро/.test(norm(q))){var r=paintKernel(q);a="MATRIX kernel H_eff="+r.qbm.H_eff.toFixed(3)+" · "+(r.gersh.stable?"STABLE":"WEAK")+"\nfp "+r.fp;gateReceipt(q,a,"kernel","ALLOW");cb(formatOut(a,"QBM+Gershgorin local sim","Verified"));return}wiki(q,function(txt){if(txt){gateReceipt(q,txt,"wiki","ALLOW");cb(formatOut(txt,"Wikipedia REST extract · external","External"));return}try{if(window.AKSI_NET&&window.AKSI_NET.status&&window.AKSI_NET.status().ready){var g=window.AKSI_NET.generate(q+" ",{n:90,temperature:0.5});if(g&&g.text&&g.text.length>q.length+6){gateReceipt(q,g.text,"net","ALLOW");cb(formatOut(g.text.trim(),"AKSI_NET embed+MLP continuation · low confidence","Generated"));return}}}catch(e){}gateReceipt(q,"DATA_NOT_FOUND","core","BLOCK");cb(formatOut("DIP_STATUS: DATA_NOT_FOUND\nНет локального факта и внешнего extract. Уточни вопрос или «запомни: тема = текст».","no seed/neuro/wiki hit","DATA_NOT_FOUND"))})}
+function out(d,p,i){setMeta(i||"Verified",lastCh.indexOf("05")>=0?"sim":"idle");return d+"\n\n—\nPROVENANCE: "+p}
+function answer(q,cb){var ch=classify(q);setCh(ch);var a;a=identity(q);if(a){receipt(q,a,"id","ALLOW");cb(out(a,"identity · local","Verified"));return}a=remember(q);if(a){receipt(q,a,"mem","ALLOW");cb(out(a,"capsule write","Verified"));return}a=recall(q);if(a){receipt(q,a,"mem","ALLOW");cb(out(a,"capsule read","Verified"));return}if(ch.indexOf("05")>=0&&/коллапс|кубит|белл|quantum|суперпоз/.test(norm(q))){var qc=qCollapse(q),kr=paintKernel(q);a="QUANTUM_SIM |"+qc.bits+"> H_eff="+kr.qbm.H_eff.toFixed(3);receipt(q,a,"quantum","ALLOW");cb(out(a,"browser amplitude sim · not QPU","Simulated"));return}a=mathA(q);if(a){receipt(q,a,"math","ALLOW");cb(out(a,"arithmetic","Verified"));return}a=neuroA(q);if(a){var ad=adia(q,a,"neuro");receipt(q,a,"neuro","ALLOW");cb(out(a,"NEURO"+(ad&&ad.metrics?" EQS="+Number(ad.metrics.EQS||0).toFixed(2):""),"Verified"));return}a=seedA(q);if(a){adia(q,a,"seed");receipt(q,a,"seed","ALLOW");cb(out(a,"SEED local","Verified"));return}if(/матриц|matrix|qbm|ядро/.test(norm(q))){var r=paintKernel(q);a="MATRIX H_eff="+r.qbm.H_eff.toFixed(3)+" "+(r.gersh.stable?"STABLE":"WEAK");receipt(q,a,"kernel","ALLOW");cb(out(a,"QBM+Gershgorin","Verified"));return}wiki(q,function(txt){if(txt){receipt(q,txt,"wiki","ALLOW");cb(out(txt,"Wikipedia external","External"));return}try{if(window.AKSI_NET&&window.AKSI_NET.status&&window.AKSI_NET.status().ready){var g=window.AKSI_NET.generate(q+" ",{n:90,temperature:0.5});if(g&&g.text&&g.text.length>q.length+6){receipt(q,g.text,"net","ALLOW");cb(out(g.text.trim(),"AKSI_NET low-confidence","Generated"));return}}}catch(e){}receipt(q,"DATA_NOT_FOUND","core","BLOCK");cb(out("DIP_STATUS: DATA_NOT_FOUND\nУточни вопрос или «запомни: тема = текст».","no local/external hit","DATA_NOT_FOUND"))})}
 function add(role,text,tag){var log=$("log");if(!log)return;var d=document.createElement("div");d.className="msg "+(role==="u"?"u":"a");if(tag){var t=document.createElement("div");t.className="tag";t.textContent=tag;d.appendChild(t)}d.appendChild(document.createTextNode(text));log.appendChild(d);log.scrollTop=log.scrollHeight}
 function send(){var inp=$("in");if(!inp)return;var q=inp.value.trim();if(!q)return;inp.value="";add("u",q,"");answer(q,function(txt){add("a",txt,"ch "+(lastCh.join(",")||"—")+" · "+lastFp);paintKernel(q)})}
-function goTab(name){[].forEach.call(document.querySelectorAll("[data-panel]"),function(p){p.hidden=p.getAttribute("data-panel")!==name});[].forEach.call(document.querySelectorAll("[data-tab]"),function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name)});if(name==="matrix")paintKernel("AKSII");if(name==="proof"){try{var arr=JSON.parse(localStorage.getItem(RK)||"[]");$("proofCard").textContent=arr.length?arr.slice(0,12).map(function(r){return r.status+" · "+r.fp+" · "+r.q.slice(0,40)}).join("\n"):"no receipts"}catch(e){$("proofCard").textContent="—"}}if(name==="memory"){var keys=Object.keys(facts);$("memCard").textContent=keys.length?keys.map(function(k){return k+" = "+facts[k]}).join("\n"):"empty — «запомни: key = value»"}if(name==="map"){var g=$("mapGrid");if(g&&!g.children.length){MAP.forEach(function(pair){var a=document.createElement("a");a.href=pair[0];a.textContent=pair[1];g.appendChild(a)})}}}
-function refreshBadges(){var n=(window.__AKSI_SEED&&window.__AKSI_SEED.length)||0;var neuro=!!window.AKSI_NEURO, net=!!window.AKSI_NET, adia=!!(window.AKSI_ADIA||window.AKSI_ALGORITHM);if($("bLocal")){$("bLocal").className="badge on";$("bLocal").textContent="local-first"}if($("bQ")){$("bQ").className="badge on";$("bQ").textContent="quantum-sim"}if($("bDip")){$("bDip").className="badge on";$("bDip").textContent="DIP ready"}if($("bMod")){$("bMod").className="badge "+(neuro&&net?"on":"warn");$("bMod").textContent="S"+n+"/N"+(neuro?1:0)+"/T"+(net?1:0)+"/A"+(adia?1:0)}setMeta("boot","idle")}
-function boot(){refreshBadges();try{if(window.AKSI_NET&&window.AKSI_NET.autoPretrain)setTimeout(function(){try{window.AKSI_NET.autoPretrain();refreshBadges()}catch(e){}},400)}catch(e){}$("send").onclick=send;$("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});document.addEventListener("click",function(ev){var t=ev.target;if(!t||!t.getAttribute)return;var q=t.getAttribute("data-q");if(q!=null){if($("in"))$("in").value=q;send();return}var tab=t.getAttribute("data-tab");if(tab){goTab(tab);return}if(t.getAttribute("data-act")==="clearMem"){facts={};saveF();goTab("memory");add("a","CAPSULE_CLEAR","sys");return}});paintKernel("AKSII");goTab("chat");add("a",formatOut("AKSII MATRIX online.\nChannels 01–06. Local Neuro/SEED/Net + ADIA.\nBackend routes when server up.","boot · modules loaded","Verified"),"boot");setTimeout(refreshBadges,600)}
+function goTab(name){[].forEach.call(document.querySelectorAll("[data-panel]"),function(p){p.hidden=p.getAttribute("data-panel")!==name});[].forEach.call(document.querySelectorAll("[data-tab]"),function(b){b.classList.toggle("on",b.getAttribute("data-tab")===name)});if(name==="matrix")paintKernel("AKSII");if(name==="trust"){try{var a=JSON.parse(localStorage.getItem(RK)||"[]");$("trustCard").textContent=a.length?a.slice(0,15).map(function(r){return r.status+" · "+r.fp+" · "+r.q.slice(0,36)}).join("\n"):"no receipts"}catch(e){}}if(name==="memory"){var k=Object.keys(facts);$("memCard").textContent=k.length?k.map(function(x){return x+" = "+facts[x]}).join("\n"):"empty — «запомни: key = value»"}if(name==="lab"){var q=qCollapse("lab"),r=Kernel.run("lab");$("labCard").textContent="collapse "+q.bits+"\nH_eff="+r.qbm.H_eff.toFixed(3)}if(name==="net"){var s=window.AKSI_NET&&window.AKSI_NET.status?window.AKSI_NET.status():{};$("netCard").textContent="AKSI Net "+(s.version||"")+"\nready:"+(s.ready?"yes":"no")+" vocab:"+(s.vocab||0)+" H:"+(s.hidden||0)+"\nepochs:"+(s.epochsDone||0)}}
+function refresh(){var n=(window.__AKSI_SEED&&window.__AKSI_SEED.length)||0,neuro=!!window.AKSI_NEURO,net=!!window.AKSI_NET,adia=!!(window.AKSI_ADIA||window.AKSI_ALGORITHM);var c=(n?1:0)+(neuro?1:0)+(net?1:0)+(adia?1:0);if($("mM"))$("mM").textContent=c+"/4";if($("bMod")){$("bMod").className="badge "+(c>=3?"on":"");$("bMod").textContent="S"+n+" N"+(neuro?1:0)+" T"+(net?1:0)+" A"+(adia?1:0)}}
+function boot(){refresh();try{if(window.AKSI_NET&&window.AKSI_NET.autoPretrain)setTimeout(function(){try{window.AKSI_NET.autoPretrain();refresh()}catch(e){}},400)}catch(e){}$("send").onclick=send;$("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});document.addEventListener("click",function(ev){var t=ev.target;if(!t||!t.getAttribute)return;var q=t.getAttribute("data-q");if(q!=null){if($("in"))$("in").value=q;send();return}var tab=t.getAttribute("data-tab");if(tab){goTab(tab);return}var act=t.getAttribute("data-act");if(act==="clearMem"){facts={};saveF();goTab("memory");return}if(act==="qrun"){goTab("lab");return}if(act==="train"){try{if(window.AKSI_NET&&window.AKSI_NET.train){var r=window.AKSI_NET.train({epochs:10});add("a","NET trained epochs="+r.epochs,"net");goTab("net")}}catch(e){}return}if(act==="status"){refresh();add("a",BUILD+" · "+($("bMod")?$("bMod").textContent:""),"sys");return}});paintKernel("AKSII");goTab("chat");add("a",out("AKSII FULL online.\nTabs: Chat·Matrix·Trust·Memory·Lab·Net·Map\nChannels 01–06 · Neuro+SEED+Net+ADIA","boot full stack","Verified"),"boot");setTimeout(refresh,700)}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
 })();
 </script>
