@@ -14,9 +14,59 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+      - name: Detect changed public URLs
+        id: urls
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, subprocess, os
+          files = subprocess.check_output(
+              ["git", "diff", "--name-only", "HEAD^", "HEAD"], text=True
+          ).splitlines()
+          base = "https://milana808.github.io"
+          all_urls = [
+              base + "/", base + "/offer/", base + "/enterprise/",
+              base + "/trust/", base + "/bridge/", base + "/verify/",
+              base + "/lifecore/", base + "/ask.html"
+          ]
+          urls = set()
+          for path in files:
+              if path in {"robots.txt", "sitemap.xml", "llms.txt"}:
+                  urls.update(all_urls)
+              elif path == "index.html":
+                  urls.add(base + "/")
+              elif path == "offer/index.html":
+                  urls.add(base + "/offer/")
+              elif path == "enterprise/index.html":
+                  urls.add(base + "/enterprise/")
+              elif path == "lifecore/index.html":
+                  urls.add(base + "/lifecore/")
+              elif path == "trust/index.html":
+                  urls.add(base + "/trust/")
+              elif path.startswith("bridge/"):
+                  urls.add(base + "/bridge/")
+              elif path.startswith("verify/"):
+                  urls.add(base + "/verify/")
+              elif path == "ask.html":
+                  urls.add(base + "/ask.html")
+              elif path == "AKSI-VAI.md":
+                  urls.add(base + "/AKSI-VAI.md")
+              elif path == ".well-known/aksi.json":
+                  urls.update([base + "/", base + "/bridge/", base + "/verify/"])
+          result = json.dumps(sorted(urls), separators=(",", ":"))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as out:
+              out.write("list=" + result + "\\n")
+          print("Changed URLs:", result)
+          PY
       - name: Notify IndexNow participating search engines
+        if: steps.urls.outputs.list != '[]'
         env:
           INDEXNOW_KEY: AKSIMATRIX-INDEXNOW-20261011-8F3C9A21
+          URL_LIST: ${{ steps.urls.outputs.list }}
         shell: bash
         run: |
           set -euo pipefail
@@ -24,16 +74,7 @@ jobs:
             --arg host "milana808.github.io" \
             --arg key "$INDEXNOW_KEY" \
             --arg keyLocation "https://milana808.github.io/AKSIMATRIX-INDEXNOW-20261011-8F3C9A21.txt" \
-            --argjson urls '[
-              "https://milana808.github.io/",
-              "https://milana808.github.io/offer/",
-              "https://milana808.github.io/enterprise/",
-              "https://milana808.github.io/trust/",
-              "https://milana808.github.io/bridge/",
-              "https://milana808.github.io/verify/",
-              "https://milana808.github.io/lifecore/",
-              "https://milana808.github.io/ask.html"
-            ]' \
+            --argjson urls "$URL_LIST" \
             '{host:$host,key:$key,keyLocation:$keyLocation,urlList:$urls}')"
           code="$(curl --silent --show-error --output response.json --write-out "%{http_code}" \
             -H "Content-Type: application/json; charset=utf-8" \
