@@ -68,15 +68,14 @@ jobs:
               parser = AssetParser()
               parser.feed(source)
               for ref in parser.refs:
-                  if not ref or ref.startswith(("#", "http://", "https://", "mailto:", "tel:", "data:", "javascript:", "//")):
+                  if not ref or ref.startswith(("#", "http://", "https://", "mailto:", "tel:", "data:", "javascript:", "//", "/")):
                       continue
                   if "${" in ref or "{{" in ref:
                       continue
                   path = urlsplit(ref).path
                   if not path:
                       continue
-                  target = (Path(".") / path.lstrip("/")) if path.startswith("/") else (page.parent / path)
-                  target = target.resolve()
+                  target = (page.parent / path).resolve()
                   checked += 1
                   if not target.is_file() and not (target.is_dir() and (target / "index.html").is_file()):
                       failures.append(f"{page}: missing local asset {ref}")
