@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090b16">
+<title>AKSI Proof — лаборатория проверяемых данных</title>
+<style>
+:root{color-scheme:dark;--bg:#090b16;--panel:#11172a;--line:#27324b;--text:#f2f5ff;--muted:#a7b1ca;--accent:#9d8cff;--good:#55d6a2;--bad:#ff8c9b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#25204c 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{width:min(960px,100% - 32px);margin:0 auto;padding:40px 0 64px}.eyebrow{letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-size:.76rem;font-weight:800}
+h1{font-size:clamp(2.1rem,6vw,4rem);line-height:1.03;letter-spacing:-.04em;margin:14px 0}h2{font-size:1.15rem;margin:0 0 12px}p{color:var(--muted)}.lead{font-size:1.1rem;max-width:700px}.panel{background:linear-gradient(160deg,rgba(22,29,52,.96),rgba(13,18,34,.96));border:1px solid var(--line);border-radius:20px;padding:22px;margin-top:20px;box-shadow:0 18px 70px #0002}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{display:block;font-size:.9rem;color:var(--muted);margin:14px 0 7px}input[type=file],input[type=text]{width:100%;padding:13px;border:1px solid var(--line);border-radius:12px;background:#090e1d;color:var(--text)}button{border:0;border-radius:12px;padding:13px 17px;font-weight:750;cursor:pointer;background:var(--accent);color:#100d25;margin-top:12px}button.secondary{background:#252d45;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.45;cursor:not-allowed}.result{white-space:pre-wrap;overflow-wrap:anywhere;background:#080d19;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:70px;font: .88rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}.status{font-weight:750}.good{color:var(--good)}.bad{color:var(--bad)}.note{font-size:.88rem;border-left:3px solid var(--accent);padding-left:12px}.pill{display:inline-block;padding:4px 9px;border-radius:99px;background:#24213f;color:#c9c0ff;font-size:.8rem}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{padding:14px;border:1px solid var(--line);border-radius:14px}.step b{display:block;margin-bottom:5px}.small{font-size:.82rem}.footer{margin-top:24px;color:var(--muted);font-size:.85rem}
+@media(max-width:680px){main{padding-top:26px}.grid,.steps{grid-template-columns:1fr}.panel{padding:17px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">AKSI MATRIX · TRUST TOOLS</div>
+  <h1>AKSI Proof</h1>
+  <p class="lead">Проверь целостность файла. Получи машиночитаемую квитанцию с SHA-256 и повтори проверку независимо — прямо в браузере.</p>
+  <p><span class="pill">MVP · локальная проверка</span> <span class="pill">без загрузки файла на сервер</span></p>
+
+  <section class="panel">
+    <h2>01 / Вычислить SHA-256</h2>
+    <p>Выбери файл. Его содержимое обрабатывается локально в этом браузере; файл не отправляется на сервер этой страницы.</p>
+    <label class="field" for="file">Файл для проверки</label>
+    <input id="file" type="file">
+    <button id="hashBtn" disabled>Вычислить хеш и создать квитанцию</button>
+    <label class="field" for="hashOut">SHA-256 файла</label>
+    <div id="hashOut" class="result" aria-live="polite">Сначала выбери файл.</div>
+    <div id="metaOut" class="small"></div>
+    <button id="downloadBtn" class="secondary" disabled>Скачать JSON-квитанцию</button>
+  </section>
+
+  <section class="panel">
+    <h2>02 / Сверить файл с известным хешем</h2>
+    <p>Вставь хеш, полученный ранее из доверенного источника, и выбери файл. Совпадение показывает, что байты одинаковы; оно не подтверждает, кто создал файл и правдив ли его контент.</p>
+    <label class="field" for="expected">Ожидаемый SHA-256 (64 шестнадцатеричных символа)</label>
+    <input id="expected" type="text" placeholder="например, 3a7bd3e2360a...">
+    <label class="field" for="verifyFile">Файл для сравнения</label>
+    <input id="verifyFile" type="file">
+    <button id="verifyBtn">Проверить совпадение</button>
+    <div id="verifyOut" class="result" aria-live="polite">Результат проверки появится здесь.</div>
+  </section>
+
+  <section class="panel">
+    <h2>Что доказывает эта версия — и чего не доказывает</h2>
+    <div class="steps">
+      <div class="step"><b>✓ Целостность</b><span class="small">Можно проверить, совпадает ли хеш файла с ранее зафиксированным значением.</span></div>
+      <div class="step"><b>○ Подлинность</b><span class="small">В этой демоверсии нет цифровой подписи и доверенного времени.</span></div>
+      <div class="step"><b>○ Действия ИИ</b><span class="small">Квитанция не доказывает, что AI-агент действительно выполнил заявленное действие.</span></div>
+    </div>
+    <p class="note">Важно: JSON-квитанция в этой версии не подписана и может быть изменена. Для производственного сервиса нужны подпись Ed25519 с защищённым управлением ключами, цепочка событий, контроль пропусков, доверенная временная метка и независимый верификатор.</p>
+  </section>
+  <p class="footer">AKSI Proof — экспериментальный прототип проверки целостности, а не юридическое заключение или сертифицированный сервис аудита.</p>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let receipt = null;
+const hex = bytes => Array.from(new Uint8Array(bytes), b => b.toString(16).padStart(2,'0')).join('');
+async function digest(file) {
+  if (!crypto.subtle) throw new Error('Web Crypto недоступен. Открой страницу через HTTPS в современном браузере.');
+  return hex(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()));
+}
+$('file').addEventListener('change', () => { $('hashBtn').disabled = !$('file').files.length; receipt = null; $('downloadBtn').disabled = true; });
+$('hashBtn').addEventListener('click', async () => {
+  const file = $('file').files[0]; if (!file) return;
+  $('hashBtn').disabled = true; $('hashOut').textContent = 'Вычисляю…';
+  try {
+    const sha256 = await digest(file);
+    receipt = {schema:'aksi-proof-receipt/v1', filename:file.name, size_bytes:file.size, media_type:file.type || 'application/octet-stream', sha256:{algorithm:'SHA-256',value:sha256}, created_at:new Date().toISOString(), method:'Web Crypto API; local browser computation', signature:null, trusted_timestamp:null, limitations:['Unsigned receipt','Timestamp comes from the local device clock','Does not prove that an AI action occurred']};
+    $('hashOut').textContent = sha256;
+    $('metaOut').textContent = file.name + ' · ' + file.size.toLocaleString() + ' байт';
+    $('downloadBtn').disabled = false;
+  } catch (e) { $('hashOut').textContent = 'Ошибка: ' + e.message; }
+  finally { $('hashBtn').disabled = false; }
+});
+$('downloadBtn').addEventListener('click', () => {
+  if (!receipt) return;
+  const blob = new Blob([JSON.stringify(receipt,null,2)+'\n'], {type:'application/json'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a');
+  a.href = url; a.download = 'aksi-proof-receipt.json'; a.click(); URL.revokeObjectURL(url);
+});
+$('verifyBtn').addEventListener('click', async () => {
+  const file = $('verifyFile').files[0], expected = $('expected').value.trim().toLowerCase();
+  if (!file) { $('verifyOut').textContent = 'Сначала выбери файл.'; return; }
+  if (!/^[0-9a-f]{64}$/.test(expected)) { $('verifyOut').textContent = 'Ожидаемый хеш должен содержать ровно 64 шестнадцатеричных символа.'; return; }
+  $('verifyBtn').disabled = true; $('verifyOut').textContent = 'Проверяю…';
+  try {
+    const actual = await digest(file), ok = actual === expected;
+    $('verifyOut').innerHTML = '';
+    const title = document.createElement('div'); title.className = 'status ' + (ok ? 'good' : 'bad'); title.textContent = ok ? 'СОВПАДЕНИЕ: хеши равны' : 'НЕ СОВПАДАЕТ: хеши различаются';
+    const detail = document.createElement('div'); detail.textContent = 'Вычисленный SHA-256: ' + actual;
+    $('verifyOut').append(title, detail);
+  } catch (e) { $('verifyOut').textContent = 'Ошибка: ' + e.message; }
+  finally { $('verifyBtn').disabled = false; }
+});
+</script>
+</body>
+</html>
