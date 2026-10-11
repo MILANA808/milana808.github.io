@@ -26,5 +26,6 @@ Open https://milana808.github.io/quant/ after the branch is merged and GitHub Pa
 1. Market data loads, or a clearly labelled synthetic demo appears.
 2. Switching pair and interval reloads the data.
 3. The page displays price, strategy P/L, drawdown, trade count, signal and a trade table.
-4. CSV export downloads a file.
-5. No exchange credentials or order endpoints are requested or stored.
+4. Equity-curve timestamps align to the candle where the simulated execution/mark occurs; the final open position is included once in terminal equity and drawdown.
+5. CSV export downloads a file.
+6. No exchange credentials or order endpoints are requested or stored.
