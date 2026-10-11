@@ -126,7 +126,7 @@ function renderCandidates(result,qs){
  });
  const r=result.result||{};
  $('answer').className='status '+(r.abstained?'warn':'good');
- $('answer').textContent=r.abstained?'AKSI воздержалась от выбора: '+((result.abstention&&result.abstention.reason)||'недостаточно уверенного разделения')+'. Ни один вариант не помечен как установленный факт.':'Выбранный вариант ('+r.label+', '+(Number(r.probability||0)*100).toFixed(1)+'% внутренней вероятности выбора):\\n'+r.answer+'\\n\\nВажно: это результат процедуры выбора, не сертификат истинности.';
+ $('answer').textContent=r.abstained?'AKSI воздержалась от выбора: '+((result.abstention&&result.abstention.reason)||'недостаточно уверенного разделения')+'. Ни один вариант не помечен как установленный факт.':'Выбранный вариант ('+r.label+', '+(Number(r.probability||0)*100).toFixed(1)+'% внутренней вероятности выбора):\n'+r.answer+'\n\nВажно: это результат процедуры выбора, не сертификат истинности.';
 }
 async function run(){
  const q=$('query').value.trim();if(!q){showStatus('Введи задачу.','warn');return}
