@@ -56,3 +56,10 @@ intent → plan → hypotheses → experiment → tool/action → observation
 
 **Статус:** главный репозиторий AKSI.
 **Лицензия:** proprietary — см. LICENSE.
+
+## Scientific research and simulation
+
+- **[AKSI Virtual World Lab](https://milana808.github.io/world-lab/)** — browser-only toy-world simulation with adjustable parameters, repeatable seed, local experiment history, JSON export and hypothesis checks.
+- **[Scientific Foundations & Research Map](https://github.com/MILANA808/milana808.github.io/blob/main/research/AKSI_SCIENTIFIC_FOUNDATIONS.md)** — model registry architecture, mathematics/physics/AI research areas, open-problem integrity rules and starter bibliography.
+
+The Virtual World is an illustrative energy-balance model, not a calibrated digital twin. It runs locally and does not require a server. Its PASS/FAIL checks apply to the code and this model, not to real-world infrastructure.
