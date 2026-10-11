@@ -29,6 +29,10 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
 .chips{display:flex;flex-wrap:wrap;gap:6px;max-width:720px;margin:0 auto;padding:0 16px 8px}
 .chips button{font-size:12px;padding:0 12px;min-height:36px;border-radius:999px;border:1px solid var(--line);background:#0f0f16;color:var(--ink);cursor:pointer;font-family:inherit}
 </style>
+
+<style>
+#aksi-local-ai{max-width:720px;width:calc(100% - 32px);margin:12px auto 6px;padding:12px;border:1px solid rgba(139,124,246,.35);border-radius:14px;background:linear-gradient(120deg,rgba(33,24,68,.78),rgba(8,20,33,.78));display:flex;align-items:center;gap:10px;flex-wrap:wrap}#aksi-local-ai .local-copy{flex:1;min-width:180px}#aksi-local-ai strong{display:block;font-size:12px;letter-spacing:.08em}#aksi-local-ai small{display:block;color:#9babc6;margin-top:3px;font-size:11px}#aksi-local-ai button{border:1px solid #8b7cf6;background:#211b42;color:#fff;border-radius:10px;padding:9px 12px;font-weight:700}#aksi-local-ai button:disabled{opacity:.55}#aksi-local-ai progress{width:100%;height:4px;accent-color:#8b7cf6}
+</style>
 </head>
 <body>
 <header>
@@ -41,6 +45,7 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
   </nav>
 </header>
 <p id="st">загрузка…</p>
+<section id="aksi-local-ai" aria-live="polite"><div class="local-copy"><strong>LOCAL LLM · WebGPU</strong><small id="aksi-local-status">Мозг в браузере: запускается отдельно, веса загружаются на устройство.</small></div><button type="button" id="aksi-local-load">Запустить локальную модель</button><progress id="aksi-local-progress" max="100" value="0"></progress></section>
 <div class="chips">
   <button type="button" data-q="Кто ты?">Кто ты</button>
   <button type="button" data-q="статус">Статус</button>
@@ -62,10 +67,15 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
 <script src="/aksi-cortex-kernel.js?v=3"></script>
 <script src="/aksi-unified-runtime.js?v=1"></script>
 <script src="/aksi-agent-runtime.js?v=2"></script>
+<script src="/aksi-webllm.js?v=5"></script>
 <script src="/aksi-bot.js?v=8"></script>
 <script>
 (function(){
   var B=window.AKSI_BOT;
+  var localStatus=document.getElementById('aksi-local-status'), localProgress=document.getElementById('aksi-local-progress'), localLoad=document.getElementById('aksi-local-load');
+  function paintLocal(s){if(!s)return;localStatus.textContent=(s.message||'')+(s.model?' · '+s.model:'')+(s.webgpu===false?' · WebGPU недоступен на этом устройстве':'');localProgress.value=s.progress||0;localLoad.disabled=!!s.loading||!!s.ready;localLoad.textContent=s.ready?'Локальная модель активна':(s.loading?'Загрузка '+(s.progress||0)+'%':'Запустить локальную модель');}
+  if(window.AKSI_WEBLLM){paintLocal(AKSI_WEBLLM.status());window.addEventListener('aksi-webllm-progress',function(e){paintLocal(e.detail);});}
+  localLoad.addEventListener('click',async function(){if(!window.AKSI_WEBLLM){localStatus.textContent='Модуль WebLLM не загружен.';return;}localLoad.disabled=true;localStatus.textContent='Проверяю поддержку WebGPU…';try{var s=await AKSI_WEBLLM.load();paintLocal(s);}catch(e){paintLocal(AKSI_WEBLLM.status());localStatus.textContent=(e&&e.message)||'Локальная модель недоступна; базовый AKSI Bot продолжит работать.';localLoad.disabled=false;}});
   if(!B){document.getElementById('st').textContent='Bot module missing';return;}
   B.status().then(function(s){
     document.getElementById('st').textContent='v'+s.version+' · seed '+s.seed+' · cortex='+(s.cortexDocs||0)+' · gate='+!!s.flyGate+' · adia='+!!s.adia+' · org='+!!s.organism;
@@ -81,7 +91,10 @@ header a{color:var(--muted);text-decoration:none;font-size:12px;margin-left:10px
     document.getElementById('q').value='';add('user',q);
     document.getElementById('go').disabled=true;
     try{
-      var out=await B.think(q);
+      var out;
+      var command=/^(запомни|remember|исследуй|изучи|research|статус|status|кортекс пароль|cortex pass(word)?)\s*[:：]?/i.test(q);
+      if(window.AKSI_WEBLLM&&AKSI_WEBLLM.ready()&&!command){out=await AKSI_WEBLLM.complete(q,{max_tokens:AKSI_WEBLLM.isMobile()?256:640});if(!out||!out.text)out=await B.think(q);else out.offline=true;}
+      else out=await B.think(q);
       var meta='<span class="badge">'+(out.source||'')+'</span>';
       if(out.gate)meta+='<span class="badge '+(out.gate.decision==='ALLOWED'?'ok':'no')+'">gate '+out.gate.decision+'</span>';
       if(out.eqs!=null)meta+='<span class="badge">EQS '+Math.round(Number(out.eqs))+'</span>';
