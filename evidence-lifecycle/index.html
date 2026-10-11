@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="AKSI Evidence Lifecycle Verifier — локальная проверка структуры переносимой записи, ссылок на источники и связности решения.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://milana808.github.io/evidence-lifecycle/">
+<title>AKSI Evidence Lifecycle Verifier</title>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#111a2b;--line:#293a54;--text:#edf4ff;--muted:#9fb0c9;--cyan:#75e4dc;--red:#ff9cae;--gold:#f3cb80}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 12% 0%,#182b45 0,transparent 44%),var(--bg);color:var(--text);font:15px/1.55 system-ui,sans-serif}header,main,footer{max-width:1000px;margin:auto;padding:22px}header{padding-top:34px}.eyebrow{font-size:12px;letter-spacing:.16em;color:var(--cyan);font-weight:800}h1{font-size:clamp(30px,6vw,54px);line-height:1.05;letter-spacing:-.04em;margin:12px 0}h2{font-size:20px;margin:0 0 12px}.lead,p{color:var(--muted)}.lead{max-width:780px;font-size:17px}.panel{background:linear-gradient(145deg,#141f33,#0f1727);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}button{background:#1c2a40;border:1px solid #425873;color:var(--text);border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}button.primary{background:var(--cyan);color:#071a1a;border-color:var(--cyan)}textarea{width:100%;min-height:310px;resize:vertical;background:#08111f;color:#e3edff;border:1px solid #334760;border-radius:12px;padding:13px;font:13px/1.5 ui-monospace,monospace}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#08111f;padding:13px;border-radius:12px;max-height:420px;overflow:auto}.muted,.small{color:var(--muted)}.small{font-size:12px}.result{padding:12px;border:1px solid var(--line);border-radius:12px;margin:8px 0}.ok{border-color:#2d746d}.bad{border-color:#8a3e50}.warn{border-color:#826b38}.status{font-weight:800}.pill{display:inline-block;padding:3px 8px;border-radius:99px;background:#203a35;color:var(--cyan);font-size:12px}.hidden{display:none}a{color:var(--cyan)}@media(max-width:650px){header,main,footer{padding:15px}.panel{padding:14px}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">AKSI MATRIX / INDEPENDENT CHECK</div><h1>Evidence Lifecycle<br><span style="color:var(--cyan)">Verifier</span></h1><p class="lead">Проверка переносимой записи AKSI: обязательные поля, уникальность идентификаторов, ссылки на источники и выбранную альтернативу. Проверка выполняется локально в браузере.</p><div class="row"><span class="pill">NO API</span><span class="pill">LOCAL VALIDATION</span><span class="pill">EXPERIMENTAL DRAFT</span></div></header>
+<main>
+<section class="panel"><h2>1 / Вставь JSON-запись</h2><textarea id="input" spellcheck="false" aria-label="JSON record" placeholder="Вставь запись AKSI Evidence Lifecycle в формате JSON…"></textarea><div class="row" style="margin-top:12px"><button class="primary" id="validate">Проверить запись</button><button id="sample">Загрузить демонстрационный пример</button><button id="clear">Очистить</button></div><p class="small">Пример содержит условные данные и example.org в качестве placeholder-источника. Замени его реальным источником до практического использования.</p></section>
+<section class="panel hidden" id="output"><h2>2 / Отчёт проверки</h2><div id="summary"></div><div id="checks"></div><h2 style="margin-top:20px">Ограничения проверки</h2><p class="small">Этот инструмент проверяет только выбранные структурные и семантические инварианты. Он не подтверждает достоверность источников, полноту журнала, подлинность автора, цифровую подпись, доверенное время, причинность или качество решения. Он не является полным валидатором JSON Schema и не выполняет криптографическую проверку подписи.</p><div class="row"><button id="download">Скачать отчёт JSON</button></div><pre id="report" class="hidden"></pre></section>
+<section class="panel"><h2>Протокол</h2><p>Схема: <a href="/schemas/aksi-evidence-lifecycle-v1.schema.json">JSON Schema</a> · Спецификация: <a href="/AKSI-EVIDENCE-LIFECYCLE-1.md">AKSI Evidence Lifecycle v1</a> · <a href="/schemas/fixtures/aksi-evidence-lifecycle-v1.example.json">Пример записи</a></p><p class="small">Версия экспериментальная. Перед производственным использованием нужны независимые реализации, согласованная каноникализация и набор conformance-тестов.</p></section>
+</main><footer class="small">AKSI MATRIX · <a href="/">Главная</a> · <a href="/aksi-engine/">Proof Engine</a> · <a href="/trace/">Trace Ledger</a></footer>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);let lastReport=null;
+const sample={
+ schema_version:"AKSI-EVIDENCE-LIFECYCLE/1",record_id:"demo-001",created_at:"2026-10-11T09:00:00Z",
+ subject:{id:"demo-project",type:"product_decision",description:"Choose a small pilot before a full build"},
+ context:{summary:"Illustrative sample only.",items:[{id:"ctx-1",kind:"assumption",content:"A small pilot can test a key assumption.",status:"hypothesis",source_ids:["src-1"]}]},
+ sources:[{id:"src-1",uri:"https://example.org/pilot-method",title:"Placeholder source for schema example",source_type:"web",retrieved_at:"2026-10-11T09:00:00Z"}],
+ claims:[{id:"claim-1",text:"A bounded pilot reduces learning cost.",status:"hypothesis",source_ids:["src-1"],confidence_label:"not_assessed"}],
+ hypotheses:[{id:"hyp-1",statement:"Three users can complete the workflow unaided.",status:"hypothesis",tests:[{id:"test-1",description:"Observe three target users",method:"Task completion test",expected_observation:"All complete the task",outcome:"pending",source_ids:["src-1"]}]}],
+ decision:{question:"What should be tested first?",alternatives:[{id:"pilot",label:"Run a small pilot",rationale:"Limit scope"},{id:"full",label:"Build everything",rationale:"High scope"}],selected_alternative_id:"pilot",policy_constraints:["No production customer data"]},
+ outcomes:[],revisions:[],extensions:{demo_notice:"Replace placeholder data before relying on this record."}
+};
+function add(list,severity,message){list.push({severity,message});}
+function isObj(x){return x!==null&&typeof x==="object"&&!Array.isArray(x);}
+function validateRecord(r){
+ const errors=[],warnings=[],info=[];
+ if(!isObj(r)){add(errors,"error","Корень JSON должен быть объектом.");return {errors,warnings,info};}
+ const required=["schema_version","record_id","created_at","subject","context","sources","claims","hypotheses","decision","outcomes","revisions"];
+ required.forEach(k=>{if(!(k in r))add(errors,"error","Отсутствует обязательное поле: "+k);});
+ if(r.schema_version!=="AKSI-EVIDENCE-LIFECYCLE/1")add(errors,"error","Неподдерживаемая schema_version.");
+ if(typeof r.record_id!=="string"||!r.record_id.trim())add(errors,"error","record_id должен быть непустой строкой.");
+ if(typeof r.created_at!=="string"||Number.isNaN(Date.parse(r.created_at)))add(errors,"error","created_at должен быть датой ISO 8601.");
+ if(!isObj(r.subject)||typeof r.subject.type!=="string"||typeof r.subject.description!=="string")add(errors,"error","subject должен содержать type и description.");
+ if(!isObj(r.context)||typeof r.context.summary!=="string"||!Array.isArray(r.context.items))add(errors,"error","context должен содержать summary и массив items.");
+ const arrFields=["sources","claims","hypotheses","outcomes","revisions"];
+ arrFields.forEach(k=>{if(!Array.isArray(r[k]))add(errors,"error",k+" должен быть массивом.");});
+ if(!isObj(r.decision)||typeof r.decision.question!=="string"||!Array.isArray(r.decision.alternatives))add(errors,"error","decision должен содержать question и массив alternatives.");
+ const ids={sources:new Set(),context:new Set(),claims:new Set(),hypotheses:new Set(),tests:new Set(),alternatives:new Set(),outcomes:new Set(),revisions:new Set()};
+ function unique(items,key,label){if(!Array.isArray(items))return;items.forEach((it,i)=>{if(!isObj(it)||typeof it.id!=="string"||!it.id.trim()){add(errors,"error",label+"["+i+"] не имеет строкового id.");return;}if(ids[key].has(it.id))add(errors,"error","Повторяющийся ID в "+label+": "+it.id);ids[key].add(it.id);});}
+ if(isObj(r.context))unique(r.context.items,"context","context.items");
+ unique(r.sources,"sources","sources");unique(r.claims,"claims","claims");unique(r.hypotheses,"hypotheses","hypotheses");unique(r.outcomes,"outcomes","outcomes");unique(r.revisions,"revisions","revisions");
+ if(isObj(r.decision))unique(r.decision.alternatives,"alternatives","decision.alternatives");
+ if(Array.isArray(r.hypotheses))r.hypotheses.forEach((h,i)=>{if(isObj(h))unique(h.tests,"tests","hypotheses["+i+"].tests");});
+ const sourceRefs=new Set(ids.sources),refFields=[];
+ if(isObj(r.context)&&Array.isArray(r.context.items))r.context.items.forEach((x,i)=>refFields.push({path:"context.items["+i+"].source_ids",refs:x?.source_ids}));
+ if(Array.isArray(r.claims))r.claims.forEach((x,i)=>refFields.push({path:"claims["+i+"].source_ids",refs:x?.source_ids}));
+ if(Array.isArray(r.hypotheses))r.hypotheses.forEach((h,i)=>{if(Array.isArray(h?.tests))h.tests.forEach((t,j)=>refFields.push({path:"hypotheses["+i+"].tests["+j+"].source_ids",refs:t?.source_ids}));});
+ if(Array.isArray(r.outcomes))r.outcomes.forEach((x,i)=>refFields.push({path:"outcomes["+i+"].source_ids",refs:x?.source_ids}));
+ refFields.forEach(f=>{if(f.refs===undefined)return;if(!Array.isArray(f.refs)){add(errors,"error",f.path+" должен быть массивом строк.");return;}f.refs.forEach(id=>{if(typeof id!=="string"||!sourceRefs.has(id))add(errors,"error",f.path+" ссылается на отсутствующий источник: "+String(id));});});
+ if(isObj(r.decision)&&Array.isArray(r.decision.alternatives)){
+  const selected=r.decision.selected_alternative_id;
+  if(selected!==null&&selected!==undefined&&!ids.alternatives.has(selected))add(errors,"error","selected_alternative_id не совпадает ни с одной альтернативой.");
+  if(selected===null)add(warnings,"warning","Решение пока не выбрано (selected_alternative_id=null).");
+  if(r.decision.alternatives.length<1)add(errors,"error","Нужна хотя бы одна альтернатива.");
+ }
+ if(Array.isArray(r.claims))r.claims.forEach((c,i)=>{if(c?.status==="verified"&&(!Array.isArray(c.source_ids)||c.source_ids.length===0))add(warnings,"warning","Claim "+(c.id||i)+" помечен verified без ссылок на источники.");});
+ if(Array.isArray(r.sources))r.sources.forEach((s,i)=>{if(typeof s?.uri!=="string"||!/^https?:\/\//i.test(s.uri))add(warnings,"warning","Источник "+(s?.id||i)+" не имеет обычного HTTP(S) URI.");if(s?.content_sha256&&!/^[a-f0-9]{64}$/i.test(s.content_sha256))add(errors,"error","Неверный формат content_sha256 у источника "+(s.id||i)+".");});
+ if(Array.isArray(r.claims))r.claims.forEach((c,i)=>{if(!["unknown","hypothesis","supported","verified","refuted","superseded"].includes(c?.status))add(errors,"error","Неизвестный статус claims["+(c?.id||i)+"].");});
+ if(!Array.isArray(r.sources)||r.sources.length===0)add(warnings,"warning","Нет источников: утверждения невозможно связать с источниками в этой записи.");
+ if(r.integrity)add(warnings,"warning","Поле integrity обнаружено, но этот инструмент не пересчитывает digest и не проверяет подписи.");
+ add(info,"info","Проверены обязательные поля, ID, ссылки на источники и выбранная альтернатива.");
+ add(info,"info","Проверка структуры не доказывает истинность содержимого.");
+ return {errors,warnings,info};
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function render(list){return list.map(x=>'<div class="result '+(x.severity==="error"?"bad":x.severity==="warning"?"warn":"ok")+'"><span class="status">'+(x.severity==="error"?"ОШИБКА":x.severity==="warning"?"ПРЕДУПРЕЖДЕНИЕ":"ИНФО")+'</span> — '+escapeHtml(x.message)+'</div>').join("");}
+function run(){
+ let r;try{r=JSON.parse($("input").value);}catch(e){$("output").classList.remove("hidden");$("summary").innerHTML='<div class="result bad"><b>JSON не разобран</b><p>'+escapeHtml(e.message)+'</p></div>';$("checks").innerHTML="";lastReport={valid:false,parse_error:e.message};return;}
+ const report=validateRecord(r);lastReport={protocol:"AKSI-EVIDENCE-LIFECYCLE-VERIFIER/1",checked_at:new Date().toISOString(),record_id:r?.record_id||null,valid:report.errors.length===0,errors:report.errors,warnings:report.warnings,info:report.info};
+ $("output").classList.remove("hidden");$("summary").innerHTML='<div class="result '+(lastReport.valid?"ok":"bad")+'"><div class="status">'+(lastReport.valid?"STRUCTURE CHECK PASSED":"VALIDATION FAILED")+'</div><p>'+report.errors.length+' ошибок · '+report.warnings.length+' предупреждений · '+report.info.length+' заметок</p><div class="small">Запись: '+escapeHtml(r.record_id||"(без ID)")+'</div></div>';$("checks").innerHTML=render([...report.errors,...report.warnings,...report.info]);$("report").classList.add("hidden");$("output").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("validate").addEventListener("click",run);
+$("sample").addEventListener("click",()=>{$("input").value=JSON.stringify(sample,null,2);run();});
+$("clear").addEventListener("click",()=>{$("input").value="";$("output").classList.add("hidden");lastReport=null;});
+$("download").addEventListener("click",()=>{if(!lastReport)return;const b=new Blob([JSON.stringify(lastReport,null,2)],{type:"application/json"}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download="aksi-evidence-validation-report.json";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);});
+})();
+</script>
+</body></html>
