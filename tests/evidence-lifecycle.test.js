@@ -41,12 +41,21 @@ for (const item of localRefs) {
   assert.ok(cursor, 'unresolved schema reference ' + item.ref + ' at ' + item.path);
 }
 
-const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)].map(m => m[1]).filter(s => s.trim());
+const scripts = [];
+let pos = 0;
+while ((pos = html.indexOf('<script', pos)) !== -1) {
+  const start = html.indexOf('>', pos);
+  const end = html.indexOf('</script>', start + 1);
+  if (start < 0 || end < 0) break;
+  const script = html.slice(start + 1, end);
+  if (script.trim()) scripts.push(script);
+  pos = end + '</script>'.length;
+}
 assert.ok(scripts.length > 0, 'verifier page should include a script');
 scripts.forEach((script, i) => {
   execFileSync(process.execPath, ['--check'], { input: script, stdio: ['pipe','pipe','pipe'] });
 });
-assert.match(html, /AKSI-EVIDENCE-LIFECYCLE-VERIFIER\\/1/);
+assert.ok(html.includes('AKSI-EVIDENCE-LIFECYCLE-VERIFIER/1'));
 assert.match(html, /не подтверждает достоверность источников/i);
 
 console.log('AKSI Evidence Lifecycle contract checks passed.');
