@@ -37,11 +37,13 @@ jobs:
           assert schema["properties"]["schema"]["const"] == "aksi-evidence-passport/v1"
           assert "localStorage" in html and "SHA-256" in html
           assert "does not prove" in html or "не доказывает" in html.lower()
-          blocks = re.findall(r"<script[^>]*>(.*?)</script>", html, re.I | re.S)
+          blocks = re.findall(r"<script([^>]*)>(.*?)</script>", html, re.I | re.S)
+          blocks = [body for attrs, body in blocks if "application/ld+json" not in attrs.lower()]
           if len(blocks) != 1:
               raise SystemExit(f"Expected one inline application script, got {len(blocks)}")
           Path("/tmp/aksi-evidence.js").write_text(blocks[0], encoding="utf-8")
-          english_blocks = re.findall(r"<script[^>]*>(.*?)</script>", english, re.I | re.S)
+          english_blocks = re.findall(r"<script([^>]*)>(.*?)</script>", english, re.I | re.S)
+          english_blocks = [body for attrs, body in english_blocks if "application/ld+json" not in attrs.lower()]
           if len(english_blocks) != 1:
               raise SystemExit(f"Expected one English application script, got {len(english_blocks)}")
           Path("/tmp/aksi-evidence-en.js").write_text(english_blocks[0], encoding="utf-8")
