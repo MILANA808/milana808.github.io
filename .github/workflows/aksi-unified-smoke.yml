@@ -39,7 +39,7 @@ jobs:
           import re
           from pathlib import Path
           html = Path("index.html").read_text(encoding="utf-8")
-          blocks = [b for b in re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script\\s*>", html, re.I) if b.strip()]
+          blocks = [b for b in re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script\s*>", html, re.I) if b.strip()]
           if not blocks:
               raise SystemExit("No inline JavaScript found in homepage")
           for i, block in enumerate(blocks):
