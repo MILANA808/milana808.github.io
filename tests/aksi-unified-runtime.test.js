@@ -64,3 +64,20 @@ test('task path validation blocks absolute and protocol-relative URLs', async ()
   await assert.rejects(api.request('https://attacker.example/collect'), /absolute path on the configured host/);
   await assert.rejects(api.request('//attacker.example/collect'), /absolute path on the configured host/);
 });
+
+test('health diagnostics do not mix two backend instances when readiness fails', async () => {
+  const calls = [];
+  const { api } = makeRuntime(async (url) => {
+    calls.push(url);
+    if (url.endsWith('/health')) return response(200, { status: 'healthy' });
+    if (url.endsWith('/ready')) return response(503, { status: 'not_ready', ready: false });
+    if (url.endsWith('/api/core/runtime')) return response(200, { ok: true });
+    return response(404, {});
+  });
+  const result = await api.health();
+  assert.equal(result.alive, true);
+  assert.equal(result.ready, false);
+  assert.equal(result.runtimeAvailable, true);
+  assert.equal(calls.length, 3);
+  assert.ok(calls.every((url) => url.startsWith('https://aksi-backend.onrender.com')));
+});
