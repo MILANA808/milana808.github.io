@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b14">
+<meta name="description" content="AKSI Trace Ledger — локальный журнал проверяемых решений ИИ. Цепочка SHA-256, экспортируемые записи и проверка целостности без backend и аккаунта.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://milana808.github.io/trace/">
+<link rel="alternate" type="text/plain" href="/llms.txt" title="AKSI AI discovery manifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKSI MATRIX">
+<meta property="og:title" content="AKSI Trace Ledger — проверяемый цифровой след">
+<meta property="og:description" content="Записывай утверждения, источники и решения в локальную цепочку SHA-256. Экспортируй и проверяй журнал без сервера.">
+<meta property="og:url" content="https://milana808.github.io/trace/">
+<title>AKSI Trace Ledger — проверяемый цифровой след</title>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"AKSI Trace Ledger","url":"https://milana808.github.io/trace/","applicationCategory":"DeveloperApplication","operatingSystem":"Modern web browser","isAccessibleForFree":true,"inLanguage":"ru-RU","description":"Локальный append-only прототип для фиксации утверждений, источников, наблюдений и статусов с цепочкой SHA-256, переносимым JSON и проверкой целостности.","creator":{"@type":"Organization","name":"AKSI MATRIX","url":"https://milana808.github.io/"},"codeRepository":"https://github.com/MILANA808/milana808.github.io"}
+</script>
+<style>
+:root{color-scheme:dark;--bg:#080b14;--panel:#101827;--line:#29364d;--ink:#edf3ff;--muted:#9aaac2;--cyan:#55e6d0;--violet:#9a8cff;--green:#55d6a2;--red:#ff7b8b;--amber:#f4c56a}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#1c2b50 0,transparent 42%),radial-gradient(ellipse at 90% 20%,#172447 0,transparent 40%),var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,sans-serif}.wrap{max-width:1120px;margin:auto;padding:20px 16px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line)}.brand{font-weight:900;letter-spacing:.13em}.brand span{color:var(--cyan)}a{color:var(--cyan)}.sub{font-size:12px;color:var(--muted)}.hero{padding:28px 0 20px}.eyebrow{font-size:11px;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase}h1{font-size:clamp(34px,6vw,60px);line-height:1.02;letter-spacing:-.045em;margin:10px 0 14px}h2{font-size:17px;margin:0 0 10px}.lead{max-width:790px;color:#b7c4dc;font-size:16px}.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(290px,.85fr);gap:13px}.panel{border:1px solid var(--line);background:linear-gradient(145deg,#121b2b,#0e1421);border-radius:16px;padding:17px;min-width:0}.field{display:grid;gap:6px;margin:12px 0}.field label{font-size:12px;color:#c4cee0}.input,textarea,select{width:100%;background:#0a111e;color:var(--ink);border:1px solid #34435b;border-radius:10px;padding:11px 12px;outline:none;font:inherit}.input:focus,textarea:focus,select:focus{border-color:var(--cyan)}textarea{min-height:82px;resize:vertical}.btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:13px}.btn{background:#172136;border:1px solid #34435b;color:var(--ink);border-radius:10px;padding:10px 13px;font:inherit;font-size:13px;font-weight:750;cursor:pointer}.btn.primary{background:linear-gradient(110deg,#4b66e8,#167e91);border:0}.btn:disabled{opacity:.5;cursor:not-allowed}.notice{border:1px solid #735c2b;background:#241d10;color:#f1d99e;border-radius:12px;padding:12px;font-size:12px;margin:12px 0}.status{border:1px solid var(--line);border-radius:12px;background:#0a111e;padding:12px;margin:10px 0}.state{font-weight:900;color:var(--cyan);font-size:17px}.hash{font:11px/1.55 ui-monospace,SFMono-Regular,monospace;word-break:break-all;color:#9df8e2;margin-top:7px}.list{display:grid;gap:9px;margin-top:12px}.entry{border:1px solid #29364d;border-radius:12px;padding:12px;background:#0a111e}.entryhead{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;align-items:center}.pill{display:inline-block;border:1px solid #34435b;border-radius:999px;padding:3px 8px;font-size:10px;color:var(--muted)}.entry p{margin:8px 0 4px;white-space:pre-wrap;overflow-wrap:anywhere}.entry small{color:var(--muted);font-size:11px}.entry a{overflow-wrap:anywhere;font-size:12px}.muted{color:var(--muted)}.footer{margin-top:22px;color:var(--muted);font-size:11px;line-height:1.8}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}@media(max-width:780px){.grid{grid-template-columns:1fr}.wrap{padding:14px 12px 40px}.panel{padding:13px}h1{font-size:38px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div><div class="brand">AKSI <span>TRACE LEDGER</span></div><div class="sub">LOCAL-FIRST · HASH-CHAIN · PORTABLE EVIDENCE</div></div><a href="/">← Главная AKSI MATRIX</a></header>
+<section class="hero"><div class="eyebrow">Новая технология · AKSI-TRACE/1</div><h1>Не просто ответ.<br><span style="color:var(--cyan)">Проверяемый след.</span></h1><p class="lead">Фиксируй утверждение, источник, наблюдение и статус проверки. Каждая запись связана с предыдущей SHA-256-хэшем. Журнал хранится в этом браузере, экспортируется в JSON и может быть проверен на другом устройстве — без аккаунта, API-ключа или отдельного сервера.</p></section>
+<div class="grid">
+<section class="panel"><h2>Добавить запись в цепочку</h2><p class="sub">Записывай то, что проверила. Статус выбирает человек; приложение не притворяется автоматическим фактчекером.</p>
+<form id="entryForm">
+<div class="field"><label for="claim">Утверждение или решение *</label><textarea id="claim" maxlength="4000" required placeholder="Например: на официальной странице компании указано, что она оказывает услугу X."></textarea></div>
+<div class="field"><label for="source">Источник (URL, необязательно)</label><input class="input" id="source" type="url" maxlength="2000" placeholder="https://example.com/source"></div>
+<div class="field"><label for="observation">Что именно подтверждено / замечено</label><textarea id="observation" maxlength="4000" placeholder="Цитата, наблюдение или причина решения. Не добавляй секреты и персональные данные."></textarea></div>
+<div class="field"><label for="status">Статус доказательности</label><select id="status"><option value="OBSERVATION">OBSERVATION — наблюдение</option><option value="HYPOTHESIS">HYPOTHESIS — гипотеза</option><option value="SUPPORTED">SUPPORTED — есть поддерживающие материалы</option><option value="REFUTED">REFUTED — опровергнуто материалами</option><option value="UNKNOWN">UNKNOWN — пока неизвестно</option></select></div>
+<div class="field"><label for="limits">Ограничения / что ещё проверить</label><input class="input" id="limits" maxlength="1500" placeholder="Например: источник не проверен независимо"></div>
+<div class="btns"><button class="btn primary" id="add" type="submit">＋ Добавить и захешировать</button><button class="btn" id="demo" type="button">Загрузить пример</button></div>
+</form>
+<div class="notice">Важно: SHA-256 обнаруживает изменения относительно известного хэша. Сам по себе он не доказывает истинность текста, автора или время события. Для независимой фиксации последнего хэша сохрани экспорт вне этого браузера.</div>
+</section>
+<aside class="panel"><h2>Состояние журнала</h2><div class="status"><div id="state" class="state">Проверка…</div><div id="summary" class="sub">Загрузка локального журнала</div><div id="latest" class="hash"></div></div>
+<div class="btns"><button class="btn primary" id="verify" type="button">✓ Проверить цепочку</button><button class="btn" id="export" type="button">Экспорт JSON</button><button class="btn" id="copyhash" type="button">Копировать хэш</button><button class="btn" id="selftest" type="button">Самотест</button><button class="btn" id="importbtn" type="button">Импорт JSON</button><input id="file" type="file" accept="application/json,.json" hidden><button class="btn" id="clear" type="button">Очистить локально</button></div>
+<div id="result" class="status" role="status">Записи остаются на устройстве, пока ты не экспортируешь или не удалишь их.</div>
+<h2 style="margin-top:18px">Публичный протокол</h2><p class="sub">Формат, код и правила проверки публикуются в GitHub. Это оставляет воспроизводимый след разработки, но не является независимым аудитом технологии.</p><p style="margin-top:8px"><a href="https://github.com/MILANA808/milana808.github.io/tree/main/trace">Исходный код и протокол ↗</a></p><p style="margin-top:7px"><a href="/trace/AKSI-TRACE-1.md">Спецификация AKSI-TRACE/1 ↗</a></p>
+</aside></div>
+<section class="panel" style="margin-top:13px"><div class="entryhead"><h2>Цепочка записей</h2><span id="count" class="pill">0 записей</span></div><p class="sub">Последняя запись ссылается на хэш предыдущей. Если запись изменить или переставить, проверка должна обнаружить нарушение.</p><div id="entries" class="list"><p class="sub">Пока нет записей. Добавь первую запись выше.</p></div></section>
+<footer class="footer">AKSI MATRIX · AKSI-TRACE/1 · Работает на статическом сайте. Локальная копия хранится только в localStorage этого браузера. Экспортируй журнал для резервного копирования.<br><a href="/evidence/">Evidence Passport</a> · <a href="/verify/">Независимая проверка</a> · <a href="/llms.txt">AI discovery manifest</a></footer>
+</main>
+<script>
+(function(){
+'use strict';
+const KEY='aksi-trace-ledger-v1';
+const $=id=>document.getElementById(id);
+let ledger=[];
+const enc=new TextEncoder();
+function canonical(v){
+ if(v===null||typeof v!=='object')return JSON.stringify(v);
+ if(Array.isArray(v))return '['+v.map(canonical).join(',')+']';
+ return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
+}
+async function sha256(v){
+ if(!window.crypto||!crypto.subtle)throw new Error('WebCrypto недоступен. Открой сайт через HTTPS в современном браузере.');
+ const bytes=await crypto.subtle.digest('SHA-256',enc.encode(typeof v==='string'?v:canonical(v)));
+ return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
+}
+function payloadOf(e){const p={...e};delete p.hash;return p;}
+function safeURL(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(ledger));return true}catch(e){showResult('bad','Не удалось сохранить в браузере: '+e.message);return false}}
+function showResult(kind,msg){const el=$('result');el.className='status '+kind;el.textContent=msg}
+function escStatus(s){return ({OBSERVATION:'Наблюдение',HYPOTHESIS:'Гипотеза',SUPPORTED:'Есть поддерживающие материалы',REFUTED:'Опровергнуто',UNKNOWN:'Неизвестно'})[s]||'Неизвестно'}
+function fmtTime(s){try{return new Date(s).toLocaleString()}catch{return s}}
+function render(){
+ $('count').textContent=ledger.length+' записей';
+ $('summary').textContent=ledger.length+' записей · '+(ledger.length?'цепочка SHA-256':'цепочка ещё не создана');
+ $('latest').textContent=ledger.length?'Последний SHA-256: '+ledger[ledger.length-1].hash:'Последний SHA-256: —';
+ $('entries').replaceChildren();
+ if(!ledger.length){const p=document.createElement('p');p.className='sub';p.textContent='Пока нет записей. Добавь первую запись выше.';$('entries').append(p);$('state').textContent='ПУСТО';$('state').className='state';return}
+ [...ledger].reverse().forEach(e=>{
+  const box=document.createElement('article');box.className='entry';
+  const head=document.createElement('div');head.className='entryhead';
+  const n=document.createElement('span');n.className='pill';n.textContent='#'+e.seq+' · '+e.protocol;
+  const st=document.createElement('span');st.className='pill';st.textContent=escStatus(e.status);head.append(n,st);box.append(head);
+  const claim=document.createElement('p');claim.textContent=e.claim;box.append(claim);
+  const meta=document.createElement('small');meta.textContent=fmtTime(e.created_at)+' · предыдущий: '+(e.previous_hash==='GENESIS'?'GENESIS':e.previous_hash.slice(0,16)+'…');box.append(meta);
+  if(e.source_url){const a=document.createElement('a');a.href=safeURL(e.source_url)||'#';a.target='_blank';a.rel='noopener noreferrer';a.textContent=e.source_url;box.append(document.createElement('br'),a)}
+  if(e.observation){const o=document.createElement('p');o.textContent=e.observation;box.append(o)}
+  if(e.limitations){const l=document.createElement('small');l.textContent='Ограничения: '+e.limitations;box.append(document.createElement('br'),l)}
+  const hash=document.createElement('div');hash.className='hash';hash.textContent='SHA-256: '+e.hash;box.append(hash);
+  $('entries').append(box);
+ });
+}
+async function verifyChain(list){
+ let prev='GENESIS';
+ for(let i=0;i<list.length;i++){
+  const e=list[i];
+  if(!e||e.protocol!=='AKSI-TRACE/1')return {ok:false,index:i,reason:'Неизвестная версия протокола'};
+  if(e.seq!==i+1)return {ok:false,index:i,reason:'Нарушен порядок или номер записи'};
+  if(e.previous_hash!==prev)return {ok:false,index:i,reason:'Не совпадает ссылка на предыдущую запись'};
+  const actual=await sha256(payloadOf(e));
+  if(actual!==e.hash)return {ok:false,index:i,reason:'Хэш содержимого не совпадает'};
+  prev=e.hash;
+ }
+ return {ok:true,count:list.length,latest:prev};
+}
+async function refreshVerification(){
+ $('state').textContent='ПРОВЕРКА…';$('state').className='state';
+ try{const v=await verifyChain(ledger);if(v.ok){$('state').textContent=ledger.length?'ЦЕПОЧКА ЦЕЛА':'ПУСТО';$('state').className='state good';showResult('good',ledger.length?'Проверено записей: '+v.count+'. Нарушений последовательности и хэшей не обнаружено.':'Пока нечего проверять.');}else{$('state').textContent='ОШИБКА ЦЕПОЧКИ';$('state').className='state bad';showResult('bad','Запись #'+(v.index+1)+': '+v.reason);}}
+ catch(e){$('state').textContent='ПРОВЕРКА НЕДОСТУПНА';$('state').className='state warn';showResult('warn',e.message)}
+}
+async function addEntry(data){
+ const payload={protocol:'AKSI-TRACE/1',seq:ledger.length+1,created_at:new Date().toISOString(),claim:data.claim.trim(),source_url:data.source_url.trim(),observation:data.observation.trim(),status:data.status,limitations:data.limitations.trim(),previous_hash:ledger.length?ledger[ledger.length-1].hash:'GENESIS'};
+ const entry={...payload,hash:await sha256(payload)};
+ ledger.push(entry);if(!save()){ledger.pop();return}
+ render();await refreshVerification();showResult('good','Запись #'+entry.seq+' добавлена. SHA-256 вычислен локально.');
+}
+function download(name,text){
+ const blob=new Blob([text],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('entryForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();$('add').disabled=true;
+ try{
+  const source=$('source').value.trim();
+  if(source&&!safeURL(source))throw new Error('Источник должен быть корректным HTTP(S)-адресом.');
+  await addEntry({claim:$('claim').value,source_url:source,observation:$('observation').value,status:$('status').value,limitations:$('limits').value});
+  $('claim').value='';$('source').value='';$('observation').value='';$('limits').value='';
+ }catch(e){showResult('bad',e.message)}finally{$('add').disabled=false}
+});
+$('verify').addEventListener('click',refreshVerification);
+$('selftest').addEventListener('click',async()=>{
+ const button=$('selftest');button.disabled=true;
+ try{
+  const abc=await sha256('abc');
+  if(abc!=='ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')throw new Error('SHA-256 known-answer test failed');
+  const p={protocol:'AKSI-TRACE/1',seq:1,created_at:'2000-01-01T00:00:00.000Z',claim:'test vector',source_url:'',observation:'self-test only',status:'OBSERVATION',limitations:'not a real record',previous_hash:'GENESIS'};
+  const e={...p,hash:await sha256(p)};
+  const valid=await verifyChain([e]);
+  const altered=await verifyChain([{...e,claim:'tampered'}]);
+  if(!valid.ok||altered.ok)throw new Error('Hash-chain integrity test failed');
+  showResult('good','Самотест пройден: SHA-256 известного значения совпал; корректная цепочка принята; изменённая запись отклонена. Реальный журнал не изменён.');
+ }catch(e){showResult('bad','Самотест не пройден: '+e.message)}
+ finally{button.disabled=false}
+});
+$('export').addEventListener('click',()=>{
+ const doc={format:'AKSI-TRACE-EXPORT/1',exported_at:new Date().toISOString(),protocol:'AKSI-TRACE/1',records:ledger,integrity_note:'Hashes detect changes relative to a known hash; they do not prove truth, authorship, or trusted time.'};
+ download('aksi-trace-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(doc,null,2));
+ showResult('good','Экспорт подготовлен. Сохрани файл отдельно, чтобы иметь внешний якорь последнего хэша.');
+});
+$('copyhash').addEventListener('click',async()=>{
+ if(!ledger.length){showResult('warn','В цепочке пока нет хэша.');return}
+ const t=ledger[ledger.length-1].hash;
+ try{await navigator.clipboard.writeText(t);showResult('good','Последний хэш скопирован. Сохрани его отдельно для последующего сравнения.')}
+ catch{showResult('warn','Скопируй последний хэш из поля «Последний SHA-256»: '+t)}
+});
+$('importbtn').addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',async()=>{
+ const file=$('file').files&&$('file').files[0];if(!file)return;
+ try{
+  const doc=JSON.parse(await file.text());const list=Array.isArray(doc)?doc:doc.records;
+  if(!Array.isArray(list))throw new Error('В JSON не найден массив records.');
+  const check=await verifyChain(list);if(!check.ok)throw new Error('Импорт отклонён: запись #'+(check.index+1)+', '+check.reason+'. Текущий журнал не изменён.');
+  if(!confirm('Цепочка импорта цела ('+list.length+' записей). Заменить текущий локальный журнал?'))return;
+  ledger=list;save();render();await refreshVerification();showResult('good','Импортировано записей: '+ledger.length+'. Цепочка прошла проверку.');
+ }catch(e){showResult('bad',e.message)}finally{$('file').value=''}
+});
+$('clear').addEventListener('click',()=>{
+ if(!confirm('Удалить локальный журнал из этого браузера? Сначала экспортируй резервную копию, если она нужна.'))return;
+ ledger=[];try{localStorage.removeItem(KEY)}catch{}render();refreshVerification();showResult('warn','Локальный журнал очищен. Экспортированные копии не затронуты.');
+});
+$('demo').addEventListener('click',()=>{
+ $('claim').value='На странице официального сайта организации опубликовано описание услуги X.';
+ $('source').value='https://example.com/';
+ $('observation').value='Демонстрационная запись. example.com используется как пример, это не реальная проверка организации.';
+ $('status').value='OBSERVATION';$('limits').value='Пример не является реальным исследованием; проверить первоисточник и дату.';
+ showResult('warn','Пример заполнен. Нажми «Добавить и захешировать», чтобы создать запись.');
+});
+async function boot(){
+ try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);if(Array.isArray(d))ledger=d;else throw new Error('Формат локального журнала не распознан. Экспортируй/восстанови копию вручную.')}}catch(e){showResult('bad','Не удалось прочитать локальный журнал: '+e.message)}
+ render();await refreshVerification();
+}
+boot();
+})();
+</script>
+</body></html>
