@@ -9,9 +9,9 @@
   const css = document.createElement('style');
   css.textContent = `
     body{isolation:isolate}
-    #aksi-living-field{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.34;mix-blend-mode:screen}
-    #aksi-living-control{position:fixed;z-index:99;right:14px;bottom:14px;display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid rgba(123,220,255,.28);border-radius:999px;background:rgba(7,10,24,.82);color:#dff8ff;font:11px/1.2 ui-monospace,monospace;letter-spacing:.08em;backdrop-filter:blur(16px);box-shadow:0 0 28px rgba(90,106,255,.15);cursor:pointer}
-    #aksi-living-control i{width:7px;height:7px;border-radius:50%;background:#66f6d1;box-shadow:0 0 12px #66f6d1;display:inline-block}
+    #aksi-living-field{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.22;mix-blend-mode:multiply}
+    #aksi-living-control{position:fixed;z-index:99;right:14px;bottom:14px;display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid rgba(154,112,69,.35);border-radius:999px;background:rgba(248,240,227,.94);color:#6c4b30;font:11px/1.2 ui-monospace,monospace;letter-spacing:.08em;backdrop-filter:blur(16px);box-shadow:0 5px 24px rgba(111,76,40,.12);cursor:pointer}
+    #aksi-living-control i{width:7px;height:7px;border-radius:50%;background:#65795b;box-shadow:0 0 10px #65795b;display:inline-block}
     @media(max-width:600px){#aksi-living-field{opacity:.23}#aksi-living-control{right:9px;bottom:9px;font-size:10px}}
   `;
   document.head.appendChild(css);
@@ -25,10 +25,10 @@
   const ctx = canvas.getContext('2d', { alpha: true });
   if (!ctx) { canvas.remove(); control.remove(); return; }
   const phases = [
-    {name:'NEBULA',a:[93,91,255],b:[40,224,255],speed:1},
-    {name:'RESONANCE',a:[255,86,205],b:[95,245,205],speed:1.35},
-    {name:'QUANTUM FLOW',a:[91,179,255],b:[179,119,255],speed:.78},
-    {name:'DEEP FIELD',a:[95,245,205],b:[100,115,255],speed:.55}
+    {name:'CHAMPAGNE',a:[190,151,101],b:[239,220,181],speed:1},
+    {name:'AMBER RESONANCE',a:[166,111,67],b:[207,181,139],speed:1.2},
+    {name:'OLIVE QUANTUM',a:[111,130,91],b:[210,194,159],speed:.78},
+    {name:'GOLDEN FIELD',a:[218,183,124],b:[126,91,59],speed:.55}
   ];
   let phase = 0, w = 0, h = 0, dpr = 1, points = [], pointer = {x:-1000,y:-1000}, last = 0, raf = 0, autoAt = performance.now()+16000;
   function resize() {
