@@ -43,6 +43,10 @@ Supported integration targets are architectural adapters for:
 
 The bridge does not grant authority. Policy, identity, and the action gateway remain separate security boundaries.
 
+## Evidence lifecycle extension
+
+An optional additive extension links a VAI envelope to a full claim-and-decision record: [AKSI-VAI Evidence Lifecycle Extension v1](./AKSI-VAI-EVIDENCE-LIFECYCLE-EXTENSION.md). The extension is experimental and does not replace policy enforcement or action authorization.
+
 ## Security
 
 SHA-256 provides content integrity. Ed25519 provides cryptographic signatures when a key is available. Neither proves that an AI statement is factually true. Private signing keys must remain outside the public repository.
