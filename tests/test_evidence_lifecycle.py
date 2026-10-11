@@ -48,6 +48,13 @@ class EvidenceLifecycleVerifierTests(unittest.TestCase):
         result = validate_evidence_record(record, SCHEMA)
         self.assertTrue(any(x["code"] == "VERIFIED_WITHOUT_SOURCE" for x in result["semanticIssues"]))
 
+    def test_duplicate_test_ids_fail(self):
+        record = copy.deepcopy(FIXTURE)
+        tests = record["hypotheses"][0]["tests"]
+        tests.append(copy.deepcopy(tests[0]))
+        result = validate_evidence_record(record, SCHEMA)
+        self.assertTrue(any(x["code"] == "DUPLICATE_ID" and ".tests[1].id" in x["path"] for x in result["semanticIssues"]))
+
     def test_unknown_status_fails(self):
         record = copy.deepcopy(FIXTURE)
         record["hypotheses"][0]["status"] = "probably-true"
