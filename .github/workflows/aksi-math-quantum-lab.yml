@@ -1,0 +1,37 @@
+name: AKSI Math Quantum Lab checks
+
+on:
+  push:
+    branches: [main, feat/aksi-math-gpu-quantum-lab]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lab-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check lab page and feature surfaces
+        run: |
+          test -s aksi-lab/index.html
+          grep -q 'function mathEval' aksi-lab/index.html
+          grep -q 'function gateH' aksi-lab/index.html
+          grep -q 'function gateCNOT' aksi-lab/index.html
+          grep -q 'SpeechRecognition' aksi-lab/index.html
+          grep -q 'hardware_gpu_used:false' aksi-lab/index.html
+      - name: Syntax-check inline JavaScript
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("aksi-lab/index.html").read_text(encoding="utf-8")
+          start = html.rfind("<script>")
+          end = html.rfind("</script>")
+          if start < 0 or end < 0 or end <= start:
+              raise SystemExit("Inline script not found")
+          Path("/tmp/aksi-lab.js").write_text(html[start + len("<script>"):end], encoding="utf-8")
+          PY
+          node --check /tmp/aksi-lab.js
