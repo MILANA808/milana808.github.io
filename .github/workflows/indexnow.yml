@@ -1,0 +1,50 @@
+name: AKSI IndexNow notification
+
+on:
+  workflow_run:
+    workflows: ["AKSI Pages"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  notify-search-engines:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify IndexNow participating search engines
+        env:
+          INDEXNOW_KEY: AKSIMATRIX-INDEXNOW-20261011-8F3C9A21
+        shell: bash
+        run: |
+          set -euo pipefail
+          payload="$(cat <<'JSON'
+          {
+            "host": "milana808.github.io",
+            "key": "${INDEXNOW_KEY}",
+            "keyLocation": "https://milana808.github.io/AKSIMATRIX-INDEXNOW-20261011-8F3C9A21.txt",
+            "urlList": [
+              "https://milana808.github.io/",
+              "https://milana808.github.io/offer/",
+              "https://milana808.github.io/enterprise/",
+              "https://milana808.github.io/trust/",
+              "https://milana808.github.io/bridge/",
+              "https://milana808.github.io/verify/",
+              "https://milana808.github.io/lifecore/",
+              "https://milana808.github.io/ask.html"
+            ]
+          }
+          JSON
+          )"
+          code="$(curl --silent --show-error --output response.json --write-out "%{http_code}" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            --data "$payload" https://api.indexnow.org/indexnow)"
+          echo "IndexNow HTTP status: $code"
+          cat response.json
+          if [[ "$code" != "200" && "$code" != "202" ]]; then
+            echo "::error::IndexNow submission was not accepted"
+            exit 1
+          fi
+          echo "URLs submitted. Acceptance is not a guarantee of indexing."
