@@ -1,7 +1,7 @@
 name: AKSI Core v3
 on:
   push:
-    branches: [main, 'aksi-core-v3-world-class']
+    branches: [main, 'feat/aksi-unified-core-current-main', 'aksi-core-v3-world-class']
   pull_request:
     branches: [main]
 jobs:
@@ -18,5 +18,7 @@ jobs:
           grep -q "quantum-like" aksi-core-v3.js
       - name: JavaScript syntax check
         run: node --check aksi-core-v3.js
+      - name: Run deterministic and receipt smoke tests
+        run: node tests/run-core-v3-node.cjs
       - name: HTML script sanity
         run: node -e "const fs=require('fs'); const h=fs.readFileSync('quantum-playground/v3/index.html','utf8'); if(!h.includes('AKSICoreV3.run')||!h.includes('id=\"q\"')) process.exit(1); console.log('OK')"
