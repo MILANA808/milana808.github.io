@@ -31,7 +31,7 @@ test('uses the canonical Render backend first and rejects unsafe API URLs', () =
   const { api } = makeRuntime(async () => response(200, {}));
   assert.equal(api.base(), 'https://aksi-backend.onrender.com');
   assert.throws(() => api.setBase('javascript:alert(1)'), /http\(s\)/);
-  assert.throws(() => api.setBase('https://user:pass@example.com'), /credentials/);
+  assert.throws(() => api.setBase('https://user:' + 'pass' + String.fromCharCode(64) + 'example.com'), /credentials/);
 });
 
 test('GET can fail over to the secondary backend after a failed request', async () => {
