@@ -69,3 +69,14 @@ node tools/evidence-lifecycle-verifier.mjs schemas/fixtures/aksi-evidence-lifecy
 ```
 
 It checks the schema keywords used by this draft and semantic invariants including unique IDs, source-reference resolution, selected-alternative resolution, and verified claims having a source. Exit code `0` means the record passed these implemented checks; `1` means validation failed; `2` means input/usage failed. This is not a certified implementation of every JSON Schema Draft 2020-12 keyword and is not a cryptographic signature verifier.
+
+## Python verifier
+
+A standard-library-only Python verifier is available at `tools/evidence_lifecycle_verify.py`. Run with Python 3.10 or later:
+
+```sh
+python tools/evidence_lifecycle_verify.py schemas/fixtures/aksi-evidence-lifecycle-v1.example.json
+python -m unittest tests/test_evidence_lifecycle.py
+```
+
+JavaScript and Python implementations are intended to agree on the current draft's checks. The automated suite runs mutation cases against both implementations. Neither implementation claims full certification for all JSON Schema Draft 2020-12 keywords, and neither proves the truth of a claim or validates digital signatures.

@@ -6,12 +6,17 @@ on:
       - 'schemas/**'
       - 'tests/evidence-lifecycle.test.js'
       - 'tools/evidence-lifecycle-verifier.mjs'
+      - 'tools/evidence_lifecycle_verify.py'
+      - 'tests/test_evidence_lifecycle.py'
       - '.github/workflows/evidence-lifecycle.yml'
   pull_request:
     paths:
       - 'evidence-lifecycle/**'
       - 'schemas/**'
       - 'tests/evidence-lifecycle.test.js'
+      - 'tools/evidence-lifecycle-verifier.mjs'
+      - 'tools/evidence_lifecycle_verify.py'
+      - 'tests/test_evidence_lifecycle.py'
       - '.github/workflows/evidence-lifecycle.yml'
   workflow_dispatch:
 jobs:
@@ -24,3 +29,5 @@ jobs:
           node-version: '20'
       - name: Validate schema fixture and verifier syntax
         run: node tests/evidence-lifecycle.test.js
+      - name: Python conformance
+        run: python tests/test_evidence_lifecycle.py
