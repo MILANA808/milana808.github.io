@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://milana808.github.io/evidence/evidence-passport.schema.json",
+  "title": "AKSI Evidence Passport",
+  "description": "Portable human-reviewed record of AI claims, source references, uncertainty and integrity metadata. It does not certify factual truth.",
+  "type": "object",
+  "required": ["schema", "title", "question", "answer", "model", "risk", "reviewer", "createdAt", "claims"],
+  "properties": {
+    "schema": { "const": "aksi-evidence-passport/v1" },
+    "title": { "type": "string", "maxLength": 180 },
+    "question": { "type": "string", "maxLength": 12000 },
+    "answer": { "type": "string", "maxLength": 30000 },
+    "model": { "type": "string", "maxLength": 160 },
+    "risk": { "enum": ["low", "medium", "high"] },
+    "reviewer": { "type": "string", "maxLength": 120 },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "claims": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": ["claim", "status", "source", "explanation"],
+        "properties": {
+          "claim": { "type": "string", "maxLength": 6000 },
+          "status": { "enum": ["supported", "partial", "unchecked", "contradicted", "opinion"] },
+          "source": { "type": "string", "maxLength": 1000 },
+          "explanation": { "type": "string", "maxLength": 6000 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["algorithm", "digest", "scope"],
+      "properties": {
+        "algorithm": { "const": "SHA-256" },
+        "digest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "scope": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
