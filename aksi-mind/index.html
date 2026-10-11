@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050816">
+<title>AKSI MIND — разговорное ядро</title>
+<style>
+:root{color-scheme:dark;--bg:#050816;--panel:#0b1224;--line:#20375b;--cyan:#75eaff;--violet:#a58bff;--muted:#9aabc7}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#142d56 0,transparent 55%),var(--bg);color:#edf5ff;font:15px/1.55 system-ui,-apple-system,sans-serif;min-height:100vh}
+main{width:min(980px,100%);margin:auto;padding:22px 16px 36px}.top{display:flex;align-items:center;gap:14px;margin:10px 0 22px}.orb{width:48px;height:48px;border:1px solid #5be7ff;border-radius:50%;box-shadow:0 0 26px #20bfff55,inset 0 0 22px #20bfff33;position:relative}.orb:after{content:"";position:absolute;inset:10px;border:1px solid var(--violet);border-radius:50%;box-shadow:0 0 16px #a58bff99}h1{font-size:clamp(23px,5vw,38px);line-height:1.05;margin:0;letter-spacing:.08em}h1 span{color:var(--cyan)}.sub{color:var(--muted);font-size:13px;margin-top:6px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px}.panel{border:1px solid var(--line);background:linear-gradient(145deg,#0b1429ee,#080d1bee);border-radius:18px;overflow:hidden;box-shadow:0 16px 50px #0005}.bar{padding:13px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}.status{font-size:12px;color:#83f4bd}.chat{height:min(55vh,540px);min-height:300px;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}.msg{max-width:92%;padding:11px 13px;border-radius:14px;white-space:pre-wrap;overflow-wrap:anywhere}.bot{align-self:flex-start;background:#111f38;border:1px solid #233d60}.user{align-self:flex-end;background:#102e48;border:1px solid #2a6a87}.who{font-size:10px;letter-spacing:.1em;color:var(--cyan);margin-bottom:4px}.composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}textarea{flex:1;min-width:0;resize:vertical;min-height:48px;max-height:150px;background:#050b19;border:1px solid #284265;border-radius:12px;padding:12px;color:white;font:inherit}button{border:1px solid #317b9b;border-radius:11px;background:linear-gradient(135deg,#103a59,#241d51);color:white;padding:10px 13px;font:inherit;cursor:pointer}button:hover{border-color:var(--cyan);box-shadow:0 0 18px #41cfff22}button:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.side{padding:15px}.side h2{font-size:13px;color:var(--cyan);letter-spacing:.12em;margin:0 0 10px}.side p,.side li{font-size:12px;color:var(--muted)}.side ul{padding-left:18px}.metric{border-top:1px solid var(--line);padding:11px 0}.metric b{display:block;font-size:18px;color:#edf5ff}.actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.actions button{font-size:12px;padding:7px 9px}.note{font-size:11px;color:#8294b2;padding:0 16px 14px}.tag{color:#c0b3ff}.foot{color:#7186a8;font-size:11px;margin:14px 2px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}.side{order:2}.chat{height:48vh;min-height:280px}.side ul{columns:2}.top{align-items:flex-start}}
+</style>
+</head>
+<body><main>
+<header class="top"><div class="orb" aria-hidden="true"></div><div><h1><span>AKSI</span> MIND</h1><div class="sub">Разговорное ядро · память · маршрутизация намерений · экспериментальный режим</div></div></header>
+<div class="grid">
+<section class="panel" aria-label="Чат с АКСИ">
+<div class="bar"><strong>Канал общения</strong><span class="status" id="status">● ядро активно</span></div>
+<div class="chat" id="chat" aria-live="polite"></div>
+<form class="composer" id="form"><textarea id="input" aria-label="Сообщение" placeholder="Напиши АКСИ…" rows="2" required></textarea><button type="submit">Отправить ↗</button></form>
+<div class="note">Базовый режим работает локально в браузере. Он не выдаёт шаблонную логику за большую нейросеть и не требует API-ключа.</div>
+</section>
+<aside class="panel side"><h2>СОСТОЯНИЕ ЯДРА</h2>
+<div class="metric"><b id="turns">0</b><span>сообщений в этой сессии</span></div>
+<div class="metric"><b id="memcount">0</b><span>сохранённых заметок памяти</span></div>
+<div class="metric"><b>LOCAL</b><span>контекст хранится на этом устройстве</span></div>
+<h2 style="margin-top:18px">БЫСТРЫЕ КОМАНДЫ</h2><div class="actions"><button type="button" data-prompt="Кто ты?">Кто ты?</button><button type="button" data-prompt="Запомни: моя цель — создать работающую АКСИ.">Запомни</button><button type="button" data-prompt="Что ты помнишь?">Память</button><button type="button" data-prompt="Объясни принцип суперпозиции простыми словами.">Суперпозиция</button><button type="button" id="clear">Очистить память</button></div>
+<h2 style="margin-top:20px">АРХИТЕКТУРА</h2><ul><li>вход и определение намерения</li><li>контекст текущего диалога</li><li>локальная долговременная память</li><li>генератор ответа и проверка согласованности</li><li class="tag">следующий этап: подключаемая языковая модель</li></ul>
+</aside></div>
+<div class="foot">AKSI MIND · исследовательский прототип. Не квантовый компьютер и не полноценная обученная LLM. Ответы базового ядра ограничены встроенными правилами.</div>
+</main>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const STORE='aksi-mind-memory-v1';
+let memory=[];
+let turns=0;
+try { const saved=JSON.parse(localStorage.getItem(STORE)||'[]'); if(Array.isArray(saved)) memory=saved.slice(-80); } catch {}
+const history=[];
+const norm=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^\p{L}\p{N}\s-]/gu,' ').replace(/\s+/g,' ').trim();
+const words=s=>new Set(norm(s).split(' ').filter(w=>w.length>2));
+function overlap(a,b){const A=words(a),B=words(b);if(!A.size||!B.size)return 0;let n=0;for(const w of A)if(B.has(w))n++;return n/(A.size+B.size-n);}
+function remember(text){memory.push({text,at:new Date().toISOString()});memory=memory.slice(-80);try{localStorage.setItem(STORE,JSON.stringify(memory));}catch{} updateMetrics();}
+function relevantMemory(q){return memory.map(m=>({...m,score:overlap(q,m.text)})).filter(m=>m.score>0).sort((a,b)=>b.score-a.score).slice(0,4);}
+function reply(q){
+ const n=norm(q);
+ if(/^(привет|здравствуй|добрый день|доброе утро|добрый вечер|хай|салам)\b/.test(n))return 'Я на связи. Расскажи, что будем разбирать или создавать?';
+ if(/кто ты|что ты такое|представься/.test(n))return 'Я — АКСИ MIND, экспериментальное разговорное ядро проекта AKSI MATRIX. Сейчас я умею маршрутизировать некоторые намерения, использовать встроенные знания и хранить заметки локально. Честно: это пока не полноценная обученная языковая модель и не квантовый интеллект.';
+ if(/что ты помнишь|покажи память|моя память|вспомни/.test(n)){if(!memory.length)return 'Пока сохранённых заметок нет. Напиши «Запомни: …», и я сохраню заметку в локальной памяти этого браузера.';return 'Мои сохранённые заметки:\n'+memory.slice(-12).map((m,i)=>(i+1)+'. '+m.text).join('\n');}
+ const m=q.match(/^(?:запомни|сохрани|запиши)\s*[:,-]?\s*(.+)$/i);
+ if(m){remember(m[1]);return 'Сохранила заметку в локальной памяти этого браузера: «'+m[1]+'». Это не синхронизируется автоматически между устройствами.';}
+ if(/очисти память|удали память/.test(n)){memory=[];try{localStorage.removeItem(STORE)}catch{}updateMetrics();return 'Локальная память очищена.';}
+ if(/суперпозиц|квантов/.test(n))return 'В квантовой механике суперпозиция — состояние, которое описывается сочетанием нескольких возможных исходов до измерения. В симуляторе можно вычислять амплитуды и вероятности. Но сама симуляция не превращается автоматически в интеллект: для общения нужна языковая модель или отдельный алгоритм генерации языка.';
+ if(/алгоритм|архитектур|с чего начать|как устро/.test(n))return 'Рабочий конвейер АКСИ: 1) принять текст; 2) определить намерение; 3) извлечь релевантный контекст из памяти; 4) передать запрос языковой модели; 5) проверить ответ на противоречия и опасные действия; 6) показать ответ; 7) сохранить только полезные заметки с разрешения пользователя. Сейчас в этом прототипе реализованы базовая маршрутизация и локальные заметки; полноценная нейросетевая генерация — следующий интеграционный этап.';
+ if(/проект|aksi|акси|сайт/.test(n))return 'Для AKSI правильная следующая цель — соединить интерфейс с настоящей языковой моделью через сменный адаптер: локальная WebGPU-модель на совместимом устройстве или защищённый серверный API. Память и экспериментальный квантовый модуль должны быть отдельными компонентами, чтобы их можно было тестировать независимо.';
+ if(/спасибо|благодар/.test(n))return 'Пожалуйста. Давай проверять каждую идею работающим прототипом и измеримыми тестами.';
+ if(/помоги|можешь ли ты|что умеешь/.test(n))return 'Я могу помочь разобрать задачу, объяснить концепцию, сохранить заметку и описать следующий шаг разработки. Введи вопрос обычными словами. Важно: базовое ядро пока ограничено встроенными правилами; оно не обучено на всём языке.';
+ const matches=relevantMemory(q);
+ if(matches.length)return 'Я нашла похожую заметку в локальной памяти: «'+matches[0].text+'».\n\nУточни, что именно нужно сделать с этой информацией — объяснить, сравнить или составить план.';
+ return 'Я разобрала сообщение, но базовому ядру пока не хватает языковой модели, чтобы надёжно сформировать содержательный ответ на произвольный вопрос.\n\nСледующий шаг — подключить настоящий LLM-адаптер. Тогда АКСИ сможет генерировать свободный текст; память, проверки и экспериментальный квантовый модуль останутся отдельными управляемыми слоями.';
+}
+function add(text,who){const el=document.createElement('div');el.className='msg '+(who==='Ты'?'user':'bot');const label=document.createElement('div');label.className='who';label.textContent=who.toUpperCase();const body=document.createElement('div');body.textContent=text;el.append(label,body);$('chat').appendChild(el);$('chat').scrollTop=$('chat').scrollHeight;}
+function updateMetrics(){$('turns').textContent=String(turns);$('memcount').textContent=String(memory.length);}
+function send(q){q=String(q||'').trim();if(!q)return;add(q,'Ты');history.push({role:'user',content:q});const a=reply(q);add(a,'АКСИ');history.push({role:'assistant',content:a});turns++;updateMetrics();}
+$('form').addEventListener('submit',e=>{e.preventDefault();const q=$('input').value;$('input').value='';send(q);});
+$('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('form').requestSubmit();}});
+document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>send(b.dataset.prompt)));
+$('clear').addEventListener('click',()=>{if(confirm('Удалить все локальные заметки AKSI MIND?')){memory=[];try{localStorage.removeItem(STORE)}catch{}updateMetrics();add('Память очищена.','АКСИ');}});
+updateMetrics();add('Ядро запущено. Можешь написать мне сообщение или использовать «Запомни: …». Это честный первый слой АКСИ, а не имитация полноценной нейросети.','АКСИ');
+})();
+</script></body></html>
