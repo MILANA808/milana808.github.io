@@ -122,7 +122,7 @@ $("example").addEventListener("click",()=>{
  ]});announce("Загружен учебный пример. Он намеренно оставлен непроверенным.","warn");
 });
 $("save").addEventListener("click",saveLocal);$("export").addEventListener("click",exportJSON);$("print").addEventListener("click",()=>{refresh();window.print();});$("importBtn").addEventListener("click",()=>$("file").click());$("file").addEventListener("change",e=>importJSON(e.target.files[0]));
-$("clear").addEventListener("click",()=>{if(!confirm("Удалить текущую форму и сохранённый локальный паспорт? Экспортируйте данные заранее, если они нужны."))return;localStorage.removeItem(storageKey);setForm({});$("title").value="";$("question").value="";$("answer").value="";$("model").value="";$("reviewer").value="";$("purpose").value="medium";announce("Локальные данные очищены.","good");});
+$("clear").addEventListener("click",()=>{if(!confirm("Удалить текущую форму и сохранённый локальный паспорт? Экспортируйте данные заранее, если они нужны."))return;setForm({});$("title").value="";$("question").value="";$("answer").value="";$("model").value="";$("reviewer").value="";$("purpose").value="medium";clearTimeout(debounce);localStorage.removeItem(storageKey);announce("Локальные данные очищены.","good");});
 ["title","question","answer","model","purpose","reviewer"].forEach(id=>$(id).addEventListener("input",refresh));
 try{const saved=localStorage.getItem(storageKey);if(saved){const d=JSON.parse(saved);if(d.schema==="aksi-evidence-passport/v1"){setForm(d);announce("Восстановлена локальная версия паспорта из этого браузера.","good");}else setForm({});}else setForm({});}catch(e){setForm({});announce("Не удалось прочитать локальное сохранение. Можно импортировать резервный JSON.","warn");}
 })();
