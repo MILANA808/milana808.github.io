@@ -1,0 +1,42 @@
+name: AKSI LIFECORE checks
+
+on:
+  push:
+    paths:
+      - "lifecore/**"
+      - ".github/workflows/lifecore-check.yml"
+  pull_request:
+    paths:
+      - "lifecore/**"
+      - ".github/workflows/lifecore-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Validate inline JavaScript syntax
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+          const html = fs.readFileSync('lifecore/index.html', 'utf8');
+          const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)];
+          if (!scripts.length) throw new Error('No inline script found');
+          scripts.forEach((match, i) => {
+            new vm.Script(match[1], { filename: `lifecore-inline-${i + 1}.js` });
+          });
+          for (const marker of ['id="exportBtn"', 'id="importFile"', 'id="promptBtn"', 'SHA-256']) {
+            if (!html.includes(marker)) throw new Error(`Missing expected feature: ${marker}`);
+          }
+          console.log(`PASS: ${scripts.length} inline script(s) parse; expected UI markers present.`);
+          NODE
