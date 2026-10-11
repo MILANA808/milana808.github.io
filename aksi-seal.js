@@ -1,6 +1,6 @@
 /**
- * AKSI Product Seal — Hybrid Post-Quantum Attestation
- * Classical ECDSA P-256 + AKSI-PQ-COMMIT hash absorb
+ * AKSI Product Seal — experimental classical seal (NOT post-quantum)
+ * Classical ECDSA P-256 + non-standard experimental hash commitment
  * © AKSI · aksilove@internet.ru · Proprietary
  */
 (function (G) {
@@ -16,15 +16,15 @@
     principles: [
       "Local-first: user data stays on device by default",
       "Proof over magic: hash-chain + Trust Compiler",
-      "Post-quantum ready: hybrid classical + PQ commitment",
+      "Post-quantum cryptography: NOT IMPLEMENTED; no PQ security claim",
       "Provider-agnostic intelligence layer",
       "Sovereign identity (DID) never leaves browser without consent",
     ],
     modules: [
       "MIND", "Brain", "Trust", "Quantum", "DKV", "Photo/Vision",
-      "LLM Adapter", "Overlay AOP/1", "Proof Ledger", "PQ Seal",
+      "LLM Adapter", "Overlay AOP/1", "Proof Ledger", "Experimental hash commitment (not PQ cryptography)",
     ],
-    claims: { offline_core: true, pq_hybrid_seal: true, byok_llm: true, no_default_telemetry: true },
+    claims: { offline_core: true, pq_hybrid_seal: false, byok_llm: true, no_default_telemetry: true },
     runtime: "https://milana808.github.io/",
     product_url: "https://milana808.github.io/product/",
   };
@@ -62,7 +62,7 @@
     }
     return {
       alg: "AKSI-PQ-COMMIT-v1",
-      note: "Hybrid PQ commitment (hash-chain absorb). Classical ECDSA binds identity. Ready for ML-DSA drop-in.",
+      note: "Non-standard experimental hash commitment only. NOT a post-quantum signature, KEM, or security guarantee. ML-DSA/ML-KEM support is not implemented.",
       salt_b64: b64(salt),
       sha256: hex(h256),
       commit: hex(state).slice(0, 128),
@@ -103,7 +103,7 @@
         signature_b64: b64(sig),
         message_sha256: hex(digest),
       },
-      banner: "⚡ AKSI WORLD RELEASE — POST-QUANTUM HYBRID SEALED · " + body.version + " · " + body.contact,
+      banner: "AKSI WORLD RELEASE — CLASSICAL ECDSA + EXPERIMENTAL HASH COMMITMENT (NOT POST-QUANTUM) · " + body.version + " · " + body.contact,
     };
     try { localStorage.setItem("aksi:world:attestation:v1", JSON.stringify(attestation)); } catch (e) {}
     return attestation;
