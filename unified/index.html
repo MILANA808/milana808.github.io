@@ -76,7 +76,13 @@ function renderModules(){
   ['Decision / receipt',!!window.AKSI_DECISION,window.AKSI_DECISION&&window.AKSI_DECISION.version],
   ['HRR memory',!!window.AKSI_HRR,window.AKSI_HRR&&'API loaded']
  ];
- $('modules').innerHTML=items.map(([name,ok,detail])=>'<div class="status"><strong class="'+(ok?'good':'warn')+'">'+(ok?'●':'○')+' '+name+'</strong><div class="muted small">'+(ok?String(detail||'доступен'):'не загружен / недоступен')+'</div></div>').join('');
+ const host=$('modules');host.replaceChildren();
+ items.forEach(([name,ok,detail])=>{
+  const card=document.createElement('div');card.className='status';
+  const strong=document.createElement('strong');strong.className=ok?'good':'warn';strong.textContent=(ok?'● ':'○ ')+name;
+  const small=document.createElement('div');small.className='muted small';small.textContent=ok?String(detail||'доступен'):'не загружен / недоступен';
+  card.append(strong,small);host.append(card);
+ });
 }
 function showStatus(text,kind){$('status').className='status '+(kind||'');$('status').textContent=text}
 function cleanText(v){return String(v==null?'':v)}
@@ -104,17 +110,23 @@ function normaliseCandidates(session,q){
  return mapped.length?mapped:fallbackCandidates(q).map(x=>({text:x.text,type:'inference',source:{provider:x.source},evidence:x.eqs,coherence:.5,agreement:x.eqs,freshness:.5,provenance:.2}));
 }
 function renderCandidates(result,qs){
- const list=result.candidates||[],probs=result.calibration&&result.calibration.quantum||[];
- $('candidates').innerHTML=list.map((c,i)=>{
+ const list=result.candidates||[],probs=result.calibration&&result.calibration.quantum||[],host=$('candidates');
+ host.replaceChildren();
+ list.forEach((candidate,i)=>{
   const p=Number(probs[i]||0),q=qs[i]||null;
-  const title='Вариант '+(i+1)+' · '+(c.source&&c.source.provider||'AKSI')+' · '+(p*100).toFixed(1)+'%';
-  const detail=q&&q.QCLI!=null?'QCLI '+Number(q.QCLI).toFixed(3):'внутренняя оценка Core v3';
-  return '<article class="candidate"><div class="top"><span>'+title+'</span><span>'+detail+'</span></div><div class="meter"><i style="width:'+(p*100).toFixed(2)+'%"></i></div><p></p></article>';
- }).join('');
- Array.from($('candidates').querySelectorAll('.candidate p')).forEach((el,i)=>{el.textContent=list[i].text});
+  const article=document.createElement('article');article.className='candidate';
+  const top=document.createElement('div');top.className='top';
+  const title=document.createElement('span');title.textContent='Вариант '+(i+1)+' · '+((candidate.source&&candidate.source.provider)||'AKSI')+' · '+(p*100).toFixed(1)+'%';
+  const detail=document.createElement('span');detail.textContent=q&&q.QCLI!=null?'QCLI '+Number(q.QCLI).toFixed(3):'внутренняя оценка Core v3';
+  top.append(title,detail);
+  const meter=document.createElement('div');meter.className='meter';
+  const fill=document.createElement('i');fill.style.width=(p*100).toFixed(2)+'%';meter.append(fill);
+  const body=document.createElement('p');body.textContent=candidate.text;
+  article.append(top,meter,body);host.append(article);
+ });
  const r=result.result||{};
  $('answer').className='status '+(r.abstained?'warn':'good');
- $('answer').textContent=r.abstained?'AKSI воздержалась от выбора: '+((result.abstention&&result.abstention.reason)||'недостаточно уверенного разделения')+'. Ни один вариант не помечен как установленный факт.':'Выбранный вариант ('+r.label+', '+(Number(r.probability||0)*100).toFixed(1)+'% внутренней вероятности выбора):\n'+r.answer+'\n\nВажно: это результат процедуры выбора, не сертификат истинности.';
+ $('answer').textContent=r.abstained?'AKSI воздержалась от выбора: '+((result.abstention&&result.abstention.reason)||'недостаточно уверенного разделения')+'. Ни один вариант не помечен как установленный факт.':'Выбранный вариант ('+r.label+', '+(Number(r.probability||0)*100).toFixed(1)+'% внутренней вероятности выбора):\\n'+r.answer+'\\n\\nВажно: это результат процедуры выбора, не сертификат истинности.';
 }
 async function run(){
  const q=$('query').value.trim();if(!q){showStatus('Введи задачу.','warn');return}
