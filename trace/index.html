@@ -37,7 +37,7 @@
 <div class="notice">Важно: SHA-256 обнаруживает изменения относительно известного хэша. Сам по себе он не доказывает истинность текста, автора или время события. Для независимой фиксации последнего хэша сохрани экспорт вне этого браузера.</div>
 </section>
 <aside class="panel"><h2>Состояние журнала</h2><div class="status"><div id="state" class="state">Проверка…</div><div id="summary" class="sub">Загрузка локального журнала</div><div id="latest" class="hash"></div></div>
-<div class="btns"><button class="btn primary" id="verify" type="button">✓ Проверить цепочку</button><button class="btn" id="export" type="button">Экспорт JSON</button><button class="btn" id="copyhash" type="button">Копировать хэш</button><button class="btn" id="importbtn" type="button">Импорт JSON</button><input id="file" type="file" accept="application/json,.json" hidden><button class="btn" id="clear" type="button">Очистить локально</button></div>
+<div class="btns"><button class="btn primary" id="verify" type="button">✓ Проверить цепочку</button><button class="btn" id="export" type="button">Экспорт JSON</button><button class="btn" id="copyhash" type="button">Копировать хэш</button><button class="btn" id="selftest" type="button">Самотест</button><button class="btn" id="importbtn" type="button">Импорт JSON</button><input id="file" type="file" accept="application/json,.json" hidden><button class="btn" id="clear" type="button">Очистить локально</button></div>
 <div id="result" class="status" role="status">Записи остаются на устройстве, пока ты не экспортируешь или не удалишь их.</div>
 <h2 style="margin-top:18px">Публичный протокол</h2><p class="sub">Формат, код и правила проверки публикуются в GitHub. Это оставляет воспроизводимый след разработки, но не является независимым аудитом технологии.</p><p style="margin-top:8px"><a href="https://github.com/MILANA808/milana808.github.io/tree/main/trace">Исходный код и протокол ↗</a></p><p style="margin-top:7px"><a href="/trace/AKSI-TRACE-1.md">Спецификация AKSI-TRACE/1 ↗</a></p>
 </aside></div>
@@ -124,6 +124,20 @@ $('entryForm').addEventListener('submit',async ev=>{
  }catch(e){showResult('bad',e.message)}finally{$('add').disabled=false}
 });
 $('verify').addEventListener('click',refreshVerification);
+$('selftest').addEventListener('click',async()=>{
+ const button=$('selftest');button.disabled=true;
+ try{
+  const abc=await sha256('abc');
+  if(abc!=='ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad')throw new Error('SHA-256 known-answer test failed');
+  const p={protocol:'AKSI-TRACE/1',seq:1,created_at:'2000-01-01T00:00:00.000Z',claim:'test vector',source_url:'',observation:'self-test only',status:'OBSERVATION',limitations:'not a real record',previous_hash:'GENESIS'};
+  const e={...p,hash:await sha256(p)};
+  const valid=await verifyChain([e]);
+  const altered=await verifyChain([{...e,claim:'tampered'}]);
+  if(!valid.ok||altered.ok)throw new Error('Hash-chain integrity test failed');
+  showResult('good','Самотест пройден: SHA-256 известного значения совпал; корректная цепочка принята; изменённая запись отклонена. Реальный журнал не изменён.');
+ }catch(e){showResult('bad','Самотест не пройден: '+e.message)}
+ finally{button.disabled=false}
+});
 $('export').addEventListener('click',()=>{
  const doc={format:'AKSI-TRACE-EXPORT/1',exported_at:new Date().toISOString(),protocol:'AKSI-TRACE/1',records:ledger,integrity_note:'Hashes detect changes relative to a known hash; they do not prove truth, authorship, or trusted time.'};
  download('aksi-trace-'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(doc,null,2));
