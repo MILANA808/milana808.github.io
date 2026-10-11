@@ -1,22 +1,22 @@
 # AKSI Evidence Lifecycle Verifier
 
-**Status:** experimental developer tool, merged into the public AKSI repository. The Python verifier uses only the Python standard library.
+**Status:** experimental developer tool, merged into the public AKSI repository. The canonical Python verifier uses only the Python standard library; a Node.js verifier is also maintained.
 
 ## Quick start
 
 From the repository root:
 
 ```bash
-python tools/aksi_evidence_verify.py schemas/fixtures/aksi-evidence-lifecycle-v1.example.json --pretty
+python tools/evidence_lifecycle_verify.py schemas/fixtures/aksi-evidence-lifecycle-v1.example.json
 ```
 
 Validate JSON from standard input:
 
 ```bash
-cat record.json | python tools/aksi_evidence_verify.py - --pretty
+cat record.json | python tools/evidence_lifecycle_verify.py -
 ```
 
-The command prints a machine-readable JSON report. Exit code `0` means semantic checks passed, `1` means the record failed checks, and `2` means input could not be read or parsed.
+The Python verifier prints a machine-readable JSON report. The Node.js verifier can be used for equivalent checks in JavaScript. See each script's usage output for its command-line contract.
 
 ## Checks performed
 
@@ -35,12 +35,13 @@ GitHub Actions runs the verifier's unit tests and validates the example fixture.
 
 A passing report means only that the record passed this implementation's semantic checks. It does not prove that sources are authentic or reliable, claims are true, the record is complete, an event actually occurred, the author is who they claim to be, or a timestamp is trusted.
 
-The verifier does not yet implement the complete JSON Schema standard, signature verification, or a cross-language canonical JSON digest profile. The browser verifier and Python verifier have different scopes; do not treat them as identical implementations of full schema conformance.
+The verifiers perform selected semantic and draft-schema checks, not a claim of full formal JSON Schema conformance. Signature verification and a cross-language canonical JSON digest profile remain separate work. The browser, Node.js, and Python verifiers have different scopes; do not treat them as interchangeable proof of truth.
 
 ## Source files
 
-- [Python verifier](https://github.com/MILANA808/milana808.github.io/blob/main/tools/aksi_evidence_verify.py)
-- [Unit tests](https://github.com/MILANA808/milana808.github.io/blob/main/tests/test_aksi_evidence_verify.py)
-- [GitHub Actions workflow](https://github.com/MILANA808/milana808.github.io/blob/main/.github/workflows/aksi-independent-verifier.yml)
+- [Python verifier](https://github.com/MILANA808/milana808.github.io/blob/main/tools/evidence_lifecycle_verify.py)
+- [Node.js verifier](https://github.com/MILANA808/milana808.github.io/blob/main/tools/evidence-lifecycle-verifier.mjs)
+- [Python conformance tests](https://github.com/MILANA808/milana808.github.io/blob/main/tests/test_evidence_lifecycle.py)
+- [GitHub Actions workflow](https://github.com/MILANA808/milana808.github.io/blob/main/.github/workflows/evidence-lifecycle.yml)
 - [Record schema](https://github.com/MILANA808/milana808.github.io/blob/main/schemas/aksi-evidence-lifecycle-v1.schema.json)
 - [Example record](https://github.com/MILANA808/milana808.github.io/blob/main/schemas/fixtures/aksi-evidence-lifecycle-v1.example.json)
