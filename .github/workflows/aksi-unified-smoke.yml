@@ -33,8 +33,14 @@ jobs:
       - name: Syntax-check canonical runtime, homepage and safety contracts
         run: |
           node --check aksi-unified-runtime.js
+          node --check aksi-crypto-provider.js
           node --check runtime/backend/client.js
           node --check aksi-agent-runtime.js
+          node --check aksi-seal.js
+          node --check aksi-capsule.js
+          node --check aksi-trust.js
+          node --check permit/aksi-permit.js
+          node --check mandate/aksi-mandate.js
           python - <<'PY'
           import re
           from pathlib import Path
@@ -47,7 +53,7 @@ jobs:
           print(f"Extracted {len(blocks)} homepage inline script block(s)")
           PY
           for file in /tmp/aksi-home-inline-*.js; do node --check "$file"; done
-          node --test tests/aksi-unified-runtime.test.js
+          node --test tests/aksi-unified-runtime.test.js tests/aksi-crypto-provider.test.js
       - name: Syntax-check unified inline JavaScript
         run: |
           python - <<'PY'
