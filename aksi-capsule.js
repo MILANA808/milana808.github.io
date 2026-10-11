@@ -5,6 +5,23 @@
 (function (G) {
   "use strict";
   var VERSION = "1.2.1-capsule";
+  async function sharedKeyPair(id, legacy) {
+    if (!G.AKSICryptoProvider) {
+      if (!G.__AKSI_CRYPTO_PROVIDER_PROMISE) {
+        G.__AKSI_CRYPTO_PROVIDER_PROMISE = new Promise(function (resolve, reject) {
+          if (!G.document) { reject(new Error("AKSI crypto provider unavailable")); return; }
+          var script = G.document.createElement("script");
+          script.src = "/aksi-crypto-provider.js?v=1";
+          script.async = true;
+          script.onload = function () { G.AKSICryptoProvider ? resolve(G.AKSICryptoProvider) : reject(new Error("AKSI crypto provider did not initialize")); };
+          script.onerror = function () { reject(new Error("Cannot load AKSI crypto provider")); };
+          G.document.head.appendChild(script);
+        });
+      }
+      await G.__AKSI_CRYPTO_PROVIDER_PROMISE;
+    }
+    return G.AKSICryptoProvider.getKeyPair(id, { algorithm: { name: "ECDSA", namedCurve: "P-256" }, privateUsages: ["sign"], legacy: legacy });
+  }
   var STORE = "aksi_capsule_runtime_v1";
   var KEY_STORE = "aksi_capsule_ecdsa_v1";
   var TEMPLATES = [
@@ -55,22 +72,11 @@
   }
   async function ensureKeys() {
     if (keys) return keys;
-    var raw = null; try { raw = localStorage.getItem(KEY_STORE); } catch (e) {}
-    if (raw) {
-      try {
-        var j = JSON.parse(raw);
-        keys = {
-          priv: await crypto.subtle.importKey("jwk", j.priv, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
-          pub: await crypto.subtle.importKey("jwk", j.pub, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]),
-          pubJwk: j.pub
-        }; return keys;
-      } catch (e) {}
-    }
-    var pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-    var privJ = await crypto.subtle.exportKey("jwk", pair.privateKey);
-    var pubJ = await crypto.subtle.exportKey("jwk", pair.publicKey);
-    try { localStorage.setItem(KEY_STORE, JSON.stringify({ priv: privJ, pub: pubJ })); } catch (e) {}
-    keys = { priv: pair.privateKey, pub: pair.publicKey, pubJwk: pubJ }; return keys;
+    var pair = await sharedKeyPair(KEY_STORE, {
+      storageKey: KEY_STORE, privateField: "priv", publicField: "pub"
+    });
+    keys = { priv: pair.privateKey, pub: pair.publicKey, pubJwk: pair.publicJwk };
+    return keys;
   }
   async function signPayload(payloadStr) {
     var k = await ensureKeys();
