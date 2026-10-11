@@ -1,0 +1,88 @@
+name: AKSI Pull Request Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aksi-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-validation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required entry points
+        run: |
+          test -f index.html
+          test -f runtime/index.html
+          test -f discovery/index.html
+          test -f proof/index.html
+          test -f proof-lab/index.html
+
+      - name: Validate HTML and local assets
+        run: |
+          python - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          class AssetParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.refs = []
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  for attr in ("href", "src"):
+                      value = attrs.get(attr)
+                      if value:
+                          self.refs.append(value.strip())
+
+          html_files = sorted(Path(".").rglob("*.html"))
+          assert html_files, "No HTML files found"
+          failures = []
+          checked = 0
+
+          for page in html_files:
+              try:
+                  source = page.read_text(encoding="utf-8")
+              except UnicodeDecodeError as exc:
+                  failures.append(f"{page}: invalid UTF-8: {exc}")
+                  continue
+
+              lowered = source.lower()
+              if "<html" not in lowered or "</html>" not in lowered:
+                  failures.append(f"{page}: missing <html> or </html>")
+                  continue
+
+              parser = AssetParser()
+              parser.feed(source)
+              for ref in parser.refs:
+                  if not ref or ref.startswith(("#", "http://", "https://", "mailto:", "tel:", "data:", "javascript:", "//")):
+                      continue
+                  if "${" in ref or "{{" in ref:
+                      continue
+                  path = urlsplit(ref).path
+                  if not path:
+                      continue
+                  target = (Path(".") / path.lstrip("/")) if path.startswith("/") else (page.parent / path)
+                  target = target.resolve()
+                  checked += 1
+                  if not target.is_file() and not (target.is_dir() and (target / "index.html").is_file()):
+                      failures.append(f"{page}: missing local asset {ref}")
+
+          if failures:
+              print("\n".join(failures))
+              raise SystemExit(f"Validation failed: {len(failures)} issue(s)")
+          print(f"Validated {len(html_files)} HTML files and {checked} local asset references.")
+          PY
