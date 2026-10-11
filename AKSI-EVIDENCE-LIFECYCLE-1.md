@@ -59,3 +59,13 @@ This draft does not prove factual truth, causal effects, legal compliance, model
 ## Next milestone
 
 Implement an independent verifier and conformance fixtures in at least two implementations (for example JavaScript and Python), then freeze the serialization and integrity profile only after the implementations agree on the same test vectors.
+
+## Independent Node.js verifier
+
+A dependency-free verifier is available at `tools/evidence-lifecycle-verifier.mjs`. With Node.js 20 or later, run:
+
+```sh
+node tools/evidence-lifecycle-verifier.mjs schemas/fixtures/aksi-evidence-lifecycle-v1.example.json
+```
+
+It checks the schema keywords used by this draft and semantic invariants including unique IDs, source-reference resolution, selected-alternative resolution, and verified claims having a source. Exit code `0` means the record passed these implemented checks; `1` means validation failed; `2` means input/usage failed. This is not a certified implementation of every JSON Schema Draft 2020-12 keyword and is not a cryptographic signature verifier.
