@@ -8,8 +8,8 @@
   canvas.setAttribute('aria-hidden', 'true');
   const css = document.createElement('style');
   css.textContent = `
-    #aksi-living-field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.34;mix-blend-mode:screen}
-    body>*:not(#aksi-living-field):not(#aksi-living-control){position:relative;z-index:1}
+    body{isolation:isolate}
+    #aksi-living-field{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.34;mix-blend-mode:screen}
     #aksi-living-control{position:fixed;z-index:99;right:14px;bottom:14px;display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid rgba(123,220,255,.28);border-radius:999px;background:rgba(7,10,24,.82);color:#dff8ff;font:11px/1.2 ui-monospace,monospace;letter-spacing:.08em;backdrop-filter:blur(16px);box-shadow:0 0 28px rgba(90,106,255,.15);cursor:pointer}
     #aksi-living-control i{width:7px;height:7px;border-radius:50%;background:#66f6d1;box-shadow:0 0 12px #66f6d1;display:inline-block}
     @media(max-width:600px){#aksi-living-field{opacity:.23}#aksi-living-control{right:9px;bottom:9px;font-size:10px}}
