@@ -82,26 +82,35 @@ jobs:
     needs: audit-and-test
     runs-on: ubuntu-latest
     steps:
-      - name: Record failure
+      - name: Record or update one deduplicated failure issue
         uses: actions/github-script@v7
         with:
           script: |
-            const title = `AKSI Autopilot failure: ${context.sha.slice(0,7)}`;
+            const title = 'AKSI Autopilot failure — rolling tracker';
             const body = [
-              'Automated AKSI audit/test pipeline failed.',
+              'This is a deduplicated tracker for recurring Autopilot failures. The newest failure is recorded at the top; inspect each linked run and group fixes by root cause.',
               '',
-              `Commit: ${context.sha}`,
-              `Workflow: ${context.workflow}`,
-              `Run: ${context.runId}`,
-              '',
-              'Inspect the failed job and fix the root cause.'
-            ].join('\n');
+              '## Latest failure',
+              `- Commit: ${context.sha}`,
+              `- Workflow: ${context.workflow}`,
+              `- Run: https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              `- Recorded: ${new Date().toISOString()}`
+            ].join('\\n');
             const existing = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              state: 'open'
+              state: 'open',
+              per_page: 100
             });
-            if (!existing.data.some(i => i.title === title)) {
+            const tracker = existing.data.find(i => i.title === title);
+            if (tracker) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: tracker.number,
+                body
+              });
+            } else {
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
