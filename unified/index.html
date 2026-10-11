@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d18">
+<meta name="description" content="AKSI Unified Core: кандидаты, квантово-подобная оценка, локальная память и проверяемая квитанция.">
+<title>AKSI Unified Core</title>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#111a2b;--line:#263550;--text:#edf3ff;--muted:#9eabc4;--accent:#8d9cff;--good:#5be0b0;--warn:#ffc978;--bad:#ff8d9a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 50% -10%,#202d55 0,transparent 65%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1000px;margin:auto;padding:22px 14px 50px}header{display:flex;gap:12px;align-items:center;margin-bottom:18px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(145deg,#5376ff,#a080ff);display:grid;place-items:center;font-weight:900;font-size:19px}h1{font-size:clamp(1.4rem,4vw,2.1rem);line-height:1.1;margin:0}.muted{color:var(--muted)}.small{font-size:.83rem}.pill{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:4px 9px;font-size:.76rem;color:var(--muted);margin:3px 4px 3px 0}
+.panel{background:linear-gradient(160deg,rgba(17,26,43,.96),rgba(12,18,32,.96));border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 15px 45px #0002}h2{font-size:1rem;margin:0 0 10px}.bar{display:flex;gap:8px;flex-wrap:wrap}input,select{flex:1;min-width:170px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#080e1b;color:var(--text);font:inherit}button{border:0;border-radius:11px;padding:11px 15px;background:var(--accent);color:#10162a;font-weight:800;font:inherit;cursor:pointer}button.secondary{background:#202b43;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.45;cursor:wait}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.status{padding:10px;border:1px solid var(--line);border-radius:10px;font-size:.86rem}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.candidate{padding:11px;border:1px solid var(--line);border-radius:11px;margin:8px 0;background:#090f1e}.candidate .top{display:flex;gap:8px;justify-content:space-between;font-size:.78rem;color:var(--muted)}.candidate p{white-space:pre-wrap;overflow-wrap:anywhere;margin:7px 0 0}.meter{height:5px;background:#26314a;border-radius:99px;overflow:hidden;margin-top:7px}.meter i{display:block;height:100%;background:linear-gradient(90deg,#6f82ff,#5be0b0)}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;background:#070b14;border:1px solid var(--line);padding:12px;border-radius:10px;font-size:.78rem}.note{border-left:3px solid var(--warn);padding:8px 12px;color:var(--muted);font-size:.85rem}.foot{margin-top:20px;text-align:center;font-size:.8rem;color:var(--muted)}a{color:#b4c0ff}
+@media(max-width:650px){.grid{grid-template-columns:1fr}main{padding:16px 10px 36px}.panel{padding:13px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="logo">A</div><div><h1>AKSI Unified Core</h1><div class="muted small">Один контур · несколько кандидатов · проверяемый результат</div></div></header>
+<div class="pill">local-first UI</div><div class="pill">quantum-inspired scoring</div><div class="pill">evidence boundary</div><div class="pill">experimental</div>
+
+<section class="panel">
+<h2>01 / Задача</h2>
+<p class="muted small">Система собирает варианты из существующего AKSI Superpose, оценивает их отдельным Core v3 и формирует квитанцию. Это не гарантирует истинность ответа: источники и ограничения показаны отдельно.</p>
+<div class="bar"><input id="query" maxlength="4000" placeholder="Задай вопрос или опиши задачу…" value="Объясни разницу между квантовой симуляцией и квантово-подобным ИИ"><select id="mode" aria-label="Режим"><option value="deterministic">Воспроизводимый режим</option><option value="exploratory">Исследовательский режим</option></select><button id="run">Запустить</button></div>
+<div id="status" class="status" role="status" aria-live="polite">Проверяю доступность модулей…</div>
+</section>
+
+<section class="panel">
+<h2>02 / Модули и состояние</h2>
+<div id="modules" class="grid"></div>
+</section>
+
+<section class="panel">
+<h2>03 / Кандидаты и распределение</h2>
+<p class="muted small">Вероятности относятся к внутренней процедуре выбора между кандидатами, а не к вероятности того, что утверждение истинно.</p>
+<div id="answer" class="status">Запусти задачу, чтобы получить результат.</div>
+<div id="candidates"></div>
+</section>
+
+<section class="panel">
+<h2>04 / Квитанция результата</h2>
+<div class="bar"><button id="download" class="secondary" disabled>Скачать JSON-квитанцию</button><button id="save" class="secondary" disabled>Сохранить в локальную память</button></div>
+<pre id="receipt">{}</pre>
+<p class="note">SHA-256-квитанция позволяет обнаруживать изменения относительно сохранённого хеша. Она сама по себе не доказывает истинность ответа, авторство, доверенное время или выполнение внешнего действия. Ключи не сохраняются этой страницей.</p>
+</section>
+
+<div class="foot">AKSI MATRIX · <a href="/">Главная</a> · <a href="/superpose/">Superpose</a> · <a href="/runtime/">Runtime</a> · <a href="/proof-lab/">Proof Lab</a></div>
+</main>
+<script src="/aksi-core-v3.js"></script>
+<script src="/aksi-knowledge.js"></script>
+<script src="/aksi-neuro.js"></script>
+<script src="/aksi-zero.js"></script>
+<script src="/aksi-quantum.js"></script>
+<script src="/aksi-qpipe.js"></script>
+<script src="/aksi-algorithm.js"></script>
+<script src="/aksi-decision.js"></script>
+<script src="/aksi-webllm.js"></script>
+<script src="/aksi-superpose.js"></script>
+<script src="/aksi-hrr.js"></script>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+let lastCore=null,lastSuperpose=null,lastQuantum=[];
+const exists=x=>typeof x!=='undefined'&&!!x;
+function renderModules(){
+ const items=[
+  ['Core v3',!!window.AKSICoreV3,window.AKSICoreV3&&window.AKSICoreV3.VERSION],
+  ['Superpose',!!window.AKSI_SUPERPOSE,window.AKSI_SUPERPOSE&&window.AKSI_SUPERPOSE.version],
+  ['Quantum simulator',!!window.AKSI_QUANTUM,window.AKSI_QUANTUM&&window.AKSI_QUANTUM.version],
+  ['Local WebLLM',!!window.AKSI_WEBLLM,window.AKSI_WEBLLM&&window.AKSI_WEBLLM.status&&JSON.stringify(window.AKSI_WEBLLM.status())],
+  ['Knowledge',!!window.AKSI_KNOWLEDGE,window.AKSI_KNOWLEDGE&&window.AKSI_KNOWLEDGE.version],
+  ['Neuro / offline retrieval',!!window.AKSI_NEURO,window.AKSI_NEURO&&window.AKSI_NEURO.version],
+  ['Decision / receipt',!!window.AKSI_DECISION,window.AKSI_DECISION&&window.AKSI_DECISION.version],
+  ['HRR memory',!!window.AKSI_HRR,window.AKSI_HRR&&'API loaded']
+ ];
+ $('modules').innerHTML=items.map(([name,ok,detail])=>'<div class="status"><strong class="'+(ok?'good':'warn')+'">'+(ok?'●':'○')+' '+name+'</strong><div class="muted small">'+(ok?String(detail||'доступен'):'не загружен / недоступен')+'</div></div>').join('');
+}
+function showStatus(text,kind){$('status').className='status '+(kind||'');$('status').textContent=text}
+function cleanText(v){return String(v==null?'':v)}
+function fallbackCandidates(q){
+ const out=[];
+ try{const k=window.AKSI_KNOWLEDGE&&AKSI_KNOWLEDGE.search(q);if(k&&k.body)out.push({text:k.body,source:'knowledge',eqs:.55,conf:.55})}catch(e){}
+ try{const n=window.AKSI_NEURO&&AKSI_NEURO.think(q);const t=n&&(n.text||n.answer);if(t)out.push({text:t,source:'neuro',eqs:n.score||.45,conf:.45})}catch(e){}
+ try{const z=window.AKSI_ZERO&&AKSI_ZERO.think(q);const t=z&&(z.text||z.answer);if(t)out.push({text:t,source:'zero',eqs:z.score||.4,conf:.4})}catch(e){}
+ return out;
+}
+function normaliseCandidates(session,q){
+ let list=Array.isArray(session&&session.superposition)?session.superposition:[];
+ if(!list.length&&session&&session.answer)list=[{text:session.answer,source:session.source||'superpose',prob:1,eqs:session.scores&&session.scores.eqs,qcli:session.scores&&session.scores.qcli}];
+ const mapped=list.filter(x=>x&&cleanText(x.text).trim()).map(x=>({
+  text:cleanText(x.text).slice(0,12000),
+  type:'inference',
+  source:{provider:'AKSI Superpose',engine:cleanText(x.source||'candidate')},
+  evidence:Math.max(0,Math.min(1,Number(x.eqs==null?(x.prob==null?.45:x.prob):x.eqs))),
+  coherence:Math.max(0,Math.min(1,Number(x.qcli==null?.5:x.qcli))),
+  agreement:Math.max(0,Math.min(1,Number(x.eqs==null?.5:x.eqs))),
+  freshness:.5,
+  provenance:.25,
+  original_probability:Number(x.prob||0)
+ }));
+ return mapped.length?mapped:fallbackCandidates(q).map(x=>({text:x.text,type:'inference',source:{provider:x.source},evidence:x.eqs,coherence:.5,agreement:x.eqs,freshness:.5,provenance:.2}));
+}
+function renderCandidates(result,qs){
+ const list=result.candidates||[],probs=result.calibration&&result.calibration.quantum||[];
+ $('candidates').innerHTML=list.map((c,i)=>{
+  const p=Number(probs[i]||0),q=qs[i]||null;
+  const title='Вариант '+(i+1)+' · '+(c.source&&c.source.provider||'AKSI')+' · '+(p*100).toFixed(1)+'%';
+  const detail=q&&q.QCLI!=null?'QCLI '+Number(q.QCLI).toFixed(3):'внутренняя оценка Core v3';
+  return '<article class="candidate"><div class="top"><span>'+title+'</span><span>'+detail+'</span></div><div class="meter"><i style="width:'+(p*100).toFixed(2)+'%"></i></div><p></p></article>';
+ }).join('');
+ Array.from($('candidates').querySelectorAll('.candidate p')).forEach((el,i)=>{el.textContent=list[i].text});
+ const r=result.result||{};
+ $('answer').className='status '+(r.abstained?'warn':'good');
+ $('answer').textContent=r.abstained?'AKSI воздержалась от выбора: '+((result.abstention&&result.abstention.reason)||'недостаточно уверенного разделения')+'. Ни один вариант не помечен как установленный факт.':'Выбранный вариант ('+r.label+', '+(Number(r.probability||0)*100).toFixed(1)+'% внутренней вероятности выбора):\n'+r.answer+'\n\nВажно: это результат процедуры выбора, не сертификат истинности.';
+}
+async function run(){
+ const q=$('query').value.trim();if(!q){showStatus('Введи задачу.','warn');return}
+ if(!window.AKSICoreV3){showStatus('Core v3 не загружен; проверь путь к скрипту.','bad');return}
+ $('run').disabled=true;showStatus('Собираю кандидаты и рассчитываю распределение…','');
+ try{
+  lastSuperpose=null;lastQuantum=[];
+  if(window.AKSI_SUPERPOSE&&typeof AKSI_SUPERPOSE.ask==='function'){
+   try{lastSuperpose=await AKSI_SUPERPOSE.ask(q,{web:false});}catch(e){lastSuperpose=null}
+  }
+  const candidates=normaliseCandidates(lastSuperpose,q);
+  if(!candidates.length)throw new Error('Нет кандидатов. Проверь загрузку Neuro / Knowledge / Superpose.');
+  if(window.AKSI_QUANTUM&&typeof AKSI_QUANTUM.answerGate==='function'){
+   lastQuantum=candidates.map(c=>{try{return AKSI_QUANTUM.answerGate(q,c.text)}catch(e){return null}});
+  }
+  lastCore=await AKSICoreV3.run(q,candidates,{mode:$('mode').value,remember:false,lambda:.25,abstainThreshold:.42,minMargin:.04});
+  renderCandidates(lastCore,lastQuantum);
+  $('receipt').textContent=JSON.stringify(lastCore.receipt,null,2);
+  $('download').disabled=false;$('save').disabled=false;
+  showStatus('Готово: '+candidates.length+' кандидатов · '+lastCore.mode+' · receipt '+String(lastCore.receipt.payload_hash||'').slice(0,16)+'…','good');
+ }catch(e){showStatus('Ошибка: '+(e&&e.message||e),'bad')}
+ finally{$('run').disabled=false;renderModules()}
+}
+$('run').addEventListener('click',run);
+$('query').addEventListener('keydown',e=>{if(e.key==='Enter')run()});
+$('download').addEventListener('click',()=>{
+ if(!lastCore)return;
+ const blob=new Blob([JSON.stringify(lastCore,null,2)+'\n'],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='aksi-unified-receipt.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$('save').addEventListener('click',()=>{
+ if(!lastCore)return;
+ try{
+  const item={timestamp:lastCore.receipt.timestamp,task:lastCore.task,mode:lastCore.mode,result:lastCore.result,receipt_hash:lastCore.receipt.receipt_hash};
+  if(window.AKSICoreV3&&AKSICoreV3.memoryWrite)AKSICoreV3.memoryWrite(item);
+  if(lastSuperpose&&window.AKSI_SUPERPOSE&&AKSI_SUPERPOSE.saveMemory)AKSI_SUPERPOSE.saveMemory(lastSuperpose);
+  showStatus('Сохранено в локальную память этого браузера.','good');
+ }catch(e){showStatus('Не удалось сохранить: '+e.message,'bad')}
+});
+renderModules();
+if(window.AKSICoreV3)showStatus('Core v3 загружен. Готово к запуску.','good');
+else showStatus('Core v3 не загружен.','bad');
+})();
+</script>
+</body>
+</html>
