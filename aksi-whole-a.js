@@ -148,3 +148,5 @@ function mathA(q){
   if(!/=/.test(expr)||!/[xх]/i.test(expr)){var v=evalExpr(expr);if(v!=null)return fmt(v)}
   return null;
 }
+
+})();
