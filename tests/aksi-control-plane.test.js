@@ -10,7 +10,8 @@ const assert=require('assert'),{execFileSync}=require('child_process'),fs=requir
       const v=new ResultVerifier();
       const verifier={
         pass:v.verify({status:'ok'},{status:'ok'}),
-        fail:v.verify({status:'ok'},{status:'error'})
+        fail:v.verify({status:'ok'},{status:'error'}),
+        scalarMismatch:v.verify('ok','not-ok')
       };
       const kernel=new AksiKernel({manifest:{agent_id:'test-agent',policy:'strict',allowed_tools:['http.get','memory.read'],denied_tools:['file.delete'],allowed_domains:['example.com'],allowed_syscalls:[],limits:{max_spend:0}}});
       const allowed=kernel.executeAgentStep('Прочитай страницу',{tool:'http.get',url:'https://example.com',params:{url:'https://example.com'}},{mode:'real',executor:()=>({status:200,path:'/expected'}),expectedResult:{status:200,path:'/expected'}});
@@ -29,6 +30,7 @@ const assert=require('assert'),{execFileSync}=require('child_process'),fs=requir
     const r=JSON.parse(out.trim());
     assert.equal(r.verifier.pass.status,'VERIFIED');
     assert.equal(r.verifier.fail.status,'FAILED');
+    assert.equal(r.verifier.scalarMismatch.status,'FAILED','scalar verification must not accept substring matches');
     assert.equal(r.allowedStatus,'VERIFIED');
     assert.equal(r.receiptOk,true);
     assert.equal(r.blocked,true);
