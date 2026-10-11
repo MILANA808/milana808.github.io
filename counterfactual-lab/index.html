@@ -86,6 +86,7 @@ function run(){
  $('receiptStatus').textContent='Результаты готовы. Квитанция будет сформирована отдельно.';$('receiptPreview').classList.add('hidden');$('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function makeReceipt(){
+ if(lastReceipt&&lastReceipt.integrity)return;
  if(!lastReceipt){run();if(!lastReceipt)return;}
  const canonical=JSON.stringify(lastReceipt);let hash='SHA-256 unavailable';
  try{const dig=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical));hash=[...new Uint8Array(dig)].map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){}
