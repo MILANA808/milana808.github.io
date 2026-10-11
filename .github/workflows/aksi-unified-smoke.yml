@@ -45,9 +45,12 @@ jobs:
           import re
           from pathlib import Path
           html = Path("index.html").read_text(encoding="utf-8")
-          blocks = [b for b in re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script\s*>", html, re.I) if b.strip()]
+          script_blocks = re.findall(r"""(<script\b[^>]*>)([\s\S]*?)</script\s*>""", html, re.I)
+          blocks = [body for tag, body in script_blocks if body.strip() and not re.search(r"""type=["']application/ld\+json["']""", tag, re.I)]
           if not blocks:
               raise SystemExit("No inline JavaScript found in homepage")
+          for i, block in enumerate(blocks):
+              Path(f"/tmp/aksi-home-inline-{i}.js").write_text(block, encoding="utf-8")
           for i, block in enumerate(blocks):
               Path(f"/tmp/aksi-home-inline-{i}.js").write_text(block, encoding="utf-8")
           print(f"Extracted {len(blocks)} homepage inline script block(s)")
