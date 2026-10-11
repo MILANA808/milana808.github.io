@@ -140,7 +140,7 @@
     var root = typeof sel === "string" ? document.querySelector(sel) : sel;
     if (!root) return;
     root.innerHTML = '<div class="card"><h2>⚡ World Seal · Classical Signature</h2>' +
-      '<p class="muted">Публичная аттестация: ECDSA P-256 + AKSI-PQ-COMMIT</p>' +
+      '<p class="muted">ECDSA P-256 + экспериментальный hash commitment. Это не постквантовая подпись и не PQ-гарантия.</p>' +
       '<div class="row"><button type="button" class="btn primary" id="sealGen">Подписать громко</button>' +
       '<button type="button" class="btn" id="sealDl">Скачать JSON</button>' +
       '<button type="button" class="btn" id="sealVer">Проверить</button></div>' +
