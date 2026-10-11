@@ -27,10 +27,12 @@ jobs:
       - name: Validate HTML, schema and product safeguards
         run: |
           test -s evidence/index.html
+          test -s evidence/en/index.html
           python - <<'PY'
           import json, re
           from pathlib import Path
           html = Path("evidence/index.html").read_text(encoding="utf-8")
+          english = Path("evidence/en/index.html").read_text(encoding="utf-8")
           schema = json.loads(Path("evidence/evidence-passport.schema.json").read_text(encoding="utf-8"))
           assert schema["properties"]["schema"]["const"] == "aksi-evidence-passport/v1"
           assert "localStorage" in html and "SHA-256" in html
@@ -39,6 +41,11 @@ jobs:
           if len(blocks) != 1:
               raise SystemExit(f"Expected one inline application script, got {len(blocks)}")
           Path("/tmp/aksi-evidence.js").write_text(blocks[0], encoding="utf-8")
+          english_blocks = re.findall(r"<script[^>]*>(.*?)</script>", english, re.I | re.S)
+          if len(english_blocks) != 1:
+              raise SystemExit(f"Expected one English application script, got {len(english_blocks)}")
+          Path("/tmp/aksi-evidence-en.js").write_text(english_blocks[0], encoding="utf-8")
           print("Evidence Passport HTML and schema checks passed")
           PY
           node --check /tmp/aksi-evidence.js
+          node --check /tmp/aksi-evidence-en.js
