@@ -1,0 +1,98 @@
+{
+  "schema_version": "AKSI-EVIDENCE-LIFECYCLE/1",
+  "record_id": "demo-001",
+  "created_at": "2026-10-11T09:00:00Z",
+  "subject": {
+    "id": "demo-project",
+    "type": "product_decision",
+    "description": "Choose which AKSI module to pilot first"
+  },
+  "context": {
+    "summary": "Illustrative sample only; not real user or business data.",
+    "items": [
+      {
+        "id": "ctx-1",
+        "kind": "assumption",
+        "content": "A small pilot is cheaper to validate than a full integration.",
+        "status": "hypothesis",
+        "source_ids": [
+          "src-1"
+        ]
+      }
+    ]
+  },
+  "sources": [
+    {
+      "id": "src-1",
+      "uri": "https://example.org/pilot-method",
+      "title": "Illustrative placeholder source",
+      "source_type": "web",
+      "retrieved_at": "2026-10-11T09:00:00Z",
+      "notes": "Example URI for schema demonstration; replace with a real source before use."
+    }
+  ],
+  "claims": [
+    {
+      "id": "claim-1",
+      "text": "A bounded pilot reduces the cost of learning whether the product is useful.",
+      "status": "hypothesis",
+      "source_ids": [
+        "src-1"
+      ],
+      "confidence_label": "not_assessed"
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "hyp-1",
+      "statement": "At least three target users can complete the workflow without assistance.",
+      "status": "hypothesis",
+      "tests": [
+        {
+          "id": "test-1",
+          "description": "Observe three target users completing a scripted task.",
+          "method": "Unmoderated usability session with task completion criteria.",
+          "expected_observation": "Three users complete the task and report no blocking issue.",
+          "outcome": "pending",
+          "source_ids": [
+            "src-1"
+          ]
+        }
+      ]
+    }
+  ],
+  "decision": {
+    "question": "What should be validated first?",
+    "alternatives": [
+      {
+        "id": "pilot",
+        "label": "Run a narrow pilot",
+        "rationale": "Limits scope while testing a core assumption.",
+        "score": 80,
+        "assumptions": [
+          "At least three target users are reachable."
+        ]
+      },
+      {
+        "id": "full-build",
+        "label": "Build the complete product",
+        "rationale": "Higher scope before evidence is collected.",
+        "score": 45,
+        "assumptions": [
+          "Requirements are stable."
+        ]
+      }
+    ],
+    "selected_alternative_id": "pilot",
+    "policy_constraints": [
+      "No production customer data in the demo."
+    ],
+    "decided_at": "2026-10-11T09:00:00Z",
+    "decision_maker": "human"
+  },
+  "outcomes": [],
+  "revisions": [],
+  "extensions": {
+    "demo_notice": "Illustrative fixture. The example source is a placeholder and must not be treated as evidence."
+  }
+}
