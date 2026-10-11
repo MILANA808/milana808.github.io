@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<meta name="description" content="AKSI Counterfactual Lab — локальная лаборатория решений: воспроизводимое моделирование неопределённости, анализ чувствительности и экспорт проверяемой квитанции.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://milana808.github.io/counterfactual-lab/">
+<title>AKSI Counterfactual Lab — лаборатория решений</title>
+<style>
+:root{color-scheme:dark;--bg:#090d18;--panel:#111a2b;--line:#273750;--text:#eef4ff;--muted:#9eb0ca;--cyan:#75e4dc;--violet:#b8a4ff;--gold:#f5cc83;--red:#ff9eae}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% 0%,#172845 0,transparent 44%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}a{color:var(--cyan)}header,main,footer{max-width:1100px;margin:auto;padding:22px}header{padding-top:34px}.eyebrow{color:var(--cyan);letter-spacing:.16em;text-transform:uppercase;font-size:12px;font-weight:800}h1{font-size:clamp(30px,6vw,56px);line-height:1.02;letter-spacing:-.04em;margin:12px 0}h2{font-size:20px;margin:0 0 12px}p{color:var(--muted)}.lead{max-width:760px;font-size:17px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.panel{background:linear-gradient(145deg,#141f33,#0f1727);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0;min-width:0}.full{grid-column:1/-1}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.field{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}label{font-size:13px;color:#bdcbe0}input,select,textarea{width:100%;min-width:0;background:#0a1220;color:var(--text);border:1px solid #334764;border-radius:10px;padding:10px;font:inherit}input[type=range]{padding:0;accent-color:var(--cyan)}button{border:1px solid #446079;border-radius:11px;padding:10px 14px;background:#1b2a40;color:var(--text);font:inherit;font-weight:700;cursor:pointer}button.primary{background:var(--cyan);color:#061a1a;border-color:var(--cyan)}button:hover{filter:brightness(1.1)}.muted{color:var(--muted)}.small{font-size:12px}.options{display:grid;gap:10px}.option{border:1px solid var(--line);padding:13px;border-radius:14px;background:#0c1422}.option h3{margin:0 0 10px;font-size:16px}.option .row{margin-top:8px}.metric{font-variant-numeric:tabular-nums;font-size:24px;font-weight:800}.statgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.stat{border:1px solid var(--line);border-radius:13px;padding:12px;background:#0b1422}.bar{height:8px;background:#202c40;border-radius:99px;overflow:hidden;margin:6px 0}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan))}.badge{display:inline-block;padding:3px 8px;border-radius:99px;background:#20382f;color:var(--cyan);font-size:12px}.warn{color:var(--gold)}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#08101d;padding:12px;border-radius:10px;max-height:300px;overflow:auto;color:#d2e1f6}.hidden{display:none}footer{padding-bottom:45px}.winner{border-color:#75e4dc;box-shadow:0 0 0 1px #75e4dc44}@media(max-width:720px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.statgrid{grid-template-columns:1fr}.panel{padding:14px}header,main,footer{padding-left:15px;padding-right:15px}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">AKSI MATRIX / DECISION INTELLIGENCE</div><h1>Counterfactual<br><span style="color:var(--cyan)">Lab</span></h1><p class="lead">Не угадывать будущее, а проверять, какие решения остаются устойчивыми при изменении предположений. Локальный симулятор альтернатив, неопределённости и чувствительности с воспроизводимым результатом.</p><div class="row"><span class="badge">OFFLINE-FIRST</span><span class="badge">10 000 сценариев</span><span class="badge">JSON + SHA-256</span></div></header>
+<main>
+<section class="panel"><h2>01 / Определи решение</h2><div class="grid"><div class="field full"><label for="goal">Какое решение принимаем?</label><input id="goal" value="Какой вариант проекта тестировать первым?"></div><div class="field"><label for="seed">Seed — число воспроизводимости</label><input id="seed" type="number" value="14021995" step="1"></div><div class="field"><label for="runs">Число симуляций</label><select id="runs"><option value="1000">1 000 — быстрый прогон</option><option value="5000">5 000</option><option value="10000" selected>10 000 — стандарт</option><option value="25000">25 000 — расширенный</option></select></div><div class="field full"><label for="uncertainty">Неопределённость входных оценок: <b id="uLabel">15%</b></label><input id="uncertainty" type="range" min="0" max="40" value="15"><div class="small muted">Каждая оценка случайно меняется в пределах выбранного процента. Это сценарная модель, не реальный прогноз.</div></div></div></section>
+<section class="panel"><h2>02 / Критерии и важность</h2><p class="small">Шкала каждого критерия: 0–100. Для стоимости и риска меньше — лучше; для пользы и реализуемости больше — лучше. Вес задаёт относительную важность.</p><div class="grid">
+<div class="field"><label for="wBenefit">Польза / ценность — вес <b id="wbLabel">40</b></label><input id="wBenefit" type="range" min="0" max="100" value="40"></div>
+<div class="field"><label for="wFeasible">Реализуемость — вес <b id="wfLabel">30</b></label><input id="wFeasible" type="range" min="0" max="100" value="30"></div>
+<div class="field"><label for="wCost">Затраты — вес <b id="wcLabel">15</b></label><input id="wCost" type="range" min="0" max="100" value="15"></div>
+<div class="field"><label for="wRisk">Риск — вес <b id="wrLabel">15</b></label><input id="wRisk" type="range" min="0" max="100" value="15"></div>
+</div></section>
+<section class="panel"><div class="row" style="justify-content:space-between"><h2>03 / Сравни альтернативы</h2><button id="add">+ Добавить вариант</button></div><p class="small">Начальные оценки — ваши предположения. Меняйте их под конкретную задачу; демо-значения не являются рекомендацией.</p><div class="options" id="options"></div><div class="row" style="margin-top:14px"><button class="primary" id="run">▶ Запустить моделирование</button><button id="reset">Сбросить пример</button><button id="save">Сохранить черновик на этом устройстве</button></div><p id="localStatus" class="small muted">Данные остаются в браузере. Внешние запросы не выполняются.</p></section>
+<section id="results" class="panel hidden"><h2>04 / Результат моделирования</h2><div id="summary"></div><div id="resultTable"></div><h2 style="margin-top:22px">Проверка устойчивости</h2><div id="sensitivity"></div><p class="small warn">Интерпретация: частота победы — доля смоделированных сценариев, в которых вариант получил наивысший балл при выбранной модели. Это не вероятность успеха в реальном мире.</p><div class="row"><button class="primary" id="receipt">Сформировать квитанцию + SHA-256</button><button id="download">Скачать JSON</button></div><div id="receiptStatus" class="small muted"></div><pre id="receiptPreview" class="hidden"></pre></section>
+<section class="panel"><h2>Как работает AKSI Counterfactual Lab</h2><div class="grid"><div><b>1. Модель решения</b><p class="small">Оценки критериев и веса превращаются в прозрачную функцию полезности. Все веса нормализуются.</p></div><div><b>2. Контрфактические сценарии</b><p class="small">Seed-генератор создаёт повторяемые возмущения оценок и пересчитывает рейтинг альтернатив.</p></div><div><b>3. Чувствительность</b><p class="small">Система меняет веса критериев по одному и показывает, сохраняется ли победитель.</p></div><div><b>4. Проверяемая квитанция</b><p class="small">Экспорт фиксирует входы, алгоритм, seed, результаты и SHA-256. Хеш выявляет изменение содержимого, но сам по себе не доказывает истинность оценок или дату создания.</p></div></div><p class="small">Прототип не использует ИИ-модель, не подключается к интернету и не принимает решения за пользователя. Он делает допущения явными и помогает сравнивать варианты.</p></section>
+</main><footer class="small muted">AKSI MATRIX · Experimental decision-support prototype · <a href="/">Главная</a> · <a href="/aksi-engine/">Proof Engine</a> · <a href="/context-compiler/">Context Compiler</a> · <a href="/trace/">Trace Ledger</a></footer>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id);
+const initial=[
+{name:'A — быстрый прототип',benefit:78,feasible:82,cost:35,risk:32},
+{name:'B — глубокая разработка',benefit:92,feasible:48,cost:75,risk:58},
+{name:'C — пилот с клиентом',benefit:72,feasible:76,cost:48,risk:24}
+];
+let options=initial.map(x=>({...x})),lastReceipt=null;
+const fields=[['benefit','Польза'],['feasible','Реализуемость'],['cost','Затраты'],['risk','Риск']];
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderOptions(){
+ const root=$('options');root.textContent='';
+ options.forEach((o,i)=>{
+  const box=document.createElement('div');box.className='option';box.dataset.index=i;
+  const h=document.createElement('h3');h.textContent='Вариант '+(i+1);box.appendChild(h);
+  const name=document.createElement('div');name.className='field';name.innerHTML='<label>Название альтернативы</label><input data-key="name" maxlength="90">';name.querySelector('input').value=o.name;box.appendChild(name);
+  const row=document.createElement('div');row.className='row';
+  fields.forEach(([key,label])=>{const f=document.createElement('div');f.className='field';f.style.minWidth='110px';f.innerHTML='<label>'+label+' (0–100)</label><input type="number" data-key="'+key+'" min="0" max="100" step="1">';f.querySelector('input').value=o[key];row.appendChild(f);});
+  box.appendChild(row);
+  const remove=document.createElement('button');remove.textContent='Удалить вариант';remove.style.marginTop='10px';remove.disabled=options.length<=2;remove.addEventListener('click',()=>{if(options.length>2){readOptions();options.splice(i,1);renderOptions();}});box.appendChild(remove);root.appendChild(box);
+ });
+}
+function readOptions(){
+ options=[...$('options').querySelectorAll('.option')].map(box=>{const o={};box.querySelectorAll('[data-key]').forEach(el=>{const k=el.dataset.key;o[k]=k==='name'?el.value.trim():Math.max(0,Math.min(100,Number(el.value)||0));});return o;});
+}
+function labels(){[['wBenefit','wbLabel'],['wFeasible','wfLabel'],['wCost','wcLabel'],['wRisk','wrLabel'],['uncertainty','uLabel']].forEach(([a,b])=>$(b).textContent=$(a).value+(a==='uncertainty'?'%':''));}
+['wBenefit','wFeasible','wCost','wRisk','uncertainty'].forEach(id=>$(id).addEventListener('input',labels));
+function weights(){let a={benefit:+$('wBenefit').value,feasible:+$('wFeasible').value,cost:+$('wCost').value,risk:+$('wRisk').value};let sum=Object.values(a).reduce((x,y)=>x+y,0);if(!sum){a={benefit:1,feasible:1,cost:1,risk:1};sum=4;}Object.keys(a).forEach(k=>a[k]/=sum);return a;}
+function rng(seed){let a=(Number(seed)>>>0)||1;return function(){a+=0x6D2B79F5;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
+function score(o,w){return o.benefit*w.benefit+o.feasible*w.feasible-o.cost*w.cost-o.risk*w.risk;}
+function clamp(x){return Math.max(0,Math.min(100,x));}
+function simulate(opts,w,runs,seed,unc){
+ const random=rng(seed),count=opts.map(()=>0),sums=opts.map(()=>0),scores=opts.map(()=>[]);
+ for(let n=0;n<runs;n++){let vals=opts.map(o=>{let v={};for(const k of ['benefit','feasible','cost','risk']){const delta=(random()*2-1)*unc/100*100;v[k]=clamp(o[k]+delta);}return score(v,w);});const max=Math.max(...vals);const win=vals.indexOf(max);count[win]++;vals.forEach((v,i)=>{sums[i]+=v;scores[i].push(v);});}
+ return opts.map((o,i)=>({name:o.name,winRate:count[i]/runs,mean:sums[i]/runs,min:Math.min(...scores[i]),max:Math.max(...scores[i])}));
+}
+function sensitivity(opts,w){
+ const base=opts.map(o=>score(o,w)),winner=base.indexOf(Math.max(...base)),tests=[];
+ for(const key of ['benefit','feasible','cost','risk'])for(const factor of [.75,1.25]){
+  let ww={...w,[key]:w[key]*factor};let sum=Object.values(ww).reduce((a,b)=>a+b,0);Object.keys(ww).forEach(k=>ww[k]/=sum);
+  const ss=opts.map(o=>score(o,ww)),win=ss.indexOf(Math.max(...ss));tests.push({criterion:key,factor,winner:opts[win].name,changed:win!==winner});
+ }
+ return {baseWinner:opts[winner].name,tests,stability:1-tests.filter(t=>t.changed).length/tests.length};
+}
+function fmt(n){return Number(n).toLocaleString('ru-RU',{maximumFractionDigits:2});}
+function run(){
+ readOptions();if(options.length<2){alert('Добавьте минимум два варианта.');return;}
+ if(options.some(o=>!o.name||['benefit','feasible','cost','risk'].some(k=>!Number.isFinite(o[k])))){alert('Проверьте названия и оценки.');return;}
+ const w=weights(),runs=+$('runs').value,seed=+$('seed').value||1,unc=+$('uncertainty').value;
+ const results=simulate(options,w,runs,seed,unc).sort((a,b)=>b.winRate-a.winRate);
+ const sens=sensitivity(options,w),top=results[0];$('results').classList.remove('hidden');
+ $('summary').innerHTML='<div class="statgrid"><div class="stat"><div class="small muted">Лидер по частоте побед</div><div class="metric">'+esc(top.name)+'</div><div class="small">'+fmt(top.winRate*100)+'% сценариев</div></div><div class="stat"><div class="small muted">Прогонов</div><div class="metric">'+fmt(runs)+'</div><div class="small">Seed: '+seed+'</div></div><div class="stat"><div class="small muted">Устойчивость лидера</div><div class="metric">'+fmt(sens.stability*100)+'%</div><div class="small">в тестах весов ±25%</div></div></div>';
+ const table=document.createElement('div');table.style.marginTop='14px';results.forEach((r,i)=>{const row=document.createElement('div');row.className='option'+(i===0?' winner':'');row.innerHTML='<div class="row" style="justify-content:space-between"><b>'+esc(r.name)+'</b><b>'+fmt(r.winRate*100)+'%</b></div><div class="bar"><span style="width:'+Math.max(0,Math.min(100,r.winRate*100))+'%"></span></div><div class="small muted">Средний балл: '+fmt(r.mean)+' · диапазон баллов: '+fmt(r.min)+'…'+fmt(r.max)+'</div>';table.appendChild(row);});$('resultTable').replaceChildren(table);
+ $('sensitivity').innerHTML='<p>Базовый лидер по оценкам: <b>'+esc(sens.baseWinner)+'</b></p><p class="small muted">Пересчёт при изменении каждого веса на −25% и +25% (с последующей нормализацией).</p>';
+ const ul=document.createElement('div');ul.className='options';sens.tests.forEach(t=>{const d=document.createElement('div');d.className='option';d.innerHTML='<div class="row" style="justify-content:space-between"><span>'+({benefit:'Польза',feasible:'Реализуемость',cost:'Затраты',risk:'Риск'}[t.criterion])+' '+(t.factor<1?'−25%':'+25%')+'</span><b class="'+(t.changed?'warn':'')+'">'+(t.changed?'Лидер изменился':'Лидер сохранён')+'</b></div><div class="small muted">Новый лидер: '+esc(t.winner)+'</div>';ul.appendChild(d);});$('sensitivity').appendChild(ul);
+ lastReceipt={protocol:'AKSI-COUNTERFACTUAL/1',createdAt:new Date().toISOString(),goal:$('goal').value,algorithm:'seeded-uniform-perturbation-weighted-score-v1',seed,runs,uncertaintyPercent:unc,weights:w,options,results,sensitivity:sens,disclaimer:'Simulation of user-provided assumptions; not a forecast or probability of real-world success.'};
+ $('receiptStatus').textContent='Результаты готовы. Квитанция будет сформирована отдельно.';$('receiptPreview').classList.add('hidden');$('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function makeReceipt(){
+ if(!lastReceipt){run();if(!lastReceipt)return;}
+ const canonical=JSON.stringify(lastReceipt);let hash='SHA-256 unavailable';
+ try{const dig=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical));hash=[...new Uint8Array(dig)].map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){}
+ const output={...lastReceipt,integrity:{algorithm:'SHA-256',digest:hash,scope:'UTF-8 bytes of JSON.stringify(receipt without integrity field)',meaning:'Integrity fingerprint only; not a digital signature, trusted timestamp or proof that input claims are true.'}};
+ lastReceipt=output;$('receiptStatus').textContent='Квитанция сформирована. SHA-256: '+hash;$('receiptPreview').textContent=JSON.stringify(output,null,2);$('receiptPreview').classList.remove('hidden');
+}
+function download(){
+ if(!lastReceipt){alert('Сначала запустите моделирование.');return;}
+ const blob=new Blob([JSON.stringify(lastReceipt,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='aksi-counterfactual-receipt.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('add').addEventListener('click',()=>{readOptions();if(options.length>=8){alert('Для ясного сравнения доступно до 8 вариантов.');return;}options.push({name:'Новый вариант '+(options.length+1),benefit:50,feasible:50,cost:50,risk:50});renderOptions();});
+$('run').addEventListener('click',run);$('receipt').addEventListener('click',makeReceipt);$('download').addEventListener('click',download);
+$('reset').addEventListener('click',()=>{options=initial.map(x=>({...x}));$('goal').value='Какой вариант проекта тестировать первым?';$('seed').value=14021995;$('runs').value='10000';$('uncertainty').value=15;$('wBenefit').value=40;$('wFeasible').value=30;$('wCost').value=15;$('wRisk').value=15;labels();renderOptions();$('results').classList.add('hidden');lastReceipt=null;});
+$('save').addEventListener('click',()=>{try{readOptions();localStorage.setItem('aksi-counterfactual-draft-v1',JSON.stringify({goal:$('goal').value,seed:$('seed').value,runs:$('runs').value,uncertainty:$('uncertainty').value,weights:[$('wBenefit').value,$('wFeasible').value,$('wCost').value,$('wRisk').value],options}));$('localStatus').textContent='Черновик сохранён в localStorage этого браузера.';}catch(e){$('localStatus').textContent='Не удалось сохранить локально: '+e.message;}});
+try{const d=JSON.parse(localStorage.getItem('aksi-counterfactual-draft-v1')||'null');if(d){$('goal').value=d.goal||$('goal').value;$('seed').value=d.seed||$('seed').value;$('runs').value=d.runs||$('runs').value;$('uncertainty').value=d.uncertainty||15;if(d.weights){['wBenefit','wFeasible','wCost','wRisk'].forEach((id,i)=>$(id).value=d.weights[i]);}if(Array.isArray(d.options)&&d.options.length>=2)options=d.options;}}catch(e){}
+labels();renderOptions();
+})();
+</script>
+</body></html>
