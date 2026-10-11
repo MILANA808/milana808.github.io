@@ -6,6 +6,23 @@
 (function (global) {
   "use strict";
   var VER = "1.0.0-trust";
+  async function sharedKeyPair(id, legacy) {
+    if (!global.AKSICryptoProvider) {
+      if (!global.__AKSI_CRYPTO_PROVIDER_PROMISE) {
+        global.__AKSI_CRYPTO_PROVIDER_PROMISE = new Promise(function (resolve, reject) {
+          if (!global.document) { reject(new Error("AKSI crypto provider unavailable")); return; }
+          var script = global.document.createElement("script");
+          script.src = "/aksi-crypto-provider.js?v=1";
+          script.async = true;
+          script.onload = function () { global.AKSICryptoProvider ? resolve(global.AKSICryptoProvider) : reject(new Error("AKSI crypto provider did not initialize")); };
+          script.onerror = function () { reject(new Error("Cannot load AKSI crypto provider")); };
+          global.document.head.appendChild(script);
+        });
+      }
+      await global.__AKSI_CRYPTO_PROVIDER_PROMISE;
+    }
+    return global.AKSICryptoProvider.getKeyPair(id, { algorithm: { name: "ECDSA", namedCurve: "P-256" }, privateUsages: ["sign"], legacy: legacy });
+  }
   var CHAIN_KEY = "aksi:trust:chain:v1";
   var STATE_KEY = "aksi:trust:state:v1";
   var POLICY_KEY = "aksi:trust:policy:v1";
@@ -106,20 +123,10 @@
   var attestKeys = null;
   async function ensureAttestKeys() {
     if (attestKeys) return attestKeys;
-    var stored = loadJSON("aksi:trust:attest:jwk", null);
-    if (stored) {
-      attestKeys = {
-        privateKey: await crypto.subtle.importKey("jwk", stored.priv, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
-        publicKey: await crypto.subtle.importKey("jwk", stored.pub, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]),
-        pubJwk: stored.pub,
-      };
-      return attestKeys;
-    }
-    var kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-    var priv = await crypto.subtle.exportKey("jwk", kp.privateKey);
-    var pub = await crypto.subtle.exportKey("jwk", kp.publicKey);
-    saveJSON("aksi:trust:attest:jwk", { priv: priv, pub: pub });
-    attestKeys = { privateKey: kp.privateKey, publicKey: kp.publicKey, pubJwk: pub };
+    var pair = await sharedKeyPair("aksi:trust:attest:jwk", {
+      storageKey: "aksi:trust:attest:jwk", privateField: "priv", publicField: "pub"
+    });
+    attestKeys = { privateKey: pair.privateKey, publicKey: pair.publicKey, pubJwk: pair.publicJwk };
     return attestKeys;
   }
   async function signAttestation(obj) {

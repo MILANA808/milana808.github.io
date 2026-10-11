@@ -44,35 +44,31 @@ function unb64(s) {
 
 let _keyPair = null;
 let _publicJwk = null;
+  async function sharedKeyPair(id, legacy) {
+    if (!globalThis.AKSICryptoProvider) {
+      if (!globalThis.__AKSI_CRYPTO_PROVIDER_PROMISE) {
+        globalThis.__AKSI_CRYPTO_PROVIDER_PROMISE = new Promise(function (resolve, reject) {
+          if (!globalThis.document) { reject(new Error("AKSI crypto provider unavailable")); return; }
+          var script = globalThis.document.createElement("script");
+          script.src = "/aksi-crypto-provider.js?v=1";
+          script.async = true;
+          script.onload = function () { globalThis.AKSICryptoProvider ? resolve(globalThis.AKSICryptoProvider) : reject(new Error("AKSI crypto provider did not initialize")); };
+          script.onerror = function () { reject(new Error("Cannot load AKSI crypto provider")); };
+          globalThis.document.head.appendChild(script);
+        });
+      }
+      await globalThis.__AKSI_CRYPTO_PROVIDER_PROMISE;
+    }
+    return globalThis.AKSICryptoProvider.getKeyPair(id, { algorithm: { name: "ECDSA", namedCurve: "P-256" }, privateUsages: ["sign"], legacy: legacy });
+  }
 
 async function ensureKeys() {
   if (_keyPair) return _keyPair;
-  try {
-    const raw = localStorage.getItem('aksi_permit_priv_jwk');
-    const pub = localStorage.getItem('aksi_permit_pub_jwk');
-    if (raw && pub) {
-      const privJwk = JSON.parse(raw);
-      const pubJwk = JSON.parse(pub);
-      const privateKey = await crypto.subtle.importKey(
-        'jwk', privJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']
-      );
-      const publicKey = await crypto.subtle.importKey(
-        'jwk', pubJwk, { name: 'ECDSA', namedCurve: 'P-256' }, true, ['verify']
-      );
-      _keyPair = { privateKey, publicKey };
-      _publicJwk = pubJwk;
-      return _keyPair;
-    }
-  } catch (e) {}
-  _keyPair = await crypto.subtle.generateKey(
-    { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']
-  );
-  _publicJwk = await crypto.subtle.exportKey('jwk', _keyPair.publicKey);
-  try {
-    const priv = await crypto.subtle.exportKey('jwk', _keyPair.privateKey);
-    localStorage.setItem('aksi_permit_priv_jwk', JSON.stringify(priv));
-    localStorage.setItem('aksi_permit_pub_jwk', JSON.stringify(_publicJwk));
-  } catch (e) {}
+  const pair = await sharedKeyPair('aksi-permit-ecdsa-p256-v1', {
+    privateStorageKey: 'aksi_permit_priv_jwk', publicStorageKey: 'aksi_permit_pub_jwk'
+  });
+  _keyPair = { privateKey: pair.privateKey, publicKey: pair.publicKey };
+  _publicJwk = pair.publicJwk;
   return _keyPair;
 }
 

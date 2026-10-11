@@ -6,6 +6,23 @@
 (function (G) {
   "use strict";
   var VER = "1.0.0-seal";
+  async function sharedKeyPair(id, legacy) {
+    if (!G.AKSICryptoProvider) {
+      if (!G.__AKSI_CRYPTO_PROVIDER_PROMISE) {
+        G.__AKSI_CRYPTO_PROVIDER_PROMISE = new Promise(function (resolve, reject) {
+          if (!G.document) { reject(new Error("AKSI crypto provider unavailable")); return; }
+          var script = G.document.createElement("script");
+          script.src = "/aksi-crypto-provider.js?v=1";
+          script.async = true;
+          script.onload = function () { G.AKSICryptoProvider ? resolve(G.AKSICryptoProvider) : reject(new Error("AKSI crypto provider did not initialize")); };
+          script.onerror = function () { reject(new Error("Cannot load AKSI crypto provider")); };
+          G.document.head.appendChild(script);
+        });
+      }
+      await G.__AKSI_CRYPTO_PROVIDER_PROMISE;
+    }
+    return G.AKSICryptoProvider.getKeyPair(id, { algorithm: { name: "ECDSA", namedCurve: "P-256" }, privateUsages: ["sign"], legacy: legacy });
+  }
   var MANIFEST = {
     product: "AKSI Decision Integrity Platform",
     codename: "WHOLE / MIND",
@@ -69,21 +86,10 @@
     };
   }
   async function ensureKey() {
-    var raw = null;
-    try { raw = localStorage.getItem("aksi:seal:ecdsa:v1"); } catch (e) {}
-    if (raw) {
-      try {
-        var j = JSON.parse(raw);
-        var priv = await crypto.subtle.importKey("jwk", j.priv, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
-        var pub = await crypto.subtle.importKey("jwk", j.pub, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
-        return { priv: priv, pub: pub, pubJwk: j.pub };
-      } catch (e) {}
-    }
-    var kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-    var privJ = await crypto.subtle.exportKey("jwk", kp.privateKey);
-    var pubJ = await crypto.subtle.exportKey("jwk", kp.publicKey);
-    try { localStorage.setItem("aksi:seal:ecdsa:v1", JSON.stringify({ priv: privJ, pub: pubJ })); } catch (e) {}
-    return { priv: kp.privateKey, pub: kp.publicKey, pubJwk: pubJ };
+    var pair = await sharedKeyPair("aksi:seal:ecdsa:v1", {
+      storageKey: "aksi:seal:ecdsa:v1", privateField: "priv", publicField: "pub"
+    });
+    return { priv: pair.privateKey, pub: pair.publicKey, pubJwk: pair.publicJwk };
   }
   async function signManifest(extra) {
     var body = Object.assign({}, MANIFEST, extra || {}, { sealed_at: new Date().toISOString(), seal_engine: VER });
@@ -133,8 +139,8 @@
   function mount(sel) {
     var root = typeof sel === "string" ? document.querySelector(sel) : sel;
     if (!root) return;
-    root.innerHTML = '<div class="card"><h2>⚡ World Seal · Post-Quantum Hybrid</h2>' +
-      '<p class="muted">Публичная аттестация: ECDSA P-256 + AKSI-PQ-COMMIT</p>' +
+    root.innerHTML = '<div class="card"><h2>⚡ World Seal · Classical Signature</h2>' +
+      '<p class="muted">ECDSA P-256 + экспериментальный hash commitment. Это не постквантовая подпись и не PQ-гарантия.</p>' +
       '<div class="row"><button type="button" class="btn primary" id="sealGen">Подписать громко</button>' +
       '<button type="button" class="btn" id="sealDl">Скачать JSON</button>' +
       '<button type="button" class="btn" id="sealVer">Проверить</button></div>' +
@@ -151,7 +157,7 @@
           contact: att.manifest.contact,
         }, null, 2);
         var b = document.getElementById("stBadge");
-        if (b) b.textContent = "PQ SEALED";
+        if (b) b.textContent = "ECDSA SEALED";
       });
     };
     document.getElementById("sealDl").onclick = function () {

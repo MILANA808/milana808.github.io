@@ -11,6 +11,23 @@
   var SCHEMA_ALIAS = "aksi-mandate/v1";
   var DID = "did:aksi:permit:v1";
   var KEY_DB = "aksi_mandate_keys_v1";
+  async function sharedKeyPair(id, legacy) {
+    if (!G.AKSICryptoProvider) {
+      if (!G.__AKSI_CRYPTO_PROVIDER_PROMISE) {
+        G.__AKSI_CRYPTO_PROVIDER_PROMISE = new Promise(function (resolve, reject) {
+          if (!G.document) { reject(new Error("AKSI crypto provider unavailable")); return; }
+          var script = G.document.createElement("script");
+          script.src = "/aksi-crypto-provider.js?v=1";
+          script.async = true;
+          script.onload = function () { G.AKSICryptoProvider ? resolve(G.AKSICryptoProvider) : reject(new Error("AKSI crypto provider did not initialize")); };
+          script.onerror = function () { reject(new Error("Cannot load AKSI crypto provider")); };
+          G.document.head.appendChild(script);
+        });
+      }
+      await G.__AKSI_CRYPTO_PROVIDER_PROMISE;
+    }
+    return G.AKSICryptoProvider.getKeyPair(id, { algorithm: { name: "ECDSA", namedCurve: "P-256" }, privateUsages: ["sign"], legacy: legacy });
+  }
   var CHAIN_KEY = "aksi_mandate_chain_v1";
 
   function enc(s) { return new TextEncoder().encode(String(s)); }
@@ -44,23 +61,11 @@
   function now() { return new Date().toISOString(); }
 
   async function loadOrCreateKeys() {
-    try {
-      var raw = localStorage.getItem(KEY_DB);
-      if (raw) {
-        var pack = JSON.parse(raw);
-        var priv = await crypto.subtle.importKey("jwk", pack.privateKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
-        var pub = await crypto.subtle.importKey("jwk", pack.publicKey, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
-        return { privateKey: priv, publicKey: pub, publicJwk: pack.publicKey, kid: pack.kid };
-      }
-    } catch (e) {}
-    var kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-    var privJ = await crypto.subtle.exportKey("jwk", kp.privateKey);
-    var pubJ = await crypto.subtle.exportKey("jwk", kp.publicKey);
-    var kid = (await sha256Hex(JSON.stringify(pubJ))).slice(0, 16);
-    try {
-      localStorage.setItem(KEY_DB, JSON.stringify({ privateKey: privJ, publicKey: pubJ, kid: kid }));
-    } catch (e2) {}
-    return { privateKey: kp.privateKey, publicKey: kp.publicKey, publicJwk: pubJ, kid: kid };
+    var pair = await sharedKeyPair("aksi-mandate-ecdsa-p256-v1", {
+      storageKey: KEY_DB, privateField: "privateKey", publicField: "publicKey", kidField: "kid"
+    });
+    var kid = (await sha256Hex(JSON.stringify(pair.publicJwk))).slice(0, 16);
+    return { privateKey: pair.privateKey, publicKey: pair.publicKey, publicJwk: pair.publicJwk, kid: kid };
   }
 
   async function signBytes(priv, bytes) {
