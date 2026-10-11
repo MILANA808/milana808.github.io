@@ -1,0 +1,26 @@
+name: AKSI Local Runtime
+on:
+  push:
+    paths:
+      - "aksi-runtime/**"
+      - ".github/workflows/aksi-runtime.yml"
+  pull_request:
+    paths:
+      - "aksi-runtime/**"
+      - ".github/workflows/aksi-runtime.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  runtime-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile
+        run: python -m py_compile aksi-runtime/aksi_runtime.py aksi-runtime/test_runtime.py
+      - name: Unit tests
+        working-directory: aksi-runtime
+        run: python -m unittest -v
