@@ -103,6 +103,12 @@ def validate_evidence_record(record, schema):
         ("context.items", (record.get("context") or {}).get("items") if isinstance(record.get("context"), dict) else None),
         ("decision.alternatives", (record.get("decision") or {}).get("alternatives") if isinstance(record.get("decision"), dict) else None),
     ]
+    hypotheses_for_tests = record.get("hypotheses")
+    if isinstance(hypotheses_for_tests, list):
+        for index, hypothesis in enumerate(hypotheses_for_tests):
+            if isinstance(hypothesis, dict):
+                groups.append((f"hypotheses[{index}].tests", hypothesis.get("tests")))
+
     id_sets = {}
     for label, items in groups:
         if not isinstance(items, list): continue
