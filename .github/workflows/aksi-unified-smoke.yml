@@ -1,0 +1,40 @@
+name: AKSI Unified Core smoke tests
+
+on:
+  push:
+    branches: [main, aksi-core-v3-world-class]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unified-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check required modules and navigation
+        run: |
+          test -s unified/index.html
+          test -s aksi-core-v3.js
+          grep -q 'AKSICoreV3.run' unified/index.html
+          grep -q '/aksi-superpose.js' unified/index.html
+          grep -q '/aksi-quantum.js' unified/index.html
+          grep -q '/aksi-hrr.js' unified/index.html
+          grep -q 'href="/unified/"' ask.html
+      - name: Syntax-check unified inline JavaScript
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("unified/index.html").read_text(encoding="utf-8")
+          blocks = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script\s*>", html, re.I)
+          if not blocks:
+              raise SystemExit("No inline script block found")
+          Path("/tmp/aksi-unified-inline.js").write_text(blocks[-1], encoding="utf-8")
+          print(f"Extracted {len(blocks)} inline script block(s)")
+          PY
+          node --check /tmp/aksi-unified-inline.js
+      - name: Check Core v3 syntax
+        run: node --check aksi-core-v3.js
