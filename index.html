@@ -1,142 +1,90 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>Акси · всё</title>
-<meta name="theme-color" content="#0c0f14"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070812"><meta name="description" content="AKSI MATRIX — интерактивная AI-лаборатория: миссии, математическое ядро, память и подключаемые модули.">
+<title>AKSI MATRIX — AI WORLD</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0c0f14;color:#e8eaed;font-family:system-ui,sans-serif}
-header{padding:12px 16px;border-bottom:1px solid #1a1f2e;position:sticky;top:0;background:#0c0f14ee;z-index:10}
-header strong{font-size:15px}
-.wrap{max-width:720px;margin:0 auto;padding:12px 14px 40px}
-#log{min-height:160px;max-height:42vh;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
-.msg{padding:11px 13px;border-radius:12px;font-size:14px;line-height:1.5;white-space:pre-wrap;max-width:92%}
-.u{align-self:flex-end;background:#1a2332;border:1px solid #2a3548}
-.a{align-self:flex-start;background:#12181f;border:1px solid #1e2836}
-.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
-.chips button{padding:7px 11px;font-size:12px;background:#151a24;color:#9aa3b5;border:1px solid #252b3a;border-radius:18px;cursor:pointer}
-.bar{display:flex;gap:8px;margin-bottom:20px}
-input{flex:1;background:#151a24;border:1px solid #252b3a;border-radius:12px;color:#e8eaed;padding:12px 14px;font-size:15px;outline:none}
-button#send{border:0;border-radius:12px;padding:12px 16px;background:#5b8def;color:#fff;font-weight:600;cursor:pointer}
-h2{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:#6b7280;margin:18px 0 8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:5px}
-.grid a{padding:9px 10px;background:#151a24;border:1px solid #252b3a;border-radius:9px;color:#c5cdd8;text-decoration:none;font-size:11px}
-.grid a:hover{border-color:#5b8def;color:#fff}
-.backend{background:#12181f;border:1px solid #252b3a;border-radius:10px;padding:12px;font-size:12px;color:#9aa3b5;line-height:1.5;margin-top:8px}
-.backend code{color:#a5b4fc;font-size:11px}
-footer{text-align:center;font-size:11px;color:#5a6375;padding:16px}
+:root{color-scheme:dark;--bg:#070812;--panel:rgba(15,19,39,.78);--line:rgba(126,111,255,.27);--violet:#9c7bff;--cyan:#57eaff;--pink:#ff70d2;--green:#55f3bd;--text:#f2f2ff;--muted:#a2a8c7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#26205b 0,transparent 48%),radial-gradient(ellipse at 95% 35%,#122c4b 0,transparent 35%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;min-height:100vh;overflow-x:hidden}button,input,textarea{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}a{color:inherit;text-decoration:none}button{color:inherit;cursor:pointer}#stars{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:.85}.top{position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);background:#070812c9;border-bottom:1px solid var(--line)}.topin{max-width:1220px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.12em}.logo{width:35px;height:35px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#6d4dff,#1ce4f2);box-shadow:0 0 24px #816bff75;font-size:19px}.live{display:flex;align-items:center;gap:7px;color:var(--green);font-size:12px}.dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor;animation:pulse 1.6s infinite}@keyframes pulse{50%{opacity:.4;box-shadow:0 0 2px currentColor}}.wrap{max-width:1220px;margin:auto;padding:28px 20px 70px}.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:30px;align-items:center;min-height:390px}.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}h1{font-size:clamp(38px,6vw,76px);line-height:.98;letter-spacing:-.055em;margin:15px 0 18px}h1 span{background:linear-gradient(100deg,#fff 10%,#a997ff 48%,#57eaff 90%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 40px #7f6dff20}.lead{max-width:600px;color:#bbc1de;font-size:clamp(15px,1.8vw,18px)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.btn{border:1px solid var(--line);background:#17162d;border-radius:13px;padding:11px 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.2s;font-weight:700}.btn:hover{transform:translateY(-2px);border-color:var(--cyan);box-shadow:0 0 25px #6b63ff28}.primary{background:linear-gradient(110deg,#7657ff,#3d8dff);border-color:transparent;box-shadow:0 0 28px #7258ff3b}.orbital{position:relative;min-height:340px;display:grid;place-items:center;isolation:isolate}.orbital:before,.orbital:after{content:"";position:absolute;width:min(72vw,300px);aspect-ratio:1;border:1px solid #8d7cff66;border-radius:50%;box-shadow:0 0 35px #7e6aff22,inset 0 0 35px #7e6aff12;animation:spin 22s linear infinite}.orbital:after{width:min(58vw,240px);border-color:#4ce9ff70;transform:rotateX(65deg);animation-duration:15s;animation-direction:reverse}.core{width:150px;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#d3caff,#7d68ff 23%,#15183f 62%,#090b1a 70%);box-shadow:0 0 28px #8972ff,0 0 85px #635bff6e,inset 0 0 25px #9efaff70;animation:float 4s ease-in-out infinite;position:relative}.core:after{content:"";position:absolute;inset:-14px;border:1px solid #a49aff88;border-radius:50%;animation:pulse 3s infinite}.core b{font-size:23px;letter-spacing:.12em;text-shadow:0 0 16px #fff}.orbitlabel{position:absolute;font-size:11px;letter-spacing:.12em;color:var(--cyan);text-shadow:0 0 12px var(--cyan)}.l1{top:11%;left:4%}.l2{right:0;top:26%}.l3{bottom:10%;left:8%}.l4{bottom:17%;right:2%}@keyframes spin{to{rotate:360deg}}@keyframes float{50%{transform:translateY(-9px) scale(1.03)}}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 34px}.stat,.panel,.module{border:1px solid var(--line);background:linear-gradient(140deg,#15182be0,#0d1020e8);border-radius:18px;box-shadow:inset 0 1px #ffffff08;backdrop-filter:blur(12px)}.stat{padding:15px}.stat strong{display:block;font-size:24px;color:#fff}.stat small{color:var(--muted)}.section{margin:38px 0}.secthead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:15px}.secthead h2{margin:4px 0;font-size:clamp(23px,3vw,34px);letter-spacing:-.03em}.sub{color:var(--muted);font-size:13px}.workspace{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(270px,.8fr);gap:14px}.panel{padding:18px;min-width:0}.paneltitle{display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800;margin-bottom:12px}.tag{font-size:10px;color:var(--green);border:1px solid #55f3bd50;border-radius:999px;padding:4px 8px}.chatlog{height:255px;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:3px 2px 12px}.bubble{white-space:pre-wrap;overflow-wrap:anywhere;max-width:94%;padding:10px 12px;border-radius:13px;font-size:13px;border:1px solid #6c70a638;background:#171b31}.bubble.user{align-self:flex-end;background:#292047;border-color:#9b78ff66}.bubble.bot{align-self:flex-start}.compose{display:flex;gap:7px}.field{min-width:0;width:100%;background:#090d1c;border:1px solid #55518a70;border-radius:12px;padding:12px;color:var(--text);outline:none}.field:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #57eaff12}.compose .field{flex:1}.iconbtn{border:1px solid var(--line);background:#1b1b38;border-radius:12px;padding:10px 13px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.chip{border:1px solid #6d64a24d;background:#11162b;color:#c7c5e8;border-radius:999px;padding:6px 10px;font-size:11px}.console{font:12px/1.65 ui-monospace,SFMono-Regular,monospace;color:#a9f7dc;white-space:pre-wrap;overflow-wrap:anywhere;min-height:175px;max-height:250px;overflow:auto;background:#080d17;border:1px solid #3d8e8460;border-radius:12px;padding:12px}.missiongrid,.modulegrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.mission{padding:16px;text-align:left;width:100%;min-height:150px;display:flex;flex-direction:column;gap:7px;border:1px solid var(--line);background:linear-gradient(140deg,#181936,#0e1324);border-radius:16px;transition:.2s}.mission:hover{border-color:var(--cyan);box-shadow:0 0 28px #695aff25;transform:translateY(-3px)}.mission .emoji{font-size:24px}.mission b{font-size:14px}.mission small{color:var(--muted);font-size:12px}.mission .xp{margin-top:auto;color:var(--green);font-size:11px}.barline{height:5px;border-radius:9px;background:#252747;overflow:hidden;margin-top:8px}.barline span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--cyan));box-shadow:0 0 12px var(--cyan);transition:width .4s}.modulegrid{grid-template-columns:repeat(4,minmax(0,1fr))}.module{padding:13px;display:flex;flex-direction:column;gap:5px;transition:.2s}.module:hover{border-color:var(--violet);box-shadow:0 0 25px #7965ff20;transform:translateY(-2px)}.module span{font-size:20px}.module b{font-size:12px}.module small{font-size:10px;color:var(--muted)}.healthlist{display:grid;gap:8px}.healthrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;background:#0c1020;border:1px solid #282849;font-size:12px}.healthstatus{color:var(--muted)}.healthstatus.ok{color:var(--green)}.healthstatus.bad{color:#ff8dba}.healthstatus.wait{color:#ffdb7a}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}.footer{text-align:center;color:#737b9c;font-size:11px;padding:25px 0}.notice{color:#939bb9;font-size:11px;margin-top:10px}.hidden{display:none!important}.pill{display:inline-block;border-radius:99px;padding:4px 8px;background:#222044;color:#c7bdff;font-size:10px}@media(max-width:760px){.hero{grid-template-columns:1fr;gap:0}.hero .orbital{min-height:270px;order:-1}.orbital:before{width:230px}.orbital:after{width:180px}.core{width:115px}.hero-copy{text-align:center}.lead{margin:auto}.actions{justify-content:center}.stats{grid-template-columns:repeat(2,1fr)}.workspace,.twocol{grid-template-columns:1fr}.missiongrid{grid-template-columns:repeat(2,minmax(0,1fr))}.modulegrid{grid-template-columns:repeat(2,minmax(0,1fr))}.secthead{align-items:start;flex-direction:column}.wrap{padding:20px 14px 50px}.topin{padding:10px 14px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header><strong>Акси · всё на месте</strong></header>
-<div class="wrap">
-  <div id="log"></div>
-  <div class="chips">
-    <button type="button" data-q="кто ты">кто ты</button>
-    <button type="button" data-q="что такое энтропия">энтропия</button>
-    <button type="button" data-q="что такое ии">ИИ</button>
-    <button type="button" data-q="что такое сознание">сознание</button>
-    <button type="button" data-q="12*12">12×12</button>
-  </div>
-  <div class="bar">
-    <input id="in" type="text" placeholder="Вопрос…" autocomplete="off" enterkeyhint="send"/>
-    <button type="button" id="send">→</button>
-  </div>
-  <h2>ИИ · знания · offline</h2>
-  <div class="grid">
-    <a href="/llm/">LLM WebLLM</a>
-    <a href="/generate/">Generate Net</a>
-    <a href="/local-ai/">Local AI</a>
-    <a href="/zero/">Zero</a>
-    <a href="/brain.html">Brain</a>
-    <a href="/neural.html">Neural</a>
-    <a href="/aksi-neuro-lab.html">Neuro lab</a>
-    <a href="/chat/">Chat</a>
-  </div>
-  <h2>Доверие · DIP · proof</h2>
-  <div class="grid">
-    <a href="/authority/">Authority</a>
-    <a href="/dip/">DIP</a>
-    <a href="/receipt/">Receipt</a>
-    <a href="/proof/">Proof</a>
-    <a href="/protocol/">Protocol</a>
-    <a href="/trust/">Trust</a>
-    <a href="/verify/">Verify</a>
-    <a href="/integrity/">Integrity</a>
-  </div>
-  <h2>Matrix · Quantum · Super</h2>
-  <div class="grid">
-    <a href="/matrix/">MATRIX</a>
-    <a href="/quantum/">Quantum</a>
-    <a href="/super/">Super</a>
-    <a href="/superpose/">Superpose</a>
-    <a href="/unified/">Unified Core</a>
-    <a href="/aksi-lab/">Math & Quantum Lab</a>
-    <a href="/contour/">Contour</a>
-    <a href="/hdc/">HDC</a>
-    <a href="/kernel/">Kernel</a>
-    <a href="/aksi-matrix/">aksi-matrix</a>
-  </div>
-  <h2>Агент · Globe · память</h2>
-  <div class="grid">
-    <a href="/agent/">Agent</a>
-    <a href="/bot.html">Bot</a>
-    <a href="/globe/">Globe</a>
-    <a href="/capsule.html">Capsule</a>
-    <a href="/whole/">WHOLE</a>
-    <a href="/one/">ONE</a>
-    <a href="/wall/">Wall</a>
-    <a href="/registry/">Registry</a>
-  </div>
-  <h2>Продукт · runtime · мир</h2>
-  <div class="grid">
-    <a href="/product/">Product</a>
-    <a href="/runtime/">Runtime</a>
-    <a href="/fir/">FIR</a>
-    <a href="/genesis/">Genesis</a>
-    <a href="/platform/">Platform</a>
-    <a href="/hub/">Hub</a>
-    <a href="/world/">World</a>
-    <a href="/earth3d/">Earth 3D</a>
-    <a href="/search/">Search</a>
-    <a href="/offer/">Offer</a>
-    <a href="/deploy/">Deploy</a>
-    <a href="/lab/">Lab</a>
-  </div>
-  <h2>Milana-backend (отдельный репозиторий)</h2>
-  <div class="backend">
-    <code>aksi/agent.py</code> · <code>aksi/api.py</code> · <code>aksi/memory/</code> · <code>aksi/quantum/</code> · <code>aksi/tools/</code><br/>
-    <code>aksi-globe/</code> · <code>app/api/chat</code> · web_agent · discovery · identity
-  </div>
-  <footer>aksilove@internet.ru · ничего не удалено из репо</footer>
-</div>
-<script src="./aksi-seed.js?v=38"></script>
+<canvas id="stars" aria-hidden="true"></canvas>
+<header class="top"><div class="topin"><a class="brand" href="#home"><span class="logo">◈</span><span>AKSI <span style="color:var(--cyan)">MATRIX</span></span></a><div class="live"><i class="dot"></i><span id="systemState">ЛАБОРАТОРИЯ ГОТОВА</span></div><button class="btn" id="soundToggle" type="button" title="Включить или выключить озвучивание">◖)) Голос</button></div></header>
+<main class="wrap" id="home">
+<section class="hero"><div class="hero-copy"><div class="eyebrow">PERSONAL AI · INTERACTIVE WORLD</div><h1>Войди в<br><span>AKSI MATRIX</span></h1><p class="lead">Не просто сайт. Интерактивная AI-лаборатория: запускай миссии, исследуй математическое ядро, проверяй соединения и собирай собственный контур ИИ.</p><div class="actions"><a class="btn primary" href="#missions">✦ Запустить миссию</a><a class="btn" href="#core">◉ Открыть ядро</a></div><p class="notice">Локальные функции работают в браузере. Внешние ИИ-модели и backend доступны только при наличии соответствующего подключения.</p></div><div class="orbital" aria-label="Анимированное ядро AKSI"><span class="orbitlabel l1">MEMORY</span><span class="orbitlabel l2">REASONING</span><span class="orbitlabel l3">QUANTUM LAB</span><span class="orbitlabel l4">AGENTS</span><div class="core"><b>AKSI</b></div></div></section>
+<div class="stats"><div class="stat"><strong id="xp">0 XP</strong><small>опыт исследователя</small></div><div class="stat"><strong id="missionCount">0</strong><small>выполнено миссий</small></div><div class="stat"><strong id="memoryCount">0</strong><small>записей памяти</small></div><div class="stat"><strong id="onlineCount">LOCAL</strong><small>режим ядра</small></div></div>
+<section class="section" id="core"><div class="secthead"><div><div class="eyebrow">01 / CORE INTERFACE</div><h2>Диалог с Акси</h2><div class="sub">Математика, локальная память, голос и подключаемый backend.</div></div><span class="pill">LOCAL-FIRST</span></div>
+<div class="workspace"><div class="panel"><div class="paneltitle"><span>◈ AKSI CONSOLE</span><span class="tag">READY</span></div><div class="chatlog" id="chatlog" aria-live="polite"><div class="bubble bot">Я Акси — интерфейс AKSI MATRIX. Могу посчитать арифметическое выражение, сохранить заметку локально, озвучить ответ и попробовать подключиться к backend. Выбери миссию или напиши вопрос.</div></div><div class="chips"><button class="chip" data-prompt="12*(8+4)">Вычислить</button><button class="chip" data-prompt="Что такое квантовая суперпозиция?">Суперпозиция</button><button class="chip" data-prompt="запомни: цель = Создать работающий AKSI">Запомнить цель</button><button class="chip" data-prompt="статус системы">Статус системы</button></div><form class="compose" id="chatForm"><input class="field" id="chatInput" autocomplete="off" placeholder="Задай вопрос или команду…" aria-label="Сообщение Акси"><button class="iconbtn" id="mic" type="button" title="Распознать речь">🎙</button><button class="btn primary" type="submit">➤</button></form><div class="notice" id="chatStatus">Готова. Для внешней модели нужен доступный AI endpoint или локальная модель.</div></div>
+<div class="panel"><div class="paneltitle"><span>⌘ ЖИВОЙ МОНИТОР</span><button class="chip" id="refreshHealth" type="button">Проверить связи ↻</button></div><div class="healthlist" id="healthlist"><div class="healthrow"><span>Локальное ядро</span><b class="healthstatus ok">работает</b></div><div class="healthrow"><span>Локальная память</span><b class="healthstatus ok">готова</b></div><div class="healthrow"><span>Backend API</span><b class="healthstatus wait">не проверен</b></div><div class="healthrow"><span>Голосовой ввод</span><b class="healthstatus">проверяется</b></div></div><div class="paneltitle" style="margin-top:18px"><span>⟡ EVENT STREAM</span><button class="chip" id="exportLog" type="button">Экспорт JSON</button></div><div class="console" id="eventlog">[BOOT] AKSI MATRIX interface initialized
+[LOCAL] Memory storage ready
+[CORE] Waiting for command…</div></div></div></section>
+<section class="section" id="missions"><div class="secthead"><div><div class="eyebrow">02 / PLAY TO LEARN</div><h2>Миссии исследователя</h2><div class="sub">Каждое действие — проверяемый эксперимент. За выполнение начисляется опыт.</div></div><span class="pill" id="rank">RANK 0 · INITIATE</span></div><div class="missiongrid">
+<button class="mission" data-mission="math"><span class="emoji">∑</span><b>Математический импульс</b><small>Проверь вычислительное ядро на контрольном выражении.</small><span class="xp">+50 XP · CALCULATION</span></button>
+<button class="mission" data-mission="memory"><span class="emoji">◉</span><b>Архив памяти</b><small>Сохрани и прочитай контрольную запись из локальной памяти.</small><span class="xp">+40 XP · MEMORY</span></button>
+<button class="mission" data-mission="voice"><span class="emoji">〰</span><b>Голосовой канал</b><small>Проверь наличие синтеза речи и распознавания голоса в браузере.</small><span class="xp">+30 XP · VOICE</span></button>
+<button class="mission" data-mission="network"><span class="emoji">⌁</span><b>Внешний контур</b><small>Проверь, отвечает ли backend API на контрольные запросы.</small><span class="xp">+60 XP · NETWORK</span></button>
+<button class="mission" data-mission="proof"><span class="emoji">⛨</span><b>Цепочка доказательств</b><small>Создай локальную запись с временной меткой и SHA-256, если доступен WebCrypto.</small><span class="xp">+50 XP · INTEGRITY</span></button>
+<button class="mission" data-mission="research"><span class="emoji">⌕</span><b>Открытое исследование</b><small>Открой поиск по знаниям и сохрани результат как заметку.</small><span class="xp">+25 XP · DISCOVERY</span></button>
+</div><div style="margin-top:13px" class="panel"><div class="paneltitle"><span>ПРОГРЕСС ДО СЛЕДУЮЩЕГО РАНГА</span><span id="progressLabel" class="sub">0 / 100 XP</span></div><div class="barline"><span id="progressBar"></span></div></div></section>
+<section class="section" id="modules"><div class="secthead"><div><div class="eyebrow">03 / CONNECTED UNIVERSE</div><h2>Модули и порталы</h2><div class="sub">Переходы к существующим экспериментам сайта. Модули могут иметь разную степень готовности.</div></div></div><div class="modulegrid">
+<a class="module" href="/llm/"><span>🧠</span><b>WebLLM</b><small>Локальная языковая модель</small></a><a class="module" href="/local-ai/"><span>⌘</span><b>Local AI</b><small>Локальные вычисления</small></a><a class="module" href="/superpose/"><span>✳</span><b>Superpose</b><small>Спектр вариантов ответа</small></a><a class="module" href="/quantum/"><span>⚛</span><b>Quantum Lab</b><small>Квантовая симуляция</small></a>
+<a class="module" href="/aksi-lab/"><span>∑</span><b>Math Lab</b><small>Математическое ядро</small></a><a class="module" href="/agent/"><span>➤</span><b>AI Agent</b><small>Эксперименты с агентом</small></a><a class="module" href="/globe/"><span>🌐</span><b>AKSI Globe</b><small>Интерактивный глобус</small></a><a class="module" href="/whole/"><span>◈</span><b>WHOLE Runtime</b><small>Единый контур</small></a>
+<a class="module" href="/matrix/"><span>▦</span><b>Matrix</b><small>Векторное пространство</small></a><a class="module" href="/kernel/"><span>⌬</span><b>Kernel</b><small>Ядро системы</small></a><a class="module" href="/proof/"><span>⛨</span><b>Proof</b><small>Доказательства</small></a><a class="module" href="/verify/"><span>✓</span><b>Verify</b><small>Проверка результата</small></a>
+<a class="module" href="/receipt/"><span>▤</span><b>Receipt</b><small>Квитанция результата</small></a><a class="module" href="/trust/"><span>◇</span><b>Trust</b><small>Контур доверия</small></a><a class="module" href="/search/"><span>⌕</span><b>Knowledge Search</b><small>Поиск по источникам</small></a><a class="module" href="/runtime/"><span>⟳</span><b>Runtime</b><small>Среда исполнения</small></a>
+</div></section>
+<section class="section twocol"><div class="panel"><div class="eyebrow">04 / LOCAL MEMORY</div><h2 style="font-size:24px;margin:8px 0">Память AKSI</h2><p class="sub">Заметки сохраняются в хранилище этого браузера на этом устройстве. Они не синхронизируются автоматически между устройствами.</p><form id="memoryForm"><input class="field" id="memoryKey" placeholder="Название заметки" required style="margin-bottom:8px"><textarea class="field" id="memoryValue" placeholder="Что сохранить…" rows="3" required></textarea><button class="btn primary" type="submit" style="margin-top:8px">＋ Сохранить</button></form><div id="memoryList" class="notice"></div></div><div class="panel"><div class="eyebrow">05 / SYSTEM DIAGNOSTICS</div><h2 style="font-size:24px;margin:8px 0">Контроль состояния</h2><p class="sub">Зелёный статус появляется только после успешной проверки. Результаты backend-запросов зависят от доступности сервера и CORS.</p><button class="btn" id="runDiagnostics" type="button">Запустить диагностику</button><div class="console" id="diagOutput" style="margin-top:12px">Диагностика ещё не запускалась.</div></div></section>
+<footer class="footer">AKSI MATRIX · LOCAL-FIRST INTERACTIVE AI LAB · <span id="year"></span><br>Демонстрационные вычисления и квантовые модели не являются доказательством превосходства над современными ИИ-системами.</footer>
+</main>
 <script>
 (function(){
-"use strict";
-var FK="aksi_mem";
-var facts={};
-try{facts=JSON.parse(localStorage.getItem(FK)||"{}")||{}}catch(e){}
-function $(id){return document.getElementById(id)}
-function save(){try{localStorage.setItem(FK,JSON.stringify(facts))}catch(e){}}
-function norm(s){return String(s||"").toLowerCase().replace(/[«»"'`?!.,;:()]/g," ").replace(/\s+/g," ").trim()}
-function toks(s){return norm(s).split(" ").filter(function(w){return w.length>1})}
-function fmt(x){if(!isFinite(x))return"—";if(Math.abs(x-Math.round(x))<1e-10)return String(Math.round(x));return String(parseFloat(x.toFixed(6)))}
-function seedA(q){var SEED=window.__AKSI_SEED||[],n=norm(q),t=toks(q),best=null,sc0=0,i,j;for(i=0;i<SEED.length;i++){var s=SEED[i],k=norm(s.q),sc=0;if(n===k)sc+=20;else if(n.indexOf(k)>=0||k.indexOf(n)>=0)sc+=12;for(j=0;j<t.length;j++)if(k.indexOf(t[j])>=0)sc+=5;if(sc>sc0){sc0=sc;best=s.a}}return sc0>=8?best:null}
-function mathA(q){var raw=String(q).trim();var expr=raw.replace(/[=?]/g,"").replace(/×/g,"*").replace(/÷/g,"/").replace(/,/g,".").trim();if(!/^[0-9+\-*/().\s]+$/.test(expr)||expr.length>40)return null;try{var v=Function('"use strict";return('+expr+")")();return typeof v==="number"&&isFinite(v)?fmt(v):null}catch(e){return null}}
-function identity(q){var l=norm(q);if(/кто ты|who are|представься/.test(l))return"Я Акси. Chat здесь. Ниже — все модули репозитория: LLM, Matrix, DIP, Agent, Globe… Ничего не выкинуто.";if(/что ты умеешь|помощь/.test(l))return"Отвечаю, считаю, запоминаю. Полная карта модулей — на этой же странице ниже.";return null}
-function remember(q){var m=String(q).match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(!m)return null;var k=norm(m[1]),v=m[2].trim();if(!k)return null;facts[k]=v;save();return"Запомнила: "+k+" = "+v}
-function recall(q){var l=norm(q),keys=Object.keys(facts),i;for(i=0;i<keys.length;i++)if(l.indexOf(keys[i])>=0||keys[i].indexOf(l)>=0)return facts[keys[i]];return null}
-function wiki(q,cb){var term=toks(q).slice(0,5).join(" ")||q;fetch("https://ru.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(term)).then(function(r){if(!r.ok)throw new Error();return r.json()}).then(function(j){cb(j&&j.extract?j.extract.slice(0,380):null)}).catch(function(){cb(null)})}
-function answer(q,cb){var a;a=identity(q);if(a){cb(a);return}a=remember(q);if(a){cb(a);return}a=recall(q);if(a){cb(a);return}a=mathA(q);if(a){cb(a);return}a=seedA(q);if(a){cb(a);return}wiki(q,function(t){cb(t||"Пока не знаю. Переформулируй или «запомни: тема = текст».")})}
-function add(role,text){var d=document.createElement("div");d.className="msg "+(role==="u"?"u":"a");d.textContent=text;$("log").appendChild(d);$("log").scrollTop=$("log").scrollHeight}
-function send(){var inp=$("in"),q=inp.value.trim();if(!q)return;inp.value="";add("u",q);answer(q,function(t){add("a",t||"…")})}
-function boot(){$("send").onclick=send;$("in").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();send()}});document.addEventListener("click",function(ev){var t=ev.target;if(t&&t.getAttribute&&t.getAttribute("data-q")){$("in").value=t.getAttribute("data-q");send()}});add("a","Акси. Chat + вся карта модулей ниже. Всё на месте.")}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot();
+'use strict';
+const $=id=>document.getElementById(id);
+const STORE='aksi-matrix-game-v1';
+const API=(window.AKSI_CONFIG&&window.AKSI_CONFIG.apiBase)||'https://milana-backend.replit.app';
+let state={xp:0,done:[],memory:{},events:[],voice:false};
+try{state=Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}catch(e){}
+function persist(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){event('WARN','Local storage unavailable');}}
+function event(kind,msg){const item={time:new Date().toISOString(),kind,message:String(msg)};state.events.push(item);state.events=state.events.slice(-150);persist();const out=$('eventlog');if(out){out.textContent=state.events.slice(-9).map(x=>'['+x.kind+'] '+x.message).join('\n')+'\n';out.scrollTop=out.scrollHeight;}}
+function render(){ $('xp').textContent=state.xp+' XP';$('missionCount').textContent=state.done.length;$('memoryCount').textContent=Object.keys(state.memory||{}).length;const rank=Math.floor(state.xp/100);$('rank').textContent='RANK '+rank+' · '+(['INITIATE','EXPLORER','BUILDER','ARCHITECT','PIONEER'][Math.min(4,rank)]);$('progressLabel').textContent=(state.xp%100)+' / 100 XP';$('progressBar').style.width=(state.xp%100)+'%';$('onlineCount').textContent=navigator.onLine?'ONLINE':'OFFLINE';$('memoryList').textContent=Object.keys(state.memory||{}).length?Object.keys(state.memory).slice(-5).map(k=>'◈ '+k+': '+String(state.memory[k]).slice(0,90)).join('\n'):'Пока нет заметок.';document.querySelectorAll('[data-mission]').forEach(b=>{if(state.done.includes(b.dataset.mission)){b.style.borderColor='#55f3bd90';b.querySelector('.xp').textContent='✓ ВЫПОЛНЕНО';}})}
+function say(text){if(!state.voice||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';speechSynthesis.speak(u);}catch(e){}}
+function bubble(role,text){const el=document.createElement('div');el.className='bubble '+role;el.textContent=text;$('chatlog').appendChild(el);$('chatlog').scrollTop=$('chatlog').scrollHeight;}
+function normalize(s){return String(s||'').toLowerCase().trim();}
+function arithmetic(s){let src=String(s).replace(/[?=]/g,'').replace(/×/g,'*').replace(/÷/g,'/').replace(/,/g,'.').trim();if(!src||src.length>90||!/^[0-9+\-*/().\s]+$/.test(src))return null;let i=0;function ws(){while(src[i]===' ')i++;}function expr(){let v=term();for(;;){ws();if(src[i]==='+'){i++;v+=term()}else if(src[i]==='-'){i++;v-=term()}else return v;}}function term(){let v=factor();for(;;){ws();if(src[i]==='*'){i++;v*=factor()}else if(src[i]==='/'){i++;let d=factor();if(d===0)throw Error('division by zero');v/=d}else return v;}}function factor(){ws();if(src[i]==='+'){i++;return factor()}if(src[i]==='-'){i++;return -factor()}if(src[i]==='('){i++;let v=expr();ws();if(src[i++]!==')')throw Error('missing )');return v;}let start=i;while(/[0-9.]/.test(src[i]||'')&&i<src.length)i++;if(start===i)throw Error('number expected');let n=Number(src.slice(start,i));if(!Number.isFinite(n))throw Error('invalid number');return n;}try{let n=expr();ws();if(i!==src.length||!Number.isFinite(n))return null;return Number(n.toPrecision(12)).toString();}catch(e){return null;}}
+async function backend(path,opts={}){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),4500);try{const r=await fetch(API+path,Object.assign({signal:controller.signal,headers:{'Accept':'application/json'}},opts));if(!r.ok)throw Error('HTTP '+r.status);return await r.json();}finally{clearTimeout(timer);}}
+async function ask(q){const n=normalize(q);if(!n)return;const calc=arithmetic(q);if(calc!==null)return 'Результат вычисления: '+calc+'\nМетод: локальный арифметический парсер AKSI. Это проверяемое вычисление, не ответ языковой модели.';
+let m=q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){state.memory[m[1].trim()]=m[2].trim();persist();render();event('MEMORY','Saved: '+m[1].trim());return 'Сохранила в локальную память: '+m[1].trim()+' = '+m[2].trim();}
+if(/^(память|покажи память|что ты помнишь)$/.test(n)){let keys=Object.keys(state.memory);return keys.length?keys.map(k=>k+' = '+state.memory[k]).join('\n'):'Локальная память пока пуста.';}
+if(n==='статус системы'||n==='диагностика') {await diagnostics();return $('diagOutput').textContent;}
+if(/кто ты|представься/.test(n))return 'Я Акси — интерфейс проекта AKSI MATRIX. Сейчас доступны локальные вычисления, память браузера, миссии, журнал событий и проверка API. Полноценные ответы свободной формы требуют подключения языковой модели; я не буду выдавать поиск по шаблонам за такую модель.';
+if(/суперпозици/.test(n))return 'В квантовой механике суперпозиция — состояние, описываемое линейной комбинацией возможных базисных состояний. Классический симулятор может вычислять такие состояния на обычном процессоре; это не означает выполнение на настоящем квантовом оборудовании.';
+if(/энтропи/.test(n))return 'Энтропия в термодинамике характеризует число доступных микросостояний и направление необратимых процессов; в теории информации — неопределённость распределения вероятностей. Конкретное определение зависит от области.';
+if(/ии|нейросет|искусственн/.test(n))return 'ИИ — широкий класс методов для задач вроде распознавания, генерации, планирования и поиска закономерностей. На этой странице интерактивный интерфейс и инструменты; генеративная языковая модель появится в ответах только при успешном подключении.';
+$('chatStatus').textContent='Пробую подключить backend…';event('NET','Trying backend chat endpoint');try{const data=await backend('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,prompt:q})});const answer=data.reply||data.answer||data.response||data.message;if(typeof answer==='string'&&answer.length){$('chatStatus').textContent='Ответ получен от backend.';return answer;}}catch(e){event('NET','Backend chat unavailable: '+e.message);}
+$('chatStatus').textContent='Backend не ответил; пробую открытый справочник.';try{const r=await fetch('https://ru.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q),{headers:{'Accept':'application/json'}});if(r.ok){const d=await r.json();if(d.extract){$('chatStatus').textContent='Ответ из открытого справочника Wikipedia; это не генерация LLM.';return (d.title?d.title+'\n':'')+d.extract.slice(0,1000)+(d.content_urls&&d.content_urls.desktop?'\nИсточник: '+d.content_urls.desktop.page:'');}}}catch(e){event('NET','Public knowledge lookup unavailable');}
+$('chatStatus').textContent='Доступна локальная функция, но генеративная модель не подключена.';return 'Не могу достоверно ответить на это только локальными правилами. Backend и открытый справочник сейчас не дали ответа. Подключи доступный LLM в разделе WebLLM или настрой API через конфигурацию сайта.';}
+$('chatForm').addEventListener('submit',async e=>{e.preventDefault();const q=$('chatInput').value.trim();if(!q)return;$('chatInput').value='';bubble('user',q);$('chatStatus').textContent='Обрабатываю запрос…';const wait=document.createElement('div');wait.className='bubble bot';wait.textContent='⟡ Анализирую…';$('chatlog').appendChild(wait);try{const a=await ask(q);wait.textContent=a;event('CHAT','Handled query: '+q.slice(0,100));say(a);}catch(err){wait.textContent='Ошибка: '+err.message;event('ERROR',err.message);}render();});
+document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>{$('chatInput').value=b.dataset.prompt;$('chatForm').requestSubmit();}));
+function completeMission(id,xp,msg){if(state.done.includes(id)){bubble('bot','Эта миссия уже пройдена. '+msg);return;}state.done.push(id);state.xp+=xp;persist();render();event('MISSION',id+' completed; +'+xp+' XP');bubble('bot','МИССИЯ ВЫПОЛНЕНА · +'+xp+' XP\n'+msg);}
+async function runMission(id){event('MISSION','Starting '+id);if(id==='math'){let a=arithmetic('123*(45-17)/4');if(a!=='861')return bubble('bot','Контроль не пройден: ожидалось 861, получено '+a);completeMission(id,50,'Контрольный тест 123 × (45 − 17) ÷ 4 = '+a+'.');}
+if(id==='memory'){state.memory['mission-check']='AKSI memory test passed';persist();if(state.memory['mission-check']!=='AKSI memory test passed')return bubble('bot','Проверка записи не пройдена.');completeMission(id,40,'Запись создана и прочитана из локального хранилища браузера.');}
+if(id==='voice'){const synth='speechSynthesis'in window,rec=('SpeechRecognition'in window)||('webkitSpeechRecognition'in window);if(!synth&&!rec)return bubble('bot','Голосовые API не обнаружены в этом браузере.');completeMission(id,30,'Синтез речи: '+(synth?'доступен':'недоступен')+'; распознавание речи: '+(rec?'доступно':'недоступно')+'. Доступность API не гарантирует разрешение микрофона.');}
+if(id==='network'){await diagnostics();if(!state._backendOK)return bubble('bot','Backend не подтвердил доступность. Миссия не засчитана. Подробности — в диагностике.');completeMission(id,60,'Backend ответил на health check.');}
+if(id==='proof'){if(!crypto||!crypto.subtle)return bubble('bot','WebCrypto недоступен в текущем контексте.');const payload=JSON.stringify({kind:'AKSI_LOCAL_PROOF',time:new Date().toISOString(),xp:state.xp,done:state.done});const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload));const hex=Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,'0')).join('');const proof={payload:JSON.parse(payload),sha256:hex,scope:'local browser demonstration; not a server signature'};state.memory['last-local-proof']=JSON.stringify(proof);persist();completeMission(id,50,'SHA-256: '+hex+'\nЭто хэш локальной записи, а не подпись сервера и не доказательство истинности содержания.');}
+if(id==='research'){const url='https://ru.wikipedia.org/wiki/Искусственный_интеллект';window.open(url,'_blank','noopener');state.memory['research-link']=url;persist();completeMission(id,25,'Открыт справочный ресурс и ссылка сохранена в локальной памяти.');}}
+document.querySelectorAll('[data-mission]').forEach(b=>b.addEventListener('click',()=>runMission(b.dataset.mission).catch(e=>{event('ERROR','Mission '+b.dataset.mission+': '+e.message);bubble('bot','Ошибка миссии: '+e.message)})));
+async function diagnostics(){const out=$('diagOutput');out.textContent='Проверка локального ядра…';$('systemState').textContent='ИДЁТ ДИАГНОСТИКА';const results=[];results.push({name:'Local UI',ok:true,detail:'loaded'});results.push({name:'LocalStorage',ok:!!window.localStorage,detail:!!window.localStorage?'available':'unavailable'});results.push({name:'WebCrypto',ok:!!(window.crypto&&crypto.subtle),detail:!!(window.crypto&&crypto.subtle)?'available':'unavailable'});results.push({name:'Speech synthesis',ok:'speechSynthesis'in window,detail:'speechSynthesis'in window?'available':'unavailable'});state._backendOK=false;for(const path of ['/health','/version','/aksi/proof','/aksi/metrics']){try{const d=await backend(path);results.push({name:API+path,ok:true,detail:JSON.stringify(d).slice(0,180)});if(path==='/health')state._backendOK=true;}catch(e){results.push({name:path,ok:false,detail:e.message});}}
+$('healthlist').innerHTML='';results.forEach(r=>{const row=document.createElement('div');row.className='healthrow';const name=document.createElement('span');name.textContent=r.name.replace(API,'API');const status=document.createElement('b');status.className='healthstatus '+(r.ok?'ok':'bad');status.textContent=r.ok?'OK':'недоступно';row.append(name,status);$('healthlist').appendChild(row);});out.textContent=results.map(r=>(r.ok?'[OK] ':'[FAIL] ')+r.name+' — '+r.detail).join('\n');$('systemState').textContent=state._backendOK?'BACKEND ПОДКЛЮЧЁН':'ЛОКАЛЬНЫЙ РЕЖИМ';$('chatStatus').textContent=state._backendOK?'Backend health ответил; генерация ответа проверяется отдельно.':'Backend не подтвердил соединение. Локальные функции продолжают работать.';event('DIAG','Diagnostics complete: '+results.filter(r=>r.ok).length+'/'+results.length+' checks passed');return results;}
+$('refreshHealth').addEventListener('click',diagnostics);$('runDiagnostics').addEventListener('click',diagnostics);
+$('memoryForm').addEventListener('submit',e=>{e.preventDefault();const k=$('memoryKey').value.trim(),v=$('memoryValue').value.trim();if(!k||!v)return;state.memory[k]=v;persist();render();event('MEMORY','Manual note saved: '+k);$('memoryKey').value='';$('memoryValue').value='';});
+$('exportLog').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),state,events:state.events},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-matrix-session.json';a.click();URL.revokeObjectURL(a.href);event('EXPORT','Session JSON exported');});
+$('soundToggle').addEventListener('click',()=>{state.voice=!state.voice;$('soundToggle').textContent=state.voice?'◖)) Голос: ВКЛ':'◖)) Голос';if(state.voice)say('Голосовой режим Акси включён');event('VOICE','Speech synthesis '+(state.voice?'enabled':'disabled'));});
+$('mic').addEventListener('click',()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){$('chatStatus').textContent='Распознавание речи не поддерживается этим браузером. Попробуй Chrome или Edge и проверь разрешение микрофона.';return;}const rec=new R();rec.lang='ru-RU';rec.interimResults=false;rec.maxAlternatives=1;rec.onstart=()=>{$('chatStatus').textContent='Слушаю… говори сейчас.'};rec.onresult=e=>{$('chatInput').value=e.results[0][0].transcript;$('chatStatus').textContent='Речь распознана.'};rec.onerror=e=>{$('chatStatus').textContent='Ошибка микрофона: '+e.error};rec.start();});
+window.addEventListener('online',()=>{render();event('NET','Browser online')});window.addEventListener('offline',()=>{render();event('NET','Browser offline')});
+$('year').textContent=new Date().getFullYear();render();state.events.slice(-8).forEach(x=>{});event('BOOT','AKSI MATRIX game interface ready');diagnostics().catch(e=>event('ERROR','Diagnostics: '+e.message));
+// Lightweight animated star field; no external graphics library.
+const c=$('stars'),ctx=c.getContext('2d');let W=0,H=0,stars=[];function resize(){W=c.width=Math.floor(innerWidth*devicePixelRatio);H=c.height=Math.floor(innerHeight*devicePixelRatio);c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';stars=Array.from({length:Math.min(120,Math.floor(innerWidth/9))},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+.3,v:Math.random()*.28+.04,p:Math.random()*6.28}));}function draw(){ctx.clearRect(0,0,W,H);for(const s of stars){s.y-=s.v*devicePixelRatio;if(s.y<0)s.y=H;const a=.28+.4*(.5+.5*Math.sin(Date.now()*.001+s.p));ctx.beginPath();ctx.arc(s.x,s.y,s.r*devicePixelRatio,0,6.283);ctx.fillStyle='rgba(155,170,255,'+a+')';ctx.fill();}requestAnimationFrame(draw);}addEventListener('resize',resize);resize();draw();
 })();
 </script>
-</body>
-</html>
+</body></html>
