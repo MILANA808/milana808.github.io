@@ -1,6 +1,6 @@
 # AKSI prior-art scan — 2026-10-11
 
-Status: preliminary desk research, not a patent search, exhaustive market map, or legal opinion. Links and descriptions should be rechecked before external fundraising, publication, or claims of novelty.
+Status: preliminary desk research, not a patent search, exhaustive market map, or legal opinion. Links and descriptions were supplemented on 2026-10-11 with current public sources; this remains a non-exhaustive desk scan. Recheck before fundraising, publication, or claims of novelty.
 
 ## Findings
 
@@ -34,6 +34,36 @@ https://github.com/evidencebound/evidencebound-core
 
 Describes an evidence-bound agent runtime with policy, deterministic verification, blast-radius analysis, and recovery. Adjacent to the longer-term goal of linking evidence status to bounded actions.
 
+### 7. AERF — Agent Evidence Receipt Format
+https://github.com/aerf-spec/aerf
+
+A public-review draft for tamper-evident, independently verifiable AI-agent action receipts, including Ed25519 signatures and policy/evidence metadata. This is directly adjacent to the receipt and independent-verification layers. AKSI must not claim signed agent receipts or offline verifiability as a unique idea.
+
+### 8. Agent Provenance Attestation Standard (APAS)
+https://github.com/agentic-research/signet/blob/main/docs/apas/agent-provenance-standard.md
+
+A draft standard for bounded agent-activity provenance, evidence scope, assurance levels, and independently appraised claims. Adjacent to execution provenance and conformance profiles.
+
+### 9. AgentHook
+https://agenthook.org/
+
+An open runtime-evidence specification describing a vendor-neutral envelope for lifecycle events such as tool calls, approvals, policy denials, and runtime controls. Adjacent to cross-provider event interchange.
+
+### 10. Evidence-Bounded Authorization / Evidence Qualification Receipt
+https://datatracker.ietf.org/doc/html/draft-watts-agent-evidence-boundary-00
+
+A September 2026 Internet-Draft proposes fail-closed qualification receipts that bind a proposition to evidence profile, freshness, contradiction state, and evaluation result. This is highly relevant prior art for evidence-qualified decisions.
+
+### 11. AgentAudit
+https://arxiv.org/abs/2609.09875
+
+A September 2026 paper proposes full-lifecycle trust evaluation of agent traces across planning, memory, tool selection, execution, grounding, and security. Adjacent to future AKSI trace evaluation and failure attribution.
+
+### 12. Evidence tracing and execution provenance survey
+https://arxiv.org/abs/2606.04990
+
+A 2026 survey maps provenance representation, evidence tracing, tool-use provenance, memory lineage, runtime guardrails, debugging, and recovery. It shows that lifecycle evidence and provenance are active research directions, not an empty field.
+
 ## What AKSI currently has (checked against the public demo repository)
 
 - Context Compiler: browser-local memory entry and portable Markdown/JSON context packets, with encrypted downloadable backup.
@@ -41,6 +71,7 @@ Describes an evidence-bound agent runtime with policy, deterministic verificatio
 - Trace Ledger: local append-oriented hash-chain journal.
 - Origin Archive: source-linked chronology of selected repository history.
 - Counterfactual Lab: a transparent weighted-score simulation with seeded uncertainty perturbations and limited weight sensitivity checks.
+- Evidence Lifecycle: an experimental JSON record format plus a browser verifier and an independent Python semantic verifier with automated negative tests. The verifier checks selected structural and cross-reference invariants; it is not yet a complete JSON Schema implementation, signature verifier, or production conformance suite.
 
 These are prototype tools. Their existence does not prove independent invention, runtime safety, scientific validity, or commercial traction.
 
@@ -58,12 +89,12 @@ The hypothesis is that teams need one interoperable record across research, deci
 
 ## Next technical tests
 
-1. Define one canonical JSON schema with versioning and explicit status/provenance fields.
-2. Write independent conformance fixtures and a verifier that does not import the producer implementation.
-3. Add mutation tests: changed input, missing source, invalid digest, stale evidence, unknown status, wrong signature.
-4. Separate integrity, authenticity, truth, causal identification, and real-world outcome quality in the API and UI.
+1. Specify canonicalization and signature semantics with cross-language test vectors; do not imply the current SHA-256 fingerprint is a signature.
+2. Expand independent conformance tests to cover stale evidence, malformed timestamps, tampered content, signatures, policy changes, and unknown extensions.
+3. Compare AKSI against AERF, APAS, AgentHook, AgentAudit, and the EQR draft feature-by-feature, including interoperability rather than merely listing projects.
+4. Add a provenance graph linking each action to exact evidence, policy version, approval, and observed effect.
 5. Benchmark on a public, versioned set of decision cases and publish failures as well as successes.
-6. Compare against adjacent projects above before using words like unique, first, or state of the art.
+6. Validate the buyer problem through interviews and a narrow pilot before making commercial or novelty claims.
 
 ## Product language
 
