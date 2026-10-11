@@ -102,3 +102,5 @@ function solveQuad(a,b,c){
   if(Math.abs(d)<1e-12)return [-b/(2*a)];
   var s=Math.sqrt(d);return [(-b+s)/(2*a),(-b-s)/(2*a)];
 }
+
+})();
