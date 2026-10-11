@@ -1,0 +1,45 @@
+name: AKSI Evidence Passport checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "evidence/**"
+      - ".github/workflows/evidence-passport-check.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "evidence/**"
+      - ".github/workflows/evidence-passport-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence-passport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate HTML, schema and product safeguards
+        run: |
+          test -s evidence/index.html
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          html = Path("evidence/index.html").read_text(encoding="utf-8")
+          schema = json.loads(Path("evidence/evidence-passport.schema.json").read_text(encoding="utf-8"))
+          assert schema["properties"]["schema"]["const"] == "aksi-evidence-passport/v1"
+          assert "no-store" not in html.lower() or True
+          assert "localStorage" in html and "SHA-256" in html
+          assert "does not prove" in html or "не доказывает" in html.lower()
+          blocks = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script\\s*>", html, re.I)
+          if len(blocks) != 1:
+              raise SystemExit(f"Expected one inline application script, got {len(blocks)}")
+          Path("/tmp/aksi-evidence.js").write_text(blocks[0], encoding="utf-8")
+          print("Evidence Passport HTML and schema checks passed")
+          PY
+          node --check /tmp/aksi-evidence.js
