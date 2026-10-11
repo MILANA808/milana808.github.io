@@ -1,0 +1,25 @@
+name: AKSI AIXI-inspired Lab Integrity
+on:
+  push:
+    paths:
+      - "aixi-lab/**"
+      - "scripts/check_aixi_lab.mjs"
+      - ".github/workflows/aksi-aixi-lab.yml"
+  pull_request:
+    paths:
+      - "aixi-lab/**"
+      - "scripts/check_aixi_lab.mjs"
+      - ".github/workflows/aksi-aixi-lab.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check lab integrity
+        run: node scripts/check_aixi_lab.mjs
