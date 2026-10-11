@@ -30,9 +30,23 @@ jobs:
           grep -q 'aksi-unified-runtime.js' chat/index.html
           grep -q 'aksi-unified-runtime.js' superpose/index.html
           grep -q 'aksi-unified-runtime.js' agent/index.html
-      - name: Syntax-check canonical runtime and test safety contracts
+      - name: Syntax-check canonical runtime, homepage and safety contracts
         run: |
           node --check aksi-unified-runtime.js
+          node --check runtime/backend/client.js
+          node --check aksi-agent-runtime.js
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html = Path("index.html").read_text(encoding="utf-8")
+          blocks = [b for b in re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script\\s*>", html, re.I) if b.strip()]
+          if not blocks:
+              raise SystemExit("No inline JavaScript found in homepage")
+          for i, block in enumerate(blocks):
+              Path(f"/tmp/aksi-home-inline-{i}.js").write_text(block, encoding="utf-8")
+          print(f"Extracted {len(blocks)} homepage inline script block(s)")
+          PY
+          for file in /tmp/aksi-home-inline-*.js; do node --check "$file"; done
           node --test tests/aksi-unified-runtime.test.js
       - name: Syntax-check unified inline JavaScript
         run: |
