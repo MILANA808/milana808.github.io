@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#11131a">
+<meta name="description" content="AKSI Evidence Passport — бесплатный локальный инструмент для проверки утверждений ИИ, фиксации источников, неопределённости и экспорта проверяемого отчёта. Данные остаются в браузере.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="keywords" content="проверка ответов ИИ, фактчекинг ИИ, AI evidence passport, проверяемый ИИ, аудит AI, источники ИИ, доверенный ИИ, локальный инструмент">
+<link rel="canonical" href="https://milana808.github.io/evidence/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKSI MATRIX">
+<meta property="og:title" content="AKSI Evidence Passport — проверь ответ ИИ">
+<meta property="og:description" content="Разложите ответ ИИ на проверяемые утверждения, прикрепите источники, отметьте неопределённость и сохраните отчёт. Локально, без отправки данных на сервер.">
+<meta property="og:url" content="https://milana808.github.io/evidence/">
+<meta name="twitter:card" content="summary">
+<title>AKSI Evidence Passport — проверка утверждений ИИ и источников</title>
+<style>
+:root{color-scheme:dark;--bg:#0c0d13;--panel:#151721;--panel2:#1b1e29;--ink:#f3f0e9;--muted:#b0b4c2;--line:#343746;--gold:#e7c98c;--cyan:#8ce1d5;--red:#ffb5a7;--green:#b6e3b8}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -10%,#80673a30,transparent 40%),radial-gradient(ellipse at 0 50%,#34305c26,transparent 42%),var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--gold)}main{max-width:1120px;margin:auto;padding:20px clamp(16px,3.5vw,42px) 60px}.nav{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:8px 0 24px}.brand{font-size:12px;letter-spacing:.22em;font-weight:900;text-decoration:none;color:var(--ink)}.navlinks{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}.navlinks a{text-decoration:none}.hero{max-width:900px;padding:24px 0 28px}.eyebrow{font-size:11px;letter-spacing:.22em;color:var(--gold);font-weight:850;text-transform:uppercase}h1{font-size:clamp(38px,6vw,68px);line-height:.99;letter-spacing:-.06em;margin:14px 0 20px}h1 span{color:var(--gold)}.lead{font-size:clamp(17px,2vw,20px);color:#d5d5de;max-width:790px}.privacy{display:inline-flex;align-items:center;gap:8px;border:1px solid #3d594f;border-radius:999px;padding:7px 12px;color:var(--green);font-size:12px;font-weight:750;margin-top:8px}.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(270px,.8fr);gap:16px;align-items:start}.panel{background:linear-gradient(145deg,#191b25,#11131b);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,2.5vw,25px);min-width:0}.panel h2{font-size:21px;letter-spacing:-.03em;margin:0 0 14px}.field{display:grid;gap:6px;margin:12px 0}.field label,.claim label{font-size:12px;color:var(--muted);font-weight:750}.field input,.field textarea,.field select,.claim input,.claim textarea,.claim select{width:100%;background:#0e1017;color:var(--ink);border:1px solid #3a3d4b;border-radius:10px;padding:11px 12px;font:inherit;min-width:0}.field textarea{min-height:112px;resize:vertical}.claim textarea{min-height:76px;resize:vertical}.btns{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;background:#20232e;border:1px solid #484b59;color:var(--ink);border-radius:11px;padding:10px 14px;font:inherit;font-size:13px;font-weight:800;text-decoration:none;cursor:pointer}.btn.primary{background:var(--gold);border-color:var(--gold);color:#17140e}.btn:hover{border-color:var(--cyan)}.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}.claim{border:1px solid #343746;background:#11131a;border-radius:13px;padding:13px;margin:12px 0}.claimhead{display:flex;align-items:center;justify-content:space-between;gap:10px}.claimhead b{font-size:13px}.claimgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:9px}.claimgrid .wide{grid-column:1/-1}.tiny{font-size:12px;color:var(--muted)}.metric{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding:10px 0}.metric strong{font-size:20px}.status{border-radius:12px;padding:12px;background:#20232e;border:1px solid var(--line);font-size:13px}.status.good{color:var(--green);border-color:#42604d}.status.warn{color:var(--gold);border-color:#6a5732}.status.bad{color:var(--red);border-color:#6c413a}.meter{height:8px;background:#2c2e39;border-radius:99px;overflow:hidden;margin:12px 0}.meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--gold),var(--green));transition:width .2s}.section{padding:28px 0;border-top:1px solid var(--line);margin-top:28px}.section h2{font-size:clamp(25px,3vw,34px);letter-spacing:-.045em;margin:0 0 12px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{padding:16px;border:1px solid var(--line);border-radius:13px;background:#12141c}.step b{display:block;color:var(--gold);margin-bottom:5px}.footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid var(--line);padding-top:22px;margin-top:34px;font-size:12px;color:var(--muted)}.footlinks{display:flex;gap:12px;flex-wrap:wrap}@media(max-width:800px){.layout{grid-template-columns:1fr}.steps{grid-template-columns:1fr 1fr}}@media(max-width:500px){.claimgrid{grid-template-columns:1fr}.claimgrid .wide{grid-column:auto}.steps{grid-template-columns:1fr 1fr}}@media(prefers-reduced-motion:reduce){.meter span{transition:none}}@media print{body{background:white;color:#171717;font-size:11pt}.nav,.btns,.privacy,.remove,.no-print{display:none!important}main{max-width:none;padding:0}.panel,.claim,.step{background:white;color:#171717;border:1px solid #bbb;break-inside:avoid}.layout{display:block}.layout aside{margin-top:16px}.field input,.field textarea,.field select,.claim input,.claim textarea,.claim select{background:white;color:#171717;border-color:#aaa}.tiny,.field label,.claim label,.footer{color:#444}.hero{padding-top:0}a{color:#111}.section{margin-top:12px}.meter{border:1px solid #777}.metric{border-color:#aaa}}
+</style>
+</head>
+<body><main>
+<nav class="nav"><a class="brand" href="/">AKSI MATRIX</a><div class="navlinks"><a href="/offer/">Для бизнеса</a><a href="/trust/">Evidence Passport</a><a href="/verify/">Проверка</a><a href="/lifecore/">LIFECORE</a><a href="https://github.com/MILANA808/milana808.github.io">Исходный код ↗</a></div></nav>
+<header class="hero"><div class="eyebrow">AKSI · OPEN TRUST TOOL</div><h1>Не верьте ответу ИИ.<br><span>Проверьте его.</span></h1><p class="lead">Разложите ответ на конкретные утверждения, укажите источники, зафиксируйте сомнения и сохраните Evidence Passport — переносимый отчёт, который можно проверить и передать коллеге.</p><div class="privacy"><span>●</span> Локально в браузере · без аккаунта · данные не отправляются на сервер</div></header>
+<div class="layout">
+<section class="panel" aria-labelledby="report-title"><h2 id="report-title">1. Создайте паспорт проверки</h2>
+<div class="field"><label for="title">Название проверки</label><input id="title" maxlength="180" placeholder="Например: ИИ предложил изменения в договоре"></div>
+<div class="field"><label for="question">Вопрос или задача</label><textarea id="question" maxlength="12000" placeholder="Какой вопрос вы задали ИИ? Какое решение от него ожидалось?"></textarea></div>
+<div class="field"><label for="answer">Ответ ИИ целиком (необязательно)</label><textarea id="answer" maxlength="30000" placeholder="Вставьте ответ, который хотите проверить. Удалите персональные и конфиденциальные данные."></textarea></div>
+<div class="field"><label for="model">Модель / источник ответа (если известно)</label><input id="model" maxlength="160" placeholder="Например: название модели, версия, локальная модель"></div>
+<div class="field"><label for="purpose">Цена ошибки</label><select id="purpose"><option value="low">Низкая — идея, черновик, развлечение</option><option value="medium" selected>Средняя — рабочая рекомендация</option><option value="high">Высокая — деньги, право, здоровье, безопасность</option></select></div>
+<div class="field"><label for="reviewer">Проверил (необязательно)</label><input id="reviewer" maxlength="120" placeholder="Имя, роль или команда"></div>
+<div class="btns"><button class="btn primary" id="addClaim" type="button">＋ Добавить утверждение</button><button class="btn" id="example" type="button">Загрузить пример</button></div>
+<h2>2. Разберите ответ на утверждения</h2><p class="tiny">Одно утверждение — одна проверяемая мысль. Прикрепляйте прямые ссылки и поясняйте, какую часть они подтверждают. Статус выбирает человек, а не этот инструмент.</p>
+<div id="claims" aria-live="polite"></div>
+<div class="btns"><button class="btn primary" id="save" type="button">Сохранить в этом браузере</button><button class="btn" id="export" type="button">Экспорт JSON</button><button class="btn" id="print" type="button">Печать / PDF</button><button class="btn" id="importBtn" type="button">Импорт JSON</button><input id="file" type="file" accept=".json,application/json" hidden><button class="btn" id="clear" type="button">Очистить</button></div>
+<div id="notice" class="status" role="status" aria-live="polite">Добавьте утверждения и источники. Паспорт ещё не сформирован.</div>
+</section>
+<aside class="panel"><h2>Сводка доказательств</h2><p class="tiny">Это прозрачная сводка заполненности, а не математическая вероятность истинности.</p>
+<div class="metric"><span>Утверждений</span><strong id="total">0</strong></div><div class="metric"><span>Подтверждено</span><strong id="supported">0</strong></div><div class="metric"><span>Частично</span><strong id="partial">0</strong></div><div class="metric"><span>Не проверено</span><strong id="unchecked">0</strong></div><div class="metric"><span>Есть противоречие</span><strong id="contradicted">0</strong></div><div class="metric"><span>Ссылок на источники</span><strong id="sources">0</strong></div><div class="meter" aria-hidden="true"><span id="meter"></span></div><div id="summary" class="status warn">Пока недостаточно данных для итоговой оценки.</div><div class="section"><h2>Что означает хэш?</h2><p class="tiny">SHA-256 помогает обнаружить изменение экспортированного содержимого. Он сам по себе не доказывает правдивость утверждений, авторство, подлинность источников или юридическую силу документа.</p><p class="tiny">Инструмент не проверяет ссылки автоматически и не заменяет специалиста. Для важных решений перепроверяйте источники независимо.</p></div><div class="section"><h2>Формат для передачи</h2><p class="tiny">JSON содержит утверждения, статусы, ссылки, отметку времени и хэш содержимого. Его можно сохранить локально, передать коллеге и импортировать для повторной проверки.</p><p class="tiny" id="hash">Хэш появится после формирования паспорта.</p></div></aside>
+</div>
+<section class="section"><h2>Как использовать</h2><div class="steps"><div class="step"><b>01 · Извлечь</b>Разделите ответ на проверяемые утверждения, не смешивая факты и мнения.</div><div class="step"><b>02 · Найти</b>Для каждого важного утверждения добавьте первичный источник и дату, если она существенна.</div><div class="step"><b>03 · Оценить</b>Отметьте подтверждение, частичное подтверждение, отсутствие проверки или противоречие.</div><div class="step"><b>04 · Сохранить</b>Экспортируйте паспорт. Коллега сможет проверить его целостность и продолжить работу.</div></div></section>
+<section class="section"><h2>Почему это важно</h2><p class="lead">AI-ответ может звучать убедительно, но не иметь источников. Evidence Passport превращает «модель сказала» в более полезный рабочий артефакт: утверждение → источник → оценка → оговорки → сохранённый отчёт.</p><p class="tiny">Открытый прототип AKSI MATRIX. Не является сертификацией, юридическим заключением, автоматическим фактчекером или заявлением о соответствии нормативным требованиям.</p></section>
+<footer class="footer"><span>AKSI MATRIX · Evidence Passport · prototype</span><div class="footlinks"><a href="/offer/">Коммерческий продукт</a><a href="/llms.txt">Описание для AI</a><a href="https://github.com/MILANA808/milana808.github.io">Код и обратная связь</a></div></footer>
+</main>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const storageKey="aksi.evidence.passport.v1";
+const statuses={supported:"Подтверждено",partial:"Частично подтверждено",unchecked:"Не проверено",contradicted:"Есть противоречие",opinion:"Мнение / прогноз"};
+let nextId=1, debounce=null, lastHash="";
+function announce(message,kind){$("notice").textContent=message;$("notice").className="status "+(kind||"");}
+function safeText(value,max){return String(value||"").slice(0,max);}
+function addClaim(data={}){
+ const id=nextId++,el=document.createElement("article");el.className="claim";el.dataset.id=String(id);
+ const head=document.createElement("div");head.className="claimhead";
+ const label=document.createElement("b");label.textContent="Утверждение "+id;
+ const remove=document.createElement("button");remove.type="button";remove.className="btn remove";remove.textContent="Удалить";remove.addEventListener("click",()=>{el.remove();renumber();refresh();});
+ head.append(label,remove);el.append(head);
+ const grid=document.createElement("div");grid.className="claimgrid";
+ function field(labelText,tag,cls,placeholder,value,options){
+  const wrap=document.createElement("div");if(cls)wrap.className=cls;
+  const lab=document.createElement("label");lab.textContent=labelText;
+  const input=document.createElement(tag);input.value=value||"";input.placeholder=placeholder||"";input.maxLength=tag==="textarea"?6000:1000;
+  if(tag==="textarea")input.rows=3;
+  if(options){for(const [v,t] of options){const o=document.createElement("option");o.value=v;o.textContent=t;input.append(o);}input.value=value||options[0][0];}
+  input.addEventListener("input",schedule);input.addEventListener("change",schedule);wrap.append(lab,input);return {wrap,input};
+ }
+ const claim=field("Точная формулировка","textarea","wide","Одно проверяемое утверждение",safeText(data.claim,6000));
+ const status=field("Оценка","select","","Выберите статус",data.status||"unchecked",Object.entries(statuses));
+ const source=field("Источник / URL","input","","https://...",safeText(data.source,1000));
+ const explanation=field("Что именно подтверждает источник?","textarea","wide","Фрагмент, дата, ограничение или причина сомнения",safeText(data.explanation,6000));
+ grid.append(claim.wrap,status.wrap,source.wrap,explanation.wrap);el.append(grid);$("claims").append(el);refresh();return el;
+}
+function renumber(){[...$("claims").children].forEach((el,i)=>{el.querySelector(".claimhead b").textContent="Утверждение "+(i+1);});}
+function readClaims(){return [...$("claims").children].map(el=>{const fields=[...el.querySelectorAll("textarea,input,select")];return {claim:fields[0].value.trim(),status:fields[1].value,source:fields[2].value.trim(),explanation:fields[3].value.trim()};}).filter(c=>c.claim||c.source||c.explanation);}
+function readForm(){return {schema:"aksi-evidence-passport/v1",title:safeText($("title").value,180).trim(),question:safeText($("question").value,12000).trim(),answer:safeText($("answer").value,30000).trim(),model:safeText($("model").value,160).trim(),risk:$("purpose").value,reviewer:safeText($("reviewer").value,120).trim(),createdAt:new Date().toISOString(),claims:readClaims()};}
+function setForm(d){$("title").value=safeText(d.title,180);$("question").value=safeText(d.question,12000);$("answer").value=safeText(d.answer,30000);$("model").value=safeText(d.model,160);$("purpose").value=["low","medium","high"].includes(d.risk)?d.risk:"medium";$("reviewer").value=safeText(d.reviewer,120);$("claims").replaceChildren();nextId=1;(Array.isArray(d.claims)?d.claims:[]).slice(0,100).forEach(c=>addClaim(c));if(!d.claims?.length)addClaim();renumber();refresh();}
+function stableObject(d){return {schema:d.schema,title:d.title,question:d.question,answer:d.answer,model:d.model,risk:d.risk,reviewer:d.reviewer,createdAt:d.createdAt,claims:d.claims};}
+async function digest(text){if(!crypto.subtle)throw new Error("Web Crypto недоступна. Откройте страницу по HTTPS или в современном браузере.");const bytes=new TextEncoder().encode(text);const hash=await crypto.subtle.digest("SHA-256",bytes);return [...new Uint8Array(hash)].map(b=>b.toString(16).padStart(2,"0")).join("");}
+function counts(d){const c={total:d.claims.length,supported:0,partial:0,unchecked:0,contradicted:0,opinion:0,sources:0};d.claims.forEach(x=>{if(Object.hasOwn(c,x.status))c[x.status]++;if(x.source)c.sources++;});return c;}
+function refresh(){
+ const d=readForm(),c=counts(d);for(const k of ["total","supported","partial","unchecked","contradicted","sources"])$(k).textContent=String(c[k]);
+ const rated=c.supported+c.partial+c.unchecked+c.contradicted;const completion=rated?Math.round((c.supported+c.partial*.5)/rated*100):0;$("meter").style.width=completion+"%";
+ let message="Пока недостаточно данных для итоговой оценки.",kind="warn";
+ if(!c.total){message="Добавьте хотя бы одно утверждение.";kind="warn";}
+ else if(c.contradicted){message="Обнаружены противоречия. Не используйте ответ без дополнительной проверки.";kind="bad";}
+ else if(c.unchecked){message="Есть непроверенные утверждения. Отсутствие опровержения не означает подтверждение.";kind="warn";}
+ else if(c.supported+c.partial===c.total&&c.partial){message="Есть частично подтверждённые утверждения: зафиксируйте ограничения.";kind="warn";}
+ else if(c.supported===c.total&&c.sources===0){message="Все статусы отмечены как подтверждённые, но источников не приложено. Проверьте основания.";kind="warn";}
+ else if(c.supported===c.total&&c.sources>=c.total){message="По заполненным данным все утверждения отмечены как подтверждённые и имеют ссылки. Проверьте первоисточники независимо.";kind="good";}
+ else if(c.opinion===c.total){message="Это мнения или прогнозы. Их следует оценивать по аргументам и допущениям, а не как факты.";kind="warn";}
+ $("summary").textContent=message;$("summary").className="status "+kind;
+ if(!d.claims.length){$("hash").textContent="Хэш появится после формирования паспорта.";lastHash="";}
+ clearTimeout(debounce);debounce=setTimeout(()=>{try{localStorage.setItem(storageKey,JSON.stringify(d));}catch(e){announce("Автосохранение недоступно (возможно, хранилище заполнено). Используйте экспорт JSON.","warn");}},400);
+}
+function renumberNoop(){}
+function saveLocal(){try{localStorage.setItem(storageKey,JSON.stringify(readForm()));announce("Сохранено локально в этом браузере. Данные не отправлены на сервер.","good");}catch(e){announce("Не удалось сохранить локально. Экспортируйте JSON.","bad");}}
+async function exportJSON(){
+ const d=readForm();if(!d.claims.length){announce("Сначала добавьте хотя бы одно утверждение.","warn");return;}
+ try{const payload=stableObject(d);const hash=await digest(JSON.stringify(payload));const packet={...payload,integrity:{algorithm:"SHA-256",digest:hash,scope:"stable payload fields only; integrity is not truth or authorship proof"}};const blob=new Blob([JSON.stringify(packet,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="aksi-evidence-passport-"+new Date().toISOString().slice(0,10)+".json";document.body.append(a);a.click();a.remove();URL.revokeObjectURL(url);lastHash=hash;$("hash").textContent="SHA-256: "+hash;announce("Паспорт экспортирован. Хэш вычислен для содержимого JSON-полей паспорта.","good");}catch(e){announce(e.message||"Не удалось сформировать хэш.","bad");}
+}
+async function importJSON(file){
+ if(!file)return;if(file.size>1024*1024){announce("Файл слишком большой (лимит 1 МБ).","bad");return;}
+ try{const d=JSON.parse(await file.text());if(d.schema!=="aksi-evidence-passport/v1"||!Array.isArray(d.claims)||d.claims.length>100)throw new Error("Неизвестная схема паспорта или неверный список утверждений.");
+ let verified=null;if(d.integrity?.algorithm==="SHA-256"&&typeof d.integrity.digest==="string"){const expected=await digest(JSON.stringify(stableObject(d)));verified=expected===d.integrity.digest;}
+ if(!confirm("Импорт заменит текущую форму. Продолжить?"))return;setForm(d);saveLocal();
+ if(verified===true){lastHash=d.integrity.digest;$("hash").textContent="SHA-256 совпал: "+lastHash;announce("Импорт завершён. Хэш совпал с содержимым файла. Это подтверждает целостность, не истинность.","good");}
+ else if(verified===false){$("hash").textContent="Хэш не совпал.";announce("ВНИМАНИЕ: хэш не совпал. Файл мог измениться после экспорта.","bad");}
+ else{ $("hash").textContent="В файле нет поддерживаемого хэша.";announce("Импорт завершён, но проверить хэш невозможно: он отсутствует или неизвестен.","warn");}
+ }catch(e){announce("Не удалось импортировать файл: "+e.message,"bad");}finally{$("file").value="";}
+}
+$("addClaim").addEventListener("click",()=>{addClaim();renumber();});
+$("example").addEventListener("click",()=>{
+ if($("claims").children.length&&!confirm("Заменить текущие данные демонстрационным примером?"))return;
+ setForm({title:"Проверка ответа ИИ о правилах работы",question:"Как проверить важное утверждение, которое сгенерировала модель?",answer:"Пример ответа: «Утверждение верно, потому что об этом написано в официальном источнике». Это ещё не доказательство: нужно открыть источник и проверить, что он действительно подтверждает формулировку.",model:"Демонстрационный ответ",risk:"medium",reviewer:"Пример — не реальная проверка",claims:[
+ {claim:"Источник существует и доступен по указанной ссылке.",status:"unchecked",source:"",explanation:"Нужно открыть ссылку и проверить доступность."},
+ {claim:"Источник прямо подтверждает всё утверждение.",status:"unchecked",source:"",explanation:"Нужно сравнить формулировку с первоисточником и контекстом."}
+ ]});announce("Загружен учебный пример. Он намеренно оставлен непроверенным.","warn");
+});
+$("save").addEventListener("click",saveLocal);$("export").addEventListener("click",exportJSON);$("print").addEventListener("click",()=>{refresh();window.print();});$("importBtn").addEventListener("click",()=>$("file").click());$("file").addEventListener("change",e=>importJSON(e.target.files[0]));
+$("clear").addEventListener("click",()=>{if(!confirm("Удалить текущую форму и сохранённый локальный паспорт? Экспортируйте данные заранее, если они нужны."))return;localStorage.removeItem(storageKey);setForm({});$("title").value="";$("question").value="";$("answer").value="";$("model").value="";$("reviewer").value="";$("purpose").value="medium";announce("Локальные данные очищены.","good");});
+["title","question","answer","model","purpose","reviewer"].forEach(id=>$(id).addEventListener("input",refresh));
+try{const saved=localStorage.getItem(storageKey);if(saved){const d=JSON.parse(saved);if(d.schema==="aksi-evidence-passport/v1"){setForm(d);announce("Восстановлена локальная версия паспорта из этого браузера.","good");}else setForm({});}else setForm({});}catch(e){setForm({});announce("Не удалось прочитать локальное сохранение. Можно импортировать резервный JSON.","warn");}
+})();
+</script>
+</body></html>
