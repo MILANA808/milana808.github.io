@@ -60,7 +60,7 @@
     var p = String(path || '');
     if (!p.startsWith('/') || p.startsWith('//')) throw new Error('API path must be an absolute path on the configured host');
     var method = String(options.method || 'GET').toUpperCase();
-    var safeFailover = method === 'GET' || p === '/api/chat' || p === '/api/aksi/chat';
+    var safeFailover = !options.noFailover && (method === 'GET' || p === '/api/chat' || p === '/api/aksi/chat');
     var hosts = [activeBase].concat(safeFailover ? bases.filter(function (b) { return b !== activeBase; }) : []);
     var last;
     for (var i = 0; i < hosts.length; i++) {
@@ -72,6 +72,7 @@
       var headers = Object.assign({ Accept: 'application/json' }, options.headers || {});
       var init = Object.assign({}, options, { method: method, headers: headers, signal: t.signal });
       delete init.timeoutMs;
+      delete init.noFailover;
       var promise = fetch(base + p, init).then(parseResponse).then(function (data) {
         breakers[base] = { failures: 0, until: 0 };
         activeBase = base;
@@ -97,11 +98,11 @@
   }
   async function health() {
     var out = { version: VERSION, api: activeBase, online: !!(G.navigator && G.navigator.onLine), liveness: null, readiness: null, runtime: null, errors: [] };
-    try { out.liveness = await request('/health', { timeoutMs: 8000 }); }
+    try { out.liveness = await request('/health', { timeoutMs: 8000, noFailover: true }); }
     catch (e) { out.errors.push({ check: 'health', error: String(e.message || e) }); }
-    try { out.readiness = await request('/ready', { timeoutMs: 8000 }); }
+    try { out.readiness = await request('/ready', { timeoutMs: 8000, noFailover: true }); }
     catch (e) { out.errors.push({ check: 'ready', error: String(e.message || e), status: e.status || null, details: e.data || null }); }
-    try { out.runtime = await request('/api/core/runtime', { timeoutMs: 8000 }); }
+    try { out.runtime = await request('/api/core/runtime', { timeoutMs: 8000, noFailover: true }); }
     catch (e) { out.errors.push({ check: 'runtime', error: String(e.message || e) }); }
     out.alive = !!out.liveness;
     out.ready = !!(out.readiness && out.readiness.ready === true);
