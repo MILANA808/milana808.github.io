@@ -41,6 +41,9 @@ jobs:
               s=p.read_text(encoding='utf-8')
               refs=re.findall(r'''(?:href|src)=["']([^"'#?]+)''', s, flags=re.I)
               for ref in refs:
+                  # Template-generated URLs are runtime values, not static filesystem paths.
+                  if '${' in ref or '{{' in ref:
+                      continue
                   if ref.startswith(('http://','https://','mailto:','tel:','data:','javascript:','//','/')):
                       continue
                   target=(p.parent/ref).resolve()
