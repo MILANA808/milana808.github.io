@@ -20,12 +20,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          payload="$(cat <<'JSON'
-          {
-            "host": "milana808.github.io",
-            "key": "${INDEXNOW_KEY}",
-            "keyLocation": "https://milana808.github.io/AKSIMATRIX-INDEXNOW-20261011-8F3C9A21.txt",
-            "urlList": [
+          payload="$(jq -n \
+            --arg host "milana808.github.io" \
+            --arg key "$INDEXNOW_KEY" \
+            --arg keyLocation "https://milana808.github.io/AKSIMATRIX-INDEXNOW-20261011-8F3C9A21.txt" \
+            --argjson urls '[
               "https://milana808.github.io/",
               "https://milana808.github.io/offer/",
               "https://milana808.github.io/enterprise/",
@@ -34,10 +33,8 @@ jobs:
               "https://milana808.github.io/verify/",
               "https://milana808.github.io/lifecore/",
               "https://milana808.github.io/ask.html"
-            ]
-          }
-          JSON
-          )"
+            ]' \
+            '{host:$host,key:$key,keyLocation:$keyLocation,urlList:$urls}')"
           code="$(curl --silent --show-error --output response.json --write-out "%{http_code}" \
             -H "Content-Type: application/json; charset=utf-8" \
             --data "$payload" https://api.indexnow.org/indexnow)"
