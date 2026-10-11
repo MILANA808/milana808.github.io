@@ -156,3 +156,5 @@ function drawStar(r){
     ctx.fillText("H="+r.qbm.H_eff.toFixed(3)+" · "+r.proof.fingerprint,8,H-8);
   }
 }
+
+})();
