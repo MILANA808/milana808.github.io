@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0d17">
+<meta name="description" content="AKSI Reality Engine — локальная лаборатория решений: гипотезы, альтернативы, тесты, источники и проверяемые хеш-чеки.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://milana808.github.io/reality-engine/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AKSI MATRIX">
+<meta property="og:title" content="AKSI Reality Engine — решения с проверяемой историей">
+<meta property="og:description" content="Собери гипотезу, сравни альтернативы, запланируй проверку и сохрани локальный evidence receipt.">
+<title>AKSI Reality Engine — проверяемые решения</title>
+<style>
+:root{color-scheme:dark;--bg:#0a0d17;--panel:#111827;--line:#263248;--text:#eef3ff;--muted:#9eacc5;--cyan:#7ce8e2;--violet:#b7a4ff;--orange:#ffc48d;--good:#a5f3c1;--bad:#ffaaa9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#182345 0,transparent 48%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--cyan)}.wrap{max-width:1100px;margin:auto;padding:22px 16px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}.brand{font-weight:800;letter-spacing:.14em;font-size:.8rem;color:var(--cyan)}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--muted);font-size:.78rem}
+h1{font-size:clamp(2rem,7vw,4.5rem);line-height:1.03;letter-spacing:-.05em;margin:38px 0 16px;max-width:900px}h1 em{font-style:normal;color:var(--cyan)}.lead{font-size:1.1rem;max-width:760px;color:#c2cee3}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:24px}.panel{background:linear-gradient(145deg,#141d30ee,#0e1422f5);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}.wide{grid-column:1/-1}h2{font-size:1.05rem;margin:0 0 12px}label{display:block;color:#b7c5dc;font-size:.86rem;margin:12px 0 5px}input,textarea,select{font:inherit;width:100%;color:var(--text);background:#090f1c;border:1px solid #35445d;border-radius:10px;padding:11px 12px;outline:none}textarea{min-height:94px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #7ce8e21c}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}button{cursor:pointer;font:600 .92rem system-ui;border:1px solid #3c4c68;background:#18243a;color:var(--text);padding:10px 14px;border-radius:10px}button.primary{background:var(--cyan);color:#071316;border-color:var(--cyan)}button:hover{filter:brightness(1.1)}button:disabled{opacity:.45;cursor:not-allowed}.small{font-size:.83rem;color:var(--muted)}.status{border-left:3px solid var(--violet);padding:8px 12px;background:#b7a4ff0b;color:#dce4f5;margin-top:12px;overflow-wrap:anywhere}.metric{font-size:1.5rem;font-weight:800;color:var(--cyan)}.items{display:grid;gap:8px}.item{border:1px solid var(--line);border-radius:12px;padding:12px;background:#0b1220}.item strong{display:block;overflow-wrap:anywhere}.item p{margin:5px 0;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}.tag{display:inline-block;border-radius:999px;padding:3px 8px;font-size:.72rem;border:1px solid #394760;color:#c4d1e8;margin:0 5px 4px 0}.ok{color:var(--good)}.warn{color:var(--orange)}.danger{color:var(--bad)}.footer{margin-top:24px;color:var(--muted);font-size:.82rem}.links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.links a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-decoration:none}.empty{color:var(--muted);padding:12px 0}.mono{font: .78rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;color:#c5d5ed}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.row{grid-template-columns:1fr}.wrap{padding:16px 12px 40px}h1{margin-top:30px}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><a class="brand" href="/" style="text-decoration:none">AKSI MATRIX</a><span class="pill">LOCAL-FIRST · EXPERIMENTAL MVP</span></header>
+<h1>Меньше догадок.<br><em>Больше проверяемых решений.</em></h1>
+<p class="lead">Reality Engine превращает расплывчатую идею в рабочую карточку исследования: гипотеза, альтернативы, источники, тест, критерий успеха и итог. Данные остаются в этом браузере, пока ты сама не экспортируешь их.</p>
+<div class="grid">
+<section class="panel">
+<h2>01 / Вопрос и гипотеза</h2>
+<label for="question">Какое решение нужно принять?</label><textarea id="question" placeholder="Например: какой из двух вариантов продукта стоит проверить первым?"></textarea>
+<label for="hypothesis">Основная гипотеза</label><textarea id="hypothesis" placeholder="Я ожидаю X, потому что наблюдаю Y..."></textarea>
+<div class="row"><div><label for="domain">Область</label><select id="domain"><option>Продукт</option><option>Исследование</option><option>Бизнес</option><option>Инженерия</option><option>Личное решение</option><option>Другое</option></select></div><div><label for="confidence">Текущая уверенность</label><select id="confidence"><option value="low">Низкая</option><option value="medium" selected>Средняя</option><option value="high">Высокая</option></select></div></div>
+<label for="alternatives">Альтернативные объяснения (по одному на строку)</label><textarea id="alternatives" placeholder="Возможно, эффект вызван ...&#10;Другой вариант — ..."></textarea>
+</section>
+<section class="panel">
+<h2>02 / План проверки</h2>
+<label for="test">Как проверить гипотезу?</label><textarea id="test" placeholder="Опиши эксперимент, измерение или источник данных."></textarea>
+<label for="criterion">Критерий результата заранее</label><textarea id="criterion" placeholder="Что будет считаться подтверждением, опровержением или неопределённым результатом?"></textarea>
+<label for="sources">Источники / наблюдения / ссылки (по одному на строку)</label><textarea id="sources" placeholder="URL или краткое описание наблюдения. Не добавляй секреты и приватные данные."></textarea>
+<label for="result">Результат проверки (можно оставить пустым)</label><textarea id="result" placeholder="Пока не проверено. Позже внеси наблюдаемый результат."></textarea>
+<div class="row"><div><label for="state">Статус</label><select id="state"><option value="hypothesis">Гипотеза</option><option value="planned">Проверка запланирована</option><option value="supported">Поддержана данными</option><option value="refuted">Опровергнута</option><option value="unknown">Неопределённо</option></select></div><div><label for="owner">Метка проекта (необязательно)</label><input id="owner" placeholder="Например: AKSI / эксперимент 01"></div></div>
+<div class="actions"><button class="primary" id="save">Сохранить карточку</button><button id="clear">Очистить форму</button></div>
+<div class="status" id="message" role="status" aria-live="polite">Готово к созданию первой карточки. Ничего не отправляется на сервер.</div>
+</section>
+<section class="panel wide">
+<div class="top"><h2>03 / Локальный журнал</h2><span class="pill" id="count">0 записей</span></div>
+<p class="small">Каждая запись содержит канонический JSON и SHA-256 контрольную сумму. Она помогает обнаружить изменение экспортированной записи, но сама по себе не доказывает правдивость, автора или время создания.</p>
+<div class="actions"><button id="export">Экспорт JSON</button><button id="verify">Проверить целостность</button><button id="importBtn">Импорт JSON</button><button id="deleteAll">Удалить локальный журнал</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
+<div id="integrity" class="status">Проверка ещё не запускалась.</div>
+<div id="records" class="items" style="margin-top:12px"><div class="empty">Пока нет записей. Создай первую гипотезу выше.</div></div>
+</section>
+<section class="panel wide">
+<h2>04 / Следующий шаг — использовать доказательства, а не только форму</h2>
+<p class="small">Эта первая версия не вызывает внешнюю LLM и не ищет в интернете автоматически. Она помогает структурировать исследование, сохраняет локальный журнал и проверяет целостность данных. Следующий уровень — связать записи с независимыми источниками, тестовым раннером и адаптерами ИИ, сохранив явное разделение фактов, предположений и неизвестного.</p>
+<div class="links"><a href="/proof/">AKSI Proof Engine ↗</a><a href="/context-compiler/">Context Compiler ↗</a><a href="/evidence-lifecycle/">Evidence Lifecycle ↗</a><a href="/quant/">AKSI Quant ↗</a><a href="/AKSI-VAI.md">Протокол AKSI-VAI ↗</a></div>
+</section>
+</div>
+<footer class="footer">AKSI Reality Engine · browser-local MVP · <a href="/">Главная AKSI MATRIX</a><p>Совет: экспортируй резервную копию. Очистка данных браузера может удалить локальный журнал. Не используй демо как единственное основание для медицинских, юридических или финансовых решений.</p></footer>
+</main>
+<script>
+(()=>{"use strict";
+const $=id=>document.getElementById(id),KEY="aksi.reality-engine.records.v1";
+const fields=["question","hypothesis","domain","confidence","alternatives","test","criterion","sources","result","state","owner"];
+let records=[];
+const canonical=value=>JSON.stringify(value,Object.keys(value).sort());
+const stable=value=>{if(Array.isArray(value))return "["+value.map(stable).join(",")+"]";if(value&&typeof value==="object")return "{"+Object.keys(value).sort().map(k=>JSON.stringify(k)+":"+stable(value[k])).join(",")+"}";return JSON.stringify(value)};
+async function digest(text){if(!crypto.subtle)throw new Error("Web Crypto недоступен: открой сайт по HTTPS или используй браузер с поддержкой SHA-256.");const bytes=new TextEncoder().encode(text);const hash=await crypto.subtle.digest("SHA-256",bytes);return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function readStore(){try{const parsed=JSON.parse(localStorage.getItem(KEY)||"[]");records=Array.isArray(parsed)?parsed:[]}catch{records=[]}}
+function say(msg){$("message").textContent=msg}
+function getForm(){const obj={};for(const f of fields)obj[f]=$(f).value.trim();return obj}
+function resetForm(){for(const f of fields){const el=$(f);if(el.tagName==="SELECT")el.selectedIndex=f==="confidence"?1:0;else el.value=""}say("Форма очищена. Существующие записи не затронуты.")}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+const statusLabels={hypothesis:"Гипотеза",planned:"Проверка запланирована",supported:"Поддержана данными",refuted:"Опровергнута",unknown:"Неопределённо"};
+function render(){ $("count").textContent=records.length+" записей";const root=$("records");if(!records.length){root.innerHTML='<div class="empty">Пока нет записей. Создай первую гипотезу выше.</div>';return}
+root.innerHTML=records.slice().reverse().map((r,i)=>'<article class="item"><span class="tag">'+esc(statusLabels[r.data.state]||r.data.state)+'</span><span class="tag">'+esc(r.data.domain)+'</span><strong>'+esc(r.data.question||"Без названия")+'</strong><p>'+esc(r.data.hypothesis||"Гипотеза не заполнена")+'</p><div class="mono">SHA-256 · '+esc(r.hash||"нет хеша")+'</div><div class="actions"><button data-open="'+esc(r.id)+'">Открыть</button><button data-remove="'+esc(r.id)+'">Удалить</button></div></article>').join("");
+root.querySelectorAll("[data-open]").forEach(b=>b.addEventListener("click",()=>{const r=records.find(x=>x.id===b.dataset.open);if(!r)return;for(const f of fields)$(f).value=r.data[f]??"";say("Карточка загружена в форму. Сохранение создаст новую запись, не перезаписывая историю.")}));
+root.querySelectorAll("[data-remove]").forEach(b=>b.addEventListener("click",()=>{records=records.filter(x=>x.id!==b.dataset.remove);persist();render();say("Запись удалена из локального журнала.")}))
+}
+function persist(){localStorage.setItem(KEY,JSON.stringify(records))}
+async function save(){const data=getForm();if(!data.question||!data.hypothesis){say("Заполни вопрос и основную гипотезу.");return}
+const record={format:"aksi-reality-record/1",id:crypto.randomUUID?crypto.randomUUID():String(Date.now())+"-"+Math.random().toString(16).slice(2),created_at:new Date().toISOString(),data};record.hash=await digest(stable(record));records.push(record);persist();render();say("Карточка сохранена в этом браузере. SHA-256 рассчитан; это контроль целостности, не доказательство истины.");}
+async function verify(){const errors=[];for(const r of records){if(!r||!r.data||!r.hash){errors.push((r&&r.id)||"неизвестная запись");continue}const copy={...r};delete copy.hash;const actual=await digest(stable(copy));if(actual!==r.hash)errors.push(r.id)}$("integrity").innerHTML=errors.length?'<span class="danger">Найдены записи с несовпадающим хешем: '+esc(errors.join(", "))+'</span>':'<span class="ok">Проверено записей: '+records.length+'. Хеши совпадают.</span> <span class="small">Это подтверждает лишь целостность проверенных полей относительно сохранённых хешей.</span>'}
+function download(name,content){const blob=new Blob([content],{type:"application/json;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$("save").addEventListener("click",()=>save().catch(e=>say("Не удалось сохранить: "+e.message)));
+$("clear").addEventListener("click",resetForm);
+$("export").addEventListener("click",()=>download("aksi-reality-engine-"+new Date().toISOString().slice(0,10)+".json",JSON.stringify({format:"aksi-reality-export/1",exported_at:new Date().toISOString(),records},null,2)));
+$("verify").addEventListener("click",()=>verify().catch(e=>$("integrity").textContent="Ошибка проверки: "+e.message));
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{const file=e.target.files[0];if(!file)return;try{const obj=JSON.parse(await file.text());const incoming=Array.isArray(obj)?obj:obj.records;if(!Array.isArray(incoming))throw new Error("Ожидался массив records.");let added=0;for(const r of incoming){if(r&&r.id&&r.data&&r.hash&&!records.some(x=>x.id===r.id)){records.push(r);added++}}persist();render();say("Импортировано новых записей: "+added+". Запусти проверку целостности, чтобы проверить хеши.");}catch(err){say("Импорт не выполнен: "+err.message)}finally{e.target.value=""}});
+$("deleteAll").addEventListener("click",()=>{if(!confirm("Удалить все записи AKSI Reality Engine из этого браузера? Сначала экспортируй резервную копию, если она нужна."))return;records=[];persist();render();$("integrity").textContent="Журнал удалён.";say("Локальный журнал очищен.")});
+readStore();render();
+})();
+</script></body></html>
