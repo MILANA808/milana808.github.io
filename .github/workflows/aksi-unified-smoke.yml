@@ -23,6 +23,17 @@ jobs:
           grep -q '/aksi-quantum.js' unified/index.html
           grep -q '/aksi-hrr.js' unified/index.html
           grep -q 'href="/unified/"' index.html
+          test -s aksi-unified-runtime.js
+          grep -q 'AKSI_UNIFIED.request' runtime/backend/client.js
+          grep -q 'aksi-unified-runtime.js' index.html
+          grep -q 'aksi-unified-runtime.js' runtime/index.html
+          grep -q 'aksi-unified-runtime.js' chat/index.html
+          grep -q 'aksi-unified-runtime.js' superpose/index.html
+          grep -q 'aksi-unified-runtime.js' agent/index.html
+      - name: Syntax-check canonical runtime and test safety contracts
+        run: |
+          node --check aksi-unified-runtime.js
+          node --test tests/aksi-unified-runtime.test.js
       - name: Syntax-check unified inline JavaScript
         run: |
           python - <<'PY'
