@@ -53,6 +53,7 @@ let nextId=1, debounce=null, lastHash="";
 function announce(message,kind){$("notice").textContent=message;$("notice").className="status "+(kind||"");}
 function safeText(value,max){return String(value||"").slice(0,max);}
 function addClaim(data={}){
+ if($("claims").children.length>=100){announce("Лимит — 100 утверждений на один паспорт.","warn");return null;}
  const id=nextId++,el=document.createElement("article");el.className="claim";el.dataset.id=String(id);
  const head=document.createElement("div");head.className="claimhead";
  const label=document.createElement("b");label.textContent="Утверждение "+id;
@@ -104,6 +105,7 @@ async function exportJSON(){
 async function importJSON(file){
  if(!file)return;if(file.size>1024*1024){announce("Файл слишком большой (лимит 1 МБ).","bad");return;}
  try{const d=JSON.parse(await file.text());if(d.schema!=="aksi-evidence-passport/v1"||!Array.isArray(d.claims)||d.claims.length>100)throw new Error("Неизвестная схема паспорта или неверный список утверждений.");
+ if(!d.claims.every(x=>x&&typeof x==="object"&&typeof x.claim==="string"&&Object.hasOwn(statuses,x.status)&&typeof x.source==="string"&&typeof x.explanation==="string"))throw new Error("Утверждения имеют неверный формат или неизвестный статус.");
  let verified=null;if(d.integrity?.algorithm==="SHA-256"&&typeof d.integrity.digest==="string"){const expected=await digest(JSON.stringify(stableObject(d)));verified=expected===d.integrity.digest;}
  if(!confirm("Импорт заменит текущую форму. Продолжить?"))return;setForm(d);saveLocal();
  if(verified===true){lastHash=d.integrity.digest;$("hash").textContent="SHA-256 совпал: "+lastHash;announce("Импорт завершён. Хэш совпал с содержимым файла. Это подтверждает целостность, не истинность.","good");}
