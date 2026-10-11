@@ -3,7 +3,10 @@ import copy
 import json
 import unittest
 from pathlib import Path
+import sys
 
+ROOT_FOR_IMPORT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT_FOR_IMPORT))
 from tools.evidence_lifecycle_verify import validate_evidence_record
 
 ROOT = Path(__file__).resolve().parents[1]
