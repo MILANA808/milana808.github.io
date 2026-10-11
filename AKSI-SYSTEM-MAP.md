@@ -44,6 +44,9 @@ Search found private JWKs persisted to `localStorage` in:
 
 This is not acceptable for a high-assurance identity. Any successful same-origin XSS or compromised dependency can read extractable key material. Treat existing browser keys as potentially exposed; do not reuse them for valuable identity, money, or production authorization. Migrate to non-extractable keys held in IndexedDB where supported, or server/HSM/KMS-held keys; prefer WebAuthn/passkeys for authentication and require explicit re-enrolment/rotation. Remove legacy plaintext private-key records after a safe migration/export decision. Do not claim this is fixed until each path has a regression test.
 
+### Critical — a custom “PQ commitment” is not post-quantum cryptography
+`aksi-seal.js` labels a custom SHA-256/SHA-512 iterative hash construction as a “Hybrid Post-Quantum Attestation” and sets `pq_hybrid_seal: true`. A custom hash loop is not ML-DSA, ML-KEM, a standardized post-quantum signature, or a reviewed hybrid protocol. Until replaced and independently tested, this claim must be treated as unsupported; do not use this seal as a post-quantum security guarantee.
+
 ### High — duplicate state/proof concepts
 - `app.js` uses `AKSI_COGNITIVE_LEDGER_V1`; another prior implementation/plan refers to `AKSI_CORE_LEDGER_V3`.
 - Bond, Trust, Seal, Permit, Capsule, Mandate, PQ, Integrity and Lab each implement overlapping receipt/key behavior.
