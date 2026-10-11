@@ -28,9 +28,10 @@ jobs:
           import re
           from pathlib import Path
           html = Path("aksi-lab/index.html").read_text(encoding="utf-8")
-          blocks = re.findall(r"<script(?:\\s[^>]*)?>([\\s\\S]*?)</script\\s*>", html, re.I)
-          if not blocks:
-              raise SystemExit("No inline script found")
-          Path("/tmp/aksi-lab.js").write_text(blocks[-1], encoding="utf-8")
+          start = html.rfind("<script>")
+          end = html.rfind("</script>")
+          if start < 0 or end < 0 or end <= start:
+              raise SystemExit("Inline script not found")
+          Path("/tmp/aksi-lab.js").write_text(html[start + len("<script>"):end], encoding="utf-8")
           PY
           node --check /tmp/aksi-lab.js
