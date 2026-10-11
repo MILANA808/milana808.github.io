@@ -47,6 +47,12 @@ This is not acceptable for a high-assurance identity. Any successful same-origin
 ### Critical — a custom “PQ commitment” is not post-quantum cryptography
 `aksi-seal.js` labels a custom SHA-256/SHA-512 iterative hash construction as a “Hybrid Post-Quantum Attestation” and sets `pq_hybrid_seal: true`. A custom hash loop is not ML-DSA, ML-KEM, a standardized post-quantum signature, or a reviewed hybrid protocol. Until replaced and independently tested, this claim must be treated as unsupported; do not use this seal as a post-quantum security guarantee.
 
+### Critical — backend proof endpoint previously asserted verification without verifying a signature
+The backend `GET /aksi/proof` previously returned `verified: true` alongside a placeholder string, without cryptographic verification. The route now creates an Ed25519-signed proof and verifies the signature before reporting the result. The endpoint explicitly limits the claim to signature integrity, not factual truth. Regression coverage was added in `Milana-backend/tests/test_security_contract.py`; CI is running for the change.
+
+### High — server signing identity may be ephemeral
+The backend signer generated an Ed25519 key but only persisted it when a key directory or persistence flag was configured. A free/ephemeral host can therefore rotate the public identity across restarts. The backend now accepts `AKSI_PRIVATE_KEY_B64` as a stable PKCS#8 PEM/DER key injected through the host's secret manager and reports `signing_key_mode` from `/health`. The Render blueprint declares this as a secret environment variable. **Deployment still needs a stable key configured in the Render dashboard**; without it, health reports `ephemeral` and identity continuity is not guaranteed.
+
 ### High — duplicate state/proof concepts
 - `app.js` uses `AKSI_COGNITIVE_LEDGER_V1`; another prior implementation/plan refers to `AKSI_CORE_LEDGER_V3`.
 - Bond, Trust, Seal, Permit, Capsule, Mandate, PQ, Integrity and Lab each implement overlapping receipt/key behavior.
