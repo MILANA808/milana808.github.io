@@ -160,6 +160,19 @@
       native.reasoning = extra;
       native.evidenceAudit = prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources";
       native.exploration = prepared.trajectory;
+      try {
+        const audit = root.AKSICognitiveCore;
+        if (audit) {
+          const record = audit.createCase(query);
+          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
+            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
+          }));
+          const receipt = await audit.receipt(record, audit.assess(record));
+          native.receipt = receipt.digest;
+          native.receiptSchema = receipt.schema;
+        }
+      } catch (_) { native.receipt = null; }
       return native;
     }
     const api = root.AKSI_WEBLLM;
