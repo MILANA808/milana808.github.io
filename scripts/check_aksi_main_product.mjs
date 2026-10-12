@@ -15,7 +15,7 @@ for (const marker of [
   'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"',
   "window.AKSI_UNIFIED_CORE.answer", "window.AKSI_INTERNET.gather",
   "state.history=state.history.slice(-60)", "if(!Array.isArray(state.history))state.history=[];",
-  "AKSI Native Generator", "Источники:"
+  "AKSI Native Generator", "Источники для самостоятельной проверки:"
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
 
 assert.ok(html.indexOf('src="/aksi-dna-topology-engine.js?v=1"') < scriptStart, "native generator must load before the main app script");
