@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
 import Core from "../aksi-cognitive-core.js";
 
-globalThis.crypto = globalThis.crypto || webcrypto;
+if (!globalThis.crypto) Object.defineProperty(globalThis, "crypto", { value: webcrypto, configurable: true });
 
 const empty = Core.createCase("The claim");
 assert.equal(Core.assess(empty).status, "insufficient_evidence");
