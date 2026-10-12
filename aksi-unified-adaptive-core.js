@@ -157,6 +157,10 @@
       if (prepared.diffusion) extra.push("Графовая диффузия: вычислена классическим алгоритмом.");
       if (Array.isArray(options.evidence) && options.evidence.length) extra.push("Найденные источники: " + options.evidence.length + " (не встроены в ответ автоматически; проверь их отдельно).");
       native.core = "AKSI Unified Adaptive Core " + VERSION + " + AKSI Native Generator";
+      state.episodes.push({ query: clean(query), answer: clean(native.text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString(), source: "aksi-native-dna-topology" });
+      if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
+      for (const t of prepared.context.tokens) ensureConcept(t).seen++;
+      save();
       native.reasoning = extra;
       native.evidenceAudit = prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources";
       native.exploration = prepared.trajectory;
