@@ -1,0 +1,31 @@
+name: AKSI Answer Engine Integrity
+on:
+  push:
+    paths:
+      - "quantum-mind/**"
+      - "aksi-calculator.js"
+      - "tests/aksi-calculator.test.js"
+      - "scripts/check_aksi_answer_engine.mjs"
+      - ".github/workflows/aksi-answer-engine.yml"
+  pull_request:
+    paths:
+      - "quantum-mind/**"
+      - "aksi-calculator.js"
+      - "tests/aksi-calculator.test.js"
+      - "scripts/check_aksi_answer_engine.mjs"
+      - ".github/workflows/aksi-answer-engine.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check answer engine and calculator
+        run: |
+          node scripts/check_aksi_answer_engine.mjs
+          node tests/aksi-calculator.test.js
