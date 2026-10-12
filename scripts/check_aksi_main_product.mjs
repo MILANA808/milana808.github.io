@@ -11,16 +11,16 @@ assert.ok(scriptEnd > bodyStart, "main product script must close");
 new Function(html.slice(bodyStart, scriptEnd));
 
 for (const marker of [
-  'id="aksiModel"', 'id="aksiLoadModel"', 'id="aksiUnloadModel"',
-  'id="aksiRememberTurns"', 'id="aksiUseWeb"', 'id="aksiClearMemory"',
-  'src="/aksi-webllm.js"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"',
-  "window.AKSI_WEBLLM.complete", "window.AKSI_INTERNET.gather",
+  'id="aksiModelStatus"', 'id="aksiRememberTurns"', 'id="aksiUseWeb"', 'id="aksiClearMemory"',
+  'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"',
+  "window.AKSI_UNIFIED_CORE.answer", "window.AKSI_INTERNET.gather",
   "state.history=state.history.slice(-60)", "state.history=[];state.memory={};",
-  "Языковая модель не загружена", "Источники:"
+  "AKSI Native Generator", "Источники:"
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
 
-assert.ok(html.indexOf('src="/aksi-webllm.js"') < scriptStart, "WebLLM must load before the main app script");
-assert.ok(html.indexOf("// Optional public-source retrieval works even when a local model is unavailable.") < html.indexOf("if(/кто ты|представься/.test(n))"), "loaded model must take priority over canned answers");
+assert.ok(html.indexOf('src="/aksi-dna-topology-engine.js?v=1"') < scriptStart, "native generator must load before the main app script");
+assert.ok(!html.includes('src="/aksi-webllm.js"'), "main chat must not depend on WebLLM");
+assert.ok(html.indexOf("window.AKSI_UNIFIED_CORE.answer") < html.indexOf("if(/кто ты|представься/.test(n))"), "native generator must take priority over canned answers");
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
 assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
