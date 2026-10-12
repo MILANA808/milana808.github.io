@@ -170,4 +170,5 @@
   }
   function clearMemory() { state = DEFAULT_STATE(); return { ok: true, persisted: save() }; }
   root.AKSI_UNIFIED_CORE = { version: VERSION, answer, prepare, feedback, stats, clearMemory, semanticAddress, lorenz };
+  if (typeof module === "object" && module.exports) module.exports = root.AKSI_UNIFIED_CORE;
 })(typeof window !== "undefined" ? window : globalThis);
