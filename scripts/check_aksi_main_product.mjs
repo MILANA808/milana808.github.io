@@ -14,7 +14,7 @@ for (const marker of [
   'id="aksiModelStatus"', 'id="aksiRememberTurns"', 'id="aksiUseWeb"', 'id="aksiClearMemory"',
   'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"',
   "window.AKSI_UNIFIED_CORE.answer", "window.AKSI_INTERNET.gather",
-  "state.history=state.history.slice(-60)", "state.history=[];state.memory={};",
+  "state.history=state.history.slice(-60)", "if(!Array.isArray(state.history))state.history=[];",
   "AKSI Native Generator", "Источники:"
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
 
