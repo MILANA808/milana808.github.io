@@ -20,6 +20,7 @@ for (const marker of [
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
 
 assert.ok(html.indexOf('src="/aksi-webllm.js"') < scriptStart, "WebLLM must load before the main app script");
+assert.ok(html.indexOf("// Optional public-source retrieval works even when a local model is unavailable.") < html.indexOf("if(/кто ты|представься/.test(n))"), "loaded model must take priority over canned answers");
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
 assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
