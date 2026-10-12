@@ -114,9 +114,9 @@
     const q=clean(query,1200),a=clean(answer,5000);
     const ep=memory.episodes.slice().reverse().find(x=>x.q===q&&x.a===a);
     if(!ep)return {ok:false,reason:"episode_not_found"};
-    const key=ep.mode+":"+hash(q+"|"+a);
-    memory.ratings[key]=clamp((memory.ratings[key]||0)+rating,-4,4);
     const matched=rank(q).items[0];
+    const key=matched ? matched.id : ("query:"+hash(q));
+    memory.ratings[key]=clamp((memory.ratings[key]||0)+rating,-4,4);
     if(matched&&rating>0&&!memory.learned.some(x=>x.q===q&&x.a===a)){
       memory.learned.push({q,a,at:new Date().toISOString()});
       memory.learned=memory.learned.slice(-100);
