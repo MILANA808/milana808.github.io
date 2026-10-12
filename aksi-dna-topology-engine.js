@@ -112,7 +112,7 @@
   function feedback(query, answer, rating) {
     rating=Number(rating);if(rating!==1&&rating!==-1)throw new RangeError("rating must be 1 or -1");
     const q=clean(query,1200),a=clean(answer,5000);
-    const ep=memory.episodes.slice().reverse().find(x=>x.q===q&&x.a===a);
+    const ep=memory.episodes.slice().reverse().find(x=>x.q===q&&(x.a===a||a.indexOf(x.a)===0));
     if(!ep)return {ok:false,reason:"episode_not_found"};
     const matched=rank(q).items[0];
     const key=matched ? matched.id : ("query:"+hash(q));
