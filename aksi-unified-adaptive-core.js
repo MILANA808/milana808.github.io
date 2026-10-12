@@ -95,9 +95,39 @@
     }
     return { stable: true, turns, signature: Number(((energy / (steps || 240)) % 1).toFixed(6)) };
   }
-  function prepare(query) {
+  function prepare(query, evidence) {
     const ctx = contextFor(query);
     const trajectory = lorenz(clean(query, 500));
+    let intent = null, diffusion = null, evidenceAssessment = null;
+    try {
+      if (root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine) {
+        intent = new root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine().analyze(query);
+      }
+    } catch (_) {}
+    try {
+      const geo = root.AKSIGeometricKnowledgeCore;
+      if (geo && ctx.tokens.length) {
+        const allTokens = Object.keys(state.concepts).slice(-100);
+        const ids = Array.from(new Set(allTokens.concat(ctx.tokens))).slice(0, 100);
+        const allowed = new Set(ids);
+        const edges = Object.values(state.links).filter(e => allowed.has(e.a) && allowed.has(e.b)).map(e => ({ from: e.a, to: e.b, weight: e.weight }));
+        const seeds = {};
+        ctx.tokens.forEach(t => { if (allowed.has(t)) seeds[t] = 1; });
+        diffusion = geo.diffuseGraph({ nodes: ids, edges }, seeds, { steps: 4, alpha: 0.3 });
+        ctx.relatedConcepts = Object.entries(diffusion.scores).filter(([k]) => !ctx.tokens.includes(k)).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([token,score])=>({token,score}));
+      }
+    } catch (_) {}
+    try {
+      const audit = root.AKSICognitiveCore;
+      if (audit && Array.isArray(evidence) && evidence.length) {
+        const record = audit.createCase(query);
+        evidence.slice(0, 6).forEach(item => audit.addEvidence(record, {
+          stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
+          url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
+        }));
+        evidenceAssessment = audit.assess(record);
+      }
+    } catch (_) {}
     const hints = [
       "Классическая адаптивная память: веса связей обновляются только по явной обратной связи пользователя.",
       "Геометрические адреса понятий — детерминированная ассоциативная эвристика, а не доказательство смысла.",
@@ -109,8 +139,11 @@
         ctx.related.map((e, i) => (i + 1) + ". Запрос: " + e.query + "\nОтвет: " + e.answer +
           "\nОбратная связь: " + (e.feedback > 0 ? "полезно" : e.feedback < 0 ? "неполезно" : "не оценено")).join("\n\n"));
     }
+    if (intent && intent.accepted) hints.push("Маршрутизация задачи (эвристика, не оценка истины): " + intent.label + " / " + intent.intent + "; сходство=" + intent.score);
+    if (ctx.relatedConcepts && ctx.relatedConcepts.length) hints.push("Геометрическое распространение активации (классический графовый ранг, не доказательство): " + JSON.stringify(ctx.relatedConcepts));
+    if (evidenceAssessment) hints.push("Аудит найденных материалов: " + evidenceAssessment.status + "; источниковых фрагментов=" + evidenceAssessment.evidenceCount + ". Они зарегистрированы как контекст, не как подтверждение или опровержение.");
     hints.push("Текущие признаки: " + JSON.stringify({ conceptCount: ctx.concepts.length, feedbackCount: state.feedbackCount, exploration: trajectory }));
-    return { context: ctx, trajectory, system: hints.join("\n\n") };
+    return { context: ctx, trajectory, intent, diffusion, evidenceAssessment, system: hints.join("\n\n") };
   }
   async function answer(query, options) {
     options = options || {};
@@ -118,15 +151,36 @@
     if (!api || typeof api.complete !== "function" || !api.ready()) {
       return { text: null, source: "none", error: "Локальная языковая модель не загружена. Загрузи модель в панели WebLLM.", core: "AKSI Unified Adaptive Core " + VERSION };
     }
-    const prepared = prepare(query);
+    const prepared = prepare(query, options.evidence || []);
     const system = [String(options.system || ""), prepared.system].filter(Boolean).join("\n\n");
-    const result = await api.complete(query, Object.assign({}, options, { system }));
+    const llmOptions = Object.assign({}, options, { system });
+    delete llmOptions.evidence;
+    const result = await api.complete(query, llmOptions);
     if (result && result.text) {
       state.episodes.push({ query: clean(query), answer: clean(result.text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString() });
       if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
       for (const t of prepared.context.tokens) ensureConcept(t).seen++;
       save();
-      return Object.assign({}, result, { core: "AKSI Unified Adaptive Core " + VERSION, adaptiveContext: prepared.context.related.length, exploration: prepared.trajectory });
+      let receipt = null;
+      try {
+        const audit = root.AKSICognitiveCore;
+        if (audit) {
+          const record = audit.createCase(query);
+          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
+            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
+          }));
+          receipt = await audit.receipt(record, audit.assess(record));
+        }
+      } catch (_) {}
+      return Object.assign({}, result, {
+        core: "AKSI Unified Adaptive Core " + VERSION,
+        adaptiveContext: prepared.context.related.length,
+        exploration: prepared.trajectory,
+        intent: prepared.intent && prepared.intent.accepted ? prepared.intent.intent : null,
+        evidenceAudit: prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources",
+        receipt: receipt ? receipt.digest : null
+      });
     }
     return result;
   }
