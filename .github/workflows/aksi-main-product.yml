@@ -1,0 +1,31 @@
+name: AKSI Main Product Integrity
+on:
+  push:
+    paths:
+      - "index.html"
+      - "aksi-webllm.js"
+      - "aksi-internet.js"
+      - "aksi-calculator.js"
+      - "scripts/check_aksi_main_product.mjs"
+      - ".github/workflows/aksi-main-product.yml"
+  pull_request:
+    paths:
+      - "index.html"
+      - "aksi-webllm.js"
+      - "aksi-internet.js"
+      - "aksi-calculator.js"
+      - "scripts/check_aksi_main_product.mjs"
+      - ".github/workflows/aksi-main-product.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  product-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate integrated product
+        run: node scripts/check_aksi_main_product.mjs
