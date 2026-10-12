@@ -6,7 +6,9 @@ on:
       - "aksi-webllm.js"
       - "aksi-internet.js"
       - "aksi-calculator.js"
+      - "aksi-wave-bayesian-engine.js"
       - "scripts/check_aksi_main_product.mjs"
+      - "scripts/test_aksi_wave_bayesian_engine.cjs"
       - ".github/workflows/aksi-main-product.yml"
   pull_request:
     paths:
@@ -14,7 +16,9 @@ on:
       - "aksi-webllm.js"
       - "aksi-internet.js"
       - "aksi-calculator.js"
+      - "aksi-wave-bayesian-engine.js"
       - "scripts/check_aksi_main_product.mjs"
+      - "scripts/test_aksi_wave_bayesian_engine.cjs"
       - ".github/workflows/aksi-main-product.yml"
   workflow_dispatch:
 permissions:
@@ -29,3 +33,5 @@ jobs:
           node-version: 20
       - name: Validate integrated product
         run: node scripts/check_aksi_main_product.mjs
+      - name: Test CPU wave-Bayesian engine
+        run: node scripts/test_aksi_wave_bayesian_engine.cjs
