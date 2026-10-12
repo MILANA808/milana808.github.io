@@ -7,6 +7,8 @@ const math = context.AKSICalculator;
 assert.ok(math);
 assert.strictEqual(math.evaluate("2+2*3").value, 8);
 assert.strictEqual(math.evaluate("(2+3)^2").value, 25);
+assert.strictEqual(math.evaluate("-3^2").value, -9);
+assert.strictEqual(math.evaluate("2^-2").value, 0.25);
 assert.strictEqual(math.evaluate("sqrt(81)").value, 9);
 assert.ok(Math.abs(math.evaluate("sin(pi/2)").value - 1) < 1e-12);
 assert.strictEqual(math.evaluate("1/0").ok, false);
