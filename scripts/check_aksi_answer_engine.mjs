@@ -8,7 +8,7 @@ const bodyStart = start + '<script type="module">'.length;
 const end = html.indexOf('</script>', bodyStart);
 assert.ok(end > bodyStart, "module script must close");
 new Function(html.slice(bodyStart, end));
-for (const marker of ["useWebEvidence", "useLocalMemory", "AKSI_INTERNET.gather", "AKSICalculator.evaluate", "AksiMemory.history", "Выбрать этот ответ", "Повторить измерение"]) assert.ok(html.includes(marker), "missing integration: " + marker);
+for (const marker of ["useWebEvidence", "useLocalMemory", "AKSI_INTERNET.gather", "AKSICalculator.evaluate", "AksiMemory.history", "Выбрать этот ответ", "Повторить измерение", "receipt", "safeScore", "sourceFootnote"]) assert.ok(html.includes(marker), "missing integration: " + marker);
 const mathContext = {};
 vm.runInNewContext(fs.readFileSync("aksi-calculator.js", "utf8"), mathContext);
 const calc = mathContext.AKSICalculator;
