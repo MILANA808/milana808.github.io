@@ -248,7 +248,7 @@ if(window.AKSI_DNA_TOPOLOGY){
  const label=document.createElement('span');label.textContent='Оцени ответ:';label.style.cssText='font-size:11px;color:var(--muted)';
  const yes=document.createElement('button');yes.type='button';yes.className='chip';yes.textContent='👍 Полезно';
  const no=document.createElement('button');no.type='button';no.className='chip';no.textContent='👎 Не то';
- function rate(value,button){try{const r=window.AKSI_DNA_TOPOLOGY.feedback(q,a,value);label.textContent=r.ok?'Обратная связь сохранена':'Не удалось связать оценку с ответом';yes.disabled=true;no.disabled=true;$('chatStatus').textContent=r.ok?'Ядро обновило веса по твоей оценке. Это не переобучение языковой модели.':'Оценка не сохранена.';event('ADAPTIVE_FEEDBACK','rating='+value);}catch(err){label.textContent='Ошибка сохранения оценки';}}
+ function rate(value,button){try{const r=window.AKSI_DNA_TOPOLOGY.feedback(q,a,value);if(window.AKSI_UNIFIED_CORE)window.AKSI_UNIFIED_CORE.feedback(q,a,value);label.textContent=r.ok?'Обратная связь сохранена':'Не удалось связать оценку с ответом';yes.disabled=true;no.disabled=true;$('chatStatus').textContent=r.ok?'Ядро обновило веса по твоей оценке. Это не переобучение языковой модели.':'Оценка не сохранена.';event('ADAPTIVE_FEEDBACK','rating='+value);}catch(err){label.textContent='Ошибка сохранения оценки';}}
  yes.addEventListener('click',()=>rate(1,yes));no.addEventListener('click',()=>rate(-1,no));
  feedback.appendChild(label);feedback.appendChild(yes);feedback.appendChild(no);wait.insertAdjacentElement('afterend',feedback);
 }
