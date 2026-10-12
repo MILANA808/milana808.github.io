@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#eee3d1">
-<meta name="description" content="AKSI MATRIX — инфраструктура проверяемости AI: происхождение данных, evidence receipts, целостность, неопределённость и переносимый контекст. Русскоязычная интерактивная демо-платформа.">
+<meta name="description" content="AKSI MATRIX — локальный AI-помощник с подключаемой браузерной языковой моделью, точными вычислениями, добровольной памятью и поиском открытых источников.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://milana808.github.io/">
 <link rel="alternate" type="text/plain" href="/llms.txt" title="AKSI AI discovery manifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AKSI MATRIX">
 <meta property="og:title" content="AKSI MATRIX — проверяемость и непрерывность AI">
-<meta property="og:description" content="Открытая демо-платформа AKSI: AI-интерфейс, evidence-подход, верификация и LIFECORE — переносимый контекст проекта.">
+<meta property="og:description" content="Один интерфейс AKSI: локальная языковая модель, математические инструменты, память с управлением пользователя, поиск источников и журнал событий.">
 <meta property="og:url" content="https://milana808.github.io/">
 <meta name="twitter:card" content="summary">
-<title>AKSI MATRIX — проверяемая AI-инфраструктура и LIFECORE</title>
+<title>AKSI MATRIX — локальный AI-помощник и проверяемые ответы</title>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Organization","name":"AKSI MATRIX","url":"https://milana808.github.io/","sameAs":["https://github.com/MILANA808/milana808.github.io"],"description":"Открытая демонстрационная инфраструктура для структурирования AI-контекста, доказательств, целостности и статусов проверки."}
 </script>
@@ -199,10 +199,6 @@ async function ask(q){const n=normalize(q);if(!n)return;let calc=null;try{if(win
 let m=q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){state.memory[m[1].trim()]=m[2].trim();persist();render();event('MEMORY','Saved: '+m[1].trim());return 'Сохранила в локальную память: '+m[1].trim()+' = '+m[2].trim();}
 if(/^(память|покажи память|что ты помнишь)$/.test(n)){let keys=Object.keys(state.memory);return keys.length?keys.map(k=>k+' = '+state.memory[k]).join('\n'):'Локальная память пока пуста.';}
 if(n==='статус системы'||n==='диагностика') {await diagnostics();return $('diagOutput').textContent;}
-if(/кто ты|представься/.test(n))return 'Я Акси — интерфейс проекта AKSI MATRIX. Сейчас доступны локальные вычисления, память браузера, миссии, журнал событий и проверка API. Полноценные ответы свободной формы требуют подключения языковой модели; я не буду выдавать поиск по шаблонам за такую модель.';
-if(/суперпозици/.test(n))return 'В квантовой механике суперпозиция — состояние, описываемое линейной комбинацией возможных базисных состояний. Классический симулятор может вычислять такие состояния на обычном процессоре; это не означает выполнение на настоящем квантовом оборудовании.';
-if(/энтропи/.test(n))return 'Энтропия в термодинамике характеризует число доступных микросостояний и направление необратимых процессов; в теории информации — неопределённость распределения вероятностей. Конкретное определение зависит от области.';
-if(/ии|нейросет|искусственн/.test(n))return 'ИИ — широкий класс методов для задач вроде распознавания, генерации, планирования и поиска закономерностей. На этой странице интерактивный интерфейс и инструменты; генеративная языковая модель появится в ответах только при успешном подключении.';
 // Optional public-source retrieval works even when a local model is unavailable.
 let evidence=[];
 if(!$('aksiUseWeb').checked){$('aksiEvidence').style.display='none';}
@@ -229,6 +225,10 @@ if(evidence.length){
  $('chatStatus').textContent='Найдены открытые источники; языковая модель не загружена, поэтому показываю материалы без генеративного пересказа.';
  return 'Языковая модель не загружена. Вот найденные материалы — это выдержки из источников, не проверенный итоговый ответ:\n\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+'\n'+String(x.text||'').slice(0,700)+'\nURL: '+(x.url||'не указан')).join('\n\n');
 }
+if(/кто ты|представься/.test(n))return 'Я Акси — интерфейс проекта AKSI MATRIX. Сейчас доступны локальные вычисления, память браузера, миссии, журнал событий и проверка API. Полноценные ответы свободной формы требуют подключения языковой модели; я не буду выдавать поиск по шаблонам за такую модель.';
+if(/суперпозици/.test(n))return 'В квантовой механике суперпозиция — состояние, описываемое линейной комбинацией возможных базисных состояний. Классический симулятор может вычислять такие состояния на обычном процессоре; это не означает выполнение на настоящем квантовом оборудовании.';
+if(/энтропи/.test(n))return 'Энтропия в термодинамике характеризует число доступных микросостояний и направление необратимых процессов; в теории информации — неопределённость распределения вероятностей. Конкретное определение зависит от области.';
+if(/ии|нейросет|искусственн/.test(n))return 'ИИ — широкий класс методов для задач вроде распознавания, генерации, планирования и поиска закономерностей. На этой странице интерактивный интерфейс и инструменты; генеративная языковая модель появится в ответах только при успешном подключении.';
 const seeds=window.__AKSI_SEED||[];for(const item of seeds){const key=normalize(item.q||'');if(key&& (n===key || (key.length>4&&n.includes(key))))return String(item.a||'');}
 $('chatStatus').textContent='Пробую подключить backend…';event('NET','Trying backend chat endpoint');try{const data=await backend('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,prompt:q})});const answer=data.reply||data.answer||data.response||data.message;if(typeof answer==='string'&&answer.length){$('chatStatus').textContent='Ответ получен от backend.';return answer;}}catch(e){event('NET','Backend chat unavailable: '+e.message);}
 $('chatStatus').textContent='Backend не ответил; пробую открытый справочник.';try{const r=await fetch('https://ru.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(q),{headers:{'Accept':'application/json'}});if(r.ok){const d=await r.json();if(d.extract){$('chatStatus').textContent='Ответ из открытого справочника Wikipedia; это не генерация LLM.';return (d.title?d.title+'\n':'')+d.extract.slice(0,1000)+(d.content_urls&&d.content_urls.desktop?'\nИсточник: '+d.content_urls.desktop.page:'');}}}catch(e){event('NET','Public knowledge lookup unavailable');}
