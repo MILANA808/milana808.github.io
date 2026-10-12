@@ -147,11 +147,42 @@
   }
   async function answer(query, options) {
     options = options || {};
+    const prepared = prepare(query, options.evidence || []);
+    // Native offline generation is the primary path; WebLLM is deliberately not called.
+    if (root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function") {
+      const native = root.AKSI_DNA_TOPOLOGY.generate(query, options);
+      const extra = [];
+      if (prepared.intent && prepared.intent.accepted) extra.push("Маршрут интента: " + prepared.intent.label);
+      if (prepared.context.related.length) extra.push("Похожие локальные эпизоды учтены как контекст: " + prepared.context.related.length);
+      if (prepared.diffusion) extra.push("Графовая диффузия: вычислена классическим алгоритмом.");
+      if (Array.isArray(options.evidence) && options.evidence.length) extra.push("Найденные источники: " + options.evidence.length + " (не встроены в ответ автоматически; проверь их отдельно).");
+      native.core = "AKSI Unified Adaptive Core " + VERSION + " + AKSI Native Generator";
+      state.episodes.push({ query: clean(query), answer: clean(native.text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString(), source: "aksi-native-dna-topology" });
+      if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
+      for (const t of prepared.context.tokens) ensureConcept(t).seen++;
+      save();
+      native.reasoning = extra;
+      native.evidenceAudit = prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources";
+      native.exploration = prepared.trajectory;
+      try {
+        const audit = root.AKSICognitiveCore;
+        if (audit) {
+          const record = audit.createCase(query);
+          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
+            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
+          }));
+          const receipt = await audit.receipt(record, audit.assess(record));
+          native.receipt = receipt.digest;
+          native.receiptSchema = receipt.schema;
+        }
+      } catch (_) { native.receipt = null; }
+      return native;
+    }
     const api = root.AKSI_WEBLLM;
     if (!api || typeof api.complete !== "function" || !api.ready()) {
-      return { text: null, source: "none", error: "Локальная языковая модель не загружена. Загрузи модель в панели WebLLM.", core: "AKSI Unified Adaptive Core " + VERSION };
+      return { text: "Встроенный генератор АКСИ не загрузился. Обнови страницу и проверь подключение aksi-dna-topology-engine.js.", source: "native-core-error", error: "AKSI_DNA_TOPOLOGY unavailable", core: "AKSI Unified Adaptive Core " + VERSION };
     }
-    const prepared = prepare(query, options.evidence || []);
     const system = [String(options.system || ""), prepared.system].filter(Boolean).join("\n\n");
     const llmOptions = Object.assign({}, options, { system });
     delete llmOptions.evidence;
@@ -190,7 +221,7 @@
     rating = Number(rating);
     if (rating !== 1 && rating !== -1) throw new RangeError("rating must be 1 (helpful) or -1 (not helpful).");
     const q = clean(query), a = clean(answerText, 5000);
-    const episode = state.episodes.slice().reverse().find(e => e.query === q && e.answer === a);
+    const episode = state.episodes.slice().reverse().find(e => e.query === q && (e.answer === a || a.indexOf(e.answer) === 0));
     if (!episode) return { ok: false, reason: "episode_not_found" };
     if (episode.feedback === rating) return { ok: true, changed: false, feedbackCount: state.feedbackCount };
     const previous = Number(episode.feedback) || 0;
