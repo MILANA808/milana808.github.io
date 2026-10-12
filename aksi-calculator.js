@@ -8,9 +8,9 @@
     function ws() { while (/\s/.test(s[i] || "")) i++; }
     function eat(ch) { ws(); if (s[i] === ch) { i++; return true; } return false; }
     function expr() { var v = term(); for (;;) { if (eat("+")) v += term(); else if (eat("-")) v -= term(); else return v; } }
-    function term() { var v = power(); for (;;) { if (eat("*")) v *= power(); else if (eat("/")) { var d = power(); if (d === 0) throw Error("Деление на ноль."); v /= d; } else return v; } }
-    function power() { var v = unary(); if (eat("^")) v = Math.pow(v, power()); return v; }
-    function unary() { if (eat("+")) return unary(); if (eat("-")) return -unary(); return primary(); }
+    function term() { var v = unary(); for (;;) { if (eat("*")) v *= unary(); else if (eat("/")) { var d = unary(); if (d === 0) throw Error("Деление на ноль."); v /= d; } else return v; } }
+    function power() { var v = primary(); if (eat("^")) v = Math.pow(v, unary()); return v; }
+    function unary() { if (eat("+")) return unary(); if (eat("-")) return -unary(); return power(); }
     function primary() {
       ws();
       if (eat("(")) { var v = expr(); if (!eat(")")) throw Error("Не хватает закрывающей скобки."); return v; }
