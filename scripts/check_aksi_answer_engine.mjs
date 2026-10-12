@@ -8,7 +8,7 @@ const bodyStart = start + '<script type="module">'.length;
 const end = html.indexOf('</script>', bodyStart);
 assert.ok(end > bodyStart, "module script must close");
 new Function(html.slice(bodyStart, end));
-for (const marker of ["useWebEvidence", "useLocalMemory", "AKSI_INTERNET.gather", "AKSICalculator.evaluate", "AksiMemory.history", "Выбрать этот ответ", "Повторить измерение", "receipt", "safeScore", "sourceFootnote", "verifyReceipt", "receiptCheck", "ЦЕЛОСТНОСТЬ ПОДТВЕРЖДЕНА", "showMemory", "clearMemory", "memoryStatus"]) assert.ok(html.includes(marker), "missing integration: " + marker);
+for (const marker of ["useWebEvidence", "useLocalMemory", "AKSI_INTERNET.gather", "AKSICalculator.evaluate", "AksiMemory.history", "Выбрать этот ответ", "Повторить измерение", "receipt", "safeScore", "sourceFootnote", "verifyReceipt", "receiptCheck", "ЦЕЛОСТНОСТЬ ПОДТВЕРЖДЕНА", "showMemory", "clearMemory", "memoryStatus", "window.AKSI_WEBLLM", "engine.complete", "href=\"/ask.html\"", "Qwen2.5-0.5B-Instruct-q4f16_1-MLC", "loaded&&loaded.model"]) assert.ok(html.includes(marker), "missing integration: " + marker);
 const mathContext = {};
 vm.runInNewContext(fs.readFileSync("aksi-calculator.js", "utf8"), mathContext);
 const calc = mathContext.AKSICalculator;
@@ -24,4 +24,6 @@ assert.ok(html.includes("delete payload.integrity"), "receipt verifier must excl
 assert.ok(html.includes("actual===expected"), "receipt verifier must compare recomputed and stored hashes");
 assert.ok(html.includes("window.AksiMemory.clear()"), "local history must be deletable from the UI");
 assert.ok(html.includes("window.AksiMemory.history(40)"), "local history must be inspectable from the UI");
+assert.ok(html.includes('<script src="/aksi-webllm.js"></script>'), "answer engine must use the shared pinned WebLLM runtime");
+assert.ok(!html.includes('import("https://esm.run/@mlc-ai/web-llm")'), "unversioned direct WebLLM import must not return");
 console.log("AKSI Answer Engine integrity checks: OK");
