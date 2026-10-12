@@ -221,7 +221,7 @@
     rating = Number(rating);
     if (rating !== 1 && rating !== -1) throw new RangeError("rating must be 1 (helpful) or -1 (not helpful).");
     const q = clean(query), a = clean(answerText, 5000);
-    const episode = state.episodes.slice().reverse().find(e => e.query === q && e.answer === a);
+    const episode = state.episodes.slice().reverse().find(e => e.query === q && (e.answer === a || a.indexOf(e.answer) === 0));
     if (!episode) return { ok: false, reason: "episode_not_found" };
     if (episode.feedback === rating) return { ok: true, changed: false, feedbackCount: state.feedbackCount };
     const previous = Number(episode.feedback) || 0;
