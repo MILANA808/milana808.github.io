@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - "index.html"
+      - "scripts/test_aksi_main_chat_runtime.cjs"
       - "aksi-webllm.js"
       - "aksi-internet.js"
       - "aksi-calculator.js"
@@ -56,6 +57,8 @@ jobs:
           node-version: 20
       - name: Validate integrated product
         run: node scripts/check_aksi_main_product.mjs
+      - name: Test main chat runtime escapes
+        run: node scripts/test_aksi_main_chat_runtime.cjs
       - name: Test unified adaptive core
         run: node scripts/test_aksi_unified_adaptive_core.cjs
       - name: Test native DNA topology generator
