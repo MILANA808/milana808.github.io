@@ -229,7 +229,7 @@ if($('aksiUseWeb').checked){
    const remoteAnswer=data.reply||data.answer||data.response||data.message;
    if(typeof remoteAnswer==='string'&&remoteAnswer.trim()){
     $('chatStatus').textContent='Ответ получен от backend-модели. Проверь факты и источники отдельно.';
-    return remoteAnswer.trim();
+    return remoteAnswer.trim()+'\n\n[ИСТОЧНИК ОТВЕТА] backend /api/chat · серверная подпись и проверка происхождения не подтверждены этим интерфейсом.';
    }
    event('BACKEND','Chat endpoint responded without a recognized answer; using local fallback.');
   }catch(err){event('BACKEND_FALLBACK','Backend model unavailable; using local fallback: '+err.message);}
@@ -239,6 +239,10 @@ if($('aksiUseWeb').checked){
  if(result&&result.text){
   $('chatStatus').textContent='AKSI Native Generator · '+(result.mode||'local')+' · без WebLLM'+(evidence.length?' · источников найдено: '+evidence.length:'');
   let output=result.text;
+  if(result.core)output+='\n\n[ЯДРО] '+result.core;
+  if(result.evidenceAudit)output+='\n[АУДИТ ИСТОЧНИКОВ] '+result.evidenceAudit+' · источники не считаются подтверждением автоматически.';
+  if(result.receipt)output+='\n[КВИТАНЦИЯ] '+result.receipt+(result.receiptSchema?' · '+result.receiptSchema:'')+' · целостность записи не доказывает истинность ответа.';
+  if(Array.isArray(result.reasoning)&&result.reasoning.length)output+='\n[ПРОЦЕСС] '+result.reasoning.join('; ');
   if(evidence.length)output+='\n\nИсточники для самостоятельной проверки:\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'URL не указан')).join('\n');
   if(result.dna)output+='\n\n[DNA/topology] '+result.dna.invariant+' · длина='+result.dna.length+' · crossings='+result.dna.crossings+' · '+result.dna.note;
   return output;
