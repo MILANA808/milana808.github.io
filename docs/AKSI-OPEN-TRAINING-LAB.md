@@ -12,13 +12,13 @@ Public entry: `/training-lab/`. Browser-only CPU experiment; no external model e
 - A fixed seed produces a deterministic line-level train/test split.
 - Only train rows update counts; test rows are used only for evaluation.
 - The page exposes training/test line counts, cross-entropy, perplexity, vocabulary, context count, parameter count, hashes, seed, model order, and timestamps.
-- Model JSON can be exported and imported. Browser persistence occurs only when the user explicitly saves.
+- Model JSON can be exported and imported. Browser persistence occurs only when the user explicitly saves. The export manifest includes SHA-256 hashes plus the exact train/test lines so the split can be independently reproduced; exported files may contain user-provided text.
 - Tests cover fixed-seed split, training, held-out evaluation, generation, manifest hashes, and JSON roundtrip.
 
 ## Limits
 
 - Default corpus is tiny and only demonstrates the pipeline.
-- FNV-1a digests are non-cryptographic change detectors, not provenance proof.
+- SHA-256 digests detect corpus/line changes, but do not prove who supplied the text or whether it is true.
 - Perplexity measures next-character prediction, not semantic correctness or usefulness.
 - LocalStorage is browser-specific and can be cleared by the user.
 - A serious neural model requires a larger licensed corpus, tokenizer, trainable parameters, an optimizer, checkpointing, held-out benchmark suite, and resource planning. This lab is a visible baseline to compare against, not a claim that the final AKSI language model is finished.
