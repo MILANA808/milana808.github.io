@@ -19,6 +19,12 @@
  const chars=s=>Array.from(s);
  function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
  function rng(seed){let x=seed>>>0||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return(x>>>0)/4294967296;};}
+ async function sha256(s){
+  const bytes=new TextEncoder().encode(String(s));
+  if(root.crypto&&root.crypto.subtle){const digest=await root.crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,"0")).join("");}
+  if(typeof require==="function"){try{return require("node:crypto").createHash("sha256").update(String(s),"utf8").digest("hex");}catch(_){}}
+  throw new Error("SHA-256 недоступен в этой среде.");
+ }
  function splitLines(corpus,seed,ratio){
   const lines=clean(corpus).split(/\n+/).map(s=>s.trim()).filter(Boolean);
   const r=rng(seed), tagged=lines.map((text,index)=>({text,index,key:r()}));
@@ -37,12 +43,12 @@
   const order=Math.max(1,Math.min(5,Number(opts.order)||3)),seed=Number(opts.seed)||14021995,ratio=Math.max(.5,Math.min(.9,Number(opts.trainRatio)||.8));
   const split=splitLines(corpus,seed,ratio);if(!split.train.length)throw new Error("Добавь хотя бы одну непустую строку.");
   const model=fresh(order);model.seed=seed;model.vocabulary=Array.from(new Set(chars(split.train.join("\n")))).sort();
-  model.corpusDigest="fnv1a32:"+hash(corpus).toString(16).padStart(8,"0");
+  model.corpusDigest="sha256:"+await sha256(corpus);
   const total=split.train.length;
   for(let i=0;i<total;i++){addText(model,split.train[i]+"\n");if(opts.onProgress)opts.onProgress({stage:"training",done:i+1,total,percent:Math.round((i+1)/total*100)});if(i%8===7)await new Promise(resolve=>setTimeout(resolve,0));}
   model.trainedAt=new Date().toISOString();
   model.metrics={split:{total:split.total,train:split.train.length,test:split.test.length,seed,trainRatio:ratio},train:evaluate(model,split.train),test:split.test.length?evaluate(model,split.test):null};
-  model.trainingManifest={corpusDigest:model.corpusDigest,order,seed,trainRatio:ratio,trainLineHashes:split.train.map(x=>"fnv1a32:"+hash(x).toString(16)),testLineHashes:split.test.map(x=>"fnv1a32:"+hash(x).toString(16)),disclosure:"FNV-1a hashes detect accidental changes only; they are not cryptographic proofs."};
+  model.trainingManifest={schema:"AKSI-TRAINING-MANIFEST/1",corpusDigest:model.corpusDigest,order,seed,trainRatio:ratio,trainLineHashes:await Promise.all(split.train.map(async x=>"sha256:"+await sha256(x))),testLineHashes:await Promise.all(split.test.map(async x=>"sha256:"+await sha256(x))),trainExamples:split.train,testExamples:split.test,datasetDisclosure:"Training and test text are included in exported model for reproducibility. Export may contain user-provided text.",hashAlgorithm:"SHA-256"};
   return {model,split};
  }
  function generate(model,prompt,opts){
