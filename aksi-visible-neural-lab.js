@@ -75,9 +75,9 @@ function generate(m,prompt,opts){
  }
  return {text:out.join(""),model:"AKSI tiny character MLP "+VERSION,algorithm:m.algorithm,warning:"Маленькая учебная нейросеть; возможен бессвязный текст. Это не большая языковая модель и не фактологический проверяющий модуль."};
 }
-function serializable(m){return {...m,W1:Array.from(m.W1),b1:Array.from(m.b1),W2:Array.from(m.W2),b2:Array.from(m.b2)};}
+function serializable(m){return {...m,charToId:Object.fromEntries(m.charToId instanceof Map?m.charToId:Object.entries(m.charToId||{})),W1:Array.from(m.W1),b1:Array.from(m.b1),W2:Array.from(m.W2),b2:Array.from(m.b2)};}
 function exportModel(m){return JSON.stringify({format:SCHEMA,exportedAt:new Date().toISOString(),model:serializable(m)},null,2);}
-function importModel(raw){const d=typeof raw==="string"?JSON.parse(raw):raw,m=d.model||d;if(m.schema!==SCHEMA||!Array.isArray(m.W1)||!Array.isArray(m.W2)||!Array.isArray(m.vocabulary))throw Error("Файл не распознан как нейросеть AKSI.");return {...m,W1:Float64Array.from(m.W1),b1:Float64Array.from(m.b1),W2:Float64Array.from(m.W2),b2:Float64Array.from(m.b2),charToId:m.charToId||Object.fromEntries(m.vocabulary.map((c,i)=>[c,i+1]))};}
+function importModel(raw){const d=typeof raw==="string"?JSON.parse(raw):raw,m=d.model||d;if(m.schema!==SCHEMA||!Array.isArray(m.W1)||!Array.isArray(m.W2)||!Array.isArray(m.vocabulary))throw Error("Файл не распознан как нейросеть AKSI.");return {...m,W1:Float64Array.from(m.W1),b1:Float64Array.from(m.b1),W2:Float64Array.from(m.W2),b2:Float64Array.from(m.b2),charToId:new Map(Object.entries(m.charToId||Object.fromEntries(m.vocabulary.map((c,i)=>[c,i+1]))).map(([k,v])=>[k,Number(v)]))};}
 const api={version:VERSION,defaultCorpus:DEFAULT_CORPUS.join("\n"),train,generate,evaluate,exportModel,importModel,splitLines,serializable};
 root.AKSI_NEURAL_LAB=api;if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
