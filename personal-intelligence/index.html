@@ -70,7 +70,7 @@ else {out='Я разобрала запрос: «'+q+'».\n\n'+(ctx.length?'Св
 return {out,steps}}
 async function sendMessage(q){
  bubble(q,'user');const traceSteps=[];let r=null;
- const matched=relevant(q);const ctx=matched.map(m=>'['+m.category+'] '+m.title+': '+m.body).join('\n');
+ const matched=relevant(q);let learned=[];try{const mind=JSON.parse(localStorage.getItem('aksi-mind-core-v1')||'{}');if(Array.isArray(mind.concepts)){const qw=new Set(terms(q).filter(w=>w.length>2));learned=mind.concepts.map(m=>{const ws=terms((m.name||'')+' '+(m.definition||''));const score=ws.filter(w=>qw.has(w)).length/Math.max(1,ws.length);return {m,score}}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,8).map(x=>'[ПОНЯТИЕ ЛИЧНОГО ЯДРА / '+(x.m.category||'знание')+'] '+x.m.name+': '+x.m.definition)}}catch{}const ctx=matched.map(m=>'[ПАМЯТЬ / '+m.category+'] '+m.title+': '+m.body).concat(learned).join('\n');
  const hist=db.chat.filter(m=>m.who==='user'||m.who==='assistant').slice(0,-1).slice(-10).map(m=>({role:m.who==='user'?'user':'assistant',content:m.text}));
  const prompt=(ctx?'ПЕРСОНАЛЬНЫЙ КОНТЕКСТ ИЗ ПАМЯТИ (это заметки пользователя, не гарантированные факты):\n'+ctx+'\n\n':'')+'ЗАПРОС: '+q;
  const llm=window.AKSI_WEBLLM;
