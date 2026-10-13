@@ -1,0 +1,57 @@
+{
+  "schema": "AKSI-TRAINING-RUN/1",
+  "runType": "CPU character MLP, supervised next-character prediction",
+  "trainedAt": "2026-10-13T10:00:32.016Z",
+  "algorithm": "character-level one-hidden-layer tanh MLP + softmax; SGD + backpropagation",
+  "parameters": {
+    "seed": 14021995,
+    "epochs": 8,
+    "hidden": 24,
+    "contextSize": 4,
+    "trainRatio": 0.8,
+    "learningRate": 0.025
+  },
+  "dataset": {
+    "schema": "AKSI-TRANSPARENT-TRAINING-DATASET/1",
+    "title": "AKSI Archive + Mathematics Learning Corpus",
+    "version": "1.0.0",
+    "entryCount": 23,
+    "sha256": "2df41d3c065a83bee783c0f11b605558fa55becf989fceda37237890420e22a8",
+    "corpusSha256": "471c3ece27e4a974d5dfdc6528c8f576b226ab81140ea50fa57852bb117a678e",
+    "sourceIds": ["aksi-origin-archive","shannon1948","bayes","cross-entropy","sgd","universal-approximation","no-free-lunch","sha256","ed25519","merkle","data-leakage","reproducibility"]
+  },
+  "split": {"total":23,"train":18,"test":5,"seed":14021995,"trainRatio":0.8},
+  "metrics": {
+    "split": {"total":23,"train":18,"test":5,"seed":14021995,"trainRatio":0.8},
+    "train": {"characters":4106,"crossEntropy":1.897401194319686,"perplexity":6.668541659845894,"top1Accuracy":0.44763760350706283},
+    "test": {"characters":1297,"crossEntropy":2.374959305035606,"perplexity":10.750575682879699,"top1Accuracy":0.3330763299922899}
+  },
+  "history": [
+    {"epoch":1,"trainCrossEntropy":3.139744098033982},
+    {"epoch":2,"trainCrossEntropy":2.6794883791533053},
+    {"epoch":3,"trainCrossEntropy":2.4932200328496177},
+    {"epoch":4,"trainCrossEntropy":2.352983290318601},
+    {"epoch":5,"trainCrossEntropy":2.25160004408036},
+    {"epoch":6,"trainCrossEntropy":2.16624800793827},
+    {"epoch":7,"trainCrossEntropy":2.089024632722673},
+    {"epoch":8,"trainCrossEntropy":2.0189625330641823}
+  ],
+  "model": {
+    "file": "aksi-theorem-pretrained.json",
+    "sha256": "94ab4fe80a8ddad7f0df1600d3bfba17831deaf23effd5cf00126973a1b5c76d",
+    "parameterCount": 7864,
+    "vocabularySize": 64
+  },
+  "artifact": {
+    "url": "https://github.com/MILANA808/milana808.github.io/actions/runs/38380354274/artifacts/11802189466",
+    "name": "aksi-theorem-training-83a837aa1c2ea1a3b9eb645641638d6d6a975a79",
+    "sha256": "08302b46a996e2ba83f5ce4be4400cc4c83462f9770bd0fe8c0c461a125f84fd",
+    "expiresAt": "2027-01-11T10:00:20Z"
+  },
+  "limitations": [
+    "A small character-level MLP is not a modern LLM.",
+    "Metrics measure next-character prediction, not factual accuracy or reasoning.",
+    "The model is trained on a small curated corpus; source metadata is not fed as structured input.",
+    "Archive entries preserve caveats; the corpus is not all mathematics or all AKSI history."
+  ]
+}
