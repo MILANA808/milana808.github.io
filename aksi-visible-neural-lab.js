@@ -78,6 +78,9 @@ function generate(m,prompt,opts){
 function serializable(m){return {...m,charToId:Object.fromEntries(m.charToId instanceof Map?m.charToId:Object.entries(m.charToId||{})),W1:Array.from(m.W1),b1:Array.from(m.b1),W2:Array.from(m.W2),b2:Array.from(m.b2)};}
 function exportModel(m){return JSON.stringify({format:SCHEMA,exportedAt:new Date().toISOString(),model:serializable(m)},null,2);}
 function importModel(raw){const d=typeof raw==="string"?JSON.parse(raw):raw,m=d.model||d;if(m.schema!==SCHEMA||!Array.isArray(m.W1)||!Array.isArray(m.W2)||!Array.isArray(m.vocabulary))throw Error("Файл не распознан как нейросеть AKSI.");return {...m,W1:Float64Array.from(m.W1),b1:Float64Array.from(m.b1),W2:Float64Array.from(m.W2),b2:Float64Array.from(m.b2),charToId:new Map(Object.entries(m.charToId||Object.fromEntries(m.vocabulary.map((c,i)=>[c,i+1]))).map(([k,v])=>[k,Number(v)]))};}
-const api={version:VERSION,defaultCorpus:DEFAULT_CORPUS.join("\n"),train,generate,evaluate,exportModel,importModel,splitLines,serializable};
+const STORE="aksi_visible_neural_model_v1";
+function saveLocal(m){try{root.localStorage.setItem(STORE,exportModel(m));return true;}catch(e){return false;}}
+function loadLocal(){try{const raw=root.localStorage.getItem(STORE);return raw?importModel(raw):null;}catch(e){return null;}}
+const api={version:VERSION,defaultCorpus:DEFAULT_CORPUS.join("\n"),train,generate,evaluate,exportModel,importModel,splitLines,serializable,saveLocal,loadLocal};
 root.AKSI_NEURAL_LAB=api;if(typeof module==="object"&&module.exports)module.exports=api;
 })(typeof window!=="undefined"?window:globalThis);
