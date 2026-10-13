@@ -23,3 +23,11 @@ Run tests with Node.js: `node scripts/test_aksi_visible_neural_lab.cjs`
 
 ## Limits
 This is a small educational character MLP, not a transformer or competitive LLM. It does not understand facts, retrieve sources, or verify truth. Cross-entropy/perplexity measure character prediction, not intelligence. A small demonstration corpus is inadequate for general-purpose conversation. Browser memory and CPU limit model size. Export files contain learned weights and can include metadata; do not train on secrets or personal data.
+
+## AKSI archive + theorem corpus
+
+The lab can load the curated JSON dataset at `datasets/aksi-archive-theorem-corpus-v1.json` using **«Загрузить архив AKSI + теоремы»**. The page shows each entry, its label, source links, caveats, and a SHA-256 digest before training. The dataset includes selected archive observations from 2025 and concise entries about Bayes' theorem, Shannon entropy, cross-entropy, SGD, universal approximation, no-free-lunch optimization, SHA-256, Ed25519, Merkle trees, data leakage, and reproducibility.
+
+The word “selected” matters: this is not all mathematics or all AKSI history. Archive facts retain explicit caveats; for example, the 2025 Ed25519 public-key field was a placeholder. The corpus teaches textual patterns; the character MLP does not reason over the source metadata or verify theorem proofs. Check sources independently before relying on any entry.
+
+Validate the dataset with `node scripts/test_aksi_archive_theorem_corpus.cjs`.
