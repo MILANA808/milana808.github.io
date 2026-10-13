@@ -1,0 +1,28 @@
+const assert=require("node:assert/strict");
+const Lab=require("../aksi-open-training-lab.js");
+(async()=>{
+ assert.equal(Lab.version,"0.1.0");
+ const corpus="АКСИ учится на тексте.\nМодель считает символы.\nПроверка использует новые строки.\nОткрытый эксперимент сохраняет параметры.\n";
+ const a=await Lab.train({corpus,order:2,seed:42,trainRatio:.75});
+ const b=await Lab.train({corpus,order:2,seed:42,trainRatio:.75});
+ assert.equal(a.model.corpusDigest,b.model.corpusDigest);
+ assert.deepEqual(a.split,b.split,"fixed seed must make split reproducible");
+ assert.ok(a.split.train.length>=1&&a.split.test.length>=1);
+ assert.ok(a.model.trainedChars>0);
+ assert.ok(a.model.metrics.train.perplexity>0);
+ assert.ok(a.model.metrics.test.perplexity>0);
+ assert.deepEqual(a.model.trainingManifest.trainLineHashes,a.split.train.map(x=>"fnv1a32:"+Lab.hash(x).toString(16)));
+ const g=Lab.generate(a.model,"АКСИ",{maxChars:50,seed:3});
+ assert.equal(g.model,"AKSI character n-gram 0.1.0");
+ assert.ok(g.text.startsWith("АКСИ"));
+ assert.ok(g.text.length>4);
+ const exported=Lab.exportModel(a.model);
+ const imported=Lab.importModel(exported);
+ assert.equal(imported.schema,"AKSI-CHAR-NGRAM/1");
+ assert.deepEqual(imported.metrics,a.model.metrics);
+ let progress=0;
+ await Lab.train({corpus,order:1,onProgress:p=>progress=p.percent});
+ assert.equal(progress,100);
+ assert.throws(()=>Lab.importModel('{"foo":1}'),/не распознан/);
+ console.log("AKSI Open Training Lab: all tests passed.");
+})().catch(e=>{console.error(e);process.exitCode=1;});
