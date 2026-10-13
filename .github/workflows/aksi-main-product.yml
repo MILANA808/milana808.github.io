@@ -10,14 +10,12 @@ on:
       - "neural-lab/index.html"
       - "scripts/test_aksi_visible_neural_lab.cjs"
       - "datasets/aksi-archive-theorem-corpus-v1.json"
-      - "scripts/test_aksi_archive_theorem_corpus.cjs"\n      - "scripts/train_aksi_archive_model.cjs"
+      - "scripts/test_aksi_archive_theorem_corpus.cjs"
+      - "scripts/train_aksi_archive_model.cjs"
       - "docs/AKSI-VISIBLE-NEURAL-LAB.md"
       - "aksi-unified-adaptive-core.js"
       - "aksi-dna-topology-engine.js"
       - "aksi-open-training-lab.js"
-      - "aksi-visible-neural-lab.js"
-      - "neural-lab/index.html"
-      - "scripts/test_aksi_visible_neural_lab.cjs"
       - "training-lab/index.html"
       - "scripts/test_aksi_open_training_lab.cjs"
       - "docs/AKSI-OPEN-TRAINING-LAB.md"
@@ -30,12 +28,6 @@ on:
       - "scripts/test_aksi_wave_bayesian_engine.cjs"
       - "scripts/test_aksi_geometric_knowledge_core.cjs"
       - "scripts/check_aksi_main_product.mjs"
-      - "datasets/aksi-archive-theorem-corpus-v1.json"
-      - "scripts/test_aksi_archive_theorem_corpus.cjs"
-      - "docs/AKSI-VISIBLE-NEURAL-LAB.md"
-      - "neural-lab/index.html"
-      - "aksi-visible-neural-lab.js"
-      - "scripts/test_aksi_visible_neural_lab.cjs"
       - ".github/workflows/aksi-main-product.yml"
   pull_request:
     paths:
@@ -43,9 +35,15 @@ on:
       - "aksi-webllm.js"
       - "aksi-internet.js"
       - "aksi-calculator.js"
-      - "scripts/check_aksi_main_product.mjs"
+      - "aksi-visible-neural-lab.js"
+      - "neural-lab/index.html"
+      - "datasets/aksi-archive-theorem-corpus-v1.json"
+      - "scripts/test_aksi_archive_theorem_corpus.cjs"
+      - "scripts/train_aksi_archive_model.cjs"
+      - "scripts/test_aksi_visible_neural_lab.cjs"
+      - "docs/AKSI-VISIBLE-NEURAL-LAB.md"
       - ".github/workflows/aksi-main-product.yml"
-  workflow_dispatch:
+workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -64,6 +62,21 @@ jobs:
         run: node scripts/test_aksi_dna_topology_engine.cjs
       - name: Test open training lab
         run: node scripts/test_aksi_open_training_lab.cjs
+      - name: Validate AKSI archive and theorem corpus
+        run: node scripts/test_aksi_archive_theorem_corpus.cjs
+      - name: Test visible neural training lab
+        run: node scripts/test_aksi_visible_neural_lab.cjs
+      - name: Train AKSI model on archive and theorem corpus
+        run: node scripts/train_aksi_archive_model.cjs
+      - name: Publish model checkpoint and training report
+        uses: actions/upload-artifact@v4
+        with:
+          name: aksi-theorem-training-${{ github.sha }}
+          path: |
+            training-results/aksi-theorem-pretrained.json
+            training-results/training-report.json
+          if-no-files-found: error
+          retention-days: 90
       - name: Test cognitive evidence core
         run: node scripts/test_aksi_cognitive_core.mjs
       - name: Test wave Bayesian engine
