@@ -3,14 +3,14 @@ const assert = require('node:assert/strict');
 
 const html = fs.readFileSync('index.html', 'utf8');
 
-assert.match(html, /const neuralMatch=String\(q\)\.match\(\/\^\\\\s\*/);
-assert.doesNotMatch(html, /const neuralMatch=String\(q\)\.match\(\/\^\\\\\\\\s\*/);
-assert.match(html, /q\.replace\(\/\^\\\\s\*/);
-assert.match(html, /generated\.text\+"\\\\n\\\\n\[/);
-assert.match(html, /\.join\('\\\\n'\)/);
-assert.match(html, /\.join\('\\\\n\\\\n'\)/);
+assert.ok(html.includes('const neuralMatch=String(q).match(/^\\s*'), 'neural command must use a real whitespace regex');
+assert.ok(!html.includes('const neuralMatch=String(q).match(/^\\\\s*'), 'neural command must not match a literal backslash');
+assert.ok(html.includes("q.replace(/^\\s*(?:посчитай|вычисли|сколько будет)\\s*/i"), 'calculator command prefix must accept whitespace');
+assert.ok(html.includes('generated.text+"\\n\\n['), 'neural model caveat must render on separate lines');
+assert.ok(html.includes(".join('\\n')"), 'lists must join with actual newline escape sequences');
+assert.ok(html.includes(".join('\\n\\n')"), 'paragraphs must join with blank lines');
 
-const command = /^\s*(?:нейросеть|нейронная модель|генерация)\s*[:：]\s*([\s\S]+)$/i;
+const command = /^\\s*(?:нейросеть|нейронная модель|генерация)\\s*[:：]\\s*([\\s\\S]+)$/i;
 assert.equal(command.exec('нейросеть: проверь модель')[1], 'проверь модель');
 assert.equal(command.exec('  генерация：пример')[1], 'пример');
 
