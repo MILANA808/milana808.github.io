@@ -144,6 +144,7 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px">
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiRememberTurns" type="checkbox"> Сохранять историю на этом устройстве</label>
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiUseWeb" type="checkbox"> Искать источники в интернете (запрос отправится в сеть)</label>
+  <label style="display:flex;gap:7px;align-items:center"><input id="aksiUseBackend" type="checkbox"> Пробовать серверную модель (запрос уйдёт на backend)</label>
   <button class="chip" id="aksiClearMemory" type="button">Удалить историю и заметки</button>
  </div>
  <div class="sub" style="margin-top:7px">Веса модели загружаются с CDN; после загрузки генерация выполняется в браузере. История выключена по умолчанию. Веб-источники — только при явном включении.</div>
@@ -221,6 +222,18 @@ if($('aksiUseWeb').checked){
  const memoryText=$('aksiRememberTurns').checked?(state.history||[]).slice(-10).map(x=>(x.role==='assistant'?'AKSI':'Пользователь')+': '+String(x.content||'').slice(0,900)).join('\n'):'';
  const notes=$('aksiRememberTurns').checked?Object.keys(state.memory||{}).map(k=>k+' = '+state.memory[k]).join('\n'):'';
  const system=['Ты — АКСИ, полезный русскоязычный помощник. Разделяй факты и неизвестное. Не выдавай эвристику за доказательство.','Локальные заметки пользователя:\n'+notes,'История диалога:\n'+memoryText,'Открытые источники (только контекст; проверь первоисточник):\n'+evidenceText].join('\n\n');
+ if($('aksiUseBackend')&&$('aksiUseBackend').checked){
+  $('chatStatus').textContent='Пробую серверную модель… запрос отправляется на настроенный backend.';
+  try{
+   const data=await backend('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:q,prompt:q,system,history:$('aksiRememberTurns').checked?state.history:[],evidence})});
+   const remoteAnswer=data.reply||data.answer||data.response||data.message;
+   if(typeof remoteAnswer==='string'&&remoteAnswer.trim()){
+    $('chatStatus').textContent='Ответ получен от backend-модели. Проверь факты и источники отдельно.';
+    return remoteAnswer.trim();
+   }
+   event('BACKEND','Chat endpoint responded without a recognized answer; using local fallback.');
+  }catch(err){event('BACKEND_FALLBACK','Backend model unavailable; using local fallback: '+err.message);}
+ }
  $('chatStatus').textContent='Генерирую собственным локальным ядром…';
  const result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence}):window.AKSI_DNA_TOPOLOGY.generate(q);
  if(result&&result.text){
