@@ -14,7 +14,25 @@
 <section class="panel"><div class="head"><b>КАК РАБОТАЕТ МЫШЛЕНИЕ</b></div><div class="pad"><div class="steps"><div class="step"><span class="num">1</span><span><b>Контекст.</b> Ищем релевантные записи в твоей памяти.</span></div><div class="step"><span class="num">2</span><span><b>Постановка.</b> Определяем цель, ограничения и нужный результат.</span></div><div class="step"><span class="num">3</span><span><b>План.</b> Предлагаем выполнимые шаги и сохраняем выбранные задачи.</span></div><div class="step"><span class="num">4</span><span><b>Проверка.</b> Отделяем известное от предположений; действия не объявляются выполненными без результата.</span></div></div></div></section>
 <section class="panel"><div class="head"><b>СВЯЗАННЫЕ ИНСТРУМЕНТЫ</b></div><div class="pad"><div class="memorylist"><a class="memory" href="/aksi-agent/"><b>AKSI Agent</b><p>Символьный агент, вычисления и доступные открытые источники.</p></a><a class="memory" href="/aksi-quantum-ai/"><b>Quantum AI Lab</b><p>Классическая симуляция квантовых схем, измерений и алгоритма Гровера.</p></a><a class="memory" href="/"><b>AKSI MATRIX</b><p>Главная платформа и остальные модули.</p></a></div></div></section>
 <section class="panel"><div class="head"><b>ГРАНИЦЫ И ЧЕСТНЫЙ СТАТУС</b></div><div class="pad"><div class="warning">Локальный режим обеспечивает память и планирование. Для генеративных ответов можно загрузить WebLLM на совместимом устройстве; если это невозможно, включён резервный ответ. Серверный backend отправляет запросы за пределы браузера. Данные хранятся в localStorage этого браузера, не синхронизируются автоматически и могут исчезнуть при очистке данных сайта. Не сохраняй пароли, ключи и секреты.</div><p class="muted">Для настоящих генеративных ответов нужен подключённый model endpoint через защищённый backend. Секретный API-ключ нельзя встраивать в публичный HTML.</p></div></section>
-</aside></div><footer class="footer">AKSI MATRIX · Personal Intelligence · <a href="/">На главную</a></footer></main>
+</aside></div><footer class="footer">AKSI MATRIX · Personal Intelligence · <a href="/">На главную</a></footer>
+<section class="panel" id="aksiMindLab" style="margin-top:16px">
+  <div class="head"><div><b>02 / AKSI MIND LAB · ЛИЧНОЕ ЯДРО</b><div class="muted">Прозрачная семантическая модель, вычисления и обучение на твоих примерах</div></div><span class="status" id="mindStatus">Локально · без внешнего API</span></div>
+  <div class="pad">
+    <div class="warning">Это отдельный проверяемый символико-математический модуль, а не доказательство AGI и не замена большой языковой модели. Он показывает свои совпадения и правила; записи сохраняются в этом браузере.</div>
+    <label class="fieldlabel" style="margin-top:12px">Запрос ядру<textarea id="mindQuestion" rows="3" placeholder="Например: Что общего у памяти и обучения? Или: (125 * 8) / 4"></textarea></label>
+    <div class="actions"><button class="primary" id="mindRun">Вычислить / рассуждать</button><button id="mindClear">Очистить результат</button></div>
+    <div id="mindAnswer" class="evidenceitem" style="margin-top:12px;white-space:pre-wrap;overflow-wrap:anywhere">Результат и ход вычисления появятся здесь.</div>
+    <div class="formgrid" style="margin-top:14px">
+      <label class="fieldlabel">Понятие<input id="mindConcept" placeholder="Например: личная цель"></label>
+      <label class="fieldlabel">Категория<select id="mindCategory"><option>цель</option><option>предпочтение</option><option>знание</option><option>решение</option><option>гипотеза</option><option>определение</option></select></label>
+      <label class="fieldlabel full">Твоё объяснение / связь<textarea id="mindDefinition" rows="2" placeholder="Опиши своими словами, что это значит и с чем связано"></textarea></label>
+    </div>
+    <div class="actions"><button id="mindLearn" class="primary">Обучить на примере</button><button id="mindExport">Экспорт модели JSON</button><button id="mindImportBtn">Импорт модели JSON</button><input id="mindImportFile" class="hidden" type="file" accept="application/json"></div>
+    <div class="stats" style="margin-top:14px"><div class="stat"><strong id="mindConceptCount">0</strong><small>понятий ядра</small></div><div class="stat"><strong id="mindRunCount">0</strong><small>запусков</small></div><div class="stat"><strong id="mindEvidenceCount">0</strong><small>шагов объяснения</small></div></div>
+    <div class="muted" style="margin-top:10px">Последние изменения и ответы</div><div id="mindHistory" class="evidence" style="margin-top:8px"></div>
+  </div>
+</section>
+</main>
 <script src="/aksi-webllm.js?v=5"></script>
 <script>
 (()=>{'use strict';
@@ -100,4 +118,50 @@ $('#clearChat').addEventListener('click',()=>{if(confirm('Очистить то�
 $('#focusChat').addEventListener('click',()=>{$('#workspace').scrollIntoView({behavior:'smooth'});$('#prompt').focus()});
 renderStats();renderMemory();renderTasks();renderChat();persist();
 })();
-</script></body></html>
+</script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), KEY='aksi-mind-core-v1';
+const seed=[
+ {name:'Память',category:'знание',definition:'Сохранённые сведения, решения и контекст, которые можно пересматривать, исправлять и использовать повторно.'},
+ {name:'Обучение',category:'знание',definition:'Изменение внутреннего представления по примерам с последующей проверкой на новых задачах.'},
+ {name:'Доказательство',category:'знание',definition:'Проверяемые основания, позволяющие оценить конкретное утверждение; хеш подтверждает целостность данных, но не их истинность.'},
+ {name:'Цель',category:'цель',definition:'Желаемый результат с критерием готовности, ограничениями и следующим проверяемым действием.'},
+ {name:'AKSI',category:'определение',definition:'Персональная интеллектуальная система с контекстом, памятью, вычислениями, политиками и проверяемыми следами действий.'}
+];
+let state;try{state=JSON.parse(localStorage.getItem(KEY)||'null')}catch{state=null}
+if(!state||!Array.isArray(state.concepts))state={concepts:seed.map(x=>({...x,id:uid(),created:new Date().toISOString(),source:'базовые понятия'})),runs:[],count:0};
+function uid(){return 'm-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));render()}
+function norm(s){return String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}]+/gu,' ').trim()}
+function words(s){return new Set(norm(s).split(/\s+/).filter(x=>x.length>2))}
+function overlap(a,b){const A=words(a),B=words(b);if(!A.size||!B.size)return 0;let n=0;for(const w of A)if(B.has(w))n++;return n/(A.size+B.size-n)}
+function nearest(q){return state.concepts.map(c=>({c,score:overlap(q,c.name+' '+c.category+' '+c.definition)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,5)}
+function arithmetic(q){
+ const s=q.replace(/,/g,'.').trim();
+ if(!/^[\d\s()+\-*/%.]+$/.test(s)||!/[+*/%\-]/.test(s))return null;
+ const tokens=s.match(/\d+(?:\.\d+)?|[()+\-*/%]/g);if(!tokens||tokens.join('')!==s.replace(/\s/g,''))return null;
+ let i=0;function expr(){let v=term();while(tokens[i]==='+'||tokens[i]==='-'){let op=tokens[i++],b=term();v=op==='+'?v+b:v-b}return v}
+ function term(){let v=factor();while(['*','/','%'].includes(tokens[i])){let op=tokens[i++],b=factor();if((op==='/'||op==='%')&&b===0)throw Error('Деление на ноль');v=op==='*'?v*b:op==='/'?v/b:v%b}return v}
+ function factor(){if(tokens[i]==='+'){i++;return factor()}if(tokens[i]==='-'){i++;return -factor()}if(tokens[i]==='('){i++;let v=expr();if(tokens[i++]!==')')throw Error('Не закрыта скобка');return v}const t=tokens[i++];if(!t||!/^\d/.test(t))throw Error('Ожидалось число');return Number(t)}
+ try{const result=expr();if(i!==tokens.length||!Number.isFinite(result))return {error:'Не удалось разобрать выражение'};return {result,steps:['Выражение прошло проверку допустимых символов.','Выполнены операции с приоритетом: скобки, умножение/деление/остаток, сложение/вычитание.','Результат вычислен локально: '+result]}}catch(e){return {error:e.message}}
+}
+function answer(q){
+ const calc=arithmetic(q);if(calc)return calc.error?{text:'Ошибка вычисления: '+calc.error,steps:['Вычисление остановлено; некорректный результат не принят.']}:{text:'Результат: '+calc.result+'\n\nХод вычисления:\n'+calc.steps.map((x,i)=>(i+1)+'. '+x).join('\n'),steps:calc.steps};
+ const hits=nearest(q);if(!hits.length)return {text:'В текущем ядре нет достаточно близких понятий. Это не значит, что ответа не существует. Добавь понятие или пример через форму обучения.\n\nАлгоритм: нормализация текста → сравнение пересечения слов → ранжирование совпадений. Семантическая нейросетевая модель здесь не используется.',steps:['Совпадений по словарному сходству не найдено.','Неизвестное не выдано за известный факт.','Можно добавить определение и повторить запрос.']};
+ const top=hits[0];const steps=['Запрос нормализован в набор слов.','Найдено '+hits.length+' связанных записей по пересечению слов.','Лучшее совпадение: «'+top.c.name+'»; коэффициент лексического сходства '+top.score.toFixed(3)+'.','Используется сохранённое пользователем определение; оно не проверено независимым источником.'];
+ return {text:'Разбор запроса: «'+q+'»\n\nБлижайшее понятие: '+top.c.name+' ('+top.c.category+')\n'+top.c.definition+'\n\nСвязанные понятия:\n'+hits.map(x=>'• '+x.c.name+' — сходство '+x.score.toFixed(3)).join('\n')+'\n\nОграничение: это объяснимое лексическое сопоставление, а не свободное человеческое мышление или полноценная языковая модель.',steps};
+}
+function render(){ $('mindConceptCount').textContent=state.concepts.length;$('mindRunCount').textContent=state.count;$('mindEvidenceCount').textContent=state.runs.reduce((n,r)=>n+(r.steps||[]).length,0);
+ const root=$('mindHistory');root.replaceChildren();state.runs.slice(-5).reverse().forEach(r=>{const el=document.createElement('div');el.className='evidenceitem';const b=document.createElement('b');b.textContent=r.question;const p=document.createElement('p');p.style.whiteSpace='pre-wrap';p.textContent=r.summary;const small=document.createElement('div');small.className='muted';small.textContent=new Date(r.at).toLocaleString()+' · шагов: '+r.steps.length;el.append(b,p,small);root.append(el)});if(!root.children.length)root.innerHTML='<div class="empty">Запусков пока нет.</div>'}
+$('mindRun').addEventListener('click',()=>{const q=$('mindQuestion').value.trim();if(!q){$('mindAnswer').textContent='Сначала введи запрос.';return}const r=answer(q);$('mindAnswer').textContent=r.text+'\n\nПРОВЕРЯЕМЫЕ ШАГИ:\n'+r.steps.map((x,i)=>(i+1)+'. '+x).join('\n');state.count++;state.runs.push({question:q,summary:r.text.slice(0,600),steps:r.steps,at:new Date().toISOString()});state.runs=state.runs.slice(-100);save();$('mindStatus').textContent='Выполнено локально · '+r.steps.length+' шагов'});
+$('mindClear').addEventListener('click',()=>{$('mindAnswer').textContent='Результат очищен. История запусков сохранена отдельно.'});
+$('mindLearn').addEventListener('click',()=>{const name=$('mindConcept').value.trim(),definition=$('mindDefinition').value.trim(),category=$('mindCategory').value;if(name.length<2||definition.length<8){$('mindStatus').textContent='Нужно название и объяснение не короче 8 символов.';return}const existing=state.concepts.find(c=>norm(c.name)===norm(name));if(existing){existing.definition=definition;existing.category=category;existing.updated=new Date().toISOString();existing.source='обновлено пользователем'}else state.concepts.push({id:uid(),name,category,definition,created:new Date().toISOString(),source:'пример пользователя'});$('mindStatus').textContent='Понятие сохранено. Это обновление словаря, не обучение нейросетевых весов.';$('mindConcept').value='';$('mindDefinition').value='';save()});
+$('mindExport').addEventListener('click',()=>download(JSON.stringify({format:'AKSI-MIND-CORE/1',exportedAt:new Date().toISOString(),...state},null,2),'aksi-mind-core.json'));
+$('mindImportBtn').addEventListener('click',()=>$('mindImportFile').click());
+$('mindImportFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;try{const x=JSON.parse(await file.text());if(!Array.isArray(x.concepts)||!Array.isArray(x.runs))throw Error('Формат не похож на AKSI Mind Core');if(!confirm('Заменить текущую локальную модель импортированными данными?'))return;state={concepts:x.concepts,count:Number(x.count)||0,runs:x.runs};save();$('mindStatus').textContent='Импорт завершён'}catch(err){alert('Ошибка импорта: '+err.message)}finally{e.target.value=''}});
+function download(text,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+render();
+})();
+</script>
+</body></html>
