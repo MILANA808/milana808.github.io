@@ -10,7 +10,7 @@ assert.ok(html.includes('generated.text+"\\n\\n['), 'neural model caveat must re
 assert.ok(html.includes(".join('\\n')"), 'lists must join with actual newline escape sequences');
 assert.ok(html.includes(".join('\\n\\n')"), 'paragraphs must join with blank lines');
 
-const command = /^\\s*(?:нейросеть|нейронная модель|генерация)\\s*[:：]\\s*([\\s\\S]+)$/i;
+const command = /^\s*(?:нейросеть|нейронная модель|генерация)\s*[:：]\s*([\s\S]+)$/i;
 assert.equal(command.exec('нейросеть: проверь модель')[1], 'проверь модель');
 assert.equal(command.exec('  генерация：пример')[1], 'пример');
 
