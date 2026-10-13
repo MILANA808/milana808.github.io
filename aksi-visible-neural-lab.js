@@ -40,7 +40,7 @@ async function train(opts){
  const rand=rng(seed),scale=Math.sqrt(2/(contextSize*I+hidden)),W1=new Float64Array(hidden*contextSize*I),b1=new Float64Array(hidden),W2=new Float64Array(V*hidden),b2=new Float64Array(V);
  for(let i=0;i<W1.length;i++)W1[i]=(rand()*2-1)*scale;
  for(let i=0;i<W2.length;i++)W2[i]=(rand()*2-1)*Math.sqrt(2/(hidden+V));
- const m={schema:SCHEMA,version:VERSION,algorithm:"character-level one-hidden-layer tanh MLP + softmax; SGD + backpropagation",seed,epochs,hidden,contextSize,learningRate:lr,vocabulary,charToId:Object.fromEntries(charToId),vocabSize:V,inputSize:I,W1:Array.from(W1),b1:Array.from(b1),W2:Array.from(W2),b2:Array.from(b2),trainedAt:null,history:[],corpusLines:split.total,trainedCharacters:0};
+ const m={schema:SCHEMA,version:VERSION,algorithm:"character-level one-hidden-layer tanh MLP + softmax; SGD + backpropagation",seed,epochs,hidden,contextSize,learningRate:lr,vocabulary,charToId,vocabSize:V,inputSize:I,W1:Array.from(W1),b1:Array.from(b1),W2:Array.from(W2),b2:Array.from(b2),trainedAt:null,history:[],corpusLines:split.total,trainedCharacters:0};
  const examples=makeExamples(split.train,charToId,contextSize);if(!examples.length)throw Error("Недостаточно символов для обучения.");
  // Mutable typed arrays are kept in the working model; export converts them to plain arrays.
  m.W1=W1;m.b1=b1;m.W2=W2;m.b2=b2;
