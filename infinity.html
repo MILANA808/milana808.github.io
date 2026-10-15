@@ -129,7 +129,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   var mode = "local";
   var LS_TASKS = "aksi.infinity.tasks.v2";
   var LS_API = "aksi.infinity.api";
-  var DEFAULT_API = "https://milana-backend.onrender.com";
+  var DEFAULT_API = "";
 
   $("api").value = localStorage.getItem(LS_API) || DEFAULT_API;
 
@@ -477,6 +477,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   async function ping() {
     $("connection").textContent = "● checking…";
     localStorage.setItem(LS_API, base());
+    if (!base()) { mode = "local"; $("connection").textContent = "● local runtime · backend not configured"; return; }
     try {
       var r = await fetch(base() + "/api/agent/tasks?limit=1");
       if (r.ok) {

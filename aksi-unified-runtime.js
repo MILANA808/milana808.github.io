@@ -6,7 +6,8 @@
   'use strict';
   if (G.AKSI_UNIFIED) return;
   var VERSION = '1.0.0';
-  var DEFAULTS = ['https://aksi-backend.onrender.com', 'https://milana-backend.replit.app'];
+  // No remote service is contacted by default. Configure an API explicitly to opt in.
+  var DEFAULTS = [];
   var cfgKey = 'AKSI_API';
   var breakers = Object.create(null);
   var inflight = Object.create(null);
@@ -30,7 +31,7 @@
     return Array.from(new Set([cleanBase(configured), ...DEFAULTS.map(cleanBase)].filter(Boolean)));
   }
   var bases = candidates();
-  var activeBase = bases[0] || DEFAULTS[0];
+  var activeBase = bases[0] || '';
   function setBase(value) {
     var b = cleanBase(value);
     if (!b) throw new Error('API URL must use http(s) and contain no credentials');
@@ -60,6 +61,7 @@
     var p = String(path || '');
     if (!p.startsWith('/') || p.startsWith('//')) throw new Error('API path must be an absolute path on the configured host');
     var method = String(options.method || 'GET').toUpperCase();
+    if (!activeBase) throw new Error('AKSI автономен: backend не настроен. Сетевой вызов отменён.');
     var safeFailover = !options.noFailover && (method === 'GET' || p === '/api/chat' || p === '/api/aksi/chat');
     var hosts = [activeBase].concat(safeFailover ? bases.filter(function (b) { return b !== activeBase; }) : []);
     var last;

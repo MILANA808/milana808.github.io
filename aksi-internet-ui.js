@@ -3,7 +3,7 @@
   "use strict";
   if (G.AKSI_INTERNET_UI && G.AKSI_INTERNET_UI.version === "1.1.0") return;
   var VERSION = "1.1.0";
-  var API = (localStorage.getItem("AKSI_API_URL") || localStorage.getItem("AKSI_API") || "https://milana-backend.onrender.com").replace(/\/$/, "");
+  var API = String(localStorage.getItem("AKSI_API_URL") || localStorage.getItem("AKSI_API") || "").replace(/\/$/, "");
 
   function esc(s) {
     return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
@@ -111,6 +111,7 @@
         renderBrowser(out, br);
         st.textContent = "browser · " + new Date().toLocaleTimeString();
         try {
+          if (!API) throw new Error("backend not configured; browser-only result retained");
           var be = await researchBackend(text);
           if (be && be.evidence && be.evidence.length) {
             st.textContent = "browser + backend · " + new Date().toLocaleTimeString();

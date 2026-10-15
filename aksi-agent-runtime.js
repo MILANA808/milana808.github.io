@@ -5,9 +5,7 @@
 (function (G) {
   "use strict";
   if (G.AKSI_AGENT_RUNTIME) return;
-  var API = (G.AKSI_UNIFIED && G.AKSI_UNIFIED.base()) ||
-    (G.AKSI_API_BASE || (typeof localStorage !== "undefined" && (localStorage.getItem("AKSI_API") || localStorage.getItem("aksi_api"))) ||
-    "https://aksi-backend.onrender.com").replace(/\/$/, "");
+  var API = String((G.AKSI_UNIFIED && G.AKSI_UNIFIED.base()) || G.AKSI_API_BASE || (typeof localStorage !== "undefined" && (localStorage.getItem("AKSI_API") || localStorage.getItem("aksi_api"))) || "").replace(/\/$/, "");
   var TERMINAL = { COMPLETED:1, FAILED:1, STOPPED:1, NEEDS_PERMISSION:1, RECOVERABLE:1 };
   function setApi(url) {
     var next = String(url || "").trim().replace(/\/$/, "");
@@ -21,6 +19,7 @@
       var result = await G.AKSI_UNIFIED.health();
       return { ok: result.alive, ready: result.ready, api: result.api, data: result };
     }
+    if (!API) return { ok:false, ready:false, api:"", error:"AKSI автономен: backend не настроен." };
     try {
       var r = await fetch(API + "/health", { signal: AbortSignal.timeout(8000) });
       return { ok: r.ok, api: API, data: await r.json() };
@@ -38,6 +37,7 @@
       });
       return result;
     }
+    if (!API) throw new Error("AKSI автономен: backend не настроен. Задача остаётся локальной.");
     var r = await fetch(API + "/api/agent/tasks", {
       method:"POST", headers:{"Content-Type":"application/json"},
       body:JSON.stringify({goal:goal,permissions:permissions,max_sources:opts.max_sources||10}),

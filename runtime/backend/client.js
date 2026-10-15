@@ -4,9 +4,9 @@
 (function(G){
   "use strict";
   var KEY="AKSI_BACKEND_URL";
-  var DEFAULTS=["https://aksi-backend.onrender.com","https://milana-backend.replit.app"];
+  var DEFAULTS=[];
   function base(){
-    try{return G.AKSI_UNIFIED?G.AKSI_UNIFIED.base():String(localStorage.getItem(KEY)||DEFAULTS[0]).replace(/\/$/,"")}catch(e){return DEFAULTS[0]}
+    try{return G.AKSI_UNIFIED?G.AKSI_UNIFIED.base():String(localStorage.getItem(KEY)||localStorage.getItem("AKSI_API")||"").replace(/\/$/,"")}catch(e){return ""}
   }
   function setBase(url){
     var v=String(url||"").trim().replace(/\/$/,"");
@@ -21,6 +21,7 @@
       return {ok:true,status:200,json:async function(){return data;}};
     }
     var method=String((init||{}).method||"GET").toUpperCase();
+    if(!base()) throw new Error("AKSI автономен: backend не настроен.");
     var candidates=[base()].concat(method==="GET"?DEFAULTS.filter(function(x){return x!==base();}):[]);
     var last=null;
     for(var i=0;i<candidates.length;i++){
