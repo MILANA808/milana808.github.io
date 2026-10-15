@@ -18,7 +18,7 @@ assert.ok(html.includes('window.AKSI_WEBLLM.complete(q'), 'chat should use loade
 assert.ok(html.includes('window.AKSI_WEBLLM.ready()'), 'chat must only call local generation when model is ready');
 assert.ok(html.includes('вывод модели не является независимой проверкой фактов'), 'model answer must retain factual limitation notice');
 assert.ok(html.includes('Выгрузить') && html.includes('Загрузить модель'), 'user must be able to load and unload the model');
-assert.ok(demo.includes('id="langToggle"') && demo.includes('Русский') && demo.includes('English'), 'public demo should expose RU/EN language control');
+assert.ok(demo.includes('id="langToggle"') && demo.includes('Switch to Russian') && demo.includes('Switch to English'), 'public demo should expose RU/EN language control');
 
 const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
   .filter(m => !/\bsrc\s*=/.test(m[1]) && !/application\/ld\+json/i.test(m[1]))
