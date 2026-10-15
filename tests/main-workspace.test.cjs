@@ -9,6 +9,7 @@ const adapter = fs.readFileSync('aksi-webllm.js', 'utf8');
 const demo = fs.readFileSync('demo/index.html', 'utf8');
 const workspace = fs.readFileSync('workspace/index.html', 'utf8');
 const proofbench = fs.readFileSync('proofbench/index.html', 'utf8');
+const unifiedCore = fs.readFileSync('core/index.html', 'utf8');
 
 for (const id of ['aksiLocalModelPanel','aksiLocalModelSelect','aksiLoadLocalModel','aksiUnloadLocalModel','aksiLocalModelStatus','aksiModelProgress']) {
   assert.ok(html.includes('id="' + id + '"'), 'main workspace missing model control: ' + id);
@@ -36,6 +37,19 @@ for (const id of ['task','run','save','receipt','decide','math','calc','angle','
 }
 assert.ok(workspace.includes('id="tests"'), 'integrated workspace must expose runnable self-tests');
 assert.ok(proofbench.includes('id="run"') && proofbench.includes('id="repeat"'), 'ProofBench must expose run and repeat controls');
+assert.ok(html.includes('href="/core/"'), 'homepage must link to the unified core demo');
+for (const id of ['task','claim','source','altA','altB','runCore','runTests','verifyReceipt','downloadReport','health','history']) {
+  assert.ok(unifiedCore.includes('id="' + id + '"'), 'unified core demo missing control: ' + id);
+}
+for (const token of ['AKSI-UNIFIED-CORE-DEMO/1','SHA-256','Фактическая проверка URL','не проверялись','SELF_TEST']) {
+  assert.ok(unifiedCore.includes(token), 'unified core demo missing expected contract: ' + token);
+}
+const coreScripts = [...unifiedCore.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
+  .filter(m => !/\\bsrc\\s*=/.test(m[1]) && !/application\\/ld\\+json/i.test(m[1]))
+  .map(m => m[2]).filter(s => s.trim());
+assert.ok(coreScripts.length, 'unified core demo must include its controller');
+coreScripts.forEach((script, i) => new vm.Script(script, { filename: 'core/index.html:inline-script-' + i }));
+
 for (const [name, source] of [['workspace', workspace], ['proofbench', proofbench]]) {
   const scripts = [...source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter(m => !/\bsrc\s*=/.test(m[1]) && !/application\/ld\+json/i.test(m[1]))
