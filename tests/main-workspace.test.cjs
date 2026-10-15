@@ -44,8 +44,8 @@ for (const id of ['task','claim','source','altA','altB','runCore','runTests','ve
 for (const token of ['AKSI-UNIFIED-CORE-DEMO/1','SHA-256','Фактическая проверка URL','не проверялись','SELF_TEST']) {
   assert.ok(unifiedCore.includes(token), 'unified core demo missing expected contract: ' + token);
 }
-const coreScripts = [...unifiedCore.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-  .filter(m => !/\\bsrc\\s*=/.test(m[1]) && !/application\\/ld\\+json/i.test(m[1]))
+const coreScripts = [...unifiedCore.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+  .filter(m => !/\bsrc\s*=/.test(m[1]) && !/application\/ld\+json/i.test(m[1]))
   .map(m => m[2]).filter(s => s.trim());
 assert.ok(coreScripts.length, 'unified core demo must include its controller');
 coreScripts.forEach((script, i) => new vm.Script(script, { filename: 'core/index.html:inline-script-' + i }));
