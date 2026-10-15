@@ -140,6 +140,16 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
  <div class="sub" id="aksiModelStatus" role="status" aria-live="polite" style="margin-top:8px">Собственное генеративное ядро готово. Ответы собираются из локальной базы, семантических совпадений и обратной связи.</div>
  <div class="sub" style="margin-top:8px"><a href="/training-lab/" style="color:#7de7dd">Открытая лаборатория обучения → корпус, train/test, метрики и экспорт модели</a>
   <div class="sub" style="margin-top:6px"><a href="/neural-lab/" style="color:#7de7dd">Нейросетевая лаборатория → реальные обучаемые веса, backpropagation и тестовая ошибка</a></div></div>
+ <div class="panel" id="aksiLocalModelPanel" style="margin-top:10px">
+  <div class="paneltitle"><span>◈ ЛОКАЛЬНАЯ ЯЗЫКОВАЯ МОДЕЛЬ</span><span class="tag" id="aksiLocalModelBadge">НЕ ЗАГРУЖЕНА</span></div>
+  <div class="sub">Модель работает в браузере на совместимом WebGPU-устройстве. Первый запуск загружает веса; это не облачный запрос. Доступность зависит от браузера, памяти и устройства.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
+   <select id="aksiLocalModelSelect" class="field" aria-label="Локальная модель" style="min-width:220px;flex:1"></select>
+   <button class="chip" id="aksiLoadLocalModel" type="button">Загрузить модель</button>
+   <button class="chip" id="aksiUnloadLocalModel" type="button" disabled>Выгрузить</button>
+  </div>
+  <div id="aksiLocalModelStatus" class="sub" role="status" aria-live="polite" style="margin-top:7px">Проверяю поддержку WebGPU…</div>
+ </div>
  <div id="aksiModelProgress" style="height:4px;width:100%;background:linear-gradient(90deg,#9c7bff,#57eaff);border-radius:99px;margin-top:7px"></div>
  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px">
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiRememberTurns" type="checkbox"> Сохранять историю на этом устройстве</label>
@@ -183,10 +193,35 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
 <script src="/aksi-geometric-knowledge-core.js"></script>
 <script src="/aksi-unified-adaptive-core.js?v=2"></script>
 <script src="/aksi-visible-neural-lab.js?v=1"></script>
+<script src="/aksi-webllm.js?v=5.0.0" defer></script>
 <script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
+function initLocalModel(){
+ const api=window.AKSI_WEBLLM, select=$('aksiLocalModelSelect'), load=$('aksiLoadLocalModel'), unload=$('aksiUnloadLocalModel'), status=$('aksiLocalModelStatus'), badge=$('aksiLocalModelBadge');
+ if(!api){status.textContent='Модуль локальной модели не загрузился. Проверь загрузку /aksi-webllm.js.';badge.textContent='ОШИБКА';load.disabled=true;return;}
+ const models=api.modelsForDevice();
+ models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;select.appendChild(o);});
+ select.value=api.defaultModel();
+ function renderModelState(st){
+  if(!st)return;
+  status.textContent=(st.message||'Состояние обновлено')+(st.error?' · '+st.error:'')+' · '+(st.progress||0)+'%';
+  $('aksiModelProgress').style.width=(st.progress||0)+'%';
+  badge.textContent=st.ready?'ГОТОВА':st.loading?'ЗАГРУЗКА':'НЕ ЗАГРУЖЕНА';
+  load.disabled=!!st.loading||!!st.ready;unload.disabled=!st.ready&&!st.loading;select.disabled=!!st.loading;
+ }
+ window.addEventListener('aksi-webllm-progress',e=>renderModelState(e.detail));
+ const st=api.status();renderModelState(st);
+ if(st.webgpu===false)status.textContent=(st.ios?'На этом iPhone WebGPU недоступен в текущем браузере.':'WebGPU недоступен в этом браузере или на устройстве.')+' Доступны встроенные инструменты AKSI.';
+ load.addEventListener('click',async()=>{
+  load.disabled=true;status.textContent='Подготовка загрузки…';
+  try{const r=await api.load(select.value,renderModelState);renderModelState(r);status.textContent='Модель загружена локально: '+r.model+'. Можно задавать вопросы.';event('MODEL','WebLLM loaded: '+r.model);}
+  catch(e){status.textContent='Локальная модель не загрузилась: '+(e.message||e)+'. Встроенные инструменты остаются доступны.';badge.textContent='НЕДОСТУПНА';load.disabled=false;event('MODEL_ERROR',e.message||String(e));}
+ });
+ unload.addEventListener('click',()=>{api.unload();renderModelState(api.status());status.textContent='Модель выгружена из памяти.';});
+}
+initLocalModel();
 const STORE='aksi-matrix-game-v1';
 const API_CANDIDATES=window.AKSI_UNIFIED?window.AKSI_UNIFIED.candidates():['https://aksi-backend.onrender.com','https://milana-backend.replit.app'];
 let API=window.AKSI_UNIFIED?window.AKSI_UNIFIED.base():(API_CANDIDATES[0]||'https://aksi-backend.onrender.com');
@@ -234,7 +269,21 @@ if($('aksiUseWeb').checked){
    event('BACKEND','Chat endpoint responded without a recognized answer; using local fallback.');
   }catch(err){event('BACKEND_FALLBACK','Backend model unavailable; using local fallback: '+err.message);}
  }
- $('chatStatus').textContent='Генерирую собственным локальным ядром…';
+ if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready()){
+  $('chatStatus').textContent='Генерирую ответ локальной языковой моделью в браузере…';
+  try{
+   const localReply=await window.AKSI_WEBLLM.complete(q,{system,history:$('aksiRememberTurns').checked?state.history:[],max_tokens:512});
+   if(localReply&&localReply.text){
+    $('chatStatus').textContent='Локальная модель · '+localReply.model+' · ответ сформирован на устройстве';
+    let answer=localReply.text;
+    if(evidence.length)answer+='\n\nИсточники для самостоятельной проверки:\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'URL не указан')).join('\n');
+    return answer+'\n\n[ИСТОЧНИК ОТВЕТА] WebLLM в браузере · вывод модели не является независимой проверкой фактов.';
+   }
+   event('MODEL_FALLBACK','Local model did not return text; falling back to AKSI native generator.');
+   $('chatStatus').textContent='Локальная модель не ответила; переключаюсь на встроенное ядро AKSI…';
+  }catch(err){event('MODEL_ERROR',err.message||String(err));$('chatStatus').textContent='Ошибка локальной модели; использую встроенное ядро AKSI…';}
+ }
+$('chatStatus').textContent='Генерирую собственным локальным ядром…';
  const result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence}):window.AKSI_DNA_TOPOLOGY.generate(q);
  if(result&&result.text){
   $('chatStatus').textContent='AKSI Native Generator · '+(result.mode||'local')+' · без WebLLM'+(evidence.length?' · источников найдено: '+evidence.length:'');
