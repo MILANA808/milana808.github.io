@@ -224,8 +224,8 @@ function initLocalModel(){
 }
 initLocalModel();
 const STORE='aksi-matrix-game-v1';
-const API_CANDIDATES=window.AKSI_UNIFIED?window.AKSI_UNIFIED.candidates():['https://aksi-backend.onrender.com','https://milana-backend.replit.app'];
-let API=window.AKSI_UNIFIED?window.AKSI_UNIFIED.base():(API_CANDIDATES[0]||'https://aksi-backend.onrender.com');
+const API_CANDIDATES=[];
+let API='';
 let state={xp:0,done:[],memory:{},events:[],voice:false,history:[]};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}catch(e){}
 if(!state.memory||typeof state.memory!=='object')state.memory={};if(!Array.isArray(state.history))state.history=[];
@@ -340,7 +340,7 @@ function completeMission(id,xp,msg){if(state.done.includes(id)){bubble('bot','Э
 async function runMission(id){event('MISSION','Starting '+id);if(id==='math'){let a=arithmetic('123*(45-17)/4');if(a!=='861')return bubble('bot','Контроль не пройден: ожидалось 861, получено '+a);completeMission(id,50,'Контрольный тест 123 × (45 − 17) ÷ 4 = '+a+'.');}
 if(id==='memory'){state.memory['mission-check']='AKSI memory test passed';persist();if(state.memory['mission-check']!=='AKSI memory test passed')return bubble('bot','Проверка записи не пройдена.');completeMission(id,40,'Запись создана и прочитана из локального хранилища браузера.');}
 if(id==='voice'){const synth='speechSynthesis'in window,rec=('SpeechRecognition'in window)||('webkitSpeechRecognition'in window);if(!synth&&!rec)return bubble('bot','Голосовые API не обнаружены в этом браузере.');completeMission(id,30,'Синтез речи: '+(synth?'доступен':'недоступен')+'; распознавание речи: '+(rec?'доступно':'недоступно')+'. Доступность API не гарантирует разрешение микрофона.');}
-if(id==='network'){await diagnostics();if(!state._backendOK)return bubble('bot','Backend не подтвердил доступность. Миссия не засчитана. Подробности — в диагностике.');completeMission(id,60,'Backend ответил на health check.');}
+if(id==='network'){const checks=await diagnostics();const localOk=checks.some(r=>r.name==='Local UI'&&r.ok)&&checks.some(r=>r.name==='Local answer core'&&r.ok);if(!localOk)return bubble('bot','Локальное ядро не прошло проверку. Открой диагностику.');completeMission(id,60,'Локальное ядро и интерфейс проверены. Backend намеренно отключён; внешний сервер для этой миссии не нужен.');}
 if(id==='proof'){if(!crypto||!crypto.subtle)return bubble('bot','WebCrypto недоступен в текущем контексте.');const payload=JSON.stringify({kind:'AKSI_LOCAL_PROOF',time:new Date().toISOString(),xp:state.xp,done:state.done});const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload));const hex=Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,'0')).join('');const proof={payload:JSON.parse(payload),sha256:hex,scope:'local browser demonstration; not a server signature'};state.memory['last-local-proof']=JSON.stringify(proof);persist();completeMission(id,50,'SHA-256: '+hex+'\nЭто хэш локальной записи, а не подпись сервера и не доказательство истинности содержания.');}
 if(id==='research'){const url='https://ru.wikipedia.org/wiki/Искусственный_интеллект';window.open(url,'_blank','noopener');state.memory['research-link']=url;persist();completeMission(id,25,'Открыт справочный ресурс и ссылка сохранена в локальной памяти.');}}
 document.querySelectorAll('[data-mission]').forEach(b=>b.addEventListener('click',()=>runMission(b.dataset.mission).catch(e=>{event('ERROR','Mission '+b.dataset.mission+': '+e.message);bubble('bot','Ошибка миссии: '+e.message)})));
