@@ -14,9 +14,15 @@
 <footer>Честное ограничение: виртуальные workers здесь не являются физическими GPU и не увеличивают доступную вычислительную мощность. Для обучения языковой модели нужны реальные вычислительные ресурсы, датасет, сохранение весов и оценка качества.</footer>
 </main>
 <script>
-const API=(new URLSearchParams(location.search).get("api")||"https://milana-backend.replit.app").replace(/\/$/,"");
-document.getElementById("backendLabel").textContent=API;
-async function call(path,body){const r=await fetch(API+path,{method:body?"POST":"GET",headers:body?{"Content-Type":"application/json"}:undefined,body:body?JSON.stringify(body):undefined});const t=await r.text();let d;try{d=JSON.parse(t)}catch{d={raw:t}}if(!r.ok)throw Error("HTTP "+r.status+": "+JSON.stringify(d));return d}
+const API=(new URLSearchParams(location.search).get("api")||localStorage.getItem("aksi-backend-url")||"").trim().replace(/\/$/,"");
+document.getElementById("backendLabel").textContent=API||"Не настроен — локальный режим";
+async function call(path,body){
+ if(!API)throw Error("Backend не настроен. Для сетевого режима укажи ?api=https://… . Локальные тесты работают без backend.");
+ let parsed;try{parsed=new URL(API)}catch{throw Error("Некорректный URL backend.")}
+ if(!["https:"].includes(parsed.protocol)&&!(["localhost","127.0.0.1"].includes(parsed.hostname)&&parsed.protocol==="http:"))throw Error("Backend должен использовать HTTPS, кроме localhost.");
+ const r=await fetch(API+path,{method:body?"POST":"GET",headers:body?{"Content-Type":"application/json"}:undefined,body:body?JSON.stringify(body):undefined});
+ const t=await r.text();let d;try{d=JSON.parse(t)}catch{d={raw:t}}if(!r.ok)throw Error("HTTP "+r.status+": "+JSON.stringify(d));return d
+}
 async function status(){const el=document.getElementById("status");el.textContent="Проверяю backend…";try{const d=await call("/aksi/cluster/status");el.textContent=JSON.stringify(d,null,2)}catch(e){el.textContent="Backend недоступен или маршрут ещё не развёрнут. "+e.message+"\nМожно использовать локальный тест ниже."}}
 document.getElementById("refresh").onclick=status;
 document.getElementById("sumBtn").onclick=async()=>{const b=document.getElementById("sumBtn"),o=document.getElementById("sumOut");b.disabled=true;o.textContent="Выполняю…";try{const n=Math.max(10,Math.min(100000,Number(document.getElementById("n").value)||1000));const d=await call("/aksi/cluster/map-sum",{values:Array.from({length:n},(_,i)=>i+1)});o.textContent=JSON.stringify(d,null,2)}catch(e){o.textContent="Не удалось выполнить через backend: "+e.message+"\nНажми локальный тест, чтобы проверить браузерный вариант."}finally{b.disabled=false}};
