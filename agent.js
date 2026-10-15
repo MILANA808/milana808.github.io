@@ -7,7 +7,7 @@
 (function (G) {
   "use strict";
   var VER = "4.0.0";
-  var API = (G.AKSI_API_BASE || "https://milana-backend.onrender.com").replace(/\/$/, "");
+  var API = String(G.AKSI_API_BASE || (typeof localStorage !== "undefined" && (localStorage.getItem("AKSI_API") || localStorage.getItem("aksi_api"))) || "").replace(/\/$/, "");
   function localAnswer(q) {
     var low = String(q || "").toLowerCase();
     if (/кто ты|who are you|что такое акси/.test(low))
@@ -67,7 +67,7 @@
       } catch (e) {}
     }
     var loc = localAnswer(q);
-    if (wantServer(opts)) {
+    if (wantServer(opts) && API) {
       try {
         var res = await fetch(API + "/api/v1/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: q }), signal: AbortSignal.timeout(15000) });
         if (res.ok) {
@@ -80,7 +80,7 @@
   }
   async function capabilities() {
     return {
-      version: VER, offline: true, serverEnabled: wantServer({}), apiBase: API,
+      version: VER, offline: true, serverEnabled: wantServer({}) && !!API, apiBase: API,
       zero: !!(G.AKSI_ZERO && G.AKSI_ZERO.think), fir: !!(G.AKSI_FIR && G.AKSI_FIR.think),
       genesis: !!(G.AKSI_GENESIS && G.AKSI_GENESIS.think), neuro: !!(G.AKSI_NEURO && G.AKSI_NEURO.think),
       aksi_ai: !!(G.AKSI_AI && G.AKSI_AI.think), crypto: !!G.AKSI_CRYPTO,
