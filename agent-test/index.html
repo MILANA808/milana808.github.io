@@ -7,15 +7,18 @@ body{margin:0;background:#07090d;color:#eef2f7;font:15px system-ui,sans-serif}.w
 <body><div class="wrap">
 <h1>AKSI Agent — LIVE TEST</h1>
 <div class="muted">Проверяет реальный backend: доступность → создание задачи → worker → report → receipt.</div>
-<div class="card"><input id="api" value="https://milana-backend.onrender.com"><input id="goal" value="Проверь, что AKSI backend принимает автономную исследовательскую задачу и формирует отчёт с receipt."><button id="run">Запустить тест</button></div>
+<div class="card"><input id="api" value="" placeholder="Вставь URL своего AKSI backend (HTTPS)"><input id="goal" value="Проверь, что AKSI backend принимает автономную исследовательскую задачу и формирует отчёт с receipt."><button id="run">Запустить тест</button></div>
 <div class="card"><b id="state">Ожидание</b><pre id="log"></pre></div>
 </div>
 <script>
 const $=id=>document.getElementById(id), log=(s)=>{$('log').textContent+=s+'\n'};
 async function test(){
  $('run').disabled=true;$('log').textContent='';
- const base=$('api').value.replace(/\/$/,''); const goal=$('goal').value;
+ const base=$('api').value.trim().replace(/\/$/,''); const goal=$('goal').value;
  try{
+  if(!base)throw new Error('Backend не настроен. Вставь URL явно; страница не выбирает сервер за тебя.');
+  let parsed;try{parsed=new URL(base)}catch{throw new Error('Некорректный URL backend.')}
+  if(parsed.protocol!=='https:'&&!(parsed.protocol==='http:'&&['localhost','127.0.0.1'].includes(parsed.hostname)))throw new Error('Backend должен использовать HTTPS, кроме localhost.');
   log('1. GET /api/agent/tasks');
   let r=await fetch(base+'/api/agent/tasks?limit=1'); if(!r.ok) throw new Error('GET tasks HTTP '+r.status);
   log('PASS: backend reachable');
