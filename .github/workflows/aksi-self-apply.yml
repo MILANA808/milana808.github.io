@@ -1,5 +1,7 @@
 name: AKSI Self-Apply
 
+# This workflow stores explicitly supplied learning notes. It must not push
+# directly to main: all updates are proposed as a reviewable pull request.
 on:
   repository_dispatch:
     types: [aksi-self-teach]
@@ -12,48 +14,88 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: aksi-self-apply
   cancel-in-progress: false
 
 jobs:
-  apply:
+  propose-learning:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Append self-taught fact
+        with:
+          ref: ${{ github.event.repository.default_branch || github.ref_name }}
+
+      - name: Validate and append learning note
         env:
           FACT: ${{ github.event.client_payload.fact || inputs.fact }}
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p data
           if [ ! -f data/self-taught.json ]; then
-            echo '{"version":1,"updated":null,"items":[]}' > data/self-taught.json
+            printf '%s\n' '{"version":1,"updated":null,"items":[]}' > data/self-taught.json
           fi
           node <<'NODE'
-          const fs = require('fs');
-          const fact = process.env.FACT || '';
-          if (!fact.trim()) { console.log('No fact'); process.exit(0); }
-          if (fact.length > 2000) { console.error('too long'); process.exit(1); }
+          const fs = require('node:fs');
+          const fact = (process.env.FACT || '').trim();
+          if (!fact) {
+            console.error('A non-empty fact is required.');
+            process.exit(1);
+          }
+          if (fact.length > 2000) {
+            console.error('Fact exceeds 2000 characters.');
+            process.exit(1);
+          }
+          if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/u.test(fact)) {
+            console.error('Fact contains unsupported control characters.');
+            process.exit(1);
+          }
+
           const path = 'data/self-taught.json';
-          let data = { version: 1, items: [] };
-          try { data = JSON.parse(fs.readFileSync(path, 'utf8')); } catch (e) {}
-          if (!Array.isArray(data.items)) data.items = [];
-          data.items.push({ t: Date.now(), text: fact.trim(), source: 'workflow', meta: {} });
+          let data;
+          try {
+            data = JSON.parse(fs.readFileSync(path, 'utf8'));
+          } catch (error) {
+            console.error(`Existing learning file is invalid JSON: ${error.message}`);
+            process.exit(1);
+          }
+          if (!data || data.version !== 1 || !Array.isArray(data.items)) {
+            console.error('Existing learning file has an unsupported schema; refusing to overwrite it.');
+            process.exit(1);
+          }
+          if (data.items.some(item => item && item.text === fact)) {
+            console.log('Identical fact already exists; no change needed.');
+            process.exit(0);
+          }
+          data.items.push({
+            t: Date.now(),
+            text: fact,
+            source: 'workflow_dispatch',
+            meta: { repository: process.env.GITHUB_REPOSITORY || '' }
+          });
           if (data.items.length > 500) data.items = data.items.slice(-500);
           data.updated = new Date().toISOString();
-          fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n');
-          console.log('n=', data.items.length);
+          fs.writeFileSync(path, JSON.stringify(data, null, 2) + '\n', { encoding: 'utf8', mode: 0o600 });
           NODE
-      - name: Commit
-        run: |
-          git config user.name "AKSI Self-Apply"
-          git config user.email "aksi-bot@users.noreply.github.com"
-          git add data/self-taught.json
-          if git diff --staged --quiet; then
-            echo "No changes"
-          else
-            git commit -m "AKSI Self-Apply: teach from workflow"
-            git push
-          fi
+
+      - name: Create reviewable pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/aksi-self-taught
+          delete-branch: false
+          commit-message: "AKSI: propose learning note"
+          title: "AKSI: propose learning note"
+          body: |
+            ## What changed
+            - Adds a manually supplied learning note to `data/self-taught.json`.
+            - Keeps the change reviewable instead of pushing directly to `main`.
+
+            ## Safety
+            - Input length and control characters are checked.
+            - Existing JSON/schema errors fail closed.
+            - Duplicate facts are ignored.
+            - The normal pull-request checks must pass before merge.
+          add-paths: data/self-taught.json
