@@ -213,7 +213,8 @@ function initLocalModel(){
  }
  window.addEventListener('aksi-webllm-progress',e=>renderModelState(e.detail));
  const st=api.status();renderModelState(st);
- if(st.webgpu===false)status.textContent=(st.ios?'На этом iPhone WebGPU недоступен в текущем браузере.':'WebGPU недоступен в этом браузере или на устройстве.')+' Доступны встроенные инструменты AKSI.';
+ if(!navigator.gpu){load.disabled=true;badge.textContent='WEBGPU НЕТ';status.textContent=(st.ios?'На этом iPhone WebGPU не предоставлен текущим браузером.':'Этот браузер или устройство не предоставляет WebGPU.')+' Доступны встроенные инструменты AKSI; локальная большая модель не запустится.';}
+ else{status.textContent='WebGPU API обнаружен. Совместимость адаптера проверится при загрузке модели.';}
  load.addEventListener('click',async()=>{
   load.disabled=true;status.textContent='Подготовка загрузки…';
   try{const r=await api.load(select.value,renderModelState);renderModelState(r);status.textContent='Модель загружена локально: '+r.model+'. Можно задавать вопросы.';event('MODEL','WebLLM loaded: '+r.model);}
