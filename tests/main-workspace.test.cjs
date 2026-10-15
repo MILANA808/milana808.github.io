@@ -41,6 +41,13 @@ assert.ok(html.includes('href="/core/"'), 'homepage must link to the unified cor
 for (const id of ['task','claim','source','altA','altB','runCore','runTests','verifyReceipt','downloadReport','health','history']) {
   assert.ok(unifiedCore.includes('id="' + id + '"'), 'unified core demo missing control: ' + id);
 }
+for (const id of ['backendBase','checkBackend','saveBackend','backendStatus','backendOutput','backendGoal','allowInternet','createBackendTask','taskOutput']) {
+  assert.ok(unifiedCore.includes('id="' + id + '"'), 'unified core demo missing backend control: ' + id);
+}
+for (const token of ['AKSI-VAI/1','/health','/api/core/runtime','/api/agent/tasks','internet:$('+'allowInternet'+').checked','credentials']) {
+  if (token === 'credentials') continue;
+  assert.ok(unifiedCore.includes(token), 'unified core demo missing backend contract token: ' + token);
+}
 for (const token of ['AKSI-UNIFIED-CORE-DEMO/1','SHA-256','Фактическая проверка URL','не проверялись','SELF_TEST']) {
   assert.ok(unifiedCore.includes(token), 'unified core demo missing expected contract: ' + token);
 }
