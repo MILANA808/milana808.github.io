@@ -37,8 +37,8 @@ for (const id of ['task','run','save','receipt','decide','math','calc','angle','
 assert.ok(workspace.includes('id="tests"'), 'integrated workspace must expose runnable self-tests');
 assert.ok(proofbench.includes('id="run"') && proofbench.includes('id="repeat"'), 'ProofBench must expose run and repeat controls');
 for (const [name, source] of [['workspace', workspace], ['proofbench', proofbench]]) {
-  const scripts = [...source.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)]
-    .filter(m => !/\\bsrc\\s*=/.test(m[1]) && !/application\\/ld\\+json/i.test(m[1]))
+  const scripts = [...source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
+    .filter(m => !/\bsrc\s*=/.test(m[1]) && !/application\/ld\+json/i.test(m[1]))
     .map(m => m[2]).filter(s => s.trim());
   assert.ok(scripts.length, name + ' must include a controller script');
   scripts.forEach((script, i) => new vm.Script(script, { filename: name + ':inline-script-' + i }));
