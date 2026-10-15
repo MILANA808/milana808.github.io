@@ -14,7 +14,7 @@
 </style>
 </head>
 <body>
-<header class="nav"><div class="navin"><a class="brand" href="/" aria-label="AKSI MATRIX — главная"><span class="mark">A</span><span>AKSI MATRIX</span></a><div class="status"><span class="pulse"></span><span>ЛОКАЛЬНАЯ ДЕМО-СЕССИЯ</span></div></div></header>
+<header class="nav"><div class="navin"><a class="brand" href="/" aria-label="AKSI MATRIX — главная"><span class="mark">A</span><span>AKSI MATRIX</span></a><div style="display:flex;align-items:center;gap:12px"><button class="btn" id="langToggle" type="button" aria-label="Switch language" style="padding:7px 11px">EN</button><div class="status"><span class="pulse"></span><span>ЛОКАЛЬНАЯ ДЕМО-СЕССИЯ</span></div></div></div></header>
 <main class="wrap">
 <section class="hero">
  <div class="hero-copy"><div class="eyebrow">Интерактивная лаборатория · версия 1.0</div><h1>Интеллект,<br><span>который можно проверить.</span></h1><p class="lead">Исследуй математическое ядро AKSI: преобразуй состояние, запускай вычисления, проверяй целостность данных и управляй памятью. Всё работает прямо в браузере — без регистрации и отправки введённых данных на сервер.</p><div class="actions"><a class="btn primary" href="#lab">Открыть лабораторию ↓</a><button class="btn" id="runAll">Запустить проверку</button></div></div>
@@ -51,6 +51,130 @@ $('clearMemory').addEventListener('click',()=>{memory=null;$('memoryText').value
 $('exportLog').addEventListener('click',()=>{const payload={product:'AKSI MATRIX Demo',format:'aksi-local-session-log-v1',exportedAt:new Date().toISOString(),events};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='aksi-session-log.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);log('LOG_EXPORTED',events.length+' prior events exported')});
 $('runAll').addEventListener('click',async()=>{const checks=[];try{checks.push(['math',safeMath('(12+8)*3/2')===30])}catch{checks.push(['math',false])}try{checks.push(['parser-error',(()=>{try{safeMath('1/0');return false}catch{return true}})()])}catch{checks.push(['parser-error',false])}try{checks.push(['sha256',/^[0-9a-f]{64}$/.test(await sha256('AKSI'))])}catch{checks.push(['sha256',false])}const ok=checks.every(x=>x[1]);$('calcOut').textContent='Встроенная проверка\n'+checks.map(x=>(x[1]?'PASS':'FAIL')+' — '+x[0]).join('\n')+'\nИтог: '+(ok?'все локальные проверки пройдены':'есть ошибки');log('SELF_TEST',checks.filter(x=>x[1]).length+'/'+checks.length+' passed');document.querySelector('#lab').scrollIntoView({behavior:'smooth',block:'start'})});
 log('SESSION_START','local interactive lab ready');
+})();
+</script>
+
+<script id="aksi-i18n">
+(()=> {
+const pairs = [
+["ЛОКАЛЬНАЯ ДЕМО-СЕССИЯ","LOCAL DEMO SESSION"],
+["Интерактивная лаборатория · версия 1.0","Interactive Lab · version 1.0"],
+["Интеллект,","Intelligence,"],
+["который можно проверить.","you can verify."],
+["Исследуй математическое ядро AKSI: преобразуй состояние, запускай вычисления, проверяй целостность данных и управляй памятью. Всё работает прямо в браузере — без регистрации и отправки введённых данных на сервер.","Explore the AKSI math core: change state, run calculations, verify data integrity, and manage memory. Everything runs in your browser — no registration and no sending your input to a server."],
+["Открыть лабораторию ↓","Open the lab ↓"],
+["Запустить проверку","Run self-test"],
+["01 / вычисление","01 / calculation"],
+["Математическое ядро","Mathematical Core"],
+["Введи арифметическое выражение. Поддерживаются числа, скобки и операции + − × ÷, степень и унарный минус. Произвольный JavaScript не исполняется.","Enter an arithmetic expression. Numbers, parentheses, + − × ÷, powers, and unary minus are supported. Arbitrary JavaScript is not executed."],
+["Вычислить","Calculate"],
+["Ожидаю выражение…","Waiting for an expression…"],
+["Проверка ошибки","Error test"],
+["02 / состояние","02 / state"],
+["Вектор состояния","State Vector"],
+["Выбери намерение — демонстрационное ядро обновит четырёхкомпонентный вектор. Это прозрачная модель состояния, а не обученная универсальная языковая модель.","Choose an intention — the demo core updates a four-component vector. This is a transparent state model, not a trained general-purpose language model."],
+["Исследовать","Explore"],
+["Рассуждать","Reason"],
+["Запомнить","Remember"],
+["Сбросить","Reset"],
+["СМЫСЛ","MEANING"],
+["ЛОГИКА","LOGIC"],
+["КОНТЕКСТ","CONTEXT"],
+["УВЕРЕННОСТЬ","CONFIDENCE"],
+["Состояние инициализировано. Выбери действие, чтобы увидеть изменение.","State initialized. Choose an action to see a change."],
+["03 / кластерная модель","03 / cluster model"],
+["Симулятор вычислительных узлов","Compute Node Simulator"],
+["Раздели вычислительную задачу на независимые фрагменты и собери результат. Узлы симулируются в браузере; это не реальный GPU-кластер и не квантовое оборудование.","Split a task into independent parts and combine the results. Nodes are simulated in the browser; this is not a real GPU cluster or quantum hardware."],
+["Количество узлов","Number of nodes"],
+["Запустить узлы","Run nodes"],
+["Готов к запуску.","Ready to run."],
+["04 / доказательство","04 / integrity"],
+["Квитанция целостности","Integrity Receipt"],
+["Создай отпечаток своего текста с помощью Web Crypto API. Изменение даже одного символа даст другой хеш. Квитанция подтверждает целостность текста, но сама по себе не доказывает авторство или время создания.","Create a fingerprint of your text using the Web Crypto API. Changing even one character changes the hash. The receipt checks text integrity but does not, by itself, prove authorship or creation time."],
+["Введи текст или описание результата проверки…","Enter text or describe a test result…"],
+["Создать хеш","Create hash"],
+["Проверить","Verify"],
+["Хеш ещё не создан.","No hash created yet."],
+["05 / добровольная память","05 / optional memory"],
+["Память под твоим контролем","Memory Under Your Control"],
+["Сохрани заметку только в памяти этой вкладки. Она не отправляется в облако и исчезнет при закрытии вкладки или перезагрузке страницы.","Save a note only in this tab's session memory. It is not sent to the cloud and disappears when the tab is closed or the page is reloaded."],
+["Например: в следующем тесте проверить отрицательные числа…","Example: test negative numbers next…"],
+["Сохранить в сессию","Save to session"],
+["Удалить","Delete"],
+["Память пуста.","Memory is empty."],
+["06 / журнал","06 / log"],
+["История проверок","Activity Log"],
+["Локальная лента действий этой демонстрационной сессии. Обновляется при вычислениях, симуляции и работе с квитанцией.","A local activity feed for this demo session. Updates during calculations, simulations, and receipt checks."],
+["Лаборатория запущена","Lab started"],
+["Скачать журнал JSON","Download JSON log"],
+["Принцип разработки","Development Principle"],
+["Проверяемость важнее громких обещаний","Verifiability Over Big Claims"],
+["Прозрачное состояние","Transparent State"],
+["Вектор и изменения видны пользователю; скрытого обучения в этой демоверсии нет.","The vector and its changes are visible; this demo has no hidden training."],
+["Локальная обработка","Local Processing"],
+["Вычисления, журнал и память работают в браузере. Для этой страницы внешние AI API не требуются.","Calculations, log, and memory run in the browser. This page does not require external AI APIs."],
+["Честные границы","Honest Limitations"],
+["Демо не заявляет AGI, реальное квантовое вычисление, распределённый GPU-кластер или сертифицированное доказательство.","The demo does not claim AGI, real quantum computing, a distributed GPU cluster, or certified proof."],
+["Это интерактивный прототип собственных демонстрационных механизмов AKSI. Он показывает работающие функции страницы, но не заменяет независимые тесты всего репозитория и серверной системы.","This is an interactive prototype of AKSI's own demo mechanisms. It shows the page's working features but does not replace independent tests of the full repository and server system."],
+["Главная страница","Home"],
+["Данные этой сессии остаются в текущей вкладке.","Session data stays in the current tab."],
+["Вычислено локальным парсером AKSI.","Calculated by the local AKSI parser."],
+["Статус: успешно","Status: success"],
+["Ошибка: ","Error: "],
+["Действие: ","Action: "],
+["Норма L₂: ","L₂ norm: "],
+["Симуляция завершена","Simulation complete"],
+["Узлов: ","Nodes: "],
+["Элементов: ","Values: "],
+["Сумма частей: ","Combined sum: "],
+["Статус: результат собран локально; узлы симулированы.","Status: result combined locally; nodes are simulated."],
+["Хеш не создан.","Hash not created."],
+["Сначала создай хеш.","Create a hash first."],
+["Результат проверки: ","Verification result: "],
+["СОВПАДАЕТ","MATCH"],
+["НЕ СОВПАДАЕТ","MISMATCH"],
+["Исходный: ","Original: "],
+["Текущий:  ","Current:  "],
+["Сохранено только в оперативном состоянии этой вкладки.","Saved only in this tab's in-memory session."],
+["Время: ","Time: "],
+["Заметка: ","Note: "],
+["Память очищена.","Memory cleared."],
+["Нечего сохранять: введи заметку.","Nothing to save: enter a note."],
+["Нет событий.","No events."],
+["Встроенная проверка","Built-in self-test"],
+["Итог: ","Result: "],
+["все локальные проверки пройдены","all local checks passed"],
+["есть ошибки","some checks failed"],
+["Статус: отпечаток рассчитан в браузере.","Status: fingerprint calculated in the browser."]
+];
+const ruToEn = new Map(pairs), enToRu = new Map(pairs.map(([ru,en])=>[en,ru]));
+let lang = "ru";
+function swapText(node) {
+  if (!node || node.nodeType !== Node.TEXT_NODE) return;
+  const raw=node.nodeValue, trimmed=raw.trim();
+  if (!trimmed) return;
+  const map=lang==="en"?ruToEn:enToRu;
+  if(map.has(trimmed)) node.nodeValue=raw.replace(trimmed,map.get(trimmed));
+}
+function translate(root=document) {
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const nodes=[]; while(walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(swapText);
+  document.querySelectorAll("[placeholder]").forEach(el=>{
+    const map=lang==="en"?ruToEn:enToRu;
+    if(map.has(el.placeholder)) el.placeholder=map.get(el.placeholder);
+  });
+  document.documentElement.lang=lang;
+  document.title=lang==="en"?"AKSI MATRIX — Interactive Lab":"AKSI MATRIX — интерактивная лаборатория";
+  const meta=document.querySelector('meta[name="description"]');
+  if(meta) meta.content=lang==="en"?"AKSI MATRIX — interactive demo of a local math core, vector state, optional memory, and integrity receipts.":"AKSI MATRIX — интерактивная демонстрация локального математического ядра, векторного состояния, добровольной памяти и проверяемых квитанций.";
+  const toggle=document.getElementById("langToggle");
+  if(toggle){toggle.textContent=lang==="en"?"RU":"EN";toggle.setAttribute("aria-label",lang==="en"?"Switch to Russian":"Switch to English");}
+}
+document.getElementById("langToggle")?.addEventListener("click",()=>{lang=lang==="ru"?"en":"ru";translate();});
+translate();
+const observer=new MutationObserver(records=>{for(const rec of records){if(rec.type==="characterData")swapText(rec.target);else rec.addedNodes.forEach(n=>{if(n.nodeType===Node.TEXT_NODE)swapText(n);else if(n.nodeType===Node.ELEMENT_NODE)translate(n);});}});
+observer.observe(document.body,{subtree:true,childList:true,characterData:true});
 })();
 </script>
 </body></html>
