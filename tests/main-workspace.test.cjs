@@ -18,6 +18,7 @@ assert.ok(html.includes('window.AKSI_WEBLLM.complete(q'), 'chat should use loade
 assert.ok(html.includes('window.AKSI_WEBLLM.ready()'), 'chat must only call local generation when model is ready');
 assert.ok(html.includes('вывод модели не является независимой проверкой фактов'), 'model answer must retain factual limitation notice');
 assert.ok(html.includes('Выгрузить') && html.includes('Загрузить модель'), 'user must be able to load and unload the model');
+assert.ok(html.includes('if(!navigator.gpu)') && html.includes('локальная большая модель не запустится'), 'unsupported WebGPU must be reported before the user downloads weights');
 assert.ok(demo.includes('id="langToggle"') && demo.includes('Switch to Russian') && demo.includes('Switch to English'), 'public demo should expose RU/EN language control');
 
 const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
