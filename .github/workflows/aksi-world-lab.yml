@@ -1,0 +1,32 @@
+name: AKSI World Lab integrity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "world-lab/**"
+      - "scripts/check_world_lab.py"
+      - ".github/workflows/aksi-world-lab.yml"
+  pull_request:
+    paths:
+      - "world-lab/**"
+      - "scripts/check_world_lab.py"
+      - ".github/workflows/aksi-world-lab.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify browser lab
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Check JavaScript syntax and lab integrity
+        run: python scripts/check_world_lab.py
