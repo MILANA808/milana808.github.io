@@ -174,6 +174,36 @@
   }
   async function answer(query, options) {
     options = options || {};
+    const neuralRequest = String(query == null ? "" : query).match(/^\s*(?:нейросеть|нейронная модель|генерация)\s*[:：]\s*([\s\S]+)$/i);
+    if (neuralRequest) {
+      const lab = root.AKSI_NEURAL_LAB;
+      if (!lab || typeof lab.loadLocal !== "function" || typeof lab.generate !== "function") {
+        return { text: "Модуль локальной нейросети не загружен. Проверь aksi-visible-neural-lab.js.", source: "neural-lab-unavailable", error: "AKSI_NEURAL_LAB unavailable" };
+      }
+      const model = lab.loadLocal();
+      if (!model) {
+        recordTrace({ type: "neural_request", generator: "aksi-visible-neural-lab", status: "model_not_trained" });
+        return {
+          text: "Сначала открой /neural-lab/, обучи маленькую символьную модель и нажми «Сохранить для чата». Затем повтори запрос: нейросеть: твой текст. Это учебная MLP, а не большая языковая модель и не проверка фактов.",
+          source: "aksi-visible-neural-lab",
+          model: "AKSI tiny character MLP",
+          integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-visible-neural-lab", modelReady: false }
+        };
+      }
+      try {
+        const generated = lab.generate(model, neuralRequest[1], { maxChars: 220 });
+        recordTrace({ type: "neural_generation", generator: "aksi-visible-neural-lab", status: "generated" });
+        return {
+          text: generated.text + "\n\n[" + generated.model + " · " + generated.warning + "]",
+          source: "aksi-visible-neural-lab",
+          model: generated.model,
+          integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-visible-neural-lab", modelReady: true, warning: generated.warning }
+        };
+      } catch (error) {
+        recordTrace({ type: "neural_generation", generator: "aksi-visible-neural-lab", status: "error" });
+        return { text: "Локальная символьная модель завершилась с ошибкой: " + clean(error && error.message || error, 300), source: "aksi-visible-neural-lab", error: "generation_failed" };
+      }
+    }
     const prepared = prepare(query, options.evidence || []);
     const math = extractMathExpression(query);
     if (math && root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function") {
@@ -418,6 +448,7 @@
     const modules = {
       adaptiveMemory: true,
       decisionCoreV3: !!(root.AKSICoreV3 && typeof root.AKSICoreV3.run === "function"),
+      visibleNeuralLab: !!(root.AKSI_NEURAL_LAB && typeof root.AKSI_NEURAL_LAB.generate === "function" && typeof root.AKSI_NEURAL_LAB.loadLocal === "function"),
       nativeGenerator: !!(root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function"),
       intentRouter: !!(root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine),
       evidenceAssessor: !!(root.AKSICognitiveCore && typeof root.AKSICognitiveCore.assess === "function"),
