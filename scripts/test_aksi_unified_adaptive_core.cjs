@@ -43,6 +43,14 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(answer.integration.schema, "AKSI-CORE-RESULT/1");
   assert.equal(answer.integration.generator, "aksi-native-dna-topology");
   assert.equal(answer.integration.evidence.status, "insufficient_evidence");
+  const annotated = Core.prepare("claim under test", [
+    { stance: "supports", text: "independent supporting source", url: "https://a.example/evidence", reliability: 0.8, sourceGroup: "a" },
+    { stance: "refutes", text: "independent refuting source", url: "https://b.example/evidence", reliability: 0.8, sourceGroup: "b" }
+  ]);
+  assert.equal(annotated.evidenceAssessment.status, "contested", "explicitly annotated opposing evidence must remain contested");
+  assert.equal(annotated.evidenceAssessment.supportWeight, 0.8);
+  assert.equal(annotated.evidenceAssessment.refuteWeight, 0.8);
+  assert.match(annotated.evidenceAssessment.warning, /not a probability of truth/i);
   assert.equal(Core.getTrace().length, 1);
   assert.equal(Core.getTrace()[0].type, "answer");
   Core.clearTrace();
