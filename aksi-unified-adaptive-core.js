@@ -266,14 +266,6 @@
         } : { status: "no_sources", count: 0 },
         modules: inspect().modules, memory: prepared.context.notes || []
       };
-      recordTrace({
-        type: "answer",
-        generator: "aksi-native-dna-topology",
-        intent: prepared.intent ? prepared.intent.intent : null,
-        evidenceStatus: native.evidenceAudit,
-        evidenceCount: (options.evidence || []).length,
-        graphUsed: !!prepared.diffusion
-      });
       try {
         const audit = root.AKSICognitiveCore;
         if (audit) {
@@ -294,6 +286,15 @@
           native.receiptAssessmentStatus = assessment.status;
         }
       } catch (_) { native.receipt = null; }
+      recordTrace({
+        type: "answer",
+        generator: "aksi-native-dna-topology",
+        intent: prepared.intent ? prepared.intent.intent : null,
+        evidenceStatus: native.evidenceAudit,
+        evidenceCount: (options.evidence || []).length,
+        graphUsed: !!prepared.diffusion,
+        receiptDigest: native.receipt || null
+      });
       return native;
     }
     const api = root.AKSI_WEBLLM;
@@ -355,7 +356,8 @@
         intent: prepared.intent ? prepared.intent.intent : null,
         evidenceStatus: combined.evidenceAudit,
         evidenceCount: (options.evidence || []).length,
-        graphUsed: !!prepared.diffusion
+        graphUsed: !!prepared.diffusion,
+        receiptDigest: combined.receipt || null
       });
       return combined;
     }
