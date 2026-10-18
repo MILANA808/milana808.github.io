@@ -13,7 +13,8 @@ The existing `AKSI_UNIFIED_CORE` is the orchestration entry point for the main b
 
 ## Module and result contracts
 
-- The main page loads the existing `aksi-core-v3.js` decision engine before the orchestrator. `AKSI_UNIFIED_CORE.decide(task, candidates, options)` delegates structured candidate comparison to `AKSICoreV3.run` and records the decision receipt hash in the in-memory trace. This is a separate structured-decision path, not the free-form text generator; the candidate scores are heuristic and are not calibrated probabilities of truth.
+- The main page loads the existing `aksi-core-v3.js` decision engine before the orchestrator.
+- When the user explicitly enables web search, `AKSI_UNIFIED_CORE.answer(..., { useWeb: true })` calls the existing `AKSI_INTERNET.gather`, records search status in the trace, and passes retrieved material into evidence assessment. Search results default to context, not support or refutation. `AKSI_UNIFIED_CORE.decide(task, candidates, options)` delegates structured candidate comparison to `AKSICoreV3.run` and records the decision receipt hash in the in-memory trace. This is a separate structured-decision path, not the free-form text generator; the candidate scores are heuristic and are not calibrated probabilities of truth.
 
 - `AKSI_UNIFIED_CORE.inspect()` reports module availability. Availability does not prove that a module was executed for every request.
 - Successful answers include `integration.schema = "AKSI-CORE-RESULT/1"`, with the generator, intent-routing result, graph use, evidence status, and available modules.
