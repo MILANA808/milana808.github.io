@@ -12,13 +12,14 @@ new Function(html.slice(bodyStart, scriptEnd));
 
 for (const marker of [
   'id="aksiModelStatus"', 'id="aksiRememberTurns"', 'id="aksiUseWeb"', 'id="aksiClearMemory"',
-  'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"',
+  'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"', 'src="/aksi-core-v3.js?v=3.1.0"',
   "window.AKSI_UNIFIED_CORE.answer", "window.AKSI_INTERNET.gather",
   "state.history=state.history.slice(-60)", "if(!Array.isArray(state.history))state.history=[];",
   "AKSI Native Generator", "Источники для самостоятельной проверки:"
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
 
 assert.ok(html.indexOf('src="/aksi-dna-topology-engine.js?v=1"') < scriptStart, "native generator must load before the main app script");
+assert.ok(html.indexOf('src="/aksi-core-v3.js?v=3.1.0"') < html.indexOf('src="/aksi-unified-adaptive-core.js?v=3"'), "Core v3 must load before the unified orchestrator");
 assert.ok(!html.includes('src="/aksi-webllm.js"'), "main chat must not depend on WebLLM");
 assert.ok(html.indexOf("window.AKSI_UNIFIED_CORE.answer") < html.indexOf("if(/кто ты|представься/.test(n))"), "native generator must take priority over canned answers");
 assert.ok(!html.includes("if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready())"), "main chat must route through the unified core before any model fallback");
