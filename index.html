@@ -241,18 +241,10 @@ async function backend(path,opts={}){throw Error('Автономный режи�
 async function ask(q){const n=normalize(q);if(!n)return;let m=q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){const k=m[1].trim(),v=m[2].trim();state.memory[k]=v;const saved=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.remember?window.AKSI_UNIFIED_CORE.remember(k,v):{ok:false};persist();render();event('MEMORY','Saved through unified core: '+k);return saved.ok?'Сохранила в единую локальную память: '+k+' = '+v:'Запись сохранена в памяти интерфейса, но ядро не подтвердило сохранение.';}
 if(/^(память|покажи память|что ты помнишь)$/.test(n)){const notes=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.listNotes?window.AKSI_UNIFIED_CORE.listNotes():[];const merged=Object.assign({},state.memory);notes.forEach(x=>{merged[x.key]=x.value;});const keys=Object.keys(merged);return keys.length?keys.map(k=>k+' = '+merged[k]).join('\n'):'Локальная память пока пуста.';}
 if(n==='статус системы'||n==='диагностика') {await diagnostics();return $('diagOutput').textContent;}
-// Optional public-source retrieval works even when a local model is unavailable.
+// The unified core owns opt-in source retrieval; the UI only renders returned sources.
 let evidence=[];
-if(!$('aksiUseWeb').checked){$('aksiEvidence').style.display='none';}
-if($('aksiUseWeb').checked){
- $('chatStatus').textContent='Ищу открытые источники…';
- try{
-  if(!window.AKSI_INTERNET||typeof window.AKSI_INTERNET.gather!=='function')throw new Error('Модуль поиска не загружен.');
-  const pack=await window.AKSI_INTERNET.gather(q,{mode:'lite'});evidence=(pack.evidence||[]).slice(0,6);
-  $('aksiEvidence').style.display='block';
-  $('aksiEvidence').textContent=evidence.length?'ИСТОЧНИКИ (проверь первоисточник):\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'')+'\n'+String(x.text||'').slice(0,280)).join('\n\n'):'Источники не найдены; веб-доказательств нет.';
- }catch(e){$('aksiEvidence').style.display='block';$('aksiEvidence').textContent='Поиск не удался: '+(e.message||e)+'\nОтвет без веб-доказательств.';event('WEB_ERROR',e.message||e);}
-}
+const useWeb=$('aksiUseWeb').checked;
+if(!useWeb){$('aksiEvidence').style.display='none';}
 {
  const evidenceText=evidence.map((x,i)=>'['+(i+1)+'] '+String(x.title||'Источник')+'\n'+String(x.text||'').slice(0,1100)+'\nURL: '+String(x.url||'')).join('\n\n');
  const memoryText=$('aksiRememberTurns').checked?(state.history||[]).slice(-10).map(x=>(x.role==='assistant'?'AKSI':'Пользователь')+': '+String(x.content||'').slice(0,900)).join('\n'):'';
@@ -271,7 +263,9 @@ if($('aksiUseWeb').checked){
   }catch(err){event('BACKEND_FALLBACK','Backend model unavailable; using local fallback: '+err.message);}
  }
 $('chatStatus').textContent='Генерирую собственным локальным ядром…';
- const result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence}):window.AKSI_DNA_TOPOLOGY.generate(q);
+ const result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence,useWeb}):window.AKSI_DNA_TOPOLOGY.generate(q);
+ evidence=Array.isArray(result&&result.evidence)?result.evidence:[];
+ if(useWeb){$('aksiEvidence').style.display='block';$('aksiEvidence').textContent=evidence.length?'ИСТОЧНИКИ (контекст, проверь первоисточник):\\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'')+'\\n'+String(x.text||'').slice(0,280)).join('\\n\\n'):'Источники не найдены или поиск недоступен; веб-доказательств нет.';}
  if(result&&result.text){
   $('chatStatus').textContent='AKSI Native Generator · '+(result.mode||'local')+' · без WebLLM'+(evidence.length?' · источников найдено: '+evidence.length:'');
   let output=result.text;
