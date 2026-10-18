@@ -376,6 +376,7 @@
   function inspect() {
     const modules = {
       adaptiveMemory: true,
+      decisionCoreV3: !!(root.AKSICoreV3 && typeof root.AKSICoreV3.run === "function"),
       nativeGenerator: !!(root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function"),
       intentRouter: !!(root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine),
       evidenceAssessor: !!(root.AKSICognitiveCore && typeof root.AKSICognitiveCore.assess === "function"),
@@ -397,8 +398,24 @@
       ]
     };
   }
+  async function decide(task, candidates, options) {
+    const engine = root.AKSICoreV3;
+    if (!engine || typeof engine.run !== "function") {
+      throw new Error("AKSI Core v3 is unavailable; load aksi-core-v3.js before the unified adaptive core.");
+    }
+    const result = await engine.run(task, candidates, options || {});
+    recordTrace({
+      type: "decision",
+      generator: "aksi-core-v3",
+      mode: result.mode,
+      candidateCount: Array.isArray(candidates) ? candidates.length : 0,
+      abstained: !!(result.result && result.result.abstained),
+      receiptHash: result.receipt && result.receipt.receipt_hash || null
+    });
+    return result;
+  }
   function getTrace() { return trace.map(item => Object.assign({}, item)); }
   function clearTrace() { trace.length = 0; return { ok: true }; }
-  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, prepare, feedback, stats, clearMemory, semanticAddress, lorenz, inspect, getTrace, clearTrace };
+  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, decide, prepare, feedback, stats, clearMemory, semanticAddress, lorenz, inspect, getTrace, clearTrace };
   if (typeof module === "object" && module.exports) module.exports = root.AKSI_UNIFIED_CORE;
 })(typeof window !== "undefined" ? window : globalThis);
