@@ -98,7 +98,7 @@
   function prepare(query, evidence) {
     const ctx = contextFor(query);
     const trajectory = lorenz(clean(query, 500));
-    let intent = null, diffusion = null, evidenceAssessment = null;
+    let intent = null, diffusion = null, evidenceAssessment = null, evidenceRecord = null;
     try {
       if (root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine) {
         intent = new root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine().analyze(query);
@@ -120,8 +120,8 @@
     try {
       const audit = root.AKSICognitiveCore;
       if (audit && Array.isArray(evidence) && evidence.length) {
-        const record = audit.createCase(query);
-        evidence.slice(0, 6).forEach(item => audit.addEvidence(record, {
+        evidenceRecord = audit.createCase(query);
+        evidence.slice(0, 6).forEach(item => audit.addEvidence(evidenceRecord, {
           // Retrieved material is context by default. It counts as support/refutation
           // only when an upstream reviewer explicitly supplies stance.
           stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
@@ -131,7 +131,7 @@
           reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
           observedAt: item.observedAt || ""
         }));
-        evidenceAssessment = audit.assess(record);
+        evidenceAssessment = audit.assess(evidenceRecord);
       }
     } catch (_) {}
     const hints = [
@@ -149,7 +149,7 @@
     if (ctx.relatedConcepts && ctx.relatedConcepts.length) hints.push("Геометрическое распространение активации (классический графовый ранг, не доказательство): " + JSON.stringify(ctx.relatedConcepts));
     if (evidenceAssessment) hints.push("Аудит найденных материалов: " + evidenceAssessment.status + "; источниковых фрагментов=" + evidenceAssessment.evidenceCount + ". Они зарегистрированы как контекст, не как подтверждение или опровержение.");
     hints.push("Текущие признаки: " + JSON.stringify({ conceptCount: ctx.concepts.length, feedbackCount: state.feedbackCount, exploration: trajectory }));
-    return { context: ctx, trajectory, intent, diffusion, evidenceAssessment, system: hints.join("\n\n") };
+    return { context: ctx, trajectory, intent, diffusion, evidenceRecord, evidenceAssessment, system: hints.join("\n\n") };
   }
   function extractMathExpression(query) {
     const original = clean(query, 200);
@@ -234,14 +234,21 @@
       try {
         const audit = root.AKSICognitiveCore;
         if (audit) {
-          const record = audit.createCase(query);
-          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
-            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
-            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
-          }));
-          const receipt = await audit.receipt(record, audit.assess(record));
+          const record = prepared.evidenceRecord || audit.createCase(query);
+          if (!prepared.evidenceRecord) {
+            (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+              stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
+              text: item.text || item.snippet || item.title || "Retrieved source",
+              url: item.url || "", sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
+              reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
+              observedAt: item.observedAt || ""
+            }));
+          }
+          const assessment = prepared.evidenceAssessment || audit.assess(record);
+          const receipt = await audit.receipt(record, assessment);
           native.receipt = receipt.digest;
           native.receiptSchema = receipt.schema;
+          native.receiptAssessmentStatus = assessment.status;
         }
       } catch (_) { native.receipt = null; }
       return native;
@@ -263,12 +270,17 @@
       try {
         const audit = root.AKSICognitiveCore;
         if (audit) {
-          const record = audit.createCase(query);
-          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
-            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
-            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
-          }));
-          receipt = await audit.receipt(record, audit.assess(record));
+          const record = prepared.evidenceRecord || audit.createCase(query);
+          if (!prepared.evidenceRecord) {
+            (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+              stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
+              text: item.text || item.snippet || item.title || "Retrieved source",
+              url: item.url || "", sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
+              reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
+              observedAt: item.observedAt || ""
+            }));
+          }
+          receipt = await audit.receipt(record, prepared.evidenceAssessment || audit.assess(record));
         }
       } catch (_) {}
       const combined = Object.assign({}, result, {
