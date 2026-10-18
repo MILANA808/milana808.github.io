@@ -11,6 +11,7 @@ global.window = {
     { q: "Что такое квантовая суперпозиция?", a: "Суперпозиция — математическое описание квантового состояния." }
   ]
 };
+require("../aksi-calculator.js");
 window.AKSI_DNA_TOPOLOGY = require("../aksi-dna-topology-engine.js");
 window.AKSICognitiveCore = require("../aksi-cognitive-core.js");
 window.AKSIWaveBayesianEngine = require("../aksi-wave-bayesian-engine.js");
