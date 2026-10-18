@@ -13,7 +13,7 @@ new Function(html.slice(bodyStart, scriptEnd));
 for (const marker of [
   'id="aksiModelStatus"', 'id="aksiRememberTurns"', 'id="aksiUseWeb"', 'id="aksiClearMemory"',
   'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"', 'src="/aksi-core-v3.js?v=3.1.0"', 'src="/aksi-visible-neural-lab.js?v=1"',
-  "window.AKSI_UNIFIED_CORE.answer", "window.AKSI_INTERNET.gather",
+  "window.AKSI_UNIFIED_CORE.answer", "useWeb",
   "state.history=state.history.slice(-60)", "if(!Array.isArray(state.history))state.history=[];",
   "AKSI Native Generator", "Источники для самостоятельной проверки:"
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
@@ -34,7 +34,8 @@ assert.ok(html.includes("[ЛОКАЛЬНАЯ ПАМЯТЬ — КОНТЕКСТ, 
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
 assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
-assert.ok(html.includes("if($('aksiUseWeb').checked){"), "opt-in web search must run when explicitly enabled");
+assert.ok(html.includes("const useWeb=$('aksiUseWeb').checked;"), "web-search opt-in must be passed into the unified core");
+assert.ok(html.includes("evidence=Array.isArray(result&&result.evidence)?result.evidence:[]"), "main UI must render evidence returned by the unified core");
 assert.ok(!html.includes("if(false && $('aksiUseWeb').checked){"), "web search must not be permanently disabled");
 
 const ctx = {};
