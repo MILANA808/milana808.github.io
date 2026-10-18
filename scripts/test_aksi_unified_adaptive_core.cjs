@@ -10,7 +10,14 @@ global.window = {
     { q: "Что такое память AKSI?", a: "Память AKSI хранит локальные эпизоды и оценки ответов." },
     { q: "Что такое квантовая суперпозиция?", a: "Суперпозиция — математическое описание квантового состояния." }
   ],
-  dispatchEvent: () => true
+  dispatchEvent: () => true,
+  AKSI_INTERNET: {
+    calls: 0,
+    gather: async () => {
+      window.AKSI_INTERNET.calls++;
+      return { evidence: [{ title: "Test source", text: "Retrieved material", url: "https://example.test/source" }] };
+    }
+  }
 };
 require("../aksi-calculator.js");
 require("../aksi-core-v3.js");
@@ -48,6 +55,12 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(neuralRequest.source, "aksi-visible-neural-lab");
   assert.equal(neuralRequest.integration.modelReady, false, "untrained model should not be represented as ready");
   assert.equal(Core.getTrace()[0].type, "neural_request");
+  Core.clearTrace();
+  const searched = await Core.answer("question requiring sources", { useWeb: true });
+  assert.equal(window.AKSI_INTERNET.calls, 1);
+  assert.equal(searched.evidence.length, 1);
+  assert.equal(searched.integration.evidence.status, "insufficient_evidence", "retrieved sources remain context unless explicitly annotated");
+  assert.ok(Core.getTrace().some(t => t.type === "source_search" && t.status === "completed"));
   Core.clearTrace();
   const mathResult = await Core.answer("посчитай sqrt(81) + 2^3", {});
   assert.equal(mathResult.source, "aksi-calculator");
