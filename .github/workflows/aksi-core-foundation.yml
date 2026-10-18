@@ -1,0 +1,26 @@
+name: AKSI Core foundation tests
+
+on:
+  pull_request:
+    paths:
+      - "aksi-core/**"
+      - ".github/workflows/aksi-core-foundation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "aksi-core/**"
+      - ".github/workflows/aksi-core-foundation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --test tests/core.test.mjs
+        working-directory: aksi-core
