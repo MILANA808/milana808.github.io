@@ -1,26 +1,42 @@
 # AKSI Unified Adaptive Core
 
-Browser-local adaptive memory integrated into the main AKSI chat.
+The existing `AKSI_UNIFIED_CORE` is the orchestration entry point for the main browser chat. This is an experimental classical browser architecture, not a claim of AGI, quantum advantage, or a truth oracle.
 
-## Runtime
+## Runtime path
 
-- `aksi-unified-adaptive-core.js` prepares a bounded context from local episodes and concept memory.
-- `index.html` calls the unified core for local WebLLM answer generation and exposes explicit helpful/not-helpful feedback controls.
-- The existing `AKSI_WEBLLM` is still the language model. The adaptive core does not replace it or claim to train its neural weights.
-- The local state is stored under `aksi_unified_core_v1` in this browser only. It does not synchronize between devices.
-- Positive/negative feedback updates small classical association weights. Merely generating an answer does not treat it as true or reinforce it.
-- A deterministic, bounded Lorenz integration supplies an exploration descriptor, not a truth score. The semantic address is a finite hash-derived geometric heuristic, not an actual Penrose tiling or infinite-capacity memory.
+1. The main chat optionally uses the explicitly enabled backend path when the user turns it on.
+2. Otherwise, it calls `AKSI_UNIFIED_CORE.answer(query, options)`.
+3. The core prepares bounded local context, calls the existing intent router and geometric graph module when available, and assesses supplied evidence annotations.
+4. Arithmetic-only requests and explicit commands such as `посчитай sqrt(81) + 2^3` are routed to the existing `AKSICalculator` parser, which evaluates a restricted arithmetic grammar without `eval`.
+5. Other requests use the existing offline DNA/topology generator when available. The core does not call WebLLM directly from the main chat path first; its fallback remains inside the core.
+6. The main chat shows the generator and integration metadata returned by the core.
 
-## Limits
+## Module and result contracts
 
-This is an experimental classical CPU/browser module, not memristor hardware, a quantum computer, a truth oracle, or evidence of consciousness. Model answers require the selected WebLLM model to be successfully downloaded and loaded; browser WebGPU and memory support vary. The local adaptive memory cannot by itself generate fluent answers without that model.
+- `AKSI_UNIFIED_CORE.inspect()` reports module availability. Availability does not prove that a module was executed for every request.
+- Successful answers include `integration.schema = "AKSI-CORE-RESULT/1"`, with the generator, intent-routing result, graph use, evidence status, and available modules.
+- `getTrace()` returns a bounded in-memory diagnostic trace for the current page session; `clearTrace()` clears it. This trace is not persisted, signed, or tamper-proof.
+- The cognitive evidence assessor accepts `supports`, `refutes`, and `context` annotations. Retrieved items default to `context`; retrieval alone does not establish whether a source supports a claim.
+- The evidence assessor's balance and strength fields are heuristic summaries of supplied annotations, not calibrated probabilities of truth. Source quality and independence require external validation.
+- SHA-256 receipt digests establish the digest of the supplied receipt payload; they do not prove the answer is true.
 
-## Test
+## Memory and learning boundaries
+
+- Local adaptive state uses the browser storage key `aksi_unified_core_v1`; it does not synchronize between devices.
+- Positive/negative feedback updates classical association weights. Merely generating an answer does not treat it as true or reinforce it.
+- The bounded Lorenz integration is an exploration descriptor, not a truth score.
+- Semantic addresses are finite hash-derived geometric heuristics, not a literal infinite Penrose tiling or infinite-capacity memory.
+- The separate visible neural lab is a small CPU-based character model/training demonstration; it is not automatically the main chat's answer generator.
+
+## Limitations
+
+This is an experimental classical browser system. It is not memristor hardware, a physical quantum computer, a truth oracle, or evidence of consciousness. The native generator is lightweight and can produce limited answers; calculator support is restricted to the grammar implemented in `aksi-calculator.js`. The browser may block storage, and the live public site does not include this branch's changes until the PR is reviewed, merged, and deployed.
+
+## Tests
 
 ```sh
 node scripts/test_aksi_unified_adaptive_core.cjs
+node scripts/check_aksi_main_product.mjs
 ```
 
-## User behavior
-
-Use the 👍 / 👎 controls shown under generated local-model answers. Ratings update local association weights and are persisted in browser localStorage. The user can clear this memory with the existing clear-memory control.
+The integration workflow runs both commands on pull requests that change the core, main page, or relevant tests.
