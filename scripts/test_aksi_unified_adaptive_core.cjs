@@ -9,9 +9,11 @@ global.window = {
   __AKSI_SEED: [
     { q: "Что такое память AKSI?", a: "Память AKSI хранит локальные эпизоды и оценки ответов." },
     { q: "Что такое квантовая суперпозиция?", a: "Суперпозиция — математическое описание квантового состояния." }
-  ]
+  ],
+  dispatchEvent: () => true
 };
 require("../aksi-calculator.js");
+require("../aksi-core-v3.js");
 window.AKSI_DNA_TOPOLOGY = require("../aksi-dna-topology-engine.js");
 window.AKSICognitiveCore = require("../aksi-cognitive-core.js");
 window.AKSIWaveBayesianEngine = require("../aksi-wave-bayesian-engine.js");
@@ -21,10 +23,20 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(Core.version, "0.1.0");
   const status = Core.inspect();
   assert.equal(status.schema, "AKSI-CORE-STATUS/1");
+  assert.equal(status.modules.decisionCoreV3, true);
   assert.equal(status.modules.nativeGenerator, true);
   assert.equal(status.modules.intentRouter, true);
   assert.equal(status.modules.evidenceAssessor, true);
   assert.equal(status.modules.geometricGraph, true);
+  const decision = await Core.decide("choose a reproducible candidate", [
+    { text: "Candidate A", evidence: 0.9, coherence: 0.9, agreement: 0.9, freshness: 0.9, provenance: 0.9, type: "inference", source: { url: "https://example.test/a" } },
+    { text: "Candidate B", evidence: 0.4, coherence: 0.5, agreement: 0.4, freshness: 0.5, provenance: 0.3, type: "uncertain" },
+    { text: "Candidate C", evidence: 0.7, coherence: 0.6, agreement: 0.7, freshness: 0.8, provenance: 0.7, type: "inference" }
+  ], { mode: "deterministic", remember: false });
+  assert.equal(decision.protocol, "AKSI-CORE/3");
+  assert.equal(decision.receipt.receipt_hash.length, 64);
+  assert.equal(Core.getTrace()[0].type, "decision");
+  Core.clearTrace();
   const mathResult = await Core.answer("посчитай sqrt(81) + 2^3", {});
   assert.equal(mathResult.source, "aksi-calculator");
   assert.equal(mathResult.calculation.value, 17);
