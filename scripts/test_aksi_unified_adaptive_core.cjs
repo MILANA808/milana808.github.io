@@ -87,6 +87,7 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.match(annotated.evidenceAssessment.warning, /not a probability of truth/i);
   assert.equal(Core.getTrace().length, 1);
   assert.equal(Core.getTrace()[0].type, "answer");
+  assert.equal(Core.getTrace()[0].receiptDigest, answer.receipt, "answer trace must reference the generated evidence receipt");
   Core.clearTrace();
   assert.equal(Core.getTrace().length, 0);
   assert.match(answer.receipt, /^[a-f0-9]{64}$/);
