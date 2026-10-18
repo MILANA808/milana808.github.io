@@ -1,0 +1,29 @@
+name: AKSI Discovery Engine Tests
+
+on:
+  push:
+    branches: [main, "fix/**"]
+    paths:
+      - "aksi-discovery-engine.js"
+      - "tests/aksi-discovery-engine.test.cjs"
+      - ".github/workflows/aksi-discovery-tests.yml"
+  pull_request:
+    paths:
+      - "aksi-discovery-engine.js"
+      - "tests/aksi-discovery-engine.test.cjs"
+      - ".github/workflows/aksi-discovery-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discovery-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check aksi-discovery-engine.js
+      - run: node --test tests/aksi-discovery-engine.test.cjs
