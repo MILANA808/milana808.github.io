@@ -228,7 +228,7 @@
             intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
             graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
             evidence: { status: "not_applicable_to_arithmetic", count: 0 },
-            modules: inspect().modules
+            modules: inspect().modules, memory: prepared.context.notes || []
           }
         };
         recordTrace({ type: "calculation", generator: "aksi-calculator", expression: math.expression, ok: !!calculation.ok, graphUsed: !!prepared.diffusion });
@@ -264,7 +264,7 @@
           refuteWeight: prepared.evidenceAssessment.refuteWeight,
           warning: prepared.evidenceAssessment.warning
         } : { status: "no_sources", count: 0 },
-        modules: inspect().modules
+        modules: inspect().modules, memory: prepared.context.notes || []
       };
       recordTrace({
         type: "answer",
@@ -346,7 +346,7 @@
             refuteWeight: prepared.evidenceAssessment.refuteWeight,
             warning: prepared.evidenceAssessment.warning
           } : { status: "no_sources", count: 0 },
-          modules: inspect().modules
+          modules: inspect().modules, memory: prepared.context.notes || []
         }
       });
       recordTrace({
