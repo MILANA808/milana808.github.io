@@ -204,7 +204,7 @@
         return { text: "Локальная символьная модель завершилась с ошибкой: " + clean(error && error.message || error, 300), source: "aksi-visible-neural-lab", error: "generation_failed" };
       }
     }
-    let evidence = Array.isArray(evidence) ? evidence.slice(0, 6) : [];
+    let evidence = Array.isArray(options.evidence) ? options.evidence.slice(0, 6) : [];
     if (options.useWeb) {
       const internet = root.AKSI_INTERNET;
       if (internet && typeof internet.gather === "function") {
