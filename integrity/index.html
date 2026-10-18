@@ -121,6 +121,7 @@ code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;
   </p>
 </div>
 
+<script src="../aksi-crypto-provider.js"></script>
 <script>
 (function () {
   "use strict";
@@ -170,62 +171,27 @@ code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;
   tickMsk();
   setInterval(tickMsk, 1000);
 
-  async function tryEd25519() {
-    try {
-      var kp = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
-      var pub = new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey));
-      var privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
-      var pubJwk = await crypto.subtle.exportKey("jwk", kp.publicKey);
-      return { alg: "Ed25519", kp: kp, pubRaw: pub, privJwk: privJwk, pubJwk: pubJwk };
-    } catch (e) { return null; }
-  }
-  async function makeEcdsa() {
-    var kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
-    var pub = new Uint8Array(await crypto.subtle.exportKey("spki", kp.publicKey));
-    var privJwk = await crypto.subtle.exportKey("jwk", kp.privateKey);
-    var pubJwk = await crypto.subtle.exportKey("jwk", kp.publicKey);
-    return { alg: "ECDSA-P256", kp: kp, pubRaw: pub, privJwk: privJwk, pubJwk: pubJwk };
-  }
-  async function importIdentity(pack) {
-    if (pack.alg === "Ed25519") {
-      var priv = await crypto.subtle.importKey("jwk", pack.privJwk, { name: "Ed25519" }, true, ["sign"]);
-      var pub = await crypto.subtle.importKey("jwk", pack.pubJwk, { name: "Ed25519" }, true, ["verify"]);
-      return { alg: pack.alg, privateKey: priv, publicKey: pub, pubRaw: unb64(pack.pubB64), did: pack.did, created: pack.created };
-    }
-    var priv2 = await crypto.subtle.importKey("jwk", pack.privJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]);
-    var pub2 = await crypto.subtle.importKey("jwk", pack.pubJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]);
-    return { alg: pack.alg, privateKey: priv2, publicKey: pub2, pubRaw: unb64(pack.pubB64), did: pack.did, created: pack.created };
-  }
   async function ensureIdentity(force) {
-    if (!force) {
-      try {
-        var raw = localStorage.getItem(LS_KEY);
-        if (raw) {
-          identity = await importIdentity(JSON.parse(raw));
-          paintId();
-          return identity;
-        }
-      } catch (e) {}
-    }
-    var made = (await tryEd25519()) || (await makeEcdsa());
-    var fp = hex((await sha256(made.pubRaw)).slice(0, 16));
-    var did = "did:aksi:" + (made.alg === "Ed25519" ? "ed25519" : "p256") + ":" + fp;
-    var pack = {
-      alg: made.alg,
-      did: did,
-      pubB64: b64(made.pubRaw),
-      privJwk: made.privJwk,
-      pubJwk: made.pubJwk,
-      created: Date.now()
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(pack));
+    if (identity && !force) return identity;
+    if (!window.AKSICryptoProvider) throw new Error("AKSI Crypto Provider is unavailable; refusing plaintext key storage");
+    var keyId = force
+      ? "aksi-integrity-rotated-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10)
+      : "aksi-integrity-v1";
+    var pair = await window.AKSICryptoProvider.getKeyPair(keyId, {
+      algorithm: { name: "ECDSA", namedCurve: "P-256" },
+      privateUsages: ["sign"],
+      legacy: { privateStorageKey: LS_KEY, removeKeys: [LS_KEY] }
+    });
+    var pubRaw = new Uint8Array(await crypto.subtle.exportKey("spki", pair.publicKey));
+    var fp = hex((await sha256(pubRaw)).slice(0, 16));
     identity = {
-      alg: made.alg,
-      privateKey: made.kp.privateKey,
-      publicKey: made.kp.publicKey,
-      pubRaw: made.pubRaw,
-      did: did,
-      created: pack.created
+      alg: "ECDSA-P256",
+      privateKey: pair.privateKey,
+      publicKey: pair.publicKey,
+      pubRaw: pubRaw,
+      did: "did:aksi:p256:" + fp,
+      created: pair.createdAt || Date.now(),
+      keyId: pair.id
     };
     paintId();
     return identity;
@@ -240,9 +206,6 @@ code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;
 
   async function signBytes(data) {
     var id = await ensureIdentity();
-    if (id.alg === "Ed25519") {
-      return new Uint8Array(await crypto.subtle.sign({ name: "Ed25519" }, id.privateKey, data));
-    }
     return new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, id.privateKey, data));
   }
 
