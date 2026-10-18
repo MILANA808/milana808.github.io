@@ -125,8 +125,15 @@
       if (!th) return;
       var d = document.createElement("div");
       d.className = "msg ai";
-      d.innerHTML = '<div class="bub">' + String(t).replace(/</g, "&lt;") +
-        '<div class="meta">' + (meta || "") + "</div></div>";
+      var bubble = document.createElement("div");
+      bubble.className = "bub";
+      // Chat content and transport metadata are untrusted. Keep both as text.
+      bubble.appendChild(document.createTextNode(String(t == null ? "" : t)));
+      var metadata = document.createElement("div");
+      metadata.className = "meta";
+      metadata.textContent = String(meta == null ? "" : meta);
+      bubble.appendChild(metadata);
+      d.appendChild(bubble);
       th.appendChild(d);
       th.scrollTop = th.scrollHeight;
     }
