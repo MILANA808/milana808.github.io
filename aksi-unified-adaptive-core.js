@@ -153,10 +153,10 @@
   }
   function extractMathExpression(query) {
     const original = clean(query, 200);
-    const command = original.match(/^(?:вычисли|посчитай|реши|сколько будет|calculate|compute|evaluate)\\s+(.+)$/i);
+    const command = original.match(/^(?:вычисли|посчитай|реши|сколько будет|calculate|compute|evaluate)\s+(.+)$/i);
     const expression = (command ? command[1] : original).trim();
-    if (!expression || !/^[\\d\\s()+\\-*/.^a-zA-Z]+$/.test(expression)) return null;
-    if (!/[+\\-*/^()]|\\b(?:sqrt|abs|sin|cos|tan|ln|log|exp)\\s*\\(/i.test(expression)) return null;
+    if (!expression || !/^[\d\s()+\-*/.^a-zA-Z]+$/.test(expression)) return null;
+    if (!/[+\-*/^()]|\b(?:sqrt|abs|sin|cos|tan|ln|log|exp)\s*\(/i.test(expression)) return null;
     return { expression, explicitlyRequested: !!command };
   }
   async function answer(query, options) {
