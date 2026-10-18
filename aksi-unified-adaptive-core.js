@@ -151,9 +151,47 @@
     hints.push("Текущие признаки: " + JSON.stringify({ conceptCount: ctx.concepts.length, feedbackCount: state.feedbackCount, exploration: trajectory }));
     return { context: ctx, trajectory, intent, diffusion, evidenceAssessment, system: hints.join("\n\n") };
   }
+  function extractMathExpression(query) {
+    const original = clean(query, 200);
+    const command = original.match(/^(?:вычисли|посчитай|реши|сколько будет|calculate|compute|evaluate)\\s+(.+)$/i);
+    const expression = (command ? command[1] : original).trim();
+    if (!expression || !/^[\\d\\s()+\\-*/.^a-zA-Z]+$/.test(expression)) return null;
+    if (!/[+\\-*/^()]|\\b(?:sqrt|abs|sin|cos|tan|ln|log|exp)\\s*\\(/i.test(expression)) return null;
+    return { expression, explicitlyRequested: !!command };
+  }
   async function answer(query, options) {
     options = options || {};
     const prepared = prepare(query, options.evidence || []);
+    const math = extractMathExpression(query);
+    if (math && root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function") {
+      const calculation = root.AKSICalculator.evaluate(math.expression);
+      if (calculation.ok || math.explicitlyRequested) {
+        const text = calculation.ok
+          ? math.expression + " = " + calculation.formatted
+          : "Не удалось вычислить выражение: " + calculation.error;
+        if (calculation.ok) {
+          state.episodes.push({ query: clean(query), answer: clean(text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString(), source: "aksi-calculator" });
+          if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
+          for (const t of prepared.context.tokens) ensureConcept(t).seen++;
+          save();
+        }
+        const result = {
+          text, source: "aksi-calculator", model: "AKSI Calculator " + (calculation.version || "1.0.0"),
+          core: "AKSI Unified Adaptive Core " + VERSION, calculation,
+          reasoning: ["Выражение обработано парсером арифметики без eval и без исполнения произвольного кода."],
+          evidenceAudit: "not_applicable_to_arithmetic",
+          integration: {
+            schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-calculator",
+            intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
+            graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
+            evidence: { status: "not_applicable_to_arithmetic", count: 0 },
+            modules: inspect().modules
+          }
+        };
+        recordTrace({ type: "calculation", generator: "aksi-calculator", expression: math.expression, ok: !!calculation.ok, graphUsed: !!prepared.diffusion });
+        return result;
+      }
+    }
     // Native offline generation is the primary path; WebLLM is deliberately not called.
     if (root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function") {
       const native = root.AKSI_DNA_TOPOLOGY.generate(query, options);
