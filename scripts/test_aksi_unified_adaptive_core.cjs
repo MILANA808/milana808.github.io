@@ -105,7 +105,7 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(Core.getTrace().length, 0);
   assert.match(answer.receipt, /^[a-f0-9]{64}$/);
   assert.equal(answer.model, "AKSI Native Generator 0.1.0");
-  assert.equal(Core.stats().episodes, 2, "successful calculation and answer should both be recorded");
+  assert.equal(Core.stats().episodes, 3, "successful source-backed request, calculation and answer should all be recorded");
   const contestedAnswer = await Core.answer("claim under test", {
     evidence: [
       { stance: "supports", text: "support", url: "https://a.example/evidence", reliability: 0.8, sourceGroup: "a" },
