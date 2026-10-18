@@ -27,6 +27,7 @@ assert.ok(html.includes("[ЕДИНЫЙ КОНТУР]"), "main chat must show uni
 assert.ok(html.includes("ПОСЛЕДНИЕ ВЫЗОВЫ ЕДИНОГО ЯДРА"), "diagnostics must show the unified-core trace");
 assert.ok(html.includes("Unified core API"), "diagnostics must check the unified-core API");
 assert.ok(html.includes("Safe calculator"), "diagnostics must check the safe calculator");
+assert.ok(html.includes("window.AKSI_UNIFIED_CORE.remember"), "main product must route memory writes through the unified core");
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
 assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
