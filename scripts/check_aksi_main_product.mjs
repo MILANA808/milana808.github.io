@@ -26,6 +26,7 @@ assert.ok(html.indexOf("window.AKSI_UNIFIED_CORE.answer") < html.indexOf("if(/к
 assert.ok(!html.includes("if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready())"), "main chat must route through the unified core before any model fallback");
 assert.ok(html.includes("[ЕДИНЫЙ КОНТУР]"), "main chat must show unified-core integration metadata");
 assert.ok(html.includes("ПОСЛЕДНИЕ ВЫЗОВЫ ЕДИНОГО ЯДРА"), "diagnostics must show the unified-core trace");
+assert.ok(html.includes("receiptDigest||t.receiptHash"), "diagnostic trace must show a receipt hash prefix when available");
 assert.ok(html.includes("Unified core API"), "diagnostics must check the unified-core API");
 assert.ok(html.includes("Safe calculator"), "diagnostics must check the safe calculator");
 assert.ok(html.includes("window.AKSI_UNIFIED_CORE.remember"), "main product must route memory writes through the unified core");
