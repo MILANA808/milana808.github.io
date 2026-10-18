@@ -10,7 +10,7 @@
   const STORAGE_KEY = "aksi_unified_core_v1";
   const MAX_ITEMS = 300;
   const MAX_CHARS = 1200;
-  const DEFAULT_STATE = () => ({ schema: "AKSI-UNIFIED-MEMORY/1", version: VERSION, concepts: {}, links: {}, episodes: [], feedbackCount: 0 });
+  const DEFAULT_STATE = () => ({ schema: "AKSI-UNIFIED-MEMORY/1", version: VERSION, concepts: {}, links: {}, episodes: [], notes: {}, feedbackCount: 0 });
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const clean = (v, max) => String(v == null ? "" : v).trim().slice(0, max || MAX_CHARS);
   function tokens(s) {
@@ -37,7 +37,9 @@
       if (!raw) return DEFAULT_STATE();
       const parsed = JSON.parse(raw);
       if (!parsed || parsed.schema !== "AKSI-UNIFIED-MEMORY/1") return DEFAULT_STATE();
-      return Object.assign(DEFAULT_STATE(), parsed);
+      const merged = Object.assign(DEFAULT_STATE(), parsed);
+      if (!merged.notes || typeof merged.notes !== "object" || Array.isArray(merged.notes)) merged.notes = {};
+      return merged;
     } catch (_) { return DEFAULT_STATE(); }
   }
   let state = loadState();
@@ -72,7 +74,14 @@
       const c = ensureConcept(t);
       return { token: t, conductance: Number(c.conductance.toFixed(3)), seen: c.seen, layer: c.layer };
     });
-    return { tokens: ts, concepts, related };
+    const noteMatches = Object.entries(state.notes || {}).map(([key, note]) => {
+      const value = typeof note === "string" ? note : clean(note && note.value, 5000);
+      const noteTokens = new Set(tokens(key + " " + value));
+      const overlap = ts.filter(t => noteTokens.has(t)).length;
+      const score = ts.length ? overlap / Math.max(1, new Set([...ts, ...noteTokens]).size) : 0;
+      return { key, value, score: Number(score.toFixed(3)), updatedAt: note && note.updatedAt || "" };
+    }).filter(item => item.value && item.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
+    return { tokens: ts, concepts, related, notes: noteMatches };
   }
   // Lorenz integration supplies reproducible exploratory features only. The end point
   // is not used as a truth score or as the answer itself.
@@ -140,6 +149,10 @@
       "Динамический хаос используется только для разнообразия исследовательских признаков; не считай его критерием истины.",
       "Если локальные эпизоды противоречат источникам или запросу, явно укажи это; не выдавай память за проверенный факт."
     ];
+    if (ctx.notes && ctx.notes.length) {
+      hints.push("Локальные заметки пользователя (контекст, не проверенные факты):\n" +
+        ctx.notes.map((note, i) => (i + 1) + ". " + note.key + " = " + note.value).join("\n"));
+    }
     if (ctx.related.length) {
       hints.push("Похожие прошлые эпизоды (не обязательно верны; учитывай только как контекст):\n" +
         ctx.related.map((e, i) => (i + 1) + ". Запрос: " + e.query + "\nОтвет: " + e.answer +
@@ -356,6 +369,34 @@
   function stats() {
     return { version: VERSION, concepts: Object.keys(state.concepts).length, links: Object.keys(state.links).length, episodes: state.episodes.length, feedbackCount: state.feedbackCount, storageKey: STORAGE_KEY, modelReady: !!(root.AKSI_WEBLLM && root.AKSI_WEBLLM.ready && root.AKSI_WEBLLM.ready()) };
   }
+  function remember(key, value) {
+    key = clean(key, 120);
+    value = clean(value, 5000);
+    if (!key || !value) return { ok: false, error: "A non-empty note key and value are required." };
+    state.notes = state.notes && typeof state.notes === "object" ? state.notes : {};
+    state.notes[key] = { value, updatedAt: new Date().toISOString() };
+    const keys = Object.keys(state.notes);
+    if (keys.length > 200) keys.slice(0, keys.length - 200).forEach(k => { delete state.notes[k]; });
+    return { ok: true, persisted: save(), key, value };
+  }
+  function listNotes() {
+    return Object.entries(state.notes || {}).map(([key, note]) => ({
+      key, value: typeof note === "string" ? note : clean(note && note.value, 5000),
+      updatedAt: note && note.updatedAt || ""
+    }));
+  }
+  function recall(query) {
+    const q = clean(query, 500);
+    const exact = listNotes().find(note => note.key.toLocaleLowerCase() === q.toLocaleLowerCase());
+    if (exact) return [Object.assign({ score: 1 }, exact)];
+    const ts = Array.from(new Set(tokens(q)));
+    return listNotes().map(note => {
+      const nt = new Set(tokens(note.key + " " + note.value));
+      const overlap = ts.filter(t => nt.has(t)).length;
+      const score = ts.length ? overlap / Math.max(1, new Set([...ts, ...nt]).size) : 0;
+      return Object.assign({ score: Number(score.toFixed(3)) }, note);
+    }).filter(note => note.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+  }
   function clearMemory() { state = DEFAULT_STATE(); return { ok: true, persisted: save() }; }
   // A single, inspectable orchestration contract over the modules that already exist.
   // Trace is diagnostic metadata, not a signed or tamper-proof audit log.
@@ -416,6 +457,6 @@
   }
   function getTrace() { return trace.map(item => Object.assign({}, item)); }
   function clearTrace() { trace.length = 0; return { ok: true }; }
-  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, decide, prepare, feedback, stats, clearMemory, semanticAddress, lorenz, inspect, getTrace, clearTrace };
+  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, decide, prepare, feedback, stats, remember, listNotes, recall, clearMemory, semanticAddress, lorenz, inspect, getTrace, clearTrace };
   if (typeof module === "object" && module.exports) module.exports = root.AKSI_UNIFIED_CORE;
 })(typeof window !== "undefined" ? window : globalThis);
