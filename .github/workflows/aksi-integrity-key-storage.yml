@@ -1,0 +1,30 @@
+name: AKSI Integrity Key Storage Tests
+
+on:
+  push:
+    branches: [main, "fix/**"]
+    paths:
+      - "integrity/index.html"
+      - "aksi-crypto-provider.js"
+      - "tests/aksi-integrity-key-storage.test.cjs"
+      - ".github/workflows/aksi-integrity-key-storage.yml"
+  pull_request:
+    paths:
+      - "integrity/index.html"
+      - "aksi-crypto-provider.js"
+      - "tests/aksi-integrity-key-storage.test.cjs"
+      - ".github/workflows/aksi-integrity-key-storage.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integrity-key-storage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --test tests/aksi-integrity-key-storage.test.cjs
