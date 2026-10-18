@@ -204,7 +204,23 @@
         return { text: "Локальная символьная модель завершилась с ошибкой: " + clean(error && error.message || error, 300), source: "aksi-visible-neural-lab", error: "generation_failed" };
       }
     }
-    const prepared = prepare(query, options.evidence || []);
+    let evidence = Array.isArray(evidence) ? evidence.slice(0, 6) : [];
+    if (options.useWeb) {
+      const internet = root.AKSI_INTERNET;
+      if (internet && typeof internet.gather === "function") {
+        recordTrace({ type: "source_search", generator: "aksi-internet", status: "started" });
+        try {
+          const pack = await internet.gather(query, { mode: "lite" });
+          evidence = (pack && Array.isArray(pack.evidence) ? pack.evidence : []).slice(0, 6);
+          recordTrace({ type: "source_search", generator: "aksi-internet", status: "completed", evidenceCount: evidence.length });
+        } catch (error) {
+          recordTrace({ type: "source_search", generator: "aksi-internet", status: "error", error: clean(error && error.message || error, 300) });
+        }
+      } else {
+        recordTrace({ type: "source_search", generator: "aksi-internet", status: "unavailable" });
+      }
+    }
+    const prepared = prepare(query, evidence);
     const math = extractMathExpression(query);
     if (math && root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function") {
       const calculation = root.AKSICalculator.evaluate(math.expression);
@@ -219,7 +235,7 @@
           save();
         }
         const result = {
-          text, source: "aksi-calculator", model: "AKSI Calculator " + (calculation.version || "1.0.0"),
+          text, source: "aksi-calculator", model: "AKSI Calculator " + (calculation.version || "1.0.0"), evidence,
           core: "AKSI Unified Adaptive Core " + VERSION, calculation,
           reasoning: ["Выражение обработано парсером арифметики без eval и без исполнения произвольного кода."],
           evidenceAudit: "not_applicable_to_arithmetic",
@@ -242,8 +258,9 @@
       if (prepared.intent && prepared.intent.accepted) extra.push("Маршрут интента: " + prepared.intent.label);
       if (prepared.context.related.length) extra.push("Похожие локальные эпизоды учтены как контекст: " + prepared.context.related.length);
       if (prepared.diffusion) extra.push("Графовая диффузия: вычислена классическим алгоритмом.");
-      if (Array.isArray(options.evidence) && options.evidence.length) extra.push("Найденные источники: " + options.evidence.length + " (не встроены в ответ автоматически; проверь их отдельно).");
+      if (Array.isArray(evidence) && evidence.length) extra.push("Найденные источники: " + evidence.length + " (не встроены в ответ автоматически; проверь их отдельно).");
       native.core = "AKSI Unified Adaptive Core " + VERSION + " + AKSI Native Generator";
+      native.evidence = evidence;
       state.episodes.push({ query: clean(query), answer: clean(native.text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString(), source: "aksi-native-dna-topology" });
       if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
       for (const t of prepared.context.tokens) ensureConcept(t).seen++;
@@ -271,7 +288,7 @@
         if (audit) {
           const record = prepared.evidenceRecord || audit.createCase(query);
           if (!prepared.evidenceRecord) {
-            (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+            (evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
               stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
               text: item.text || item.snippet || item.title || "Retrieved source",
               url: item.url || "", sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
@@ -291,7 +308,7 @@
         generator: "aksi-native-dna-topology",
         intent: prepared.intent ? prepared.intent.intent : null,
         evidenceStatus: native.evidenceAudit,
-        evidenceCount: (options.evidence || []).length,
+        evidenceCount: (evidence || []).length,
         graphUsed: !!prepared.diffusion,
         receiptDigest: native.receipt || null
       });
@@ -316,7 +333,7 @@
         if (audit) {
           const record = prepared.evidenceRecord || audit.createCase(query);
           if (!prepared.evidenceRecord) {
-            (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+            (evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
               stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
               text: item.text || item.snippet || item.title || "Retrieved source",
               url: item.url || "", sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
@@ -329,6 +346,7 @@
       } catch (_) {}
       const combined = Object.assign({}, result, {
         core: "AKSI Unified Adaptive Core " + VERSION,
+        evidence,
         adaptiveContext: prepared.context.related.length,
         exploration: prepared.trajectory,
         intent: prepared.intent && prepared.intent.accepted ? prepared.intent.intent : null,
@@ -355,7 +373,7 @@
         generator: "AKSI_WEBLLM",
         intent: prepared.intent ? prepared.intent.intent : null,
         evidenceStatus: combined.evidenceAudit,
-        evidenceCount: (options.evidence || []).length,
+        evidenceCount: (evidence || []).length,
         graphUsed: !!prepared.diffusion,
         receiptDigest: combined.receipt || null
       });
