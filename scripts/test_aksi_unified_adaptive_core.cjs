@@ -68,6 +68,14 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.match(answer.receipt, /^[a-f0-9]{64}$/);
   assert.equal(answer.model, "AKSI Native Generator 0.1.0");
   assert.equal(Core.stats().episodes, 2, "successful calculation and answer should both be recorded");
+  const contestedAnswer = await Core.answer("claim under test", {
+    evidence: [
+      { stance: "supports", text: "support", url: "https://a.example/evidence", reliability: 0.8, sourceGroup: "a" },
+      { stance: "refutes", text: "refutation", url: "https://b.example/evidence", reliability: 0.8, sourceGroup: "b" }
+    ]
+  });
+  assert.equal(contestedAnswer.integration.evidence.status, "contested");
+  assert.equal(contestedAnswer.receiptAssessmentStatus, "contested", "receipt must bind the same assessment shown by the answer");
   const good = Core.feedback("Что такое память AKSI?", answer.text, 1);
   assert.equal(good.ok, true);
   assert.equal(Core.stats().feedbackCount, 1);
