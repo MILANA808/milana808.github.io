@@ -63,9 +63,12 @@
     name = String(name || "tool").replace(/[^\wа-яА-ЯёЁ_-]/g, "_").slice(0, 40);
     description = String(description || "").slice(0, 200);
     bodySrc = String(bodySrc || "").trim();
-    if (!bodySrc) bodySrc = generateBody(description);
-    if (/localStorage|document\.|window\.|fetch\(|XMLHttp|eval\(|Function\(|import\s|require\s/i.test(bodySrc)) {
-      return { ok: false, error: "Опасный код отклонён (DOM/сеть/eval)" };
+    var safeBody = generateBody(description);
+    if (!bodySrc) bodySrc = safeBody;
+    // Only generated built-in templates are executable. Regex deny-lists cannot
+    // safely sandbox arbitrary JavaScript; custom bodies are stored nowhere.
+    if (bodySrc !== safeBody) {
+      return { ok: false, error: "Пользовательский JavaScript отключён; доступны только встроенные шаблоны инструментов." };
     }
     var tools = loadTools().filter(function (t) { return t.name !== name; });
     var tool = { name: name, description: description, body: bodySrc, created: Date.now(), runs: 0 };
@@ -89,8 +92,20 @@
     for (i = 0; i < tools.length; i++) if (tools[i].name === name) { t = tools[i]; break; }
     if (!t) return { ok: false, error: "Нет инструмента «" + name + "»" };
     try {
-      var fn = new Function("args", t.body);
-      var result = fn(Array.isArray(args) ? args : [args]);
+      if (t.body !== generateBody(t.description)) {
+        return { ok: false, error: "Отклонён старый или пользовательский код инструмента. Создайте инструмент заново из встроенного шаблона." };
+      }
+      var a = Array.isArray(args) ? args : [args];
+      var d = String(t.description || "").toLowerCase();
+      var result;
+      if (/привет|hello|greet/.test(d)) result = "Привет. Я АКСИ. Инструмент работает.";
+      else if (/время|time|час/.test(d)) result = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) + " МСК";
+      else if (/сумм|сложи|add|plus/.test(d)) result = (Number(a[0]) || 0) + (Number(a[1]) || 0);
+      else if (/повтор|repeat|echo/.test(d)) result = String(a[0] || "");
+      else if (/длина|length|count/.test(d)) result = String(a[0] || "").length;
+      else if (/верх|upper|caps/.test(d)) result = String(a[0] || "").toUpperCase();
+      else if (/формул|aksi/.test(d)) result = "AKSI = (A×I×S)×(1+0.4√n)";
+      else result = "AKSI-tool: " + (a[0] != null ? String(a[0]) : (t.description || "готово"));
       t.runs = (t.runs || 0) + 1; saveTools(tools);
       log("run", name + " → " + String(result).slice(0, 120));
       return { ok: true, result: result, tool: t.name };
