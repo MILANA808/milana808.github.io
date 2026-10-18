@@ -50,9 +50,9 @@ async function run(query,opts={}){
  if(promoted){const a=load();a.push({id:null,claim:best.claim,evidence:best.evidence,evidence_relevance:best.evidence_relevance,confidence:best.confidence,score:best.score,created_at:record.created_at});save(a);trace(events,'knowledge.promoted',{claim:best.claim})}else trace(events,'knowledge.held',{reason:'no relevant evidence or confidence threshold not met'});
  record.trace=events;
  record.verifiable={algorithm:'SHA-256',canonicalization:'recursive sorted object keys; arrays preserve order',scope:'record fields excluding hash and proof; includes trace and verifiable metadata',knowledge_promotion_rule:'relevant_evidence_count>0 && confidence>=0.65 && score>=0.60'};
+ if(g.AKSIProof?.add){try{record.proof=await g.AKSIProof.add('DISCOVERY_RUN',{schema:record.schema,query_digest:record.context_digest,knowledge_status:record.knowledge_status});trace(events,'proof.committed')}catch(e){trace(events,'proof.error',{message:e.message})}}
  record.hash=await digest(record);
  if(promoted){const a=load();if(a.length){a[a.length-1].id=record.hash;a[a.length-1].record_hash=record.hash;save(a)}}
- if(g.AKSIProof?.add){try{record.proof=await g.AKSIProof.add('DISCOVERY_RUN',{hash:record.hash,scope:record.verifiable.scope});trace(events,'proof.committed')}catch(e){trace(events,'proof.error',{message:e.message})}}
  return record;
 }
 g.AKSIDiscovery={version:VERSION,run,knowledge:load,clear:()=>save([])};
