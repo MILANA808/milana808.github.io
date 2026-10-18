@@ -270,20 +270,6 @@ if($('aksiUseWeb').checked){
    event('BACKEND','Chat endpoint responded without a recognized answer; using local fallback.');
   }catch(err){event('BACKEND_FALLBACK','Backend model unavailable; using local fallback: '+err.message);}
  }
- if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready()){
-  $('chatStatus').textContent='Генерирую ответ локальной языковой моделью в браузере…';
-  try{
-   const localReply=await window.AKSI_WEBLLM.complete(q,{system,history:$('aksiRememberTurns').checked?state.history:[],max_tokens:512});
-   if(localReply&&localReply.text){
-    $('chatStatus').textContent='Локальная модель · '+localReply.model+' · ответ сформирован на устройстве';
-    let answer=localReply.text;
-    if(evidence.length)answer+='\n\nИсточники для самостоятельной проверки:\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'URL не указан')).join('\n');
-    return answer+'\n\n[ИСТОЧНИК ОТВЕТА] WebLLM в браузере · вывод модели не является независимой проверкой фактов.';
-   }
-   event('MODEL_FALLBACK','Local model did not return text; falling back to AKSI native generator.');
-   $('chatStatus').textContent='Локальная модель не ответила; переключаюсь на встроенное ядро AKSI…';
-  }catch(err){event('MODEL_ERROR',err.message||String(err));$('chatStatus').textContent='Ошибка локальной модели; использую встроенное ядро AKSI…';}
- }
 $('chatStatus').textContent='Генерирую собственным локальным ядром…';
  const result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence}):window.AKSI_DNA_TOPOLOGY.generate(q);
  if(result&&result.text){
@@ -292,7 +278,14 @@ $('chatStatus').textContent='Генерирую собственным лока�
   if(result.core)output+='\n\n[ЯДРО] '+result.core;
   if(result.evidenceAudit)output+='\n[АУДИТ ИСТОЧНИКОВ] '+result.evidenceAudit+' · источники не считаются подтверждением автоматически.';
   if(result.receipt)output+='\n[КВИТАНЦИЯ] '+result.receipt+(result.receiptSchema?' · '+result.receiptSchema:'')+' · целостность записи не доказывает истинность ответа.';
-  if(Array.isArray(result.reasoning)&&result.reasoning.length)output+='\n[ПРОЦЕСС] '+result.reasoning.join('; ');
+  if(Array.isArray(result.reasoning)&&result.reasoning.length)output+='\\n[ПРОЦЕСС] '+result.reasoning.join('; ');
+  if(result.integration){
+   const it=result.integration, mods=it.modules||{};
+   const available=Object.keys(mods).filter(k=>mods[k]);
+   output+='\\n[ЕДИНЫЙ КОНТУР] '+it.schema+' · генератор='+it.generator+' · доступные модули='+available.join(', ');
+   if(it.intent)output+=' · маршрутизация='+it.intent.id+' ('+(it.intent.accepted?'принята':'не принята')+')';
+   output+=' · граф='+(it.graph&&it.graph.used?'вычислен':'не использован')+' · свидетельства='+(it.evidence&&it.evidence.status||'нет оценки');
+  }
   if(evidence.length)output+='\n\nИсточники для самостоятельной проверки:\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'URL не указан')).join('\n');
   if(result.dna)output+='\n\n[DNA/topology] '+result.dna.invariant+' · длина='+result.dna.length+' · crossings='+result.dna.crossings+' · '+result.dna.note;
   return output;
