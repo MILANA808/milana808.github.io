@@ -14,6 +14,8 @@ const overlap=(a,b)=>{const A=words(a),B=words(b);if(!A.size||!B.size)return 0;l
 const evidenceText=e=>typeof e==='string'?e:(e&&typeof e==='object'?String(e.text??e.content??e.quote??e.excerpt??''):'');
 const stable=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(stable).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';
 async function digest(v){if(!g.crypto?.subtle)throw Error('WebCrypto unavailable');const d=await g.crypto.subtle.digest('SHA-256',new TextEncoder().encode(stable(v)));return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function digestRecord(record){const payload={...record};delete payload.hash;delete payload.proof;return digest(payload)}
+async function verify(record){if(!record||typeof record!=='object'||typeof record.hash!=='string')return false;return await digestRecord(record)===record.hash}
 function trace(events,stage,data={}){const e={stage,at:Date.now(),...data};events.push(e);try{g.dispatchEvent(new CustomEvent('aksi:discovery-trace',{detail:e}))}catch(_){}}
 function load(){try{return JSON.parse(g.localStorage.getItem(STORE)||'[]')}catch(_){return[]}}
 function save(a){try{g.localStorage.setItem(STORE,JSON.stringify(a.slice(-500)))}catch(_){}}
@@ -51,10 +53,10 @@ async function run(query,opts={}){
  record.trace=events;
  record.verifiable={algorithm:'SHA-256',canonicalization:'recursive sorted object keys; arrays preserve order',scope:'record fields excluding hash and proof; includes trace and verifiable metadata',knowledge_promotion_rule:'relevant_evidence_count>0 && confidence>=0.65 && score>=0.60'};
  if(g.AKSIProof?.add){try{record.proof=await g.AKSIProof.add('DISCOVERY_RUN',{schema:record.schema,query_digest:record.context_digest,knowledge_status:record.knowledge_status});trace(events,'proof.committed')}catch(e){trace(events,'proof.error',{message:e.message})}}
- record.hash=await digest(record);
+ record.hash=await digestRecord(record);
  if(promoted){const a=load();if(a.length){a[a.length-1].id=record.hash;a[a.length-1].record_hash=record.hash;save(a)}}
  return record;
 }
-g.AKSIDiscovery={version:VERSION,run,knowledge:load,clear:()=>save([])};
+g.AKSIDiscovery={version:VERSION,run,knowledge:load,verify,clear:()=>save([])};
 try{g.dispatchEvent(new CustomEvent('aksi:discovery-ready',{detail:{version:VERSION}}))}catch(_){}
 })(typeof window!=='undefined'?window:globalThis);
