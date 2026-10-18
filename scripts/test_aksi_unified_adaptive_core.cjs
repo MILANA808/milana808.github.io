@@ -67,7 +67,7 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(Core.getTrace().length, 0);
   assert.match(answer.receipt, /^[a-f0-9]{64}$/);
   assert.equal(answer.model, "AKSI Native Generator 0.1.0");
-  assert.equal(Core.stats().episodes, 1);
+  assert.equal(Core.stats().episodes, 2, "successful calculation and answer should both be recorded");
   const good = Core.feedback("Что такое память AKSI?", answer.text, 1);
   assert.equal(good.ok, true);
   assert.equal(Core.stats().feedbackCount, 1);
