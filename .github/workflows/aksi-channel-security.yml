@@ -1,0 +1,29 @@
+name: AKSI Channel Security Tests
+
+on:
+  push:
+    branches: [main, "fix/**"]
+    paths:
+      - "aksi-channel.js"
+      - "tests/aksi-channel-security.test.cjs"
+      - ".github/workflows/aksi-channel-security.yml"
+  pull_request:
+    paths:
+      - "aksi-channel.js"
+      - "tests/aksi-channel-security.test.cjs"
+      - ".github/workflows/aksi-channel-security.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  channel-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node --check aksi-channel.js
+      - run: node --test tests/aksi-channel-security.test.cjs
