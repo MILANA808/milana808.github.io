@@ -21,6 +21,8 @@ for (const marker of [
 assert.ok(html.indexOf('src="/aksi-dna-topology-engine.js?v=1"') < scriptStart, "native generator must load before the main app script");
 assert.ok(!html.includes('src="/aksi-webllm.js"'), "main chat must not depend on WebLLM");
 assert.ok(html.indexOf("window.AKSI_UNIFIED_CORE.answer") < html.indexOf("if(/кто ты|представься/.test(n))"), "native generator must take priority over canned answers");
+assert.ok(!html.includes("if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready())"), "main chat must route through the unified core before any model fallback");
+assert.ok(html.includes("[ЕДИНЫЙ КОНТУР]"), "main chat must show unified-core integration metadata");
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
 assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
