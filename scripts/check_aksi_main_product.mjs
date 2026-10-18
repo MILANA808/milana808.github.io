@@ -33,7 +33,7 @@ assert.ok(html.includes("window.AKSI_UNIFIED_CORE.remember"), "main product must
 assert.ok(html.includes("[ЛОКАЛЬНАЯ ПАМЯТЬ — КОНТЕКСТ, НЕ ПРОВЕРЕННЫЕ ФАКТЫ]"), "answers must disclose relevant local notes as context");
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
-assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
+assert.ok(html.includes("if(!useWeb){$('aksiEvidence').style.display='none';}"), "old evidence must be hidden when web lookup is disabled");
 assert.ok(html.includes("const useWeb=$('aksiUseWeb').checked;"), "web-search opt-in must be passed into the unified core");
 assert.ok(html.includes("evidence=Array.isArray(result&&result.evidence)?result.evidence:[]"), "main UI must render evidence returned by the unified core");
 assert.ok(!html.includes("if(false && $('aksiUseWeb').checked){"), "web search must not be permanently disabled");
