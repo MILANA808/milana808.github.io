@@ -18,6 +18,12 @@ window.AKSIGeometricKnowledgeCore = require("../aksi-geometric-knowledge-core.js
 const Core = require("../aksi-unified-adaptive-core.js");
 (async () => {
   assert.equal(Core.version, "0.1.0");
+  const status = Core.inspect();
+  assert.equal(status.schema, "AKSI-CORE-STATUS/1");
+  assert.equal(status.modules.nativeGenerator, true);
+  assert.equal(status.modules.intentRouter, true);
+  assert.equal(status.modules.evidenceAssessor, true);
+  assert.equal(status.modules.geometricGraph, true);
   assert.deepEqual(Core.semanticAddress("акси"), Core.semanticAddress("акси"));
   const l = Core.lorenz("test", 100);
   assert.equal(l.stable, true);
@@ -34,6 +40,13 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(answer.source, "aksi-native-dna-topology");
   assert.equal(answer.core, "AKSI Unified Adaptive Core 0.1.0 + AKSI Native Generator");
   assert.equal(answer.evidenceAudit, "insufficient_evidence", "retrieved source fragments remain context until assessed");
+  assert.equal(answer.integration.schema, "AKSI-CORE-RESULT/1");
+  assert.equal(answer.integration.generator, "aksi-native-dna-topology");
+  assert.equal(answer.integration.evidence.status, "insufficient_evidence");
+  assert.equal(Core.getTrace().length, 1);
+  assert.equal(Core.getTrace()[0].type, "answer");
+  Core.clearTrace();
+  assert.equal(Core.getTrace().length, 0);
   assert.match(answer.receipt, /^[a-f0-9]{64}$/);
   assert.equal(answer.model, "AKSI Native Generator 0.1.0");
   assert.equal(Core.stats().episodes, 1);
