@@ -122,8 +122,14 @@
       if (audit && Array.isArray(evidence) && evidence.length) {
         const record = audit.createCase(query);
         evidence.slice(0, 6).forEach(item => audit.addEvidence(record, {
-          stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
-          url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
+          // Retrieved material is context by default. It counts as support/refutation
+          // only when an upstream reviewer explicitly supplies stance.
+          stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
+          text: item.text || item.snippet || item.title || "Retrieved source",
+          url: item.url || "",
+          sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
+          reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
+          observedAt: item.observedAt || ""
         }));
         evidenceAssessment = audit.assess(record);
       }
@@ -164,6 +170,29 @@
       native.reasoning = extra;
       native.evidenceAudit = prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources";
       native.exploration = prepared.trajectory;
+      native.integration = {
+        schema: "AKSI-CORE-RESULT/1",
+        coreVersion: VERSION,
+        generator: "aksi-native-dna-topology",
+        intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
+        graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
+        evidence: prepared.evidenceAssessment ? {
+          status: prepared.evidenceAssessment.status,
+          count: prepared.evidenceAssessment.evidenceCount,
+          supportWeight: prepared.evidenceAssessment.supportWeight,
+          refuteWeight: prepared.evidenceAssessment.refuteWeight,
+          warning: prepared.evidenceAssessment.warning
+        } : { status: "no_sources", count: 0 },
+        modules: inspect().modules
+      };
+      recordTrace({
+        type: "answer",
+        generator: "aksi-native-dna-topology",
+        intent: prepared.intent ? prepared.intent.intent : null,
+        evidenceStatus: native.evidenceAudit,
+        evidenceCount: (options.evidence || []).length,
+        graphUsed: !!prepared.diffusion
+      });
       try {
         const audit = root.AKSICognitiveCore;
         if (audit) {
@@ -204,14 +233,38 @@
           receipt = await audit.receipt(record, audit.assess(record));
         }
       } catch (_) {}
-      return Object.assign({}, result, {
+      const combined = Object.assign({}, result, {
         core: "AKSI Unified Adaptive Core " + VERSION,
         adaptiveContext: prepared.context.related.length,
         exploration: prepared.trajectory,
         intent: prepared.intent && prepared.intent.accepted ? prepared.intent.intent : null,
         evidenceAudit: prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources",
-        receipt: receipt ? receipt.digest : null
+        receipt: receipt ? receipt.digest : null,
+        integration: {
+          schema: "AKSI-CORE-RESULT/1",
+          coreVersion: VERSION,
+          generator: "AKSI_WEBLLM",
+          intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
+          graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
+          evidence: prepared.evidenceAssessment ? {
+            status: prepared.evidenceAssessment.status,
+            count: prepared.evidenceAssessment.evidenceCount,
+            supportWeight: prepared.evidenceAssessment.supportWeight,
+            refuteWeight: prepared.evidenceAssessment.refuteWeight,
+            warning: prepared.evidenceAssessment.warning
+          } : { status: "no_sources", count: 0 },
+          modules: inspect().modules
+        }
       });
+      recordTrace({
+        type: "answer",
+        generator: "AKSI_WEBLLM",
+        intent: prepared.intent ? prepared.intent.intent : null,
+        evidenceStatus: combined.evidenceAudit,
+        evidenceCount: (options.evidence || []).length,
+        graphUsed: !!prepared.diffusion
+      });
+      return combined;
     }
     return result;
   }
@@ -254,6 +307,48 @@
     return { version: VERSION, concepts: Object.keys(state.concepts).length, links: Object.keys(state.links).length, episodes: state.episodes.length, feedbackCount: state.feedbackCount, storageKey: STORAGE_KEY, modelReady: !!(root.AKSI_WEBLLM && root.AKSI_WEBLLM.ready && root.AKSI_WEBLLM.ready()) };
   }
   function clearMemory() { state = DEFAULT_STATE(); return { ok: true, persisted: save() }; }
-  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, prepare, feedback, stats, clearMemory, semanticAddress, lorenz };
+  // A single, inspectable orchestration contract over the modules that already exist.
+  // Trace is diagnostic metadata, not a signed or tamper-proof audit log.
+  const trace = [];
+  const MAX_TRACE = 200;
+  function recordTrace(entry) {
+    trace.push(Object.assign({
+      sequence: trace.length + 1,
+      at: new Date().toISOString(),
+      coreVersion: VERSION
+    }, entry));
+    if (trace.length > MAX_TRACE) {
+      trace.splice(0, trace.length - MAX_TRACE);
+      trace.forEach((item, index) => { item.sequence = index + 1; });
+    }
+    return trace[trace.length - 1];
+  }
+  function inspect() {
+    const modules = {
+      adaptiveMemory: true,
+      nativeGenerator: !!(root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function"),
+      intentRouter: !!(root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine),
+      evidenceAssessor: !!(root.AKSICognitiveCore && typeof root.AKSICognitiveCore.assess === "function"),
+      geometricGraph: !!(root.AKSIGeometricKnowledgeCore && typeof root.AKSIGeometricKnowledgeCore.diffuseGraph === "function"),
+      calculator: !!(root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function"),
+      sourceLookup: !!(root.AKSI_INTERNET && typeof root.AKSI_INTERNET.gather === "function")
+    };
+    return {
+      schema: "AKSI-CORE-STATUS/1",
+      version: VERSION,
+      mode: "classical-browser-orchestrator",
+      modules,
+      activeModuleCount: Object.values(modules).filter(Boolean).length,
+      limitations: [
+        "Module presence does not prove every runtime path is correct.",
+        "Intent and graph scores are heuristics, not truth probabilities.",
+        "Retrieved sources default to context; support/refutation requires explicit annotation.",
+        "Trace is in-memory diagnostic data, not a signed audit receipt."
+      ]
+    };
+  }
+  function getTrace() { return trace.map(item => Object.assign({}, item)); }
+  function clearTrace() { trace.length = 0; return { ok: true }; }
+  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, prepare, feedback, stats, clearMemory, semanticAddress, lorenz, inspect, getTrace, clearTrace };
   if (typeof module === "object" && module.exports) module.exports = root.AKSI_UNIFIED_CORE;
 })(typeof window !== "undefined" ? window : globalThis);
