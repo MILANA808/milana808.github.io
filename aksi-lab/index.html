@@ -99,6 +99,77 @@
 <script>
 'use strict';
 window.__aksiBootState = 'app-script-started';
+
+/* AKSI-SYMBOLIC-CORE v0.1 — isolated from the legacy UI script. */
+(function(){
+  'use strict';
+  const memory = [];
+  const $core = id => document.getElementById(id);
+  const norm = s => String(s || '').toLowerCase().replace(/ё/g,'е').trim();
+  function tokenizeMath(src){
+    const out=[]; let i=0;
+    while(i<src.length){
+      if(/\s/.test(src[i])){i++;continue}
+      const m=src.slice(i).match(/^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i);
+      if(m){out.push({t:'n',v:Number(m[0])});i+=m[0].length;continue}
+      const id=src.slice(i).match(/^[a-z]+/i);
+      if(id){out.push({t:'id',v:id[0].toLowerCase()});i+=id[0].length;continue}
+      if('+-*/^()%'.includes(src[i])){out.push({t:src[i],v:src[i]});i++;continue}
+      throw Error('Недопустимый символ «'+src[i]+'»');
+    }
+    out.push({t:'eof'});return out;
+  }
+  function calc(src){
+    const ts=tokenizeMath(src);let p=0;
+    const peek=()=>ts[p]; const take=t=>{if(peek().t!==t)throw Error('Ожидался '+t);return ts[p++]};
+    function primary(){
+      if(peek().t==='n')return take('n').v;
+      if(peek().t==='+'){take('+');return primary()}
+      if(peek().t==='-'){take('-');return -primary()}
+      if(peek().t==='('){take('(');const v=expr(0);take(')');return v}
+      if(peek().t==='id'){
+        const id=take('id').v;
+        if(id==='pi')return Math.PI;if(id==='e')return Math.E;
+        const f={sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,abs:Math.abs,log:Math.log,log10:Math.log10,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,round:Math.round};
+        if(!f[id])throw Error('Неизвестная функция '+id);
+        take('(');const v=expr(0);take(')');return f[id](v);
+      }
+      throw Error('Неожиданный токен '+peek().t);
+    }
+    const prec={'+':1,'-':1,'*':2,'/':2,'%':2,'^':3};
+    function expr(min){let a=primary();while((prec[peek().t]||0)>=min && prec[peek().t]!==undefined){const op=take(peek().t).t;const b=expr(prec[op]+(op==='^'?0:1));if(op==='+')a+=b;else if(op==='-')a-=b;else if(op==='*')a*=b;else if(op==='/')a/=b;else if(op==='%')a%=b;else a=Math.pow(a,b)}return a}
+    const result=expr(0);if(peek().t!=='eof')throw Error('Лишний ввод');
+    if(!Number.isFinite(result))throw Error('Результат не конечен');return result;
+  }
+  function remember(q,a){memory.push({q,a,at:new Date().toISOString()});if(memory.length>40)memory.shift()}
+  function solve(raw){
+    const q=String(raw||'').trim(), s=norm(q);
+    if(!q)return 'Напиши вопрос или задачу.';
+    const percent=s.match(/(?:сколько|какой процент|процент).{0,35}?(\d+(?:[.,]\d+)?)\s*(?:из|\/|от)\s*(\d+(?:[.,]\d+)?)/)
+      || s.match(/(\d+(?:[.,]\d+)?)\s*(?:из|\/|от)\s*(\d+(?:[.,]\d+)?).{0,35}процент/);
+    if(percent){const a=Number(percent[1].replace(',','.')),b=Number(percent[2].replace(',','.'));if(!b)return 'Ошибка: деление на ноль.';return 'Результат: '+(a/b*100).toFixed(6).replace(/0+$/,'').replace(/\.$/,'')+'%. Основание: часть / целое × 100 = '+a+' / '+b+' × 100.'}
+    let expr=q.replace(/^(?:чему равен|посчитай|вычисли|рассчитай|сколько будет|реши выражение)\s*/i,'').replace(/[?=]+$/,'').replace(/,/g,'.').trim();
+    if(/^[\d\s.+*\/^()%\-a-z]+$/i.test(expr) && /\d/.test(expr) && !/[a-z]{2,}/i.test(expr.replace(/sqrt|sin|cos|tan|log10|log|abs|exp|floor|ceil|round|pi/ig,''))){
+      try{return 'Результат: '+calc(expr)+'.\nОснование: вычисление локальным символьным парсером; внешний ИИ и сервер не использовались.'}catch(e){if(/^(?:чему равен|посчитай|вычисли|рассчитай|сколько будет|реши выражение)/i.test(q))return 'Не смогла вычислить: '+e.message}
+    }
+    if(/^(привет|здравствуй|здравствуйте|добрый день|добрый вечер|доброе утро)\b/.test(s))return 'Привет. Я АКСИ. Сейчас отвечает локальное символическое ядро: оно умеет считать выражения, обрабатывать некоторые типы задач и объяснять основание ответа. Это ещё не универсальное понимание.';
+    if(/кто ты|что такое акси|что умеешь|твои возможности/.test(s))return 'Я АКСИ — прототип собственного символического ядра. Сейчас есть: безопасный парсер арифметики, распознавание нескольких форм запросов, локальная память текущего сеанса и объяснение использованного правила. Нет: универсальной языковой модели, самостоятельного интернет-браузера и подтверждённого понимания произвольных тем.';
+    if(/что ты помнишь|что я говорила|моя память|что было раньше/.test(s)){return memory.length?'В памяти этого сеанса '+memory.length+' записей:\n'+memory.slice(-5).map((m,i)=>(i+1)+'. Запрос: '+m.q+'\n   Ответ: '+m.a).join('\n'):'В этой вкладке пока нет предыдущих запросов, записанных ядром. Память не переносится между сеансами.'}
+    if(/запомни|сохрани в памяти/.test(s)){const item=q.replace(/^(запомни|сохрани в памяти)\s*/i,'');remember('память: '+item,'Запись сохранена в оперативной памяти этой вкладки.');return 'Записала в память текущего сеанса: «'+item+'». Это временная память вкладки, не постоянное хранилище.'}
+    if(/план|гипотез|проверь|эксперимент|исследован/.test(s))return 'Структура решения:\n1. Цель: '+q+'\n2. Уточнить проверяемое утверждение.\n3. Задать наблюдаемый критерий успеха.\n4. Проверить минимум одну альтернативу и контрпример.\n5. Сохранить вход, вывод и результат проверки.\nОграничение: это алгоритмический шаблон, а не доказательство фактов.';
+    const prior=memory.filter(m=>norm(m.q).split(/\W+/).some(w=>w.length>4&&s.includes(w)));
+    if(prior.length)return 'Нашла совпадение с записью этого сеанса: «'+prior[prior.length-1].q+'». Ответ был: '+prior[prior.length-1].a+'\nСвязь найдена по общим словам, это не доказательство смысловой эквивалентности.';
+    return 'Я получила вопрос: «'+q+'». Моё текущее ядро пока не может надёжно вывести ответ на произвольный вопрос. Я не буду выдумывать его. Следующий нужный модуль — семантическое представление понятий и проверяемый механизм вывода; арифметический парсер сам по себе этого не заменяет.';
+  }
+  function show(text){const out=$core('chatout');if(out){out.textContent=text;out.className='status good';out.style.whiteSpace='pre-wrap'}remember($core('ask')?.value||'',text)}
+  function handleSend(e){const b=e.target.closest&&e.target.closest('#send');if(!b)return;e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();const q=$core('ask')?.value||'';show(solve(q))}
+  document.addEventListener('click',handleSend,true);
+  document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='ask'){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();show(solve(e.target.value))}},true);
+  window.AKSI_SYMBOLIC_CORE={version:'0.1',solve,calculate:calc,getMemory:()=>memory.slice()};
+  window.__aksiCoreStatus='ready';
+})();
+</script>
+
 const $=id=>document.getElementById(id);let mathCount=0,lastAnswer='',lastQuantum=null,lastCluster=null;
 function tokenize(s){const out=[];let i=0;while(i<s.length){if(/\s/.test(s[i])){i++;continue}const num=s.slice(i).match(/^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i);if(num){out.push({t:'n',v:Number(num[0])});i+=num[0].length;continue}const id=s.slice(i).match(/^[a-zA-Z]+/);if(id){out.push({t:'id',v:id[0].toLowerCase()});i+=id[0].length;continue}if('+-*/^()%'.includes(s[i])){out.push({t:s[i],v:s[i]});i++;continue}throw Error('Недопустимый символ: '+s[i])}out.push({t:'eof'});return out}
 function mathEval(src){const ts=tokenize(src);let p=0;const peek=()=>ts[p],take=t=>{if(peek().t!==t)throw Error('Ожидалось '+t);return ts[p++]};function primary(){if(peek().t==='n')return take('n').v;if(peek().t==='+'){take('+');return primary()}if(peek().t==='-'){take('-');return-primary()}if(peek().t==='('){take('(');const x=expr(0);take(')');return x}if(peek().t==='id'){const id=take('id').v;if(id==='pi')return Math.PI;if(id==='e')return Math.E;const funcs={sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,log:Math.log,log10:Math.log10,abs:Math.abs,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,round:Math.round};if(!(id in funcs))throw Error('Неизвестная функция или константа: '+id);take('(');const x=expr(0);take(')');return funcs[id](x)}throw Error('Неожиданный токен: '+peek().t)}const prec={'+':1,'-':1,'*':2,'/':2,'%':2,'^':3};function expr(min){let left=primary();while(prec[peek().t]>=min){const op=take(peek().t).t,pr=prec[op],right=expr(pr+(op==='^'?0:1));if(op==='+')left+=right;else if(op==='-')left-=right;else if(op==='*')left*=right;else if(op==='/')left/=right;else if(op==='%')left%=right;else left=Math.pow(left,right)}return left}const result=expr(0);if(peek().t!=='eof')throw Error('Лишний ввод: '+peek().t);if(!Number.isFinite(result))throw Error('Результат не является конечным числом');return result}
