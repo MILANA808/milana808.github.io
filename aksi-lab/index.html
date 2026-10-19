@@ -69,28 +69,33 @@
 <script>
 (function(){
   window.__aksiBootState = 'diagnostics-loaded';
+  let runtimeErrorSeen = false;
   function showDiagnostic(title, detail) {
     let panel = document.getElementById('aksi-runtime-diagnostic');
     if (!panel) {
       panel = document.createElement('section');
       panel.id = 'aksi-runtime-diagnostic';
       panel.setAttribute('role','alert');
-      panel.style.cssText = 'position:sticky;top:0;z-index:99999;margin:0;padding:12px 14px;background:#4a1720;color:#fff;border:2px solid #ff8794;font:14px/1.45 system-ui,sans-serif;overflow-wrap:anywhere';
+      panel.style.cssText = 'position:sticky;top:0;z-index:99999;margin:0;padding:12px 14px;background:#4a1720;color:#fff;border:2px solid #ff8794;font:14px/1.45 system-ui,sans-serif;overflow-wrap:anywhere;white-space:pre-wrap';
       document.body.insertBefore(panel, document.body.firstChild);
     }
     panel.textContent = title + ' | ' + detail + ' | Этап: ' + (window.__aksiBootState || 'неизвестен') + '. Сделай скриншот этого сообщения.';
   }
   window.addEventListener('error', function(e) {
-    showDiagnostic('AKSI: ошибка JavaScript', (e.message || 'неизвестная ошибка') + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ':' + e.colno + ')' : ''));
+    runtimeErrorSeen = true;
+    const where = e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ':' + e.colno + ')' : '';
+    const stack = e.error && e.error.stack ? '\\n' + e.error.stack : '';
+    showDiagnostic('AKSI: ошибка JavaScript', (e.message || 'неизвестная ошибка') + where + stack);
   });
   window.addEventListener('unhandledrejection', function(e) {
+    runtimeErrorSeen = true;
     let reason = e.reason;
-    showDiagnostic('AKSI: ошибка асинхронной операции', reason && reason.message ? reason.message : String(reason));
+    showDiagnostic('AKSI: ошибка асинхронной операции', reason && reason.stack ? String(reason.stack) : (reason && reason.message ? reason.message : String(reason)));
   });
   document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function(){
-      if (window.__aksiBootState !== 'ready') {
-        showDiagnostic('AKSI: инициализация не завершена', 'Скрипт остановился до регистрации всех обработчиков. Состояние: ' + (window.__aksiBootState || 'неизвестно'));
+      if (window.__aksiBootState !== 'ready' && !runtimeErrorSeen) {
+        showDiagnostic('AKSI: инициализация не завершена', 'Скрипт остановился без перехваченной ошибки. Состояние: ' + (window.__aksiBootState || 'неизвестно') + '. Сообщи этот статус разработчику.');
       }
     }, 0);
   });
