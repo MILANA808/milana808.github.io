@@ -88,7 +88,66 @@ $('cnot').onclick=()=>{try{if(n<2)throw Error('Нужно минимум 2 ку�
 $('reset').onclick=resetQ;resetQ();
 function workload(start,end,seed){let acc=0;for(let i=start;i<end;i++){const x=(i+seed)%997;acc+=(Math.sqrt(x+1)*Math.sin(x*.01))**2}return acc}
 $('cluster').onclick=async()=>{const nodes=Number($('nodes').value),ops=Number($('work').value),host=$('workers');host.replaceChildren();$('cluster').disabled=true;$('clusterstatus').textContent='Распределяю диапазоны по виртуальным узлам…';const tasks=Array.from({length:nodes},(_,id)=>{const start=Math.floor(ops*id/nodes),end=Math.floor(ops*(id+1)/nodes);const card=document.createElement('div');card.className='worker';card.innerHTML='<b>Node '+id+'</b><span>запущен</span>';host.append(card);return {id,start,end,card}});const t0=performance.now();try{const results=await Promise.all(tasks.map(t=>new Promise(resolve=>setTimeout(()=>{const value=workload(t.start,t.end,t.id+1);t.card.querySelector('span').textContent=(t.end-t.start).toLocaleString('ru-RU')+' ops · done';resolve({node:t.id,operations:t.end-t.start,value})},0))));const ms=performance.now()-t0;const checksum=results.reduce((s,r)=>s+r.value,0);$('clusterstatus').className='status good';$('clusterstatus').textContent='Готово. '+nodes+' виртуальных узла выполнили разделённые диапазоны. Это CPU-симуляция распределения, не реальный GPU-кластер.';$('ops').textContent=ops.toLocaleString('ru-RU');$('elapsed').textContent=ms.toFixed(2);$('throughput').textContent=Math.round(ops/(ms/1000)).toLocaleString('ru-RU');lastCluster={nodes,operations:ops,elapsed_ms:Number(ms.toFixed(3)),throughput_ops_sec:Math.round(ops/(ms/1000)),checksum,results,mode:'virtual-node-simulation-on-browser-main-thread',hardware_gpu_used:false}}catch(e){$('clusterstatus').textContent='Ошибка: '+e.message}finally{$('cluster').disabled=false}};
-function reply(){const q=$('ask').value.trim();if(!q)return;let answer='Я — исследовательский прототип AKSI. Сейчас доступны математический парсер, симулятор квантовых схем и виртуальный кластер. Полноценная языковая модель и внешний агент ещё должны быть подключены.';try{if(/^[\d\s.+*/^()%,-]+$/.test(q)||/^(sqrt|sin|cos|tan|log|abs|exp|pi|e)\b/i.test(q)){answer='Математический результат: '+mathEval(q);lastAnswer=answer}else if(/кто ты|что такое aksi|что умеешь/i.test(q)){lastAnswer=answer}else if(/квант|кубит|bell/i.test(q)){lastAnswer='Симулятор использует классический вектор амплитуд и моделирует квантовые гейты. Он полезен для экспериментов с небольшими схемами, но не выполняет вычисления на физическом квантовом процессоре.'}else{lastAnswer=answer}}catch(e){lastAnswer='Не смогла вычислить это выражение: '+e.message+' . Можно ввести его в поле математического ядра.'} $('chatout').textContent=lastAnswer}
+function reply(){
+ const q=$('ask').value.trim();
+ if(!q)return;
+ const low=q.toLowerCase().replace(/ё/g,'е');
+ let answer='';
+ const respond=(text)=>{lastAnswer=text;$('chatout').textContent=text;$('chatout').className='status good';};
+ const calculateFrom=(raw)=>{
+   const cleaned=raw.trim().replace(/[?=]+$/,'').replace(/,/g,'.');
+   return mathEval(cleaned);
+ };
+ try{
+   const pct=low.match(/(?:сколько|какой процент|процент).{0,35}?(\d+(?:[.,]\d+)?)\s*(?:из|\/|от)\s*(\d+(?:[.,]\d+)?)/i)
+      || low.match(/(\d+(?:[.,]\d+)?)\s*(?:из|\/|от)\s*(\d+(?:[.,]\d+)?).{0,35}процент/i);
+   if(pct){
+     const a=Number(pct[1].replace(',','.')),b=Number(pct[2].replace(',','.'));
+     if(b===0) throw Error('деление на ноль');
+     respond(a+' из '+b+' = '+(a/b*100).toFixed(4).replace(/0+$/,'').replace(/\.$/,'')+'%. Формула: часть ÷ целое × 100. Это точное арифметическое вычисление в пределах точности JavaScript Number.');
+     return;
+   }
+   const mathPrompt=low.match(/(?:чему равен|посчитай|вычисли|рассчитай|сколько будет|реши выражение)\s*[:：]?\s*(.+)$/i);
+   const raw=mathPrompt?mathPrompt[1]:q;
+   if(/^[\d\s.+*/^()%,-]+$/.test(raw)||/^(sqrt|sin|cos|tan|log|log10|abs|exp|floor|ceil|round|pi|e)\b/i.test(raw)){
+     const value=calculateFrom(raw);
+     respond('Результат: '+value+'\n\nМетод: локальный математический парсер; выражение вычислено в браузере, без языковой модели и без отправки на сервер.');
+     return;
+   }
+   if(/^(привет|здравствуй|здравствуйте|доброе утро|добрый день|добрый вечер|салют)\b/i.test(low)){
+     respond('Привет! Я АКСИ — экспериментальное локальное ядро этой лаборатории. Могу вычислять математические выражения, объяснять устройство демонстрации и строить простые планы проверки гипотез. Сложное свободное рассуждение и интернет-поиск пока не подключены.');
+     return;
+   }
+   if(/кто ты|что такое акси|что такое aksi|что ты умеешь|твои возможности|как ты работаешь/i.test(low)){
+     respond('Я — АКСИ в экспериментальной лаборатории. Сейчас реально работают: локальный математический парсер, классическая симуляция квантовых схем, виртуальный кластерный демонстратор, голосовые API браузера (если поддерживаются), журнал эксперимента и экспорт отчёта.\n\nВажно: эта страница пока не содержит полноценную обученную языковую модель и не имеет подключённого интернет-браузера для выполнения поручений. Мои ответы здесь формируются локальными правилами, поэтому я не буду выдавать их за универсальный интеллект.');
+     return;
+   }
+   if(/квант|кубит|bell|суперпозиц|запутан/i.test(low)){
+     respond('В этой лаборатории квантовая схема моделируется классически: состояние хранится как вектор комплексных амплитуд, а гейты изменяют этот вектор. Это позволяет исследовать небольшие схемы, но не является запуском на физическом квантовом компьютере и само по себе не доказывает квантовое преимущество.\n\nДля проверки можно сравнивать результат симуляции с аналитическим ожиданием и фиксировать входную схему, состояние и выход.');
+     return;
+   }
+   if(/саморазв|обновля|улучш|гитхаб|свой код|ядро/i.test(low)){
+     respond('Цикл саморазвития в текущем прототипе пока исследовательский, не автономный. Страница может показать признаки, сравнить заранее заданные профили и сформировать предложение эксперимента. Она пока не меняет собственный исходный код и не пишет в GitHub.\n\nБезопасный следующий этап: агент готовит изменение в отдельной ветке, запускает фиксированный набор тестов против базовой версии и формирует отчёт. Слияние допускается только после независимой проверки и возможности отката.');
+     return;
+   }
+   if(/интернет|браузер|найди|поищи|открой сайт|последние новости|сегодняшн|актуальн/i.test(low)){
+     respond('Интернет-поиск и управление браузером к этой странице сейчас не подключены. Я не буду притворяться, что искала в интернете. Для реального выполнения поручений нужен отдельный браузерный инструмент или backend с явными разрешениями; найденные страницы затем должны передаваться ядру как источники для проверки.');
+     return;
+   }
+   if(/план|гипотез|провер|эксперимент|исследован|как сделать|как создать|что дальше|с чего начать/i.test(low)){
+     const goal=q.replace(/[.!?]+$/,'');
+     respond('Разберу задачу как локальный исследовательский план.\n\n1. Цель: '+goal+'.\n2. Формализовать успех: заранее определить наблюдаемый результат, который подтвердит выполнение.\n3. Сформулировать минимум две конкурирующие гипотезы и указать, какие данные различат их.\n4. Провести проверку на фиксированных данных; отдельно записать ошибки и неопределённость.\n5. Повторить тест после изменения и сравнить с исходной версией.\n\nОграничение: это структурированный план по правилам, а не доказательство того, что гипотезы верны. Для фактической проверки нужны данные или доступ к источникам.');
+     return;
+   }
+   if(/помоги|объясни|почему|что значит|проанализируй|сравни|расскажи/i.test(low)){
+     respond('Я получила задачу: «'+q+'». В этой версии ещё нет универсального языкового механизма, поэтому я не хочу сочинять ответ, будто у меня есть достаточные знания. Могу продолжить, если задача будет задана как вычисление, проверка конкретных гипотез, план эксперимента или вопрос о возможностях самой лаборатории. Для свободного диалога нужно подключить языковую модель как временную опору, а затем сравнивать её выводы с собственным ядром.');
+     return;
+   }
+   respond('Запрос принят: «'+q+'». Сейчас я могу обрабатывать арифметику и несколько определённых типов исследовательских задач, но не умею надёжно отвечать на произвольные вопросы без языковой модели или подключённых источников. Я зафиксировала ограничение вместо того, чтобы выдумывать ответ.');
+ }catch(e){
+   respond('Не удалось выполнить вычисление: '+e.message+'\nПроверь выражение. Поддерживаются числа, скобки, + − × ÷, %, степень ^, pi, e и функции sqrt, sin, cos, tan, log, log10, abs, exp, floor, ceil, round.');
+ }
+}
 $('send').onclick=reply;$('ask').addEventListener('keydown',e=>{if(e.key==='Enter')reply()});
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;let recognition=null;if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang='ru-RU';recognition.interimResults=false;recognition.maxAlternatives=1;recognition.onresult=e=>{$('ask').value=e.results[0][0].transcript;$('speechstatus').textContent='Речь распознана: '+e.results[0][0].transcript;reply()};recognition.onerror=e=>$('speechstatus').textContent='Ошибка распознавания: '+e.error;recognition.onend=()=>{$('listen').disabled=false;$('listen').textContent='🎙 Начать говорить'}}else $('speechstatus').textContent='Распознавание речи не поддерживается этим браузером. Текстовый ввод доступен.';
 $('listen').onclick=()=>{if(!recognition){$('speechstatus').textContent='Нет SpeechRecognition API. Попробуй другой браузер или введи текст.';return}try{$('listen').disabled=true;$('listen').textContent='Слушаю…';$('speechstatus').textContent='Разреши доступ к микрофону, если браузер спросит.';recognition.start()}catch(e){$('listen').disabled=false;$('speechstatus').textContent=e.message}};
