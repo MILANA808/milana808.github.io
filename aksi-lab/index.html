@@ -67,7 +67,38 @@
 <div class="foot">AKSI MATRIX · Math & Quantum Lab · экспериментальная сборка</div>
 </main>
 <script>
+(function(){
+  window.__aksiBootState = 'diagnostics-loaded';
+  function showDiagnostic(title, detail) {
+    let panel = document.getElementById('aksi-runtime-diagnostic');
+    if (!panel) {
+      panel = document.createElement('section');
+      panel.id = 'aksi-runtime-diagnostic';
+      panel.setAttribute('role','alert');
+      panel.style.cssText = 'position:sticky;top:0;z-index:99999;margin:0;padding:12px 14px;background:#4a1720;color:#fff;border:2px solid #ff8794;font:14px/1.45 system-ui,sans-serif;overflow-wrap:anywhere';
+      document.body.insertBefore(panel, document.body.firstChild);
+    }
+    panel.textContent = title + ' | ' + detail + ' | Этап: ' + (window.__aksiBootState || 'неизвестен') + '. Сделай скриншот этого сообщения.';
+  }
+  window.addEventListener('error', function(e) {
+    showDiagnostic('AKSI: ошибка JavaScript', (e.message || 'неизвестная ошибка') + (e.filename ? ' (' + e.filename.split('/').pop() + ':' + e.lineno + ':' + e.colno + ')' : ''));
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    let reason = e.reason;
+    showDiagnostic('AKSI: ошибка асинхронной операции', reason && reason.message ? reason.message : String(reason));
+  });
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function(){
+      if (window.__aksiBootState !== 'ready') {
+        showDiagnostic('AKSI: инициализация не завершена', 'Скрипт остановился до регистрации всех обработчиков. Состояние: ' + (window.__aksiBootState || 'неизвестно'));
+      }
+    }, 0);
+  });
+})();
+</script>
+<script>
 'use strict';
+window.__aksiBootState = 'app-script-started';
 const $=id=>document.getElementById(id);let mathCount=0,lastAnswer='',lastQuantum=null,lastCluster=null;
 function tokenize(s){const out=[];let i=0;while(i<s.length){if(/\s/.test(s[i])){i++;continue}const num=s.slice(i).match(/^(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?/i);if(num){out.push({t:'n',v:Number(num[0])});i+=num[0].length;continue}const id=s.slice(i).match(/^[a-zA-Z]+/);if(id){out.push({t:'id',v:id[0].toLowerCase()});i+=id[0].length;continue}if('+-*/^()%'.includes(s[i])){out.push({t:s[i],v:s[i]});i++;continue}throw Error('Недопустимый символ: '+s[i])}out.push({t:'eof'});return out}
 function mathEval(src){const ts=tokenize(src);let p=0;const peek=()=>ts[p],take=t=>{if(peek().t!==t)throw Error('Ожидалось '+t);return ts[p++]};function primary(){if(peek().t==='n')return take('n').v;if(peek().t==='+'){take('+');return primary()}if(peek().t==='-'){take('-');return-primary()}if(peek().t==='('){take('(');const x=expr(0);take(')');return x}if(peek().t==='id'){const id=take('id').v;if(id==='pi')return Math.PI;if(id==='e')return Math.E;const funcs={sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,tan:Math.tan,log:Math.log,log10:Math.log10,abs:Math.abs,exp:Math.exp,floor:Math.floor,ceil:Math.ceil,round:Math.round};if(!(id in funcs))throw Error('Неизвестная функция или константа: '+id);take('(');const x=expr(0);take(')');return funcs[id](x)}throw Error('Неожиданный токен: '+peek().t)}const prec={'+':1,'-':1,'*':2,'/':2,'%':2,'^':3};function expr(min){let left=primary();while(prec[peek().t]>=min){const op=take(peek().t).t,pr=prec[op],right=expr(pr+(op==='^'?0:1));if(op==='+')left+=right;else if(op==='-')left-=right;else if(op==='*')left*=right;else if(op==='/')left/=right;else if(op==='%')left%=right;else left=Math.pow(left,right)}return left}const result=expr(0);if(peek().t!=='eof')throw Error('Лишний ввод: '+peek().t);if(!Number.isFinite(result))throw Error('Результат не является конечным числом');return result}
@@ -163,4 +194,5 @@ $('selftest').addEventListener('click',()=>{if(!selfReport){selfLog('[TEST] Сн
 $('selfreport').addEventListener('click',()=>{const data=selfReport||{schema:'AKSI-SELF-IMPROVEMENT/0.1',status:'not-run',limitations:['No run performed','No GitHub writes']};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='aksi-self-improvement-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);selfLog('[EXPORT] JSON-отчёт сформирован локально.')});
 
 $('export').onclick=()=>{const report={schema:'AKSI-LAB-REPORT/1',timestamp:new Date().toISOString(),math:{count:mathCount,last_expression:$('expr').value,last_result:$('mathout').textContent},quantum:lastQuantum,cluster:lastCluster,capabilities:{webgpu_api:!!(navigator.gpu),speech_recognition:!!SpeechRecognition,speech_synthesis:'speechSynthesis'in window},limitations:['No real GPU cluster was used by the virtual cluster benchmark.','Quantum circuit execution is a classical statevector simulation.','No general-purpose LLM is embedded in this static page.']};const blob=new Blob([JSON.stringify(report,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='aksi-lab-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+window.__aksiBootState = 'ready';
 </script></body></html>
