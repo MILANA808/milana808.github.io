@@ -109,7 +109,7 @@ function reply(){
    }
    const mathPrompt=low.match(/(?:чему равен|посчитай|вычисли|рассчитай|сколько будет|реши выражение)\s*[:：]?\s*(.+)$/i);
    const raw=mathPrompt?mathPrompt[1]:q;
-   if(/^[\d\s.+*/^()%,-]+$/.test(raw)||/^(sqrt|sin|cos|tan|log|log10|abs|exp|floor|ceil|round|pi|e)\b/i.test(raw)){
+   if(/^[\d\s.+*\/^()%,-]+$/.test(raw)||/^(sqrt|sin|cos|tan|log|log10|abs|exp|floor|ceil|round|pi|e)\b/i.test(raw)){
      const value=calculateFrom(raw);
      respond('Результат: '+value+'\n\nМетод: локальный математический парсер; выражение вычислено в браузере, без языковой модели и без отправки на сервер.');
      return;
