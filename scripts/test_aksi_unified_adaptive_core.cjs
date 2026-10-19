@@ -9,8 +9,19 @@ global.window = {
   __AKSI_SEED: [
     { q: "Что такое память AKSI?", a: "Память AKSI хранит локальные эпизоды и оценки ответов." },
     { q: "Что такое квантовая суперпозиция?", a: "Суперпозиция — математическое описание квантового состояния." }
-  ]
+  ],
+  dispatchEvent: () => true,
+  AKSI_INTERNET: {
+    calls: 0,
+    gather: async () => {
+      window.AKSI_INTERNET.calls++;
+      return { evidence: [{ title: "Test source", text: "Retrieved material", url: "https://example.test/source" }] };
+    }
+  }
 };
+require("../aksi-calculator.js");
+require("../aksi-core-v3.js");
+require("../aksi-visible-neural-lab.js");
 window.AKSI_DNA_TOPOLOGY = require("../aksi-dna-topology-engine.js");
 window.AKSICognitiveCore = require("../aksi-cognitive-core.js");
 window.AKSIWaveBayesianEngine = require("../aksi-wave-bayesian-engine.js");
@@ -18,6 +29,48 @@ window.AKSIGeometricKnowledgeCore = require("../aksi-geometric-knowledge-core.js
 const Core = require("../aksi-unified-adaptive-core.js");
 (async () => {
   assert.equal(Core.version, "0.1.0");
+  const status = Core.inspect();
+  assert.equal(status.schema, "AKSI-CORE-STATUS/1");
+  assert.equal(status.modules.decisionCoreV3, true);
+  assert.equal(status.modules.visibleNeuralLab, true);
+  assert.equal(status.modules.nativeGenerator, true);
+  assert.equal(status.modules.intentRouter, true);
+  assert.equal(status.modules.evidenceAssessor, true);
+  assert.equal(status.modules.geometricGraph, true);
+  const decision = await Core.decide("choose a reproducible candidate", [
+    { text: "Candidate A", evidence: 0.9, coherence: 0.9, agreement: 0.9, freshness: 0.9, provenance: 0.9, type: "inference", source: { url: "https://example.test/a" } },
+    { text: "Candidate B", evidence: 0.4, coherence: 0.5, agreement: 0.4, freshness: 0.5, provenance: 0.3, type: "uncertain" },
+    { text: "Candidate C", evidence: 0.7, coherence: 0.6, agreement: 0.7, freshness: 0.8, provenance: 0.7, type: "inference" }
+  ], { mode: "deterministic", remember: false });
+  assert.equal(decision.protocol, "AKSI-CORE/3");
+  assert.equal(decision.receipt.receipt_hash.length, 64);
+  assert.equal(Core.getTrace()[0].type, "decision");
+  Core.clearTrace();
+  const noteSaved = Core.remember("project", "AKSI unifies evidence, memory and calculations");
+  assert.equal(noteSaved.ok, true);
+  assert.equal(Core.recall("project")[0].value, "AKSI unifies evidence, memory and calculations");
+  assert.ok(Core.prepare("AKSI project", []).context.notes.length > 0, "saved notes should enter relevant context");
+  assert.equal(Core.listNotes().length, 1);
+  const neuralRequest = await Core.answer("нейросеть: тест", {});
+  assert.equal(neuralRequest.source, "aksi-visible-neural-lab");
+  assert.equal(neuralRequest.integration.modelReady, false, "untrained model should not be represented as ready");
+  assert.equal(Core.getTrace()[0].type, "neural_request");
+  Core.clearTrace();
+  const searched = await Core.answer("question requiring sources", { useWeb: true });
+  assert.equal(window.AKSI_INTERNET.calls, 1);
+  assert.equal(searched.evidence.length, 1);
+  assert.equal(searched.integration.evidence.status, "insufficient_evidence", "retrieved sources remain context unless explicitly annotated");
+  assert.ok(Core.getTrace().some(t => t.type === "source_search" && t.status === "completed"));
+  Core.clearTrace();
+  const mathResult = await Core.answer("посчитай sqrt(81) + 2^3", {});
+  assert.equal(mathResult.source, "aksi-calculator");
+  assert.equal(mathResult.calculation.value, 17);
+  assert.equal(mathResult.integration.generator, "aksi-calculator");
+  assert.equal(Core.getTrace()[0].type, "calculation");
+  const badMath = await Core.answer("вычисли 1/0", {});
+  assert.equal(badMath.calculation.ok, false);
+  assert.match(badMath.text, /Деление на ноль/);
+  Core.clearTrace();
   assert.deepEqual(Core.semanticAddress("акси"), Core.semanticAddress("акси"));
   const l = Core.lorenz("test", 100);
   assert.equal(l.stable, true);
@@ -34,9 +87,33 @@ const Core = require("../aksi-unified-adaptive-core.js");
   assert.equal(answer.source, "aksi-native-dna-topology");
   assert.equal(answer.core, "AKSI Unified Adaptive Core 0.1.0 + AKSI Native Generator");
   assert.equal(answer.evidenceAudit, "insufficient_evidence", "retrieved source fragments remain context until assessed");
+  assert.equal(answer.integration.schema, "AKSI-CORE-RESULT/1");
+  assert.equal(answer.integration.generator, "aksi-native-dna-topology");
+  assert.equal(answer.integration.evidence.status, "insufficient_evidence");
+  const annotated = Core.prepare("claim under test", [
+    { stance: "supports", text: "independent supporting source", url: "https://a.example/evidence", reliability: 0.8, sourceGroup: "a" },
+    { stance: "refutes", text: "independent refuting source", url: "https://b.example/evidence", reliability: 0.8, sourceGroup: "b" }
+  ]);
+  assert.equal(annotated.evidenceAssessment.status, "contested", "explicitly annotated opposing evidence must remain contested");
+  assert.equal(annotated.evidenceAssessment.supportWeight, 0.8);
+  assert.equal(annotated.evidenceAssessment.refuteWeight, 0.8);
+  assert.match(annotated.evidenceAssessment.warning, /not a probability of truth/i);
+  assert.equal(Core.getTrace().length, 1);
+  assert.equal(Core.getTrace()[0].type, "answer");
+  assert.equal(Core.getTrace()[0].receiptDigest, answer.receipt, "answer trace must reference the generated evidence receipt");
+  Core.clearTrace();
+  assert.equal(Core.getTrace().length, 0);
   assert.match(answer.receipt, /^[a-f0-9]{64}$/);
   assert.equal(answer.model, "AKSI Native Generator 0.1.0");
-  assert.equal(Core.stats().episodes, 1);
+  assert.equal(Core.stats().episodes, 3, "successful source-backed request, calculation and answer should all be recorded");
+  const contestedAnswer = await Core.answer("claim under test", {
+    evidence: [
+      { stance: "supports", text: "support", url: "https://a.example/evidence", reliability: 0.8, sourceGroup: "a" },
+      { stance: "refutes", text: "refutation", url: "https://b.example/evidence", reliability: 0.8, sourceGroup: "b" }
+    ]
+  });
+  assert.equal(contestedAnswer.integration.evidence.status, "contested");
+  assert.equal(contestedAnswer.receiptAssessmentStatus, "contested", "receipt must bind the same assessment shown by the answer");
   const good = Core.feedback("Что такое память AKSI?", answer.text, 1);
   assert.equal(good.ok, true);
   assert.equal(Core.stats().feedbackCount, 1);

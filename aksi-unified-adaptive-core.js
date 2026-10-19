@@ -10,7 +10,7 @@
   const STORAGE_KEY = "aksi_unified_core_v1";
   const MAX_ITEMS = 300;
   const MAX_CHARS = 1200;
-  const DEFAULT_STATE = () => ({ schema: "AKSI-UNIFIED-MEMORY/1", version: VERSION, concepts: {}, links: {}, episodes: [], feedbackCount: 0 });
+  const DEFAULT_STATE = () => ({ schema: "AKSI-UNIFIED-MEMORY/1", version: VERSION, concepts: {}, links: {}, episodes: [], notes: {}, feedbackCount: 0 });
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
   const clean = (v, max) => String(v == null ? "" : v).trim().slice(0, max || MAX_CHARS);
   function tokens(s) {
@@ -37,7 +37,9 @@
       if (!raw) return DEFAULT_STATE();
       const parsed = JSON.parse(raw);
       if (!parsed || parsed.schema !== "AKSI-UNIFIED-MEMORY/1") return DEFAULT_STATE();
-      return Object.assign(DEFAULT_STATE(), parsed);
+      const merged = Object.assign(DEFAULT_STATE(), parsed);
+      if (!merged.notes || typeof merged.notes !== "object" || Array.isArray(merged.notes)) merged.notes = {};
+      return merged;
     } catch (_) { return DEFAULT_STATE(); }
   }
   let state = loadState();
@@ -72,7 +74,14 @@
       const c = ensureConcept(t);
       return { token: t, conductance: Number(c.conductance.toFixed(3)), seen: c.seen, layer: c.layer };
     });
-    return { tokens: ts, concepts, related };
+    const noteMatches = Object.entries(state.notes || {}).map(([key, note]) => {
+      const value = typeof note === "string" ? note : clean(note && note.value, 5000);
+      const noteTokens = new Set(tokens(key + " " + value));
+      const overlap = ts.filter(t => noteTokens.has(t)).length;
+      const score = ts.length ? overlap / Math.max(1, new Set([...ts, ...noteTokens]).size) : 0;
+      return { key, value, score: Number(score.toFixed(3)), updatedAt: note && note.updatedAt || "" };
+    }).filter(item => item.value && item.score > 0).sort((a, b) => b.score - a.score).slice(0, 3);
+    return { tokens: ts, concepts, related, notes: noteMatches };
   }
   // Lorenz integration supplies reproducible exploratory features only. The end point
   // is not used as a truth score or as the answer itself.
@@ -98,7 +107,7 @@
   function prepare(query, evidence) {
     const ctx = contextFor(query);
     const trajectory = lorenz(clean(query, 500));
-    let intent = null, diffusion = null, evidenceAssessment = null;
+    let intent = null, diffusion = null, evidenceAssessment = null, evidenceRecord = null;
     try {
       if (root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine) {
         intent = new root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine().analyze(query);
@@ -120,12 +129,18 @@
     try {
       const audit = root.AKSICognitiveCore;
       if (audit && Array.isArray(evidence) && evidence.length) {
-        const record = audit.createCase(query);
-        evidence.slice(0, 6).forEach(item => audit.addEvidence(record, {
-          stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
-          url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
+        evidenceRecord = audit.createCase(query);
+        evidence.slice(0, 6).forEach(item => audit.addEvidence(evidenceRecord, {
+          // Retrieved material is context by default. It counts as support/refutation
+          // only when an upstream reviewer explicitly supplies stance.
+          stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
+          text: item.text || item.snippet || item.title || "Retrieved source",
+          url: item.url || "",
+          sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
+          reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
+          observedAt: item.observedAt || ""
         }));
-        evidenceAssessment = audit.assess(record);
+        evidenceAssessment = audit.assess(evidenceRecord);
       }
     } catch (_) {}
     const hints = [
@@ -134,6 +149,10 @@
       "Динамический хаос используется только для разнообразия исследовательских признаков; не считай его критерием истины.",
       "Если локальные эпизоды противоречат источникам или запросу, явно укажи это; не выдавай память за проверенный факт."
     ];
+    if (ctx.notes && ctx.notes.length) {
+      hints.push("Локальные заметки пользователя (контекст, не проверенные факты):\n" +
+        ctx.notes.map((note, i) => (i + 1) + ". " + note.key + " = " + note.value).join("\n"));
+    }
     if (ctx.related.length) {
       hints.push("Похожие прошлые эпизоды (не обязательно верны; учитывай только как контекст):\n" +
         ctx.related.map((e, i) => (i + 1) + ". Запрос: " + e.query + "\nОтвет: " + e.answer +
@@ -143,11 +162,95 @@
     if (ctx.relatedConcepts && ctx.relatedConcepts.length) hints.push("Геометрическое распространение активации (классический графовый ранг, не доказательство): " + JSON.stringify(ctx.relatedConcepts));
     if (evidenceAssessment) hints.push("Аудит найденных материалов: " + evidenceAssessment.status + "; источниковых фрагментов=" + evidenceAssessment.evidenceCount + ". Они зарегистрированы как контекст, не как подтверждение или опровержение.");
     hints.push("Текущие признаки: " + JSON.stringify({ conceptCount: ctx.concepts.length, feedbackCount: state.feedbackCount, exploration: trajectory }));
-    return { context: ctx, trajectory, intent, diffusion, evidenceAssessment, system: hints.join("\n\n") };
+    return { context: ctx, trajectory, intent, diffusion, evidenceRecord, evidenceAssessment, system: hints.join("\n\n") };
+  }
+  function extractMathExpression(query) {
+    const original = clean(query, 200);
+    const command = original.match(/^(?:вычисли|посчитай|реши|сколько будет|calculate|compute|evaluate)\s+(.+)$/i);
+    const expression = (command ? command[1] : original).trim();
+    if (!expression || !/^[\d\s()+\-*/.^a-zA-Z]+$/.test(expression)) return null;
+    if (!/[+\-*/^()]|\b(?:sqrt|abs|sin|cos|tan|ln|log|exp)\s*\(/i.test(expression)) return null;
+    return { expression, explicitlyRequested: !!command };
   }
   async function answer(query, options) {
     options = options || {};
-    const prepared = prepare(query, options.evidence || []);
+    const neuralRequest = String(query == null ? "" : query).match(/^\s*(?:нейросеть|нейронная модель|генерация)\s*[:：]\s*([\s\S]+)$/i);
+    if (neuralRequest) {
+      const lab = root.AKSI_NEURAL_LAB;
+      if (!lab || typeof lab.loadLocal !== "function" || typeof lab.generate !== "function") {
+        return { text: "Модуль локальной нейросети не загружен. Проверь aksi-visible-neural-lab.js.", source: "neural-lab-unavailable", error: "AKSI_NEURAL_LAB unavailable" };
+      }
+      const model = lab.loadLocal();
+      if (!model) {
+        recordTrace({ type: "neural_request", generator: "aksi-visible-neural-lab", status: "model_not_trained" });
+        return {
+          text: "Сначала открой /neural-lab/, обучи маленькую символьную модель и нажми «Сохранить для чата». Затем повтори запрос: нейросеть: твой текст. Это учебная MLP, а не большая языковая модель и не проверка фактов.",
+          source: "aksi-visible-neural-lab",
+          model: "AKSI tiny character MLP",
+          integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-visible-neural-lab", modelReady: false }
+        };
+      }
+      try {
+        const generated = lab.generate(model, neuralRequest[1], { maxChars: 220 });
+        recordTrace({ type: "neural_generation", generator: "aksi-visible-neural-lab", status: "generated" });
+        return {
+          text: generated.text + "\n\n[" + generated.model + " · " + generated.warning + "]",
+          source: "aksi-visible-neural-lab",
+          model: generated.model,
+          integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-visible-neural-lab", modelReady: true, warning: generated.warning }
+        };
+      } catch (error) {
+        recordTrace({ type: "neural_generation", generator: "aksi-visible-neural-lab", status: "error" });
+        return { text: "Локальная символьная модель завершилась с ошибкой: " + clean(error && error.message || error, 300), source: "aksi-visible-neural-lab", error: "generation_failed" };
+      }
+    }
+    let evidence = Array.isArray(options.evidence) ? options.evidence.slice(0, 6) : [];
+    if (options.useWeb) {
+      const internet = root.AKSI_INTERNET;
+      if (internet && typeof internet.gather === "function") {
+        recordTrace({ type: "source_search", generator: "aksi-internet", status: "started" });
+        try {
+          const pack = await internet.gather(query, { mode: "lite" });
+          evidence = (pack && Array.isArray(pack.evidence) ? pack.evidence : []).slice(0, 6);
+          recordTrace({ type: "source_search", generator: "aksi-internet", status: "completed", evidenceCount: evidence.length });
+        } catch (error) {
+          recordTrace({ type: "source_search", generator: "aksi-internet", status: "error", error: clean(error && error.message || error, 300) });
+        }
+      } else {
+        recordTrace({ type: "source_search", generator: "aksi-internet", status: "unavailable" });
+      }
+    }
+    const prepared = prepare(query, evidence);
+    const math = extractMathExpression(query);
+    if (math && root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function") {
+      const calculation = root.AKSICalculator.evaluate(math.expression);
+      if (calculation.ok || math.explicitlyRequested) {
+        const text = calculation.ok
+          ? math.expression + " = " + calculation.formatted
+          : "Не удалось вычислить выражение: " + calculation.error;
+        if (calculation.ok) {
+          state.episodes.push({ query: clean(query), answer: clean(text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString(), source: "aksi-calculator" });
+          if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
+          for (const t of prepared.context.tokens) ensureConcept(t).seen++;
+          save();
+        }
+        const result = {
+          text, source: "aksi-calculator", model: "AKSI Calculator " + (calculation.version || "1.0.0"), evidence,
+          core: "AKSI Unified Adaptive Core " + VERSION, calculation,
+          reasoning: ["Выражение обработано парсером арифметики без eval и без исполнения произвольного кода."],
+          evidenceAudit: "not_applicable_to_arithmetic",
+          integration: {
+            schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-calculator",
+            intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
+            graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
+            evidence: { status: "not_applicable_to_arithmetic", count: 0 },
+            modules: inspect().modules, memory: prepared.context.notes || []
+          }
+        };
+        recordTrace({ type: "calculation", generator: "aksi-calculator", expression: math.expression, ok: !!calculation.ok, graphUsed: !!prepared.diffusion });
+        return result;
+      }
+    }
     // Native offline generation is the primary path; WebLLM is deliberately not called.
     if (root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function") {
       const native = root.AKSI_DNA_TOPOLOGY.generate(query, options);
@@ -155,8 +258,9 @@
       if (prepared.intent && prepared.intent.accepted) extra.push("Маршрут интента: " + prepared.intent.label);
       if (prepared.context.related.length) extra.push("Похожие локальные эпизоды учтены как контекст: " + prepared.context.related.length);
       if (prepared.diffusion) extra.push("Графовая диффузия: вычислена классическим алгоритмом.");
-      if (Array.isArray(options.evidence) && options.evidence.length) extra.push("Найденные источники: " + options.evidence.length + " (не встроены в ответ автоматически; проверь их отдельно).");
+      if (Array.isArray(evidence) && evidence.length) extra.push("Найденные источники: " + evidence.length + " (не встроены в ответ автоматически; проверь их отдельно).");
       native.core = "AKSI Unified Adaptive Core " + VERSION + " + AKSI Native Generator";
+      native.evidence = evidence;
       state.episodes.push({ query: clean(query), answer: clean(native.text, 5000), tokens: prepared.context.tokens, feedback: 0, at: new Date().toISOString(), source: "aksi-native-dna-topology" });
       if (state.episodes.length > MAX_ITEMS) state.episodes = state.episodes.slice(-MAX_ITEMS);
       for (const t of prepared.context.tokens) ensureConcept(t).seen++;
@@ -164,19 +268,50 @@
       native.reasoning = extra;
       native.evidenceAudit = prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources";
       native.exploration = prepared.trajectory;
+      native.integration = {
+        schema: "AKSI-CORE-RESULT/1",
+        coreVersion: VERSION,
+        generator: "aksi-native-dna-topology",
+        intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
+        graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
+        evidence: prepared.evidenceAssessment ? {
+          status: prepared.evidenceAssessment.status,
+          count: prepared.evidenceAssessment.evidenceCount,
+          supportWeight: prepared.evidenceAssessment.supportWeight,
+          refuteWeight: prepared.evidenceAssessment.refuteWeight,
+          warning: prepared.evidenceAssessment.warning
+        } : { status: "no_sources", count: 0 },
+        modules: inspect().modules, memory: prepared.context.notes || []
+      };
       try {
         const audit = root.AKSICognitiveCore;
         if (audit) {
-          const record = audit.createCase(query);
-          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
-            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
-            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
-          }));
-          const receipt = await audit.receipt(record, audit.assess(record));
+          const record = prepared.evidenceRecord || audit.createCase(query);
+          if (!prepared.evidenceRecord) {
+            (evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+              stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
+              text: item.text || item.snippet || item.title || "Retrieved source",
+              url: item.url || "", sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
+              reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
+              observedAt: item.observedAt || ""
+            }));
+          }
+          const assessment = prepared.evidenceAssessment || audit.assess(record);
+          const receipt = await audit.receipt(record, assessment);
           native.receipt = receipt.digest;
           native.receiptSchema = receipt.schema;
+          native.receiptAssessmentStatus = assessment.status;
         }
       } catch (_) { native.receipt = null; }
+      recordTrace({
+        type: "answer",
+        generator: "aksi-native-dna-topology",
+        intent: prepared.intent ? prepared.intent.intent : null,
+        evidenceStatus: native.evidenceAudit,
+        evidenceCount: (evidence || []).length,
+        graphUsed: !!prepared.diffusion,
+        receiptDigest: native.receipt || null
+      });
       return native;
     }
     const api = root.AKSI_WEBLLM;
@@ -196,22 +331,53 @@
       try {
         const audit = root.AKSICognitiveCore;
         if (audit) {
-          const record = audit.createCase(query);
-          (options.evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
-            stance: "context", text: item.text || item.snippet || item.title || "Retrieved source",
-            url: item.url || "", sourceGroup: item.url || item.title || "unattributed-source", reliability: 0.5
-          }));
-          receipt = await audit.receipt(record, audit.assess(record));
+          const record = prepared.evidenceRecord || audit.createCase(query);
+          if (!prepared.evidenceRecord) {
+            (evidence || []).slice(0, 6).forEach(item => audit.addEvidence(record, {
+              stance: ["supports", "refutes", "context"].includes(item.stance) ? item.stance : "context",
+              text: item.text || item.snippet || item.title || "Retrieved source",
+              url: item.url || "", sourceGroup: item.sourceGroup || item.url || item.title || "unattributed-source",
+              reliability: Number.isFinite(item.reliability) && item.reliability >= 0 && item.reliability <= 1 ? item.reliability : 0.5,
+              observedAt: item.observedAt || ""
+            }));
+          }
+          receipt = await audit.receipt(record, prepared.evidenceAssessment || audit.assess(record));
         }
       } catch (_) {}
-      return Object.assign({}, result, {
+      const combined = Object.assign({}, result, {
         core: "AKSI Unified Adaptive Core " + VERSION,
+        evidence,
         adaptiveContext: prepared.context.related.length,
         exploration: prepared.trajectory,
         intent: prepared.intent && prepared.intent.accepted ? prepared.intent.intent : null,
         evidenceAudit: prepared.evidenceAssessment ? prepared.evidenceAssessment.status : "no_sources",
-        receipt: receipt ? receipt.digest : null
+        receipt: receipt ? receipt.digest : null,
+        integration: {
+          schema: "AKSI-CORE-RESULT/1",
+          coreVersion: VERSION,
+          generator: "AKSI_WEBLLM",
+          intent: prepared.intent ? { id: prepared.intent.intent, accepted: !!prepared.intent.accepted, method: prepared.intent.method || null } : null,
+          graph: prepared.diffusion ? { used: true, method: "classical-weighted-graph-diffusion" } : { used: false },
+          evidence: prepared.evidenceAssessment ? {
+            status: prepared.evidenceAssessment.status,
+            count: prepared.evidenceAssessment.evidenceCount,
+            supportWeight: prepared.evidenceAssessment.supportWeight,
+            refuteWeight: prepared.evidenceAssessment.refuteWeight,
+            warning: prepared.evidenceAssessment.warning
+          } : { status: "no_sources", count: 0 },
+          modules: inspect().modules, memory: prepared.context.notes || []
+        }
       });
+      recordTrace({
+        type: "answer",
+        generator: "AKSI_WEBLLM",
+        intent: prepared.intent ? prepared.intent.intent : null,
+        evidenceStatus: combined.evidenceAudit,
+        evidenceCount: (evidence || []).length,
+        graphUsed: !!prepared.diffusion,
+        receiptDigest: combined.receipt || null
+      });
+      return combined;
     }
     return result;
   }
@@ -253,7 +419,95 @@
   function stats() {
     return { version: VERSION, concepts: Object.keys(state.concepts).length, links: Object.keys(state.links).length, episodes: state.episodes.length, feedbackCount: state.feedbackCount, storageKey: STORAGE_KEY, modelReady: !!(root.AKSI_WEBLLM && root.AKSI_WEBLLM.ready && root.AKSI_WEBLLM.ready()) };
   }
+  function remember(key, value) {
+    key = clean(key, 120);
+    value = clean(value, 5000);
+    if (!key || !value) return { ok: false, error: "A non-empty note key and value are required." };
+    state.notes = state.notes && typeof state.notes === "object" ? state.notes : {};
+    state.notes[key] = { value, updatedAt: new Date().toISOString() };
+    const keys = Object.keys(state.notes);
+    if (keys.length > 200) keys.slice(0, keys.length - 200).forEach(k => { delete state.notes[k]; });
+    return { ok: true, persisted: save(), key, value };
+  }
+  function listNotes() {
+    return Object.entries(state.notes || {}).map(([key, note]) => ({
+      key, value: typeof note === "string" ? note : clean(note && note.value, 5000),
+      updatedAt: note && note.updatedAt || ""
+    }));
+  }
+  function recall(query) {
+    const q = clean(query, 500);
+    const exact = listNotes().find(note => note.key.toLocaleLowerCase() === q.toLocaleLowerCase());
+    if (exact) return [Object.assign({ score: 1 }, exact)];
+    const ts = Array.from(new Set(tokens(q)));
+    return listNotes().map(note => {
+      const nt = new Set(tokens(note.key + " " + note.value));
+      const overlap = ts.filter(t => nt.has(t)).length;
+      const score = ts.length ? overlap / Math.max(1, new Set([...ts, ...nt]).size) : 0;
+      return Object.assign({ score: Number(score.toFixed(3)) }, note);
+    }).filter(note => note.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+  }
   function clearMemory() { state = DEFAULT_STATE(); return { ok: true, persisted: save() }; }
-  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, prepare, feedback, stats, clearMemory, semanticAddress, lorenz };
+  // A single, inspectable orchestration contract over the modules that already exist.
+  // Trace is diagnostic metadata, not a signed or tamper-proof audit log.
+  const trace = [];
+  const MAX_TRACE = 200;
+  function recordTrace(entry) {
+    trace.push(Object.assign({
+      sequence: trace.length + 1,
+      at: new Date().toISOString(),
+      coreVersion: VERSION
+    }, entry));
+    if (trace.length > MAX_TRACE) {
+      trace.splice(0, trace.length - MAX_TRACE);
+      trace.forEach((item, index) => { item.sequence = index + 1; });
+    }
+    return trace[trace.length - 1];
+  }
+  function inspect() {
+    const modules = {
+      adaptiveMemory: true,
+      decisionCoreV3: !!(root.AKSICoreV3 && typeof root.AKSICoreV3.run === "function"),
+      visibleNeuralLab: !!(root.AKSI_NEURAL_LAB && typeof root.AKSI_NEURAL_LAB.generate === "function" && typeof root.AKSI_NEURAL_LAB.loadLocal === "function"),
+      nativeGenerator: !!(root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function"),
+      intentRouter: !!(root.AKSIWaveBayesianEngine && root.AKSIWaveBayesianEngine.AKSIWaveBayesianEngine),
+      evidenceAssessor: !!(root.AKSICognitiveCore && typeof root.AKSICognitiveCore.assess === "function"),
+      geometricGraph: !!(root.AKSIGeometricKnowledgeCore && typeof root.AKSIGeometricKnowledgeCore.diffuseGraph === "function"),
+      calculator: !!(root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function"),
+      sourceLookup: !!(root.AKSI_INTERNET && typeof root.AKSI_INTERNET.gather === "function")
+    };
+    return {
+      schema: "AKSI-CORE-STATUS/1",
+      version: VERSION,
+      mode: "classical-browser-orchestrator",
+      modules,
+      activeModuleCount: Object.values(modules).filter(Boolean).length,
+      limitations: [
+        "Module presence does not prove every runtime path is correct.",
+        "Intent and graph scores are heuristics, not truth probabilities.",
+        "Retrieved sources default to context; support/refutation requires explicit annotation.",
+        "Trace is in-memory diagnostic data, not a signed audit receipt."
+      ]
+    };
+  }
+  async function decide(task, candidates, options) {
+    const engine = root.AKSICoreV3;
+    if (!engine || typeof engine.run !== "function") {
+      throw new Error("AKSI Core v3 is unavailable; load aksi-core-v3.js before the unified adaptive core.");
+    }
+    const result = await engine.run(task, candidates, options || {});
+    recordTrace({
+      type: "decision",
+      generator: "aksi-core-v3",
+      mode: result.mode,
+      candidateCount: Array.isArray(candidates) ? candidates.length : 0,
+      abstained: !!(result.result && result.result.abstained),
+      receiptHash: result.receipt && result.receipt.receipt_hash || null
+    });
+    return result;
+  }
+  function getTrace() { return trace.map(item => Object.assign({}, item)); }
+  function clearTrace() { trace.length = 0; return { ok: true }; }
+  root.AKSI_UNIFIED_CORE = { version: VERSION, answer, decide, prepare, feedback, stats, remember, listNotes, recall, clearMemory, semanticAddress, lorenz, inspect, getTrace, clearTrace };
   if (typeof module === "object" && module.exports) module.exports = root.AKSI_UNIFIED_CORE;
 })(typeof window !== "undefined" ? window : globalThis);

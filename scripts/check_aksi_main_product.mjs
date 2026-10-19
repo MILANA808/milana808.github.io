@@ -12,19 +12,30 @@ new Function(html.slice(bodyStart, scriptEnd));
 
 for (const marker of [
   'id="aksiModelStatus"', 'id="aksiRememberTurns"', 'id="aksiUseWeb"', 'id="aksiClearMemory"',
-  'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"',
-  "window.AKSI_UNIFIED_CORE.answer", "window.AKSI_INTERNET.gather",
+  'src="/aksi-dna-topology-engine.js?v=1"', 'src="/aksi-internet.js"', 'src="/aksi-calculator.js"', 'src="/aksi-core-v3.js?v=3.1.0"', 'src="/aksi-visible-neural-lab.js?v=1"',
+  "window.AKSI_UNIFIED_CORE.answer", "useWeb",
   "state.history=state.history.slice(-60)", "if(!Array.isArray(state.history))state.history=[];",
   "AKSI Native Generator", "Источники для самостоятельной проверки:"
 ]) assert.ok(html.includes(marker), "missing main-product capability: " + marker);
 
 assert.ok(html.indexOf('src="/aksi-dna-topology-engine.js?v=1"') < scriptStart, "native generator must load before the main app script");
+assert.ok(html.indexOf('src="/aksi-core-v3.js?v=3.1.0"') < html.indexOf('src="/aksi-unified-adaptive-core.js?v=5"'), "Core v3 must load before the unified orchestrator");
+assert.ok(html.indexOf('src="/aksi-visible-neural-lab.js?v=1"') < html.indexOf('src="/aksi-unified-adaptive-core.js?v=5"'), "neural lab must load before the unified orchestrator");
 assert.ok(!html.includes('src="/aksi-webllm.js"'), "main chat must not depend on WebLLM");
 assert.ok(html.indexOf("window.AKSI_UNIFIED_CORE.answer") < html.indexOf("if(/кто ты|представься/.test(n))"), "native generator must take priority over canned answers");
+assert.ok(!html.includes("if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready())"), "main chat must route through the unified core before any model fallback");
+assert.ok(html.includes("[ЕДИНЫЙ КОНТУР]"), "main chat must show unified-core integration metadata");
+assert.ok(html.includes("ПОСЛЕДНИЕ ВЫЗОВЫ ЕДИНОГО ЯДРА"), "diagnostics must show the unified-core trace");
+assert.ok(html.includes("receiptDigest||t.receiptHash"), "diagnostic trace must show a receipt hash prefix when available");
+assert.ok(html.includes("Unified core API"), "diagnostics must check the unified-core API");
+assert.ok(html.includes("Safe calculator"), "diagnostics must check the safe calculator");
+assert.ok(html.includes("window.AKSI_UNIFIED_CORE.remember"), "main product must route memory writes through the unified core");
+assert.ok(html.includes("[ЛОКАЛЬНАЯ ПАМЯТЬ — КОНТЕКСТ, НЕ ПРОВЕРЕННЫЕ ФАКТЫ]"), "answers must disclose relevant local notes as context");
 assert.ok(html.indexOf('src="/aksi-internet.js"') < scriptStart, "source lookup must load before the main app script");
 assert.ok(html.includes("if($('aksiRememberTurns').checked)"), "conversation persistence must be opt-in");
-assert.ok(html.includes("if(!$('aksiUseWeb').checked)"), "old evidence must be hidden when web lookup is disabled");
-assert.ok(html.includes("if($('aksiUseWeb').checked){"), "opt-in web search must run when explicitly enabled");
+assert.ok(html.includes("if(!useWeb){$('aksiEvidence').style.display='none';}"), "old evidence must be hidden when web lookup is disabled");
+assert.ok(html.includes("const useWeb=$('aksiUseWeb').checked;"), "web-search opt-in must be passed into the unified core");
+assert.ok(html.includes("evidence=Array.isArray(result&&result.evidence)?result.evidence:[]"), "main UI must render evidence returned by the unified core");
 assert.ok(!html.includes("if(false && $('aksiUseWeb').checked){"), "web search must not be permanently disabled");
 
 const ctx = {};
