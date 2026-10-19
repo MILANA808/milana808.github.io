@@ -168,9 +168,9 @@ window.__aksiBootState = 'app-script-started';
   }
   function show(text){const out=$core('chatout');if(out){out.textContent=text;out.className='status good';out.style.whiteSpace='pre-wrap'}remember($core('ask')?.value||'',text)}
   function handleSend(e){const b=e.target.closest&&e.target.closest('#send');if(!b)return;e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();const q=$core('ask')?.value||'';show(solve(q))}
-  document.addEventListener('click',handleSend,true);
-  document.addEventListener('keydown',function(e){if(e.key==='Enter'&&e.target&&e.target.id==='ask'){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();show(solve(e.target.value))}},true);
-  window.AKSI_SYMBOLIC_CORE={version:'0.1',solve,calculate:calc,getMemory:()=>memory.slice()};
+  // Expose the core only; the UI binds one direct handler below.
+  // Avoid competing capture/bubble handlers, which can swallow taps on mobile Safari.
+  window.AKSI_SYMBOLIC_CORE={version:'0.2',solve,calculate:calc,getMemory:()=>memory.slice()};
   window.__aksiCoreStatus='ready';
 })();
 
@@ -254,7 +254,26 @@ function reply(){
    respond('Не удалось выполнить вычисление: '+e.message+'\nПроверь выражение. Поддерживаются числа, скобки, + − × ÷, %, степень ^, pi, e и функции sqrt, sin, cos, tan, log, log10, abs, exp, floor, ceil, round.');
  }
 }
-$('send').onclick=reply;$('ask').addEventListener('keydown',e=>{if(e.key==='Enter')reply()});
+function sendMessage(){
+  const input=$('ask');
+  const out=$('chatout');
+  const q=input.value.trim();
+  if(!q){out.textContent='Напиши вопрос или задачу.';out.className='status warn';input.focus();return}
+  try{
+    const answer=window.AKSI_SYMBOLIC_CORE.solve(q);
+    lastAnswer=answer;
+    out.textContent=answer;
+    out.className='status good';
+    out.style.whiteSpace='pre-wrap';
+    $('speechstatus').textContent='Ответ сформирован локальным ядром AKSI.';
+  }catch(e){
+    out.textContent='Ошибка ядра: '+(e&&e.message?e.message:String(e));
+    out.className='status warn';
+    $('speechstatus').textContent='Ядро сообщило об ошибке; подробность показана в ответе.';
+  }
+}
+$('send').addEventListener('click',sendMessage);
+$('ask').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage()}});
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;let recognition=null;if(SpeechRecognition){recognition=new SpeechRecognition();recognition.lang='ru-RU';recognition.interimResults=false;recognition.maxAlternatives=1;recognition.onresult=e=>{$('ask').value=e.results[0][0].transcript;$('speechstatus').textContent='Речь распознана: '+e.results[0][0].transcript;reply()};recognition.onerror=e=>$('speechstatus').textContent='Ошибка распознавания: '+e.error;recognition.onend=()=>{$('listen').disabled=false;$('listen').textContent='🎙 Начать говорить'}}else $('speechstatus').textContent='Распознавание речи не поддерживается этим браузером. Текстовый ввод доступен.';
 $('listen').onclick=()=>{if(!recognition){$('speechstatus').textContent='Нет SpeechRecognition API. Попробуй другой браузер или введи текст.';return}try{$('listen').disabled=true;$('listen').textContent='Слушаю…';$('speechstatus').textContent='Разреши доступ к микрофону, если браузер спросит.';recognition.start()}catch(e){$('listen').disabled=false;$('speechstatus').textContent=e.message}};
 $('speak').onclick=()=>{if(!('speechSynthesis'in window)){ $('speechstatus').textContent='Озвучивание не поддерживается';return}if(!lastAnswer){$('speechstatus').textContent='Сначала получи ответ';return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(lastAnswer);u.lang='ru-RU';speechSynthesis.speak(u);$('speechstatus').textContent='Озвучиваю ответ через системный синтез речи.'};
