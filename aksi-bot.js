@@ -6,20 +6,23 @@
   "use strict";
   var VER = "1.5.1-clear";
   var seed = [];
-  var DEFAULT_CORTEX_PW = "aksi";
   var CORTEX_MIN_SCORE = 0.002;
 
   function cortexPw() {
-    try { return sessionStorage.getItem("aksi_cortex_pw") || DEFAULT_CORTEX_PW; }
-    catch (e) { return DEFAULT_CORTEX_PW; }
+    try { return String(sessionStorage.getItem("aksi_cortex_pw") || "").trim(); }
+    catch (e) { return ""; }
   }
   function setCortexPw(pw) {
-    try { sessionStorage.setItem("aksi_cortex_pw", String(pw || DEFAULT_CORTEX_PW)); } catch (e) {}
-    if (G.AKSI_CORTEX_KERNEL && G.AKSI_CORTEX_KERNEL.setSessionPassword)
-      G.AKSI_CORTEX_KERNEL.setSessionPassword(pw || DEFAULT_CORTEX_PW);
+    pw = String(pw || "").trim();
+    try {
+      if (pw) sessionStorage.setItem("aksi_cortex_pw", pw);
+      else sessionStorage.removeItem("aksi_cortex_pw");
+    } catch (e) {}
+    if (G.AKSI_CORTEX_KERNEL && G.AKSI_CORTEX_KERNEL.setSessionPassword && pw)
+      G.AKSI_CORTEX_KERNEL.setSessionPassword(pw);
   }
   function ensureCortexSession() {
-    if (!G.AKSI_CORTEX_KERNEL) return null;
+    if (!G.AKSI_CORTEX_KERNEL || !cortexPw()) return null;
     try { G.AKSI_CORTEX_KERNEL.setSessionPassword(cortexPw()); } catch (e) {}
     return G.AKSI_CORTEX_KERNEL;
   }
