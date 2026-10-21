@@ -271,7 +271,7 @@ if(!useWeb){$('aksiEvidence').style.display='none';}
   const modelResult=await window.AKSI_WEBLLM.complete(q,{system,history:$('aksiRememberTurns').checked?state.history:[]});
   if(modelResult&&typeof modelResult.text==='string'&&modelResult.text.trim()){
    $('chatStatus').textContent='AKSI WebLLM · '+(modelResult.model||'локальная модель')+' · ответ сформирован на устройстве; факты проверь отдельно.';
-   return modelResult.text.trim()+'\n\n[ИСТОЧНИК ОТВЕТА] локальная WebLLM · '+(modelResult.model||'модель браузера')+' · генерация выполнена на устройстве; истинность ответа отдельно не проверена.';
+   return modelResult.text.trim()+'\n\n[ИСТОЧНИК ОТВЕТА] локальная WebLLM · '+(modelResult.model||'модель браузера')+' · генерация выполнена на устройстве; истинность ответа отдельно не проверена. Вывод модели не является независимой проверкой фактов.';
   }
   event('WEBLLM_FALLBACK','Local WebLLM returned no answer; using the native AKSI core.');
  }
