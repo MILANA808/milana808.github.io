@@ -262,8 +262,21 @@ if(!useWeb){$('aksiEvidence').style.display='none';}
    event('BACKEND','Chat endpoint responded without a recognized answer; using local fallback.');
   }catch(err){event('BACKEND_FALLBACK','Backend model unavailable; using local fallback: '+err.message);}
  }
-$('chatStatus').textContent=useWeb?'Единое ядро: ищу открытые источники и готовлю ответ…':'Генерирую собственным локальным ядром…';
- const result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence,useWeb}):window.AKSI_DNA_TOPOLOGY.generate(q);
+// If the user has explicitly loaded a browser-local language model, use it for
+ // ordinary chat. Keep web-source retrieval on the unified core; if local
+ // generation fails, fall back to the native core.
+ let result;
+ if(!useWeb && window.AKSI_WEBLLM && window.AKSI_WEBLLM.ready()){
+  $('chatStatus').textContent='Локальная WebLLM: генерирую ответ на устройстве…';
+  const modelResult=await window.AKSI_WEBLLM.complete(q,{system,history:$('aksiRememberTurns').checked?state.history:[]});
+  if(modelResult&&typeof modelResult.text==='string'&&modelResult.text.trim()){
+   $('chatStatus').textContent='AKSI WebLLM · '+(modelResult.model||'локальная модель')+' · ответ сформирован на устройстве; факты проверь отдельно.';
+   return modelResult.text.trim()+'\n\n[ИСТОЧНИК ОТВЕТА] локальная WebLLM · '+(modelResult.model||'модель браузера')+' · генерация выполнена на устройстве; истинность ответа отдельно не проверена.';
+  }
+  event('WEBLLM_FALLBACK','Local WebLLM returned no answer; using the native AKSI core.');
+ }
+ $('chatStatus').textContent=useWeb?'Единое ядро: ищу открытые источники и готовлю ответ…':'Генерирую собственным локальным ядром…';
+ result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence,useWeb}):window.AKSI_DNA_TOPOLOGY.generate(q);
  evidence=Array.isArray(result&&result.evidence)?result.evidence:[];
  if(useWeb){$('aksiEvidence').style.display='block';$('aksiEvidence').textContent=evidence.length?'ИСТОЧНИКИ (контекст, проверь первоисточник):\\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'')+'\\n'+String(x.text||'').slice(0,280)).join('\\n\\n'):'Источники не найдены или поиск недоступен; веб-доказательств нет.';}
  if(result&&result.text){
