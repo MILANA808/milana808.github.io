@@ -20,8 +20,11 @@
     const clauses = match[1].split(/[;\n]+/).map(x => x.trim()).filter(Boolean);
     const rules = [];
     const facts = [];
+    const aliases = [];
     let query = "";
     for (const clause of clauses) {
+      const alias = clause.match(/^(?:синоним|понятие)\s*[:：]\s*(.+?)\s*(?:=|—|->)\s*(.+)$/i);
+      if (alias) { aliases.push({ alias: clean(alias[1]), canonical: clean(alias[2]) }); continue; }
       const q = clause.match(/^(?:следует ли|выведи ли|докажи)\s+(.+)$/i);
       if (q) {
         if (query) return { ok: false, error: "В одном запросе поддерживается только один вопрос." };
@@ -41,7 +44,18 @@
     }
     if (!query) return { ok: false, error: "Добавь вопрос в конце: «следует ли ...?»." };
     if (!facts.length && !rules.length) return { ok: false, error: "Не найдены факты или правила для вывода." };
-    return { ok: true, rules, facts: Array.from(new Set(facts)), query };
+    // Semantic equivalence is never guessed: users must declare aliases explicitly.
+    const aliasMap = new Map(aliases.filter(a => a.alias && a.canonical).map(a => [a.alias, a.canonical]));
+    function canonical(value) {
+      let current = clean(value);
+      const visited = new Set();
+      while (aliasMap.has(current) && !visited.has(current)) { visited.add(current); current = aliasMap.get(current); }
+      return current;
+    }
+    const normalizedRules = rules.map(rule => ({ antecedent: canonical(rule.antecedent), consequent: canonical(rule.consequent), text: "если " + canonical(rule.antecedent) + ", то " + canonical(rule.consequent) }));
+    const normalizedFacts = Array.from(new Set(facts.map(canonical)));
+    query = canonical(query);
+    return { ok: true, rules: normalizedRules, facts: normalizedFacts, aliases, query };
   }
 
   function infer(input) {
