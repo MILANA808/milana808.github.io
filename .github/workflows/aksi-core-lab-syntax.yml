@@ -1,0 +1,35 @@
+name: AKSI Core Lab syntax check
+on:
+  pull_request:
+    paths:
+      - 'aksi-core-lab/**'
+      - '.github/workflows/aksi-core-lab-syntax.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'aksi-core-lab/**'
+      - '.github/workflows/aksi-core-lab-syntax.yml'
+permissions:
+  contents: read
+jobs:
+  javascript-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Extract inline JavaScript and check syntax
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path('aksi-core-lab/index.html').read_text(encoding='utf-8')
+          scripts = re.findall(r'<script>(.*?)</script>', html, flags=re.S)
+          if len(scripts) != 1:
+              raise SystemExit(f'Expected one inline script, found {len(scripts)}')
+          Path('/tmp/aksi-core-lab.js').write_text(scripts[0], encoding='utf-8')
+          print(f'Extracted {len(scripts[0])} JavaScript characters')
+          PY
+          node --check /tmp/aksi-core-lab.js
