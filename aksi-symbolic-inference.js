@@ -86,7 +86,7 @@
       const steps = proof.get(parsed.query) || [];
       return {
         ok: true, version: VERSION, status: "proven", query: parsed.query,
-        facts: parsed.facts, rules: parsed.rules, rounds,
+        facts: parsed.facts, rules: parsed.rules, aliases: parsed.aliases || [], rounds,
         proof: steps,
         text: "Вывод получен из предоставленных фактов и правил: «" + parsed.query + "»."
       };
