@@ -21,8 +21,19 @@
     const rules = [];
     const facts = [];
     const aliases = [];
+    const relations = [];
     let query = "";
     for (const clause of clauses) {
+      const relation = clause.match(/^отношение\s*[:：]\s*(.+?)\s*--([\p{L}\p{N}_-]+)-->\s*(.+)$/iu);
+      if (relation) {
+        const subject = clean(relation[1]);
+        const predicate = clean(relation[2]);
+        const object = clean(relation[3]);
+        if (!subject || !predicate || !object) return { ok: false, error: "Отношение должно содержать субъект, тип и объект." };
+        relations.push({ subject, predicate, object, statement: subject + " " + predicate + " " + object });
+        facts.push(subject + " " + predicate + " " + object);
+        continue;
+      }
       const alias = clause.match(/^(?:синоним|понятие)\s*[:：]\s*(.+?)\s*(?:=|—|->)\s*(.+)$/i);
       if (alias) { aliases.push({ alias: clean(alias[1]), canonical: clean(alias[2]) }); continue; }
       const q = clause.match(/^(?:следует ли|выведи ли|докажи)\s+(.+)$/i);
@@ -58,7 +69,7 @@
     const normalizedRules = rules.map(rule => ({ antecedent: canonical(rule.antecedent), consequent: canonical(rule.consequent), text: "если " + canonical(rule.antecedent) + ", то " + canonical(rule.consequent) }));
     const normalizedFacts = Array.from(new Set(facts.map(canonical)));
     query = canonical(query);
-    return { ok: true, rules: normalizedRules, facts: normalizedFacts, aliases, query };
+    return { ok: true, rules: normalizedRules, facts: normalizedFacts, aliases, relations, query };
   }
 
   function infer(input) {
@@ -82,19 +93,35 @@
         }
       }
     }
+    // Detect only explicit lexical negation pairs; do not infer contradiction from topic similarity.
+    const contradictions = [];
+    for (const statement of known) {
+      const opposite = statement.startsWith("не ") ? statement.slice(3) : "не " + statement;
+      if (known.has(opposite) && statement < opposite) {
+        const positive = statement.startsWith("не ") ? opposite : statement;
+        const negative = statement.startsWith("не ") ? statement : opposite;
+        contradictions.push({ positive, negative, positiveProof: proof.get(positive) || [], negativeProof: proof.get(negative) || [] });
+      }
+    }
+    const common = {
+      version: VERSION, query: parsed.query, facts: parsed.facts, rules: parsed.rules,
+      aliases: parsed.aliases || [], relations: parsed.relations || [], rounds, contradictions
+    };
     if (known.has(parsed.query)) {
       const steps = proof.get(parsed.query) || [];
       return {
-        ok: true, version: VERSION, status: "proven", query: parsed.query,
-        facts: parsed.facts, rules: parsed.rules, aliases: parsed.aliases || [], rounds,
+        ok: true, ...common, status: contradictions.length ? "proven_with_contradictions" : "proven",
         proof: steps,
-        text: "Вывод получен из предоставленных фактов и правил: «" + parsed.query + "»."
+        text: contradictions.length
+          ? "Вывод «" + parsed.query + "» получен, но система обнаружила явные противоречия во входных данных. Проверь список противоречий перед использованием результата."
+          : "Вывод получен из предоставленных фактов и правил: «" + parsed.query + "»."
       };
     }
     return {
-      ok: true, version: VERSION, status: "not_derived", query: parsed.query,
-      facts: parsed.facts, rules: parsed.rules, rounds, proof: [],
-      text: "Не удалось вывести «" + parsed.query + "» из предоставленных фактов и правил. Это не доказывает, что утверждение ложно."
+      ok: true, ...common, status: contradictions.length ? "contradiction_detected" : "not_derived", proof: [],
+      text: contradictions.length
+        ? "Обнаружены явно противоречащие утверждения. Запрошенный вывод отдельно не получен."
+        : "Не удалось вывести «" + parsed.query + "» из предоставленных фактов и правил. Это не доказывает, что утверждение ложно."
     };
   }
 
