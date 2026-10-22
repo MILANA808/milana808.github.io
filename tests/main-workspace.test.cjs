@@ -19,7 +19,7 @@ assert.ok(html.indexOf('<script src="/aksi-webllm.js?v=5.0.0"></script>') < html
 assert.ok(adapter.includes('complete: complete') && adapter.includes('load: loadModel') && adapter.includes('unload: unload'), 'adapter API contract changed');
 assert.ok(html.includes('window.AKSI_WEBLLM.complete(q'), 'chat should use loaded browser-local language model');
 assert.ok(html.includes('window.AKSI_WEBLLM.ready()'), 'chat must only call local generation when model is ready');
-assert.ok(html.includes('вывод модели не является независимой проверкой фактов'), 'model answer must retain factual limitation notice');
+assert.match(html, /вывод модели не является независимой проверкой фактов/i, 'model answer must retain factual limitation notice');
 assert.ok(html.includes('Выгрузить') && html.includes('Загрузить модель'), 'user must be able to load and unload the model');
 assert.ok(html.includes('if(!navigator.gpu)') && html.includes('локальная большая модель не запустится'), 'unsupported WebGPU must be reported before the user downloads weights');
 assert.ok(demo.includes('id="langToggle"') && demo.includes('Switch to Russian') && demo.includes('Switch to English'), 'public demo should expose RU/EN language control');
