@@ -47,10 +47,13 @@
     // Semantic equivalence is never guessed: users must declare aliases explicitly.
     const aliasMap = new Map(aliases.filter(a => a.alias && a.canonical).map(a => [a.alias, a.canonical]));
     function canonical(value) {
-      let current = clean(value);
-      const visited = new Set();
-      while (aliasMap.has(current) && !visited.has(current)) { visited.add(current); current = aliasMap.get(current); }
-      return current;
+      // Alias replacement is token-level, explicit, and deterministic.
+      return clean(value).split(" ").map(token => {
+        let current = token;
+        const visited = new Set();
+        while (aliasMap.has(current) && !visited.has(current)) { visited.add(current); current = aliasMap.get(current); }
+        return current;
+      }).join(" ");
     }
     const normalizedRules = rules.map(rule => ({ antecedent: canonical(rule.antecedent), consequent: canonical(rule.consequent), text: "если " + canonical(rule.antecedent) + ", то " + canonical(rule.consequent) }));
     const normalizedFacts = Array.from(new Set(facts.map(canonical)));
