@@ -175,7 +175,7 @@
   async function answer(query, options) {
     options = options || {};
     // Explicit symbolic mode is intentionally narrow: it proves only what follows from the supplied rules.
-    if (/^\\s*(?:логика|выведи)\\s*[:：]/i.test(String(query == null ? "" : query))) {
+    if (/^\s*(?:логика|выведи)\s*[:：]/i.test(String(query == null ? "" : query))) {
       const engine = root.AKSISymbolicInference;
       if (!engine || typeof engine.infer !== "function") {
         return { text: "Модуль символического вывода не загружен.", source: "symbolic-inference-unavailable", error: "AKSISymbolicInference unavailable" };
