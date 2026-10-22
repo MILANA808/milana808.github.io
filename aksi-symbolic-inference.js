@@ -1,6 +1,6 @@
 /*!
  * AKSI Symbolic Inference v1.0.0
- * Small, explicit forward-chaining reasoner for user-supplied propositions.
+ * Small forward-chaining reasoner with explicitly declared concept aliases.
  * It is not a general natural-language reasoner or a truth oracle.
  */
 (function (root) {
