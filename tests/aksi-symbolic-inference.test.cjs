@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
 const inference = require('../aksi-symbolic-inference.js');
 
 test('derives a conclusion through a chain of explicit rules', () => {
@@ -31,6 +33,26 @@ test('rejects requests without a query', () => {
 test('keeps propositions exact rather than guessing semantic equivalence', () => {
   const result = inference.infer('логика: идет дождь; следует ли улица мокрая?');
   assert.equal(result.status, 'not_derived');
+});
+
+test('main adaptive core routes explicit logic prompts into the reasoner', async () => {
+  const storage = new Map();
+  const sandbox = {
+    AKSISymbolicInference: inference,
+    localStorage: {
+      getItem: key => storage.has(key) ? storage.get(key) : null,
+      setItem: (key, value) => storage.set(key, String(value))
+    },
+    console
+  };
+  sandbox.window = sandbox;
+  vm.runInNewContext(fs.readFileSync('aksi-unified-adaptive-core.js', 'utf8'), sandbox, { filename: 'aksi-unified-adaptive-core.js' });
+  const result = await sandbox.AKSI_UNIFIED_CORE.answer(
+    'логика: если идет дождь, то земля мокрая; идет дождь; следует ли земля мокрая?'
+  );
+  assert.equal(result.source, 'aksi-symbolic-inference');
+  assert.equal(result.inference.status, 'proven');
+  assert.equal(sandbox.AKSI_UNIFIED_CORE.inspect().modules.symbolicInference, true);
 });
 
 console.log('AKSI symbolic inference tests: OK');
