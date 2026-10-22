@@ -174,6 +174,23 @@
   }
   async function answer(query, options) {
     options = options || {};
+    // Explicit symbolic mode is intentionally narrow: it proves only what follows from the supplied rules.
+    if (/^\s*(?:логика|выведи)\s*[:：]/i.test(String(query == null ? "" : query))) {
+      const engine = root.AKSISymbolicInference;
+      if (!engine || typeof engine.infer !== "function") {
+        return { text: "Модуль символического вывода не загружен.", source: "symbolic-inference-unavailable", error: "AKSISymbolicInference unavailable" };
+      }
+      const inference = engine.infer(query);
+      recordTrace({ type: "symbolic_inference", generator: "aksi-symbolic-inference", status: inference.status || "invalid_input" });
+      return {
+        text: inference.text,
+        source: "aksi-symbolic-inference",
+        inference,
+        core: "AKSI Unified Adaptive Core " + VERSION,
+        reasoning: inference.proof || [],
+        integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-symbolic-inference", inferenceStatus: inference.status || "invalid_input" }
+      };
+    }
     const neuralRequest = String(query == null ? "" : query).match(/^\s*(?:нейросеть|нейронная модель|генерация)\s*[:：]\s*([\s\S]+)$/i);
     if (neuralRequest) {
       const lab = root.AKSI_NEURAL_LAB;
@@ -467,6 +484,7 @@
   function inspect() {
     const modules = {
       adaptiveMemory: true,
+      symbolicInference: !!(root.AKSISymbolicInference && typeof root.AKSISymbolicInference.infer === "function"),
       decisionCoreV3: !!(root.AKSICoreV3 && typeof root.AKSICoreV3.run === "function"),
       visibleNeuralLab: !!(root.AKSI_NEURAL_LAB && typeof root.AKSI_NEURAL_LAB.generate === "function" && typeof root.AKSI_NEURAL_LAB.loadLocal === "function"),
       nativeGenerator: !!(root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function"),
