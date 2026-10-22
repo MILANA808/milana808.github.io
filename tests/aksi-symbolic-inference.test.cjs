@@ -55,4 +55,17 @@ test('main adaptive core routes explicit logic prompts into the reasoner', async
   assert.equal(sandbox.AKSI_UNIFIED_CORE.inspect().modules.symbolicInference, true);
 });
 
+test('uses only explicitly declared concept aliases across facts, rules, and query', () => {
+  const result = inference.infer('логика: синоним: авто = автомобиль; факт: авто движется; если автомобиль движется, то есть движение; следует ли есть движение?');
+  assert.equal(result.status, 'proven');
+  assert.equal(result.query, 'есть движение');
+  assert.equal(result.facts[0], 'автомобиль движется');
+  assert.equal(result.aliases.length, 1);
+});
+
+test('does not guess undeclared semantic equivalence', () => {
+  const result = inference.infer('логика: автомобиль движется; следует ли авто движется?');
+  assert.equal(result.status, 'not_derived');
+});
+
 console.log('AKSI symbolic inference tests: OK');
