@@ -60,7 +60,7 @@ function response(ok, data, status = 200) {
     result = await router.answer("Команда — узнай погоду в Анапе");
     assert.equal(result.route, "weather");
     assert.match(result.text, /не удалось получить актуальную погоду/i);
-    assert.match(result.text, /не буду подставлять выдуманные данные/i);
+    assert.match(result.text, /не буду подставлять выдуманные значения/i);
 
     globalThis.AKSI_WEBLLM = {
       ready: () => true,
