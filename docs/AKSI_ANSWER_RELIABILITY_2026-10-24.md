@@ -12,6 +12,7 @@ Scope: browser chat routing and failure behavior in the canonical GitHub Pages r
 - CI includes an end-to-end contract test that loads the real weather adapter and answer router together with a mocked HTTP boundary.
 - The semantic graph now covers additional computing/science concepts and recognizes several natural-language paraphrases; a 20-prompt benchmark measures both supported questions and deliberate abstention.
 - The on-page diagnostics now show whether the answer router, semantic graph and weather command parser are actually loaded, and clearly mark the deliberately disabled backend and unloaded local model as limitations.
+- The local knowledge base now answers natural-language queries over stored relations (properties, parts, incoming causes and connected facts), with proof entries tied to user-entered records.
 
 ## Acceptance tests
 
