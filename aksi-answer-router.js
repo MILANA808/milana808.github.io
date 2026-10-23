@@ -32,8 +32,22 @@
     if (!q) return { handled: false, version: VERSION };
     const weather = root.AKSIWeather;
     if (weather && typeof weather.detect === "function" && weather.detect(raw)) {
-      const result = await weather.answer(raw);
-      return Object.assign({ version: VERSION, route: "weather", handled: true }, result, { statusText: result && result.error ? "Не удалось получить актуальную погоду из онлайн-источника." : "Погодные данные получены онлайн из Open-Meteo." });
+      try {
+        const result = await weather.answer(raw);
+        return Object.assign({ version: VERSION, route: "weather", handled: true }, result, {
+          statusText: result && result.error
+            ? "Не удалось получить актуальную погоду из онлайн-источника."
+            : result && result.data
+              ? "Погодные данные получены онлайн из Open-Meteo."
+              : "Команда погоды распознана; нужны уточнения."
+        });
+      } catch (error) {
+        return {
+          handled: true, version: VERSION, route: "weather-error",
+          statusText: "Погодный сервис не ответил.",
+          text: "Не удалось получить актуальную погоду: онлайн-сервис или сетевое соединение недоступны. Я не буду подставлять выдуманные данные."
+        };
+      }
     }
     if (/^(?:логика|выведи)\s*[:：]/i.test(q)) {
       const symbolic = root.AKSISymbolicInference;
@@ -113,6 +127,7 @@
       }
     }
     const llm = root.AKSI_WEBLLM;
+    let modelFailure = null;
     if (llm && typeof llm.ready === "function" && llm.ready() && typeof llm.complete === "function") {
       const evidenceContext = evidence.length
         ? "\n\nМатериалы найденных источников. Используй их осторожно, не считай каждую фразу доказанным фактом; при утверждениях укажи номера источников:\n" +
@@ -125,12 +140,17 @@
         String(options.system || ""),
         evidenceContext
       ].filter(Boolean).join("\n\n");
-      const modelResult = await llm.complete(q, {
-        system,
-        history: Array.isArray(options.history) ? options.history : [],
-        max_tokens: options.max_tokens || 700,
-        temperature: 0.35
-      });
+      let modelResult = null;
+      try {
+        modelResult = await llm.complete(q, {
+          system,
+          history: Array.isArray(options.history) ? options.history : [],
+          max_tokens: options.max_tokens || 700,
+          temperature: 0.35
+        });
+      } catch (error) {
+        modelFailure = String(error && error.message || error).slice(0, 160);
+      }
       if (modelResult && typeof modelResult.text === "string" && modelResult.text.trim()) {
         const citations = evidence.length ? "\n\nИсточники для проверки:\n" + evidence.slice(0, 5).map((x, i) => "[" + (i + 1) + "] " + String(x.title || "Источник") + (x.url ? " — " + x.url : "")).join("\n") : "";
         return {
@@ -141,7 +161,13 @@
         };
       }
       if (!evidence.length && !useWeb) {
-        return { handled: true, version: VERSION, route: "model-unavailable", statusText: "Локальная языковая модель не вернула ответ.", text: "Модель не смогла сформировать ответ. Проверь её состояние или повтори запрос." };
+        return {
+          handled: true, version: VERSION, route: modelFailure ? "model-error" : "model-unavailable",
+          statusText: modelFailure ? "Локальная модель временно недоступна." : "Локальная языковая модель не вернула ответ.",
+          text: modelFailure
+            ? "Локальная модель завершилась с ошибкой и не сформировала ответ. Попробуй повторить запрос или перезапустить модель. Внутренняя ошибка зарегистрирована без вывода технической трассировки в чат."
+            : "Модель не смогла сформировать ответ. Проверь её состояние или повтори запрос."
+        };
       }
     }
     if (useWeb) {
