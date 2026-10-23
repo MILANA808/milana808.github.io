@@ -114,8 +114,9 @@
     });
     return parts;
   }
-  function packSystem(prompt) {
+  function packSystem(prompt, limit) {
     var b = budgets();
+    var maxChars = Number.isFinite(limit) ? Math.max(0, Math.min(b.sys, limit)) : b.sys;
     var chunks = [BASE_SYS];
     if (adaptedHint) chunks.push("Адаптация:\n" + adaptedHint);
     var mem = loadMemAll();
@@ -127,13 +128,18 @@
       }
     } catch (e) {}
     var sys = chunks.join("\n\n");
-    if (sys.length > b.sys) sys = sys.slice(0, b.sys);
+    if (sys.length > maxChars) sys = sys.slice(0, maxChars);
     return sys;
   }
   function packMessages(prompt, history, options) {
     var b = budgets();
-    var sys = packSystem(prompt);
-    if (options && options.system) sys += "\n" + String(options.system).slice(0, 1000);
+    var extra = options && options.system ? String(options.system) : "";
+    // Reserve room for evidence/user context instead of appending only 1,000 chars
+    // after the base prompt has already consumed the whole system budget.
+    var extraBudget = extra ? Math.min(extra.length, Math.floor(b.sys * 0.6)) : 0;
+    var baseBudget = Math.max(0, b.sys - extraBudget - (extraBudget ? 1 : 0));
+    var sys = packSystem(prompt, baseBudget);
+    if (extraBudget) sys += "\n" + extra.slice(0, extraBudget);
     var msgs = [{ role: "system", content: sys }];
     var hist = Array.isArray(history) ? history.slice(-b.turns) : [];
     var acc = 0, kept = [], i, h, piece;
