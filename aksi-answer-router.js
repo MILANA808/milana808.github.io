@@ -51,6 +51,15 @@
         text: result.text, proof: result.proof || [], semantic: result
       };
     }
+    const knowledge = root.AKSIKnowledgeBase;
+    if (knowledge && typeof knowledge.answer === "function") {
+      const knowledgeResult = knowledge.answer(q);
+      if (knowledgeResult && knowledgeResult.handled) return {
+        handled: true, version: VERSION, route: "local-knowledge-base",
+        statusText: "Локальная база знаний · выводы основаны на пользовательских записях, а не на независимой проверке.",
+        text: knowledgeResult.text, proof: knowledgeResult.proof || [], knowledge: knowledgeResult
+      };
+    }
     const expression = mathExpression(q);
     if (expression && root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function") {
       const result = root.AKSICalculator.evaluate(expression);
