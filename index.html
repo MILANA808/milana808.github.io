@@ -277,7 +277,15 @@ if(!useWeb){$('aksiEvidence').style.display='none';}
   event('WEBLLM_FALLBACK','Local WebLLM returned no answer; using the native AKSI core.');
  }
  $('chatStatus').textContent=useWeb?'Единое ядро: ищу открытые источники и готовлю ответ…':'Генерирую собственным локальным ядром…';
+ try{
  result=window.AKSI_UNIFIED_CORE?await window.AKSI_UNIFIED_CORE.answer(q,{system,history:$('aksiRememberTurns').checked?state.history:[],evidence,useWeb}):window.AKSI_DNA_TOPOLOGY.generate(q);
+}catch(coreError){
+ const message=String(coreError&&coreError.message||coreError);
+ event('CORE_FALLBACK','Unified core failed; using isolated local generator: '+message.slice(0,240));
+ if(!window.AKSI_DNA_TOPOLOGY||typeof window.AKSI_DNA_TOPOLOGY.generate!=='function')throw coreError;
+ result=window.AKSI_DNA_TOPOLOGY.generate(q);
+ if(result&&result.text)result.text+='\n\n[ДИАГНОСТИКА] Единое ядро временно завершилось с ошибкой; ответ сформирован резервным локальным генератором. Ошибка записана в журнал.';
+}
  evidence=Array.isArray(result&&result.evidence)?result.evidence:[];
  if(useWeb){$('aksiEvidence').style.display='block';$('aksiEvidence').textContent=evidence.length?'ИСТОЧНИКИ (контекст, проверь первоисточник):\\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'')+'\\n'+String(x.text||'').slice(0,280)).join('\\n\\n'):'Источники не найдены или поиск недоступен; веб-доказательств нет.';}
  if(result&&result.text){
