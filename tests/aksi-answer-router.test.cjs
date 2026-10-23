@@ -11,7 +11,7 @@ async function run() {
       answer: async q => ({ handled: true, text: "Погода для теста", data: { city: "Анапа" } })
     };
     root.AKSISemanticReasoning = { answer: q => /^что такое математика/i.test(q) ? { handled: true, status: "defined", text: "Математика изучает структуры.", proof: [{type:"definition"}] } : null };
-    root.AKSICalculator = { evaluate: expression => expression === "2+2" ? { ok: true, value: 4, formatted: "4" } : { ok: false, error: "bad expression" } };
+    root.AKSICalculator = { evaluate: expression => expression === "2+2" ? { ok: true, value: 4, formatted: "4" } : expression === "sqrt(81)" ? { ok: true, value: 9, formatted: "9" } : { ok: false, error: "bad expression" } };
     let result = await router.answer("Команда - узнай погоду в Анапе");
     assert.equal(result.route, "weather");
     assert.match(result.text, /Погода для теста/);
@@ -27,6 +27,9 @@ async function run() {
     result = await router.answer("сколько будет 2+2?");
     assert.equal(result.route, "calculator");
     assert.match(result.text, /4/);
+    result = await router.answer("sqrt(81)");
+    assert.equal(result.route, "calculator");
+    assert.match(result.text, /9/);
     result = await router.answer("Команда - найди в интернете причины приливов");
     assert.equal(router.isExplicitSearch("Команда - найди в интернете причины приливов"), true);
     assert.equal(result.route, "web-evidence");
