@@ -105,8 +105,8 @@ test('applies an explicit variable rule to different named entities', () => {
   assert.equal(applied.bindings.x, 'сократ');
 });
 
-test('requires repeated variables to match the same entity', () => {
-  const result = inference.infer('логика: факт: сократ является человек; факт: платон смертен; если {x} является человек, то {x} смертен; следует ли сократ смертен?');
+test('requires repeated variables in a rule antecedent to match the same entity', () => {
+  const result = inference.infer('логика: факт: сократ связан платон; если {x} связан {x}, то {x} совпадает с собой; следует ли сократ совпадает с собой?');
   assert.equal(result.status, 'not_derived');
 });
 
