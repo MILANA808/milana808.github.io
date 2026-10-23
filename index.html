@@ -399,7 +399,7 @@ async function runAnswerSelfTest(){
  const results=[];
  for(const item of tests){try{const r=item[1]();results.push({name:item[0],ok:!!r.ok,detail:String(r.detail||'')});}catch(e){results.push({name:item[0],ok:false,detail:'ошибка проверки'});}}
  const passed=results.filter(r=>r.ok).length;
- out.textContent='ЛОКАЛЬНЫЙ САМОТЕСТ · '+passed+'/'+results.length+'\\n\\n'+results.map(r=>(r.ok?'[OK] ':'[FAIL] ')+r.name+' — '+r.detail).join('\\n')+'\\n\\nПроверка не отправляла запросы в интернет и не меняла сохранённые факты.';
+ out.textContent='ЛОКАЛЬНЫЙ САМОТЕСТ · '+passed+'/'+results.length+'\n\n'+results.map(r=>(r.ok?'[OK] ':'[FAIL] ')+r.name+' — '+r.detail).join('\n')+'\n\nПроверка не отправляла запросы в интернет и не меняла сохранённые факты.';
  $('chatStatus').textContent=passed===results.length?'Локальный самотест пройден: '+passed+'/'+results.length+'. Онлайн-погода отдельно требует доступа к источнику.':'Самотест обнаружил ограничения: '+passed+'/'+results.length+' проверок пройдены.';
  $('systemState').textContent=passed===results.length?'ЛОКАЛЬНЫЕ ПРОВЕРКИ ПРОЙДЕНЫ':'ЕСТЬ НЕИСПРАВНОСТИ';
  return results;
