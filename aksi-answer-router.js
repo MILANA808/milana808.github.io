@@ -14,7 +14,7 @@
     return /\d/.test(expression) && /[+*/^()-]/.test(expression) ? expression : null;
   }
   function isExplicitSearch(query) {
-    return /^(?:найди|поищи|поиск|узнай|проверь в интернете|найди в интернете|последние новости|актуальные новости)\b/i.test(clean(query));
+    return /^(?:найди|поищи|поиск|узнай|проверь в интернете|найди в интернете|последние новости|актуальные новости)(?=\s|$)/i.test(clean(query));
   }
   function sourcesText(evidence, query) {
     if (!evidence.length) return "Я не нашла доступных источников по запросу «" + query + "». Попробуй переформулировать запрос или проверь подключение к интернету. Я не буду придумывать результат поиска.";
