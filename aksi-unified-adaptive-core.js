@@ -268,6 +268,22 @@
         return result;
       }
     }
+    // Bounded semantic inference runs before retrieval so known concept questions do not receive repeated template answers.
+    const semantic = root.AKSISemanticReasoning;
+    if (semantic && typeof semantic.answer === "function") {
+      const semanticResult = semantic.answer(query);
+      if (semanticResult && semanticResult.handled) {
+        recordTrace({ type: "semantic_reasoning", generator: "aksi-semantic-reasoning", status: semanticResult.status || "handled" });
+        return {
+          text: semanticResult.text,
+          source: "aksi-semantic-reasoning",
+          semantic: semanticResult,
+          reasoning: semanticResult.proof || [],
+          core: "AKSI Unified Adaptive Core " + VERSION,
+          integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-semantic-reasoning", inferenceStatus: semanticResult.status || "handled" }
+        };
+      }
+    }
     // Native offline generation is the primary path; WebLLM is deliberately not called.
     if (root.AKSI_DNA_TOPOLOGY && typeof root.AKSI_DNA_TOPOLOGY.generate === "function") {
       const native = root.AKSI_DNA_TOPOLOGY.generate(query, options);
