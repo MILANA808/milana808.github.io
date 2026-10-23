@@ -113,6 +113,21 @@
     if (at <= 0) return null;
     return { subject: term(normalizedBody.slice(0, at)), object: term(normalizedBody.slice(at + 1)) };
   }
+  function factQueryResult(subject, found, mode, label) {
+    if (!found.length) return {
+      handled: true, status: "no_facts",
+      text: "В локальной базе нет записей, позволяющих ответить про «" + subject + "» (" + label + "). Это не означает, что таких связей нет в реальности.",
+      proof: [{ type: "no_user_facts", subject, mode, factsChecked: facts.length }]
+    };
+    return {
+      handled: true, status: "facts_listed",
+      text: "По сохранённым пользовательским утверждениям, " + label + " для «" + subject + "»:\n" +
+        found.map(f => "• " + f.subject + " --" + f.predicate + "--> " + f.object).join("\n") +
+        "\nЭто записи локальной базы, а не независимая проверка фактов.",
+      facts: found.map(f => Object.assign({}, f)),
+      proof: found.map(f => ({ type: "user_asserted_fact", mode, fact: Object.assign({}, f) }))
+    };
+  }
   function answer(input) {
     const raw = clean(input);
     if (!raw) return null;
@@ -148,14 +163,47 @@
       };
       return null;
     }
-    m = raw.match(/^\s*(?:что ты знаешь о|покажи факты о|факты о)\s+(.+?)\s*[?!.]*\s*$/i);
+    m = raw.match(/^\s*(?:что у|что имеет|какие свойства у)\s+(.+?)(?:\s+есть)?\s*[?!.]*\s*$/i);
     if (m) {
       const subject = term(m[1]);
-      const found = facts.filter(f => term(f.subject) === subject);
+      const found = facts.filter(f => term(f.subject) === subject && ["has", "supports", "related-to"].includes(f.predicate));
+      return factQueryResult(subject, found, "outgoing", "свойства или исходящие связи");
+    }
+    m = raw.match(/^\s*(?:из чего состоит|что входит в)\s+(.+?)\s*[?!.]*\s*$/i);
+    if (m) {
+      const whole = term(m[1]);
+      const found = facts.filter(f =>
+        (term(f.subject) === whole && f.predicate === "has") ||
+        (term(f.object) === whole && f.predicate === "part-of")
+      );
+      return factQueryResult(whole, found, "parts", "состав или части");
+    }
+    m = raw.match(/^\s*(?:что вызывает|какова причина)\s+(.+?)\s*[?!.]*\s*$/i);
+    if (m) {
+      const effect = term(m[1]);
+      const found = facts.filter(f => f.predicate === "causes" && term(f.object) === effect);
+      return factQueryResult(effect, found, "incoming-causes", "причины");
+    }
+    m = raw.match(/^\s*(?:что связано с|связи для|связи о)\s+(.+?)\s*[?!.]*\s*$/i);
+    if (m) {
+      const subject = term(m[1]);
+      const found = facts.filter(f => term(f.subject) === subject || term(f.object) === subject);
+      return factQueryResult(subject, found, "incident", "связи");
+    }
+    m = raw.match(/^\s*(?:что противоречит|какие утверждения противоречат)\s+(.+?)\s*[?!.]*\s*$/i);
+    if (m) {
+      const subject = term(m[1]);
+      const found = facts.filter(f => f.predicate === "contradicts" && (term(f.subject) === subject || term(f.object) === subject));
+      return factQueryResult(subject, found, "contradictions", "противоречащие записи");
+    }
+    m = raw.match(/^\s*(?:что ты знаешь о|покажи факты о|факты о|что известно о)\s+(.+?)\s*[?!.]*\s*$/i);
+    if (m) {
+      const subject = term(m[1]);
+      const found = facts.filter(f => term(f.subject) === subject || term(f.object) === subject);
       if (!found.length) return { handled: true, status: "no_facts", text: "В локальной базе пока нет записей о «" + subject + "». Можешь добавить проверяемую связь, например: «запомни факт: " + subject + " --is-a--> понятие».", proof: [] };
       return {
         handled: true, status: "facts_listed",
-        text: "Записи о «" + subject + "» в локальной базе (источник — пользовательские утверждения):\n" +
+        text: "Записи, связанные с «" + subject + "», в локальной базе (источник — пользовательские утверждения):\n" +
           found.map(f => "• " + f.subject + " --" + f.predicate + "--> " + f.object).join("\n"),
         facts: found, proof: found.map(f => ({ type: "user_asserted_fact", fact: f }))
       };
