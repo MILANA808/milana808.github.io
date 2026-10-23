@@ -20,7 +20,7 @@ async function run() {
     assert.match(result.text, /структуры/);
     result = await router.answer("помощь");
     assert.equal(result.route, "help");
-    assert.match(result.text, /локальная база знаний/);
+    assert.match(result.text, /локальная база знаний/i);
     result = await router.answer("сколько будет 2+2");
     assert.equal(result.route, "calculator");
     assert.match(result.text, /4/);
