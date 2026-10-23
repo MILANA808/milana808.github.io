@@ -10,6 +10,7 @@ Scope: browser chat routing and failure behavior in the canonical GitHub Pages r
 - Exceptions thrown by a loaded browser-local language model are converted to a controlled model-error result. Technical stack details are not returned to chat.
 - The page references bumped weather/router asset versions and the Service Worker cache namespace is incremented to reduce stale-client behavior.
 - CI includes an end-to-end contract test that loads the real weather adapter and answer router together with a mocked HTTP boundary.
+- The semantic graph now covers additional computing/science concepts and recognizes several natural-language paraphrases; a 20-prompt benchmark measures both supported questions and deliberate abstention.
 
 ## Acceptance tests
 
@@ -29,7 +30,7 @@ Scope: browser chat routing and failure behavior in the canonical GitHub Pages r
 
 ## Next engineering gates
 
-1. Add a reproducible benchmark set of unseen Russian paraphrases across math, definitions, search, weather, memory, unknown questions and adversarially phrased prompts.
+1. Extend the initial semantic benchmark to unseen Russian paraphrases across search, weather, memory and adversarially phrased prompts.
 2. Add browser-level smoke tests for the public page, script load order, service-worker update and visible response rendering.
 3. Improve the knowledge base with conflict detection and provenance-aware rules; do not promote user-entered facts to verified facts.
 4. Define a stable tool-result schema (route, status, text, sources, proof, error code) and validate every route against it.
