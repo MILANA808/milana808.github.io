@@ -84,7 +84,10 @@
       const names = [];
       let source = "";
       let cursor = 0;
-      const token = /\\{([a-z][a-z0-9_]*)\\}/gi;
+      const token = /\{([a-z][a-z0-9_]*)\}/gi;
+      let match;
+      while ((match = token.exec(pattern))) {
+        source += pattern.slice(cursor, match.index).replace(/[.*+?^${}()|[\]\\]/g, "\\      const token = /\\{([a-z][a-z0-9_]*)\\}/gi;
       let match;
       while ((match = token.exec(pattern))) {
         source += pattern.slice(cursor, match.index).replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
@@ -93,7 +96,22 @@
         else { names.push(name); source += "(?<" + name + ">.+?)"; }
         cursor = match.index + match[0].length;
       }
-      source += pattern.slice(cursor).replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
+      source += pattern.slice(cursor).replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");");
+        const name = match[1].toLowerCase();
+        if (names.includes(name)) source += "\\k<" + name + ">";
+        else { names.push(name); source += "(?<" + name + ">.+?)"; }
+        cursor = match.index + match[0].length;
+      }
+      source += pattern.slice(cursor).replace(/[.*+?^${}()|[\]\\]/g, "\\      const token = /\\{([a-z][a-z0-9_]*)\\}/gi;
+      let match;
+      while ((match = token.exec(pattern))) {
+        source += pattern.slice(cursor, match.index).replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");
+        const name = match[1].toLowerCase();
+        if (names.includes(name)) source += "\\\\k<" + name + ">";
+        else { names.push(name); source += "(?<" + name + ">.+?)"; }
+        cursor = match.index + match[0].length;
+      }
+      source += pattern.slice(cursor).replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&");");
       if (!names.length) return statement === pattern ? {} : null;
       const found = statement.match(new RegExp("^" + source + "$", "u"));
       if (!found) return null;
@@ -102,7 +120,7 @@
       return bindings;
     }
     function instantiate(pattern, bindings) {
-      return pattern.replace(/\\{([a-z][a-z0-9_]*)\\}/gi, (_, name) => bindings[name.toLowerCase()] || "");
+      return pattern.replace(/\{([a-z][a-z0-9_]*)\}/gi, (_, name) => bindings[name.toLowerCase()] || "");
     }
     while (changed && rounds < maxRounds) {
       changed = false;
