@@ -81,7 +81,7 @@
     if (m) {
       const a = resolve(m[1]), b = resolve(m[2]);
       if (!a || !b) return { handled: true, status: "unknown_concept", text: "Для сравнения нужны определения обоих понятий. Сейчас я не могу надёжно разобрать: «" + (!a ? m[1].trim() : m[2].trim()) + "».", proof: [] };
-      const ca = concepts[a], cb = concepts[b];
+      const ca = concepts[a] || { definition: parentDefinitions[a], features: [], parents: [], kind: "категория" }, cb = concepts[b] || { definition: parentDefinitions[b], features: [], parents: [], kind: "категория" };
       const shared = ca.features.filter(x => cb.features.includes(x));
       const onlyA = ca.features.filter(x => !cb.features.includes(x));
       const onlyB = cb.features.filter(x => !ca.features.includes(x));
@@ -93,7 +93,7 @@
     if (m) {
       const child = resolve(m[1]), parent = resolve(m[2]);
       if (!child || !parent) return { handled: true, status: "unknown_relation", text: "Я не могу подтвердить или опровергнуть эту связь по текущей базе. Неизвестная связь не равна ложной.", proof: [] };
-      const c = concepts[child];
+      const c = concepts[child] || { parents: [] };
       const known = ancestors(child).has(parent) || (c.parents || []).includes(parent);
       return { handled: true, status: known ? "entailed" : "not_established", text: known ? "Да, по графу понятий «" + child + "» относится к «" + parent + "». Цепочка оснований: " + Array.from(ancestors(child)).join(" → ") + "." : "В текущем графе нет пути, подтверждающего, что «" + child + "» относится к «" + parent + "». Это означает «не установлено», а не автоматически «ложно».", proof: [{ type: known ? "graph_path" : "no_graph_path", subject: child, object: parent, path: Array.from(ancestors(child)) }] };
     }
