@@ -7,7 +7,7 @@
     .trim();
   const norm = value => clean(value).toLocaleLowerCase("ru").replace(/[ё]/g, "е").replace(/[—–]/g, "-").replace(/[?!.,:;«»"'()]/g, " ").replace(/\s+/g, " ").trim();
   function mathExpression(query) {
-    const q = clean(query);
+    const q = clean(query).replace(/[?=]+\s*$/, "").trim();
     const match = q.match(/^(?:(?:сколько\s+(?:будет|получится)|посчитай|вычисли|реши|calculate)\s*[:：]?\s*)?([\d\s().,+\-*/^eE]+)$/i);
     if (!match) return null;
     const expression = (match[1] || match[0]).trim().replace(/,/g, ".");
@@ -33,7 +33,7 @@
     const weather = root.AKSIWeather;
     if (weather && typeof weather.detect === "function" && weather.detect(raw)) {
       const result = await weather.answer(raw);
-      return Object.assign({ version: VERSION, route: "weather", handled: true }, result);
+      return Object.assign({ version: VERSION, route: "weather", handled: true }, result, { statusText: result && result.error ? "Не удалось получить актуальную погоду из онлайн-источника." : "Погодные данные получены онлайн из Open-Meteo." });
     }
     if (/^(?:логика|выведи)\s*[:：]/i.test(q)) {
       const symbolic = root.AKSISymbolicInference;
@@ -45,7 +45,7 @@
     const semantic = root.AKSISemanticReasoning;
     if (semantic && typeof semantic.answer === "function") {
       const result = semantic.answer(q);
-      if (result && result.handled) return {
+      if (result && result.handled && !["unknown_concept", "unknown_relation"].includes(result.status)) return {
         handled: true, version: VERSION, route: "semantic-reasoning",
         statusText: "Ответ по локальному графу понятий; основания указаны в тексте.",
         text: result.text, proof: result.proof || [], semantic: result
@@ -80,7 +80,7 @@
         searchError = "Модуль веб-поиска не загружен.";
       } else {
         try {
-          const searchQuery = explicitSearch ? q.replace(/^(?:найди|поищи|поиск|узнай|проверь в интернете|найди в интернете)\s*/i, "") : q;
+          const searchQuery = explicitSearch ? q.replace(/^(?:проверь в интернете|найди в интернете|поищи в интернете|последние новости|актуальные новости|найди|поищи|поиск|узнай)\s*/i, "") : q;
           const pack = await webApi.gather(searchQuery, { mode: explicitSearch ? "full" : "lite" });
           evidence = Array.isArray(pack && pack.evidence) ? pack.evidence.slice(0, 6) : [];
           if (pack && Array.isArray(pack.errors) && pack.errors.length && !evidence.length) searchError = pack.errors.join("; ");
