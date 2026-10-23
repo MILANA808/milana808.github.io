@@ -6,7 +6,7 @@ const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 
 const weatherTag = '<script src="/aksi-weather.js?v=2"></script>';
-const routerTag = '<script src="/aksi-answer-router.js?v=3"></script>';
+const routerTag = '<script src="/aksi-answer-router.js?v=4"></script>';
 const semanticTag = '<script src="/aksi-semantic-reasoning.js?v=2"></script>';
 const knowledgeTag = '<script src="/aksi-knowledge-base.js?v=2"></script>';
 assert.ok(html.includes(weatherTag), "weather adapter cache version must be refreshed");
