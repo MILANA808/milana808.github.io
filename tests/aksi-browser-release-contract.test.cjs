@@ -1,9 +1,11 @@
 const assert = require("node:assert/strict");
+const vm = require("node:vm");
 const fs = require("node:fs");
 const path = require("node:path");
 const root = path.join(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+const inlineScript = html.match(/<script>\s*([\s\S]*?async function ask\(q\)[\s\S]*?)<\/script>/);
 
 const weatherTag = '<script src="/aksi-weather.js?v=2"></script>';
 const routerTag = '<script src="/aksi-answer-router.js?v=4"></script>';
@@ -23,6 +25,8 @@ assert.ok(sw.includes("/aksi-.*\\.js$/"), "JavaScript assets must use network-fi
 const askStart = html.indexOf("async function ask(q)");
 const askEnd = html.indexOf("async function diagnostics()", askStart);
 assert.ok(askStart >= 0 && askEnd > askStart, "chat and diagnostics functions must be present");
+assert.ok(inlineScript, "main inline application script must be present");
+assert.doesNotThrow(() => new vm.Script(inlineScript[1], { filename: "index-inline.js" }), "inline application script must parse without syntax errors");
 const ask = html.slice(askStart, askEnd);
 assert.ok(ask.indexOf("answerRouter.answer(q") < ask.indexOf("AKSI_DNA_TOPOLOGY.generate"), "explicit answer router must run before fallback generator");
 assert.match(ask, /if\(routed&&routed\.handled\)/, "handled answers must return early without diagnostic fallback");
@@ -30,4 +34,11 @@ assert.match(html, /check\('Answer router'/, "diagnostics must expose answer rou
 assert.match(html, /check\('Semantic reasoning'/, "diagnostics must expose semantic engine availability");
 assert.match(html, /check\('Weather command'/, "diagnostics must verify weather command parsing");
 assert.match(html, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
+assert.ok(html.includes('id="runAnswerSelfTest"'), "UI must expose the local answer self-test");
+assert.match(html, /async function runAnswerSelfTest\(\)/, "local answer self-test must be implemented");
+const selfTestStart = html.indexOf("async function runAnswerSelfTest()");
+const selfTestEnd = html.indexOf("$('runAnswerSelfTest').addEventListener", selfTestStart);
+const selfTest = html.slice(selfTestStart, selfTestEnd);
+assert.ok(selfTestEnd > selfTestStart, "self-test function must have a clear boundary");
+assert.ok(!selfTest.includes("fetch(") && !selfTest.includes("weather.answer("), "self-test must not make network calls");
 console.log("AKSI browser release contract: OK");
