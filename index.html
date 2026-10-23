@@ -189,6 +189,7 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
 <script src="/aksi-dna-topology-engine.js?v=1"></script>
 <script src="/aksi-internet.js"></script>
 <script src="/aksi-weather.js?v=1"></script>
+<script src="/aksi-answer-router.js?v=2"></script>
 <script src="/aksi-cognitive-core.js"></script>
 <script src="/aksi-wave-bayesian-engine.js"></script>
 <script src="/aksi-geometric-knowledge-core.js"></script>
@@ -244,7 +245,32 @@ async function backend(path,opts={}){throw Error('Автономный режи�
 async function ask(q){const n=normalize(q);if(!n)return;let m=q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){const k=m[1].trim(),v=m[2].trim();state.memory[k]=v;const saved=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.remember?window.AKSI_UNIFIED_CORE.remember(k,v):{ok:false};persist();render();event('MEMORY','Saved through unified core: '+k);return saved.ok?'Сохранила в единую локальную память: '+k+' = '+v:'Запись сохранена в памяти интерфейса, но ядро не подтвердило сохранение.';}
 if(/^(память|покажи память|что ты помнишь)$/.test(n)){const notes=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.listNotes?window.AKSI_UNIFIED_CORE.listNotes():[];const merged=Object.assign({},state.memory);notes.forEach(x=>{merged[x.key]=x.value;});const keys=Object.keys(merged);return keys.length?keys.map(k=>k+' = '+merged[k]).join('\n'):'Локальная память пока пуста.';}
 if(n==='статус системы'||n==='диагностика') {await diagnostics();return $('diagOutput').textContent;}
-const weatherApi=window.AKSIWeather;if(weatherApi&&typeof weatherApi.answer==="function"){const weatherResult=await weatherApi.answer(q);if(weatherResult&&weatherResult.handled){$("chatStatus").textContent=weatherResult.error?"Погода: источник недоступен или вернул ошибку.":"Погода получена онлайн из Open-Meteo.";if(weatherResult.data){$("aksiEvidence").style.display="block";$("aksiEvidence").textContent="ИСТОЧНИК ПОГОДЫ: Open-Meteo\n"+weatherResult.data.city+" · "+weatherResult.data.time+" · "+weatherResult.data.timezone;}return weatherResult.text;}}
+const answerRouter=window.AKSIAnswerRouter;
+if(answerRouter&&typeof answerRouter.answer==="function"){
+ const rememberTurns=$("aksiRememberTurns").checked;
+ const routeHistory=rememberTurns?(state.history||[]).slice(-10).map(x=>({role:x.role==="assistant"?"assistant":"user",content:String(x.content||"").slice(0,1200)})):[];
+ const routeNotes=rememberTurns?Object.keys(state.memory||{}).map(k=>k+" = "+state.memory[k]).join("\n"):"";
+ const routeSystem=routeNotes?"Заметки пользователя (контекст, не гарантированно проверенные факты):\n"+routeNotes:"";
+ try{
+  const routed=await answerRouter.answer(q,{useWeb:$("aksiUseWeb").checked,history:routeHistory,system:routeSystem});
+  if(routed&&routed.handled){
+   $("chatStatus").textContent=routed.statusText||("AKSI Answer Router · "+(routed.route||"обработано"));
+   if(Array.isArray(routed.evidence)&&routed.evidence.length){
+    $("aksiEvidence").style.display="block";
+    $("aksiEvidence").textContent="МАТЕРИАЛЫ ИСТОЧНИКОВ (не автоматически проверенные факты):\n"+routed.evidence.map((x,i)=>"["+(i+1)+"] "+(x.title||"Источник")+" — "+(x.url||"")+"\n"+String(x.text||x.snippet||"").slice(0,280)).join("\n\n");
+   }else if(routed.data&&routed.route==="weather"){
+    $("aksiEvidence").style.display="block";
+    $("aksiEvidence").textContent="ИСТОЧНИК ПОГОДЫ: Open-Meteo\n"+routed.data.city+" · "+routed.data.time+" · "+routed.data.timezone;
+   }else{$("aksiEvidence").style.display="none";}
+   return String(routed.text||"Ответ не сформирован.");
+  }
+ }catch(routeError){
+  const message=String(routeError&&routeError.message||routeError);
+  event("ANSWER_ROUTER_ERROR",message.slice(0,240));
+  $("chatStatus").textContent="Обработчик ответа завершился с ошибкой.";
+  return "Не удалось обработать запрос: "+message+". Проверь соединение или повтори попытку.";
+ }
+}
 // The unified core owns opt-in source retrieval; the UI only renders returned sources.
 let evidence=[];
 const useWeb=$('aksiUseWeb').checked;
