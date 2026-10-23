@@ -5,7 +5,7 @@ const path = require("node:path");
 const root = path.join(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
-const inlineScript = html.match(/<script>\\s*([\\s\\S]*?async function ask\\(q\\)[\\s\\S]*?)<\\/script>/);
+const inlineScript = html.match(/<script>\s*([\s\S]*?async function ask\(q\)[\s\S]*?)<\/script>/);
 
 const weatherTag = '<script src="/aksi-weather.js?v=2"></script>';
 const routerTag = '<script src="/aksi-answer-router.js?v=4"></script>';
