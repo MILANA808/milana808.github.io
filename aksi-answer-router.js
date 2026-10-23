@@ -8,7 +8,7 @@
   const norm = value => clean(value).toLocaleLowerCase("ru").replace(/[ё]/g, "е").replace(/[—–]/g, "-").replace(/[?!.,:;«»"'()]/g, " ").replace(/\s+/g, " ").trim();
   function mathExpression(query) {
     const q = clean(query).replace(/[?=]+\s*$/, "").trim();
-    const match = q.match(/^(?:(?:сколько\s+(?:будет|получится)|посчитай|вычисли|реши|calculate)\s*[:：]?\s*)?([\d\s().,+\-*/^eE]+)$/i);
+    const match = q.match(/^(?:(?:сколько\s+(?:будет|получится)|посчитай|вычисли|реши|calculate)\s*[:：]?\s*)?([a-zA-Z\d\s().,+\-*/^]+)$/i);
     if (!match) return null;
     const expression = (match[1] || match[0]).trim().replace(/,/g, ".");
     return /\d/.test(expression) && /[+*/^()-]/.test(expression) ? expression : null;
