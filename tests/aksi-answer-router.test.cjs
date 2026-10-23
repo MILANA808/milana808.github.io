@@ -21,6 +21,9 @@ async function run() {
     result = await router.answer("сколько будет 2+2");
     assert.equal(result.route, "calculator");
     assert.match(result.text, /4/);
+    result = await router.answer("сколько будет 2+2?");
+    assert.equal(result.route, "calculator");
+    assert.match(result.text, /4/);
     result = await router.answer("Команда - найди в интернете причины приливов");
     assert.equal(router.isExplicitSearch("Команда - найди в интернете причины приливов"), true);
     assert.equal(result.route, "web-evidence");
@@ -34,6 +37,10 @@ async function run() {
     result = await router.answer("объясни причины приливов", { useWeb: true });
     assert.equal(result.route, "webllm+evidence");
     assert.match(result.text, /Источники для проверки/);
+    root.AKSISemanticReasoning = { answer: q => /^что такое флуксометр/i.test(q) ? { handled: true, status: "unknown_concept", text: "unknown concept" } : null };
+    result = await router.answer("Что такое флуксометр?");
+    assert.equal(result.route, "webllm");
+    assert.match(result.text, /Сводка по источнику/);
     root.AKSI_WEBLLM = null;
     result = await router.answer("почему небо голубое?");
     assert.equal(result.route, "honest-abstention");
