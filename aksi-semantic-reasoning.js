@@ -36,6 +36,8 @@
   };
   const aliasToId = new Map();
   Object.keys(concepts).forEach(id => concepts[id].aliases.forEach(a => aliasToId.set(norm(a), id)));
+  Object.keys(parentDefinitions).forEach(id => aliasToId.set(norm(id), id));
+  [["наукой","наука"],["науки","наука"],["математикой","математика"],["геометрии","геометрия"],["логики","логика"],["числа","число"],["алгоритма","алгоритм"],["доказательства","доказательство"],["гипотезы","гипотеза"],["факта","факт"],["вероятности","вероятность"],["компьютера","компьютер"],["языковой модели","языковая модель"],["искусственного интеллекта","искусственный интеллект"]].forEach(([a,id]) => aliasToId.set(norm(a), id));
   function norm(value) {
     return String(value == null ? "" : value).toLocaleLowerCase("ru")
       .replace(/[ё]/g, "е").replace(/[—–]/g, "-")
