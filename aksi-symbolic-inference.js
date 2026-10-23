@@ -1,6 +1,6 @@
 /*!
  * AKSI Symbolic Inference v1.0.0
- * Small forward-chaining reasoner with explicitly declared concept aliases.
+ * Small forward-chaining reasoner with explicit aliases, relations, and single-premise variables.
  * It is not a general natural-language reasoner or a truth oracle.
  */
 (function (root) {
@@ -80,14 +80,46 @@
     const maxRounds = parsed.rules.length + 1;
     let changed = true;
     let rounds = 0;
+    function escapeRegex(value) {
+      return Array.from(value).map(ch => "\\.^$|?*+()[]{}".includes(ch) ? "\\" + ch : ch).join("");
+    }
+    function matchPattern(pattern, statement) {
+      const names = [];
+      let source = "";
+      let cursor = 0;
+      const token = new RegExp("\\{([a-z][a-z0-9_]*)\\}", "gi");
+      let match;
+      while ((match = token.exec(pattern))) {
+        source += escapeRegex(pattern.slice(cursor, match.index));
+        const name = match[1].toLowerCase();
+        if (names.includes(name)) source += "\\k<" + name + ">";
+        else { names.push(name); source += "(?<" + name + ">.+?)"; }
+        cursor = match.index + match[0].length;
+      }
+      source += escapeRegex(pattern.slice(cursor));
+      if (!names.length) return statement === pattern ? {} : null;
+      const found = statement.match(new RegExp("^" + source + "$", "u"));
+      if (!found) return null;
+      const bindings = {};
+      for (const name of names) bindings[name] = found.groups[name];
+      return bindings;
+    }
+    function instantiate(pattern, bindings) {
+      return pattern.replace(new RegExp("\\{([a-z][a-z0-9_]*)\\}", "gi"), (_, name) => bindings[name.toLowerCase()] || "");
+    }
     while (changed && rounds < maxRounds) {
       changed = false;
       rounds++;
       for (const rule of parsed.rules) {
-        if (known.has(rule.antecedent) && !known.has(rule.consequent)) {
-          known.add(rule.consequent);
-          proof.set(rule.consequent, (proof.get(rule.antecedent) || []).concat([{
-            type: "rule", statement: rule.text, from: rule.antecedent, to: rule.consequent
+        const candidates = Array.from(known);
+        for (const statement of candidates) {
+          const bindings = matchPattern(rule.antecedent, statement);
+          if (bindings === null) continue;
+          const conclusion = instantiate(rule.consequent, bindings);
+          if (!conclusion || known.has(conclusion)) continue;
+          known.add(conclusion);
+          proof.set(conclusion, (proof.get(statement) || [{ type: "fact", statement }]).concat([{
+            type: "rule", statement: rule.text, from: statement, to: conclusion, bindings
           }]));
           changed = true;
         }
