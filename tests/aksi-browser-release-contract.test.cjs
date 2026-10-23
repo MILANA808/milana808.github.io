@@ -26,5 +26,5 @@ assert.match(ask, /if\(routed&&routed\.handled\)/, "handled answers must return 
 assert.match(ask, /check\('Answer router'/, "diagnostics must expose answer router availability");
 assert.match(ask, /check\('Semantic reasoning'/, "diagnostics must expose semantic engine availability");
 assert.match(ask, /check\('Weather command'/, "diagnostics must verify weather command parsing");
-assert.match(ask, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
+assert.match(html, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
 console.log("AKSI browser release contract: OK");
