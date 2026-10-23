@@ -63,7 +63,7 @@
     return seen;
   }
   function conceptInfo(id) {
-    const c = concepts[id];
+      const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
     if (!c) return null;
     return { id, kind: c.kind, definition: c.definition, parents: c.parents.slice(), features: c.features.slice() };
   }
@@ -74,7 +74,7 @@
     if (m) {
       const id = resolve(m[1]);
       if (!id) return { handled: true, status: "unknown_concept", text: "Я пока не знаю достаточно об этом понятии, чтобы дать обоснованное определение: «" + m[1].trim() + "». Добавь определение или связанные факты в базу знаний — я не буду заменять пробел догадкой.", proof: [], concept: null };
-      const c = concepts[id];
+      const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
       return { handled: true, status: "defined", text: c.definition + "\n\nТип: " + c.kind + ".\nСвязи: " + c.parents.join(", ") + ".\nПризнаки: " + c.features.join("; ") + ".", proof: [{ type: "definition_lookup", concept: id, source: "AKSI built-in concept graph v1.0.0" }], concept: conceptInfo(id) };
     }
     m = raw.match(/^\s*(?:чем отличается|в чем разница между|сравни)\s+(.+?)\s+и\s+(.+?)\s*[?!.]*\s*$/i);
@@ -89,6 +89,7 @@
     }
     m = raw.match(/^\s*(?:является ли|это ли|относится ли)\s+(.+?)\s+(?:видом|типом|разновидностью|частью|разделом|примером)\s+(?:понятия\s+)?(.+?)\s*[?!.]*\s*$/i);
     if (!m) m = raw.match(/^\s*(?:является ли|верно ли что)\s+(.+?)\s+(?:это|есть|является)\s+(.+?)\s*[?!.]*\s*$/i);
+    if (!m) m = raw.match(/^\s*является ли\s+(.+?)\s+(.+?)\s*[?!.]*\s*$/i);
     if (m) {
       const child = resolve(m[1]), parent = resolve(m[2]);
       if (!child || !parent) return { handled: true, status: "unknown_relation", text: "Я не могу подтвердить или опровергнуть эту связь по текущей базе. Неизвестная связь не равна ложной.", proof: [] };
