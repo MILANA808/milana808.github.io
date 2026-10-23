@@ -29,13 +29,22 @@
   async function getWeather(city, fetchImpl) {
     const fetcher = fetchImpl || root.fetch;
     if (typeof fetcher !== "function") throw new Error("fetch_unavailable");
-    const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(city) + "&count=10&language=ru&format=json";
-    const geoResponse = await fetcher(geoUrl);
-    if (!geoResponse.ok) throw new Error("geocoding_http_" + geoResponse.status);
-    const geo = await geoResponse.json();
-    const places = Array.isArray(geo.results) ? geo.results : [];
-    const place = places.find(p => String(p.name || "").toLocaleLowerCase("ru") === city.toLocaleLowerCase("ru") && /russia/i.test(String(p.country_code || "")))
-      || places.find(p => /russia/i.test(String(p.country_code || "")))
+    const variants = [city];
+    // Commands naturally use the prepositional case ("в Анапе", "в Москве").
+    if (/е$/i.test(city)) variants.push(city.slice(0, -1) + "а", city.slice(0, -1) + "я");
+    if (/и$/i.test(city)) variants.push(city.slice(0, -1) + "я");
+    let places = [];
+    for (const candidate of Array.from(new Set(variants))) {
+      const geoUrl = "https://geocoding-api.open-meteo.com/v1/search?name=" + encodeURIComponent(candidate) + "&count=10&language=ru&format=json";
+      const geoResponse = await fetcher(geoUrl);
+      if (!geoResponse.ok) throw new Error("geocoding_http_" + geoResponse.status);
+      const geo = await geoResponse.json();
+      places = Array.isArray(geo.results) ? geo.results : [];
+      if (places.length) break;
+    }
+    const isRussia = p => String(p.country_code || "").toUpperCase() === "RU" || /russia|россия/i.test(String(p.country || ""));
+    const place = places.find(p => String(p.name || "").toLocaleLowerCase("ru") === city.toLocaleLowerCase("ru") && isRussia(p))
+      || places.find(isRussia)
       || places[0];
     if (!place || !Number.isFinite(Number(place.latitude)) || !Number.isFinite(Number(place.longitude))) {
       throw new Error("city_not_found");
