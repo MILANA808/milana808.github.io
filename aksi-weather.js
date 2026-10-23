@@ -10,7 +10,7 @@
   function detect(input) {
     const text = cleanCommand(input);
     if (!/(?:погод|температур|прогноз|осадк|ветер|weather|forecast)/i.test(text)) return null;
-    const m = text.match(/\b(?:в|во|для|in|for)\s+([а-яёa-z][а-яёa-z\s.-]{1,60}?)(?=\s+(?:сейчас|сегодня|завтра|на\s|пожалуйста)|[?!.,;:]|$)/i);
+    const m = text.match(/(?:^|\s)(?:в|во|для|in|for)\s+([а-яёa-z][а-яёa-z\s.-]{1,60}?)(?=\s+(?:сейчас|сегодня|завтра|на\s|пожалуйста)|[?!.,;:]|$)/i);
     if (!m) return { handled: true, city: null, error: "city_missing" };
     const city = m[1].trim().replace(/\s+/g, " ").replace(/[.]+$/, "");
     return city ? { handled: true, city } : { handled: true, city: null, error: "city_missing" };
