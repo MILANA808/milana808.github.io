@@ -30,4 +30,11 @@ assert.match(html, /check\('Answer router'/, "diagnostics must expose answer rou
 assert.match(html, /check\('Semantic reasoning'/, "diagnostics must expose semantic engine availability");
 assert.match(html, /check\('Weather command'/, "diagnostics must verify weather command parsing");
 assert.match(html, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
+assert.ok(html.includes('id="runAnswerSelfTest"'), "UI must expose the local answer self-test");
+assert.match(html, /async function runAnswerSelfTest\(\)/, "local answer self-test must be implemented");
+const selfTestStart = html.indexOf("async function runAnswerSelfTest()");
+const selfTestEnd = html.indexOf("$('runAnswerSelfTest').addEventListener", selfTestStart);
+const selfTest = html.slice(selfTestStart, selfTestEnd);
+assert.ok(selfTestEnd > selfTestStart, "self-test function must have a clear boundary");
+assert.ok(!selfTest.includes("fetch(") && !selfTest.includes("weather.answer("), "self-test must not make network calls");
 console.log("AKSI browser release contract: OK");
