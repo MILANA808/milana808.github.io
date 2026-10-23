@@ -1,0 +1,30 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const root = path.join(__dirname, "..");
+const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
+const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+
+const weatherTag = '<script src="/aksi-weather.js?v=2"></script>';
+const routerTag = '<script src="/aksi-answer-router.js?v=3"></script>';
+const semanticTag = '<script src="/aksi-semantic-reasoning.js?v=2"></script>';
+assert.ok(html.includes(weatherTag), "weather adapter cache version must be refreshed");
+assert.ok(html.includes(routerTag), "answer router cache version must be refreshed");
+assert.ok(html.includes(semanticTag), "semantic engine cache version must be refreshed");
+assert.ok(html.indexOf(weatherTag) < html.indexOf(routerTag), "weather adapter must load before router");
+assert.ok(html.indexOf(routerTag) < html.indexOf("async function ask(q)"), "router must load before chat handler");
+assert.ok(html.indexOf(semanticTag) < html.indexOf("async function ask(q)"), "semantic engine must load before chat handler");
+assert.match(sw, /var CACHE = "aksi-shell-v306"/, "service worker cache must invalidate older shell");
+assert.ok(sw.includes("/aksi-.*\\.js$/"), "JavaScript assets must use network-first strategy");
+
+const askStart = html.indexOf("async function ask(q)");
+const askEnd = html.indexOf("async function diagnostics()", askStart);
+assert.ok(askStart >= 0 && askEnd > askStart, "chat and diagnostics functions must be present");
+const ask = html.slice(askStart, askEnd);
+assert.ok(ask.indexOf("answerRouter.answer(q") < ask.indexOf("AKSI_DNA_TOPOLOGY.generate"), "explicit answer router must run before fallback generator");
+assert.match(ask, /if\(routed&&routed\.handled\)/, "handled answers must return early without diagnostic fallback");
+assert.match(html, /check\('Answer router'/, "diagnostics must expose answer router availability");
+assert.match(html, /check\('Semantic reasoning'/, "diagnostics must expose semantic engine availability");
+assert.match(html, /check\('Weather command'/, "diagnostics must verify weather command parsing");
+assert.match(html, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
+console.log("AKSI browser release contract: OK");

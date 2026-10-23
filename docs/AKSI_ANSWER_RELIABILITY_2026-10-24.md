@@ -11,6 +11,7 @@ Scope: browser chat routing and failure behavior in the canonical GitHub Pages r
 - The page references bumped weather/router asset versions and the Service Worker cache namespace is incremented to reduce stale-client behavior.
 - CI includes an end-to-end contract test that loads the real weather adapter and answer router together with a mocked HTTP boundary.
 - The semantic graph now covers additional computing/science concepts and recognizes several natural-language paraphrases; a 20-prompt benchmark measures both supported questions and deliberate abstention.
+- The on-page diagnostics now show whether the answer router, semantic graph and weather command parser are actually loaded, and clearly mark the deliberately disabled backend and unloaded local model as limitations.
 
 ## Acceptance tests
 
