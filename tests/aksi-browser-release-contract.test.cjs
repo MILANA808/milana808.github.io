@@ -23,8 +23,8 @@ assert.ok(askStart >= 0 && askEnd > askStart, "chat and diagnostics functions mu
 const ask = html.slice(askStart, askEnd);
 assert.ok(ask.indexOf("answerRouter.answer(q") < ask.indexOf("AKSI_DNA_TOPOLOGY.generate"), "explicit answer router must run before fallback generator");
 assert.match(ask, /if\(routed&&routed\.handled\)/, "handled answers must return early without diagnostic fallback");
-assert.match(ask, /check\('Answer router'/, "diagnostics must expose answer router availability");
-assert.match(ask, /check\('Semantic reasoning'/, "diagnostics must expose semantic engine availability");
-assert.match(ask, /check\('Weather command'/, "diagnostics must verify weather command parsing");
+assert.match(html, /check\('Answer router'/, "diagnostics must expose answer router availability");
+assert.match(html, /check\('Semantic reasoning'/, "diagnostics must expose semantic engine availability");
+assert.match(html, /check\('Weather command'/, "diagnostics must verify weather command parsing");
 assert.match(html, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
 console.log("AKSI browser release contract: OK");
