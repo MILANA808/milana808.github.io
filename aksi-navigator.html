@@ -8,79 +8,121 @@
 <title>АКСИ · Навигатор</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-:root{--bg:#03060c;--panel:rgba(10,14,22,.96);--line:#1e2a3c;--txt:#f2f6fc;--muted:#8a9bb0;--acc:#2ee6a8;--cam:#ff3b5c;--fuel:#ffc933;--dps:#4d9fff}
+:root{--bg:#03060c;--panel:rgba(10,14,22,.96);--line:#1e2a3c;--txt:#f2f6fc;--muted:#8a9bb0;--acc:#2ee6a8}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
-#app{position:relative;height:100%;height:100dvh;width:100%}#map{position:absolute;inset:0;z-index:0}
-#setup{position:absolute;left:0;right:0;bottom:0;z-index:20;background:var(--panel);border-top:1px solid var(--line);padding:14px 14px calc(14px + env(safe-area-inset-bottom,0));backdrop-filter:blur(18px);max-height:55vh;overflow:auto}#setup.hide{display:none}
-#setup h1{font-size:15px;font-weight:800;margin-bottom:10px}.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-input{flex:1;min-width:120px;min-height:48px;border-radius:14px;border:1px solid var(--line);background:#0c121c;color:var(--txt);padding:12px 14px;font:inherit;font-size:16px}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;height:100dvh}#map{position:absolute;inset:0}
+#setup{position:absolute;left:0;right:0;bottom:0;z-index:20;background:var(--panel);border-top:1px solid var(--line);padding:14px 14px calc(14px + env(safe-area-inset-bottom,0));backdrop-filter:blur(16px)}#setup.hide{display:none}
+h1{font-size:15px;font-weight:800;margin-bottom:10px}.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+input{flex:1;min-height:48px;border-radius:14px;border:1px solid var(--line);background:#0c121c;color:var(--txt);padding:12px 14px;font:inherit;font-size:16px}
 button{min-height:48px;border-radius:14px;border:1px solid var(--line);background:#0c121c;color:var(--txt);font:inherit;font-size:14px;font-weight:800;padding:0 14px;cursor:pointer}
-button.go{flex:1;background:#0f2f26;border-color:var(--acc);color:var(--acc);font-size:17px}button.sec{flex:1}button:disabled{opacity:.35}
-.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}#statusLine{font-size:11px;color:var(--muted);margin-top:8px}#statusLine b{color:var(--txt)}
+button.go{flex:1;background:#0f2f26;border-color:var(--acc);color:var(--acc);font-size:17px}button:disabled{opacity:.4}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}#st{font-size:11px;color:var(--muted);margin-top:8px}#st b{color:var(--txt)}
 #nav{position:absolute;inset:0;z-index:30;pointer-events:none;display:none}#nav.on{display:block}
-#navTop{position:absolute;left:0;right:0;top:0;padding:calc(8px + env(safe-area-inset-top,0)) 10px 8px;background:linear-gradient(to bottom,rgba(3,6,12,.95),rgba(3,6,12,.4),transparent)}
-#navCard{display:flex;gap:12px;align-items:center;background:rgba(10,14,22,.94);border:1px solid var(--line);border-radius:20px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 12px 36px rgba(0,0,0,.5)}
-#arrowBox{flex-shrink:0;width:68px;height:68px;border-radius:16px;background:#0c1820;border:1px solid #1e3a30;display:flex;align-items:center;justify-content:center}#arrowSvg{width:52px;height:52px}
-#nextMini{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:#0a1018;border:1px solid #243040;display:flex;align-items:center;justify-content:center;opacity:.85}#nextMini svg{width:32px;height:32px}
-#navText{flex:1;min-width:0}#navDist{font-size:26px;font-weight:900;color:var(--acc)}#navTurn{font-size:18px;font-weight:850;line-height:1.2;margin-top:2px}#navMeta{font-size:12px;color:var(--muted);margin-top:3px}
-#navBar{height:4px;background:#1a2433;border-radius:4px;margin-top:8px;overflow:hidden}#navBar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--acc),#9effd8);transition:width .3s}
-#warn{position:absolute;left:10px;right:10px;bottom:calc(100px + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:6px}
-.warn{display:none;border-radius:14px;padding:12px 14px;font-weight:850;font-size:15px;box-shadow:0 10px 28px rgba(0,0,0,.45)}.warn.on{display:block}
-.warn.cam{background:rgba(255,59,92,.94);color:#fff;animation:pulse 1.15s ease-in-out infinite}.warn.fuel{background:rgba(255,201,51,.94);color:#1a1200}.warn.dps{background:rgba(77,159,255,.94);color:#fff}
-.warn .sub{font-size:12px;font-weight:650;opacity:.9;margin-top:3px}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
-#navBottom{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0));background:linear-gradient(to top,rgba(3,6,12,.97),rgba(3,6,12,.4),transparent);pointer-events:none}
-#navStats{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-#navStats .pill{background:rgba(10,14,22,.92);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:11px;font-weight:750}
-#navStats .pill b{display:block;font-size:15px;font-weight:900;margin-top:1px}
-#navStats button{pointer-events:auto;min-height:44px;border-radius:12px;font-size:13px;padding:0 12px}
-#btnStopNav{border-color:#3a2030;background:rgba(40,12,18,.95);color:#ff8fa3}#btnOverview{border-color:#1e3a30;background:rgba(12,30,24,.95);color:var(--acc)}#btnShareLive{border-color:#1e2a40;background:rgba(12,20,40,.95);color:#9ec9ff}
-#boot{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#03060c;transition:opacity .4s}#boot.hide{opacity:0;pointer-events:none}#boot .t{font-size:16px;font-weight:700;color:var(--muted)}
-#toast{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:60;display:none;background:rgba(10,14,22,.96);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:13px;font-weight:700;max-width:90%;text-align:center}#toast.on{display:block}
-#viewerBadge{position:absolute;left:10px;top:calc(10px + env(safe-area-inset-top,0));z-index:25;display:none;background:rgba(77,159,255,.2);border:1px solid #4d9fff;color:#b6d4ff;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800}#viewerBadge.on{display:block}
-#offlinePill{position:absolute;right:10px;top:calc(10px + env(safe-area-inset-top,0));z-index:25;display:none;background:rgba(245,197,66,.15);border:1px solid #f5c542;color:#ffe6a0;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800}#offlinePill.on{display:block}
+#top{position:absolute;left:0;right:0;top:0;padding:calc(8px + env(safe-area-inset-top,0)) 10px 8px;background:linear-gradient(to bottom,rgba(3,6,12,.95),transparent)}
+#card{display:flex;gap:10px;align-items:center;background:rgba(10,14,22,.94);border:1px solid var(--line);border-radius:18px;padding:10px 12px}
+#ab{width:64px;height:64px;border-radius:14px;background:#0c1820;border:1px solid #1e3a30;display:flex;align-items:center;justify-content:center;flex-shrink:0}#ab svg{width:48px;height:48px}
+#nb{width:40px;height:40px;border-radius:10px;background:#0a1018;border:1px solid #243040;display:flex;align-items:center;justify-content:center;flex-shrink:0}#nb svg{width:28px;height:28px}
+#tx{flex:1;min-width:0}#dist{font-size:24px;font-weight:900;color:var(--acc)}#turn{font-size:17px;font-weight:850;margin-top:2px}#meta{font-size:12px;color:var(--muted);margin-top:2px}
+#bar{height:4px;background:#1a2433;border-radius:4px;margin-top:8px;overflow:hidden}#bar>i{display:block;height:100%;width:0%;background:var(--acc);transition:width .25s}
+#warn{position:absolute;left:10px;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0))}
+.w{display:none;border-radius:14px;padding:12px 14px;font-weight:850;font-size:15px;margin-top:6px}.w.on{display:block}
+.w.cam{background:rgba(255,59,92,.94);color:#fff}.w.dps{background:rgba(77,159,255,.94);color:#fff}.w.fuel{background:rgba(255,201,51,.94);color:#1a1200}
+#bot{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0));background:linear-gradient(to top,rgba(3,6,12,.96),transparent);pointer-events:none}
+#bot .row{pointer-events:none;align-items:center}#bot button{pointer-events:auto;min-height:44px;font-size:13px}
+.pill{background:rgba(10,14,22,.92);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:11px;font-weight:750}.pill b{display:block;font-size:15px;margin-top:1px}
+#stop{border-color:#3a2030;background:rgba(40,12,18,.95);color:#ff8fa3}#ov{border-color:#1e3a30;background:rgba(12,30,24,.95);color:var(--acc)}#live{border-color:#1e2a40;background:rgba(12,20,40,.95);color:#9ec9ff}
+#boot{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#03060c;transition:opacity .3s}#boot.hide{opacity:0;pointer-events:none}
+#toast{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:60;display:none;background:rgba(10,14,22,.96);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;max-width:90%}#toast.on{display:block}
+#off{position:absolute;right:10px;top:calc(10px + env(safe-area-inset-top,0));z-index:25;display:none;background:rgba(245,197,66,.15);border:1px solid #f5c542;color:#ffe6a0;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800}#off.on{display:block}
 .leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
-</style>
-</head>
-<body>
+</style></head><body>
 <div id="app">
 <div id="map"></div>
-<div id="boot"><div class="t">АКСИ · готовим навигатор…</div></div>
-<div id="toast"></div>
-<div id="viewerBadge">👁 Смотрите чужой маршрут · live</div>
-<div id="offlinePill">OFFLINE · маршрут в памяти</div>
+<div id="boot"><div style="font-weight:700;color:#8a9bb0">АКСИ…</div></div>
+<div id="toast"></div><div id="off">OFFLINE</div>
 <div id="setup">
 <h1>АКСИ · Куда едем?</h1>
 <div class="row"><input id="from" placeholder="Откуда" readonly/></div>
-<div class="row"><input id="to" placeholder="Куда — адрес или город" autocomplete="off" enterkeyhint="go"/></div>
-<div class="row"><button type="button" class="go" id="btnGo">Поехали</button></div>
-<div class="row">
-<button type="button" class="sec" id="btnResume" style="display:none">Продолжить сохранённый</button>
-<button type="button" class="sec" id="btnShareRoute">Ссылка на маршрут</button>
-</div>
-<div class="hint">Стрелка «сейчас» + «далее» · весь маршрут · offline после построения · live-шаринг · камера 500 м</div>
-<div id="statusLine">GPS <b id="gpsTxt">…</b> · ±<b id="accTxt">—</b> · net <b id="netTxt">—</b></div>
+<div class="row"><input id="to" placeholder="Куда" autocomplete="off" enterkeyhint="go"/></div>
+<div class="row"><button type="button" class="go" id="go">Поехали</button></div>
+<div class="row"><button type="button" id="resume" style="display:none;flex:1">Продолжить</button><button type="button" id="share" style="flex:1">Ссылка</button></div>
+<div class="hint">Стрелка сейчас+далее · весь путь · offline · Live · камера 500м</div>
+<div id="st">GPS <b id="gps">…</b> · ±<b id="acc">—</b></div>
 </div>
 <div id="nav">
-<div id="navTop"><div id="navCard">
-<div id="arrowBox"><svg id="arrowSvg" viewBox="0 0 64 64" fill="none"><path id="arrowPath" d="M32 8 L32 48 M32 8 L20 22 M32 8 L44 22" stroke="#2ee6a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-<div id="nextMini" title="Следующий"><svg viewBox="0 0 64 64" fill="none"><path id="nextPath" d="M32 8 L32 48 M32 8 L20 22 M32 8 L44 22" stroke="#8a9bb0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-<div id="navText"><div id="navDist">—</div><div id="navTurn">По маршруту</div><div id="navMeta">—</div></div>
-</div><div id="navBar"><i id="prog"></i></div></div>
-<div id="warn">
-<div class="warn cam" id="wCam"><div id="wCamMain">Камера</div><div class="sub" id="wCamSub"></div></div>
-<div class="warn dps" id="wDps"><div id="wDpsMain">ДПС</div><div class="sub" id="wDpsSub"></div></div>
-<div class="warn fuel" id="wFuel"><div id="wFuelMain">АЗС</div><div class="sub" id="wFuelSub"></div></div>
-</div>
-<div id="navBottom"><div id="navStats">
+<div id="top"><div id="card">
+<div id="ab"><svg viewBox="0 0 64 64" fill="none"><path id="ap" d="M32 10 L32 50 M32 10 L18 26 M32 10 L46 26" stroke="#2ee6a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="nb"><svg viewBox="0 0 64 64" fill="none"><path id="np" d="M32 10 L32 50 M32 10 L18 26 M32 10 L46 26" stroke="#8a9bb0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="tx"><div id="dist">—</div><div id="turn">По маршруту</div><div id="meta">—</div></div>
+</div><div id="bar"><i id="prog"></i></div></div>
+<div id="warn"><div class="w cam" id="wCam"></div><div class="w dps" id="wDps"></div><div class="w fuel" id="wFuel"></div></div>
+<div id="bot"><div class="row">
 <div class="pill">Осталось<b id="left">—</b></div>
-<div class="pill">Камера<b id="nextCam">—</b></div>
-<button type="button" id="btnOverview">Весь путь</button>
-<button type="button" id="btnShareLive">Live</button>
-<button type="button" id="btnStopNav">Стоп</button>
+<div class="pill">Камера<b id="nCam">—</b></div>
+<button type="button" id="ov">Весь путь</button>
+<button type="button" id="live">Live</button>
+<button type="button" id="stop">Стоп</button>
 </div></div></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-<script src="/aksi-nav-drive.js"></script>
-</body>
-</html>
+<script>
+(function(){
+"use strict";
+var map=L.map("map",{zoomControl:false,attributionControl:false,maxZoom:19}).setView([55.75,37.62],6);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,updateWhenIdle:true}).addTo(map);
+var routeLayer=null,startM=null,endM=null,userM=null,userAcc=null,liveM=null,poiG=L.layerGroup().addTo(map);
+var along={cam:[],fuel:[],dps:[]};
+var S={from:null,to:null,route:null,drive:false,overview:false,gps:{lat:null,lng:null,acc:null,mode:"",heading:null},watch:null,lastBuzz:0,lastFix:0,sm:{lat:null,lng:null},peer:null,pid:null,conns:[],host:false,viewer:false,lastPan:0};
+var $=function(id){return document.getElementById(id)};
+function toast(m,ms){$("toast").textContent=m;$("toast").classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(function(){$("toast").classList.remove("on")},ms||2200)}
+function km(m){if(m==null||isNaN(m))return"\u2014";return m<1000?Math.round(m)+" \u043c":(m/1000).toFixed(m<10000?1:0)+" \u043a\u043c"}
+function dist(a,b){var R=6371000,t=Math.PI/180,dLat=(b[0]-a[0])*t,dLng=(b[1]-a[1])*t,x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[0]*t)*Math.cos(b[0]*t)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.sqrt(x))}
+function ico(c){return L.divIcon({className:"",html:'<div style="width:12px;height:12px;border-radius:50%;background:'+c+';border:2px solid #fff"></div>',iconSize:[12,12],iconAnchor:[6,6]})}
+var AR={straight:"M32 10 L32 50 M32 10 L18 26 M32 10 L46 26",left:"M44 48 L44 28 Q44 16 32 16 L18 16 M18 16 L28 8 M18 16 L28 24",right:"M20 48 L20 28 Q20 16 32 16 L46 16 M46 16 L36 8 M46 16 L36 24",slight_left:"M36 50 L30 28 L18 18 M18 18 L28 14 M18 18 L22 28",slight_right:"M28 50 L34 28 L46 18 M46 18 L36 14 M46 18 L42 28",sharp_left:"M42 46 L22 46 L22 20 M22 20 L12 30 M22 20 L32 30",sharp_right:"M22 46 L42 46 L42 20 M42 20 L52 30 M42 20 L32 30",uturn:"M40 50 L40 24 Q40 12 28 12 Q16 12 16 24 L16 34 M16 34 L8 26 M16 34 L24 26",roundabout:"M32 12 A16 16 0 1 1 31.9 12 M32 12 L26 20 M32 12 L38 20",arrive:"M32 12 L32 40 M22 30 L32 40 L42 30 M20 50 L44 50"};
+function setArr(id,k,col){var e=$(id);if(!e)return;e.setAttribute("d",AR[k]||AR.straight);e.setAttribute("stroke",col||"#2ee6a8")}
+function mKey(s){if(!s)return"straight";var t=(s.type||"").toLowerCase(),m=(s.modifier||"").toLowerCase(),ins=(s.instruction||"").toLowerCase();if(t.indexOf("arrive")>=0)return"arrive";if(t==="roundabout"||t==="rotary")return"roundabout";if(m.indexOf("uturn")>=0)return"uturn";if(m==="sharp left")return"sharp_left";if(m==="sharp right")return"sharp_right";if(m==="slight left")return"slight_left";if(m==="slight right")return"slight_right";if(m==="left"||/\u043d\u0430\u043b\u0435\u0432\u043e|left/.test(ins))return"left";if(m==="right"||/\u043d\u0430\u043f\u0440\u0430\u0432\u043e|right/.test(ins))return"right";return"straight"}
+function mTxt(s){if(!s)return"\u041f\u043e \u043c\u0430\u0440\u0448\u0440\u0443\u0442\u0443";if(s.instruction&&s.instruction.length>2)return s.instruction;var k=mKey(s);return{straight:"\u041f\u0440\u044f\u043c\u043e",left:"\u041d\u0430\u043b\u0435\u0432\u043e",right:"\u041d\u0430\u043f\u0440\u0430\u0432\u043e",slight_left:"\u041f\u043b\u0430\u0432\u043d\u043e \u043d\u0430\u043b\u0435\u0432\u043e",slight_right:"\u041f\u043b\u0430\u0432\u043d\u043e \u043d\u0430\u043f\u0440\u0430\u0432\u043e",sharp_left:"\u0420\u0435\u0437\u043a\u043e \u043d\u0430\u043b\u0435\u0432\u043e",sharp_right:"\u0420\u0435\u0437\u043a\u043e \u043d\u0430\u043f\u0440\u0430\u0432\u043e",uturn:"\u0420\u0430\u0437\u0432\u043e\u0440\u043e\u0442",roundabout:"\u041a\u0440\u0443\u0433\u043e\u0432\u043e\u0435",arrive:"\u041f\u0440\u0438\u0435\u0445\u0430\u043b\u0438"}[k]||"\u0414\u0430\u043b\u044c\u0448\u0435"}
+function mark(k,ll){var c=k==="s"?"#2ee6a8":"#4d9fff";if(k==="s"){if(startM)map.removeLayer(startM);startM=L.marker(ll,{icon:ico(c)}).addTo(map)}else{if(endM)map.removeLayer(endM);endM=L.marker(ll,{icon:ico(c)}).addTo(map)}}
+function user(lat,lng,acc,hdg){var ll=[lat,lng];if(!userM){userM=L.marker(ll,{zIndexOffset:900,icon:L.divIcon({className:"",html:'<div id="uc" style="width:26px;height:26px;transform:rotate(0deg)"><svg width="26" height="26" viewBox="0 0 28 28"><circle cx="14" cy="14" r="7" fill="#4d9fff" stroke="#fff" stroke-width="3"/><path d="M14 2 L18 12 L14 10 L10 12 Z" fill="#4d9fff" stroke="#fff" stroke-width="1.5"/></svg></div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(map)}else userM.setLatLng(ll);if(hdg!=null&&!isNaN(hdg)){var e=document.getElementById("uc");if(e)e.style.transform="rotate("+hdg+"deg)"}if(acc&&acc<400){if(!userAcc)userAcc=L.circle(ll,{radius:Math.max(acc,10),color:"#4d9fff",weight:1,fillOpacity:.08}).addTo(map);else{userAcc.setLatLng(ll);userAcc.setRadius(Math.max(acc,10))}}}
+function onPos(pos){var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=pos.coords.accuracy,hdg=pos.coords.heading;if(S.sm.lat!=null&&acc<90){var j=dist([S.sm.lat,S.sm.lng],[lat,lng]),dt=Math.max(.4,(Date.now()-S.lastFix)/1000);if(j>100&&j/dt>50&&acc>30)return}var a=acc<=12?0.6:acc<=30?0.4:0.25;if(S.sm.lat==null){S.sm.lat=lat;S.sm.lng=lng}else{S.sm.lat=S.sm.lat*(1-a)+lat*a;S.sm.lng=S.sm.lng*(1-a)+lng*a}lat=S.sm.lat;lng=S.sm.lng;S.gps={lat:lat,lng:lng,acc:acc,mode:"live",heading:(hdg!=null&&!isNaN(hdg))?hdg:S.gps.heading};S.lastFix=Date.now();$("gps").textContent="ok";$("acc").textContent=Math.round(acc)+"\u043c";user(lat,lng,acc,S.gps.heading);if(!S.from||S.from.auto){S.from={lat:lat,lng:lng,name:"\u042f",auto:true};$("from").value="\u042f \u0437\u0434\u0435\u0441\u044c";mark("s",[lat,lng]);if(!S.drive&&!S.route&&!S.viewer)map.setView([lat,lng],15)}$("boot").classList.add("hide");if(S.drive&&S.route)tick(lat,lng);if(S.host&&S.conns.length){var msg=JSON.stringify({t:"pos",lat:lat,lng:lng});S.conns.forEach(function(c){try{c.send(msg)}catch(e){}})}}
+function onErr(){$("boot").classList.add("hide");if(S.gps.lat!=null)$("gps").textContent="hold";else{$("gps").textContent="\u043d\u0435\u0442";$("from").readOnly=false}}
+function opts(){return{enableHighAccuracy:true,maximumAge:1500,timeout:10000}}
+function once(){return new Promise(function(res,rej){if(!navigator.geolocation)return rej();navigator.geolocation.getCurrentPosition(function(p){onPos(p);res(p.coords)},onErr,opts())})}
+function watch(){if(!navigator.geolocation||S.watch!=null)return;S.watch=navigator.geolocation.watchPosition(onPos,onErr,opts())}
+function geo(q){q=String(q||"").trim();if(!q)return Promise.reject(new Error("\u041a\u0443\u0434\u0430?"));if(/^(я|здесь|я здесь)$/i.test(q)){if(S.gps.lat!=null)return Promise.resolve({lat:S.gps.lat,lng:S.gps.lng,name:"\u042f"});return once().then(function(c){return{lat:c.latitude,lng:c.longitude,name:"\u042f"}})}if(/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(q)){var p=q.split(",");return Promise.resolve({lat:+p[0],lng:+p[1],name:"pt"})}if(!navigator.onLine)return Promise.reject(new Error("\u041d\u0435\u0442 \u0441\u0435\u0442\u0438"));return fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ru&accept-language=ru&q="+encodeURIComponent(q)).then(function(r){return r.json()}).then(function(a){if(!a||!a[0])throw new Error("\u041d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e");return{lat:+a[0].lat,lng:+a[0].lon,name:a[0].display_name}})}
+function route(a,b){if(!navigator.onLine)return Promise.reject(new Error("\u041d\u0443\u0436\u0435\u043d \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442"));return fetch("https://router.project-osrm.org/route/v1/driving/"+a.lng+","+a.lat+";"+b.lng+","+b.lat+"?overview=full&geometries=geojson&steps=true").then(function(r){return r.json()}).then(function(d){if(!d.routes||!d.routes[0])throw new Error("\u041d\u0435\u0442 \u043f\u0443\u0442\u0438");var r=d.routes[0];var coords=r.geometry.coordinates.map(function(c){return[c[1],c[0]]});var steps=[];(r.legs||[]).forEach(function(leg){(leg.steps||[]).forEach(function(s){var m=s.maneuver||{};steps.push({distance:s.distance||0,name:s.name||"",instruction:m.instruction||"",type:m.type||"",modifier:m.modifier||"",location:m.location?[m.location[1],m.location[0]]:null})})});return{coords:coords,steps:steps,distance:r.distance,duration:r.duration}})}
+function draw(rt){if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.polyline(rt.coords,{color:"#2ee6a8",weight:6,opacity:.95}).addTo(map);map.fitBounds(routeLayer.getBounds(),{padding:[48,48],maxZoom:15})}
+function save(){try{localStorage.setItem("aksi_nav_route",JSON.stringify({route:S.route,from:S.from,to:S.to,ts:Date.now()}))}catch(e){}}
+function loadSaved(){try{var o=JSON.parse(localStorage.getItem("aksi_nav_route")||"null");return o&&o.route&&o.route.coords?o:null}catch(e){return null}}
+function loadPOI(coords){if(!navigator.onLine)return;poiG.clearLayers();along={cam:[],fuel:[],dps:[]};var step=Math.max(1,Math.floor(coords.length/12)),samples=[];for(var i=0;i<coords.length;i+=step)samples.push(coords[i]);if(samples.length>14)samples=samples.filter(function(_,i){return i%2===0});var parts=[];samples.forEach(function(p){parts.push('node["highway"="speed_camera"](around:160,'+p[0]+','+p[1]+');');parts.push('node["amenity"="fuel"](around:200,'+p[0]+','+p[1]+');');parts.push('node["amenity"="police"](around:220,'+p[0]+','+p[1]+');')});var q="[out:json][timeout:25];("+parts.join("")+");out body;";fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q)}).then(function(r){return r.json()}).then(function(data){var seen={};(data.elements||[]).forEach(function(n){if(n.lat==null)return;var k=n.type+n.id;if(seen[k])return;seen[k]=1;var t=n.tags||{},kind,col;if(t.highway==="speed_camera"){kind="cam";col="#ff3b5c"}else if(t.amenity==="fuel"){kind="fuel";col="#ffc933"}else if(t.amenity==="police"){kind="dps";col="#4d9fff"}else return;var near=1e12;for(var i=0;i<coords.length;i+=Math.max(1,Math.floor(coords.length/60))){var d=dist([n.lat,n.lon],coords[i]);if(d<near)near=d}if(near>280)return;poiG.addLayer(L.marker([n.lat,n.lon],{icon:ico(col)}));along[kind].push({lat:n.lat,lng:n.lon,name:t.name||t.brand||kind})})}).catch(function(){})}
+function nearest(lat,lng){var c=S.route.coords,b=0,bd=1e15;for(var i=0;i<c.length;i++){var d=dist([lat,lng],c[i]);if(d<bd){bd=d;b=i}}return{i:b,d:bd}}
+function remain(i){var c=S.route.coords,s=0;for(var j=i;j<c.length-1;j++)s+=dist(c[j],c[j+1]);return s}
+function nearList(list,lat,lng,max){var best=null,bd=1e15;list.forEach(function(o){var d=dist([lat,lng],[o.lat,o.lng]);if(d<bd){bd=d;best=o}});return best&&bd<=max?{o:best,d:bd}:null}
+function stepsAt(lat,lng){var steps=S.route.steps||[],scored=[];for(var i=0;i<steps.length;i++){if(!steps[i].location)continue;scored.push({s:steps[i],d:dist([lat,lng],steps[i].location),i:i})}scored.sort(function(a,b){return a.d-b.d});if(!scored.length)return{cur:null,next:null};var cur=scored[0],next=null;for(var j=0;j<steps.length;j++){if(j>cur.i&&steps[j].location&&steps[j].type!=="arrive"){next={s:steps[j],d:dist([lat,lng],steps[j].location)};break}}return{cur:cur,next:next}}
+function tick(lat,lng){var n=nearest(lat,lng),rem=remain(n.i),tot=S.route.distance||1;$("prog").style.width=(Math.max(0,Math.min(1,1-rem/tot))*100).toFixed(1)+"%";$("left").textContent=km(rem);var ord=stepsAt(lat,lng);if(n.d>160){setArr("ap","straight","#f5c542");setArr("np","straight","#8a9bb0");$("dist").textContent=Math.round(n.d)+" \u043c";$("turn").textContent="\u041d\u0430 \u043f\u0443\u0442\u044c";$("meta").textContent=""}else if(rem<45){setArr("ap","arrive");setArr("np","arrive","#8a9bb0");$("dist").textContent="0";$("turn").textContent="\u041f\u0440\u0438\u0435\u0445\u0430\u043b\u0438";$("meta").textContent=""}else if(ord.cur){setArr("ap",mKey(ord.cur.s));$("dist").textContent=km(ord.cur.d);$("turn").textContent=mTxt(ord.cur.s);$("meta").textContent=(ord.cur.s.name?ord.cur.s.name+" \u00b7 ":"")+km(ord.cur.s.distance);if(ord.next){setArr("np",mKey(ord.next.s),"#8a9bb0");$("meta").textContent=$("meta").textContent+" \u2192 "+mTxt(ord.next.s)}else setArr("np","arrive","#8a9bb0")}else{setArr("ap","straight");setArr("np","straight","#8a9bb0");$("dist").textContent=km(rem);$("turn").textContent="\u041f\u0440\u044f\u043c\u043e";$("meta").textContent=""}
+var c=nearList(along.cam,lat,lng,900);if(c&&c.d<=500){$("wCam").classList.add("on");$("wCam").textContent="\ud83d\udcf7 \u041a\u0430\u043c\u0435\u0440\u0430 \u0447\u0435\u0440\u0435\u0437 "+km(c.d);$("nCam").textContent=km(c.d);if(Date.now()-S.lastBuzz>9000){S.lastBuzz=Date.now();try{navigator.vibrate&&navigator.vibrate([70,40,70])}catch(e){}}}else{$("wCam").classList.remove("on");$("nCam").textContent=c?km(c.d):"\u043d\u0435\u0442"}
+var d=nearList(along.dps,lat,lng,700);if(d&&d.d<=600){$("wDps").classList.add("on");$("wDps").textContent="\ud83d\ude93 \u0414\u041f\u0421 \u0447\u0435\u0440\u0435\u0437 "+km(d.d)}else $("wDps").classList.remove("on");
+var f=nearList(along.fuel,lat,lng,1100);if(f&&f.d<=900){$("wFuel").classList.add("on");$("wFuel").textContent="\u26fd \u0410\u0417\u0421 \u0447\u0435\u0440\u0435\u0437 "+km(f.d)}else $("wFuel").classList.remove("on");
+if(S.gps.mode==="live"&&!S.overview&&Date.now()-S.lastPan>280){S.lastPan=Date.now();map.panTo([lat,lng],{animate:true,duration:.2})}}
+function goDrive(){S.drive=true;S.overview=false;$("setup").classList.add("hide");$("nav").classList.add("on");watch();if(S.gps.lat!=null){tick(S.gps.lat,S.gps.lng);map.setView([S.gps.lat,S.gps.lng],16)}else once().then(function(c){tick(c.latitude,c.longitude);map.setView([c.latitude,c.longitude],16)}).catch(function(){});$("off").classList.toggle("on",!navigator.onLine&&!!S.route)}
+function stopDrive(){S.drive=false;S.overview=false;$("nav").classList.remove("on");$("setup").classList.remove("hide");["wCam","wDps","wFuel"].forEach(function(id){$(id).classList.remove("on")})}
+function shareStatic(){if(!S.route){toast("\u0421\u043d\u0430\u0447\u0430\u043b\u0430 \u043c\u0430\u0440\u0448\u0440\u0443\u0442");return}var c=S.route.coords,thin=[];for(var i=0;i<c.length;i+=Math.max(1,Math.floor(c.length/70)))thin.push([Math.round(c[i][0]*1e5)/1e5,Math.round(c[i][1]*1e5)/1e5]);var payload={c:thin,d:Math.round(S.route.distance||0),to:S.to&&S.to.name,from:S.from&&S.from.name};var token=btoa(unescape(encodeURIComponent(JSON.stringify(payload)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");var url=location.origin+location.pathname+"#r="+token;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(function(){toast("\u0421\u0441\u044b\u043b\u043a\u0430 \u0441\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u0430")}).catch(function(){prompt("URL",url)});else prompt("URL",url)}
+function decodeR(s){try{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";return JSON.parse(decodeURIComponent(escape(atob(s))))}catch(e){return null}}
+function loadPeer(){return new Promise(function(res,rej){if(typeof Peer!=="undefined")return res();var s=document.createElement("script");s.src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";s.onload=function(){res()};s.onerror=function(){rej(new Error("PeerJS"))};document.head.appendChild(s)})}
+function ensurePeer(){return loadPeer().then(function(){return new Promise(function(res,rej){if(S.peer&&S.pid)return res(S.pid);var p=new Peer({debug:0});S.peer=p;p.on("open",function(id){S.pid=id;res(id)});p.on("error",function(e){toast("Live: "+(e.type||"err"))});p.on("connection",function(conn){S.conns.push(conn);conn.on("open",function(){toast("\u0417\u0440\u0438\u0442\u0435\u043b\u044c");if(S.route)conn.send(JSON.stringify({t:"route",route:S.route,from:S.from,to:S.to}));if(S.gps.lat!=null)conn.send(JSON.stringify({t:"pos",lat:S.gps.lat,lng:S.gps.lng}))})})})})}
+function startLive(){if(!S.route){toast("\u041d\u0443\u0436\u0435\u043d \u043c\u0430\u0440\u0448\u0440\u0443\u0442");return}ensurePeer().then(function(id){S.host=true;var url=location.origin+location.pathname+"#live="+id;if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(function(){toast("Live \u0441\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u043d\u0430")}).catch(function(){prompt("Live",url)});else prompt("Live",url)}).catch(function(){toast("Live fail")})}
+function joinLive(id){S.viewer=true;$("setup").classList.add("hide");$("boot").classList.remove("hide");ensurePeer().then(function(){var conn=S.peer.connect(id,{reliable:true});conn.on("open",function(){toast("OK");$("boot").classList.add("hide")});conn.on("data",function(raw){try{var m=typeof raw==="string"?JSON.parse(raw):raw;if(m.t==="route"&&m.route){S.route=m.route;S.from=m.from;S.to=m.to;draw(S.route)}if(m.t==="pos"){if(!liveM)liveM=L.circleMarker([m.lat,m.lng],{radius:9,color:"#fff",weight:2,fillColor:"#ff3b5c",fillOpacity:1}).addTo(map);else liveM.setLatLng([m.lat,m.lng]);map.panTo([m.lat,m.lng]);$("boot").classList.add("hide")}}catch(e){}})}).catch(function(){toast("fail");$("boot").classList.add("hide")})}
+$("go").onclick=function(){var btn=$("go");btn.disabled=true;btn.textContent="\u2026";var fp=S.from?Promise.resolve(S.from):geo($("from").value||"\u044f \u0437\u0434\u0435\u0441\u044c");fp.then(function(from){S.from=from;mark("s",[from.lat,from.lng]);return geo($("to").value).then(function(to){S.to=to;mark("e",[to.lat,to.lng]);return route(from,to)})}).then(function(rt){S.route=rt;draw(rt);save();$("left").textContent=km(rt.distance);goDrive();loadPOI(rt.coords)}).catch(function(e){toast(e.message||"err")}).then(function(){btn.disabled=false;btn.textContent="\u041f\u043e\u0435\u0445\u0430\u043b\u0438"})};
+$("stop").onclick=stopDrive;
+$("ov").onclick=function(){if(!S.route||!routeLayer)return;S.overview=!S.overview;if(S.overview){map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});$("ov").textContent="\u0417\u0430 \u043c\u043d\u043e\u0439";toast("\u0412\u0435\u0441\u044c \u043f\u0443\u0442\u044c")}else{$("ov").textContent="\u0412\u0435\u0441\u044c \u043f\u0443\u0442\u044c";if(S.gps.lat!=null)map.setView([S.gps.lat,S.gps.lng],16);toast("\u0421\u043b\u0435\u0434\u043e\u0432\u0430\u043d\u0438\u0435")}};
+$("share").onclick=shareStatic;$("live").onclick=startLive;
+$("to").addEventListener("keydown",function(e){if(e.key==="Enter")$("go").click()});
+var saved=loadSaved();if(saved){$("resume").style.display="block";$("resume").onclick=function(){S.route=saved.route;S.from=saved.from;S.to=saved.to;if(S.from&&S.from.lat)mark("s",[S.from.lat,S.from.lng]);if(S.to&&S.to.lat)mark("e",[S.to.lat,S.to.lng]);draw(S.route);$("to").value=(S.to&&S.to.name)||"";goDrive();toast("\u0418\u0437 \u043f\u0430\u043c\u044f\u0442\u0438")}}
+function hash(){var h=location.hash||"";if(h.indexOf("#live=")===0)joinLive(h.slice(6).trim());else if(h.indexOf("#r=")===0){var d=decodeR(h.slice(3));if(d&&d.c){S.route={coords:d.c,steps:[],distance:d.d||0};S.to={name:d.to||""};draw(S.route);$("to").value=d.to||"";toast("\u041f\u043e \u0441\u0441\u044b\u043b\u043a\u0435");$("boot").classList.add("hide")}}}
+try{watch();once().catch(function(){$("boot").classList.add("hide")})}catch(e){$("boot").classList.add("hide")}
+hash();window.addEventListener("hashchange",hash);
+window.addEventListener("online",function(){$("off").classList.remove("on")});
+window.addEventListener("offline",function(){if(S.route)$("off").classList.add("on")});
+setTimeout(function(){$("boot").classList.add("hide")},6000);
+})();
+</script></body></html>
