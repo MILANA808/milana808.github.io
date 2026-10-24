@@ -1,1 +1,86 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#03060c"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>АКСИ · Навигатор</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--bg:#03060c;--panel:rgba(10,14,22,.96);--line:#1e2a3c;--txt:#f2f6fc;--muted:#8a9bb0;--acc:#2ee6a8;--cam:#ff3b5c;--fuel:#ffc933;--dps:#4d9fff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;height:100dvh;width:100%}#map{position:absolute;inset:0;z-index:0}
+#setup{position:absolute;left:0;right:0;bottom:0;z-index:20;background:var(--panel);border-top:1px solid var(--line);padding:14px 14px calc(14px + env(safe-area-inset-bottom,0));backdrop-filter:blur(18px);max-height:55vh;overflow:auto}#setup.hide{display:none}
+#setup h1{font-size:15px;font-weight:800;margin-bottom:10px}.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+input{flex:1;min-width:120px;min-height:48px;border-radius:14px;border:1px solid var(--line);background:#0c121c;color:var(--txt);padding:12px 14px;font:inherit;font-size:16px}
+button{min-height:48px;border-radius:14px;border:1px solid var(--line);background:#0c121c;color:var(--txt);font:inherit;font-size:14px;font-weight:800;padding:0 14px;cursor:pointer}
+button.go{flex:1;background:#0f2f26;border-color:var(--acc);color:var(--acc);font-size:17px}button.sec{flex:1}button:disabled{opacity:.35}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.4}#statusLine{font-size:11px;color:var(--muted);margin-top:8px}#statusLine b{color:var(--txt)}
+#nav{position:absolute;inset:0;z-index:30;pointer-events:none;display:none}#nav.on{display:block}
+#navTop{position:absolute;left:0;right:0;top:0;padding:calc(8px + env(safe-area-inset-top,0)) 10px 8px;background:linear-gradient(to bottom,rgba(3,6,12,.95),rgba(3,6,12,.4),transparent)}
+#navCard{display:flex;gap:12px;align-items:center;background:rgba(10,14,22,.94);border:1px solid var(--line);border-radius:20px;padding:10px 14px;backdrop-filter:blur(14px);box-shadow:0 12px 36px rgba(0,0,0,.5)}
+#arrowBox{flex-shrink:0;width:68px;height:68px;border-radius:16px;background:#0c1820;border:1px solid #1e3a30;display:flex;align-items:center;justify-content:center}#arrowSvg{width:52px;height:52px}
+#nextMini{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:#0a1018;border:1px solid #243040;display:flex;align-items:center;justify-content:center;opacity:.85}#nextMini svg{width:32px;height:32px}
+#navText{flex:1;min-width:0}#navDist{font-size:26px;font-weight:900;color:var(--acc)}#navTurn{font-size:18px;font-weight:850;line-height:1.2;margin-top:2px}#navMeta{font-size:12px;color:var(--muted);margin-top:3px}
+#navBar{height:4px;background:#1a2433;border-radius:4px;margin-top:8px;overflow:hidden}#navBar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--acc),#9effd8);transition:width .3s}
+#warn{position:absolute;left:10px;right:10px;bottom:calc(100px + env(safe-area-inset-bottom,0));display:flex;flex-direction:column;gap:6px}
+.warn{display:none;border-radius:14px;padding:12px 14px;font-weight:850;font-size:15px;box-shadow:0 10px 28px rgba(0,0,0,.45)}.warn.on{display:block}
+.warn.cam{background:rgba(255,59,92,.94);color:#fff;animation:pulse 1.15s ease-in-out infinite}.warn.fuel{background:rgba(255,201,51,.94);color:#1a1200}.warn.dps{background:rgba(77,159,255,.94);color:#fff}
+.warn .sub{font-size:12px;font-weight:650;opacity:.9;margin-top:3px}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+#navBottom{position:absolute;left:0;right:0;bottom:0;padding:10px 10px calc(10px + env(safe-area-inset-bottom,0));background:linear-gradient(to top,rgba(3,6,12,.97),rgba(3,6,12,.4),transparent);pointer-events:none}
+#navStats{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#navStats .pill{background:rgba(10,14,22,.92);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:11px;font-weight:750}
+#navStats .pill b{display:block;font-size:15px;font-weight:900;margin-top:1px}
+#navStats button{pointer-events:auto;min-height:44px;border-radius:12px;font-size:13px;padding:0 12px}
+#btnStopNav{border-color:#3a2030;background:rgba(40,12,18,.95);color:#ff8fa3}#btnOverview{border-color:#1e3a30;background:rgba(12,30,24,.95);color:var(--acc)}#btnShareLive{border-color:#1e2a40;background:rgba(12,20,40,.95);color:#9ec9ff}
+#boot{position:absolute;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#03060c;transition:opacity .4s}#boot.hide{opacity:0;pointer-events:none}#boot .t{font-size:16px;font-weight:700;color:var(--muted)}
+#toast{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:60;display:none;background:rgba(10,14,22,.96);border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-size:13px;font-weight:700;max-width:90%;text-align:center}#toast.on{display:block}
+#viewerBadge{position:absolute;left:10px;top:calc(10px + env(safe-area-inset-top,0));z-index:25;display:none;background:rgba(77,159,255,.2);border:1px solid #4d9fff;color:#b6d4ff;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:800}#viewerBadge.on{display:block}
+#offlinePill{position:absolute;right:10px;top:calc(10px + env(safe-area-inset-top,0));z-index:25;display:none;background:rgba(245,197,66,.15);border:1px solid #f5c542;color:#ffe6a0;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:800}#offlinePill.on{display:block}
+.leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="map"></div>
+<div id="boot"><div class="t">АКСИ · готовим навигатор…</div></div>
+<div id="toast"></div>
+<div id="viewerBadge">👁 Смотрите чужой маршрут · live</div>
+<div id="offlinePill">OFFLINE · маршрут в памяти</div>
+<div id="setup">
+<h1>АКСИ · Куда едем?</h1>
+<div class="row"><input id="from" placeholder="Откуда" readonly/></div>
+<div class="row"><input id="to" placeholder="Куда — адрес или город" autocomplete="off" enterkeyhint="go"/></div>
+<div class="row"><button type="button" class="go" id="btnGo">Поехали</button></div>
+<div class="row">
+<button type="button" class="sec" id="btnResume" style="display:none">Продолжить сохранённый</button>
+<button type="button" class="sec" id="btnShareRoute">Ссылка на маршрут</button>
+</div>
+<div class="hint">Стрелка «сейчас» + «далее» · весь маршрут · offline после построения · live-шаринг · камера 500 м</div>
+<div id="statusLine">GPS <b id="gpsTxt">…</b> · ±<b id="accTxt">—</b> · net <b id="netTxt">—</b></div>
+</div>
+<div id="nav">
+<div id="navTop"><div id="navCard">
+<div id="arrowBox"><svg id="arrowSvg" viewBox="0 0 64 64" fill="none"><path id="arrowPath" d="M32 8 L32 48 M32 8 L20 22 M32 8 L44 22" stroke="#2ee6a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="nextMini" title="Следующий"><svg viewBox="0 0 64 64" fill="none"><path id="nextPath" d="M32 8 L32 48 M32 8 L20 22 M32 8 L44 22" stroke="#8a9bb0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="navText"><div id="navDist">—</div><div id="navTurn">По маршруту</div><div id="navMeta">—</div></div>
+</div><div id="navBar"><i id="prog"></i></div></div>
+<div id="warn">
+<div class="warn cam" id="wCam"><div id="wCamMain">Камера</div><div class="sub" id="wCamSub"></div></div>
+<div class="warn dps" id="wDps"><div id="wDpsMain">ДПС</div><div class="sub" id="wDpsSub"></div></div>
+<div class="warn fuel" id="wFuel"><div id="wFuelMain">АЗС</div><div class="sub" id="wFuelSub"></div></div>
+</div>
+<div id="navBottom"><div id="navStats">
+<div class="pill">Осталось<b id="left">—</b></div>
+<div class="pill">Камера<b id="nextCam">—</b></div>
+<button type="button" id="btnOverview">Весь путь</button>
+<button type="button" id="btnShareLive">Live</button>
+<button type="button" id="btnStopNav">Стоп</button>
+</div></div></div></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="/aksi-nav-drive.js"></script>
+</body>
+</html>
