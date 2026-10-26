@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#10111b">
+<title>AKSI Core Lab — единое проверяемое ядро</title>
+<style>
+:root{color-scheme:dark;--bg:#0d0f18;--panel:#151a28;--line:#30384b;--text:#f3f5fb;--muted:#aab4c8;--accent:#b9a4ff;--good:#72e0b0;--warn:#ffd479;--bad:#ff8b9b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#292149 0,transparent 45%),var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:1120px;margin:auto;padding:28px 18px 60px}h1{font-size:clamp(2rem,5vw,3.6rem);line-height:1.05;margin:8px 0 14px;letter-spacing:-.04em}h2{font-size:1.08rem;margin:0 0 12px}p{color:var(--muted)}.eyebrow{font-size:.75rem;letter-spacing:.17em;text-transform:uppercase;color:var(--accent);font-weight:800}.lead{font-size:1.08rem;max-width:780px}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--muted);font-size:.8rem;margin:3px 4px 3px 0}
+.layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:20px}.panel{background:linear-gradient(150deg,#1a2031f5,#111522f5);border:1px solid var(--line);border-radius:18px;padding:19px;min-width:0}.wide{grid-column:1/-1}.muted{color:var(--muted)}.small{font-size:.84rem}.field{display:block;margin:10px 0 5px;color:var(--muted);font-size:.88rem}input[type=text],textarea,select{width:100%;background:#0b0f19;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}textarea{min-height:80px;resize:vertical}button{background:var(--accent);color:#181326;border:0;border-radius:10px;padding:11px 14px;font-weight:750;cursor:pointer;margin:6px 6px 0 0}button.secondary{background:#252d41;color:var(--text);border:1px solid var(--line)}button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.candidate{border:1px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;background:#0e1320}.candidate strong{display:block}.bar{height:7px;background:#252d41;border-radius:8px;overflow:hidden;margin-top:7px}.bar span{display:block;height:100%;background:var(--accent);width:0}.evidence{display:flex;gap:10px;align-items:flex-start;border-top:1px solid #293146;padding:10px 0}.evidence input{margin-top:5px;accent-color:#b9a4ff}.evidence label{flex:1}.tag{font-size:.75rem;color:var(--muted)}.result{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b101b;border:1px solid var(--line);border-radius:10px;padding:12px;min-height:55px}.status{font-weight:800}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}.event{border-left:2px solid #554b7e;padding:7px 0 7px 12px;margin:8px 0}.footer{margin-top:20px;color:var(--muted);font-size:.82rem}.metric{font-size:1.5rem;font-weight:800}.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.layout,.split{grid-template-columns:1fr}.wide{grid-column:auto}main{padding:22px 12px 40px}}
+</style>
+</head>
+<body><main>
+<div class="eyebrow">AKSI MATRIX · EXPERIMENTAL RUNTIME</div>
+<h1>AKSI Core Lab</h1>
+<p class="lead">Живой прототип единого цикла: наблюдения → конкурирующие гипотезы → выбор метода → решение → проверяемый след → обновление памяти. Всё работает локально в браузере; внешние API и модель не используются.</p>
+<div><span class="pill">classical simulation</span><span class="pill">deterministic baseline</span><span class="pill">quantum-inspired heuristic</span><span class="pill">local memory</span><span class="pill">SHA-256 event chain</span></div>
+<div class="layout">
+<section class="panel">
+<h2>01 / Задача и наблюдения</h2>
+<label class="field" for="goal">Цель исследования</label>
+<input id="goal" type="text" value="Определить, достаточно ли данных для выбора гипотезы">
+<p class="small">Выбери наблюдения. Поддержка повышает оценку гипотезы; опровержение снижает. Надёжность и повторение одного источника учитываются явно.</p>
+<div id="evidence"></div>
+<label class="field" for="extra">Добавить собственное наблюдение</label>
+<input id="extra" type="text" placeholder="Например: независимая проверка не подтвердила H1">
+<div class="row"><select id="stance" aria-label="Тип наблюдения"><option value="support">Поддерживает выбранную гипотезу</option><option value="refute">Опровергает выбранную гипотезу</option><option value="context">Контекст, не решает вопрос</option></select><select id="target" aria-label="Гипотеза"><option value="H1">H1</option><option value="H2">H2</option><option value="H3">H3</option></select></div>
+<button id="addEvidence" class="secondary">Добавить наблюдение</button>
+<button id="run">Запустить цикл AKSI</button>
+</section>
+<section class="panel">
+<h2>02 / Состояние и выбор</h2>
+<div class="split">
+<div><div class="tag">АКТИВНАЯ ГИПОТЕЗА</div><div id="winner" class="metric">—</div></div>
+<div><div class="tag">УВЕРЕННОСТЬ МОДЕЛИ</div><div id="confidence" class="metric">—</div></div>
+</div>
+<p id="decision" class="result">Запусти цикл, чтобы увидеть расчёт.</p>
+<h2 style="margin-top:18px">Конкурирующие гипотезы</h2>
+<div id="candidates"></div>
+<p class="small">«Уверенность» здесь — нормализованный внутренний балл этой демонстрации, не калиброванная вероятность истинности.</p>
+</section>
+<section class="panel">
+<h2>03 / Сравнение методов</h2>
+<div class="split">
+<div><div class="tag">КЛАССИЧЕСКИЙ БАЛЛ</div><div id="classicWinner" class="metric">—</div><p id="classicScore" class="small muted">Весовая сумма свидетельств</p></div>
+<div><div class="tag">WAVE-INSPIRED</div><div id="waveWinner" class="metric">—</div><p id="waveScore" class="small muted">Игрушечная амплитудная эвристика</p></div>
+</div>
+<div id="comparison" class="result">Методы ещё не запускались.</div>
+<p class="small">Вторая оценка — классическая численная эвристика, а не квантовое вычисление и не доказательство квантового преимущества. Если она не превосходит baseline, это фиксируется.</p>
+</section>
+<section class="panel">
+<h2>04 / Память и проверяемый журнал</h2>
+<div class="row"><button id="saveMemory" class="secondary">Сохранить результат в локальную память</button><button id="clearMemory" class="secondary">Очистить память</button></div>
+<p id="memoryStatus" class="small muted">Память ещё не обновлялась.</p>
+<div id="memory" class="result">Локальных записей пока нет.</div>
+<h2 style="margin-top:18px">Цепочка событий</h2>
+<div id="ledger" class="result">Журнал появится после запуска.</div>
+<div class="row"><button id="export" class="secondary">Экспортировать JSON-отчёт</button><button id="verify" class="secondary">Проверить цепочку</button></div>
+<p id="integrity" class="small muted">SHA-256 вычисляется браузером; цепочка подтверждает целостность записанных событий, но не истинность выводов.</p>
+</section>
+<section class="panel wide">
+<h2>05 / Встроенные проверки</h2>
+<p>Эти проверки тестируют конкретные свойства демо, а не научную уникальность всей архитектуры.</p>
+<button id="selftest">Запустить тесты</button>
+<div id="tests" class="result">Ожидает запуска.</div>
+</section>
+</div>
+<p class="footer">AKSI Core Lab v0.1 · исследовательский прототип · без внешних запросов · данные памяти хранятся в localStorage этого браузера. Не является доказательством сознания, причинности или квантового преимущества.</p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const initialEvidence=[
+{id:'e1',text:'Наблюдение A: независимый источник поддерживает H1',target:'H1',stance:'support',reliability:.8,source:'source-A',active:true},
+{id:'e2',text:'Наблюдение B: независимый источник противоречит H1',target:'H1',stance:'refute',reliability:.65,source:'source-B',active:true},
+{id:'e3',text:'Наблюдение C: данные поддерживают H2',target:'H2',stance:'support',reliability:.75,source:'source-C',active:true},
+{id:'e4',text:'Наблюдение D: сведения по H3 неполны',target:'H3',stance:'context',reliability:.9,source:'source-D',active:true}
+];
+let evidence=initialEvidence.map(x=>({...x})),lastRun=null,events=[],memory=[];
+const safeParse=(s,f)=>{try{return JSON.parse(s)||f}catch{return f}};
+memory=safeParse(localStorage.getItem('aksi-core-memory-v1'),[]);
+const hex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('');
+async function sha256(s){if(!crypto.subtle)throw Error('Web Crypto API недоступен');return hex(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderEvidence(){
+ $('evidence').innerHTML=evidence.map(e=>'<div class="evidence"><input type="checkbox" data-id="'+esc(e.id)+'" '+(e.active?'checked':'')+' aria-label="Использовать наблюдение"><label><strong>'+esc(e.text)+'</strong><div class="tag">'+esc(e.target)+' · '+esc(e.stance)+' · надёжность '+e.reliability+' · '+esc(e.source)+'</div></label><button class="secondary" data-remove="'+esc(e.id)+'" aria-label="Удалить наблюдение">×</button></div>').join('');
+ $('evidence').querySelectorAll('[data-id]').forEach(n=>n.addEventListener('change',()=>{const e=evidence.find(x=>x.id===n.dataset.id);if(e)e.active=n.checked}));
+ $('evidence').querySelectorAll('[data-remove]').forEach(n=>n.addEventListener('click',()=>{evidence=evidence.filter(x=>x.id!==n.dataset.remove);renderEvidence()}));
+}
+function calculate(){
+ const active=evidence.filter(e=>e.active), ids=['H1','H2','H3'], raw={H1:0,H2:0,H3:0}, wave={H1:0,H2:0,H3:0}, groups={};
+ for(const e of active){const key=e.source+'|'+e.target+'|'+e.stance;const discount=groups[key]?0.35:1;groups[key]=true;const sign=e.stance==='support'?1:e.stance==='refute'?-1:0;raw[e.target]+=sign*e.reliability*discount;
+  // Classical toy interference-inspired score: deterministic phase-like interactions among evidence items.
+  // Source phase is deterministic; stance controls the sign. This is a classical weighted heuristic, not quantum interference.
+  let phaseSeed=0;for(const ch of e.source)phaseSeed=(phaseSeed*31+ch.charCodeAt(0))>>>0;
+  const phase=(phaseSeed%10000)/10000*2*Math.PI;
+  wave[e.target]+=sign*e.reliability*discount*(0.7+0.3*Math.cos(phase))+(e.stance==='context'?0.1*e.reliability*Math.sin(phase):0);
+ }
+ const norm=Object.fromEntries(ids.map(k=>[k,Math.max(0,raw[k]+1.2)]));
+ const sum=Object.values(norm).reduce((a,b)=>a+b,0)||1, probs=Object.fromEntries(ids.map(k=>[k,norm[k]/sum]));
+ const best=o=>ids.slice().sort((a,b)=>o[b]-o[a])[0];
+ const classic=best(raw), waveWinner=best(wave);
+ return {goal:$('goal').value,activeEvidence:active,raw,wave,probs,classic,waveWinner,winner:classic,confidence:probs[classic],timestamp:new Date().toISOString(),note:'Scores are heuristic; they are not calibrated probabilities.'};
+}
+async function logEvent(type,payload){
+ const prev=events.length?events[events.length-1].hash:'GENESIS';
+ const event={seq:events.length+1,type,at:new Date().toISOString(),payload,previous_hash:prev};
+ event.hash=await sha256(JSON.stringify(event));
+ events.push(event);renderLedger();
+}
+function renderCandidates(run){
+ $('candidates').innerHTML=['H1','H2','H3'].map(k=>'<div class="candidate"><strong>'+k+(k===run.winner?' · выбран baseline':'')+'</strong><div class="tag">классический балл '+run.raw[k].toFixed(3)+' · нормализованный балл '+(run.probs[k]*100).toFixed(1)+'%</div><div class="bar"><span style="width:'+(run.probs[k]*100)+'%"></span></div></div>').join('');
+}
+function renderRun(run){
+ $('winner').textContent=run.winner;$('confidence').textContent=(run.confidence*100).toFixed(1)+'%';
+ $('decision').textContent='Цель: '+run.goal+'\nАктивных наблюдений: '+run.activeEvidence.length+'\nВыбор baseline: '+run.winner+'\nОснование: максимальный классический вес.\nОграничение: '+run.note;
+ $('classicWinner').textContent=run.classic;$('waveWinner').textContent=run.waveWinner;
+ $('classicScore').textContent='балл '+run.raw[run.classic].toFixed(3);
+ $('waveScore').textContent='балл '+run.wave[run.waveWinner].toFixed(3);
+ $('comparison').textContent=run.classic===run.waveWinner?'Оба метода выбрали '+run.classic+'. На этом примере wave-inspired эвристика не изменила выбор.':'Методы разошлись: baseline='+run.classic+', wave-inspired='+run.waveWinner+'. Различие не означает, что второй метод лучше.';
+ renderCandidates(run);
+}
+function renderLedger(){$('ledger').textContent=events.length?events.map(e=>'#'+e.seq+' '+e.type+'\nSHA-256: '+e.hash+'\nпредыдущий: '+e.previous_hash).join('\n\n'):'Журнал пуст.'}
+function renderMemory(){$('memory').textContent=memory.length?memory.map((m,i)=>(i+1)+'. '+m.timestamp+'\nЗадача: '+m.goal+'\nРезультат: '+m.winner+' · балл '+m.confidence+'\nНаблюдений: '+m.evidenceCount).join('\n\n'):'Локальных записей пока нет.'}
+$('addEvidence').addEventListener('click',()=>{const text=$('extra').value.trim();if(!text){$('extra').focus();return}const target=$('target').value; evidence.push({id:'user-'+Date.now(),text,target,stance:$('stance').value,reliability:.6,source:'user-added',active:true});$('extra').value='';renderEvidence();});
+$('run').addEventListener('click',async()=>{try{lastRun=calculate();renderRun(lastRun);await logEvent('RUN_COMPLETED',{goal:lastRun.goal,winner:lastRun.winner,raw:lastRun.raw,active_evidence:lastRun.activeEvidence.map(e=>e.id),method:'classical weighted score'});await logEvent('METHOD_COMPARISON',{classical:lastRun.classic,wave_inspired:lastRun.waveWinner,wave_scores:lastRun.wave});$('integrity').textContent='Добавлены два события. Хеши защищают целостность последовательности только после сохранения/сверки с доверенной копией.'}catch(e){$('decision').textContent='Ошибка: '+e.message}});
+$('saveMemory').addEventListener('click',async()=>{if(!lastRun){$('memoryStatus').textContent='Сначала запусти цикл.';return}const item={timestamp:new Date().toISOString(),goal:lastRun.goal,winner:lastRun.winner,confidence:lastRun.confidence,evidenceCount:lastRun.activeEvidence.length,source:'local-browser-demo'};memory.push(item);localStorage.setItem('aksi-core-memory-v1',JSON.stringify(memory));await logEvent('MEMORY_UPDATED',{goal:item.goal,winner:item.winner,evidence_count:item.evidenceCount});renderMemory();$('memoryStatus').textContent='Запись сохранена в localStorage этого браузера.'});
+$('clearMemory').addEventListener('click',()=>{memory=[];localStorage.removeItem('aksi-core-memory-v1');renderMemory();$('memoryStatus').textContent='Локальная память очищена.'});
+$('verify').addEventListener('click',async()=>{try{let prev='GENESIS';for(const e of events){const clone={seq:e.seq,type:e.type,at:e.at,payload:e.payload,previous_hash:e.previous_hash};const actual=await sha256(JSON.stringify(clone));if(e.previous_hash!==prev||e.hash!==actual){$('integrity').textContent='ОШИБКА целостности в событии #'+e.seq;return}prev=e.hash}$('integrity').textContent='OK: '+events.length+' событий прошли локальную проверку хеш-цепочки. Это не подтверждает истинность содержимого.'}catch(e){$('integrity').textContent='Проверка недоступна: '+e.message}});
+$('export').addEventListener('click',()=>{const report={schema:'aksi-core-lab-report/v1',exported_at:new Date().toISOString(),goal:lastRun?.goal||$('goal').value,run:lastRun,events,memory,limitations:['Local browser prototype','Heuristic scores are not calibrated probabilities','Wave-inspired method is classical and not evidence of quantum advantage','Hash chain is not signed; an attacker able to rewrite the entire export can recompute it']};const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='aksi-core-lab-report.json';a.click();URL.revokeObjectURL(url)});
+$('selftest').addEventListener('click',()=>{const tests=[];const test=(name,fn)=>{try{if(fn())tests.push('PASS · '+name);else tests.push('FAIL · '+name)}catch(e){tests.push('FAIL · '+name+' — '+e.message)}};test('3 гипотезы присутствуют',()=>['H1','H2','H3'].every(k=>Object.hasOwn(calculate().raw,k)));test('отключённое наблюдение не участвует',()=>{const old=evidence; const expected=old.filter(e=>e.active).length-(old[0]?.active?1:0); evidence=old.map((e,i)=>i===0?({...e,active:false}):({...e}));const actual=calculate().activeEvidence.length;evidence=old;return actual===expected});test('опровержение снижает wave-score относительно поддержки',()=>{const old=evidence;const base={id:'test',target:'H1',reliability:1,source:'test-source',active:true};evidence=[{...base,stance:'support'}];const support=calculate().wave.H1;evidence=[{...base,stance:'refute'}];const refute=calculate().wave.H1;evidence=old;return support>refute});test('повторный расчёт детерминирован',()=>{const a=calculate(),b=calculate();return JSON.stringify(a.raw)===JSON.stringify(b.raw)&&JSON.stringify(a.wave)===JSON.stringify(b.wave)});test('сумма нормализованных оценок равна 1',()=>Math.abs(Object.values(calculate().probs).reduce((a,b)=>a+b,0)-1)<1e-9);test('не утверждается физическое квантовое вычисление',()=>document.body.innerText.includes('не квантовое вычисление'));$('tests').textContent=tests.join('\n')+'\n\n'+tests.filter(x=>x.startsWith('PASS')).length+'/'+tests.length+' проверок пройдено.'});
+renderEvidence();renderMemory();
+</script></body></html>
