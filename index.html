@@ -275,12 +275,24 @@ try{state=Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}ca
 if(!state.memory||typeof state.memory!=='object')state.memory={};if(!Array.isArray(state.history))state.history=[];if(!Array.isArray(state.actionRewards))state.actionRewards=[];
 let lastEvidenceExchange=null,lastEvidenceSources=[],lastEvidencePassport=null,localEngineAdapter=null,lastEvidenceProvider='aksi-native-core',lastEvidenceModel=null;
 function persist(){try{localStorage.setItem(STORE,JSON.stringify(state));return true;}catch(e){return false;}}
+function recordActionEvidence(action,detail){
+ if(!window.AKSIEvidencePassport||typeof window.AKSIEvidencePassport.create!=='function')return;
+ const trace=window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.getTrace==='function'?window.AKSI_UNIFIED_CORE.getTrace().slice(-20):[];
+ window.AKSIEvidencePassport.create({request:String(action),answer:String(detail||'Action completed'),provider:'aksi-local-action',trace})
+  .then(passport=>{state.evidencePassports=Array.isArray(state.evidencePassports)?state.evidencePassports:[];state.evidencePassports.push(passport);state.evidencePassports=state.evidencePassports.slice(-100);persist();})
+  .catch(error=>event('EVIDENCE_ERROR',String(error&&error.message||error)));
+}
+function buildEvidencePassport(request,answer){
+ const modelStatus=window.AKSI_WEBLLM&&window.AKSI_WEBLLM.status?window.AKSI_WEBLLM.status():null;
+ const trace=window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.getTrace==='function'?window.AKSI_UNIFIED_CORE.getTrace().slice(-50):[];
+ return window.AKSIEvidencePassport.create({request,answer,provider:lastEvidenceProvider,model:lastEvidenceModel,sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url})),trace});
+}
 function awardAction(action,points){
  const manager=window.AKSIProgressManager;
  if(!manager||typeof manager.award!=='function')return false;
  const result=manager.award(state,action,points);
  if(!result.awarded)return false;
- persist();render();event('XP','+'+result.points+' XP · '+action);return true;
+ persist();render();event('XP','+'+result.points+' XP · '+action);recordActionEvidence(action,'Успешное действие AKSI · начислено '+result.points+' XP');return true;
 }
 function event(kind,msg){const item={time:new Date().toISOString(),kind,message:String(msg)};state.events.push(item);state.events=state.events.slice(-150);persist();const out=$('eventlog');if(out){out.textContent=state.events.slice(-9).map(x=>'['+x.kind+'] '+x.message).join('\n')+'\n';out.scrollTop=out.scrollHeight;}}
 function render(){ $('xp').textContent=state.xp+' XP';$('missionCount').textContent=state.done.length;$('memoryCount').textContent=Object.keys(state.memory||{}).length;const rank=Math.floor(state.xp/100);$('rank').textContent='RANK '+rank+' · '+(['INITIATE','EXPLORER','BUILDER','ARCHITECT','PIONEER'][Math.min(4,rank)]);$('progressLabel').textContent=(state.xp%100)+' / 100 XP';$('progressBar').style.width=(state.xp%100)+'%';$('onlineCount').textContent=navigator.onLine?'ONLINE':'OFFLINE';$('memoryList').textContent=Object.keys(state.memory||{}).length?Object.keys(state.memory).slice(-5).map(k=>'◈ '+k+': '+String(state.memory[k]).slice(0,90)).join('\n'):'Пока нет заметок.';document.querySelectorAll('[data-mission]').forEach(b=>{if(state.done.includes(b.dataset.mission)){b.style.borderColor='#55f3bd90';b.querySelector('.xp').textContent='✓ ВЫПОЛНЕНО';}})}
@@ -402,7 +414,7 @@ if(/суперпозици/.test(n))return 'Суперпозиция — сос�
 if(/энтропи/.test(n))return 'Энтропия информации измеряет неопределённость распределения вероятностей. В термодинамике понятие связано с числом доступных микросостояний; точное определение зависит от контекста.';
 $('chatStatus').textContent='Автономный режим · внешние серверы и веб-поиск не используются.';
 return 'В автономном ядре пока нет надёжного ответа на этот вопрос. Можно выполнить вычисление, сохранить заметку, загрузить заранее доступную локальную модель или открыть /offline/. Я не буду выдумывать ответ.';}
-$('chatForm').addEventListener('submit',async e=>{e.preventDefault();const q=$('chatInput').value.trim();if(!q)return;$('chatInput').value='';bubble('user',q);$('chatStatus').textContent='Обрабатываю запрос…';const wait=document.createElement('div');wait.className='bubble bot';wait.textContent='⟡ Анализирую…';$('chatlog').appendChild(wait);try{const a=await ask(q);wait.textContent=a;lastEvidenceExchange={request:q,answer:a};$('aksiProveAnswer').disabled=false;$('aksiVerifyPassport').disabled=true;$('aksiDownloadPassport').disabled=true;$('aksiProofOutput').style.display='none';if(arithmetic(q)!==null)awardAction('calculation:'+q,5);
+$('chatForm').addEventListener('submit',async e=>{e.preventDefault();const q=$('chatInput').value.trim();if(!q)return;$('chatInput').value='';bubble('user',q);$('chatStatus').textContent='Обрабатываю запрос…';const wait=document.createElement('div');wait.className='bubble bot';wait.textContent='⟡ Анализирую…';$('chatlog').appendChild(wait);try{const a=await ask(q);wait.textContent=a;lastEvidenceExchange={request:q,answer:a};lastEvidencePassport=null;$('aksiProveAnswer').disabled=true;$('aksiVerifyPassport').disabled=true;$('aksiDownloadPassport').disabled=true;$('aksiProofOutput').style.display='none';try{lastEvidencePassport=await buildEvidencePassport(q,a);$('aksiProveAnswer').disabled=false;$('aksiVerifyPassport').disabled=false;$('aksiDownloadPassport').disabled=false;}catch(proofError){event('EVIDENCE_ERROR',String(proofError&&proofError.message||proofError));}if(arithmetic(q)!==null)awardAction('calculation:'+q,5);
 if(window.AKSI_DNA_TOPOLOGY){
  const feedback=document.createElement('div');feedback.className='aksi-feedback';feedback.style.cssText='display:flex;gap:6px;margin:-4px 0 6px 4px;align-items:center';
  const label=document.createElement('span');label.textContent='Оцени ответ:';label.style.cssText='font-size:11px;color:var(--muted)';
@@ -423,7 +435,7 @@ document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click'
 })();
 
 
-function completeMission(id,xp,msg){if(state.done.includes(id)){bubble('bot','Эта миссия уже пройдена. '+msg);return;}state.done.push(id);state.xp+=xp;persist();render();event('MISSION',id+' completed; +'+xp+' XP');bubble('bot','МИССИЯ ВЫПОЛНЕНА · +'+xp+' XP\n'+msg);}
+function completeMission(id,xp,msg){if(state.done.includes(id)){bubble('bot','Эта миссия уже пройдена. '+msg);return;}state.done.push(id);state.xp+=xp;persist();render();event('MISSION',id+' completed; +'+xp+' XP');recordActionEvidence('mission:'+id,msg);bubble('bot','МИССИЯ ВЫПОЛНЕНА · +'+xp+' XP\n'+msg);}
 async function runMission(id){event('MISSION','Starting '+id);if(id==='math'){let a=arithmetic('123*(45-17)/4');if(a!=='861')return bubble('bot','Контроль не пройден: ожидалось 861, получено '+a);completeMission(id,50,'Контрольный тест 123 × (45 − 17) ÷ 4 = '+a+'.');}
 if(id==='memory'){state.memory['mission-check']='AKSI memory test passed';persist();if(state.memory['mission-check']!=='AKSI memory test passed')return bubble('bot','Проверка записи не пройдена.');completeMission(id,40,'Запись создана и прочитана из локального хранилища браузера.');}
 if(id==='voice'){const synth='speechSynthesis'in window,rec=('SpeechRecognition'in window)||('webkitSpeechRecognition'in window);if(!synth&&!rec)return bubble('bot','Голосовые API не обнаружены в этом браузере.');completeMission(id,30,'Синтез речи: '+(synth?'доступен':'недоступен')+'; распознавание речи: '+(rec?'доступно':'недоступно')+'. Доступность API не гарантирует разрешение микрофона.');}
@@ -470,21 +482,9 @@ $('refreshHealth').addEventListener('click',diagnostics);$('runDiagnostics').add
 $('aksiClearMemory').addEventListener('click',()=>{state.history=[];state.memory={};if(window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.clearMemory)window.AKSI_UNIFIED_CORE.clearMemory();persist();render();event('MEMORY','Conversation history and unified memory cleared');$('chatStatus').textContent='История диалога и локальная память очищены в этом браузере.';});
 if(window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.listNotes&&window.AKSI_UNIFIED_CORE.remember){const known=new Set(window.AKSI_UNIFIED_CORE.listNotes().map(x=>x.key));Object.entries(state.memory||{}).forEach(([k,v])=>{if(!known.has(k))window.AKSI_UNIFIED_CORE.remember(k,v);});}
 $('aksiProveAnswer').addEventListener('click',async()=>{
- if(!lastEvidenceExchange)return;
- const out=$('aksiProofOutput');out.style.display='block';out.textContent='Создаю Evidence Passport…';
- try{
-  const modelStatus=window.AKSI_WEBLLM&&window.AKSI_WEBLLM.status?window.AKSI_WEBLLM.status():null;
-  lastEvidencePassport=await window.AKSIEvidencePassport.create({
-   request:lastEvidenceExchange.request,answer:lastEvidenceExchange.answer,
-   provider:lastEvidenceProvider,
-   model:lastEvidenceModel,
-   sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url})),
-   trace:window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.getTrace==='function'?window.AKSI_UNIFIED_CORE.getTrace().slice(-50):[]
-  });
-  out.textContent=JSON.stringify(lastEvidencePassport,null,2);
-  $('aksiVerifyPassport').disabled=false;$('aksiDownloadPassport').disabled=false;
-  event('EVIDENCE','Evidence Passport created · SHA-256 '+lastEvidencePassport.integrity.digest.slice(0,16));
- }catch(error){out.textContent='Не удалось создать паспорт: '+String(error&&error.message||error);}
+ if(!lastEvidencePassport)return;
+ const out=$('aksiProofOutput');out.style.display='block';out.textContent=JSON.stringify(lastEvidencePassport,null,2);
+ event('EVIDENCE','Evidence Passport displayed · SHA-256 '+lastEvidencePassport.integrity.digest.slice(0,16));
 });
 $('aksiVerifyPassport').addEventListener('click',async()=>{
  if(!lastEvidencePassport)return;
