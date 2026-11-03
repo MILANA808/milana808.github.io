@@ -2,18 +2,22 @@ const assert = require("node:assert/strict");
 
 (async () => {
   let gpuRequests = 0;
-  globalThis.navigator = {
-    gpu: {
-      async requestAdapter() {
-        gpuRequests += 1;
-        return {};
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: {
+      gpu: {
+        async requestAdapter() {
+          gpuRequests += 1;
+          return {};
+        },
       },
     },
-  };
+  });
 
   let loaded = false;
   globalThis.AKSI_WEBLLM = {
     async load(_modelId, onProgress) {
+      await globalThis.navigator.gpu.requestAdapter();
       loaded = true;
       onProgress?.({ progress: 0.5, message: "half" });
       return { model: "mock-model" };
