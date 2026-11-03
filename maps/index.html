@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="theme-color" content="#0a0e14"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="description" content="АКСИ Карты — маршрут, офлайн-район, камеры, АЗС"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<title>АКСИ · Карты</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+:root{--bg:#0a0e14;--panel:rgba(12,18,28,.97);--line:#2a3a50;--txt:#eef3fb;--muted:#8b9cb0;--acc:#2ee6a8;--warn:#f5c542}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#app{position:relative;height:100%;height:100dvh}#map{position:absolute;inset:0;bottom:56px}
+#hud{position:absolute;left:0;right:0;top:0;z-index:20;pointer-events:none;padding:calc(8px + env(safe-area-inset-top,0)) 10px 0}
+#hud>*{pointer-events:auto}
+#status{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 12px;font-size:12px;font-weight:700}
+#status b{color:var(--acc)}#status .off{color:var(--warn)}
+#panel{position:absolute;left:0;right:0;bottom:56px;z-index:25;background:var(--panel);border-top:1px solid var(--line);padding:14px 14px calc(12px + env(safe-area-inset-bottom,0));max-height:58vh;overflow-y:auto;transition:transform .25s}
+#panel.drive{transform:translateY(110%)}
+#panel h1{font-size:16px;font-weight:850;margin-bottom:10px}
+.field{margin-bottom:10px}.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:650}
+.row{display:flex;gap:8px}
+input[type=text]{flex:1;min-height:48px;border-radius:12px;border:1px solid var(--line);background:#121a28;color:var(--txt);padding:12px 14px;font:inherit;font-size:16px}
+input:focus{outline:none;border-color:var(--acc)}
+button{min-height:48px;border-radius:12px;border:1px solid var(--line);background:#121a28;color:var(--txt);font:inherit;font-size:14px;font-weight:800;padding:0 14px;cursor:pointer}
+button.primary{background:#0f2f26;border-color:var(--acc);color:var(--acc);flex:1;font-size:16px}
+button.loc{min-width:48px;color:#9ec9ff}button:disabled{opacity:.4}
+.hint{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.actions button{flex:1;min-width:120px;min-height:42px;font-size:13px}
+#bnav{position:absolute;left:0;right:0;bottom:0;z-index:40;height:calc(56px + env(safe-area-inset-bottom,0));padding-bottom:env(safe-area-inset-bottom,0);background:rgba(10,14,20,.98);border-top:1px solid var(--line);display:flex}
+#bnav button{flex:1;border:0;background:transparent;color:var(--muted);border-radius:0;min-height:56px;font-size:11px;font-weight:750;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#bnav button.on{color:var(--acc)}#bnav button span{font-size:16px;line-height:1}
+#drive{position:absolute;inset:0;bottom:56px;z-index:30;pointer-events:none;display:none}#drive.on{display:block}
+#card{margin:calc(8px + env(safe-area-inset-top,0)) 10px 0;background:rgba(10,14,22,.95);border:1px solid var(--line);border-radius:16px;padding:10px 12px;display:flex;gap:10px;align-items:center;pointer-events:auto}
+#ab,#nb{display:flex;align-items:center;justify-content:center;background:#0c1820;border:1px solid #1e3a30;flex-shrink:0}
+#ab{width:56px;height:56px;border-radius:12px}#ab svg{width:42px;height:42px}
+#nb{width:36px;height:36px;border-radius:10px}#nb svg{width:26px;height:26px}
+#dist{font-size:22px;font-weight:900;color:var(--acc)}#turn{font-size:15px;font-weight:800}#meta{font-size:11px;color:var(--muted)}
+#warn{position:absolute;left:10px;right:10px;bottom:72px;pointer-events:none}
+.w{display:none;border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;margin-top:6px}.w.on{display:block}
+.w.cam{background:rgba(255,59,92,.95);color:#fff}.w.fuel{background:rgba(255,201,51,.95);color:#1a1200}.w.dps{background:rgba(77,159,255,.95);color:#fff}
+#dbar{position:absolute;left:0;right:0;bottom:0;padding:10px;pointer-events:none;display:flex;gap:8px}#dbar button{pointer-events:auto;min-height:40px;font-size:12px}
+#toast{position:absolute;left:50%;top:calc(12px + env(safe-area-inset-top,0));transform:translateX(-50%);z-index:50;display:none;background:rgba(10,14,22,.97);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:13px;font-weight:700;max-width:92%;text-align:center}#toast.on{display:block}
+#sheet{display:none;position:absolute;inset:0;z-index:35;background:rgba(0,0,0,.45)}#sheet.on{display:block}
+#sheet .box{position:absolute;left:0;right:0;bottom:56px;background:var(--panel);border-top:1px solid var(--line);padding:16px;max-height:70vh;overflow:auto;border-radius:18px 18px 0 0}
+#sheet h2{font-size:16px;margin-bottom:12px}#sheet a{display:block;padding:12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;color:var(--txt);text-decoration:none;font-weight:750}
+#sheet a span{display:block;font-size:12px;color:var(--muted);font-weight:500;margin-top:2px}
+.prog{height:6px;background:#1a2433;border-radius:4px;overflow:hidden;margin:10px 0}.prog>i{display:block;height:100%;width:0%;background:var(--acc)}
+.leaflet-control-attribution,.leaflet-control-zoom{display:none!important}
+</style></head><body>
+<div id="app">
+<div id="map"></div>
+<div id="hud"><div id="status">GPS <b id="gps">…</b> · сеть <b id="net">…</b> · офлайн-тайлы <b id="tc">0</b></div></div>
+<div id="toast"></div>
+<div id="panel">
+<h1>АКСИ · Карты</h1>
+<div class="field"><label>Откуда</label><div class="row">
+<input type="text" id="from" placeholder="Адрес или Я здесь" autocomplete="off"/>
+<button type="button" class="loc" id="here">◎</button></div></div>
+<div class="field"><label>Куда</label>
+<input type="text" id="to" placeholder="Город, улица" autocomplete="off" enterkeyhint="go"/></div>
+<div class="row"><button type="button" class="primary" id="go">Поехали</button></div>
+<div class="actions">
+<button type="button" id="saveOff">Скачать район офлайн</button>
+<button type="button" id="resume" style="display:none">Продолжить маршрут</button>
+</div>
+<div class="hint">Онлайн: маршрут + поиск. Офлайн: сохранённый маршрут и тайлы района (не вся Россия — выберите область и «Скачать район»).</div>
+</div>
+<div id="drive">
+<div id="card">
+<div id="ab"><svg viewBox="0 0 64 64" fill="none"><path id="ap" d="M32 10 L32 50 M32 10 L18 26 M32 10 L46 26" stroke="#2ee6a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div id="nb"><svg viewBox="0 0 64 64" fill="none"><path id="np" d="M32 10 L32 50 M32 10 L18 26 M32 10 L46 26" stroke="#8a9bb0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div><div id="dist">—</div><div id="turn">По маршруту</div><div id="meta">—</div></div>
+</div>
+<div id="warn"><div class="w cam" id="wCam"></div><div class="w dps" id="wDps"></div><div class="w fuel" id="wFuel"></div></div>
+<div id="dbar"><button type="button" id="ov">Весь путь</button><button type="button" id="stop">Стоп</button></div>
+</div>
+<div id="sheet"><div class="box"><h2 id="sheetTitle">Офлайн</h2><div id="sheetBody"></div><button type="button" id="sheetClose" style="width:100%;margin-top:12px">Закрыть</button></div></div>
+<nav id="bnav">
+<button type="button" class="on" data-tab="map"><span>🗺</span>Карта</button>
+<button type="button" data-tab="off"><span>⬇</span>Офлайн</button>
+<button type="button" data-tab="aksi"><span>◈</span>АКСИ</button>
+</nav>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+"use strict";
+var map=L.map("map",{zoomControl:false,attributionControl:false,maxZoom:18}).setView([55.75,37.62],6);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,updateWhenIdle:true,crossOrigin:true}).addTo(map);
+var routeLayer=null,startM=null,endM=null,userM=null,userAcc=null,poiG=L.layerGroup().addTo(map);
+var along={cam:[],fuel:[],dps:[]};
+var S={from:null,to:null,route:null,drive:false,overview:false,gps:{lat:null,lng:null,acc:null,heading:null,mode:""},watch:null,sm:{lat:null,lng:null},lastFix:0,lastBuzz:0,lastPan:0};
+var $=function(id){return document.getElementById(id)};
+function toast(m,ms){var t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove("on")},ms||2500)}
+function km(m){if(m==null||isNaN(m))return"\u2014";return m<1000?Math.round(m)+" \u043c":(m/1000).toFixed(m<10000?1:0)+" \u043a\u043c"}
+function dist(a,b){var R=6371000,t=Math.PI/180,dLat=(b[0]-a[0])*t,dLng=(b[1]-a[1])*t,x=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(a[0]*t)*Math.cos(b[0]*t)*Math.sin(dLng/2)*Math.sin(dLng/2);return 2*R*Math.asin(Math.sqrt(x))}
+function ico(c){return L.divIcon({className:"",html:'<div style="width:11px;height:11px;border-radius:50%;background:'+c+';border:2px solid #fff"></div>',iconSize:[11,11],iconAnchor:[5,5]})}
+var AR={straight:"M32 10 L32 50 M32 10 L18 26 M32 10 L46 26",left:"M44 48 L44 28 Q44 16 32 16 L18 16 M18 16 L28 8 M18 16 L28 24",right:"M20 48 L20 28 Q20 16 32 16 L46 16 M46 16 L36 8 M46 16 L36 24",slight_left:"M36 50 L30 28 L18 18 M18 18 L28 14 M18 18 L22 28",slight_right:"M28 50 L34 28 L46 18 M46 18 L36 14 M46 18 L42 28",sharp_left:"M42 46 L22 46 L22 20 M22 20 L12 30 M22 20 L32 30",sharp_right:"M22 46 L42 46 L42 20 M42 20 L52 30 M42 20 L32 30",uturn:"M40 50 L40 24 Q40 12 28 12 Q16 12 16 24 L16 34 M16 34 L8 26 M16 34 L24 26",roundabout:"M32 12 A16 16 0 1 1 31.9 12 M32 12 L26 20 M32 12 L38 20",arrive:"M32 12 L32 40 M22 30 L32 40 L42 30 M20 50 L44 50"};
+function setArr(id,k,col){var e=$(id);if(e){e.setAttribute("d",AR[k]||AR.straight);e.setAttribute("stroke",col||"#2ee6a8")}}
+function mKey(s){if(!s)return"straight";var t=(s.type||"").toLowerCase(),m=(s.modifier||"").toLowerCase(),ins=(s.instruction||"").toLowerCase();if(t.indexOf("arrive")>=0)return"arrive";if(t==="roundabout"||t==="rotary")return"roundabout";if(m.indexOf("uturn")>=0)return"uturn";if(m==="sharp left")return"sharp_left";if(m==="sharp right")return"sharp_right";if(m==="slight left")return"slight_left";if(m==="slight right")return"slight_right";if(m==="left"||/\u043d\u0430\u043b\u0435\u0432\u043e|left/.test(ins))return"left";if(m==="right"||/\u043d\u0430\u043f\u0440\u0430\u0432\u043e|right/.test(ins))return"right";return"straight"}
+function mTxt(s){if(!s)return"\u041f\u043e \u043c\u0430\u0440\u0448\u0440\u0443\u0442\u0443";if(s.instruction&&s.instruction.length>2)return s.instruction;var k=mKey(s);return{straight:"\u041f\u0440\u044f\u043c\u043e",left:"\u041d\u0430\u043b\u0435\u0432\u043e",right:"\u041d\u0430\u043f\u0440\u0430\u0432\u043e",slight_left:"\u041f\u043b\u0430\u0432\u043d\u043e \u043d\u0430\u043b\u0435\u0432\u043e",slight_right:"\u041f\u043b\u0430\u0432\u043d\u043e \u043d\u0430\u043f\u0440\u0430\u0432\u043e",sharp_left:"\u0420\u0435\u0437\u043a\u043e \u043d\u0430\u043b\u0435\u0432\u043e",sharp_right:"\u0420\u0435\u0437\u043a\u043e \u043d\u0430\u043f\u0440\u0430\u0432\u043e",uturn:"\u0420\u0430\u0437\u0432\u043e\u0440\u043e\u0442",roundabout:"\u041a\u0440\u0443\u0433\u043e\u0432\u043e\u0435",arrive:"\u041f\u0440\u0438\u0435\u0445\u0430\u043b\u0438"}[k]||"\u0414\u0430\u043b\u044c\u0448\u0435"}
+function mark(k,ll){var c=k==="s"?"#2ee6a8":"#4d9fff";if(k==="s"){if(startM)map.removeLayer(startM);startM=L.marker(ll,{icon:ico(c)}).addTo(map)}else{if(endM)map.removeLayer(endM);endM=L.marker(ll,{icon:ico(c)}).addTo(map)}}
+function user(lat,lng,acc,hdg){var ll=[lat,lng];if(!userM){userM=L.marker(ll,{zIndexOffset:900,icon:L.divIcon({className:"",html:'<div id="uc" style="width:24px;height:24px;transform:rotate(0deg)"><svg width="24" height="24" viewBox="0 0 28 28"><circle cx="14" cy="14" r="7" fill="#4d9fff" stroke="#fff" stroke-width="3"/><path d="M14 2 L18 12 L14 10 L10 12 Z" fill="#4d9fff" stroke="#fff" stroke-width="1.5"/></svg></div>',iconSize:[24,24],iconAnchor:[12,12]})}).addTo(map)}else userM.setLatLng(ll);if(hdg!=null&&!isNaN(hdg)){var e=document.getElementById("uc");if(e)e.style.transform="rotate("+hdg+"deg)"}if(acc&&acc<400){if(!userAcc)userAcc=L.circle(ll,{radius:Math.max(acc,10),color:"#4d9fff",weight:1,fillOpacity:.08}).addTo(map);else{userAcc.setLatLng(ll);userAcc.setRadius(Math.max(acc,10))}}}
+function onPos(pos){var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=pos.coords.accuracy,hdg=pos.coords.heading;if(S.sm.lat!=null&&acc<90){var j=dist([S.sm.lat,S.sm.lng],[lat,lng]),dt=Math.max(.4,(Date.now()-S.lastFix)/1000);if(j>100&&j/dt>50&&acc>30)return}var a=acc<=12?0.55:acc<=30?0.35:0.22;if(S.sm.lat==null){S.sm.lat=lat;S.sm.lng=lng}else{S.sm.lat=S.sm.lat*(1-a)+lat*a;S.sm.lng=S.sm.lng*(1-a)+lng*a}lat=S.sm.lat;lng=S.sm.lng;S.gps={lat:lat,lng:lng,acc:acc,mode:"live",heading:(hdg!=null&&!isNaN(hdg))?hdg:S.gps.heading};S.lastFix=Date.now();$("gps").textContent=Math.round(acc)+"\u043c";user(lat,lng,acc,S.gps.heading);if(!S.from||S.from.auto){S.from={lat:lat,lng:lng,name:"\u042f \u0437\u0434\u0435\u0441\u044c",auto:true};if(!$("from").value||$("from").dataset.auto==="1"){$("from").value="\u042f \u0437\u0434\u0435\u0441\u044c";$("from").dataset.auto="1"}mark("s",[lat,lng]);if(!S.drive&&!S.route)map.setView([lat,lng],14)}if(S.drive&&S.route)tick(lat,lng)}
+function onErr(){$("gps").textContent=S.gps.lat?"\u0441\u043b\u0430\u0431":"\u043d\u0435\u0442"}
+function opts(){return{enableHighAccuracy:true,maximumAge:2000,timeout:12000}}
+function once(){return new Promise(function(res,rej){if(!navigator.geolocation)return rej();navigator.geolocation.getCurrentPosition(function(p){onPos(p);res(p.coords)},function(){onErr();rej()},opts())})}
+function watch(){if(!navigator.geolocation||S.watch!=null)return;S.watch=navigator.geolocation.watchPosition(onPos,onErr,opts())}
+function geo(q){q=String(q||"").trim();if(!q)return Promise.reject(new Error("\u0410\u0434\u0440\u0435\u0441?"));if(/^(я|здесь|я здесь|me)$/i.test(q)){if(S.gps.lat!=null)return Promise.resolve({lat:S.gps.lat,lng:S.gps.lng,name:"\u042f \u0437\u0434\u0435\u0441\u044c",auto:true});return once().then(function(c){return{lat:c.latitude,lng:c.longitude,name:"\u042f \u0437\u0434\u0435\u0441\u044c",auto:true}})}if(/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(q)){var p=q.split(",");return Promise.resolve({lat:+p[0],lng:+p[1],name:"\u0422\u043e\u0447\u043a\u0430"})}if(!navigator.onLine)return Promise.reject(new Error("\u041d\u0435\u0442 \u0441\u0435\u0442\u0438"));return fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ru&accept-language=ru&q="+encodeURIComponent(q)).then(function(r){return r.json()}).then(function(a){if(!a||!a[0])throw new Error("\u041d\u0435 \u043d\u0430\u0439\u0434\u0435\u043d\u043e");return{lat:+a[0].lat,lng:+a[0].lon,name:a[0].display_name}})}
+function buildRoute(a,b){if(!navigator.onLine)return Promise.reject(new Error("\u041d\u0443\u0436\u0435\u043d \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442"));return fetch("https://router.project-osrm.org/route/v1/driving/"+a.lng+","+a.lat+";"+b.lng+","+b.lat+"?overview=full&geometries=geojson&steps=true").then(function(r){return r.json()}).then(function(d){if(!d.routes||!d.routes[0])throw new Error("\u041d\u0435\u0442 \u043f\u0443\u0442\u0438");var r=d.routes[0];var coords=r.geometry.coordinates.map(function(c){return[c[1],c[0]]});var steps=[];(r.legs||[]).forEach(function(leg){(leg.steps||[]).forEach(function(s){var m=s.maneuver||{};steps.push({distance:s.distance||0,name:s.name||"",instruction:m.instruction||"",type:m.type||"",modifier:m.modifier||"",location:m.location?[m.location[1],m.location[0]]:null})})});return{coords:coords,steps:steps,distance:r.distance}})}
+function draw(rt){if(routeLayer)map.removeLayer(routeLayer);routeLayer=L.polyline(rt.coords,{color:"#2ee6a8",weight:6,opacity:.95}).addTo(map);map.fitBounds(routeLayer.getBounds(),{padding:[48,48],maxZoom:15})}
+function saveRoute(){try{localStorage.setItem("aksi_maps_route",JSON.stringify({route:S.route,from:S.from,to:S.to,ts:Date.now()}))}catch(e){}}
+function loadRoute(){try{var o=JSON.parse(localStorage.getItem("aksi_maps_route")||"null");return o&&o.route&&o.route.coords?o:null}catch(e){return null}}
+function loadPOI(coords){if(!navigator.onLine)return;poiG.clearLayers();along={cam:[],fuel:[],dps:[]};var step=Math.max(1,Math.floor(coords.length/12)),samples=[];for(var i=0;i<coords.length;i+=step)samples.push(coords[i]);if(samples.length>14)samples=samples.filter(function(_,i){return i%2===0});var parts=[];samples.forEach(function(p){parts.push('node["highway"="speed_camera"](around:160,'+p[0]+','+p[1]+');');parts.push('node["amenity"="fuel"](around:200,'+p[0]+','+p[1]+');');parts.push('node["amenity"="police"](around:220,'+p[0]+','+p[1]+');')});fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent("[out:json][timeout:25];("+parts.join("")+");out body;")}).then(function(r){return r.json()}).then(function(data){var seen={};(data.elements||[]).forEach(function(n){if(n.lat==null)return;var k=n.type+n.id;if(seen[k])return;seen[k]=1;var t=n.tags||{},kind,col;if(t.highway==="speed_camera"){kind="cam";col="#ff3b5c"}else if(t.amenity==="fuel"){kind="fuel";col="#ffc933"}else if(t.amenity==="police"){kind="dps";col="#4d9fff"}else return;var near=1e12;for(var i=0;i<coords.length;i+=Math.max(1,Math.floor(coords.length/60))){var d=dist([n.lat,n.lon],coords[i]);if(d<near)near=d}if(near>280)return;poiG.addLayer(L.marker([n.lat,n.lon],{icon:ico(col)}));along[kind].push({lat:n.lat,lng:n.lon,name:t.name||t.brand||kind})})}).catch(function(){})}
+function nearest(lat,lng){var c=S.route.coords,b=0,bd=1e15;for(var i=0;i<c.length;i++){var d=dist([lat,lng],c[i]);if(d<bd){bd=d;b=i}}return{i:b,d:bd}}
+function remain(i){var c=S.route.coords,s=0;for(var j=i;j<c.length-1;j++)s+=dist(c[j],c[j+1]);return s}
+function nearList(list,lat,lng,max){var best=null,bd=1e15;list.forEach(function(o){var d=dist([lat,lng],[o.lat,o.lng]);if(d<bd){bd=d;best=o}});return best&&bd<=max?{o:best,d:bd}:null}
+function stepsAt(lat,lng){var steps=S.route.steps||[],scored=[];for(var i=0;i<steps.length;i++){if(!steps[i].location)continue;scored.push({s:steps[i],d:dist([lat,lng],steps[i].location),i:i})}scored.sort(function(a,b){return a.d-b.d});if(!scored.length)return{cur:null,next:null};var cur=scored[0],next=null;for(var j=0;j<steps.length;j++){if(j>cur.i&&steps[j].location&&steps[j].type!=="arrive"){next={s:steps[j]};break}}return{cur:cur,next:next}}
+function tick(lat,lng){var n=nearest(lat,lng),rem=remain(n.i);var ord=stepsAt(lat,lng);if(n.d>160){setArr("ap","straight","#f5c542");setArr("np","straight","#8a9bb0");$("dist").textContent=Math.round(n.d)+" \u043c";$("turn").textContent="\u041d\u0430 \u043f\u0443\u0442\u044c";$("meta").textContent=""}else if(rem<45){setArr("ap","arrive");setArr("np","arrive","#8a9bb0");$("dist").textContent="0";$("turn").textContent="\u041f\u0440\u0438\u0435\u0445\u0430\u043b\u0438";$("meta").textContent=""}else if(ord.cur){setArr("ap",mKey(ord.cur.s));$("dist").textContent=km(ord.cur.d);$("turn").textContent=mTxt(ord.cur.s);$("meta").textContent=(ord.cur.s.name?ord.cur.s.name+" \u00b7 ":"")+km(ord.cur.s.distance);if(ord.next){setArr("np",mKey(ord.next.s),"#8a9bb0");$("meta").textContent=$("meta").textContent+" \u2192 "+mTxt(ord.next.s)}else setArr("np","arrive","#8a9bb0")}else{setArr("ap","straight");setArr("np","straight","#8a9bb0");$("dist").textContent=km(rem);$("turn").textContent="\u041f\u0440\u044f\u043c\u043e";$("meta").textContent=""}
+var c=nearList(along.cam,lat,lng,900);if(c&&c.d<=500){$("wCam").classList.add("on");$("wCam").textContent="\ud83d\udcf7 \u041a\u0430\u043c\u0435\u0440\u0430 "+km(c.d);if(Date.now()-S.lastBuzz>9000){S.lastBuzz=Date.now();try{navigator.vibrate&&navigator.vibrate([70,40,70])}catch(e){}}}else $("wCam").classList.remove("on");
+var d=nearList(along.dps,lat,lng,700);if(d&&d.d<=600){$("wDps").classList.add("on");$("wDps").textContent="\ud83d\ude93 \u0414\u041f\u0421 "+km(d.d)}else $("wDps").classList.remove("on");
+var f=nearList(along.fuel,lat,lng,1100);if(f&&f.d<=900){$("wFuel").classList.add("on");$("wFuel").textContent="\u26fd \u0410\u0417\u0421 "+km(f.d)}else $("wFuel").classList.remove("on");
+if(!S.overview&&Date.now()-S.lastPan>300){S.lastPan=Date.now();map.panTo([lat,lng],{animate:true,duration:.2})}}
+function goDrive(){S.drive=true;S.overview=false;$("panel").classList.add("drive");$("drive").classList.add("on");watch();if(S.gps.lat){tick(S.gps.lat,S.gps.lng);map.setView([S.gps.lat,S.gps.lng],16)}}
+function stopDrive(){S.drive=false;$("panel").classList.remove("drive");$("drive").classList.remove("on");["wCam","wDps","wFuel"].forEach(function(id){$(id).classList.remove("on")})}
+function lon2tile(lon,z){return Math.floor((lon+180)/360*Math.pow(2,z))}
+function lat2tile(lat,z){return Math.floor((1-Math.log(Math.tan(lat*Math.PI/180)+1/Math.cos(lat*Math.PI/180))/Math.PI)/2*Math.pow(2,z))}
+function tileUrls(bounds,zMin,zMax){var urls=[],subs=["a","b","c"];for(var z=zMin;z<=zMax;z++){var x0=lon2tile(bounds.getWest(),z),x1=lon2tile(bounds.getEast(),z);var y0=lat2tile(bounds.getNorth(),z),y1=lat2tile(bounds.getSouth(),z);if(x1-x0>40)x1=x0+40;if(y1-y0>40)y1=y0+40;for(var x=x0;x<=x1;x++)for(var y=y0;y<=y1;y++){var s=subs[(x+y)%3];urls.push("https://"+s+".tile.openstreetmap.org/"+z+"/"+x+"/"+y+".png")}}return urls}
+function countTiles(){if(!("caches" in window))return;caches.open("aksi-maps-tiles-v1").then(function(c){return c.keys()}).then(function(keys){$("tc").textContent=String(keys.length)}).catch(function(){})}
+function downloadRegion(){if(!navigator.onLine){toast("\u041d\u0443\u0436\u0435\u043d \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442");return}if(!navigator.serviceWorker||!navigator.serviceWorker.controller){toast("SW \u043d\u0435 \u0433\u043e\u0442\u043e\u0432 \u2014 \u043e\u0431\u043d\u043e\u0432\u0438\u0442\u0435 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0443");return}var urls=tileUrls(map.getBounds(),11,15);if(urls.length>750)urls=urls.slice(0,750);toast("\u041a\u0430\u0447\u0430\u044e "+urls.length+"...");showOffSheet("\u0421\u043a\u0430\u0447\u0438\u0432\u0430\u043d\u0438\u0435","<p>\u0422\u0430\u0439\u043b\u043e\u0432: "+urls.length+"</p><div class='prog'><i id='dlp'></i></div><p id='dlmsg'>...</p>");navigator.serviceWorker.controller.postMessage({type:"CACHE_TILES",urls:urls})}
+function showOffSheet(title,html){$("sheetTitle").textContent=title;$("sheetBody").innerHTML=html;$("sheet").classList.add("on")}
+navigator.serviceWorker&&navigator.serviceWorker.addEventListener("message",function(e){if(e.data&&e.data.type==="CACHE_DONE"){var p=$("dlp"),m=$("dlmsg");if(p)p.style.width="100%";if(m)m.textContent="OK: "+e.data.ok+", fail "+e.data.fail;toast("\u041e\u0444\u043b\u0430\u0439\u043d: "+e.data.ok);countTiles()}});
+$("here").onclick=function(){toast("GPS...");once().then(function(c){S.from={lat:c.latitude,lng:c.longitude,name:"\u042f \u0437\u0434\u0435\u0441\u044c",auto:true};$("from").value="\u042f \u0437\u0434\u0435\u0441\u044c";$("from").dataset.auto="1";mark("s",[c.latitude,c.longitude]);map.setView([c.latitude,c.longitude],14);toast("OK")}).catch(function(){toast("\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0430\u0434\u0440\u0435\u0441")})};
+$("from").addEventListener("input",function(){$("from").dataset.auto="0";S.from=null});
+$("go").onclick=function(){var btn=$("go");btn.disabled=true;btn.textContent="...";var fromQ=$("from").value.trim()||"\u044f \u0437\u0434\u0435\u0441\u044c",toQ=$("to").value.trim();if(!toQ){toast("\u041a\u0443\u0434\u0430?");btn.disabled=false;btn.textContent="\u041f\u043e\u0435\u0445\u0430\u043b\u0438";return}geo(fromQ).then(function(from){S.from=from;mark("s",[from.lat,from.lng]);$("from").value=from.name||fromQ;return geo(toQ).then(function(to){S.to=to;mark("e",[to.lat,to.lng]);$("to").value=to.name||toQ;return buildRoute(from,to)})}).then(function(rt){S.route=rt;draw(rt);saveRoute();goDrive();loadPOI(rt.coords);if(navigator.serviceWorker&&navigator.serviceWorker.controller&&navigator.onLine){var urls=tileUrls(L.latLngBounds(rt.coords),12,15).slice(0,400);navigator.serviceWorker.controller.postMessage({type:"CACHE_TILES",urls:urls})}}).catch(function(e){toast(e.message||"err")}).then(function(){btn.disabled=false;btn.textContent="\u041f\u043e\u0435\u0445\u0430\u043b\u0438"})};
+$("stop").onclick=stopDrive;
+$("ov").onclick=function(){if(!S.route||!routeLayer)return;S.overview=!S.overview;if(S.overview){map.fitBounds(routeLayer.getBounds(),{padding:[40,40]});$("ov").textContent="\u0417\u0430 \u043c\u043d\u043e\u0439"}else{$("ov").textContent="\u0412\u0435\u0441\u044c \u043f\u0443\u0442\u044c";if(S.gps.lat)map.setView([S.gps.lat,S.gps.lng],16)}};
+$("saveOff").onclick=downloadRegion;$("sheetClose").onclick=function(){$("sheet").classList.remove("on")};
+$("to").addEventListener("keydown",function(e){if(e.key==="Enter")$("go").click()});
+var saved=loadRoute();if(saved){$("resume").style.display="block";$("resume").onclick=function(){S.route=saved.route;S.from=saved.from;S.to=saved.to;if(S.from&&S.from.lat)mark("s",[S.from.lat,S.from.lng]);if(S.to&&S.to.lat)mark("e",[S.to.lat,S.to.lng]);draw(S.route);$("to").value=(S.to&&S.to.name)||"";$("from").value=(S.from&&S.from.name)||"\u042f \u0437\u0434\u0435\u0441\u044c";goDrive();toast("\u0418\u0437 \u043f\u0430\u043c\u044f\u0442\u0438")}}
+document.querySelectorAll("#bnav button").forEach(function(b){b.onclick=function(){document.querySelectorAll("#bnav button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");var t=b.getAttribute("data-tab");if(t==="map"){$("sheet").classList.remove("on")}if(t==="off"){showOffSheet("\u041e\u0444\u043b\u0430\u0439\u043d","<p style='font-size:13px;color:#8b9cb0;line-height:1.45;margin-bottom:12px'>\u0421\u043e\u0445\u0440\u0430\u043d\u044f\u0435\u0442\u0441\u044f <b>\u0442\u0435\u043a\u0443\u0449\u0438\u0439 \u0432\u0438\u0434</b> (\u0437\u0443\u043c 11\u201315), \u043d\u0435 \u0432\u0441\u044f \u0420\u0424.</p><button type='button' class='primary' id='dl2' style='width:100%'>\u0421\u043a\u0430\u0447\u0430\u0442\u044c \u0440\u0430\u0439\u043e\u043d</button><button type='button' id='clr' style='width:100%;margin-top:8px'>\u041e\u0447\u0438\u0441\u0442\u0438\u0442\u044c \u043a\u044d\u0448</button><p style='margin-top:12px;font-size:12px;color:#8b9cb0'>\u0412 \u043a\u044d\u0448\u0435: <b id='tc2'>"+$("tc").textContent+"</b></p>");$("dl2").onclick=downloadRegion;$("clr").onclick=function(){if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage({type:"CLEAR_TILES"});caches.delete("aksi-maps-tiles-v1").then(function(){toast("\u041e\u0447\u0438\u0449\u0435\u043d\u043e");countTiles();var t2=$("tc2");if(t2)t2.textContent="0"})}}if(t==="aksi"){showOffSheet("\u0410\u041a\u0421\u0418","<a href='/hub.html'>\u0425\u0430\u0431<span>\u0412\u0441\u0435 \u043c\u043e\u0434\u0443\u043b\u0438</span></a><a href='/authority/'>Authority<span>GATE</span></a><a href='/one/'>ONE<span>\u041a\u043e\u043d\u0442\u0443\u0440</span></a><a href='/local-ai/'>Local AI<span>Neuro</span></a><a href='/dip/'>DIP<span>Integrity</span></a><a href='/aksi-navigator.html'>\u041d\u0430\u0432\u0438\u0433\u0430\u0442\u043e\u0440<span>classic</span></a>")}}});
+function net(){$("net").textContent=navigator.onLine?"\u043e\u043d\u043b\u0430\u0439\u043d":"\u043e\u0444\u043b\u0430\u0439\u043d";$("net").className=navigator.onLine?"":"off"}net();window.addEventListener("online",net);window.addEventListener("offline",net);
+if("serviceWorker" in navigator){navigator.serviceWorker.register("./sw.js").then(function(){countTiles()}).catch(function(){})}
+try{watch();once().catch(function(){})}catch(e){}countTiles();
+})();
+</script></body></html>
