@@ -1,0 +1,28 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+
+const html = fs.readFileSync("index.html", "utf8");
+const initStart = html.indexOf("function initLocalModel(");
+const initEnd = html.indexOf("function prepareLocalModel()", initStart);
+assert.ok(initStart >= 0 && initEnd > initStart, "lazy model UI initializer exists");
+const initBlock = html.slice(initStart, initEnd);
+assert.equal(initBlock.includes("navigator.gpu"), false, "initializing the model UI must not probe WebGPU");
+assert.equal(html.includes("initLocalModel();\nconst STORE"), false, "model UI must not initialize on page load");
+const initialStatus = html.slice(html.indexOf('id="aksiLocalModelStatus"'), html.indexOf("</div>", html.indexOf('id="aksiLocalModelStatus"')));
+assert.match(initialStatus, /Ожидание команды/);
+assert.doesNotMatch(initialStatus, /Проверяю поддержку WebGPU/);
+assert.match(html, /function startLocalModelLoad\(\)/);
+assert.equal(html.includes('<script src="/aksi-webllm.js'), false, "WebLLM script must not load on initial page view");
+assert.ok(html.includes("script.src='/aksi-webllm.js"), "WebLLM script must load after user action");
+assert.match(html, /import\('\/modules\/engine-adapter\.mjs'\)/);
+assert.match(html, /setTimeout\(\(\)=>finish\(false/);
+assert.match(html, /2500/);
+assert.match(html, /id="aksiProveAnswer"/);
+assert.match(html, /id="aksiProofOutput"/);
+assert.match(html, /function buildEvidencePassport\(/);
+assert.match(html, /recordActionEvidence\(\x27mission:/);
+assert.match(html, /lastEvidencePassport=await buildEvidencePassport\(q,a\)/);
+assert.doesNotMatch(html, /#missions\{display:none!important\}/, "mission section must remain visible");
+assert.match(html, /function universeReact\(kind\)/);
+assert.match(html, /window\.location\.href='\/quantum-mind\/'/);
+console.log("AKSI main UI contract tests: OK");
