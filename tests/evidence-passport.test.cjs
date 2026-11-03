@@ -10,9 +10,11 @@ const passportApi = require("../modules/evidence-passport.js");
     provider: "AKSI deterministic calculator",
     model: null,
     sources: [],
+    trace: [{ sequence: 7, type: "answer", generator: "semantic-core", evidenceStatus: "unverified", at: "2026-11-04T00:00:00.000Z" }],
   });
   assert.equal(passport.schema, "aksi-evidence-passport/1.0");
   assert.equal(passport.reasoning.included, false);
+  assert.equal(passport.observed_steps[0].sequence, 7);
   assert.equal((await passportApi.verify(passport)).valid, true);
   const altered = { ...passport, answer: "5" };
   assert.equal((await passportApi.verify(altered)).valid, false);
