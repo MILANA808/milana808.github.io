@@ -201,18 +201,28 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
 <script src="/aksi-symbolic-inference.js?v=1"></script>
 <script src="/aksi-semantic-reasoning.js?v=2"></script>
 <script src="/aksi-unified-adaptive-core.js?v=6"></script>
-<script src="/aksi-webllm.js?v=5.0.0"></script>
 <script src="/modules/progress-manager.js?v=1"></script>
 <script src="/modules/evidence-passport.js?v=1"></script>
 <script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-let modelUIReady=false;
-function initLocalModel(){
+let modelUIReady=false,webllmScriptPromise=null;
+function ensureWebLLM(){
+ if(window.AKSI_WEBLLM)return Promise.resolve(window.AKSI_WEBLLM);
+ if(!webllmScriptPromise){
+  webllmScriptPromise=new Promise((resolve,reject)=>{
+   const script=document.createElement('script');script.src='/aksi-webllm.js?v=5.0.0';
+   script.onload=()=>window.AKSI_WEBLLM?resolve(window.AKSI_WEBLLM):reject(new Error('aksi-webllm.js загрузился, но API не зарегистрирован.'));
+   script.onerror=()=>reject(new Error('Не удалось загрузить /aksi-webllm.js.'));
+   document.head.appendChild(script);
+  });
+ }
+ return webllmScriptPromise;
+}
+function initLocalModel(api){
  if(modelUIReady)return;
- const api=window.AKSI_WEBLLM, select=$('aksiLocalModelSelect'), load=$('aksiLoadLocalModel'), unload=$('aksiUnloadLocalModel'), status=$('aksiLocalModelStatus'), badge=$('aksiLocalModelBadge');
- if(!api){status.textContent='Локальный модуль не загрузился. Встроенные вычисления и память остаются доступны.';badge.textContent='НЕДОСТУПНА';load.disabled=true;modelUIReady=true;return;}
+ const select=$('aksiLocalModelSelect'),load=$('aksiLoadLocalModel'),unload=$('aksiUnloadLocalModel'),status=$('aksiLocalModelStatus'),badge=$('aksiLocalModelBadge');
  const models=api.modelsForDevice();
  models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;select.appendChild(o);});
  select.value=api.defaultModel();
@@ -229,16 +239,27 @@ function initLocalModel(){
  else {badge.textContent='ОЖИДАНИЕ';status.textContent='Ожидание команды. Проверка WebGPU ещё не запускалась.';}
  modelUIReady=true;
 }
-function prepareLocalModel(){
- initLocalModel();
- const status=$('aksiLocalModelStatus');
- if(status&&!window.AKSI_WEBLLM?.ready())status.textContent='Ожидание команды. Нажмите «Загрузить выбранную модель», чтобы проверить WebGPU и начать загрузку.';
+async function prepareLocalModel(){
+ const status=$('aksiLocalModelStatus'),badge=$('aksiLocalModelBadge');
+ if(modelUIReady)return window.AKSI_WEBLLM;
+ if(status)status.textContent='Подготавливаю список локальных моделей…';
+ try{
+  const api=await ensureWebLLM();initLocalModel(api);
+  if(status&&!api.ready())status.textContent='Ожидание команды. Проверка WebGPU ещё не запускалась.';
+  return api;
+ }catch(error){
+  if(status)status.textContent='Локальный модуль недоступен. Встроенные вычисления и память остаются доступны. '+String(error&&error.message||error);
+  if(badge)badge.textContent='НЕДОСТУПНА';
+  return null;
+ }
 }
 async function startLocalModelLoad(){
- prepareLocalModel();
- const api=window.AKSI_WEBLLM,select=$('aksiLocalModelSelect'),load=$('aksiLoadLocalModel'),status=$('aksiLocalModelStatus'),badge=$('aksiLocalModelBadge');
- if(!api)return;
- load.disabled=true;status.textContent='Проверяю поддержку WebGPU…';badge.textContent='ПРОВЕРКА';
+ const load=$('aksiLoadLocalModel'),status=$('aksiLocalModelStatus'),badge=$('aksiLocalModelBadge');
+ load.disabled=true;
+ const api=await prepareLocalModel();
+ if(!api){load.disabled=false;return;}
+ const select=$('aksiLocalModelSelect');
+ status.textContent='Проверяю поддержку WebGPU…';badge.textContent='ПРОВЕРКА';
  try{
   localEngineAdapter=localEngineAdapter||await import('/modules/engine-adapter.mjs');
   window.AKSI_ENGINE_ADAPTER=localEngineAdapter;
@@ -266,7 +287,7 @@ $('aksiLoadLocalModel').addEventListener('click',startLocalModelLoad);
 $('aksiUnloadLocalModel').addEventListener('click',()=>{
  const api=window.AKSI_WEBLLM;if(api){api.unload();if(localEngineAdapter)localEngineAdapter.init({provider:'webllm'});$('aksiModelProgress').style.width='0%';$('aksiLocalModelBadge').textContent='ВЫГРУЖЕНА';$('aksiLocalModelStatus').textContent='Модель выгружена из памяти устройства.';$('aksiLoadLocalModel').disabled=false;$('aksiUnloadLocalModel').disabled=true;}
 });
-document.querySelectorAll('a[href="#core"],a[href="#universe"]').forEach(link=>link.addEventListener('click',prepareLocalModel));
+document.querySelectorAll('a[href="#core"],a[href="#universe"]').forEach(link=>link.addEventListener('click',()=>{prepareLocalModel();}));
 const STORE='aksi-matrix-game-v1';
 const API_CANDIDATES=[];
 let API='';
