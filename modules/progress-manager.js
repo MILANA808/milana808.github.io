@@ -13,7 +13,7 @@
     if (!key || !Number.isFinite(amount) || amount <= 0) {
       throw new TypeError("A non-empty action and positive XP amount are required.");
     }
-    const day = now.toISOString().slice(0, 10);
+    const day = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"), String(now.getDate()).padStart(2, "0")].join("-");
     const rewardId = day + ":" + key;
     if (state.actionRewards.includes(rewardId)) return { awarded: false, xp: Number(state.xp) || 0, rewardId };
     state.actionRewards.push(rewardId);
