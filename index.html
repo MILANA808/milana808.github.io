@@ -270,7 +270,7 @@ document.querySelectorAll('a[href="#core"],a[href="#universe"]').forEach(link=>l
 const STORE='aksi-matrix-game-v1';
 const API_CANDIDATES=[];
 let API='';
-let state={xp:0,done:[],memory:{},events:[],voice:false,history:[],actionRewards:[]};
+let state={xp:0,done:[],memory:{},events:[],voice:false,history:[],actionRewards:[],evidencePassports:[]};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}catch(e){}
 if(!state.memory||typeof state.memory!=='object')state.memory={};if(!Array.isArray(state.history))state.history=[];if(!Array.isArray(state.actionRewards))state.actionRewards=[];
 let lastEvidenceExchange=null,lastEvidenceSources=[],lastEvidencePassport=null,localEngineAdapter=null,lastEvidenceProvider='aksi-native-core',lastEvidenceModel=null;
@@ -283,7 +283,6 @@ function recordActionEvidence(action,detail){
   .catch(error=>event('EVIDENCE_ERROR',String(error&&error.message||error)));
 }
 function buildEvidencePassport(request,answer){
- const modelStatus=window.AKSI_WEBLLM&&window.AKSI_WEBLLM.status?window.AKSI_WEBLLM.status():null;
  const trace=window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.getTrace==='function'?window.AKSI_UNIFIED_CORE.getTrace().slice(-50):[];
  return window.AKSIEvidencePassport.create({request,answer,provider:lastEvidenceProvider,model:lastEvidenceModel,sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url})),trace});
 }
