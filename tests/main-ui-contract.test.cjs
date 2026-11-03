@@ -2,7 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
 const html = fs.readFileSync("index.html", "utf8");
-const initStart = html.indexOf("function initLocalModel()");
+const initStart = html.indexOf("function initLocalModel(");
 const initEnd = html.indexOf("function prepareLocalModel()", initStart);
 assert.ok(initStart >= 0 && initEnd > initStart, "lazy model UI initializer exists");
 const initBlock = html.slice(initStart, initEnd);
