@@ -31,6 +31,7 @@
       execution: {
         provider: String(input.provider || "unknown"),
         model: input.model ? String(input.model) : null,
+        provider_version: input.providerVersion ? String(input.providerVersion) : null,
         app_version: String(input.appVersion || "AKSI MATRIX"),
       },
       sources: Array.isArray(input.sources) ? input.sources.slice(0, 30).map((source) => ({
