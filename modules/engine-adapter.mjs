@@ -40,18 +40,6 @@ function assertAdapter(adapter) {
   }
 }
 
-async function detectWebGPU() {
-  const gpu = root.navigator?.gpu;
-  if (!gpu || typeof gpu.requestAdapter !== "function") {
-    state.webgpu = false;
-    throw new Error("WebGPU недоступен в этом браузере или устройстве.");
-  }
-  const adapter = await gpu.requestAdapter();
-  state.webgpu = Boolean(adapter);
-  if (!adapter) throw new Error("Браузер не предоставил WebGPU adapter.");
-  return adapter;
-}
-
 adapters.set("webllm", {
   async init() {
     if (!root.AKSI_WEBLLM) {
@@ -61,12 +49,14 @@ adapters.set("webllm", {
   },
 
   async loadModel(options = {}) {
-    await detectWebGPU();
     const runtime = root.AKSI_WEBLLM;
     if (typeof runtime.load !== "function") {
       throw new Error("WebLLM runtime не предоставляет load().");
     }
-    return runtime.load(options.modelId || null, options.onProgress);
+    const result = await runtime.load(options.modelId || null, options.onProgress);
+    const providerStatus = runtime.status?.();
+    if (typeof providerStatus?.webgpu === "boolean") state.webgpu = providerStatus.webgpu;
+    return result;
   },
 
   async generate(prompt, options = {}) {
@@ -156,6 +146,8 @@ export async function loadModel(options = {}) {
     return snapshot({ providerStatus: result || null });
   } catch (error) {
     state.phase = "failed";
+    const providerStatus = adapters.get(state.provider)?.status?.();
+    if (typeof providerStatus?.webgpu === "boolean") state.webgpu = providerStatus.webgpu;
     state.error = String(error?.message || error);
     throw error;
   }
