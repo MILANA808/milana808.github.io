@@ -10,6 +10,11 @@ module.exports = [
       sourceType: "module",
       globals: {
         globalThis: "readonly",
+        Array: "readonly",
+        Boolean: "readonly",
+        JSON: "readonly",
+        Math: "readonly",
+        Object: "readonly",
         Error: "readonly",
         Map: "readonly",
         Number: "readonly",
