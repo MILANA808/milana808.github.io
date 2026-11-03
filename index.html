@@ -478,7 +478,8 @@ $('aksiProveAnswer').addEventListener('click',async()=>{
    request:lastEvidenceExchange.request,answer:lastEvidenceExchange.answer,
    provider:lastEvidenceProvider,
    model:lastEvidenceModel,
-   sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url}))
+   sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url})),
+   trace:window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.getTrace==='function'?window.AKSI_UNIFIED_CORE.getTrace().slice(-50):[]
   });
   out.textContent=JSON.stringify(lastEvidencePassport,null,2);
   $('aksiVerifyPassport').disabled=false;$('aksiDownloadPassport').disabled=false;
