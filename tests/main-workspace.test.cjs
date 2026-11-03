@@ -25,7 +25,7 @@ assert.ok(html.includes('window.AKSI_ENGINE_ADAPTER.status().ready'), 'chat must
 assert.ok(html.includes('window.AKSI_WEBLLM.complete(q'), 'native provider fallback call must remain behind the adapter readiness gate');
 assert.match(html, /вывод модели не является независимой проверкой фактов/i, 'model answer must retain factual limitation notice');
 assert.ok(html.includes('Выгрузить') && html.includes('Загрузить выбранную модель'), 'user must be able to load and unload the model');
-assert.ok(adapter.includes('navigator.gpu') && adapter.includes('WebGPU недоступен'), 'unsupported WebGPU must be reported by the provider when the user starts loading');
+assert.ok(adapter.includes('G.navigator.gpu') && adapter.includes('WebGPU недоступен'), 'unsupported WebGPU must be reported by the provider when the user starts loading');
 assert.ok(demo.includes('id="langToggle"') && demo.includes('Switch to Russian') && demo.includes('Switch to English'), 'public demo should expose RU/EN language control');
 
 const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
