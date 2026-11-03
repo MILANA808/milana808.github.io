@@ -4,15 +4,33 @@ const router = require("../aksi-answer-router.js");
 async function run() {
   const root = globalThis;
   const previous = {};
-  for (const name of ["AKSIWeather","AKSISemanticReasoning","AKSICalculator","AKSISymbolicInference","AKSI_INTERNET","AKSI_WEBLLM"]) previous[name] = root[name];
+  for (const name of ["AKSIWeather","AKSISemanticReasoning","AKSICalculator","AKSISymbolicInference","AKSIKnowledgeBase","AKSI_INTERNET","AKSI_WEBLLM"]) previous[name] = root[name];
   try {
     root.AKSIWeather = {
       detect: q => /погод/i.test(q) ? { handled: true } : null,
       answer: async q => ({ handled: true, text: "Погода для теста", data: { city: "Анапа" } })
     };
     root.AKSISemanticReasoning = { answer: q => /^что такое математика/i.test(q) ? { handled: true, status: "defined", text: "Математика изучает структуры.", proof: [{type:"definition"}] } : null };
+    const knowledgeBase = require("../aksi-knowledge-base.js");
+    knowledgeBase.clear();
+    root.AKSIKnowledgeBase = knowledgeBase;
+    let result = await router.answer("запомни факт: кошка — это животное");
+    assert.equal(result.route, "local-knowledge-base");
+    assert.match(result.text, /утверждение пользователя/i);
+    result = await router.answer("запомни факт: животное --is-a--> живое существо");
+    assert.equal(result.route, "local-knowledge-base");
+    result = await router.answer("является ли кошка живым существом?");
+    assert.equal(result.route, "local-knowledge-base");
+    assert.match(result.text, /кошка → животное → живое существо/);
+    result = await router.answer("запомни факт: кошка --not-is-a--> животное");
+    assert.equal(result.route, "local-knowledge-base");
+    result = await router.answer("является ли кошка животное?");
+    assert.equal(result.route, "local-knowledge-base");
+    assert.equal(result.knowledge.status, "contradiction");
+    assert.match(result.text, /противоречие/i);
+    knowledgeBase.clear();
     root.AKSICalculator = { evaluate: expression => expression === "2+2" ? { ok: true, value: 4, formatted: "4" } : expression === "sqrt(81)" ? { ok: true, value: 9, formatted: "9" } : { ok: false, error: "bad expression" } };
-    let result = await router.answer("Команда - узнай погоду в Анапе");
+    result = await router.answer("Команда - узнай погоду в Анапе");
     assert.equal(result.route, "weather");
     assert.match(result.text, /Погода для теста/);
     result = await router.answer("Что такое математика?");
@@ -51,7 +69,7 @@ async function run() {
     result = await router.answer("почему небо голубое?");
     assert.equal(result.route, "honest-abstention");
     assert.match(result.text, /не могу надёжно ответить/);
-    console.log("AKSI answer router tests: OK (7 scenarios)");
+    console.log("AKSI answer router tests: OK (weather, semantic, knowledge graph, contradictions, math, web, abstention)");
   } finally {
     for (const [name, value] of Object.entries(previous)) {
       if (value === undefined) delete root[name]; else root[name] = value;
