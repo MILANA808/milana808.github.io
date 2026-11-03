@@ -138,7 +138,7 @@ export async function loadModel(options = {}) {
         state.progress = Number.isFinite(value)
           ? Math.max(0, Math.min(100, value <= 1 ? value * 100 : value))
           : state.progress;
-        try { options.onProgress?.(snapshot({ providerStatus: progress || null })); } catch {}
+        try { options.onProgress?.(snapshot({ providerStatus: progress || null })); } catch (callbackError) { void callbackError; }
       },
     });
     state.phase = "ready";
