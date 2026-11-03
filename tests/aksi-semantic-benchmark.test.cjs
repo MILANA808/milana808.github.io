@@ -21,7 +21,17 @@ const corpus = [
   ["Является ли геометрия разделом математики?", "entailed"],
   ["Что такое флуксометр?", "unknown_concept"],
   ["Является ли флуксометр наукой?", "unknown_relation"],
-  ["Привет", null]
+  ["Привет", null],
+  ["В чём разница между математикой и логикой?", "compared"],
+  ["Чем отличается нейросеть от языковой модели?", "compared"],
+  ["Объясни понятие алгоритм", "defined"],
+  ["Расскажи мне про геометрию", "defined"],
+  ["Что означает вероятность?", "defined"],
+  ["Что такое искусственный интеллект?", "defined"],
+  ["Что такое доказательство?", "defined"],
+  ["Что такое гипотеза?", "defined"],
+  ["Что такое факт?", "defined"],
+  ["Что такое компьютер?", "defined"]
 ];
 
 let passed = 0;
@@ -33,5 +43,5 @@ for (const [prompt, expected] of corpus) {
   else passed++;
 }
 assert.deepEqual(failures, [], "semantic benchmark failures");
-assert.equal(engine.version, "1.1.0");
+assert.equal(engine.version, "1.2.0");
 console.log("AKSI semantic benchmark: " + passed + "/" + corpus.length + " prompts passed");
