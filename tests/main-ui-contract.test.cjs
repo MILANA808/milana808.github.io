@@ -17,7 +17,7 @@ assert.match(html, /setTimeout\(\(\)=>finish\(false/);
 assert.match(html, /2500/);
 assert.match(html, /id="aksiProveAnswer"/);
 assert.match(html, /id="aksiProofOutput"/);
-assert.match(html, /#missions\{display:none!important\}/, "mission section must not be hidden");
+assert.doesNotMatch(html, /#missions\{display:none!important\}/, "mission section must remain visible");
 assert.match(html, /function universeReact\(kind\)/);
 assert.match(html, /window\.location\.href='\/quantum-mind\/'/);
 console.log("AKSI main UI contract tests: OK");
