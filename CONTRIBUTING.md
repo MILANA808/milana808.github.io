@@ -26,7 +26,7 @@ python3 -m http.server 8000
 ```
 
 Откройте http://localhost:8000/. Для локальной проверки отдельных порталов используйте
-их пути, например `/runtime/`, `/chat/`, `/superpose/`.
+их подтверждённые пути, например `/world-lab/`, `/quantum-mind/`, `/superpose/`.
 
 GitHub Pages публикует содержимое корня репозитория. Рабочий процесс
 `.github/workflows/pages.yml` запускается при push в `main` и при ручном запуске.
