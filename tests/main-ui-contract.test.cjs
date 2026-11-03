@@ -12,8 +12,8 @@ const initialStatus = html.slice(html.indexOf('id="aksiLocalModelStatus"'), html
 assert.match(initialStatus, /Ожидание команды/);
 assert.doesNotMatch(initialStatus, /Проверяю поддержку WebGPU/);
 assert.match(html, /function startLocalModelLoad\(\)/);
-assert.doesNotMatch(html, /<script src="\\/aksi-webllm\\.js/);
-assert.match(html, /script\.src=\x27\\/aksi-webllm\\.js/);
+assert.equal(html.includes('<script src="/aksi-webllm.js'), false, "WebLLM script must not load on initial page view");
+assert.ok(html.includes("script.src='/aksi-webllm.js"), "WebLLM script must load after user action");
 assert.match(html, /import\('\/modules\/engine-adapter\.mjs'\)/);
 assert.match(html, /setTimeout\(\(\)=>finish\(false/);
 assert.match(html, /2500/);
