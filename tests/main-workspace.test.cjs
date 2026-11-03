@@ -6,6 +6,7 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync('index.html', 'utf8');
 const adapter = fs.readFileSync('aksi-webllm.js', 'utf8');
+const engineAdapter = fs.readFileSync('modules/engine-adapter.mjs', 'utf8');
 const demo = fs.readFileSync('demo/index.html', 'utf8');
 const workspace = fs.readFileSync('workspace/index.html', 'utf8');
 const proofbench = fs.readFileSync('proofbench/index.html', 'utf8');
@@ -14,14 +15,17 @@ const unifiedCore = fs.readFileSync('core/index.html', 'utf8');
 for (const id of ['aksiLocalModelPanel','aksiLocalModelSelect','aksiLoadLocalModel','aksiUnloadLocalModel','aksiLocalModelStatus','aksiModelProgress']) {
   assert.ok(html.includes('id="' + id + '"'), 'main workspace missing model control: ' + id);
 }
-assert.ok(html.includes('<script src="/aksi-webllm.js?v=5.0.0"></script>'), 'model adapter must load before inline workspace initialization');
-assert.ok(html.indexOf('<script src="/aksi-webllm.js?v=5.0.0"></script>') < html.indexOf('<script>\n(function(){'), 'adapter script must precede workspace script');
-assert.ok(adapter.includes('complete: complete') && adapter.includes('load: loadModel') && adapter.includes('unload: unload'), 'adapter API contract changed');
-assert.ok(html.includes('window.AKSI_WEBLLM.complete(q'), 'chat should use loaded browser-local language model');
-assert.ok(html.includes('window.AKSI_WEBLLM.ready()'), 'chat must only call local generation when model is ready');
+assert.equal(html.includes('<script src="/aksi-webllm.js?v=5.0.0"></script>'), false, 'WebLLM runtime must not load during initial page view');
+assert.ok(html.includes("script.src='/aksi-webllm.js?v=5.0.0'"), 'WebLLM runtime must be injected after a user action');
+assert.ok(html.includes('function ensureWebLLM()') && html.includes('function prepareLocalModel()') && html.includes('function startLocalModelLoad()'), 'lazy loading lifecycle must be present');
+assert.ok(engineAdapter.includes('export async function init(') && engineAdapter.includes('export async function loadModel(') && engineAdapter.includes('export async function generate(') && engineAdapter.includes('export function status('), 'provider-neutral adapter API contract changed');
+assert.ok(adapter.includes('complete: complete') && adapter.includes('load: loadModel') && adapter.includes('unload: unload'), 'WebLLM provider API contract changed');
+assert.ok(html.includes('window.AKSI_ENGINE_ADAPTER.generate(q'), 'chat should route through the shared model adapter');
+assert.ok(html.includes('window.AKSI_ENGINE_ADAPTER.status().ready'), 'chat must only call local generation when the adapter reports ready');
+assert.ok(html.includes('window.AKSI_WEBLLM.complete(q'), 'native provider fallback call must remain behind the adapter readiness gate');
 assert.match(html, /вывод модели не является независимой проверкой фактов/i, 'model answer must retain factual limitation notice');
-assert.ok(html.includes('Выгрузить') && html.includes('Загрузить модель'), 'user must be able to load and unload the model');
-assert.ok(html.includes('if(!navigator.gpu)') && html.includes('локальная большая модель не запустится'), 'unsupported WebGPU must be reported before the user downloads weights');
+assert.ok(html.includes('Выгрузить') && html.includes('Загрузить выбранную модель'), 'user must be able to load and unload the model');
+assert.ok(adapter.includes('G.navigator.gpu') && adapter.includes('WebGPU недоступен'), 'unsupported WebGPU must be reported by the provider when the user starts loading');
 assert.ok(demo.includes('id="langToggle"') && demo.includes('Switch to Russian') && demo.includes('Switch to English'), 'public demo should expose RU/EN language control');
 
 const inlineScripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
