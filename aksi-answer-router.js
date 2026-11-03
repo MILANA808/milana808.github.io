@@ -74,6 +74,17 @@
         text: knowledgeResult.text, proof: knowledgeResult.proof || [], knowledge: knowledgeResult
       };
     }
+    const nativeLanguage = root.AKSINativeLanguageCore;
+    if (nativeLanguage && typeof nativeLanguage.answer === "function") {
+      const nativeResult = nativeLanguage.answer(q);
+      if (nativeResult && nativeResult.handled) return {
+        handled: true, version: VERSION, route: "native-language-core",
+        statusText: nativeResult.status === "grounded_composition"
+          ? "Собственное языковое ядро AKSI · ответ собран из локального графа понятий; основания доступны."
+          : "Собственное языковое ядро распознало вопрос, но не нашло достаточного понятия для ответа.",
+        text: nativeResult.text, proof: nativeResult.proof || [], native: nativeResult
+      };
+    }
     const expression = mathExpression(q);
     if (expression && root.AKSICalculator && typeof root.AKSICalculator.evaluate === "function") {
       const result = root.AKSICalculator.evaluate(expression);
