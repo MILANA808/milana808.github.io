@@ -101,14 +101,14 @@
   function answer(input) {
     const raw = String(input == null ? "" : input).trim().replace(/[ёЁ]/g, ch => ch === "Ё" ? "Е" : "е");
     if (!raw) return null;
-    let m = raw.match(/^\s*(?:что такое|что означает|объясни(?:\s+мне)?(?:,?\s+что такое)?|расскажи(?:\s+мне)?\s+о|опиши|дай определение|определи)\s+(.+?)\s*[?!.]*\s*$/i);
+    let m = raw.match(/^\s*(?:что такое|что означает|объясни(?:\s+мне)?(?:,?\s+что такое)?|объясни(?:\s+мне)?\s+понятие|расскажи(?:\s+мне)?\s+(?:о|про)|опиши|дай определение|определи)\s+(.+?)\s*[?!.]*\s*$/i);
     if (m) {
       const id = resolve(m[1]);
       if (!id) return { handled: true, status: "unknown_concept", text: "Я пока не знаю достаточно об этом понятии, чтобы дать обоснованное определение: «" + m[1].trim() + "». Добавь определение или связанные факты в базу знаний — я не буду заменять пробел догадкой.", proof: [], concept: null };
       const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
       return { handled: true, status: "defined", text: c.definition + "\n\nТип: " + c.kind + ".\nСвязи: " + c.parents.join(", ") + ".\nПризнаки: " + c.features.join("; ") + ".", proof: [{ type: "definition_lookup", concept: id, source: "AKSI built-in concept graph v" + VERSION }], concept: conceptInfo(id) };
     }
-    m = raw.match(/^\s*(?:чем отличается|в чем разница между|сравни)\s+(.+?)\s+и\s+(.+?)\s*[?!.]*\s*$/i);
+    m = raw.match(/^\s*(?:чем отличается|чем различаются|в чем разница между|сравни)\s+(.+?)\s+(?:и|от)\s+(.+?)\s*[?!.]*\s*$/i);
     if (m) {
       const a = resolve(m[1]), b = resolve(m[2]);
       if (!a || !b) return { handled: true, status: "unknown_concept", text: "Для сравнения нужны определения обоих понятий. Сейчас я не могу надёжно разобрать: «" + (!a ? m[1].trim() : m[2].trim()) + "».", proof: [] };
