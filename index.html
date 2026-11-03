@@ -535,10 +535,10 @@ requestAnimationFrame(drawUniverse);}
 function universeReact(kind){
  const labels={memory:'MEMORY FIELD · открой и сохрани заметку',reason:'REASONING FIELD · математический инструмент',quantum:'QUANTUM LAB · открываю симулятор',agents:'NETWORK FIELD · локальная диагностика'};
  $('worldStatus').textContent=labels[kind]||'FIELD: ACTIVE';$('worldCore').style.filter='hue-rotate('+(Math.random()*65-30)+'deg)';$('worldCore').style.scale='1.08';setTimeout(()=>$('worldCore').style.scale='1',260);event('WORLD','Node activated: '+kind);
- if(kind==='memory'){awardAction('world-memory',5);document.querySelector('#memoryForm').scrollIntoView({behavior:'smooth',block:'center'});$('memoryKey').focus();$('chatStatus').textContent='Открылся блок локальной памяти. Добавьте название и текст заметки.';return;}
- if(kind==='quantum'){awardAction('world-quantum',10);window.location.href='/quantum-mind/';return;}
- if(kind==='agents'){awardAction('world-diagnostics',5);document.querySelector('#diagOutput').scrollIntoView({behavior:'smooth',block:'center'});diagnostics();return;}
- if(kind==='reason'){awardAction('world-math',5);$('chatInput').value='Вычисли 12*(8+4) и покажи точный результат.';document.querySelector('#core').scrollIntoView({behavior:'smooth',block:'start'});$('chatInput').focus();$('chatForm').requestSubmit();}
+ if(kind==='memory'){document.querySelector('#memoryForm').scrollIntoView({behavior:'smooth',block:'center'});$('memoryKey').focus();$('chatStatus').textContent='Открылся блок локальной памяти. Добавьте название и текст заметки.';return;}
+ if(kind==='quantum'){window.location.href='/quantum-mind/';return;}
+ if(kind==='agents'){document.querySelector('#diagOutput').scrollIntoView({behavior:'smooth',block:'center'});diagnostics().then(results=>{const ok=(name)=>results.some(r=>r.name===name&&r.ok);if(ok('Local UI')&&ok('LocalStorage')&&ok('Local answer core'))awardAction('world-diagnostics',5);});return;}
+ if(kind==='reason'){$('chatInput').value='Вычисли 12*(8+4) и покажи точный результат.';document.querySelector('#core').scrollIntoView({behavior:'smooth',block:'start'});$('chatInput').focus();$('chatForm').requestSubmit();}
 }
 document.querySelectorAll('[data-world]').forEach(b=>b.addEventListener('click',()=>universeReact(b.dataset.world)));addEventListener('resize',resizeUniverse);resizeUniverse();drawUniverse();
 })();
