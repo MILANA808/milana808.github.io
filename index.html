@@ -305,7 +305,8 @@ function recordActionEvidence(action,detail){
 }
 function buildEvidencePassport(request,answer){
  const trace=window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.getTrace==='function'?window.AKSI_UNIFIED_CORE.getTrace().slice(-50):[];
- return window.AKSIEvidencePassport.create({request,answer,provider:lastEvidenceProvider,model:lastEvidenceModel,sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url})),trace});
+ const providerVersion=lastEvidenceProvider==='webllm'?(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.version):((window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.version)||(window.AKSI_DNA_TOPOLOGY&&window.AKSI_DNA_TOPOLOGY.version)||null);
+ return window.AKSIEvidencePassport.create({request,answer,provider:lastEvidenceProvider,model:lastEvidenceModel,providerVersion,sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url})),trace});
 }
 function awardAction(action,points){
  const manager=window.AKSIProgressManager;
