@@ -144,7 +144,7 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
   <div class="paneltitle"><span>◈ ЛОКАЛЬНАЯ ЯЗЫКОВАЯ МОДЕЛЬ</span><span class="tag" id="aksiLocalModelBadge">ОЖИДАНИЕ</span></div>
   <div class="sub">Локальная модель запускается только по команде. Выберите модель и нажмите кнопку: проверка WebGPU и загрузка весов начнутся после этого действия. Размер зависит от выбранной модели и состояния кэша браузера.</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
-   <select id="aksiLocalModelSelect" class="field" aria-label="Локальная модель" style="min-width:220px;flex:1"></select>
+   <select id="aksiLocalModelSelect" class="field" aria-label="Локальная модель" style="min-width:220px;flex:1" disabled></select>
    <button class="chip" id="aksiLoadLocalModel" type="button">Загрузить выбранную модель</button>
    <button class="chip" id="aksiUnloadLocalModel" type="button" disabled>Выгрузить</button>
   </div>
@@ -226,7 +226,7 @@ function initLocalModel(api){
  const select=$('aksiLocalModelSelect'),load=$('aksiLoadLocalModel'),unload=$('aksiUnloadLocalModel'),status=$('aksiLocalModelStatus'),badge=$('aksiLocalModelBadge');
  const models=api.modelsForDevice();
  models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;select.appendChild(o);});
- select.value=api.defaultModel();
+ select.value=api.defaultModel();select.disabled=false;
  function renderModelState(st){
   if(!st)return;
   if(st.loading)status.textContent=(st.message||'Загрузка модели…')+' · '+(st.progress||0)+'%';
