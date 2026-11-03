@@ -38,6 +38,13 @@
         url: String(source.url || "").slice(0, 2000),
         retrieved_at: source.retrieved_at || null,
       })) : [],
+      observed_steps: Array.isArray(input.trace) ? input.trace.slice(-50).map((step) => ({
+        sequence: Number.isFinite(Number(step.sequence)) ? Number(step.sequence) : null,
+        type: String(step.type || "event").slice(0, 100),
+        generator: String(step.generator || "").slice(0, 100),
+        evidence_status: String(step.evidenceStatus || step.evidence_status || "").slice(0, 100),
+        at: step.at || null,
+      })) : [],
       verification_scope: {
         digest: "SHA-256 over canonical passport payload",
         proves: "integrity of this exported record after creation",
