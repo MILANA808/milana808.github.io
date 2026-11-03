@@ -31,4 +31,16 @@ assert.match(unknownRelation.text, /не равна ложной/i);
 
 assert.equal(engine.answer('Привет'), null, 'unrelated queries must fall through to the existing router');
 assert.equal(engine.answer(''), null, 'empty input must not be handled');
+
+const inflectedComparison = ask('В чём разница между математикой и логикой?', 'compared');
+assert.deepEqual(inflectedComparison.proof[0].concepts, ['математика', 'логика']);
+
+const alternateComparison = ask('Чем отличается нейросеть от языковой модели?', 'compared');
+assert.deepEqual(alternateComparison.proof[0].concepts, ['нейронная сеть', 'языковая модель']);
+
+const explainConcept = ask('Объясни понятие алгоритм', 'defined');
+assert.match(explainConcept.text, /последовательность шагов/i);
+
+const tellAbout = ask('Расскажи мне про геометрию', 'defined');
+assert.match(tellAbout.text, /пространстве/i);
 console.log('AKSI semantic reasoning tests: OK (8 assertions groups)');
