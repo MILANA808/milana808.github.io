@@ -141,16 +141,16 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
  <div class="sub" style="margin-top:8px"><a href="/training-lab/" style="color:#7de7dd">Открытая лаборатория обучения → корпус, train/test, метрики и экспорт модели</a>
   <div class="sub" style="margin-top:6px"><a href="/neural-lab/" style="color:#7de7dd">Нейросетевая лаборатория → реальные обучаемые веса, backpropagation и тестовая ошибка</a></div></div>
  <div class="panel" id="aksiLocalModelPanel" style="margin-top:10px">
-  <div class="paneltitle"><span>◈ ЛОКАЛЬНАЯ ЯЗЫКОВАЯ МОДЕЛЬ</span><span class="tag" id="aksiLocalModelBadge">НЕ ЗАГРУЖЕНА</span></div>
-  <div class="sub">Модель работает в браузере на совместимом WebGPU-устройстве. Первый запуск загружает веса; это не облачный запрос. Доступность зависит от браузера, памяти и устройства.</div>
+  <div class="paneltitle"><span>◈ ЛОКАЛЬНАЯ ЯЗЫКОВАЯ МОДЕЛЬ</span><span class="tag" id="aksiLocalModelBadge">ОЖИДАНИЕ</span></div>
+  <div class="sub">Локальная модель запускается только по команде. Выберите модель и нажмите кнопку: проверка WebGPU и загрузка весов начнутся после этого действия. Размер зависит от выбранной модели и состояния кэша браузера.</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px">
    <select id="aksiLocalModelSelect" class="field" aria-label="Локальная модель" style="min-width:220px;flex:1"></select>
-   <button class="chip" id="aksiLoadLocalModel" type="button">Загрузить модель</button>
+   <button class="chip" id="aksiLoadLocalModel" type="button">Загрузить выбранную модель</button>
    <button class="chip" id="aksiUnloadLocalModel" type="button" disabled>Выгрузить</button>
   </div>
-  <div id="aksiLocalModelStatus" class="sub" role="status" aria-live="polite" style="margin-top:7px">Проверяю поддержку WebGPU…</div>
+  <div id="aksiLocalModelStatus" class="sub" role="status" aria-live="polite" style="margin-top:7px">Ожидание команды. Локальная модель пока не запускается.</div>
  </div>
- <div id="aksiModelProgress" style="height:4px;width:100%;background:linear-gradient(90deg,#9c7bff,#57eaff);border-radius:99px;margin-top:7px"></div>
+ <div style="height:4px;width:100%;background:#ffffff12;border-radius:99px;overflow:hidden;margin-top:7px"><div id="aksiModelProgress" style="height:4px;width:0%;background:linear-gradient(90deg,#9c7bff,#57eaff);border-radius:99px"></div></div>
  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px">
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiRememberTurns" type="checkbox"> Сохранять историю на этом устройстве</label>
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiUseWeb" type="checkbox"> Искать источники в интернете (запрос отправится в сеть)</label>
@@ -160,8 +160,10 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
  <div class="sub" style="margin-top:7px">Веса модели загружаются с CDN; после загрузки генерация выполняется в браузере. История выключена по умолчанию. Веб-источники — только при явном включении.</div>
 </div>
 <div id="aksiEvidence" class="notice" style="display:none;white-space:pre-wrap;overflow-wrap:anywhere"></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="chip" id="aksiProveAnswer" type="button" disabled>Доказать · Evidence Passport</button><button class="chip" id="aksiVerifyPassport" type="button" disabled>Проверить целостность</button><button class="chip" id="aksiDownloadPassport" type="button" disabled>Экспорт JSON</button></div>
+<pre id="aksiProofOutput" class="console" style="display:none;max-height:300px;white-space:pre-wrap"></pre>
 <form class="compose" id="chatForm"><input class="field" id="chatInput" autocomplete="off" placeholder="Вопрос… или нейросеть: продолжи текст" aria-label="Сообщение Акси"><button class="iconbtn" id="mic" type="button" title="Распознать речь">🎙</button><button class="btn primary" type="submit">➤</button></form><div class="notice" id="chatStatus">Готова. Для внешней модели нужен доступный AI endpoint или локальная модель.</div></div>
-<div class="panel"><div class="paneltitle"><span>⌘ ЖИВОЙ МОНИТОР</span><button class="chip" id="refreshHealth" type="button">Проверить связи ↻</button></div><div class="healthlist" id="healthlist"><div class="healthrow"><span>Локальное ядро</span><b class="healthstatus ok">работает</b></div><div class="healthrow"><span>Локальная память</span><b class="healthstatus ok">готова</b></div><div class="healthrow"><span>Backend API</span><b class="healthstatus wait">не проверен</b></div><div class="healthrow"><span>Голосовой ввод</span><b class="healthstatus">проверяется</b></div></div><div class="paneltitle" style="margin-top:18px"><span>⟡ EVENT STREAM</span><button class="chip" id="exportLog" type="button">Экспорт JSON</button></div><div class="console" id="eventlog">[BOOT] AKSI MATRIX interface initialized
+<div class="panel"><div class="paneltitle"><span>⌘ ЖИВОЙ МОНИТОР</span><button class="chip" id="refreshHealth" type="button">Проверить связи ↻</button></div><div class="healthlist" id="healthlist"><div class="healthrow"><span>Локальное ядро</span><b class="healthstatus ok">работает</b></div><div class="healthrow"><span>Локальная память</span><b class="healthstatus ok">готова</b></div><div class="healthrow"><span>Backend API</span><b class="healthstatus wait">не проверен</b></div><div class="healthrow"><span>Голосовой ввод</span><b class="healthstatus" id="voiceHealthStatus">проверяется</b></div></div><div class="paneltitle" style="margin-top:18px"><span>⟡ EVENT STREAM</span><button class="chip" id="exportLog" type="button">Экспорт JSON</button></div><div class="console" id="eventlog">[BOOT] AKSI MATRIX interface initialized
 [LOCAL] Memory storage ready
 [CORE] Waiting for command…</div></div></div></section>
 <section class="section" id="missions"><div class="secthead"><div><div class="eyebrow">02 / PLAY TO LEARN</div><h2>Миссии исследователя</h2><div class="sub">Каждое действие — проверяемый эксперимент. За выполнение начисляется опыт.</div></div><span class="pill" id="rank">RANK 0 · INITIATE</span></div><div class="missiongrid">
@@ -200,35 +202,66 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
 <script src="/aksi-semantic-reasoning.js?v=2"></script>
 <script src="/aksi-unified-adaptive-core.js?v=6"></script>
 <script src="/aksi-webllm.js?v=5.0.0"></script>
+<script src="/modules/progress-manager.js?v=1"></script>
+<script src="/modules/evidence-passport.js?v=1"></script>
 <script>
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
+let modelUIReady=false;
 function initLocalModel(){
+ if(modelUIReady)return;
  const api=window.AKSI_WEBLLM, select=$('aksiLocalModelSelect'), load=$('aksiLoadLocalModel'), unload=$('aksiUnloadLocalModel'), status=$('aksiLocalModelStatus'), badge=$('aksiLocalModelBadge');
- if(!api){status.textContent='Модуль локальной модели не загрузился. Проверь загрузку /aksi-webllm.js.';badge.textContent='ОШИБКА';load.disabled=true;return;}
+ if(!api){status.textContent='Локальный модуль не загрузился. Встроенные вычисления и память остаются доступны.';badge.textContent='НЕДОСТУПНА';load.disabled=true;modelUIReady=true;return;}
  const models=api.modelsForDevice();
  models.forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.label;select.appendChild(o);});
  select.value=api.defaultModel();
  function renderModelState(st){
   if(!st)return;
-  status.textContent=(st.message||'Состояние обновлено')+(st.error?' · '+st.error:'')+' · '+(st.progress||0)+'%';
+  if(st.loading)status.textContent=(st.message||'Загрузка модели…')+' · '+(st.progress||0)+'%';
   $('aksiModelProgress').style.width=(st.progress||0)+'%';
-  badge.textContent=st.ready?'ГОТОВА':st.loading?'ЗАГРУЗКА':'НЕ ЗАГРУЖЕНА';
+  badge.textContent=st.ready?'ГОТОВА':st.loading?'ЗАГРУЗКА':st.error?'ОШИБКА':'ОЖИДАНИЕ';
   load.disabled=!!st.loading||!!st.ready;unload.disabled=!st.ready&&!st.loading;select.disabled=!!st.loading;
  }
  window.addEventListener('aksi-webllm-progress',e=>renderModelState(e.detail));
- const st=api.status();renderModelState(st);
- if(!navigator.gpu){load.disabled=true;badge.textContent='WEBGPU НЕТ';status.textContent=(st.ios?'На этом iPhone WebGPU не предоставлен текущим браузером.':'Этот браузер или устройство не предоставляет WebGPU.')+' Доступны встроенные инструменты AKSI; локальная большая модель не запустится.';}
- else{status.textContent='WebGPU API обнаружен. Совместимость адаптера проверится при загрузке модели.';}
- load.addEventListener('click',async()=>{
-  load.disabled=true;status.textContent='Подготовка загрузки…';
-  try{const r=await api.load(select.value,renderModelState);renderModelState(r);status.textContent='Модель загружена локально: '+r.model+'. Можно задавать вопросы.';event('MODEL','WebLLM loaded: '+r.model);}
-  catch(e){status.textContent='Локальная модель не загрузилась: '+(e.message||e)+'. Встроенные инструменты остаются доступны.';badge.textContent='НЕДОСТУПНА';load.disabled=false;event('MODEL_ERROR',e.message||String(e));}
- });
- unload.addEventListener('click',()=>{api.unload();renderModelState(api.status());status.textContent='Модель выгружена из памяти.';});
+ const st=api.status();
+ if(st&&st.ready){renderModelState(st);status.textContent='Модель уже загружена: '+(st.model||'локальная модель')+'.';}
+ else {badge.textContent='ОЖИДАНИЕ';status.textContent='Ожидание команды. Проверка WebGPU ещё не запускалась.';}
+ modelUIReady=true;
 }
-initLocalModel();
+function prepareLocalModel(){
+ initLocalModel();
+ const status=$('aksiLocalModelStatus');
+ if(status&&!window.AKSI_WEBLLM?.ready())status.textContent='Ожидание команды. Нажмите «Загрузить выбранную модель», чтобы проверить WebGPU и начать загрузку.';
+}
+async function startLocalModelLoad(){
+ prepareLocalModel();
+ const api=window.AKSI_WEBLLM,select=$('aksiLocalModelSelect'),load=$('aksiLoadLocalModel'),status=$('aksiLocalModelStatus'),badge=$('aksiLocalModelBadge');
+ if(!api)return;
+ load.disabled=true;status.textContent='Проверяю поддержку WebGPU…';badge.textContent='ПРОВЕРКА';
+ try{
+  const r=await api.load(select.value,st=>{
+   $('aksiModelProgress').style.width=(st.progress||0)+'%';
+   status.textContent=(st.message||'Загрузка модели…')+' · '+(st.progress||0)+'%';
+   badge.textContent='ЗАГРУЗКА';
+  });
+  $('aksiModelProgress').style.width='100%';badge.textContent='ГОТОВА';load.disabled=true;
+  $('aksiUnloadLocalModel').disabled=false;status.textContent='Модель загружена локально: '+r.model+'. Генерация выполняется на устройстве.';
+  event('MODEL','WebLLM loaded: '+r.model);awardAction('model-loaded',10);
+ }catch(e){
+  const message=String(e&&e.message||e);
+  badge.textContent='НЕДОСТУПНА';load.disabled=false;
+  status.textContent=/webgpu|adapter|gpu/i.test(message)
+   ?'WebGPU недоступен или не предоставил адаптер. Используйте встроенные вычисления, память и семантические инструменты AKSI; облачный fallback не настроен. Подробности: '+message
+   :'Не удалось загрузить модель. Встроенные инструменты AKSI продолжают работать. Подробности: '+message;
+  event('MODEL_ERROR',message);
+ }
+}
+$('aksiLoadLocalModel').addEventListener('click',startLocalModelLoad);
+$('aksiUnloadLocalModel').addEventListener('click',()=>{
+ const api=window.AKSI_WEBLLM;if(api){api.unload();$('aksiModelProgress').style.width='0%';$('aksiLocalModelBadge').textContent='ВЫГРУЖЕНА';$('aksiLocalModelStatus').textContent='Модель выгружена из памяти устройства.';$('aksiLoadLocalModel').disabled=false;$('aksiUnloadLocalModel').disabled=true;}
+});
+document.querySelectorAll('a[href="#core"],a[href="#universe"]').forEach(link=>link.addEventListener('click',prepareLocalModel));
 const STORE='aksi-matrix-game-v1';
 const API_CANDIDATES=[];
 let API='';
