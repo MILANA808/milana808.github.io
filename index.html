@@ -293,7 +293,7 @@ const API_CANDIDATES=[];
 let API='';
 let state={xp:0,done:[],memory:{},events:[],voice:false,history:[],actionRewards:[],evidencePassports:[]};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}catch(e){}
-if(!state.memory||typeof state.memory!=='object')state.memory={};if(!Array.isArray(state.history))state.history=[];if(!Array.isArray(state.actionRewards))state.actionRewards=[];
+if(!state.memory||typeof state.memory!=='object')state.memory={};if(!Array.isArray(state.history))state.history=[];if(!Array.isArray(state.done))state.done=[];if(!Array.isArray(state.events))state.events=[];if(!Array.isArray(state.actionRewards))state.actionRewards=[];if(!Array.isArray(state.evidencePassports))state.evidencePassports=[];
 let lastEvidenceExchange=null,lastEvidenceSources=[],lastEvidencePassport=null,localEngineAdapter=null,lastEvidenceProvider='aksi-native-core',lastEvidenceModel=null;
 function persist(){try{localStorage.setItem(STORE,JSON.stringify(state));return true;}catch(e){return false;}}
 function recordActionEvidence(action,detail){
