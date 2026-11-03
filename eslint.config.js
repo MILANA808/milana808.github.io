@@ -4,12 +4,16 @@ module.exports = [
   { ignores: ["**/node_modules/**", "**/dist/**"] },
   js.configs.recommended,
   {
-    files: ["modules/**/*.mjs"],
+    files: ["modules/**/*.{js,mjs}"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
       globals: {
         globalThis: "readonly",
+        module: "readonly",
+        Date: "readonly",
+        TextEncoder: "readonly",
+        Uint8Array: "readonly",
         Array: "readonly",
         Boolean: "readonly",
         JSON: "readonly",
