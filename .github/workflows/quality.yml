@@ -1,0 +1,35 @@
+name: AKSI Quality
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install quality tools
+        run: npm install --no-audit --no-fund
+      - name: Test adapter and deterministic calculator
+        run: npm test
+      - name: Lint new modules
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
