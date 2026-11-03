@@ -16,7 +16,7 @@ async function run() {
     root.AKSIKnowledgeBase = knowledgeBase;
     let result = await router.answer("запомни факт: кошка — это животное");
     assert.equal(result.route, "local-knowledge-base");
-    assert.match(result.text, /пользовательское утверждение/i);
+    assert.match(result.text, /утверждение пользователя/i);
     result = await router.answer("запомни факт: животное --is-a--> живое существо");
     assert.equal(result.route, "local-knowledge-base");
     result = await router.answer("является ли кошка живым существом?");
