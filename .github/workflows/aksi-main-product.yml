@@ -10,6 +10,14 @@ on:
       - "aksi-visible-neural-lab.js"
       - "neural-lab/index.html"
       - "scripts/test_aksi_visible_neural_lab.cjs"
+      - "modules/engine-adapter.mjs"
+      - "tests/engine-adapter.test.cjs"
+      - "tests/aksi-calculator.test.js"
+      - "package.json"
+      - "eslint.config.js"
+      - ".prettierrc.json"
+      - "CONTRIBUTING.md"
+      - "quantum-mind/index.html"
       - "datasets/aksi-archive-theorem-corpus-v1.json"
       - "scripts/test_aksi_archive_theorem_corpus.cjs"
       - "scripts/train_aksi_archive_model.cjs"
@@ -29,6 +37,14 @@ on:
       - "scripts/test_aksi_wave_bayesian_engine.cjs"
       - "scripts/test_aksi_geometric_knowledge_core.cjs"
       - "scripts/check_aksi_main_product.mjs"
+      - "modules/engine-adapter.mjs"
+      - "tests/engine-adapter.test.cjs"
+      - "tests/aksi-calculator.test.js"
+      - "package.json"
+      - "eslint.config.js"
+      - ".prettierrc.json"
+      - "CONTRIBUTING.md"
+      - "quantum-mind/index.html"
       - ".github/workflows/aksi-main-product.yml"
   pull_request:
     paths:
@@ -55,6 +71,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Install AKSI quality tools
+        run: npm install --no-audit --no-fund
+      - name: Test provider adapter and deterministic calculator
+        run: npm test
+      - name: Lint new modules
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
       - name: Validate integrated product
         run: node scripts/check_aksi_main_product.mjs
       - name: Test main chat runtime escapes
