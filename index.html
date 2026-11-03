@@ -213,8 +213,8 @@ function ensureWebLLM(){
  if(!webllmScriptPromise){
   webllmScriptPromise=new Promise((resolve,reject)=>{
    const script=document.createElement('script');script.src='/aksi-webllm.js?v=5.0.0';
-   script.onload=()=>window.AKSI_WEBLLM?resolve(window.AKSI_WEBLLM):reject(new Error('aksi-webllm.js загрузился, но API не зарегистрирован.'));
-   script.onerror=()=>reject(new Error('Не удалось загрузить /aksi-webllm.js.'));
+   script.onload=()=>{if(window.AKSI_WEBLLM)resolve(window.AKSI_WEBLLM);else{webllmScriptPromise=null;reject(new Error('aksi-webllm.js загрузился, но API не зарегистрирован.'));}};
+   script.onerror=()=>{webllmScriptPromise=null;reject(new Error('Не удалось загрузить /aksi-webllm.js.'));};
    document.head.appendChild(script);
   });
  }
