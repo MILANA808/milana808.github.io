@@ -273,7 +273,7 @@ let API='';
 let state={xp:0,done:[],memory:{},events:[],voice:false,history:[],actionRewards:[]};
 try{state=Object.assign(state,JSON.parse(localStorage.getItem(STORE)||'{}'));}catch(e){}
 if(!state.memory||typeof state.memory!=='object')state.memory={};if(!Array.isArray(state.history))state.history=[];if(!Array.isArray(state.actionRewards))state.actionRewards=[];
-let lastEvidenceExchange=null,lastEvidenceSources=[],lastEvidencePassport=null,localEngineAdapter=null;
+let lastEvidenceExchange=null,lastEvidenceSources=[],lastEvidencePassport=null,localEngineAdapter=null,lastEvidenceProvider='aksi-native-core',lastEvidenceModel=null;
 function persist(){try{localStorage.setItem(STORE,JSON.stringify(state));return true;}catch(e){return false;}}
 function awardAction(action,points){
  const manager=window.AKSIProgressManager;
@@ -289,7 +289,7 @@ function bubble(role,text){const el=document.createElement('div');el.className='
 function normalize(s){return String(s||'').toLowerCase().trim();}
 function arithmetic(s){let src=String(s).replace(/[?=]/g,'').replace(/×/g,'*').replace(/÷/g,'/').replace(/,/g,'.').trim();if(!src||src.length>90||!/^[0-9+\-*/().\s]+$/.test(src))return null;let i=0;function ws(){while(src[i]===' ')i++;}function expr(){let v=term();for(;;){ws();if(src[i]==='+'){i++;v+=term()}else if(src[i]==='-'){i++;v-=term()}else return v;}}function term(){let v=factor();for(;;){ws();if(src[i]==='*'){i++;v*=factor()}else if(src[i]==='/'){i++;let d=factor();if(d===0)throw Error('division by zero');v/=d}else return v;}}function factor(){ws();if(src[i]==='+'){i++;return factor()}if(src[i]==='-'){i++;return -factor()}if(src[i]==='('){i++;let v=expr();ws();if(src[i++]!==')')throw Error('missing )');return v;}let start=i;while(/[0-9.]/.test(src[i]||'')&&i<src.length)i++;if(start===i)throw Error('number expected');let n=Number(src.slice(start,i));if(!Number.isFinite(n))throw Error('invalid number');return n;}try{let n=expr();ws();if(i!==src.length||!Number.isFinite(n))return null;return Number(n.toPrecision(12)).toString();}catch(e){return null;}}
 async function backend(path,opts={}){throw Error('Автономный режим AKSI: обращения к backend отключены.');}
-async function ask(q){const n=normalize(q);if(!n)return;let m=/^запомни\s+факт\s*[:：]/i.test(q)?null:q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){const k=m[1].trim(),v=m[2].trim();state.memory[k]=v;const saved=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.remember?window.AKSI_UNIFIED_CORE.remember(k,v):{ok:false};persist();render();event('MEMORY','Saved through unified core: '+k);return saved.ok?'Сохранила в единую локальную память: '+k+' = '+v:'Запись сохранена в памяти интерфейса, но ядро не подтвердило сохранение.';}
+async function ask(q){const n=normalize(q);if(!n)return;lastEvidenceSources=[];lastEvidenceProvider='aksi-native-core';lastEvidenceModel=null;let m=/^запомни\s+факт\s*[:：]/i.test(q)?null:q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){const k=m[1].trim(),v=m[2].trim();state.memory[k]=v;const saved=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.remember?window.AKSI_UNIFIED_CORE.remember(k,v):{ok:false};persist();render();event('MEMORY','Saved through unified core: '+k);return saved.ok?'Сохранила в единую локальную память: '+k+' = '+v:'Запись сохранена в памяти интерфейса, но ядро не подтвердило сохранение.';}
 if(/^(память|покажи память|что ты помнишь)$/.test(n)){const notes=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.listNotes?window.AKSI_UNIFIED_CORE.listNotes():[];const merged=Object.assign({},state.memory);notes.forEach(x=>{merged[x.key]=x.value;});const keys=Object.keys(merged);return keys.length?keys.map(k=>k+' = '+merged[k]).join('\n'):'Локальная память пока пуста.';}
 if(n==='статус системы'||n==='диагностика') {await diagnostics();return $('diagOutput').textContent;}
 const answerRouter=window.AKSIAnswerRouter;
@@ -348,7 +348,7 @@ if(!useWeb){$('aksiEvidence').style.display='none';}
   const modelResult=window.AKSI_ENGINE_ADAPTER&&window.AKSI_ENGINE_ADAPTER.status().ready
    ?await window.AKSI_ENGINE_ADAPTER.generate(q,{system,history:$('aksiRememberTurns').checked?state.history:[]})
    :await window.AKSI_WEBLLM.complete(q,{system,history:$('aksiRememberTurns').checked?state.history:[]});
-  if(modelResult&&typeof modelResult.text==='string'&&modelResult.text.trim()){
+  if(modelResult&&typeof modelResult.text==='string'&&modelResult.text.trim()){lastEvidenceProvider='webllm';lastEvidenceModel=modelResult.model||null;
    $('chatStatus').textContent='AKSI WebLLM · '+(modelResult.model||'локальная модель')+' · ответ сформирован на устройстве; факты проверь отдельно.';
    return modelResult.text.trim()+'\n\n[ИСТОЧНИК ОТВЕТА] локальная WebLLM · '+(modelResult.model||'модель браузера')+' · генерация выполнена на устройстве; истинность ответа отдельно не проверена. Вывод модели не является независимой проверкой фактов.';
   }
@@ -364,7 +364,7 @@ if(!useWeb){$('aksiEvidence').style.display='none';}
  result=window.AKSI_DNA_TOPOLOGY.generate(q);
  if(result&&result.text)result.text+='\n\n[ДИАГНОСТИКА] Единое ядро временно завершилось с ошибкой; ответ сформирован резервным локальным генератором. Ошибка записана в журнал.';
 }
- evidence=Array.isArray(result&&result.evidence)?result.evidence:[];lastEvidenceSources=evidence;
+ evidence=Array.isArray(result&&result.evidence)?result.evidence:[];lastEvidenceSources=evidence;lastEvidenceProvider='aksi-native-core:'+String(result&&result.mode||'local');
  if(useWeb){$('aksiEvidence').style.display='block';$('aksiEvidence').textContent=evidence.length?'ИСТОЧНИКИ (контекст, проверь первоисточник):\\n'+evidence.map((x,i)=>'['+(i+1)+'] '+(x.title||'Источник')+' — '+(x.url||'')+'\\n'+String(x.text||'').slice(0,280)).join('\\n\\n'):'Источники не найдены или поиск недоступен; веб-доказательств нет.';}
  if(result&&result.text){
   $('chatStatus').textContent='AKSI Native Generator · '+(result.mode||'local')+' · без WebLLM'+(evidence.length?' · источников найдено: '+evidence.length:'');
@@ -476,8 +476,8 @@ $('aksiProveAnswer').addEventListener('click',async()=>{
   const modelStatus=window.AKSI_WEBLLM&&window.AKSI_WEBLLM.status?window.AKSI_WEBLLM.status():null;
   lastEvidencePassport=await window.AKSIEvidencePassport.create({
    request:lastEvidenceExchange.request,answer:lastEvidenceExchange.answer,
-   provider:modelStatus&&modelStatus.ready?'webllm':'aksi-local-core',
-   model:modelStatus&&modelStatus.ready?modelStatus.model:null,
+   provider:lastEvidenceProvider,
+   model:lastEvidenceModel,
    sources:lastEvidenceSources.map(x=>({title:x.title,url:x.url}))
   });
   out.textContent=JSON.stringify(lastEvidencePassport,null,2);
@@ -499,7 +499,7 @@ $('aksiDownloadPassport').addEventListener('click',()=>{
 $('memoryForm').addEventListener('submit',e=>{e.preventDefault();const k=$('memoryKey').value.trim(),v=$('memoryValue').value.trim();if(!k||!v)return;state.memory[k]=v;const saved=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.remember?window.AKSI_UNIFIED_CORE.remember(k,v):{ok:false};persist();render();awardAction('note:'+k,10);event('MEMORY',saved.ok?'Unified core note saved: '+k:'UI note saved without core confirmation: '+k);$('memoryKey').value='';$('memoryValue').value='';});
 $('exportLog').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({exportedAt:new Date().toISOString(),state,events:state.events},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='aksi-matrix-session.json';a.click();URL.revokeObjectURL(a.href);event('EXPORT','Session JSON exported');});
 $('soundToggle').addEventListener('click',()=>{state.voice=!state.voice;$('soundToggle').textContent=state.voice?'◖)) Голос: ВКЛ':'◖)) Голос';if(state.voice)say('Голосовой режим Акси включён');event('VOICE','Speech synthesis '+(state.voice?'enabled':'disabled'));});
-$('mic').addEventListener('click',()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){$('chatStatus').textContent='Распознавание речи не поддерживается этим браузером. Попробуй Chrome или Edge и проверь разрешение микрофона.';return;}const rec=new R();rec.lang='ru-RU';rec.interimResults=false;rec.maxAlternatives=1;rec.onstart=()=>{$('chatStatus').textContent='Слушаю… говори сейчас.'};rec.onresult=e=>{$('chatInput').value=e.results[0][0].transcript;$('chatStatus').textContent='Речь распознана.'};rec.onerror=e=>{$('chatStatus').textContent='Ошибка микрофона: '+e.error};rec.start();});
+$('mic').addEventListener('click',()=>{const R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){$('chatStatus').textContent='Голосовой ввод недоступен в этом браузере.';$('mic').disabled=true;return;}try{const rec=new R();rec.lang='ru-RU';rec.interimResults=false;rec.maxAlternatives=1;rec.onstart=()=>{$('chatStatus').textContent='Слушаю… говори сейчас.'};rec.onresult=e=>{$('chatInput').value=e.results[0][0].transcript;$('chatStatus').textContent='Речь распознана.'};rec.onerror=e=>{$('chatStatus').textContent='Ошибка микрофона: '+e.error};rec.onend=()=>{$('mic').disabled=false};$('mic').disabled=true;rec.start();}catch(error){$('mic').disabled=false;$('chatStatus').textContent='Не удалось запустить микрофон: '+String(error&&error.message||error);}});
 window.addEventListener('online',()=>{render();event('NET','Browser online')});window.addEventListener('offline',()=>{render();event('NET','Browser offline')});
 $('year').textContent=new Date().getFullYear();render();state.events.slice(-8).forEach(x=>{});event('BOOT','AKSI MATRIX living universe ready');diagnostics().then(checkSpeechSupport).catch(e=>{event('ERROR','Diagnostics: '+e.message);checkSpeechSupport();});
 // Lightweight animated star field; no external graphics library.
