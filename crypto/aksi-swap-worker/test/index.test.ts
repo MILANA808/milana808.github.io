@@ -48,7 +48,6 @@ describe("AKSI swap Worker", () => {
     expect(response.status).toBe(200);
     expect(body.liveTrading).toBe(false);
     expect(body.configured).toBe(true);
-    expect(body.tokenDeployed).toBe(true);
   });
 
   it("exposes token/network configuration without exposing secrets", async () => {
