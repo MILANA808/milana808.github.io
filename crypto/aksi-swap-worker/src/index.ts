@@ -66,6 +66,28 @@ function validQuoteEnvelope(value: unknown): boolean {
   );
 }
 
+async function tokenHasCode(address: string): Promise<boolean> {
+  try {
+    const response = await fetch("https://mainnet.base.org", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "eth_getCode",
+        params: [address, "latest"],
+      }),
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!response.ok) return false;
+    const payload: unknown = await response.json().catch(() => null);
+    if (!isRecord(payload) || typeof payload.result !== "string") return false;
+    return /^0x[0-9a-fA-F]+$/.test(payload.result) && payload.result !== "0x";
+  } catch {
+    return false;
+  }
+}
+
 async function callZeroEx(url: URL, env: Env, allowedOrigin: string): Promise<Response> {
   try {
     const upstream = await fetch(url, {
@@ -116,13 +138,16 @@ export default {
 
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/config") {
-      const configured = Boolean(env.ZEROX_API_KEY && validEvmAddress(env.AKSI_TOKEN_ADDRESS));
+      const addressValid = validEvmAddress(env.AKSI_TOKEN_ADDRESS);
+      const tokenDeployed = addressValid ? await tokenHasCode(env.AKSI_TOKEN_ADDRESS) : false;
+      const configured = Boolean(env.ZEROX_API_KEY && addressValid && tokenDeployed);
       return json({
         service: "aksi-bitcoin-swap",
         configured,
+        tokenDeployed,
         network: "Base",
         chainId: 8453,
-        tokenAddress: validEvmAddress(env.AKSI_TOKEN_ADDRESS) ? env.AKSI_TOKEN_ADDRESS : null,
+        tokenAddress: addressValid ? env.AKSI_TOKEN_ADDRESS : null,
         tokenDecimals: 18,
         bitcoinNetwork: "Bitcoin mainnet",
         bitcoinDecimals: 8,
@@ -160,6 +185,10 @@ export default {
       if (!validIntegerAmount(amount)) return json({ error: "Amount must be a positive integer in token base units." }, 400, allowedOrigin);
       if (!validEvmAddress(evmAddress)) return json({ error: "Invalid Base EVM address." }, 400, allowedOrigin);
       if (!validBtcAddress(bitcoinAddress)) return json({ error: "Bitcoin mainnet address format is not recognized." }, 400, allowedOrigin);
+
+      if (!(await tokenHasCode(env.AKSI_TOKEN_ADDRESS))) {
+        return json({ error: "The configured AKSI address has no verified contract bytecode on Base. Quotes are disabled." }, 503, allowedOrigin);
+      }
 
       const params = new URLSearchParams({
         sortQuotesBy: "price",
