@@ -89,7 +89,7 @@ describe("AKSI swap Worker", () => {
     }), env);
     expect(response.status).toBe(200);
     expect(response.headers.get("access-control-allow-origin")).toBe(ORIGIN);
-    const [url, init] = fetchMock.mock.calls[0] as [URL, RequestInit];
+    const [url, init] = fetchMock.mock.calls[1] as [URL, RequestInit];
     const parsed = new URL(String(url));
     expect(parsed.searchParams.get("originChain")).toBe("base");
     expect(parsed.searchParams.get("destinationChain")).toBe("bitcoin");
@@ -108,7 +108,7 @@ describe("AKSI swap Worker", () => {
       body: JSON.stringify({ direction: "btc-to-aksi", amount: "100000000", evmAddress: EVM, bitcoinAddress: BTC }),
     }), env);
     expect(response.status).toBe(200);
-    const parsed = new URL(String((fetchMock.mock.calls[0] as [URL])[0]));
+    const parsed = new URL(String((fetchMock.mock.calls[1] as [URL])[0]));
     expect(parsed.searchParams.get("originChain")).toBe("bitcoin");
     expect(parsed.searchParams.get("destinationChain")).toBe("base");
     expect(parsed.searchParams.get("originAddress")).toBe(BTC);
