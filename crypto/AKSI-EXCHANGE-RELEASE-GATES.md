@@ -16,8 +16,8 @@ This checklist separates code completion from a live financial service. A green 
 - [ ] Verify source and constructor arguments on BaseScan Sepolia.
 - [ ] Confirm token name, symbol, 18 decimals, total supply and deployer balance.
 - [ ] Test wallet-to-wallet transfers and import the token into a standard EVM wallet.
-- [ ] Run the full Worker quote/status flow with test assets where the provider supports the route.
-- [ ] Exercise both EVM and Bitcoin PSBT wallet paths; record transaction hashes and outcomes.
+- [ ] Verify Worker endpoint behavior against mocked 0x responses; Base Sepolia does not prove a native-BTC mainnet route.
+- [ ] Test ordinary AKSI transfers on Base Sepolia and record transaction hashes. Do not claim native-BTC cross-chain settlement from testnet unless the provider explicitly supports that test route.
 
 ## Gate 3 — Worker operations
 
@@ -42,7 +42,7 @@ This checklist separates code completion from a live financial service. A green 
 ## Gate 5 — production release
 
 - [ ] Independent smart-contract and application security review.
-- [ ] End-to-end test on Base Sepolia with a real EVM wallet and UniSat-compatible Bitcoin wallet.
+- [ ] After mainnet token deployment, liquidity funding and security review, run a very small real-asset end-to-end test between Base mainnet and Bitcoin mainnet with an EVM wallet and UniSat-compatible Bitcoin wallet.
 - [ ] Re-check npm dependency audit and all GitHub Actions checks.
 - [ ] Confirm token supply, allocation, legal review and liquidity plan in writing.
 - [ ] Obtain separate explicit approval for Base mainnet deployment and liquidity funding.
