@@ -1,0 +1,28 @@
+name: AKSI swap Worker checks
+on:
+  push:
+    paths:
+      - "crypto/aksi-swap-worker/**"
+      - ".github/workflows/aksi-swap-worker.yml"
+  pull_request:
+    paths:
+      - "crypto/aksi-swap-worker/**"
+      - ".github/workflows/aksi-swap-worker.yml"
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: crypto/aksi-swap-worker
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - run: npm run typecheck
+      - run: npm test
