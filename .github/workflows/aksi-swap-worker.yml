@@ -22,5 +22,9 @@ jobs:
         with:
           node-version: 22
       - run: npm install
+      - name: Report dependency audit findings
+        run: |
+          npm audit --json > npm-audit.json || true
+          node -e 'const a=require("./npm-audit.json"); for (const [n,v] of Object.entries(a.vulnerabilities||{})) console.log(n, v.severity, "fixAvailable="+JSON.stringify(v.fixAvailable));'
       - run: npm run typecheck
       - run: npm test
