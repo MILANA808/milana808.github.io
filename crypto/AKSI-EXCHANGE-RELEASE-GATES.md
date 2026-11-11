@@ -25,7 +25,8 @@ This checklist separates code completion from a live financial service. A green 
 - [ ] Deploy the Worker only after the Base contract address is verified.
 - [ ] Store `ZEROX_API_KEY` and `AKSI_TOKEN_ADDRESS` as encrypted Cloudflare secrets.
 - [ ] Confirm `SITE_ORIGIN` is exactly `https://milana808.github.io`.
-- [ ] Configure Cloudflare rate limiting/bot controls. CORS is not abuse protection.
+- [ ] Confirm the Worker rate-limit namespace IDs are unique in the Cloudflare account and tune thresholds for expected traffic.
+- [ ] Add Cloudflare WAF/bot controls and monitor 429s. Built-in Worker limits are approximate and per location; CORS is not abuse protection.
 - [ ] Verify `/health`, `/config`, `/quote` and `/status` from the public site.
 - [ ] Confirm API key never appears in browser assets, logs or Git history.
 
