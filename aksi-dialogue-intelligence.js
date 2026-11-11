@@ -66,9 +66,13 @@
   }
   function resolveConcept(text, semantic) {
     if (!semantic || typeof semantic.resolve !== "function") return null;
-    const exact = semantic.resolve(text);
-    if (exact) return exact;
     const cleaned = norm(text);
+    const variants = [cleaned, cleaned.replace(/ику$/, "ика"), cleaned.replace(/ию$/, "ия"),
+      cleaned.replace(/ии$/, "ия"), cleaned.replace(/у$/, "а"), cleaned.replace(/ой$/, "а")];
+    for (const variant of variants) {
+      const exact = semantic.resolve(variant);
+      if (exact) return exact;
+    }
     const candidates = (semantic.concepts || []).map(id => ({ id, score: overlap(tokens(cleaned), tokens(id)) }))
       .filter(x => x.score >= 0.5).sort((a, b) => b.score - a.score);
     if (!candidates.length || (candidates[1] && candidates[1].score === candidates[0].score)) return null;
