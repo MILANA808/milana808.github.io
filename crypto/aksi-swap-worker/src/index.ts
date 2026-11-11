@@ -66,7 +66,7 @@ function validQuoteEnvelope(value: unknown): boolean {
   );
 }
 
-async function callZeroEx(url: URL, env: Env): Promise<Response> {
+async function callZeroEx(url: URL, env: Env, allowedOrigin: string): Promise<Response> {
   try {
     const upstream = await fetch(url, {
       headers: {
@@ -82,14 +82,14 @@ async function callZeroEx(url: URL, env: Env): Promise<Response> {
       const safePayload = isRecord(payload)
         ? { code: payload.code, message: payload.message, name: payload.name }
         : { message: "The quote provider returned an unreadable response." };
-      return json({ error: "Quote provider rejected the request.", provider: safePayload }, upstream.status);
+      return json({ error: "Quote provider rejected the request.", provider: safePayload }, upstream.status, allowedOrigin);
     }
-    return json(payload);
+    return json(payload, 200, allowedOrigin);
   } catch (error) {
     const message = error instanceof Error && error.name === "TimeoutError"
       ? "Quote provider timed out. Please request a fresh quote."
       : "Quote provider is temporarily unavailable.";
-    return json({ error: message }, 502);
+    return json({ error: message }, 502, allowedOrigin);
   }
 }
 
@@ -167,7 +167,7 @@ export default {
         params.set("originAddress", bitcoinAddress);
         params.set("destinationAddress", evmAddress);
       }
-      const response = await callZeroEx(new URL(`${ZEROX}/quotes?${params.toString()}`), env);
+      const response = await callZeroEx(new URL(`${ZEROX}/quotes?${params.toString()}`), env, allowedOrigin);
       if (!response.ok) return json(await response.json(), response.status, allowedOrigin);
       const payload: unknown = await response.json();
       if (!validQuoteEnvelope(payload)) {
@@ -194,7 +194,7 @@ export default {
         originTxHash,
         quoteId,
       });
-      return callZeroEx(new URL(`${ZEROX}/status?${params.toString()}`), env);
+      return callZeroEx(new URL(`${ZEROX}/status?${params.toString()}`), env, allowedOrigin);
     }
 
     return json({ error: "Not found" }, 404, allowedOrigin);
