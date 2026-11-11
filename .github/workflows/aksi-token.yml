@@ -1,0 +1,30 @@
+name: AKSI token tests
+
+on:
+  push:
+    paths:
+      - "crypto/aksi-token/**"
+      - ".github/workflows/aksi-token.yml"
+  pull_request:
+    paths:
+      - "crypto/aksi-token/**"
+      - ".github/workflows/aksi-token.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  foundry:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: crypto/aksi-token
+    steps:
+      - uses: actions/checkout@v4
+      - uses: foundry-rs/foundry-toolchain@v1
+      - name: Install dependencies
+        run: |
+          forge install OpenZeppelin/openzeppelin-contracts --no-commit
+          forge install foundry-rs/forge-std --no-commit
+      - name: Run contract tests
+        run: forge test -vv
