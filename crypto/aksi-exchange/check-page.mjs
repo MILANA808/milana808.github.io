@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 const pageUrl = new URL("../../aksi-exchange/index.html", import.meta.url);
 const html = readFileSync(pageUrl, "utf8");
-const scripts = [...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)];
+const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 assert.equal(scripts.length, 1, "Expected exactly one inline application script");
 new Function(scripts[0][1]);
 
