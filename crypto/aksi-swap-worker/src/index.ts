@@ -1,7 +1,13 @@
+interface RateLimitBinding {
+  limit(options: { key: string }): Promise<{ success: boolean }>;
+}
+
 export interface Env {
   ZEROX_API_KEY: string;
   AKSI_TOKEN_ADDRESS: string;
   SITE_ORIGIN: string;
+  QUOTE_LIMITER: RateLimitBinding;
+  STATUS_LIMITER: RateLimitBinding;
 }
 
 const BTC_NATIVE = "bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmql8k8";
@@ -64,6 +70,12 @@ function validQuoteEnvelope(value: unknown): boolean {
     isRecord(quote.transaction) &&
     isRecord(quote.transaction.details)
   );
+}
+
+async function rateLimitAllows(binding: RateLimitBinding, request: Request, scope: string): Promise<boolean> {
+  const clientIp = request.headers.get("CF-Connecting-IP") || "unknown";
+  const result = await binding.limit({ key: `${scope}:${clientIp}` });
+  return result.success;
 }
 
 async function tokenHasCode(address: string): Promise<boolean> {
@@ -138,6 +150,9 @@ export default {
 
     const url = new URL(request.url);
     if (request.method === "GET" && url.pathname === "/config") {
+      if (!(await rateLimitAllows(env.QUOTE_LIMITER, request, "config"))) {
+        return json({ error: "Too many configuration requests. Try again shortly." }, 429, allowedOrigin);
+      }
       const addressValid = validEvmAddress(env.AKSI_TOKEN_ADDRESS);
       const tokenDeployed = addressValid ? await tokenHasCode(env.AKSI_TOKEN_ADDRESS) : false;
       const configured = Boolean(env.ZEROX_API_KEY && addressValid && tokenDeployed);
@@ -186,6 +201,10 @@ export default {
       if (!validEvmAddress(evmAddress)) return json({ error: "Invalid Base EVM address." }, 400, allowedOrigin);
       if (!validBtcAddress(bitcoinAddress)) return json({ error: "Bitcoin mainnet address format is not recognized." }, 400, allowedOrigin);
 
+      if (!(await rateLimitAllows(env.QUOTE_LIMITER, request, "quote"))) {
+        return json({ error: "Quote rate limit exceeded. Wait before requesting another quote." }, 429, allowedOrigin);
+      }
+
       if (!(await tokenHasCode(env.AKSI_TOKEN_ADDRESS))) {
         return json({ error: "The configured AKSI address has no verified contract bytecode on Base. Quotes are disabled." }, 503, allowedOrigin);
       }
@@ -233,6 +252,9 @@ export default {
         : /^0x[0-9a-fA-F]{64}$/.test(originTxHash);
       if (!validTx) return json({ error: "Invalid origin transaction hash." }, 400, allowedOrigin);
 
+      if (!(await rateLimitAllows(env.STATUS_LIMITER, request, "status"))) {
+        return json({ error: "Status polling rate limit exceeded. Wait before retrying." }, 429, allowedOrigin);
+      }
       const params = new URLSearchParams({
         originChain: direction === "btc-to-aksi" ? "bitcoin" : "base",
         originTxHash,
