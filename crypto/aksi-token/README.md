@@ -29,11 +29,11 @@ forge test -vv
 
 ## Testnet deployment
 
-Use Sepolia first. Never use a wallet holding meaningful funds for initial experiments.
+Use **Base Sepolia** first (chain ID `84532`), then Base mainnet (chain ID `8453`) only after the testnet release, security review and separate approval. Never use a wallet holding meaningful funds for initial experiments.
 
 1. Create a dedicated deployer wallet and fund it with Sepolia test ETH.
 2. Keep the private key outside the repository and shell history; use a local ignored `.env` file or a secrets manager.
-3. Set `DEPLOYER_PRIVATE_KEY`, `AKSI_INITIAL_SUPPLY`, and an RPC URL in the local environment.
+3. Set `DEPLOYER_PRIVATE_KEY`, `AKSI_INITIAL_SUPPLY`, `EXPECTED_CHAIN_ID=84532`, and `BASE_SEPOLIA_RPC_URL` in the local environment.
 4. Review the exact constructor supply and deployment transaction in your wallet.
 5. Deploy with Foundry using the Sepolia chain ID and verify the source on the block explorer.
 6. Publish the contract address only after checking bytecode, constructor arguments, total supply and deployer allocation.
