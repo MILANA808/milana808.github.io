@@ -185,8 +185,9 @@
       if (resolved) { topic = resolved; kind = "concept"; }
     }
     if (topic) {
-      const label = kind === "theorem" && math && math.find(topic)
-        ? math.find(topic).name : topic;
+      const theoremRecord = kind === "theorem" && math && typeof math.list === "function"
+        ? math.list().find(item => item.id === topic) : null;
+      const label = theoremRecord ? theoremRecord.name : topic;
       contextTurns.push({ topic, kind, label, intent: result.intent || "lookup" });
       if (contextTurns.length > 5) contextTurns = contextTurns.slice(-5);
     }
