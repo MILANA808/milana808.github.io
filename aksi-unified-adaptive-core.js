@@ -268,6 +268,22 @@
         return result;
       }
     }
+    // Compositional dialogue layer runs before narrow concept lookup and retrieval.
+    const dialogue = root.AKSIDialogueIntelligence;
+    if (dialogue && typeof dialogue.answer === "function") {
+      const dialogueResult = dialogue.answer(query);
+      if (dialogueResult && dialogueResult.handled) {
+        recordTrace({ type: "dialogue_intelligence", generator: "aksi-dialogue-intelligence", status: dialogueResult.status || "handled", intent: dialogueResult.intent || null });
+        return {
+          text: dialogueResult.text,
+          source: "aksi-dialogue-intelligence",
+          dialogue: dialogueResult,
+          reasoning: dialogueResult.proof || [],
+          core: "AKSI Unified Adaptive Core " + VERSION,
+          integration: { schema: "AKSI-CORE-RESULT/1", coreVersion: VERSION, generator: "aksi-dialogue-intelligence", inferenceStatus: dialogueResult.status || "handled", intent: dialogueResult.intent || null }
+        };
+      }
+    }
     // Bounded semantic inference runs before retrieval so known concept questions do not receive repeated template answers.
     const semantic = root.AKSISemanticReasoning;
     if (semantic && typeof semantic.answer === "function") {
