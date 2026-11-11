@@ -73,7 +73,7 @@
     if (/^(?:покажи|перечисли|какие есть|список) теорем/.test(q)) {
       return { handled: true, status: "catalog", intent: "list_theorems", text: "В учебной библиотеке АКСИ сейчас есть:\n" + entries.map((x,i) => (i+1)+". "+x.name+" — "+x.field).join("\n"), proof: [{type:"curated_catalog", count:entries.length}] };
     }
-    const isPractice = /(?:практика|задач[ауи]|упражнени[ея]|проверь меня)/.test(q);
+    const isPractice = /(?:практик[ауеи]|задач[ауи]|упражнени[ея]|проверь меня)/.test(q);
     const isExample = /(?:пример|применени[ея])/.test(q);
     const isTheorem = /(?:теорем|формул|правил|объясни|докажи|что такое)/.test(q);
     if (!isPractice && !isExample && !isTheorem) return null;
