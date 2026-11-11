@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eee3d1">
+<title>AKSI Exchange — AKSI ↔ Bitcoin</title>
+<meta name="description" content="Интерфейс подготовки котировки обмена AKSI на Base и native BTC в сети Bitcoin.">
+<style>
+:root{color-scheme:light;--bg:#f1e7d8;--card:#fffaf1;--ink:#34291f;--muted:#796958;--line:#d5c1a4;--accent:#8b623d;--green:#58734f;--red:#a54f43}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#fffaf1,transparent 55%),var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:900px;margin:0 auto;padding:28px 16px 70px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:28px}.brand{font-weight:900;letter-spacing:.12em}.back{color:var(--accent);text-decoration:none}
+h1{font-size:clamp(32px,6vw,54px);line-height:1.05;margin:8px 0}.lead{color:var(--muted);max-width:680px}
+.card{background:rgba(255,250,241,.9);border:1px solid var(--line);border-radius:20px;padding:20px;margin:16px 0;box-shadow:0 14px 40px #62401a0c}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input,select{width:100%;border:1px solid var(--line);border-radius:11px;background:#fffdf8;padding:12px;color:var(--ink);font:inherit;min-width:0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.directions{display:flex;gap:8px;flex-wrap:wrap}.directions label{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fffdf8;margin:0}.directions input{width:auto}
+button{border:0;border-radius:12px;padding:13px 18px;background:linear-gradient(110deg,#725035,#b58a5b);color:white;font:700 14px system-ui;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
+.note{font-size:12px;color:var(--muted)}.status{padding:12px;border-radius:12px;background:#f0e6d6;color:#614a32;margin-top:14px}.status.good{background:#e8efe3;color:var(--green)}.status.bad{background:#f5e6e1;color:var(--red)}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#211d19;color:#f6ead8;border-radius:12px;padding:14px;max-height:360px;overflow:auto;font-size:12px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;font-size:13px}.kv span:nth-child(odd){color:var(--muted)}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.card{padding:16px}.kv{grid-template-columns:1fr;gap:2px}.kv span:nth-child(even){margin-bottom:8px}}
+</style>
+</head>
+<body><main>
+<div class="top"><div class="brand">AKSI MATRIX</div><a class="back" href="/">← На главную</a></div>
+<p class="note">BASE · BITCOIN MAINNET</p><h1>AKSI Exchange</h1>
+<p class="lead">Подготовка котировки обмена AKSI на Base и настоящего BTC в сети Bitcoin — в обе стороны. Это интерфейс запроса котировки, а не подтверждение доступности ликвидности или готовности обмена.</p>
+<div class="card">
+<strong>Состояние интеграции</strong>
+<div id="status" class="status">Worker не подключён. Введите адрес развёрнутого Cloudflare Worker после его настройки.</div>
+<label for="worker">Адрес Cloudflare Worker</label>
+<input id="worker" type="url" placeholder="https://aksi-swap-worker.example.workers.dev" autocomplete="url">
+<p class="note">Адрес сохраняется только в локальном хранилище этого браузера. Не вставляйте сюда API-ключи или приватные ключи.</p>
+<button id="health" type="button">Проверить соединение</button>
+</div>
+<div class="card">
+<strong>Запрос котировки</strong>
+<div class="directions" style="margin-top:12px">
+<label><input type="radio" name="direction" value="aksi-to-btc" checked> AKSI → BTC</label>
+<label><input type="radio" name="direction" value="btc-to-aksi"> BTC → AKSI</label>
+</div>
+<label for="amount">Сумма</label><input id="amount" inputmode="decimal" placeholder="Например, 25">
+<p id="unit" class="note">AKSI · 18 знаков после запятой</p>
+<div class="grid">
+<div><label for="evm">Адрес кошелька Base (0x…)</label><input id="evm" autocomplete="off" placeholder="0x…"></div>
+<div><label for="btc">Адрес Bitcoin (mainnet)</label><input id="btc" autocomplete="off" placeholder="bc1… / 1… / 3…"></div>
+</div>
+<p class="note">Для AKSI → BTC укажите адрес Base отправителя и адрес Bitcoin получателя. Для BTC → AKSI — адрес Bitcoin отправителя и адрес Base получателя.</p>
+<button id="quote" type="button">Получить котировку</button>
+<div id="quoteStatus" class="status" aria-live="polite">Котировка ещё не запрашивалась.</div>
+<div id="quoteDetails" hidden></div>
+</div>
+<div class="card">
+<strong>Защита средств</strong>
+<p class="note">Эта версия не подключает кошельки, не подписывает транзакции и не отправляет средства. Не переводите активы вручную по данным из этого прототипа. Перед реальным запуском нужны проверка ответа 0x, срока действия котировки, минимальной суммы получения, комиссий, маршрута, симуляция транзакции и отдельная проверка Bitcoin PSBT.</p>
+<p class="note">Требуются развёрнутый контракт AKSI в Base, подтверждённая ликвидность, Worker с секретами и аудит. WBTC не является настоящим BTC; целевой актив здесь — native BTC.</p>
+</div>
+</main>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const worker=$('worker'),status=$('status'),quoteStatus=$('quoteStatus'),details=$('quoteDetails');
+try{worker.value=localStorage.getItem('aksi.swap.worker')||'';}catch(_){}
+function endpoint(path){const base=worker.value.trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(base))throw new Error('Нужен HTTPS-адрес развёрнутого Worker.');return base+path;}
+function direction(){return document.querySelector('input[name="direction"]:checked').value;}
+function setStatus(el,msg,type){el.textContent=msg;el.className='status'+(type?' '+type:'');}
+function amountBaseUnits(value,decimals){if(!/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(value))throw new Error('Введите корректную положительную сумму.');const [whole,fraction='']=value.split('.');if(fraction.length>decimals)throw new Error('Слишком много знаков после запятой. Допустимо: '+decimals+'.');const result=BigInt(whole)*10n**BigInt(decimals)+BigInt((fraction+'0'.repeat(decimals)).slice(0,decimals)||'0');if(result<=0n)throw new Error('Сумма должна быть больше нуля.');return result.toString();}
+function validateAddresses(){const evm=$('evm').value.trim(),btc=$('btc').value.trim();if(!/^0x[0-9a-fA-F]{40}$/.test(evm))throw new Error('Проверьте адрес Base: ожидается адрес 0x и 40 шестнадцатеричных символов.');if(!/^(1[1-9A-HJ-NP-Za-km-z]{25,34}|3[1-9A-HJ-NP-Za-km-z]{25,34}|bc1q[0-9ac-hj-np-z]{38,58}|bc1p[0-9ac-hj-np-z]{58})$/.test(btc))throw new Error('Формат Bitcoin-адреса не распознан. Это предварительная проверка, не проверка контрольной суммы.');return{evmAddress:evm,bitcoinAddress:btc};}
+function safe(v){return String(v==null?'—':v);}
+$('health').addEventListener('click',async()=>{try{setStatus(status,'Проверяю Worker…');const r=await fetch(endpoint('/health'));const data=await r.json();if(!r.ok)throw new Error(data.error||'HTTP '+r.status);setStatus(status,'Worker отвечает. Это подтверждает только доступность сервиса, не готовность обмена.','good');try{localStorage.setItem('aksi.swap.worker',worker.value.trim());}catch(_){}}catch(e){setStatus(status,e.message,'bad');}});
+document.querySelectorAll('input[name="direction"]').forEach(el=>el.addEventListener('change',()=>{$('unit').textContent=direction()==='aksi-to-btc'?'AKSI · 18 знаков после запятой':'BTC · 8 знаков после запятой';quoteStatus.textContent='Направление изменено. Запросите новую котировку.';details.hidden=true;}));
+$('quote').addEventListener('click',async()=>{details.hidden=true;try{const dir=direction(),decimals=dir==='aksi-to-btc'?18:8,amount=amountBaseUnits($('amount').value.trim(),decimals),addresses=validateAddresses();setStatus(quoteStatus,'Запрашиваю котировку у Worker…');const response=await fetch(endpoint('/quote'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({direction:dir,amount,...addresses})});const data=await response.json().catch(()=>({error:'Worker вернул не-JSON ответ'}));if(!response.ok)throw new Error(data.error||data.message||('Ошибка Worker: HTTP '+response.status));const raw=JSON.stringify(data,null,2);details.hidden=false;details.innerHTML='<hr><div class="kv"><span>Направление</span><span>'+safe(dir==='aksi-to-btc'?'AKSI → native BTC':'native BTC → AKSI')+'</span><span>Ликвидность</span><span>'+safe(data.liquidityAvailable===true?'API сообщает о доступной ликвидности':data.liquidityAvailable===false?'Ликвидность недоступна':'Поле не подтверждено ответом API')+'</span><span>Важно</span><span>Котировка не подписана и не исполнена. Проверьте срок действия, min received, комиссии и маршрут.</span></div><h3>Ответ провайдера</h3><pre></pre>';details.querySelector('pre').textContent=raw;setStatus(quoteStatus,'Получен ответ API. Это ещё не означает, что обмен можно безопасно исполнить.','good');try{localStorage.setItem('aksi.swap.worker',worker.value.trim());}catch(_){}}catch(e){setStatus(quoteStatus,e.message,'bad');}});
+})();
+</script></body></html>
