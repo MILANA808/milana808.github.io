@@ -34,6 +34,19 @@ Cloudflare Worker backend for requesting and tracking 0x Cross-Chain API quotes 
    npx wrangler deploy
    ```
 
+## GitHub Actions deployment
+
+A manual deployment workflow is included at `.github/workflows/deploy-aksi-swap-worker.yml`. It does not deploy on ordinary pushes. Before using it, add these repository Actions secrets:
+
+- `CLOUDFLARE_API_TOKEN` — Cloudflare API token with Workers edit permissions.
+- `CLOUDFLARE_ACCOUNT_ID` — Cloudflare account ID.
+- `ZEROX_API_KEY` — 0x API key.
+- `AKSI_TOKEN_ADDRESS` — verified AKSI ERC-20 contract address on Base mainnet.
+
+The workflow checks that the address has Base mainnet bytecode and that its metadata is exactly AKSI / AKSI / 18 decimals. It then deploys the Worker and uploads the 0x key and token address as encrypted Worker secrets. To run it, open GitHub Actions → Deploy AKSI swap Worker → Run workflow and enter `DEPLOY_AKSI_WORKER`.
+
+Do not add private keys or seed phrases to GitHub secrets. The deployment workflow does not deploy the token contract or fund liquidity.
+
 ## Endpoints
 
 - `GET /health` — service health and non-secret configuration state; does not imply trading is live.
