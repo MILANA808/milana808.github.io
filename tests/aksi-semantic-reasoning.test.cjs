@@ -29,6 +29,15 @@ assert.match(unknownDefinition.text, /не буду заменять пробе�
 const unknownRelation = ask('Является ли флуксометр наукой?', 'unknown_relation');
 assert.match(unknownRelation.text, /не равна ложной/i);
 
+const commonPath = engine.explainRelation("нейронная сеть", "языковая модель");
+assert.equal(commonPath.status, "shared_category");
+assert.equal(commonPath.proof[0].ancestor, "вычислительная модель");
+const subtypePath = engine.explainRelation("геометрия", "математика");
+assert.equal(subtypePath.status, "directed_relation");
+assert.deepEqual(subtypePath.proof[0].path, ["геометрия", "математика"]);
+const unknownPath = engine.explainRelation("флуксометр", "математика");
+assert.equal(unknownPath.status, "unknown_concept");
+
 assert.equal(engine.answer('Привет'), null, 'unrelated queries must fall through to the existing router');
 assert.equal(engine.answer(''), null, 'empty input must not be handled');
 

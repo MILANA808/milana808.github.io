@@ -93,6 +93,33 @@
     });
     return seen;
   }
+  function parentPath(id, target, seen) {
+    seen = seen || new Set();
+    if (!id || seen.has(id)) return null;
+    if (id === target) return [id];
+    seen.add(id);
+    const parents = concepts[id] && concepts[id].parents || [];
+    for (const parent of parents) {
+      const tail = parentPath(parent, target, new Set(seen));
+      if (tail) return [id].concat(tail);
+    }
+    return null;
+  }
+  function explainRelation(first, second) {
+    const a = resolve(first), b = resolve(second);
+    if (!a || !b) return { handled: true, status: 'unknown_concept', text: 'Для объяснения связи мне нужно однозначно определить оба понятия.', proof: [] };
+    if (a === b) return { handled: true, status: 'same_concept', concepts: [a,b], text: 'Оба выражения обозначают одно и то же понятие: «' + a + '».', proof: [{ type: 'same_concept', concept: a }] };
+    const aToB = parentPath(a,b), bToA = parentPath(b,a);
+    if (aToB || bToA) {
+      const path = aToB || bToA, child = aToB ? a : b, parent = aToB ? b : a;
+      return { handled: true, status: 'directed_relation', concepts: [a,b], text: 'В текущем графе понятий «' + child + '» является более узким понятием по отношению к «' + parent + '». Цепочка: ' + path.join(' → ') + '. Это классификационная связь, а не утверждение о причинности.', proof: [{ type: 'ontology_parent_path', child, parent, path, source: 'AKSI built-in concept graph v' + VERSION }] };
+    }
+    const aa = Array.from(ancestors(a)), bb = new Set(ancestors(b));
+    const common = aa.filter(id => bb.has(id)).map(id => ({ id, aPath: parentPath(a,id), bPath: parentPath(b,id) })).sort((x,y) => (x.aPath.length+x.bPath.length)-(y.aPath.length+y.bPath.length));
+    if (!common.length) return { handled: true, status: 'no_shared_path', concepts: [a,b], text: 'В текущем графе не найден общий классификационный путь между «' + a + '» и «' + b + '». Это не доказывает, что между ними вообще нет связи: база ограничена.', proof: [{ type: 'no_shared_ancestor', concepts: [a,b], source: 'AKSI built-in concept graph v' + VERSION }] };
+    const n = common[0];
+    return { handled: true, status: 'shared_category', concepts: [a,b], text: 'В графе понятий «' + a + '» и «' + b + '» связаны через общую категорию «' + n.id + '».\n\nПуть от первого: ' + n.aPath.join(' → ') + '.\nПуть от второго: ' + n.bPath.join(' → ') + '.\n\nЭто показывает общую классификацию, но само по себе не означает, что одно понятие вызывает другое.', proof: [{ type: 'nearest_shared_ancestor', ancestor: n.id, paths: [n.aPath,n.bPath], candidates: common.map(x => x.id), source: 'AKSI built-in concept graph v' + VERSION }] };
+  }
   function conceptInfo(id) {
       const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
     if (!c) return null;
@@ -130,6 +157,6 @@
     }
     return null;
   }
-  root.AKSISemanticReasoning = { version: VERSION, answer, resolve, conceptInfo, concepts: Object.keys(concepts) };
+  root.AKSISemanticReasoning = { version: VERSION, answer, resolve, conceptInfo, explainRelation, concepts: Object.keys(concepts) };
   if (typeof module === "object" && module.exports) module.exports = root.AKSISemanticReasoning;
 })(typeof window !== "undefined" ? window : globalThis);
