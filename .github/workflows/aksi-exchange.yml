@@ -5,6 +5,9 @@ on:
       - "aksi-exchange/**"
       - "crypto/aksi-exchange/**"
       - ".github/workflows/aksi-exchange.yml"
+      - ".github/workflows/deploy-aksi-swap-worker.yml"
+      - "crypto/aksi-swap-worker/scripts/preflight.mjs"
+      - "crypto/aksi-swap-worker/wrangler.toml"
   pull_request:
     paths:
       - "aksi-exchange/**"
@@ -20,5 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate exchange page script and safety guards
+      - name: Validate Worker deployment preflight syntax
+        run: node --check crypto/aksi-swap-worker/scripts/preflight.mjs
+      - name: Validate exchange page and deployment safety guards
         run: node crypto/aksi-exchange/check-page.mjs
