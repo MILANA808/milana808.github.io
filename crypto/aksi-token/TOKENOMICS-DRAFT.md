@@ -19,7 +19,7 @@ A utility description is not a guarantee of demand, profit, price appreciation o
 | Decision | Current status |
 |---|---|
 | Token name / ticker | AKSI / AKSI |
-| Chain | Sepolia testnet for development; production chain undecided |
+| Chain | Base selected for production architecture; Base Sepolia (84532) testnet first; Base mainnet (8453) not deployed |
 | Standard | ERC-20 |
 | Production supply | Not approved |
 | Founder / treasury / user allocation | Not approved |
