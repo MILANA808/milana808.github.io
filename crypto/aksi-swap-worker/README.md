@@ -7,6 +7,7 @@ Cloudflare Worker backend for requesting and tracking 0x Cross-Chain API quotes 
 - Source and automated test suite are committed; deployment has **not** been performed.
 - The AKSI ERC-20 contract must be deployed to Base and its address configured as a Worker secret.
 - A 0x API key is required and must remain in an encrypted Worker secret.
+- The Worker checks that the configured AKSI address has non-empty contract bytecode on Base before exposing a configured state or requesting a quote.
 - A quote is not proof of final settlement. The app must show the provider's minimum output, fees, route and estimated time, and must stop if `liquidityAvailable` is not true.
 - This Worker never receives wallet private keys and never signs transactions.
 - For BTC-origin swaps, the provider returns a PSBT. The user signs and broadcasts it with their own Bitcoin wallet.
@@ -22,7 +23,7 @@ Cloudflare Worker backend for requesting and tracking 0x Cross-Chain API quotes 
    npx wrangler secret put AKSI_TOKEN_ADDRESS
    ```
 3. Confirm `SITE_ORIGIN` in `wrangler.toml` matches the public website origin exactly.
-4. Run local checks:
+4. Run local checks (Vitest 5.1.x; CI also runs `npm audit --audit-level=high`):
    ```sh
    npm install
    npm run typecheck
