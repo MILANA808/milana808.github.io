@@ -50,6 +50,15 @@ describe("AKSI swap Worker", () => {
     expect(body.configured).toBe(true);
   });
 
+  it("exposes token/network configuration without exposing secrets", async () => {
+    const response = await worker.fetch(req("/config"), env);
+    const body = await response.json() as Record<string, unknown>;
+    expect(body.chainId).toBe(8453);
+    expect(body.tokenAddress).toBe(EVM);
+    expect(body.configured).toBe(true);
+    expect(JSON.stringify(body)).not.toContain("test-api-key");
+  });
+
   it("does not call 0x when configuration is missing", async () => {
     const response = await worker.fetch(req("/quote", {
       method: "POST", body: JSON.stringify({ direction: "aksi-to-btc", amount: "1", evmAddress: EVM, bitcoinAddress: BTC }),
