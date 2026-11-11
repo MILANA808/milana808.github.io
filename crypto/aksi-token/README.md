@@ -43,8 +43,10 @@ Example (after setting a private RPC endpoint in the environment):
 ```sh
 forge script script/DeployAKSI.s.sol:DeployAKSI \
   --rpc-url "$BASE_SEPOLIA_RPC_URL" \
-  --broadcast
+  --broadcast --ledger --sender "$AKSI_DEPLOYER"
 ```
+
+For a local Foundry keystore instead of a Ledger, use `--account "$FOUNDRY_ACCOUNT" --sender "$AKSI_DEPLOYER"` and omit `--ledger`.
 
 Do not commit `.env`, private keys, seed phrases, RPC credentials or wallet exports.
 
