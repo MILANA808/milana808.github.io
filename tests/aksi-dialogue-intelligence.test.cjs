@@ -32,7 +32,7 @@ engine.clearContext();
 const missingContext = engine.answer("А почему?");
 assert.equal(missingContext.status, "insufficient_grounding");
 engine.clearContext();
-engine.answer("Что такое математика");
+engine.answer("Объясни проще математику");
 const followWhy = engine.answer("А почему?");
 assert.equal(followWhy.status, "causal_evidence_missing");
 assert.equal(followWhy.contextUsed, true);
