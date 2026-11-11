@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 global.AKSISemanticReasoning = require("../aksi-semantic-reasoning.js");
 const engine = require("../aksi-dialogue-intelligence.js");
 assert.equal(engine.version, "1.0.0");
-assert.equal(engine.bayesUpdate(0.1, 0.9, 0.2), 0.3333333333333333);
+assert.ok(Math.abs(engine.bayesUpdate(0.1, 0.9, 0.2) - 1 / 3) < 1e-12);
 assert.equal(engine.entropy([0.5, 0.5]), 1);
 assert.equal(engine.modusPonens({if:"дождь",then:"мокро"}, {subject:"улица",predicate:"дождь"}).conclusion.predicate, "мокро");
 assert.deepEqual(engine.relationClosure([{from:"a",to:"b"},{from:"b",to:"c"}],"a","c"), ["a","b","c"]);
