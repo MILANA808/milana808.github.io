@@ -8,6 +8,8 @@ const env: Env = {
   ZEROX_API_KEY: "test-api-key",
   AKSI_TOKEN_ADDRESS: EVM,
   SITE_ORIGIN: ORIGIN,
+  QUOTE_LIMITER: { limit: async () => ({ success: true }) },
+  STATUS_LIMITER: { limit: async () => ({ success: true }) },
 };
 
 function req(path: string, init: RequestInit = {}) {
@@ -74,6 +76,28 @@ describe("AKSI swap Worker", () => {
       method: "POST", body: JSON.stringify({ direction: "aksi-to-btc", amount: "1.5", evmAddress: "bad", bitcoinAddress: BTC }),
     }), env);
     expect(response.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rate limits quote requests before calling upstream services", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const limitedEnv = { ...env, QUOTE_LIMITER: { limit: async () => ({ success: false }) } };
+    const response = await worker.fetch(req("/quote", {
+      method: "POST",
+      body: JSON.stringify({ direction: "aksi-to-btc", amount: "1", evmAddress: EVM, bitcoinAddress: BTC }),
+    }), limitedEnv);
+    expect(response.status).toBe(429);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rate limits status polling before calling the provider", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const limitedEnv = { ...env, STATUS_LIMITER: { limit: async () => ({ success: false }) } };
+    const hash = "0x" + "a".repeat(64);
+    const response = await worker.fetch(req("/status?direction=aksi-to-btc&originTxHash=" + hash + "&quoteId=q-1"), limitedEnv);
+    expect(response.status).toBe(429);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
