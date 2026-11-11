@@ -43,7 +43,7 @@ A manual deployment workflow is included at `.github/workflows/deploy-aksi-swap-
 - `ZEROX_API_KEY` — 0x API key.
 - `AKSI_TOKEN_ADDRESS` — verified AKSI ERC-20 contract address on Base mainnet.
 
-The workflow checks that the address has Base mainnet bytecode and that its metadata is exactly AKSI / AKSI / 18 decimals. It then deploys the Worker and uploads the 0x key and token address as encrypted Worker secrets. To run it, open GitHub Actions → Deploy AKSI swap Worker → Run workflow and enter `DEPLOY_AKSI_WORKER`.
+The workflow checks that the address has Base mainnet bytecode and that its metadata is exactly AKSI / AKSI / 18 decimals. It then deploys the Worker and uploads the 0x key and token address as encrypted Worker secrets. To run it, open GitHub Actions → Deploy AKSI swap Worker → Run workflow and enter `DEPLOY_AKSI_WORKER`. The workflow prints the deployed Worker URL in the run summary and verifies `/health` and `/config` after deployment.
 
 Do not add private keys or seed phrases to GitHub secrets. The deployment workflow does not deploy the token contract or fund liquidity.
 
