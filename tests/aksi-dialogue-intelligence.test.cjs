@@ -16,6 +16,7 @@ assert.equal(why.status, "causal_evidence_missing");
 const compare = engine.answer("Сопоставь математику и геометрию");
 assert.equal(compare.status, "compared");
 const unknown = engine.answer("Почему флуксометр летает?");
-assert.equal(unknown, null);
+assert.equal(unknown.status, "insufficient_grounding");
+assert.match(unknown.text, /нужны дополнительные факты или уточнение/i);
 assert.throws(() => engine.entropy([0.2, 0.2]), /sum/);
 console.log("AKSI dialogue intelligence: all tests passed");
