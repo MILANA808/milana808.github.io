@@ -5,7 +5,7 @@
  */
 (function (root) {
   "use strict";
-  const VERSION = "1.1.0";
+  const VERSION = "1.2.0";
   const norm = value => String(value == null ? "" : value).toLocaleLowerCase("ru-RU")
     .replace(/[ё]/g, "е").replace(/[«»"']/g, "").replace(/[^\p{L}\p{N}\s-]/gu, " ")
     .replace(/\s+/g, " ").trim();
@@ -113,6 +113,14 @@
         text: "Это причинный вопрос. Определение понятия «" + info.id + "» само по себе не объясняет причину.\n\nЧто известно из базы: " + info.definition + "\n\nДля обоснованного ответа нужны наблюдения или проверенная причинная связь; я не буду выдавать ассоциацию за причину.",
         proof: [{ type: "causal_claim_withheld", concept: info.id, reason: "no_causal_evidence" }]
       };
+    }
+    match = q.match(/^(?:как связаны|что общего между|в чем связь между|какая связь между) (.+?) (?:и|с) (.+)$/);
+    if (match && semantic && typeof semantic.explainRelation === "function") {
+      const a = resolveConcept(match[1], semantic), b = resolveConcept(match[2], semantic);
+      if (!a || !b) return abstain(raw, "Для объяснения связи мне нужно однозначно определить оба понятия.");
+      const relation = semantic.explainRelation(a, b);
+      return Object.assign({}, relation, { intent: "explain_relation",
+        proof: (relation.proof || []).concat([{ type: "intent_normalization", from: raw, concepts: [a,b] }]) });
     }
     match = q.match(/^(?:сравни|сопоставь) (.+?) (?:и|с) (.+)$/);
     if (match && semantic) {
