@@ -115,6 +115,21 @@ export default {
     }
 
     const url = new URL(request.url);
+    if (request.method === "GET" && url.pathname === "/config") {
+      const configured = Boolean(env.ZEROX_API_KEY && validEvmAddress(env.AKSI_TOKEN_ADDRESS));
+      return json({
+        service: "aksi-bitcoin-swap",
+        configured,
+        network: "Base",
+        chainId: 8453,
+        tokenAddress: validEvmAddress(env.AKSI_TOKEN_ADDRESS) ? env.AKSI_TOKEN_ADDRESS : null,
+        tokenDecimals: 18,
+        bitcoinNetwork: "Bitcoin mainnet",
+        bitcoinDecimals: 8,
+        liveTrading: false,
+      }, 200, allowedOrigin);
+    }
+
     if (request.method === "GET" && url.pathname === "/health") {
       return json({
         service: "aksi-bitcoin-swap",
