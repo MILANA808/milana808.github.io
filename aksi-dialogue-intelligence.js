@@ -82,6 +82,11 @@
     const raw = clean(input, 1200);
     if (!raw) return null;
     const semantic = root.AKSISemanticReasoning;
+    const mathPractice = root.AKSIMathPractice;
+    if (mathPractice && typeof mathPractice.answer === "function") {
+      const mathResult = mathPractice.answer(raw);
+      if (mathResult && mathResult.handled) return mathResult;
+    }
     const q = norm(raw);
     let match, conceptId;
     // Rephrase common natural-language requests into the existing grounded concept engine.
