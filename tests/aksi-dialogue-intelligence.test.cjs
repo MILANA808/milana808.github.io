@@ -1,8 +1,9 @@
 "use strict";
 const assert = require("node:assert/strict");
 global.AKSISemanticReasoning = require("../aksi-semantic-reasoning.js");
+global.AKSIMathPractice = require("../aksi-math-practice.js");
 const engine = require("../aksi-dialogue-intelligence.js");
-assert.equal(engine.version, "1.0.0");
+assert.equal(engine.version, "1.1.0");
 assert.ok(Math.abs(engine.bayesUpdate(0.1, 0.9, 0.2) - 1 / 3) < 1e-12);
 assert.equal(engine.entropy([0.5, 0.5]), 1);
 assert.equal(engine.modusPonens({if:"дождь",then:"мокро"}, {subject:"улица",predicate:"дождь"}).conclusion.predicate, "мокро");
@@ -19,4 +20,25 @@ const unknown = engine.answer("Почему флуксометр летает?")
 assert.equal(unknown.status, "insufficient_grounding");
 assert.match(unknown.text, /нужны дополнительные факты или уточнение/i);
 assert.throws(() => engine.entropy([0.2, 0.2]), /sum/);
+// Multi-turn references use the last grounded topic without retaining raw dialogue text.
+engine.clearContext();
+const priorTheorem = engine.answer("Объясни теорему Пифагора");
+assert.equal(priorTheorem.theorem, "pythagoras");
+const followExample = engine.answer("А пример?");
+assert.equal(followExample.intent, "math_example");
+assert.equal(followExample.contextUsed, true);
+assert.ok(followExample.proof.some(step => step.type === "conversation_context" && step.topic === "pythagoras"));
+engine.clearContext();
+const missingContext = engine.answer("А почему?");
+assert.equal(missingContext.status, "insufficient_grounding");
+engine.clearContext();
+engine.answer("Объясни проще математику");
+const followWhy = engine.answer("А почему?");
+assert.equal(followWhy.status, "causal_evidence_missing");
+assert.equal(followWhy.contextUsed, true);
+const followSimple = engine.answer("Объясни проще");
+assert.equal(followSimple.status, "explained");
+assert.equal(engine.getContext().length <= 5, true);
+engine.clearContext();
+assert.equal(engine.getContext().length, 0);
 console.log("AKSI dialogue intelligence: all tests passed");

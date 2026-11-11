@@ -5,7 +5,7 @@
  */
 (function (root) {
   "use strict";
-  const VERSION = "1.0.0";
+  const VERSION = "1.1.0";
   const norm = value => String(value == null ? "" : value).toLocaleLowerCase("ru-RU")
     .replace(/[ё]/g, "е").replace(/[«»"']/g, "").replace(/[^\p{L}\p{N}\s-]/gu, " ")
     .replace(/\s+/g, " ").trim();
@@ -78,7 +78,7 @@
     if (!candidates.length || (candidates[1] && candidates[1].score === candidates[0].score)) return null;
     return candidates[0].id;
   }
-  function answer(input) {
+  function answerStateless(input) {
     const raw = clean(input, 1200);
     if (!raw) return null;
     const semantic = root.AKSISemanticReasoning;
@@ -145,6 +145,70 @@
     }
     return null;
   }
+
+  // Session context stores only a bounded topic reference, not the full conversation.
+  // It is intentionally in-memory: refreshing the page starts a fresh dialogue session.
+  let contextTurns = [];
+  function answer(input) {
+    const raw = clean(input, 1200);
+    if (!raw) return null;
+    const q = norm(raw);
+    const previous = contextTurns.length ? contextTurns[contextTurns.length - 1] : null;
+    let routed = raw, usedContext = false;
+    const isWhyFollowUp = /^(?:а )?(?:почему|зачем)\s*[?!.]*$/.test(q);
+    const isExampleFollowUp = /^(?:а )?(?:пример|а пример|приведи пример)\s*[?!.]*$/.test(q);
+    const isSimplifyFollowUp = /^(?:(?:а )?(?:объясни проще|попроще|простыми словами)|что это)\s*[?!.]*$/.test(q);
+    const isPracticeFollowUp = /^(?:а )?(?:задачу|дай задачу|практику|упражнение)\s*[?!.]*$/.test(q);
+    if (isWhyFollowUp || isExampleFollowUp || isSimplifyFollowUp || isPracticeFollowUp) {
+      if (!previous) {
+        return abstain(raw, "Я пока не знаю, к какой теме относится этот вопрос. Сначала назови понятие или теорему, а затем задай уточняющий вопрос.");
+      }
+      usedContext = true;
+      if (isExampleFollowUp) routed = "Приведи пример применения " + previous.label;
+      else if (isSimplifyFollowUp) routed = "Объясни проще " + previous.label;
+      else if (isPracticeFollowUp) routed = "Дай практику по " + previous.label;
+      else routed = "Почему " + previous.label;
+    }
+    const result = answerStateless(routed);
+    if (!result || !result.handled) return result;
+    const semantic = root.AKSISemanticReasoning;
+    const math = root.AKSIMathPractice;
+    let topic = result.concept || null;
+    let kind = topic ? "concept" : null;
+    if (result.theorem) { topic = result.theorem; kind = "theorem"; }
+    if (!topic && math && typeof math.find === "function") {
+      const item = math.find(routed);
+      if (item) { topic = item.id; kind = "theorem"; }
+    }
+    if (!topic && semantic && typeof semantic.resolve === "function") {
+      const resolved = resolveConcept(routed, semantic);
+      if (resolved) { topic = resolved; kind = "concept"; }
+    }
+    if (topic) {
+      const theoremRecord = kind === "theorem" && math && typeof math.list === "function"
+        ? math.list().find(item => item.id === topic) : null;
+      const label = theoremRecord ? theoremRecord.name : topic;
+      contextTurns.push({ topic, kind, label, intent: result.intent || "lookup" });
+      if (contextTurns.length > 5) contextTurns = contextTurns.slice(-5);
+    }
+    if (usedContext) {
+      result.contextUsed = true;
+      result.proof = (result.proof || []).concat([{
+        type: "conversation_context",
+        topic: previous.topic,
+        source: "previous_grounded_turn",
+        contextPolicy: "topic_reference_only"
+      }]);
+    }
+    return result;
+  }
+  function getContext() {
+    return contextTurns.map(item => Object.assign({}, item));
+  }
+  function clearContext() {
+    contextTurns = [];
+    return { ok: true };
+  }
   function simplify(sentence) {
     return sentence.replace(/^([^—:;]+)[—:;]\\s*/, "").replace(/\bсистематическое исследование\b/gi, "последовательное изучение")
       .replace(/\bвычислительная система\b/gi, "система, которая обрабатывает данные")
@@ -155,7 +219,7 @@
     return { handled: true, status: "insufficient_grounding", intent: "abstain", text: reason + "\n\nТема запроса: «" + clean(topic, 180) + "». Нужны дополнительные факты или уточнение.", proof: [{ type: "abstention", reason: "insufficient_grounding" }] };
   }
   root.AKSIDialogueIntelligence = {
-    version: VERSION, answer, tokens, overlap, bayesUpdate, entropy, modusPonens, relationClosure,
+    version: VERSION, answer, getContext, clearContext, tokens, overlap, bayesUpdate, entropy, modusPonens, relationClosure,
     status: () => ({ version: VERSION, mode: "bounded-symbolic-dialogue", generalLanguageModel: false })
   };
   if (typeof module === "object" && module.exports) module.exports = root.AKSIDialogueIntelligence;
