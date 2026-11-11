@@ -10,7 +10,7 @@ new Function(scripts[0][1]);
 for (const required of [
   'id="worker"', 'id="getQuote"', 'id="execute"', 'id="checkTx"',
   'window.ethereum', 'signPsbt', 'pushPsbt', '/status',
-  'liquidityAvailable!==true', 'tokenAddress'
+  'liquidityAvailable!==true', 'tokenAddress', 'BTC_NATIVE_ID', 'eth_sendTransaction', 'eth_call', 'q.sellAmount!==amount'
 ]) {
   assert.ok(html.includes(required), `Missing required exchange behavior: ${required}`);
 }
