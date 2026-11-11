@@ -82,7 +82,7 @@ a{color:var(--accent);overflow-wrap:anywhere}
 const $=id=>document.getElementById(id);
 const worker=$('worker'),serviceStatus=$('serviceStatus'),quoteStatus=$('quoteStatus'),quoteDetails=$('quoteDetails'),executeButton=$('execute'),txStatus=$('txStatus');
 const BTC_NATIVE_ID='bc1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqmql8k8';
-let serviceConfig=null,lastQuote=null,lastRequest=null,lastOperation=null,evmProvider=null,evmAccount=null,btcProvider=null,btcAccount=null;
+let serviceConfig=null,lastQuote=null,lastRequest=null,lastOperation=null,evmProvider=null,evmAccount=null,btcProvider=null,btcAccount=null,transferStatus=$('transferStatus');
 try{worker.value=localStorage.getItem('aksi.swap.worker')||'';}catch(_){}
 function endpoint(path){const base=worker.value.trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(base))throw new Error('Укажи HTTPS-адрес развёрнутого Worker.');return base+path;}
 function direction(){return document.querySelector('input[name="direction"]:checked').value;}
