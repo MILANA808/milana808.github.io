@@ -9,7 +9,7 @@ const inlineScript = html.match(/<script>\s*([\s\S]*?async function ask\(q\)[\s\
 
 const weatherTag = '<script src="/aksi-weather.js?v=2"></script>';
 const routerTag = '<script src="/aksi-answer-router.js?v=4"></script>';
-const semanticTag = '<script src="/aksi-semantic-reasoning.js?v=2"></script>';
+const semanticTag = '<script src="/aksi-semantic-reasoning.js?v=3"></script>';
 const knowledgeTag = '<script src="/aksi-knowledge-base.js?v=2"></script>';
 assert.ok(html.includes(weatherTag), "weather adapter cache version must be refreshed");
 assert.ok(html.includes(routerTag), "answer router cache version must be refreshed");
