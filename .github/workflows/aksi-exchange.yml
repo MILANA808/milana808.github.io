@@ -1,0 +1,29 @@
+name: AKSI Exchange page checks
+on:
+  push:
+    paths:
+      - "aksi-exchange/**"
+      - "crypto/aksi-exchange/**"
+      - ".github/workflows/aksi-exchange.yml"
+      - ".github/workflows/deploy-aksi-swap-worker.yml"
+      - "crypto/aksi-swap-worker/scripts/preflight.mjs"
+      - "crypto/aksi-swap-worker/wrangler.toml"
+  pull_request:
+    paths:
+      - "aksi-exchange/**"
+      - "crypto/aksi-exchange/**"
+      - ".github/workflows/aksi-exchange.yml"
+permissions:
+  contents: read
+jobs:
+  page-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Worker deployment preflight syntax
+        run: node --check crypto/aksi-swap-worker/scripts/preflight.mjs
+      - name: Validate exchange page and deployment safety guards
+        run: node crypto/aksi-exchange/check-page.mjs

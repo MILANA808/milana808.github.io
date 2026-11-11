@@ -1,0 +1,53 @@
+name: Deploy AKSI swap Worker
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type DEPLOY_AKSI_WORKER only after token deployment and secret setup"
+        required: true
+        type: string
+jobs:
+  deploy:
+    if: ${{ inputs.confirm == 'DEPLOY_AKSI_WORKER' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: crypto/aksi-swap-worker
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify Base mainnet AKSI contract and required secrets
+        run: node scripts/preflight.mjs
+        env:
+          ZEROX_API_KEY: ${{ secrets.ZEROX_API_KEY }}
+          AKSI_TOKEN_ADDRESS: ${{ secrets.AKSI_TOKEN_ADDRESS }}
+      - name: Deploy Worker and upload encrypted secrets
+        id: deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: crypto/aksi-swap-worker
+          wranglerVersion: "4"
+          command: deploy
+          secrets: |
+            ZEROX_API_KEY
+            AKSI_TOKEN_ADDRESS
+        env:
+          ZEROX_API_KEY: ${{ secrets.ZEROX_API_KEY }}
+          AKSI_TOKEN_ADDRESS: ${{ secrets.AKSI_TOKEN_ADDRESS }}
+
+      - name: Verify deployed Worker endpoints
+        env:
+          WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
+        run: |
+          test -n "$WORKER_URL"
+          curl --fail --silent --show-error -H "Origin: https://milana808.github.io" "$WORKER_URL/health"
+          curl --fail --silent --show-error -H "Origin: https://milana808.github.io" "$WORKER_URL/config" > worker-config.json
+          node -e 'const c=require("./worker-config.json"); if (!c.configured || !c.tokenDeployed || c.chainId !== 8453) process.exit(1); console.log("Worker configuration and Base contract bytecode verified.");'
+          echo "AKSI Worker deployed at: $WORKER_URL" >> "$GITHUB_STEP_SUMMARY"
