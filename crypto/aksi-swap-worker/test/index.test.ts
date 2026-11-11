@@ -48,9 +48,11 @@ describe("AKSI swap Worker", () => {
     expect(response.status).toBe(200);
     expect(body.liveTrading).toBe(false);
     expect(body.configured).toBe(true);
+    expect(body.tokenDeployed).toBe(true);
   });
 
   it("exposes token/network configuration without exposing secrets", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ result: "0x6000" }), { status: 200 })));
     const response = await worker.fetch(req("/config"), env);
     const body = await response.json() as Record<string, unknown>;
     expect(body.chainId).toBe(8453);
@@ -77,7 +79,9 @@ describe("AKSI swap Worker", () => {
   });
 
   it("requests AKSI to native BTC with the required API version header", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(quoteResponse()), { status: 200 }));
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ result: "0x6000" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(quoteResponse()), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     const response = await worker.fetch(req("/quote", {
       method: "POST", headers: { "content-type": "application/json" },
@@ -95,7 +99,9 @@ describe("AKSI swap Worker", () => {
   });
 
   it("requests native BTC to AKSI in the reverse direction", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(quoteResponse()), { status: 200 }));
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ result: "0x6000" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(quoteResponse()), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     const response = await worker.fetch(req("/quote", {
       method: "POST", headers: { "content-type": "application/json" },
@@ -109,7 +115,9 @@ describe("AKSI swap Worker", () => {
   });
 
   it("rejects malformed upstream quote data instead of returning an executable-looking response", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ liquidityAvailable: true, quotes: [{}] }), { status: 200 })));
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ result: "0x6000" }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ liquidityAvailable: true, quotes: [{}] }), { status: 200 })));
     const response = await worker.fetch(req("/quote", {
       method: "POST", body: JSON.stringify({ direction: "aksi-to-btc", amount: "1", evmAddress: EVM, bitcoinAddress: BTC }),
     }), env);
