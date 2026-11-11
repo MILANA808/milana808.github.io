@@ -8,9 +8,9 @@ assert.equal(scripts.length, 1, "Expected exactly one inline application script"
 new Function(scripts[0][1]);
 
 for (const required of [
-  'id="worker"', 'id="getQuote"', 'id="execute"', 'id="checkTx"',
+  'id="worker"', 'id="getQuote"', 'id="execute"', 'id="checkTx"', 'id="sendAksi"',
   'window.ethereum', 'signPsbt', 'pushPsbt', '/status',
-  'liquidityAvailable!==true', 'tokenAddress', 'BTC_NATIVE_ID', 'eth_sendTransaction', 'eth_call', 'q.sellAmount!==amount'
+  'liquidityAvailable!==true', 'tokenAddress', 'BTC_NATIVE_ID', 'eth_sendTransaction', 'eth_call', '0xa9059cbb', 'q.sellAmount!==amount'
 ]) {
   assert.ok(html.includes(required), `Missing required exchange behavior: ${required}`);
 }
