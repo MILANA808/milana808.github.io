@@ -31,6 +31,7 @@ contract AKSITokenTest is Test {
         token.transfer(user, 125 ether);
         assertEq(token.balanceOf(user), 125 ether);
         assertEq(token.balanceOf(founder), 99_999_875 ether);
+        assertEq(token.totalSupply(), 100_000_000 ether);
     }
 
     function testZeroSupplyRejected() public {
