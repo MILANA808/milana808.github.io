@@ -35,14 +35,14 @@ Use **Base Sepolia** first (chain ID `84532`), then Base mainnet (chain ID `8453
 2. Keep the private key outside the repository and shell history; use a local ignored `.env` file or a secrets manager.
 3. Set `DEPLOYER_PRIVATE_KEY`, `AKSI_INITIAL_SUPPLY`, `EXPECTED_CHAIN_ID=84532`, and `BASE_SEPOLIA_RPC_URL` in the local environment.
 4. Review the exact constructor supply and deployment transaction in your wallet.
-5. Deploy with Foundry using the Sepolia chain ID and verify the source on the block explorer.
+5. Deploy with Foundry using Base Sepolia chain ID `84532` and verify the source on the block explorer.
 6. Publish the contract address only after checking bytecode, constructor arguments, total supply and deployer allocation.
 
 Example (after setting a private RPC endpoint in the environment):
 
 ```sh
 forge script script/DeployAKSI.s.sol:DeployAKSI \
-  --rpc-url "$SEPOLIA_RPC_URL" \
+  --rpc-url "$BASE_SEPOLIA_RPC_URL" \
   --broadcast
 ```
 
