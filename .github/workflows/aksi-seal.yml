@@ -1,0 +1,34 @@
+name: AKSI Seal verification
+
+on:
+  pull_request:
+    paths:
+      - "tools/aksi-seal.mjs"
+      - "tools/aksi-seal.test.mjs"
+      - "package.json"
+      - ".github/workflows/aksi-seal.yml"
+  push:
+    branches: [main]
+    paths:
+      - "tools/aksi-seal.mjs"
+      - "tools/aksi-seal.test.mjs"
+      - "package.json"
+      - ".github/workflows/aksi-seal.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  seal-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run AKSI Seal tests
+        run: node --test tools/aksi-seal.test.mjs
+      - name: Run complete repository test suite
+        run: npm test
