@@ -266,7 +266,18 @@ class Runtime:
             "measure": _measure,
         }
         self.concepts: dict[str, str] = {}
+        self.aliases: dict[str, str] = {}
         self.relations: list[tuple[str, str, str]] = []
+
+    @staticmethod
+    def _concept_key(value: str) -> str:
+        return str(value).strip().casefold().replace("ё", "е")
+
+    def resolve_concept(self, value: str) -> str:
+        key = self._concept_key(value)
+        if key in self.concepts:
+            return key
+        return self.aliases.get(key, key)
 
     def expression(self, source: str) -> Any:
         if len(source) > 4096:
@@ -278,27 +289,38 @@ class Runtime:
             payload = json.loads(Path(path).read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
             raise AksiError(f"cannot load semantic graph: {exc}") from exc
-        if payload.get("schema") != "AKSI-SEMANTIC-GRAPH/1":
+        if not isinstance(payload, dict) or payload.get("schema") != "AKSI-SEMANTIC-GRAPH/1":
             raise AksiError("unsupported semantic graph schema")
         concepts = payload.get("concepts")
         if not isinstance(concepts, list):
             raise AksiError("semantic graph concepts must be a list")
         staged_concepts = {}
+        staged_aliases = {}
         staged_relations = []
         for item in concepts:
             if not isinstance(item, dict):
                 raise AksiError("semantic graph concept must be an object")
             name, definition = item.get("id"), item.get("definition")
             parents = item.get("parents")
+            aliases = item.get("aliases", [name] if isinstance(name, str) else [])
             if not isinstance(name, str) or not name.strip() or not isinstance(definition, str) or not definition.strip():
                 raise AksiError("semantic graph concept requires non-empty id and definition")
             if name in staged_concepts:
                 raise AksiError(f"duplicate semantic concept: {name}")
             if not isinstance(parents, list) or any(not isinstance(parent, str) for parent in parents):
                 raise AksiError(f"invalid parent list for concept: {name}")
+            if not isinstance(aliases, list) or any(not isinstance(alias, str) or not alias.strip() for alias in aliases):
+                raise AksiError(f"invalid aliases for concept: {name}")
             staged_concepts[name] = definition
             staged_relations.extend((name, "is_a", parent) for parent in parents)
+            for alias in [name, *aliases]:
+                key = self._concept_key(alias)
+                existing = staged_aliases.get(key)
+                if existing is not None and existing != name:
+                    raise AksiError(f"ambiguous semantic alias: {alias}")
+                staged_aliases[key] = name
         self.concepts.update(staged_concepts)
+        self.aliases.update(staged_aliases)
         for relation in staged_relations:
             if relation not in self.relations:
                 self.relations.append(relation)
@@ -330,6 +352,7 @@ class Runtime:
                 if not match: raise AksiError('expected: concept "name" means "definition"')
                 name, definition = (_quoted_value(x) for x in match.groups())
                 self.concepts[name] = definition
+                self.aliases[self._concept_key(name)] = name
                 return None
             if source.startswith("relate "):
                 match = re.fullmatch(r'relate\s+(".*?"|\'.*?\')\s*->\s*(".*?"|\'.*?\')\s+as\s+(".*?"|\'.*?\')', source)
@@ -339,13 +362,13 @@ class Runtime:
                 if item not in self.relations: self.relations.append(item)
                 return None
             if source.startswith("ask "):
-                name = _quoted_value(source[4:].strip())
+                name = self.resolve_concept(_quoted_value(source[4:].strip()))
                 if name not in self.concepts: return f"Unknown concept: {name}"
                 links = [f"{r}: {o}" for s, r, o in self.relations if s == name]
                 suffix = ("; relations: " + ", ".join(links)) if links else ""
                 return self.concepts[name] + suffix
             if source.startswith("infer "):
-                name = _quoted_value(source[6:].strip())
+                name = self.resolve_concept(_quoted_value(source[6:].strip()))
                 found, frontier, seen = [], [name], {name}
                 while frontier:
                     current = frontier.pop(0)
