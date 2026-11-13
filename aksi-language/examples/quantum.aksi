@@ -6,3 +6,10 @@ print measure(equal, shots=32, seed=42)
 
 let shifted = phase(equal, pi / 2)
 print probabilities(shifted)
+
+# Two-qubit Bell pair: H on qubit 0 followed by CNOT(0, 1)
+let register = qstate(2)
+let superposed = h(register, 0)
+let bell = cnot(superposed, 0, 1)
+print probabilities(bell)
+print measure(bell, shots=64, seed=2026)
