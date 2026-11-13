@@ -6,7 +6,6 @@ Quantum operations are classical state-vector simulations, not QPU execution.
 """
 from __future__ import annotations
 
-import ast
 import cmath
 import math
 import random
@@ -14,6 +13,8 @@ import re
 import sys
 from pathlib import Path
 from typing import Any
+
+from aksi_parser import ParseError, decode_string, parse_expression
 
 VERSION = "0.1.0"
 
@@ -205,6 +206,13 @@ def _measure(state: Any, shots: int = 1, seed: int = 0) -> Any:
     return {key: value for key, value in counts.items() if value}
 
 
+def _quoted_value(source: str) -> str:
+    try:
+        return decode_string(source)
+    except ParseError as exc:
+        raise AksiError(str(exc)) from exc
+
+
 def _format(value: Any) -> str:
     if isinstance(value, complex):
         if abs(value.imag) < 1e-12:
@@ -260,14 +268,7 @@ class Runtime:
     def expression(self, source: str) -> Any:
         if len(source) > 4096:
             raise AksiError("expression exceeds the 4096-character limit")
-        try:
-            tree = ast.parse(source, mode="eval")
-            if sum(1 for _ in ast.walk(tree)) > 2048:
-                raise AksiError("expression exceeds the syntax-node budget")
-            node = tree.body
-        except SyntaxError as exc:
-            raise AksiError(f"syntax error: {exc.msg}") from exc
-        return self._eval(node)
+        return parse_expression(source, self.env, AksiError)
 
     def _eval(self, node: ast.AST) -> Any:
         if isinstance(node, ast.Constant):
@@ -364,7 +365,7 @@ class Runtime:
             if source.startswith("concept "):
                 match = re.fullmatch(r'concept\s+(".*?"|\'.*?\')\s+means\s+(".*?"|\'.*?\')', source)
                 if not match: raise AksiError('expected: concept "name" means "definition"')
-                name, definition = (ast.literal_eval(x) for x in match.groups())
+                name, definition = (_quoted_value(x) for x in match.groups())
                 self.concepts[name] = definition
                 return None
             if source.startswith("relate "):
@@ -375,13 +376,13 @@ class Runtime:
                 if item not in self.relations: self.relations.append(item)
                 return None
             if source.startswith("ask "):
-                name = ast.literal_eval(source[4:].strip())
+                name = _quoted_value(source[4:].strip())
                 if name not in self.concepts: return f"Unknown concept: {name}"
                 links = [f"{r}: {o}" for s, r, o in self.relations if s == name]
                 suffix = ("; relations: " + ", ".join(links)) if links else ""
                 return self.concepts[name] + suffix
             if source.startswith("infer "):
-                name = ast.literal_eval(source[6:].strip())
+                name = _quoted_value(source[6:].strip())
                 found, frontier, seen = [], [name], {name}
                 while frontier:
                     current = frontier.pop(0)
