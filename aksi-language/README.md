@@ -73,8 +73,9 @@ Built-ins include \`vector\`, \`dot\`, \`norm\`, \`normalize\`, \`tensor\`,
   are available to AKSI source programs.
 - The v0.1 parser is line-oriented; blocks, user-defined functions, modules,
   static type checking, and compilation to native machine code are not yet present.
-- The concept graph is explicit symbolic data, not open-domain natural-language
-  understanding.
+- The concept graph is explicit symbolic data generated from the canonical
+  `aksi-semantic-reasoning.js` source; it is not open-domain natural-language
+  understanding. Use `--knowledge data/semantic-graph.json` to load it.
 - The state-vector simulator supports up to 10 qubits with H/X/Z, phase and
   Rx/Ry/Rz rotations, CNOT, probability extraction and seeded measurement.
   It is a classical simulator, not quantum hardware.
