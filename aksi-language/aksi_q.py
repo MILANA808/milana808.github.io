@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""AKSI Q language v0.1 — a small, safe, deterministic interpreter.
+"""AKSI Q reference interpreter.
 
-The interpreter uses Python's AST only as a parser. It never calls eval/exec.
-Quantum operations are classical state-vector simulations, not QPU execution.
+Expressions are tokenized and parsed by the native AKSI Pratt parser. The
+runtime never calls Python eval or exec. Quantum operations are classical
+state-vector simulations, not QPU execution.
 """
 from __future__ import annotations
 
