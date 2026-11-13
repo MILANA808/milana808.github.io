@@ -1,13 +1,13 @@
 # AKSI Q — executable language prototype
 
-**Version:** 0.1.0  
+**Version:** 0.2.0  
 **Runtime:** Python 3.10+; standard library only  
 **Mode:** local-first; no server, model API, WebLLM, or network required.
 
 AKSI Q is a small domain-specific language for deterministic mathematical work,
 small quantum-state simulations, and explicit concept relations. The interpreter
-uses Python's AST only to parse expressions; it evaluates an allowlisted set of
-nodes itself and never calls Python \`eval\` or \`exec\`.
+uses its own lexer and Pratt expression parser. It never calls Python eval or
+exec and does not use Python AST for expression parsing.
 
 > Quantum operations in this version are classical state-vector simulations.
 > This is not quantum hardware and makes no quantum-advantage claim.
