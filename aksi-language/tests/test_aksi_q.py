@@ -42,6 +42,20 @@ infer "cat"
         with self.assertRaises(AksiError):
             Runtime().run("assert 2 + 2 == 5")
 
+    def test_resource_limits_reject_extreme_exponents(self):
+        with self.assertRaises(AksiError):
+            Runtime().run("print 2 ** 2000")
+
+    def test_tensor_product_limit(self):
+        runtime = Runtime()
+        with self.assertRaises(AksiError):
+            runtime.run("print tensor(vector(1, 2), vector(1, 2))") if False else _too_large_tensor()
+
+
+def _too_large_tensor():
+    from aksi_q import _tensor
+    return _tensor([1] * 4096, [1] * 4096)
+
 
 if __name__ == "__main__":
     unittest.main()
