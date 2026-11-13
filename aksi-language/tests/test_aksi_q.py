@@ -9,6 +9,20 @@ class AksiLanguageTests(unittest.TestCase):
         runtime = Runtime()
         self.assertEqual(runtime.run("let v = vector(3, 4)\nprint norm(v)\nprint dot(v, v)"), [5.0, 25])
 
+    def test_native_expression_precedence_and_power_associativity(self):
+        runtime = Runtime()
+        self.assertEqual(runtime.run("print 2 + 3 * 4\nprint 2 ** 3 ** 2\nprint -2 ** 2"), [14, 512, -4])
+
+    def test_native_boolean_and_comparison_parser(self):
+        runtime = Runtime()
+        self.assertEqual(runtime.run("print not (2 > 3) and 4 >= 4\nprint 1 < 2 < 3"), [True, True])
+
+    def test_native_string_escapes_and_keyword_arguments(self):
+        runtime = Runtime()
+        result = runtime.run('let state = h(qstate(1))\nprint measure(state, shots=8, seed=5)\nprint "line\\nfeed"')
+        self.assertIsInstance(result[0], dict)
+        self.assertEqual(result[1], "line\nfeed")
+
     def test_hadamard_probabilities(self):
         state = _hadamard([1, 0])
         self.assertAlmostEqual(state[0].real, 1 / math.sqrt(2))
