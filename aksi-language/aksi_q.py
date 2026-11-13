@@ -70,6 +70,7 @@ def _tensor(left: Any, right: Any) -> list[complex]:
 
 def _probabilities(state: Any) -> list[float]:
     v = _vector(state, "state")
+    _infer_qubits(v)
     total = sum(abs(x) ** 2 for x in v)
     if total <= 0:
         raise AksiError("quantum state has zero norm")
