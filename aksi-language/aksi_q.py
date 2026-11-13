@@ -17,7 +17,7 @@ from typing import Any
 
 from aksi_parser import ParseError, decode_string, parse_expression
 
-VERSION = "0.1.0"
+VERSION = "0.2.0"
 
 
 class AksiError(Exception):
