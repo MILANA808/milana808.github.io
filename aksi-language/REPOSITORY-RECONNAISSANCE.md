@@ -13,7 +13,7 @@
 - The public product tree contains 868 files; the backend tree contains 159 files at the time of this scan.
 - The public product already contains a richer JavaScript quantum simulator, semantic concept graph, symbolic inference engine and grounded Russian answer composer. AKSI Q now has a separate native expression parser, reference runtime and generated semantic-data bridge.
 - The new language is isolated in a draft PR. It has not been merged into main or connected to the live website.
-- All nine workflows for the latest AKSI Q branch commit completed successfully.
+- On the latest inspected PR commit (`09a5fae9`), seven of eight triggered workflow runs completed successfully; the `AKSI Quality` run was still pending. The dedicated AKSI Q workflow passed all 19 unit tests and executed both example programs.
 
 ## Repository inventory
 
@@ -83,6 +83,17 @@ The draft branch implements:
 5. Review every candidate repository's license, commit ancestry, secret exposure and unique modules before copying code.
 6. Add browser-runtime conformance tests before connecting AKSI Q to the public product.
 7. Perform security review and fuzzing of parser and interpreter before accepting untrusted programs.
+
+
+## Route and build verification — 2026-11-14
+
+- The main-branch sitemap contains 42 URL entries. Every listed path maps to an existing file or directory in the main-branch Git tree at the time of inspection; no missing sitemap paths were found.
+- The PR's static route/entry-point and local-asset validation job completed successfully.
+- The PR's runtime smoke, unified-core smoke, Math/Quantum Lab checks, Core v3 checks and verification workflow completed successfully on commit `09a5fae9`.
+- The dedicated AKSI Q workflow completed successfully: 19 unit tests passed, the semantic export generated 24 concepts, and both `first.aksi` and `quantum.aksi` executed. The Bell-state fixture produced probabilities `[0.5, 0.0, 0.0, 0.5]` and seeded samples `00`/`11`.
+- The `AKSI Quality` workflow was pending when this report was updated; it is not counted as passed.
+- The existing AKSI Pages deployment workflow on main completed successfully on 2026-11-11, including static-site validation, artifact upload and GitHub Pages deployment. The current AKSI Q PR is not merged, so it has not been deployed to the public site.
+- Direct external HTTP reachability of each public URL was not independently established in this inspection. The route result above is a repository-path and CI validation, not a live browser availability guarantee.
 
 ## Claims not made
 
