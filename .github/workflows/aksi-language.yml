@@ -17,6 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Export canonical AKSI semantic graph
+        working-directory: aksi-language
+        run: node tools/export_semantics.cjs
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -26,5 +32,5 @@ jobs:
       - name: Run example programs
         working-directory: aksi-language
         run: |
-          python aksi_q.py examples/first.aksi
+          python aksi_q.py --knowledge data/semantic-graph.json examples/first.aksi
           python aksi_q.py examples/quantum.aksi
