@@ -25,8 +25,19 @@ class AksiError(Exception):
 def _vector(value: Any, name: str = "vector") -> list[complex]:
     if not isinstance(value, (list, tuple)) or not value:
         raise AksiError(f"{name} must be a non-empty list")
+    if len(value) > 4096:
+        raise AksiError(f"{name} exceeds the 4096-element limit")
     out = [complex(x) for x in value]
     return out
+
+
+def _safe_power(left: Any, right: Any) -> Any:
+    if isinstance(right, (int, float)) and abs(right) > 1024:
+        raise AksiError("power exponent is limited to |n| <= 1024")
+    if isinstance(left, int) and isinstance(right, int) and right > 0:
+        if abs(left).bit_length() * right > 100_000:
+            raise AksiError("power result exceeds the integer-size budget")
+    return left ** right
 
 
 def _norm(values: Any) -> float:
@@ -50,7 +61,10 @@ def _dot(left: Any, right: Any) -> complex:
 
 
 def _tensor(left: Any, right: Any) -> list[complex]:
-    return [a * b for a in _vector(left) for b in _vector(right)]
+    a, b = _vector(left), _vector(right)
+    if len(a) * len(b) > 65536:
+        raise AksiError("tensor result exceeds the 65536-element limit")
+    return [x * y for x in a for y in b]
 
 
 def _probabilities(state: Any) -> list[float]:
@@ -143,8 +157,13 @@ class Runtime:
         self.relations: list[tuple[str, str, str]] = []
 
     def expression(self, source: str) -> Any:
+        if len(source) > 4096:
+            raise AksiError("expression exceeds the 4096-character limit")
         try:
-            node = ast.parse(source, mode="eval").body
+            tree = ast.parse(source, mode="eval")
+            if sum(1 for _ in ast.walk(tree)) > 2048:
+                raise AksiError("expression exceeds the syntax-node budget")
+            node = tree.body
         except SyntaxError as exc:
             raise AksiError(f"syntax error: {exc.msg}") from exc
         return self._eval(node)
@@ -177,7 +196,7 @@ class Runtime:
                 ast.Div: lambda: left / right,
                 ast.FloorDiv: lambda: left // right,
                 ast.Mod: lambda: left % right,
-                ast.Pow: lambda: left ** right,
+                ast.Pow: lambda: _safe_power(left, right),
             }
             for kind, operation in ops.items():
                 if isinstance(node.op, kind):
@@ -222,6 +241,8 @@ class Runtime:
 
     def run_line(self, line: str, line_number: int = 1) -> Any:
         source = line.strip()
+        if len(source) > 4096:
+            raise AksiError(f"line {line_number}: source line exceeds the 4096-character limit")
         if not source or source.startswith("#"):
             return None
         try:
@@ -272,8 +293,13 @@ class Runtime:
             raise AksiError(f"line {line_number}: {exc}") from exc
 
     def run(self, source: str) -> list[Any]:
+        if len(source) > 1_000_000:
+            raise AksiError("program exceeds the 1 MB source limit")
+        lines = source.splitlines()
+        if len(lines) > 10_000:
+            raise AksiError("program exceeds the 10000-line limit")
         output = []
-        for number, line in enumerate(source.splitlines(), 1):
+        for number, line in enumerate(lines, 1):
             result = self.run_line(line, number)
             if result is not None: output.append(result)
         return output
