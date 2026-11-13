@@ -8,6 +8,7 @@ state-vector simulations, not QPU execution.
 from __future__ import annotations
 
 import cmath
+import json
 import math
 import random
 import re
@@ -272,6 +273,37 @@ class Runtime:
             raise AksiError("expression exceeds the 4096-character limit")
         return parse_expression(source, self.env, AksiError)
 
+    def load_semantic_graph(self, path: str | Path) -> int:
+        try:
+            payload = json.loads(Path(path).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            raise AksiError(f"cannot load semantic graph: {exc}") from exc
+        if payload.get("schema") != "AKSI-SEMANTIC-GRAPH/1":
+            raise AksiError("unsupported semantic graph schema")
+        concepts = payload.get("concepts")
+        if not isinstance(concepts, list):
+            raise AksiError("semantic graph concepts must be a list")
+        staged_concepts = {}
+        staged_relations = []
+        for item in concepts:
+            if not isinstance(item, dict):
+                raise AksiError("semantic graph concept must be an object")
+            name, definition = item.get("id"), item.get("definition")
+            parents = item.get("parents")
+            if not isinstance(name, str) or not name.strip() or not isinstance(definition, str) or not definition.strip():
+                raise AksiError("semantic graph concept requires non-empty id and definition")
+            if name in staged_concepts:
+                raise AksiError(f"duplicate semantic concept: {name}")
+            if not isinstance(parents, list) or any(not isinstance(parent, str) for parent in parents):
+                raise AksiError(f"invalid parent list for concept: {name}")
+            staged_concepts[name] = definition
+            staged_relations.extend((name, "is_a", parent) for parent in parents)
+        self.concepts.update(staged_concepts)
+        for relation in staged_relations:
+            if relation not in self.relations:
+                self.relations.append(relation)
+        return len(staged_concepts)
+
     def run_line(self, line: str, line_number: int = 1) -> Any:
         source = line.strip()
         if len(source) > 4096:
@@ -339,16 +371,18 @@ class Runtime:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = list(sys.argv[1:] if argv is None else argv)
-    if not args or args[0] in ("-h", "--help"):
-        print("AKSI Q", VERSION)
-        print("Usage: python aksi_q.py FILE.aksi")
-        print("Statements: let, print, assert, concept, relate, ask, infer")
-        return 0
-    path = Path(args[0])
+    import argparse
+
+    parser = argparse.ArgumentParser(description=f"AKSI Q {VERSION} interpreter")
+    parser.add_argument("--knowledge", type=Path, help="load a generated AKSI semantic graph JSON file")
+    parser.add_argument("file", type=Path, help="AKSI source file (.aksi)")
+    args = parser.parse_args(sys.argv[1:] if argv is None else argv)
     try:
-        source = path.read_text(encoding="utf-8")
+        source = args.file.read_text(encoding="utf-8")
         runtime = Runtime()
+        if args.knowledge:
+            count = runtime.load_semantic_graph(args.knowledge)
+            print(f"[AKSI Q] loaded {count} semantic concepts")
         for result in runtime.run(source):
             print(_format(result))
         print(f"[AKSI Q {VERSION}] completed")
