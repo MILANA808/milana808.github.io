@@ -300,7 +300,7 @@ class Runtime:
             if source.startswith("relate "):
                 match = re.fullmatch(r'relate\s+(".*?"|\'.*?\')\s*->\s*(".*?"|\'.*?\')\s+as\s+(".*?"|\'.*?\')', source)
                 if not match: raise AksiError('expected: relate "subject" -> "object" as "relation"')
-                subject, obj, relation = (ast.literal_eval(x) for x in match.groups())
+                subject, obj, relation = (_quoted_value(x) for x in match.groups())
                 item = (subject, relation, obj)
                 if item not in self.relations: self.relations.append(item)
                 return None
