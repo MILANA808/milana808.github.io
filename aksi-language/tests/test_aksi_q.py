@@ -26,7 +26,7 @@ concept "mammal" means "animal"
 concept "animal" means "living thing"
 relate "cat" -> "mammal" as "is_a"
 relate "mammal" -> "animal" as "is_a"
-print infer "cat"
+infer "cat"
 '''
         self.assertEqual(Runtime().run(source), [["mammal", "animal"]])
 
