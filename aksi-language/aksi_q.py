@@ -267,6 +267,7 @@ class Runtime:
         }
         self.concepts: dict[str, str] = {}
         self.aliases: dict[str, str] = {}
+        self.ambiguous_aliases: set[str] = set()
         self.relations: list[tuple[str, str, str]] = []
 
     @staticmethod
@@ -275,7 +276,7 @@ class Runtime:
 
     def resolve_concept(self, value: str) -> str:
         key = self._concept_key(value)
-        if key in self.concepts:
+        if key in self.concepts or key in self.ambiguous_aliases:
             return key
         return self.aliases.get(key, key)
 
@@ -317,8 +318,10 @@ class Runtime:
                 key = self._concept_key(alias)
                 existing = staged_aliases.get(key)
                 if existing is not None and existing != name:
-                    raise AksiError(f"ambiguous semantic alias: {alias}")
-                staged_aliases[key] = name
+                    staged_aliases.pop(key, None)
+                    self.ambiguous_aliases.add(key)
+                elif key not in self.ambiguous_aliases:
+                    staged_aliases[key] = name
         self.concepts.update(staged_concepts)
         self.aliases.update(staged_aliases)
         for relation in staged_relations:
