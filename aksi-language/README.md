@@ -35,6 +35,12 @@ let balanced = h(start)
 print probabilities(balanced)
 print measure(balanced, shots=20, seed=7)
 
+# two-qubit Bell state
+let register = qstate(2)
+let superposed = h(register, 0)
+let bell = cnot(superposed, 0, 1)
+print probabilities(bell)
+
 # a tiny explicit concept graph
 concept "cat" means "a domesticated mammal"
 concept "mammal" means "a warm-blooded vertebrate"
@@ -69,9 +75,9 @@ Built-ins include \`vector\`, \`dot\`, \`norm\`, \`normalize\`, \`tensor\`,
   static type checking, and compilation to native machine code are not yet present.
 - The concept graph is explicit symbolic data, not open-domain natural-language
   understanding.
-- The quantum simulator currently supports one-qubit Hadamard and phase
-  operations plus measurement; multi-qubit gates are a later, separately tested
-  extension.
+- The state-vector simulator supports up to 10 qubits with H/X/Z, phase and
+  Rx/Ry/Rz rotations, CNOT, probability extraction and seeded measurement.
+  It is a classical simulator, not quantum hardware.
 - An \`assert\` checks a runtime condition; it is not a formal mathematical proof.
 
 ## Roadmap
