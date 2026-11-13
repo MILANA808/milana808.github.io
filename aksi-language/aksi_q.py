@@ -91,6 +91,100 @@ def _phase(state: Any, theta: Any) -> list[complex]:
     return [v[0], v[1] * cmath.exp(1j * float(theta))]
 
 
+
+def _infer_qubits(state: Any) -> int:
+    v = _vector(state, "quantum state")
+    if len(v) < 2 or len(v) & (len(v) - 1):
+        raise AksiError("multi-qubit state length must be a power of two")
+    n = len(v).bit_length() - 1
+    if n > 10:
+        raise AksiError("state-vector simulator is limited to 10 qubits")
+    return n
+
+
+def _apply_single_gate(state: Any, target: int, matrix: tuple[complex, complex, complex, complex]) -> list[complex]:
+    v = _vector(state, "quantum state")
+    n = _infer_qubits(v)
+    if not isinstance(target, int) or target < 0 or target >= n:
+        raise AksiError(f"target qubit must be from 0 to {n-1}")
+    u00, u01, u10, u11 = matrix
+    out = v[:]
+    bit = 1 << target
+    for i in range(len(v)):
+        if i & bit:
+            continue
+        j = i | bit
+        a, b = v[i], v[j]
+        out[i] = u00 * a + u01 * b
+        out[j] = u10 * a + u11 * b
+    return out
+
+
+def _qstate(qubits: int = 1) -> list[complex]:
+    if not isinstance(qubits, int) or qubits < 1 or qubits > 10:
+        raise AksiError("qstate() supports 1 to 10 qubits")
+    state = [0j] * (1 << qubits)
+    state[0] = 1 + 0j
+    return state
+
+
+def _x_gate(state: Any, target: int = 0) -> list[complex]:
+    return _apply_single_gate(state, target, (0j, 1+0j, 1+0j, 0j))
+
+
+def _z_gate(state: Any, target: int = 0) -> list[complex]:
+    return _apply_single_gate(state, target, (1+0j, 0j, 0j, -1+0j))
+
+
+def _h_gate(state: Any, target: int | None = None) -> list[complex]:
+    v = _vector(state, "state")
+    if target is None:
+        if len(v) != 2:
+            raise AksiError("h(state) requires one qubit; use h(state, target) for a register")
+        target = 0
+    scale = 1 / math.sqrt(2)
+    return _apply_single_gate(v, target, (scale, scale, scale, -scale))
+
+
+def _phase_gate(state: Any, theta: Any, target: int | None = None) -> list[complex]:
+    v = _vector(state, "state")
+    if target is None:
+        if len(v) != 2:
+            raise AksiError("phase(state, angle) requires one qubit; use phase(state, angle, target) for a register")
+        target = 0
+    return _apply_single_gate(v, target, (1+0j, 0j, 0j, cmath.exp(1j * float(theta))))
+
+
+def _cnot(state: Any, control: int, target: int) -> list[complex]:
+    v = _vector(state, "state")
+    n = _infer_qubits(v)
+    if not all(isinstance(q, int) and 0 <= q < n for q in (control, target)):
+        raise AksiError(f"control and target must be qubits from 0 to {n-1}")
+    if control == target:
+        raise AksiError("control and target qubits must differ")
+    out = v[:]
+    control_bit, target_bit = 1 << control, 1 << target
+    for i in range(len(v)):
+        if (i & control_bit) and not (i & target_bit):
+            j = i | target_bit
+            out[i], out[j] = v[j], v[i]
+    return out
+
+
+def _rx(state: Any, theta: Any, target: int = 0) -> list[complex]:
+    c, s = math.cos(float(theta)/2), math.sin(float(theta)/2)
+    return _apply_single_gate(state, target, (c, -1j*s, -1j*s, c))
+
+
+def _ry(state: Any, theta: Any, target: int = 0) -> list[complex]:
+    c, s = math.cos(float(theta)/2), math.sin(float(theta)/2)
+    return _apply_single_gate(state, target, (c, -s, s, c))
+
+
+def _rz(state: Any, theta: Any, target: int = 0) -> list[complex]:
+    angle = float(theta)
+    return _apply_single_gate(state, target, (cmath.exp(-1j*angle/2), 0j, 0j, cmath.exp(1j*angle/2)))
+
 def _measure(state: Any, shots: int = 1, seed: int = 0) -> Any:
     if not isinstance(shots, int) or shots < 1 or shots > 1_000_000:
         raise AksiError("measure() shots must be an integer from 1 to 1000000")
@@ -149,8 +243,15 @@ class Runtime:
             "interfere": lambda a, b: [x + y for x, y in zip(_vector(a), _vector(b))]
             if len(_vector(a)) == len(_vector(b)) else (_ for _ in ()).throw(AksiError("interfere() requires equal vector lengths")),
             "probabilities": _probabilities,
-            "h": _hadamard,
-            "phase": _phase,
+            "h": _h_gate,
+            "phase": _phase_gate,
+            "qstate": _qstate,
+            "x": _x_gate,
+            "z": _z_gate,
+            "cnot": _cnot,
+            "rx": _rx,
+            "ry": _ry,
+            "rz": _rz,
             "measure": _measure,
         }
         self.concepts: dict[str, str] = {}
