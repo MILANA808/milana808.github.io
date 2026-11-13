@@ -41,8 +41,8 @@ concept "mammal" means "a warm-blooded vertebrate"
 concept "animal" means "a living organism that can move"
 relate "cat" -> "mammal" as "is_a"
 relate "mammal" -> "animal" as "is_a"
-print ask "cat"
-print infer "cat"
+ask "cat"
+infer "cat"
 \`\`\`
 
 ## v0.1 language reference
