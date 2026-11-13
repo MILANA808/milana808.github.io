@@ -18,7 +18,7 @@ MILANA808/milana808.github.io:
 ## Important implementation finding
 
 The repository already contains a richer JavaScript quantum simulator than the
-initial AKSI Q v0.1 interpreter. The v0.2 prototype adds a bounded Python
+initial AKSI Q v0.1 interpreter. The v0.2 prototype adds a native AKSI Pratt expression parser and a bounded Python
 state-vector subset (up to 10 qubits, H/X/Z, phase, Rx/Ry/Rz and CNOT) so the
 language can express and test Bell-state preparation without browser or network.
 
