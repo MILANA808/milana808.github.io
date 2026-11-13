@@ -19,6 +19,30 @@ class AksiLanguageTests(unittest.TestCase):
         state = _hadamard([1, 0])
         self.assertEqual(_measure(state, 100, 19), _measure(state, 100, 19))
 
+    def test_bell_state_has_correlated_measurements(self):
+        runtime = Runtime()
+        result = runtime.run("let zero = qstate(2)\nlet plus = h(zero, 0)\nlet bell = cnot(plus, 0, 1)\nprint probabilities(bell)")
+        self.assertAlmostEqual(result[0][0], 0.5)
+        self.assertAlmostEqual(result[0][3], 0.5)
+        self.assertAlmostEqual(result[0][1], 0.0)
+        self.assertAlmostEqual(result[0][2], 0.0)
+
+    def test_single_qubit_x_gate(self):
+        result = Runtime().run("let zero = qstate(1)\nlet one = x(zero)\nprint probabilities(one)")
+        self.assertEqual(result[0], [0.0, 1.0])
+
+    def test_rotation_preserves_norm(self):
+        result = Runtime().run("let zero = qstate(1)\nlet rotated = ry(zero, pi / 3)\nprint norm(rotated)")
+        self.assertAlmostEqual(result[0], 1.0)
+
+    def test_quantum_register_limit(self):
+        with self.assertRaises(AksiError):
+            Runtime().run("let too_large = qstate(11)")
+
+    def test_invalid_cnot_target_is_rejected(self):
+        with self.assertRaises(AksiError):
+            Runtime().run("let zero = qstate(2)\nprint cnot(zero, 0, 0)")
+
     def test_concept_transitive_inference(self):
         source = '''
 concept "cat" means "mammal"
