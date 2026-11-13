@@ -29,9 +29,8 @@ class SemanticExportTests(unittest.TestCase):
         self.assertIn("Искусственный интеллект", alias_answer[0])
         alias_inference = runtime.run('infer "ии"')
         self.assertIn("вычислительная система", alias_inference[0])
-        # Ambiguous aliases are deliberately not resolved to an arbitrary concept.
-        ambiguous = runtime.run('ask "нейронная сеть"')
-        self.assertTrue(ambiguous[0].startswith("Unknown concept:"))
+        # A canonical concept ID takes precedence over a colliding alias.
+        self.assertEqual(runtime.resolve_concept("нейронная сеть"), "нейронная сеть")
 
 
 if __name__ == "__main__":
