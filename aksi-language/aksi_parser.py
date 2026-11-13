@@ -82,6 +82,8 @@ class ExpressionParser:
             pos = match.end()
             if not token.isspace():
                 tokens.append(token)
+        if len(tokens) > 2048:
+            self.fail("expression exceeds the 2048-token budget")
         tokens.append("<EOF>")
         return tokens
 
@@ -149,7 +151,7 @@ class ExpressionParser:
     def prefix(self) -> Any:
         token = self.take()
         if token in ("+", "-", "not"):
-            value = self.expression(7)
+            value = self.expression(6 if token in ("+", "-") else 3)
             try:
                 return +value if token == "+" else -value if token == "-" else not bool(value)
             except TypeError as exc:
@@ -238,6 +240,12 @@ class ExpressionParser:
 
     def _binary(self, op: str, left: Any, right: Any) -> Any:
         try:
+            if op == "**":
+                if isinstance(right, (int, float)) and abs(right) > 1024:
+                    self.fail("power exponent is limited to |n| <= 1024")
+                if isinstance(left, int) and isinstance(right, int) and right > 0:
+                    if abs(left).bit_length() * right > 100_000:
+                        self.fail("power result exceeds the integer-size budget")
             operations: dict[str, Callable[[], Any]] = {
                 "+": lambda: left + right,
                 "-": lambda: left - right,
