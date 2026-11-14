@@ -2,6 +2,8 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { Runtime, AksiError, tokenize, limits } = require("../aksi-q-browser.js");
+require("../aksi-semantic-reasoning.js");
+require("../aksi-symbolic-inference.js");
 
 class TestMemory {
   constructor() { this.records = new Map(); }
@@ -42,6 +44,14 @@ test("registered functions only; unknown names and injection are rejected", asyn
   const r = new Runtime({ memory: new TestMemory() });
   await assert.rejects(() => r.run('print __import__("os")'), AksiError);
   await assert.rejects(() => r.run("print not_defined"), AksiError);
+});
+
+test("runtime imports canonical semantic concepts and exposes AKSI symbolic inference", async () => {
+  const r = new Runtime({ memory: new TestMemory() });
+  assert.ok(r.concepts.size >= 20, "canonical AKSI concept graph should be loaded");
+  const result = await r.run('print symbolic_infer("логика: факт: снег белый; если снег белый, то снег отражает свет; следует ли снег отражает свет?")');
+  assert.equal(result[0].ok, true);
+  assert.equal(result[0].status, "proven");
 });
 
 test("concept definitions and explicit transitive is_a inference", async () => {
