@@ -1,0 +1,38 @@
+name: AKSI Q language
+on:
+  push:
+    branches: [main, aksi-language-v0.1]
+    paths:
+      - "aksi-language/**"
+      - ".github/workflows/aksi-language.yml"
+  pull_request:
+    paths:
+      - "aksi-language/**"
+      - ".github/workflows/aksi-language.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Export canonical AKSI semantic graph
+        working-directory: aksi-language
+        run: node tools/export_semantics.cjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run interpreter tests
+        working-directory: aksi-language
+        run: python -m unittest discover -s tests -v
+      - name: Run example programs
+        working-directory: aksi-language
+        run: |
+          python aksi_q.py --knowledge data/semantic-graph.json examples/first.aksi
+          python aksi_q.py examples/quantum.aksi
+      - name: Compare Python and browser quantum state vectors
+        run: node aksi-language/tools/check_quantum_parity.cjs

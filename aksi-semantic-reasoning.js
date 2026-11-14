@@ -123,7 +123,7 @@
   function conceptInfo(id) {
       const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
     if (!c) return null;
-    return { id, kind: c.kind, definition: c.definition, parents: c.parents.slice(), features: c.features.slice() };
+    return { id, kind: c.kind, definition: c.definition, aliases: (c.aliases || [id]).slice(), parents: c.parents.slice(), features: c.features.slice() };
   }
   function answer(input) {
     const raw = String(input == null ? "" : input).trim().replace(/[ёЁ]/g, ch => ch === "Ё" ? "Е" : "е");
