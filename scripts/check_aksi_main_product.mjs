@@ -29,6 +29,10 @@ assert.ok(!html.includes("if(window.AKSI_WEBLLM&&window.AKSI_WEBLLM.ready())"), 
 assert.ok(html.includes("[ЕДИНЫЙ КОНТУР]"), "main chat must show unified-core integration metadata");
 assert.ok(html.includes("ПОСЛЕДНИЕ ВЫЗОВЫ ЕДИНОГО ЯДРА"), "diagnostics must show the unified-core trace");
 assert.ok(html.includes("receiptDigest||t.receiptHash"), "diagnostic trace must show a receipt hash prefix when available");
+assert.ok(html.includes("02 / NATIVE REASONING"), "main chat must not imply consciousness");
+assert.ok(html.includes("Это не обученная LLM"), "main chat must disclose the bounded retrieval/logic implementation");
+assert.ok(html.includes("Локальные ответы доступны без внешней модели"), "main chat must describe its actual offline default");
+assert.ok(!html.includes("02 / CONSCIOUS INTERFACE"), "remove unsupported consciousness-style UI wording");
 assert.ok(html.includes("Unified core API"), "diagnostics must check the unified-core API");
 assert.ok(html.includes("Safe calculator"), "diagnostics must check the safe calculator");
 assert.ok(html.includes("window.AKSI_UNIFIED_CORE.remember"), "main product must route memory writes through the unified core");
