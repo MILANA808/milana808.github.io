@@ -92,9 +92,17 @@ equivalence. An unknown relation is not automatically false.
 ## 8. Browser runtime and persistent memory profile (v0.3)
 
 The browser runtime implements the expression grammar and bounded mathematical,
-concept and state-vector operations in JavaScript. It exposes the following
-additional statements, which are currently browser-profile extensions and are
-not yet implemented by the Python v0.2 reference runtime:
+concept and state-vector operations in JavaScript. When the existing AKSI
+semantic and symbolic modules are loaded on the page, it imports the canonical
+concept graph and exposes `semantic_answer(query)` and
+`symbolic_infer(input)` adapters. These adapters reuse the existing
+`AKSISemanticReasoning`, `AKSINativeLanguageCore` and
+`AKSISymbolicInference` components; they do not create an open-domain language
+model or infer facts that those modules do not support.
+
+It also exposes the following additional statements, which are currently
+browser-profile extensions and are not yet implemented by the Python v0.2
+reference runtime:
 
     remember "key" = expression
     recall "key"
