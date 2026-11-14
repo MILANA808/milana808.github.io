@@ -32,9 +32,7 @@ and a user-controlled IndexedDB memory profile. The browser profile supports
 current browser and origin; export/import is provided for backups and transfer.
 Browser storage is quota-limited and is not infinite or cloud-synchronized.
 
-The JavaScript runtime is not yet certified as fully conformant with the
-Python reference runtime. Cross-runtime fixtures and quantum differential
-checks remain required before claiming full parity.
+The shared `conformance/common-v1.json` corpus is executed by both runtimes in CI and compares arithmetic, boolean expressions, vectors, concept relations and state-vector probabilities. The separate quantum differential test compares selected circuit amplitudes. This is a tested common subset, not full language parity: browser-only IndexedDB memory, seeded measurement details, edge cases and the complete grammar still require additional differential coverage.
 
 ## Language sample
 
