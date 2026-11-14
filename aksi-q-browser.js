@@ -558,6 +558,9 @@
       const result = await this.runLine(lines[i], i + 1);
       if (result !== null && result !== undefined) output.push(result);
     }
+    this.lastSource = source;
+    this.lastResults = output.slice();
+    this.lastRunAt = new Date().toISOString();
     return output;
   };
 
@@ -601,6 +604,25 @@
         show(qOut, "ОШИБКА: " + (error.message || String(error)));
         if (status) status.textContent = "Остановлено: программа не прошла проверку";
       } finally { runButton.disabled = false; }
+    });
+    const receiptButton = byId("aksiQReceipt");
+    if (receiptButton) receiptButton.addEventListener("click", async () => {
+      receiptButton.disabled = true;
+      try {
+        if (!runtime.lastSource) throw new AksiError("Сначала выполни программу AKSI Q");
+        if (!root.AKSICoreV3 || typeof root.AKSICoreV3.buildReceipt !== "function") throw new AksiError("AKSI Core v3 receipt API is unavailable");
+        const receipt = await root.AKSICoreV3.buildReceipt({
+          task: "AKSI Q browser program execution",
+          mode: "deterministic",
+          parameters: { runtime: VERSION, source: runtime.lastSource },
+          result: { outputs: runtime.lastResults || [], executedAt: runtime.lastRunAt },
+          evidence: [],
+          events: []
+        });
+        show(qOut, { outputs: runtime.lastResults || [], receipt });
+        if (status) status.textContent = "Receipt создан · SHA-256 " + receipt.payload_hash;
+      } catch (error) { show(qOut, "Receipt не создан: " + (error.message || String(error))); }
+      finally { receiptButton.disabled = false; }
     });
     const example = byId("aksiQExample");
     if (example) example.addEventListener("click", () => {
