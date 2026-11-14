@@ -35,6 +35,15 @@ test("complex arithmetic, conjugate dot product and norm", async () => {
   assert.equal(result[3].im, 0);
 });
 
+test("runtime retains the exact source and outputs for a later reproducibility receipt", async () => {
+  const r = new Runtime({ memory: new TestMemory() });
+  const source = "print 6 * 7";
+  const result = await r.run(source);
+  assert.equal(r.lastSource, source);
+  assert.deepEqual(r.lastResults, result);
+  assert.ok(r.lastRunAt);
+});
+
 test("boolean expressions and chained comparisons", async () => {
   const r = new Runtime({ memory: new TestMemory() });
   assert.deepEqual(await r.run("print not (2 > 3) and 4 >= 4\nprint 1 < 2 < 3"), [true, true]);
