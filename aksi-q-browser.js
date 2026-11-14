@@ -405,6 +405,20 @@
   MemoryStore.prototype.export = async function () {
     return { schema: "AKSI-MEMORY-EXPORT/1", exportedAt: new Date().toISOString(), records: await this.all() };
   };
+  MemoryStore.prototype.storageInfo = async function (requestPersistence) {
+    if (!root.navigator || !root.navigator.storage) return { available: false, reason: "StorageManager API is unavailable" };
+    let persisted = false;
+    if (typeof root.navigator.storage.persisted === "function") persisted = await root.navigator.storage.persisted();
+    if (requestPersistence && !persisted && typeof root.navigator.storage.persist === "function") persisted = await root.navigator.storage.persist();
+    const estimate = typeof root.navigator.storage.estimate === "function" ? await root.navigator.storage.estimate() : {};
+    return {
+      available: true,
+      persisted: !!persisted,
+      usageBytes: Number(estimate.usage || 0),
+      quotaBytes: Number(estimate.quota || 0),
+      usagePercent: estimate.quota ? Number(((estimate.usage || 0) / estimate.quota * 100).toFixed(2)) : null
+    };
+  };
   MemoryStore.prototype.import = async function (payload) {
     if (!payload || payload.schema !== "AKSI-MEMORY-EXPORT/1" || !Array.isArray(payload.records)) throw new AksiError("unsupported memory export schema");
     if (payload.records.length > 10000) throw new AksiError("memory import is limited to 10000 records");
@@ -637,6 +651,20 @@
     if (verify) verify.addEventListener("click", async () => {
       try { show(memoryOut, await runtime.memory.verify()); }
       catch (error) { show(memoryOut, "Проверка не выполнена: " + (error.message || String(error))); }
+    });
+    const protect = byId("memoryProtect");
+    if (protect) protect.addEventListener("click", async () => {
+      protect.disabled = true;
+      try {
+        const info = await runtime.memory.storageInfo(true);
+        show(memoryOut, info.available ? {
+          ...info,
+          usage: Math.round(info.usageBytes / 1024) + " KB",
+          quota: info.quotaBytes ? Math.round(info.quotaBytes / 1024 / 1024) + " MB" : "not reported",
+          note: info.persisted ? "Браузер разрешил persistent storage; пользователь всё равно может очистить данные сайта." : "Браузер не подтвердил защиту от автоматического вытеснения. Делай экспортные копии."
+        } : info);
+      } catch (error) { show(memoryOut, "Не удалось проверить защиту хранилища: " + (error.message || String(error))); }
+      finally { protect.disabled = false; }
     });
     renderMemory();
   }
