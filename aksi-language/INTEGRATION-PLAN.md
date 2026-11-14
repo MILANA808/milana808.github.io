@@ -69,6 +69,7 @@ into this language prototype by this integration pass.
 - [ ] Runtime receipts identify code, inputs, seed and outputs.
 - [x] Product UI reports exact runtime capabilities and limitations.
 - [x] Browser-native interpreter and user-controlled local memory are available in Research Lab.
+- [x] Browser program executions can create AKSI Core v3 reproducibility receipts.
 - [ ] Browser and Python runtimes pass a shared conformance suite.
 - [ ] Memory import/export and record-integrity checks receive browser integration tests.
 - [ ] No quantum advantage, AGI or general-understanding claim without independent evidence.
