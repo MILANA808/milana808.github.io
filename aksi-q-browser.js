@@ -383,6 +383,16 @@
       tx.onerror = () => reject(tx.error);
     });
   };
+  MemoryStore.prototype.clear = async function () {
+    const db = await this.open();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, "readwrite");
+      tx.objectStore(STORE).clear();
+      tx.oncomplete = () => resolve({ ok: true });
+      tx.onerror = () => reject(tx.error || new AksiError("Could not clear AKSI memory"));
+      tx.onabort = () => reject(tx.error || new AksiError("AKSI memory clear was aborted"));
+    });
+  };
   MemoryStore.prototype.all = async function () {
     const db = await this.open();
     return new Promise((resolve, reject) => {

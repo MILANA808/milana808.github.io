@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 
 const html = fs.readFileSync("index.html", "utf8");
+const memoryBridge = fs.readFileSync("aksi-q-site-memory.js", "utf8");
 const initStart = html.indexOf("function initLocalModel(");
 const initEnd = html.indexOf("function prepareLocalModel()", initStart);
 assert.ok(initStart >= 0 && initEnd > initStart, "lazy model UI initializer exists");
@@ -26,3 +27,9 @@ assert.doesNotMatch(html, /#missions\{display:none!important\}/, "mission sectio
 assert.match(html, /function universeReact\(kind\)/);
 assert.match(html, /window\.location\.href='\/quantum-mind\/'/);
 console.log("AKSI main UI contract tests: OK");
+
+assert.match(html, /AKSI_SITE_MEMORY\.clear\(\)/, "clear-memory control must clear IndexedDB notes");
+assert.match(html, /window\.AKSI_SITE_MEMORY_CONTEXT=\{\}/, "clear-memory control must clear in-memory prompt context");
+assert.match(html, /Не удалось подтвердить полную очистку памяти/, "clear-memory control must not claim success when storage deletion fails");
+assert.match(memoryBridge, /ready: ready/);
+assert.match(memoryBridge, /await ready;\s*const result = await store\.clear\(\)/, "clear must wait for the initial migration to finish");

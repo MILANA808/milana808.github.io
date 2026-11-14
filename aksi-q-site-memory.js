@@ -104,9 +104,21 @@
         catch (error) { if (memoryList) memoryList.textContent = "Не удалось сохранить команду памяти: " + (error.message || String(error)); }
       }, true);
     }
-    migrate().catch(error => {
+    const ready = migrate().catch(error => {
       if (memoryList) memoryList.textContent = "Локальная память AKSI недоступна: " + (error.message || String(error));
+      throw error;
     });
+    root.AKSI_SITE_MEMORY = {
+      ready: ready,
+      all: () => store.all(),
+      refresh: refresh,
+      clear: async () => {
+        await ready;
+        const result = await store.clear();
+        await refresh();
+        return result;
+      }
+    };
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true });
   else start();
