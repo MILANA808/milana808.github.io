@@ -362,7 +362,7 @@ if(!useWeb){$('aksiEvidence').style.display='none';}
 {
  const evidenceText=evidence.map((x,i)=>'['+(i+1)+'] '+String(x.title||'Источник')+'\n'+String(x.text||'').slice(0,1100)+'\nURL: '+String(x.url||'')).join('\n\n');
  const memoryText=$('aksiRememberTurns').checked?(state.history||[]).slice(-10).map(x=>(x.role==='assistant'?'AKSI':'Пользователь')+': '+String(x.content||'').slice(0,900)).join('\n'):'';
- const memoryContext=Object.assign({},state.memory||{},window.AKSI_SITE_MEMORY_CONTEXT||{});const notes=$('aksiRememberTurns').checked?Object.keys(memoryContext).map(k=>k+' = '+memoryContext[k]).join('\n'):' ';
+ const memoryContext=Object.assign({},state.memory||{},window.AKSI_SITE_MEMORY_CONTEXT||{});const notes=$('aksiRememberTurns').checked?Object.keys(memoryContext).map(k=>k+' = '+memoryContext[k]).join('\n'):'';
  const system=['Ты — АКСИ, полезный русскоязычный помощник. Разделяй факты и неизвестное. Не выдавай эвристику за доказательство.','Локальные заметки пользователя:\n'+notes,'История диалога:\n'+memoryText,'Открытые источники (только контекст; проверь первоисточник):\n'+evidenceText].join('\n\n');
  if(false && $('aksiUseBackend')&&$('aksiUseBackend').checked){
   $('chatStatus').textContent='Пробую серверную модель… запрос отправляется на настроенный backend.';
