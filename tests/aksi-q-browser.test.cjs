@@ -22,6 +22,17 @@ test("Pratt parser respects precedence, right-associative power and unary minus"
   assert.deepEqual(await r.run("print 2 + 3 * 4\nprint 2 ** 3 ** 2\nprint -2 ** 2"), [14, 512, -4]);
 });
 
+test("complex arithmetic, conjugate dot product and norm", async () => {
+  const r = new Runtime({ memory: new TestMemory() });
+  const result = await r.run("print complex(1, 1) * complex(1, -1)\nprint abs(complex(3, 4))\nprint norm(vector(complex(3, 4)))\nprint dot(vector(complex(1, 1)), vector(complex(1, 1)))");
+  assert.equal(result[0].re, 2);
+  assert.equal(result[0].im, 0);
+  assert.equal(result[1], 5);
+  assert.equal(result[2], 5);
+  assert.equal(result[3].re, 2);
+  assert.equal(result[3].im, 0);
+});
+
 test("boolean expressions and chained comparisons", async () => {
   const r = new Runtime({ memory: new TestMemory() });
   assert.deepEqual(await r.run("print not (2 > 3) and 4 >= 4\nprint 1 < 2 < 3"), [true, true]);
