@@ -155,7 +155,7 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiRememberTurns" type="checkbox"> Использовать локальную память и сохранять историю на этом устройстве</label>
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiUseWeb" type="checkbox"> Искать источники в интернете (запрос отправится в сеть)</label>
   <label style="display:flex;gap:7px;align-items:center"><input id="aksiUseBackend" type="checkbox"> Пробовать серверную модель (запрос уйдёт на backend)</label>
-  <button class="chip" id="aksiClearMemory" type="button">Удалить историю, заметки и паспорта</button>
+  <button class="chip" id="aksiClearMemory" type="button">Удалить историю чата, заметки и паспорта</button>
  </div>
  <div class="sub" style="margin-top:7px">Веса модели загружаются с CDN; после загрузки генерация выполняется в браузере. История выключена по умолчанию. Веб-источники — только при явном включении.</div>
 </div>
@@ -504,7 +504,24 @@ async function runAnswerSelfTest(){
 }
 $('runAnswerSelfTest').addEventListener('click',runAnswerSelfTest);
 $('refreshHealth').addEventListener('click',diagnostics);$('runDiagnostics').addEventListener('click',diagnostics);
-$('aksiClearMemory').addEventListener('click',()=>{state.history=[];state.memory={};state.evidencePassports=[];lastEvidencePassport=null;lastEvidenceExchange=null;if(window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.clearMemory)window.AKSI_UNIFIED_CORE.clearMemory();persist();render();event('MEMORY','Conversation history and unified memory cleared');$('chatStatus').textContent='История диалога и локальная память очищены в этом браузере.';});
+$('aksiClearMemory').addEventListener('click',async()=>{
+ const button=$('aksiClearMemory');button.disabled=true;
+ try{
+  if(window.AKSI_SITE_MEMORY&&typeof window.AKSI_SITE_MEMORY.clear==='function')await window.AKSI_SITE_MEMORY.clear();
+  else if(window.AKSI_Q_BROWSER&&window.AKSI_Q_BROWSER.MemoryStore){const memoryStore=new window.AKSI_Q_BROWSER.MemoryStore();await memoryStore.clear();}
+  else throw new Error('Модуль IndexedDB-памяти не загружен; полная очистка не подтверждена.');
+  state.history=[];state.memory={};state.evidencePassports=[];lastEvidencePassport=null;lastEvidenceExchange=null;
+  window.AKSI_SITE_MEMORY_CONTEXT={};
+  if(window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.clearMemory)window.AKSI_UNIFIED_CORE.clearMemory();
+  persist();render();event('MEMORY','Chat history, IndexedDB notes and evidence passports cleared');
+  if($('memoryList'))$('memoryList').textContent='Пока нет заметок.';
+  if($('memoryCount'))$('memoryCount').textContent='0';
+  $('chatStatus').textContent='История чата, заметки IndexedDB и паспорта очищены в этом браузере.';
+ }catch(error){
+  const message=String(error&&error.message||error);event('ERROR','Memory clear failed: '+message);
+  $('chatStatus').textContent='Не удалось подтвердить полную очистку памяти: '+message;
+ }finally{button.disabled=false;}
+});
 if(window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.listNotes&&window.AKSI_UNIFIED_CORE.remember){const known=new Set(window.AKSI_UNIFIED_CORE.listNotes().map(x=>x.key));Object.entries(state.memory||{}).forEach(([k,v])=>{if(!known.has(k))window.AKSI_UNIFIED_CORE.remember(k,v);});}
 $('aksiProveAnswer').addEventListener('click',async()=>{
  if(!lastEvidencePassport)return;
