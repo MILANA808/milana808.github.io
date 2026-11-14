@@ -28,7 +28,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run AKSI Seal tests
+      - name: Run AKSI Seal CLI tests
         run: node --test tools/aksi-seal.test.mjs
+      - name: Run AKSI browser receipt tests
+        run: node --test seal/aksi-seal-browser.test.cjs
       - name: Run complete repository test suite
         run: npm test
