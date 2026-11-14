@@ -1,6 +1,6 @@
 /**
  * AKSI Trust Compiler v1 · MVP
- * verify_response · ECDSA attestation · Self-Adaptive Chain · QRNG Bell · self-obsolescence
+ * verify_response · ECDSA attestation · Self-Adaptive Chain · CSPRNG smoke test · self-obsolescence
  * © AKSI · aksilove@internet.ru · Proprietary
  */
 (function (global) {
@@ -56,19 +56,19 @@
   }
   function setState(patch) { var s = Object.assign(state(), patch); saveJSON(STATE_KEY, s); return s; }
 
-  function qrngBytes(n) { var u = new Uint8Array(n); crypto.getRandomValues(u); return u; }
-  function bellTest(samples) {
+  function secureRandomBytes(n) { var u = new Uint8Array(n); crypto.getRandomValues(u); return u; }
+  function randomnessSmokeTest(samples) {
     samples = samples || 2048;
-    var buf = qrngBytes(samples), same = 0, pairs = 0;
+    var buf = secureRandomBytes(samples), same = 0, pairs = 0;
     for (var i = 0; i + 1 < buf.length; i += 2) { if ((buf[i] & 1) === (buf[i + 1] & 1)) same++; pairs++; }
     var corr = pairs ? same / pairs : 0.5;
-    return { ok: corr > 0.35 && corr < 0.65, correlation: Math.round(corr * 1000) / 1000, samples: pairs, source: "CSPRNG·Bell-stat" };
+    return { ok: corr > 0.35 && corr < 0.65, correlation: Math.round(corr * 1000) / 1000, samples: pairs, source: "WebCrypto CSPRNG; adjacent-bit correlation smoke test" };
   }
   async function generateKeyMaterial() {
-    var bell = bellTest(4096);
-    var raw = qrngBytes(32);
+    var randomnessCheck = randomnessSmokeTest(4096);
+    var raw = secureRandomBytes(32);
     var h = await sha256(raw);
-    return { keyId: hex(h).slice(0, 16), materialB64: b64(raw), bell: bell, alg: "AKSI-Q-hybrid-v1" };
+    return { keyId: hex(h).slice(0, 16), materialB64: b64(raw), randomnessCheck: randomnessCheck, alg: "CSPRNG-SHA256-v1" };
   }
 
   function chain() { var c = loadJSON(CHAIN_KEY, []); return Array.isArray(c) ? c : []; }
@@ -188,7 +188,7 @@
       '<textarea id="trResp" placeholder="Ответ LLM" style="margin-top:8px;min-height:72px"></textarea>' +
       '<div class="row"><button type="button" class="btn p" id="trVerify">verify_response</button>' +
       '<button type="button" class="btn" id="trChain">Аудит chain</button>' +
-      '<button type="button" class="btn" id="trBell">QRNG Bell</button>' +
+      '<button type="button" class="btn" id="trRandomness">Тест CSPRNG</button>' +
       '<button type="button" class="btn" id="trReset">Сброс safe-mode</button></div>' +
       '<pre id="trOut" class="out" style="margin-top:10px;max-height:280px">—</pre></div>';
     function show(x) { var el = document.getElementById("trOut"); if (el) el.textContent = typeof x === "string" ? x : JSON.stringify(x, null, 2); }
@@ -201,7 +201,7 @@
       verifyResponse(document.getElementById("trPrompt").value, document.getElementById("trResp").value, { source: "ui" }).then(function (r) { show(r); refresh(); });
     };
     document.getElementById("trChain").onclick = function () { verifyChain().then(function (v) { show({ verify: v, tail: chain().slice(-5) }); }); };
-    document.getElementById("trBell").onclick = function () { generateKeyMaterial().then(show); };
+    document.getElementById("trRandomness").onclick = function () { generateKeyMaterial().then(show); };
     document.getElementById("trReset").onclick = function () { show(resetSafeMode()); refresh(); };
   }
 
@@ -209,7 +209,7 @@
     version: VER, verifyResponse: verifyResponse, verify_response: verifyResponse,
     generateKey: generateKeyMaterial, generate_key: generateKeyMaterial,
     auditChain: auditExport, audit_chain: auditExport, verifyChain: verifyChain,
-    bellTest: bellTest, state: state, resetSafeMode: resetSafeMode, recordAnomaly: recordAnomaly,
+    randomnessSmokeTest: randomnessSmokeTest, state: state, resetSafeMode: resetSafeMode, recordAnomaly: recordAnomaly,
     appendChain: appendChain, mount: mount, policy: policy,
   };
 })(typeof window !== "undefined" ? window : this);
