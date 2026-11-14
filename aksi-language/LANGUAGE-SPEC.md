@@ -1,7 +1,7 @@
-# AKSI Q Language Specification — Draft 0.2
+# AKSI Q Language Specification — Draft 0.3
 
 **Status:** executable prototype specification; subject to change before 1.0.
-**Runtime target:** Python 3.10+ reference interpreter. **Encoding:** UTF-8.
+**Runtime targets:** Python 3.10+ reference interpreter (v0.2) and browser-native JavaScript runtime (v0.3 profile). **Encoding:** UTF-8.
 **File extension:** .aksi.
 
 ## 1. Design goals
@@ -80,7 +80,33 @@ seed and runtime version. It is not a physical measurement and demonstrates
 no quantum advantage. Invalid indices, repeated CNOT qubits, non-power-of-two
 state lengths, zero-norm states and registers above 10 qubits are rejected.
 
-## 7. Symbolic knowledge
+
+## 8. Browser runtime and persistent memory profile (v0.3)
+
+The browser runtime implements the expression grammar and bounded mathematical,
+concept and state-vector operations in JavaScript. It exposes the following
+additional statements, which are currently browser-profile extensions and are
+not yet implemented by the Python v0.2 reference runtime:
+
+    remember "key" = expression
+    recall "key"
+    search "query"
+    forget "key"
+
+The browser profile stores explicitly requested records in IndexedDB on the
+current origin and browser. It does not automatically store conversations or
+synchronize data to a server. Browser storage is quota-limited and may be
+cleared by browser settings; users should export backups for portability.
+A record SHA-256 digest detects changes relative to the stored digest but does
+not prove truth, authorship or trusted time. Import validates the export schema
+and record size bounds. Cross-device sync, end-to-end encrypted sync, automatic
+conversation ingestion and unbounded storage are not implemented.
+
+The browser runtime is not yet claimed to be fully conformant with the Python
+reference implementation. The shared fixtures and differential tests remain
+release gates.
+
+## 9. Symbolic knowledge
 
 The concept store is explicit and local to one runtime instance. The current
 inference rule is intentionally narrow: A is_a B and B is_a C imply that
