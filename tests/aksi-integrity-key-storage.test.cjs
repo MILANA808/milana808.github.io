@@ -31,7 +31,10 @@ test("rotated key identity survives reload through a non-secret active-key point
   assert.match(html, /crypto\.getRandomValues\(new Uint8Array\(12\)\)/);
 });
 
-test("Integrity uses the provider key only for ECDSA-P256 signing", () => {
-  assert.match(html, /name: "ECDSA", hash: "SHA-256"/);
-  assert.doesNotMatch(html, /name: "Ed25519"/);
+test("Integrity signs new receipts with ECDSA-P256 and keeps legacy Ed25519 verification", () => {
+  const signSection = html.match(/async function signBytes\(data\) \{([\s\S]*?)\n  \}/);
+  assert.ok(signSection, "signBytes function must exist");
+  assert.match(signSection[1], /name: "ECDSA", hash: "SHA-256"/);
+  assert.doesNotMatch(signSection[1], /Ed25519/);
+  assert.match(html, /receipt\.alg[^\n]*Ed25519/);
 });
