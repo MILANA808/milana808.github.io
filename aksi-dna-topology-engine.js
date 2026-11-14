@@ -47,8 +47,9 @@
     const out=[];
     const seed=Array.isArray(root.__AKSI_SEED)?root.__AKSI_SEED:[];
     seed.forEach((x,i)=>{if(x&&x.q&&x.a)out.push({id:"seed-"+i,q:clean(x.q),a:clean(x.a,1800),tokens:tokens(x.q+" "+x.a),source:"built-in"});});
-    memory.learned.forEach((x,i)=>{if(x&&x.q&&x.a)out.push({id:"learned-"+i,q:x.q,a:x.a,tokens:tokens(x.q+" "+x.a),source:"user-feedback"});});
-    memory.episodes.slice(-200).forEach((x,i)=>{if(x&&x.q&&x.a)out.push({id:"episode-"+i,q:x.q,a:x.a,tokens:tokens(x.q+" "+x.a),source:"local-episode"});});
+    // Only built-in seed material and explicitly positively rated user material are retrieval candidates.
+    // Generated episodes remain history/context; they must never silently become new knowledge.
+    memory.learned.forEach((x,i)=>{if(x&&x.q&&x.a)out.push({id:"learned-"+i,q:x.q,a:clean(x.a,1800),tokens:tokens(x.q+" "+x.a),source:"user-feedback"});});
     return out;
   }
   function rank(query) {
