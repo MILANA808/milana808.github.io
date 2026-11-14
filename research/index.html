@@ -17,7 +17,7 @@ h1{font-size:clamp(2.4rem,7vw,5.4rem);line-height:.98;letter-spacing:-.055em;mar
 label{display:block;color:#bacbe1;font-size:13px;margin:12px 0 5px}input,textarea,select{width:100%;background:#091323;color:var(--text);border:1px solid #354a68;border-radius:10px;padding:10px 11px;outline:none}textarea{min-height:94px;resize:vertical}input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px #76e6e21c}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.output{white-space:pre-wrap;overflow-wrap:anywhere;background:#07111f;border:1px solid #2d435f;border-radius:11px;padding:12px;margin-top:12px;min-height:58px;color:#d7e7f9;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace}.status{border-left:3px solid var(--violet);background:#b7a4ff0d;padding:9px 12px;margin-top:12px;color:#d9e4f5;overflow-wrap:anywhere}.ok{color:var(--green)}.warn{color:var(--amber)}.bad{color:var(--red)}.links{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.links a{border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-decoration:none}.metricgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#0a1627;border:1px solid var(--line);border-radius:11px;padding:11px}.metric b{display:block;font-size:1.25rem;color:var(--cyan)}.metric small{color:var(--muted)}
 footer{margin-top:26px;color:var(--muted);font-size:12px}
 @media(max-width:720px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}.row{grid-template-columns:1fr}.wrap{padding:16px 12px 40px}h1{margin-top:30px}.metricgrid{grid-template-columns:1fr 1fr}}
-</style>
+ .memory-list{display:grid;gap:9px;margin-top:12px}.memory-item{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#091525}.memory-item b{overflow-wrap:anywhere;color:var(--cyan)}.memory-item p{grid-column:1/-1;margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.memory-item small{color:var(--muted)}.memory-item button{grid-column:2;grid-row:1/3;align-self:center}@media(max-width:520px){.memory-item{grid-template-columns:1fr}.memory-item button{grid-column:1;grid-row:auto}}\n</style>
 </head>
 <body><main class="wrap">
 <header class="top"><a class="brand" href="/">AKSI MATRIX</a><span class="pill">OPEN RESEARCH · EXPERIMENTAL · LOCAL-FIRST</span></header>
@@ -94,7 +94,52 @@ footer{margin-top:26px;color:var(--muted);font-size:12px}
 </section>
 
 <section class="card wide">
-<h2>8 / Архитектура и честные границы</h2>
+<h2>8 / AKSI Q — собственный язык в браузере</h2>
+<p class="small">Браузерный интерпретатор AKSI Q v0.3.0. Собственный лексер и Pratt-парсер, безопасный список встроенных функций, математические выражения, явные понятия и отношения, ограниченная state-vector симуляция. Исполнение происходит локально в этой вкладке.</p>
+<div class="status" id="aksiQStatus" role="status">Подготавливаю AKSI Q Browser Runtime…</div>
+<label for="aksiQSource">Программа AKSI Q</label>
+<textarea id="aksiQSource" spellcheck="false" style="min-height:260px;font-family:ui-monospace,monospace"># AKSI Q · пример
+let v = vector(3, 4)
+print norm(v)
+let zero = qstate(2)
+let plus = h(zero, 0)
+let bell = cnot(plus, 0, 1)
+print probabilities(bell)
+print measure(bell, shots=100, seed=42)
+concept "cat" means "mammal"
+concept "mammal" means "animal"
+relate "cat" -> "mammal" as "is_a"
+relate "mammal" -> "animal" as "is_a"
+ask "cat"
+infer "cat"
+print semantic_answer("что такое доказательство?")
+print symbolic_infer("логика: факт: снег белый; если снег белый, то снег отражает свет; следует ли снег отражает свет?")</textarea>
+<div class="actions"><button class="primary" id="aksiQRun">▶ Выполнить AKSI Q</button><button id="aksiQExample">Загрузить пример</button><button id="aksiQReceipt">Сформировать receipt</button></div>
+<div class="output" id="aksiQOutput" aria-live="polite">Ожидает запуска программы.</div>
+<p class="small">Поддерживаются let, print, assert, concept, relate, ask, infer, арифметика, векторы, qstate, H/X/Z, phase, Rx/Ry/Rz, CNOT, probabilities и воспроизводимые measure. Команды памяти: remember "ключ" = выражение; recall "ключ"; search "слово"; forget "ключ". Лимиты: 100 КБ на программу, 2 000 строк, 10 кубитов. Receipt фиксирует версию, исходный текст и результаты; хэш подтверждает целостность записи, а не истинность вычисления.</p>
+</section>
+
+<section class="card wide" id="aksi-memory-hub">
+<h2>9 / Долговременная память AKSI</h2>
+<p class="small">Записи сохраняются в IndexedDB этого браузера и доступны при следующих посещениях сайта на том же устройстве и в том же браузере. Система не сохраняет диалоги автоматически: добавляй только то, что сама решила запомнить. Это не бесконечное облачное хранилище — объём ограничен квотой браузера и свободным местом устройства.</p>
+<div class="row">
+<div><label for="memoryKey">Ключ / название записи</label><input id="memoryKey" maxlength="160" placeholder="Например: цель проекта AKSI"></div>
+<div><label for="memoryTags">Теги через запятую</label><input id="memoryTags" placeholder="проект, решение, идея"></div>
+</div>
+<label for="memoryValue">Что сохранить</label>
+<textarea id="memoryValue" maxlength="100000" placeholder="Запиши факт, решение, гипотезу или задачу…"></textarea>
+<div class="actions"><button class="primary" id="memorySave">Сохранить в память</button><button id="memoryRefresh">Показать последние записи</button><button id="memoryExport">Экспортировать резервную копию</button><button id="memoryImportButton">Импортировать копию</button><input id="memoryImportFile" type="file" accept="application/json,.json" hidden><button id="memoryVerify">Проверить целостность</button><button id="memoryProtect">Проверить квоту и запросить защиту хранения</button></div>
+<div class="row">
+<div><label for="memoryQuery">Поиск по ключам, тексту и тегам</label><input id="memoryQuery" placeholder="Например: архитектура"></div>
+<div style="display:flex;align-items:end"><button class="primary" id="memorySearch" style="width:100%">Найти в памяти</button></div>
+</div>
+<div class="output" id="memoryOutput" aria-live="polite">Локальная память загружается…</div>
+<div id="memoryList" class="memory-list" aria-live="polite">Загружаю записи…</div>
+<div class="status">Контроль приватности: память хранится локально, не синхронизируется с сервером и не передаётся автоматически. Экспортированный JSON содержит твои записи — храни его безопасно. Очистка данных сайта в настройках браузера может удалить эту память. Для переноса на другое устройство используй экспорт и импорт.</div>
+</section>
+
+<section class="card wide">
+<h2>10 / Архитектура и честные границы</h2>
 <div><span class="tag">РЕАЛИЗОВАНО В РЕПОЗИТОРИИ</span><span class="tag">ОТДЕЛЬНЫЕ МОДУЛИ</span><span class="tag">НЕ AGI</span></div>
 <ul>
 <li><b>Семантический граф и native language core:</b> определения, категории, признаки и ограниченные ответы на поддерживаемые типы вопросов.</li>
@@ -118,4 +163,5 @@ footer{margin-top:26px;color:var(--muted);font-size:12px}
 <script src="/aksi-quantum.js"></script>
 <script src="/aksi-core-v3.js"></script>
 <script src="/aksi-research-lab.js"></script>
+<script src="/aksi-q-browser.js"></script>
 </body></html>

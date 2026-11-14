@@ -1,7 +1,7 @@
-# AKSI Q Language Specification — Draft 0.2
+# AKSI Q Language Specification — Draft 0.3
 
 **Status:** executable prototype specification; subject to change before 1.0.
-**Runtime target:** Python 3.10+ reference interpreter. **Encoding:** UTF-8.
+**Runtime targets:** Python 3.10+ reference interpreter (v0.2) and browser-native JavaScript runtime (v0.3 profile). **Encoding:** UTF-8.
 **File extension:** .aksi.
 
 ## 1. Design goals
@@ -80,6 +80,7 @@ seed and runtime version. It is not a physical measurement and demonstrates
 no quantum advantage. Invalid indices, repeated CNOT qubits, non-power-of-two
 state lengths, zero-norm states and registers above 10 qubits are rejected.
 
+
 ## 7. Symbolic knowledge
 
 The concept store is explicit and local to one runtime instance. The current
@@ -88,7 +89,40 @@ infer A includes B and C. This is graph reachability, not a general theorem
 prover. It does not infer causality, temporal order or natural-language
 equivalence. An unknown relation is not automatically false.
 
-## 8. Safety and resource limits
+## 8. Browser runtime and persistent memory profile (v0.3)
+
+The browser runtime implements the expression grammar and bounded mathematical,
+concept and state-vector operations in JavaScript. When the existing AKSI
+semantic and symbolic modules are loaded on the page, it imports the canonical
+concept graph and exposes `semantic_answer(query)` and
+`symbolic_infer(input)` adapters. These adapters reuse the existing
+`AKSISemanticReasoning`, `AKSINativeLanguageCore` and
+`AKSISymbolicInference` components; they do not create an open-domain language
+model or infer facts that those modules do not support.
+
+It also exposes the following additional statements, which are currently
+browser-profile extensions and are not yet implemented by the Python v0.2
+reference runtime:
+
+    remember "key" = expression
+    recall "key"
+    search "query"
+    forget "key"
+
+The browser profile stores explicitly requested records in IndexedDB on the
+current origin and browser. It does not automatically store conversations or
+synchronize data to a server. Browser storage is quota-limited and may be
+cleared by browser settings; users should export backups for portability.
+A record SHA-256 digest detects changes relative to the stored digest but does
+not prove truth, authorship or trusted time. Import validates the export schema
+and record size bounds. Cross-device sync, end-to-end encrypted sync, automatic
+conversation ingestion and unbounded storage are not implemented.
+
+The browser runtime is not yet claimed to be fully conformant with the Python
+reference implementation. The shared fixtures and differential tests remain
+release gates.
+
+## 9. Safety and resource limits
 
 The reference interpreter never invokes Python eval or exec. It evaluates a
 restricted AST allowlist and rejects imports, attribute access, indirect calls
@@ -99,7 +133,7 @@ These controls reduce accidental and some adversarial resource use. They are
 not a formal security proof. Fuzzing and security review are required before
 executing untrusted programs in a service.
 
-## 9. Errors and reproducibility
+## 10. Errors and reproducibility
 
 Errors include a source line number where possible. A program executes
 statements in order and stops at the first runtime error. Rollback and
@@ -110,7 +144,7 @@ language/runtime versions, deterministic seed, inputs, external data references,
 outputs, error status and environment metadata. Hashes/signatures establish
 integrity or attribution, not mathematical correctness or factual truth.
 
-## 10. Compatibility
+## 11. Compatibility
 
 Before version 1.0, grammar and built-ins may change. Every breaking change
 must update this document, examples, tests and version number together.
