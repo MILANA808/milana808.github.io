@@ -103,8 +103,9 @@
         if (precedence === undefined || precedence < minimum) break;
         this.take();
         if (["==", "!=", "<", "<=", ">", ">="].includes(token)) {
-          let result = compare(token, left, this.expression(precedence + 1));
-          left = this.lastCompared;
+          let right = this.expression(precedence + 1);
+          let result = compare(token, left, right);
+          left = right;
           while (["==", "!=", "<", "<=", ">", ">="].includes(this.peek())) {
             const op = this.take();
             const right = this.expression(precedence + 1);
@@ -282,6 +283,7 @@
   }
   function measure(state, shots, seed) {
     const probs = probabilities(state);
+    if (shots && typeof shots === "object") { seed = shots.seed; shots = shots.shots; }
     shots = shots === undefined ? 1 : shots;
     seed = seed === undefined ? 0 : seed;
     if (!Number.isInteger(shots) || shots < 1 || shots > 100000) throw new AksiError("measure shots must be 1..100000");
