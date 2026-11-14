@@ -107,6 +107,9 @@
   async function genClassical() {
     var kp = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
     var signKp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    // Export only transiently to re-import private keys as non-extractable CryptoKeys.
+    kp = { privateKey: await crypto.subtle.importKey("jwk", await crypto.subtle.exportKey("jwk", kp.privateKey), { name: "ECDH", namedCurve: "P-256" }, false, ["deriveBits"]), publicKey: kp.publicKey };
+    signKp = { privateKey: await crypto.subtle.importKey("jwk", await crypto.subtle.exportKey("jwk", signKp.privateKey), { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]), publicKey: signKp.publicKey };
     return { ecdh: kp, ecdsa: signKp };
   }
   async function exportPub(key, type) {
@@ -192,52 +195,57 @@
   async function ensureIdentity() {
     if (identity) return identity;
     var stored = await idbGet("identity");
-    if (stored && stored.ecdhPrivJwk) {
+    if (stored && stored.ecdhPrivateKey && stored.ecdsaPrivateKey) {
       identity = {
-        ecdh: {
-          privateKey: await crypto.subtle.importKey("jwk", stored.ecdhPrivJwk, { name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]),
-          publicKey: await crypto.subtle.importKey("jwk", stored.ecdhPubJwk, { name: "ECDH", namedCurve: "P-256" }, true, []),
-        },
-        ecdsa: {
-          privateKey: await crypto.subtle.importKey("jwk", stored.ecdsaPrivJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["sign"]),
-          publicKey: await crypto.subtle.importKey("jwk", stored.ecdsaPubJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]),
-        },
+        ecdh: { privateKey: stored.ecdhPrivateKey, publicKey: stored.ecdhPublicKey },
+        ecdsa: { privateKey: stored.ecdsaPrivateKey, publicKey: stored.ecdsaPublicKey },
         ecdhPubRaw: unb64(stored.ecdhPubRawB64),
         ecdsaPubSpki: unb64(stored.ecdsaPubSpkiB64),
-        did: stored.did,
-        pq: stored.pq || null,
-        createdAt: stored.createdAt,
+        did: stored.did, pq: null, createdAt: stored.createdAt,
       };
       return identity;
     }
-    var cl = await genClassical();
-    var ecdhPubRaw = await exportPub(cl.ecdh.publicKey, "ecdh");
-    var ecdsaPubSpki = await exportPub(cl.ecdsa.publicKey, "ecdsa");
+    var legacy = stored && stored.ecdhPrivJwk ? stored : null;
+    var cl;
+    if (legacy) {
+      cl = {
+        ecdh: {
+          privateKey: await crypto.subtle.importKey("jwk", legacy.ecdhPrivJwk, { name: "ECDH", namedCurve: "P-256" }, false, ["deriveBits"]),
+          publicKey: await crypto.subtle.importKey("jwk", legacy.ecdhPubJwk, { name: "ECDH", namedCurve: "P-256" }, true, []),
+        },
+        ecdsa: {
+          privateKey: await crypto.subtle.importKey("jwk", legacy.ecdsaPrivJwk, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]),
+          publicKey: await crypto.subtle.importKey("jwk", legacy.ecdsaPubJwk, { name: "ECDSA", namedCurve: "P-256" }, true, ["verify"]),
+        },
+      };
+    } else {
+      cl = await genClassical();
+    }
+    var ecdhPubRaw = legacy ? unb64(legacy.ecdhPubRawB64) : await exportPub(cl.ecdh.publicKey, "ecdh");
+    var ecdsaPubSpki = legacy ? unb64(legacy.ecdsaPubSpkiB64) : await exportPub(cl.ecdsa.publicKey, "ecdsa");
     var fp = await fingerprint(ecdhPubRaw);
-    var did = "did:aksi:pq:" + fp;
-    var pq = null;
-    try {
-      var pqk = await pqKeygen();
-      if (pqk) pq = { publicKeyB64: b64(pqk.publicKey), secretKeyB64: b64(pqk.secretKey), alg: "ML-KEM-768" };
-    } catch (e) {}
+    var did = legacy && legacy.did ? legacy.did : "did:aksi:pq:" + fp;
+    // PQ secret keys were previously stored as plaintext base64 in IndexedDB.
+    // Disable persistence of that secret until an authenticated encrypted vault exists.
+    var createdAt = legacy && legacy.createdAt ? legacy.createdAt : Date.now();
     var pack = {
-      ecdhPrivJwk: await crypto.subtle.exportKey("jwk", cl.ecdh.privateKey),
-      ecdhPubJwk: await crypto.subtle.exportKey("jwk", cl.ecdh.publicKey),
-      ecdsaPrivJwk: await crypto.subtle.exportKey("jwk", cl.ecdsa.privateKey),
-      ecdsaPubJwk: await crypto.subtle.exportKey("jwk", cl.ecdsa.publicKey),
+      ecdhPrivateKey: cl.ecdh.privateKey,
+      ecdhPublicKey: cl.ecdh.publicKey,
+      ecdsaPrivateKey: cl.ecdsa.privateKey,
+      ecdsaPublicKey: cl.ecdsa.publicKey,
       ecdhPubRawB64: b64(ecdhPubRaw),
       ecdsaPubSpkiB64: b64(ecdsaPubSpki),
-      did: did, pq: pq, createdAt: Date.now(), ver: VER,
+      did: did, pq: null, createdAt: createdAt, ver: VER,
     };
     await idbSet("identity", pack);
     var pubPack = {
       did: did, alg: "AKSI-HQ1",
       ecdhPub: pack.ecdhPubRawB64, ecdsaPub: pack.ecdsaPubSpkiB64,
-      pqPub: pq ? pq.publicKeyB64 : null, pqAlg: pq ? pq.alg : null, createdAt: pack.createdAt,
+      pqPub: null, pqAlg: null, createdAt: createdAt,
     };
     try { localStorage.setItem(LS_PUB, JSON.stringify(pubPack)); } catch (e) {}
-    identity = { ecdh: cl.ecdh, ecdsa: cl.ecdsa, ecdhPubRaw: ecdhPubRaw, ecdsaPubSpki: ecdsaPubSpki, did: did, pq: pq, createdAt: pack.createdAt };
-    appendLedger("pq-identity", did);
+    identity = { ecdh: cl.ecdh, ecdsa: cl.ecdsa, ecdhPubRaw: ecdhPubRaw, ecdsaPubSpki: ecdsaPubSpki, did: did, pq: null, createdAt: createdAt };
+    appendLedger("classical-identity", did);
     return identity;
   }
 
