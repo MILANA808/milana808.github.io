@@ -203,6 +203,14 @@
         ecdsaPubSpki: unb64(stored.ecdsaPubSpkiB64),
         did: stored.did, pq: null, createdAt: stored.createdAt,
       };
+      // Clear any stale legacy PQ advertisement from the public profile.
+      try {
+        localStorage.setItem(LS_PUB, JSON.stringify({
+          did: stored.did, alg: "AKSI-HQ1",
+          ecdhPub: stored.ecdhPubRawB64, ecdsaPub: stored.ecdsaPubSpkiB64,
+          pqPub: null, pqAlg: null, createdAt: stored.createdAt,
+        }));
+      } catch (e) {}
       return identity;
     }
     var legacy = stored && stored.ecdhPrivJwk ? stored : null;
@@ -321,12 +329,11 @@
   async function status() {
     var me = await ensureIdentity();
     var hasPq = Boolean(me.pq && me.pq.publicKeyB64);
-    var nobleOk = await loadNoble();
     return {
       version: VER, did: me.did,
       classical: "P-256 ECDH + ECDSA + AES-256-GCM + HKDF",
       postQuantum: hasPq ? "ML-KEM-768 hybrid" : "disabled: encrypted persistent secret-key vault not implemented",
-      pqKeys: hasPq, noble: nobleOk, publicPack: publicPack(),
+      pqKeys: hasPq, noble: false, publicPack: publicPack(),
       mission: "E2E · Classical ECDH/ECDSA · server sees ciphertext only; PQ mode disabled",
     };
   }
