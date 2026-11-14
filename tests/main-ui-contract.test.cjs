@@ -33,6 +33,9 @@ assert.match(html, /AKSI_UNIFIED_CORE\.clearMemory\(\)/, "clear-memory control m
 assert.match(html, /AKSIKnowledgeBase\.clear\(\)/, "clear-memory control must clear user knowledge-base facts");
 assert.match(html, /AKSIDialogueIntelligence\.clearContext\(\)/, "clear-memory control must clear dialogue context");
 assert.match(html, /const failed=storageChecks\.filter\(x=>!x\.ok\)/, "clear-memory control must verify persistent store deletion");
+assert.match(html, /const requiredStores=\[/, "clear-memory must require all expected store modules");
+assert.match(html, /if\(missingStores\.length\)throw new Error/, "clear-memory must fail closed if a store module is missing");
+
 assert.match(html, /if\(!persist\(\)\)throw new Error/, "clear-memory control must verify empty UI state persistence");
 
 
