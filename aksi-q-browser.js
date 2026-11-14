@@ -125,6 +125,7 @@
       if (["+", "-", "not"].includes(token)) {
         const value = this.expression(token === "not" ? 3 : 6);
         if (token === "not") return !value;
+        if (isComplex(value)) return token === "-" ? cscale(value, -1) : value;
         if (typeof value !== "number") throw new AksiError("unary arithmetic requires a number");
         return token === "-" ? -value : value;
       }
@@ -205,6 +206,14 @@
     if (op === "and") return Boolean(a) && Boolean(b);
     if (op === "or") return Boolean(a) || Boolean(b);
     if (op === "+" && typeof a === "string" && typeof b === "string") return a + b;
+    if (isComplex(a) || isComplex(b)) {
+      const left = asComplex(a), right = asComplex(b);
+      if (op === "+") return cadd(left, right);
+      if (op === "-") return cadd(left, cscale(right, -1));
+      if (op === "*") return cmul(left, right);
+      if (op === "/") return cdiv(left, right);
+      throw new AksiError("operator " + op + " is not defined for complex values");
+    }
     if (typeof a !== "number" || typeof b !== "number") throw new AksiError("arithmetic operators require numbers");
     if (op === "**" && Math.abs(b) > 1024) throw new AksiError("power exponent is limited to |n| <= 1024");
     const result = ({ "+": () => a + b, "-": () => a - b, "*": () => a * b, "/": () => a / b, "//": () => Math.floor(a / b), "%": () => a % b, "**": () => Math.pow(a, b) })[op]();
@@ -212,11 +221,14 @@
     return result;
   }
 
-  const C = (re, im) => ({ re: Number(re) || 0, im: Number(im) || 0 });
+  const C = (re, im) => ({ re: Number(re) || 0, im: Number(im) || 0, __aksiComplex: true });
+  const isComplex = value => !!(value && typeof value === "object" && value.__aksiComplex === true);
+  const asComplex = value => isComplex(value) ? value : C(Number(value), 0);
   const cadd = (a, b) => C(a.re + b.re, a.im + b.im);
   const cmul = (a, b) => C(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   const cscale = (a, s) => C(a.re * s, a.im * s);
   const cabs2 = a => a.re * a.re + a.im * a.im;
+  const cdiv = (a, b) => { const d = cabs2(b); if (!d) throw new AksiError("division by zero complex number"); return C((a.re*b.re+a.im*b.im)/d,(a.im*b.re-a.re*b.im)/d); };
   function stateVector(state) {
     if (!Array.isArray(state) || state.length < 2 || (state.length & (state.length - 1)) !== 0 || state.length > (1 << MAX_QUBITS)) throw new AksiError("state must have 2^n amplitudes for 1..10 qubits");
     return state.map(v => typeof v === "number" ? C(v, 0) : C(v.re, v.im));
@@ -408,13 +420,14 @@
     options = options || {};
     this.env = {
       pi: Math.PI, e: Math.E, sqrt: Math.sqrt, sin: Math.sin, cos: Math.cos, tan: Math.tan,
-      exp: Math.exp, log: Math.log, abs: Math.abs, sum: xs => xs.reduce((a, b) => a + b, 0),
+      exp: Math.exp, log: Math.log, abs: value => isComplex(value) ? Math.hypot(value.re, value.im) : Math.abs(value), sum: xs => xs.reduce((a, b) => binary("+", a, b), 0),
       len: xs => xs.length, min: Math.min, max: Math.max, round: Math.round,
-      vector: (...xs) => xs, dot: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) throw new AksiError("dot requires equal-length vectors"); return a.reduce((s, x, i) => s + x * b[i], 0); },
-      norm: xs => Math.sqrt(xs.reduce((s, x) => s + x * x, 0)),
-      normalize: xs => { const n = Math.sqrt(xs.reduce((s, x) => s + x * x, 0)); if (!n) throw new AksiError("cannot normalize zero vector"); return xs.map(x => x / n); },
-      tensor: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length * b.length > MAX_TENSOR) throw new AksiError("tensor exceeds the 65536-element limit"); return a.flatMap(x => b.map(y => x * y)); },
-      interfere: (a, b) => { if (a.length !== b.length || a.length * b.length > MAX_VECTOR * MAX_VECTOR) throw new AksiError("interfere requires equal-length vectors"); return a.map((x, i) => x + b[i]); },
+      complex: (re, im) => C(re, im), vector: (...xs) => xs,
+      dot: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) throw new AksiError("dot requires equal-length vectors"); return a.reduce((sum, value, i) => cadd(asComplex(sum), cmul(C(value.re === undefined ? value : value.re, value.im || 0), C(b[i].re === undefined ? b[i] : b[i].re, b[i].im || 0))), C(0, 0)); },
+      norm: xs => Math.sqrt(xs.reduce((sum, value) => sum + (isComplex(value) ? cabs2(value) : value * value), 0)),
+      normalize: xs => { const n = Math.sqrt(xs.reduce((sum, value) => sum + (isComplex(value) ? cabs2(value) : value * value), 0)); if (!n) throw new AksiError("cannot normalize zero vector"); return xs.map(value => isComplex(value) ? cscale(value, 1 / n) : value / n); },
+      tensor: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length * b.length > MAX_TENSOR) throw new AksiError("tensor exceeds the 65536-element limit"); return a.flatMap(value => b.map(other => isComplex(value) || isComplex(other) ? cmul(asComplex(value), asComplex(other)) : value * other)); },
+      interfere: (a, b) => { if (a.length !== b.length || a.length > MAX_VECTOR) throw new AksiError("interfere requires equal-length vectors"); return a.map((value, i) => isComplex(value) || isComplex(b[i]) ? cadd(asComplex(value), asComplex(b[i])) : value + b[i]); },
       probabilities, qstate, h, x, z, phase, rx, ry, rz, cnot, measure
     };
     this.concepts = new Map();
