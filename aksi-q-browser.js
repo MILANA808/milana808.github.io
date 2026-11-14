@@ -553,6 +553,9 @@
     if (typeof source !== "string" || source.length > MAX_SOURCE) throw new AksiError("program must be text up to 100 KB");
     const lines = source.split(/\r?\n/);
     if (lines.length > MAX_LINES) throw new AksiError("program exceeds the 2000-line limit");
+    this.lastSource = null;
+    this.lastResults = [];
+    this.lastRunAt = null;
     const output = [];
     for (let i = 0; i < lines.length; i += 1) {
       const result = await this.runLine(lines[i], i + 1);
