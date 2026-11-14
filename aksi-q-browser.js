@@ -408,8 +408,10 @@
   MemoryStore.prototype.storageInfo = async function (requestPersistence) {
     if (!root.navigator || !root.navigator.storage) return { available: false, reason: "StorageManager API is unavailable" };
     let persisted = false;
-    if (typeof root.navigator.storage.persisted === "function") persisted = await root.navigator.storage.persisted();
-    if (requestPersistence && !persisted && typeof root.navigator.storage.persist === "function") persisted = await root.navigator.storage.persist();
+    // Invoke persist() before the first await so a user click can satisfy browser activation requirements.
+    const persistenceRequest = requestPersistence && typeof root.navigator.storage.persist === "function" ? root.navigator.storage.persist() : null;
+    if (persistenceRequest) persisted = await persistenceRequest;
+    else if (typeof root.navigator.storage.persisted === "function") persisted = await root.navigator.storage.persisted();
     const estimate = typeof root.navigator.storage.estimate === "function" ? await root.navigator.storage.estimate() : {};
     return {
       available: true,
