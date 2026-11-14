@@ -64,12 +64,16 @@
     }
 
     async function migrate() {
-      const state = readState();
-      const notes = state.memory && typeof state.memory === "object" ? Object.entries(state.memory) : [];
-      for (const [key, value] of notes) {
-        if (!String(key).trim()) continue;
-        const existing = await store.get(key);
-        if (!existing) await store.put(key, value);
+      const alreadyMigrated = localStorage.getItem("aksi-q-memory-migrated-v1") === "1";
+      if (!alreadyMigrated) {
+        const state = readState();
+        const notes = state.memory && typeof state.memory === "object" ? Object.entries(state.memory) : [];
+        for (const [key, value] of notes) {
+          if (!String(key).trim()) continue;
+          const existing = await store.get(key);
+          if (!existing) await store.put(key, value);
+        }
+        localStorage.setItem("aksi-q-memory-migrated-v1", "1");
       }
       await refresh();
     }
