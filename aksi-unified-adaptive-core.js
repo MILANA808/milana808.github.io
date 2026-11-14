@@ -1,7 +1,9 @@
 /*!
  * AKSI Unified Adaptive Core v0.1.0
- * Browser-local classical adaptive memory + geometric features + Lorenz exploration.
- * Answer generation is delegated to an explicitly loaded language model (e.g. AKSI_WEBLLM).
+ * Browser-local classical orchestrator: bounded semantics, symbolic inference,
+ * deterministic tools, and a retrieval/recombination fallback.
+ * The default homepage chat does not require WebLLM or a remote model.
+ * Retrieval overlap and graph scores are heuristics, not truth probabilities.
  * No quantum advantage, consciousness, or truth oracle is claimed.
  */
 (function (root) {
