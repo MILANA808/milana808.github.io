@@ -26,3 +26,7 @@ assert.doesNotMatch(html, /#missions\{display:none!important\}/, "mission sectio
 assert.match(html, /function universeReact\(kind\)/);
 assert.match(html, /window\.location\.href='\/quantum-mind\/'/);
 console.log("AKSI main UI contract tests: OK");
+
+assert.match(html, /AKSI_SITE_MEMORY\.clear\(\)/, "clear-memory control must clear IndexedDB notes");
+assert.match(html, /window\.AKSI_SITE_MEMORY_CONTEXT=\{\}/, "clear-memory control must clear in-memory prompt context");
+assert.match(html, /Не удалось подтвердить полную очистку памяти/, "clear-memory control must not claim success when storage deletion fails");
