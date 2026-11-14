@@ -81,6 +81,14 @@ no quantum advantage. Invalid indices, repeated CNOT qubits, non-power-of-two
 state lengths, zero-norm states and registers above 10 qubits are rejected.
 
 
+## 7. Symbolic knowledge
+
+The concept store is explicit and local to one runtime instance. The current
+inference rule is intentionally narrow: A is_a B and B is_a C imply that
+infer A includes B and C. This is graph reachability, not a general theorem
+prover. It does not infer causality, temporal order or natural-language
+equivalence. An unknown relation is not automatically false.
+
 ## 8. Browser runtime and persistent memory profile (v0.3)
 
 The browser runtime implements the expression grammar and bounded mathematical,
@@ -106,15 +114,7 @@ The browser runtime is not yet claimed to be fully conformant with the Python
 reference implementation. The shared fixtures and differential tests remain
 release gates.
 
-## 9. Symbolic knowledge
-
-The concept store is explicit and local to one runtime instance. The current
-inference rule is intentionally narrow: A is_a B and B is_a C imply that
-infer A includes B and C. This is graph reachability, not a general theorem
-prover. It does not infer causality, temporal order or natural-language
-equivalence. An unknown relation is not automatically false.
-
-## 8. Safety and resource limits
+## 9. Safety and resource limits
 
 The reference interpreter never invokes Python eval or exec. It evaluates a
 restricted AST allowlist and rejects imports, attribute access, indirect calls
@@ -125,7 +125,7 @@ These controls reduce accidental and some adversarial resource use. They are
 not a formal security proof. Fuzzing and security review are required before
 executing untrusted programs in a service.
 
-## 9. Errors and reproducibility
+## 10. Errors and reproducibility
 
 Errors include a source line number where possible. A program executes
 statements in order and stops at the first runtime error. Rollback and
@@ -136,7 +136,7 @@ language/runtime versions, deterministic seed, inputs, external data references,
 outputs, error status and environment metadata. Hashes/signatures establish
 integrity or attribution, not mathematical correctness or factual truth.
 
-## 10. Compatibility
+## 11. Compatibility
 
 Before version 1.0, grammar and built-ins may change. Every breaking change
 must update this document, examples, tests and version number together.
