@@ -1,0 +1,30 @@
+name: AKSI Research Lab
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/**"
+      - "aksi-research-lab.js"
+      - "tests/aksi-research-lab.test.cjs"
+      - ".github/workflows/aksi-research-lab.yml"
+  pull_request:
+    paths:
+      - "research/**"
+      - "aksi-research-lab.js"
+      - "tests/aksi-research-lab.test.cjs"
+      - ".github/workflows/aksi-research-lab.yml"
+permissions:
+  contents: read
+jobs:
+  research-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run reproducible method tests
+        run: node --test tests/aksi-research-lab.test.cjs
+      - name: Check public page module wiring
+        run: |
+          node -e "const fs=require('fs');const h=fs.readFileSync('research/index.html','utf8');for(const s of ['/aksi-semantic-reasoning.js','/aksi-native-language-core.js','/aksi-symbolic-inference.js','/aksi-quantum.js','/aksi-core-v3.js','/aksi-research-lab.js'])if(!h.includes(s))throw Error('Missing script '+s);for(const id of ['semanticRun','logicRun','bayesRun','optRun','bellRun','foldRun','receiptRun'])if(!h.includes('id=\"'+id+'\"'))throw Error('Missing control '+id);console.log('Research page wiring passed');"
