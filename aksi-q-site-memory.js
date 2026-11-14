@@ -104,6 +104,16 @@
         catch (error) { if (memoryList) memoryList.textContent = "Не удалось сохранить команду памяти: " + (error.message || String(error)); }
       }, true);
     }
+    root.AKSI_SITE_MEMORY = {
+      all: () => store.all(),
+      refresh: refresh,
+      clear: async () => {
+        const result = await store.clear();
+        await refresh();
+        return result;
+      }
+    };
+
     migrate().catch(error => {
       if (memoryList) memoryList.textContent = "Локальная память AKSI недоступна: " + (error.message || String(error));
     });
