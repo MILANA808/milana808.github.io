@@ -44,3 +44,5 @@ assert.match(html, /window\.AKSI_SITE_MEMORY_CONTEXT=\{\}/, "clear-memory contro
 assert.match(html, /Не удалось подтвердить полную очистку памяти/, "clear-memory control must not claim success when storage deletion fails");
 assert.match(memoryBridge, /ready: ready/);
 assert.match(memoryBridge, /await ready;\s*const result = await store\.clear\(\)/, "clear must wait for the initial migration to finish");
+
+assert.match(html, /href="\/seal\//, "main module navigation must link to AKSI Seal");
