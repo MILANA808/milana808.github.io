@@ -13,6 +13,11 @@ class TestMemory {
   async remove(key) { this.records.delete(key.toLowerCase()); }
 }
 
+test("MemoryStore exposes an atomic clear-all operation", () => {
+  const { MemoryStore } = require("../aksi-q-browser.js");
+  assert.equal(typeof MemoryStore.prototype.clear, "function");
+});
+
 test("AKSI Q browser runtime exposes explicit resource limits", () => {
   assert.equal(limits.qubits, 10);
   assert.equal(limits.lines, 2000);
