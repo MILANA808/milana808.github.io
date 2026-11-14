@@ -505,6 +505,128 @@
       return item;
     }, 2);
   }
+  MemoryStore.prototype.verify = async function () {
+    const records = await this.all();
+    const results = [];
+    for (const record of records) {
+      const copy = Object.assign({}, record);
+      const expected = copy.sha256;
+      delete copy.sha256;
+      const actual = await this.digest(JSON.stringify(copy));
+      results.push({ key: record.key, valid: !!actual && actual === expected, available: !!actual });
+    }
+    return { checked: results.length, valid: results.filter(x => x.valid).length, unavailable: results.filter(x => !x.available).length, records: results };
+  };
+
+  function initUI() {
+    if (typeof document === "undefined") return;
+    const byId = id => document.getElementById(id);
+    const runtime = new Runtime();
+    const qOut = byId("aksiQOutput");
+    const memoryOut = byId("memoryOutput");
+    const status = byId("aksiQStatus");
+    const show = (el, value) => { if (el) el.textContent = typeof value === "string" ? value : safeJSON(value); };
+    if (status) status.textContent = "AKSI Q Browser Runtime v" + VERSION + " · локальное исполнение готово";
+    const runButton = byId("aksiQRun");
+    if (runButton) runButton.addEventListener("click", async () => {
+      runButton.disabled = true;
+      show(qOut, "Выполняю программу…");
+      try {
+        const results = await runtime.run(byId("aksiQSource").value);
+        show(qOut, results.length ? results : "Программа выполнена. Нет печатаемых результатов.");
+        if (status) status.textContent = "Выполнено · " + results.length + " результата(ов) · AKSI Q " + VERSION;
+      } catch (error) {
+        show(qOut, "ОШИБКА: " + (error.message || String(error)));
+        if (status) status.textContent = "Остановлено: программа не прошла проверку";
+      } finally { runButton.disabled = false; }
+    });
+    const example = byId("aksiQExample");
+    if (example) example.addEventListener("click", () => {
+      byId("aksiQSource").value = [
+        '# AKSI Q · математический и квантовый пример',
+        'let v = vector(3, 4)',
+        'print norm(v)',
+        'let zero = qstate(2)',
+        'let plus = h(zero, 0)',
+        'let bell = cnot(plus, 0, 1)',
+        'print probabilities(bell)',
+        'print measure(bell, shots=100, seed=42)',
+        'concept "cat" means "mammal"',
+        'concept "mammal" means "animal"',
+        'relate "cat" -> "mammal" as "is_a"',
+        'relate "mammal" -> "animal" as "is_a"',
+        'print ask("cat")',
+        'print infer("cat")'
+      ].join("\n");
+      show(qOut, "Пример загружен. Нажми «Выполнить».");
+    });
+    const save = byId("memorySave");
+    if (save) save.addEventListener("click", async () => {
+      save.disabled = true;
+      try {
+        const tags = (byId("memoryTags").value || "").split(",").map(x => x.trim()).filter(Boolean);
+        const record = await runtime.memory.put(byId("memoryKey").value, byId("memoryValue").value, tags);
+        show(memoryOut, "Сохранено локально · " + record.key + " · SHA-256 " + (record.sha256 || "недоступен"));
+        await renderMemory();
+      } catch (error) { show(memoryOut, "Не удалось сохранить: " + (error.message || String(error))); }
+      finally { save.disabled = false; }
+    });
+    async function renderMemory(query) {
+      const list = byId("memoryList");
+      if (!list) return;
+      list.replaceChildren();
+      try {
+        const records = query ? await runtime.memory.search(query) : (await runtime.memory.all()).slice(0, 30);
+        if (!records.length) { list.textContent = "Записей не найдено."; return; }
+        records.forEach(record => {
+          const item = document.createElement("article");
+          item.className = "memory-item";
+          const title = document.createElement("b"); title.textContent = record.key;
+          const body = document.createElement("p"); body.textContent = record.value;
+          const meta = document.createElement("small"); meta.textContent = new Date(record.updatedAt).toLocaleString() + (record.tags && record.tags.length ? " · " + record.tags.join(", ") : "");
+          const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Удалить";
+          remove.addEventListener("click", async () => { if (!root.confirm || root.confirm("Удалить запись «" + record.key + "» с этого устройства?")) { await runtime.memory.remove(record.key); await renderMemory(query); } });
+          item.append(title, body, meta, remove); list.append(item);
+        });
+      } catch (error) { list.textContent = "Память недоступна: " + (error.message || String(error)); }
+    }
+    const search = byId("memorySearch");
+    if (search) search.addEventListener("click", () => renderMemory(byId("memoryQuery").value));
+    const refresh = byId("memoryRefresh");
+    if (refresh) refresh.addEventListener("click", () => renderMemory());
+    const exportButton = byId("memoryExport");
+    if (exportButton) exportButton.addEventListener("click", async () => {
+      try {
+        const data = await runtime.memory.export();
+        const blob = new Blob([safeJSON(data)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = url; a.download = "aksi-memory-export.json"; a.click();
+        URL.revokeObjectURL(url); show(memoryOut, "Экспорт подготовлен: " + data.records.length + " записей.");
+      } catch (error) { show(memoryOut, "Экспорт не выполнен: " + (error.message || String(error))); }
+    });
+    const importButton = byId("memoryImportButton");
+    const fileInput = byId("memoryImportFile");
+    if (importButton && fileInput) importButton.addEventListener("click", () => fileInput.click());
+    if (fileInput) fileInput.addEventListener("change", async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      try {
+        if (file.size > 5 * 1024 * 1024) throw new AksiError("import file exceeds 5 MB");
+        const payload = JSON.parse(await file.text());
+        const count = await runtime.memory.import(payload);
+        show(memoryOut, "Импортировано записей: " + count);
+        await renderMemory();
+      } catch (error) { show(memoryOut, "Импорт отклонён: " + (error.message || String(error))); }
+      finally { fileInput.value = ""; }
+    });
+    const verify = byId("memoryVerify");
+    if (verify) verify.addEventListener("click", async () => {
+      try { show(memoryOut, await runtime.memory.verify()); }
+      catch (error) { show(memoryOut, "Проверка не выполнена: " + (error.message || String(error))); }
+    });
+    renderMemory();
+  }
+  initUI();
   const api = {
     version: VERSION, Runtime, MemoryStore, AksiError, tokenize,
     limits: { sourceBytes: MAX_SOURCE, lineCharacters: MAX_LINE, tokens: MAX_TOKENS, lines: MAX_LINES, vectorElements: MAX_VECTOR, tensorElements: MAX_TENSOR, qubits: MAX_QUBITS },
