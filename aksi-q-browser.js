@@ -555,8 +555,8 @@
         'concept "mammal" means "animal"',
         'relate "cat" -> "mammal" as "is_a"',
         'relate "mammal" -> "animal" as "is_a"',
-        'print ask("cat")',
-        'print infer("cat")'
+        'ask "cat"',
+        'infer "cat"'
       ].join("\n");
       show(qOut, "Пример загружен. Нажми «Выполнить».");
     });
