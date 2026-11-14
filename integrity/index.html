@@ -126,6 +126,7 @@ code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;
 (function () {
   "use strict";
   var LS_KEY = "aksi_integrity_id_v1";
+  var LS_ACTIVE_KEY = "aksi_integrity_active_key_v1";
   var LS_RECEIPTS = "aksi_integrity_receipts_v1";
   var PROTOCOL = "aksi-decision-receipt";
   var VERSION = "1.0.0-integrity";
@@ -176,9 +177,16 @@ code.block{display:block;font-size:10px;word-break:break-all;background:#0a0f1c;
     if (!window.AKSICryptoProvider) {
       throw new Error("AKSI Crypto Provider is unavailable; refusing plaintext key storage");
     }
-    var keyId = force
-      ? "aksi-integrity-rotated-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10)
-      : "aksi-integrity-v1";
+    var keyId;
+    if (force) {
+      var random = crypto.getRandomValues(new Uint8Array(12));
+      var suffix = Array.from(random).map(function (value) { return value.toString(16).padStart(2, "0"); }).join("");
+      keyId = "aksi-integrity-rotated-" + suffix;
+      try { localStorage.setItem(LS_ACTIVE_KEY, keyId); }
+      catch (error) { throw new Error("Cannot persist the active key identifier; rotation was not completed"); }
+    } else {
+      keyId = localStorage.getItem(LS_ACTIVE_KEY) || "aksi-integrity-v1";
+    }
     var pair = await window.AKSICryptoProvider.getKeyPair(keyId, {
       algorithm: { name: "ECDSA", namedCurve: "P-256" },
       privateUsages: ["sign"],
