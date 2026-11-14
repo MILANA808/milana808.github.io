@@ -28,6 +28,17 @@ assert.match(html, /function universeReact\(kind\)/);
 assert.match(html, /window\.location\.href='\/quantum-mind\/'/);
 console.log("AKSI main UI contract tests: OK");
 
+assert.match(html, /AKSI_DNA_TOPOLOGY\.clearMemory\(\)/, "clear-memory control must clear native generator history and approved feedback");
+assert.match(html, /AKSI_UNIFIED_CORE\.clearMemory\(\)/, "clear-memory control must clear unified-core memory");
+assert.match(html, /AKSIKnowledgeBase\.clear\(\)/, "clear-memory control must clear user knowledge-base facts");
+assert.match(html, /AKSIDialogueIntelligence\.clearContext\(\)/, "clear-memory control must clear dialogue context");
+assert.match(html, /const failed=storageChecks\.filter\(x=>!x\.ok\)/, "clear-memory control must verify persistent store deletion");
+assert.match(html, /const requiredStores=\[/, "clear-memory must require all expected store modules");
+assert.match(html, /if\(missingStores\.length\)throw new Error/, "clear-memory must fail closed if a store module is missing");
+
+assert.match(html, /if\(!persist\(\)\)throw new Error/, "clear-memory control must verify empty UI state persistence");
+
+
 assert.match(html, /AKSI_SITE_MEMORY\.clear\(\)/, "clear-memory control must clear IndexedDB notes");
 assert.match(html, /window\.AKSI_SITE_MEMORY_CONTEXT=\{\}/, "clear-memory control must clear in-memory prompt context");
 assert.match(html, /Не удалось подтвердить полную очистку памяти/, "clear-memory control must not claim success when storage deletion fails");
