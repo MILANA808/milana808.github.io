@@ -21,9 +21,15 @@ const unknown = Engine.generate("объясни принцип сверхпро�
 assert.equal(typeof unknown.text,"string");
 assert.ok(unknown.text.length>30);
 assert.equal(Engine.stats().episodes,2);
+assert.equal(Engine.stats().episodes,2);
+// A generated answer or abstention is history, not new knowledge.
+const repeatedUnknown = Engine.generate("объясни принцип сверхпроводимости в конкретном материале подробнее");
+assert.equal(repeatedUnknown.mode, "transparent_abstention");
+assert.ok(!Engine.rank("сверхпроводимость").items.some(item => item.source === "local-episode"));
 const rating = Engine.feedback("что такое акси",known.text,1);
 assert.equal(rating.ok,true);
 assert.equal(Engine.stats().learnedItems,1);
+assert.ok(Engine.rank("что такое акси").items.some(item => item.source === "user-feedback"));
 assert.ok(store.has("aksi_native_dna_topology_v1"));
 Engine.clearMemory();
 assert.equal(Engine.stats().episodes,0);
