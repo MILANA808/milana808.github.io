@@ -9,6 +9,7 @@
 
   var VER = "1.1.0";
   var SECRETS_KEY = "aksi:llm:secrets:v1";
+  var LEGACY_SECRETS_KEY = "aksi:llm:secrets:v1";
   var CFG_KEY = "aksi:llm:cfg:v1";
   var HIST_KEY = "aksi:llm:hist:v1";
   var DEFAULT_ORDER = ["ollama", "custom", "xai", "openai", "anthropic", "gemini"];
@@ -31,18 +32,33 @@
     } catch (e) {}
   }
 
+  // Provider credentials are tab-scoped, not persisted across browser restarts.
+  // This reduces at-rest exposure; it does not protect against XSS or malicious same-origin code.
+  function loadSecrets() {
+    try {
+      var current = JSON.parse(sessionStorage.getItem(SECRETS_KEY) || "null");
+      if (current && typeof current === "object") return current;
+      var legacy = JSON.parse(localStorage.getItem(LEGACY_SECRETS_KEY) || "null");
+      if (legacy && typeof legacy === "object") {
+        sessionStorage.setItem(SECRETS_KEY, JSON.stringify(legacy));
+        localStorage.removeItem(LEGACY_SECRETS_KEY);
+        return legacy;
+      }
+    } catch (e) {}
+    return {};
+  }
   function getSecret(id) {
-    var all = loadJSON(SECRETS_KEY, {});
+    var all = loadSecrets();
     return (all[id] && all[id].key) || null;
   }
   function setSecret(id, key) {
-    var all = loadJSON(SECRETS_KEY, {});
+    var all = loadSecrets();
     if (!key) delete all[id];
     else all[id] = { key: String(key), updatedAt: Date.now() };
-    saveJSON(SECRETS_KEY, all);
+    try { sessionStorage.setItem(SECRETS_KEY, JSON.stringify(all)); } catch (e) {}
   }
   function listSecrets() {
-    var all = loadJSON(SECRETS_KEY, {});
+    var all = loadSecrets();
     return Object.keys(all).filter(function (k) {
       return all[k] && all[k].key;
     });
