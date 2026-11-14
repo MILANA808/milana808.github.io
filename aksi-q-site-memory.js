@@ -41,7 +41,7 @@
       const records = await store.all();
       draw(records);
       const state = readState();
-      state.memory = state.memory && typeof state.memory === "object" ? state.memory : {};
+      state.memory = {};
       // Keep the main chat's prompt context bounded; all records remain in IndexedDB.
       records.slice(0, 100).forEach(record => {
         try { state.memory[record.key] = JSON.parse(record.value); }
