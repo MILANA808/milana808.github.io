@@ -618,7 +618,9 @@
         'relate "cat" -> "mammal" as "is_a"',
         'relate "mammal" -> "animal" as "is_a"',
         'ask "cat"',
-        'infer "cat"'
+        'infer "cat"',
+        'print semantic_answer("что такое доказательство?")',
+        'print symbolic_infer("логика: факт: снег белый; если снег белый, то снег отражает свет; следует ли снег отражает свет?")'
       ].join("\n");
       show(qOut, "Пример загружен. Нажми «Выполнить».");
     });
