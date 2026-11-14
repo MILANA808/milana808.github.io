@@ -227,6 +227,7 @@
   const cadd = (a, b) => C(a.re + b.re, a.im + b.im);
   const cmul = (a, b) => C(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
   const cscale = (a, s) => C(a.re * s, a.im * s);
+  const cconj = a => C(a.re, -a.im);
   const cabs2 = a => a.re * a.re + a.im * a.im;
   const cdiv = (a, b) => { const d = cabs2(b); if (!d) throw new AksiError("division by zero complex number"); return C((a.re*b.re+a.im*b.im)/d,(a.im*b.re-a.re*b.im)/d); };
   function stateVector(state) {
@@ -423,7 +424,7 @@
       exp: Math.exp, log: Math.log, abs: value => isComplex(value) ? Math.hypot(value.re, value.im) : Math.abs(value), sum: xs => xs.reduce((a, b) => binary("+", a, b), 0),
       len: xs => xs.length, min: Math.min, max: Math.max, round: Math.round,
       complex: (re, im) => C(re, im), vector: (...xs) => xs,
-      dot: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) throw new AksiError("dot requires equal-length vectors"); return a.reduce((sum, value, i) => cadd(asComplex(sum), cmul(C(value.re === undefined ? value : value.re, value.im || 0), C(b[i].re === undefined ? b[i] : b[i].re, b[i].im || 0))), C(0, 0)); },
+      dot: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) throw new AksiError("dot requires equal-length vectors"); return a.reduce((sum, value, i) => cadd(sum, cmul(cconj(asComplex(value)), asComplex(b[i]))), C(0, 0)); },
       norm: xs => Math.sqrt(xs.reduce((sum, value) => sum + (isComplex(value) ? cabs2(value) : value * value), 0)),
       normalize: xs => { const n = Math.sqrt(xs.reduce((sum, value) => sum + (isComplex(value) ? cabs2(value) : value * value), 0)); if (!n) throw new AksiError("cannot normalize zero vector"); return xs.map(value => isComplex(value) ? cscale(value, 1 / n) : value / n); },
       tensor: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length * b.length > MAX_TENSOR) throw new AksiError("tensor exceeds the 65536-element limit"); return a.flatMap(value => b.map(other => isComplex(value) || isComplex(other) ? cmul(asComplex(value), asComplex(other)) : value * other)); },
