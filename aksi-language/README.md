@@ -1,8 +1,8 @@
 # AKSI Q — executable language prototype
 
-**Version:** 0.2.0  
-**Runtime:** Python 3.10+; standard library only  
-**Mode:** local-first; no server, model API, WebLLM, or network required.
+**Language version:** 0.3 browser profile + 0.2 Python reference runtime  
+**Runtimes:** Python 3.10+ reference interpreter; browser-native JavaScript interpreter  
+**Mode:** local-first; no server, model API, WebLLM, or network required for execution.
 
 AKSI Q is a small domain-specific language for deterministic mathematical work,
 small quantum-state simulations, and explicit concept relations. The interpreter
@@ -12,7 +12,7 @@ exec and does not use Python AST for expression parsing.
 > Quantum operations in this version are classical state-vector simulations.
 > This is not quantum hardware and makes no quantum-advantage claim.
 
-## Run
+## Run the Python reference runtime
 
 \`\`\`bash
 python aksi_q.py examples/first.aksi
@@ -20,6 +20,21 @@ python -m unittest discover -s tests -v
 \`\`\`
 
 No package installation is required.
+
+
+## Run in the browser
+
+Open [AKSI Research Lab](https://milana808.github.io/research/) and use the
+AKSI Q editor. The browser interpreter has its own lexer and Pratt parser,
+math and state-vector functions, explicit concept relations, resource limits,
+and a user-controlled IndexedDB memory profile. The browser profile supports
+`remember`, `recall`, `search` and `forget` statements. Memory is local to the
+current browser and origin; export/import is provided for backups and transfer.
+Browser storage is quota-limited and is not infinite or cloud-synchronized.
+
+The JavaScript runtime is not yet certified as fully conformant with the
+Python reference runtime. Cross-runtime fixtures and quantum differential
+checks remain required before claiming full parity.
 
 ## Language sample
 
@@ -51,7 +66,7 @@ ask "cat"
 infer "cat"
 \`\`\`
 
-## v0.1 language reference
+## Language reference
 
 | Form | Meaning |
 |---|---|
@@ -71,7 +86,7 @@ Built-ins include \`vector\`, \`dot\`, \`norm\`, \`normalize\`, \`tensor\`,
 
 - No arbitrary Python attribute access, imports, file access, or network calls
   are available to AKSI source programs.
-- The v0.1 parser is line-oriented; blocks, user-defined functions, modules,
+- The current parser is line-oriented; blocks, user-defined functions, modules,
   static type checking, and compilation to native machine code are not yet present.
 - The concept graph is explicit symbolic data generated from the canonical
   `aksi-semantic-reasoning.js` source; it is not open-domain natural-language
@@ -86,5 +101,5 @@ Built-ins include \`vector\`, \`dot\`, \`norm\`, \`normalize\`, \`tensor\`,
 1. Freeze grammar and add parser conformance tests.
 2. Add typed values and multi-qubit state-vector operations with strict size limits.
 3. Add a proof object format and deterministic replay.
-4. Add a browser/WASM runtime only after the language semantics are stable.
+4. Complete Python/JavaScript conformance and differential quantum tests.
 5. Benchmark against equivalent Python/NumPy and established quantum simulators.
