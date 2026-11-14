@@ -41,8 +41,9 @@ same circuits and probability distributions before equivalence is claimed.
 5. Receipts: bind source, runtime version, inputs, output, evidence and proof
    trace into a deterministic receipt. Signature verification stays separate
    from truth/correctness verification.
-6. Browser runtime: after grammar stabilizes, implement JavaScript interpreter
-   with matching semantics and run the same conformance fixtures in both runtimes.
+6. Browser runtime: implemented as an experimental JavaScript interpreter and
+   connected to the public Research Lab. The browser profile adds explicit
+   IndexedDB memory statements; full Python/JavaScript parity is still open.
 
 ## Repository inventory boundary
 
@@ -66,5 +67,8 @@ into this language prototype by this integration pass.
 - [ ] Inference proof traces are deterministic and independently replayable.
 - [ ] Resource limits and untrusted-input tests pass.
 - [ ] Runtime receipts identify code, inputs, seed and outputs.
-- [ ] Product UI reports exact runtime capabilities and limitations.
+- [x] Product UI reports exact runtime capabilities and limitations.
+- [x] Browser-native interpreter and user-controlled local memory are available in Research Lab.
+- [ ] Browser and Python runtimes pass a shared conformance suite.
+- [ ] Memory import/export and record-integrity checks receive browser integration tests.
 - [ ] No quantum advantage, AGI or general-understanding claim without independent evidence.
