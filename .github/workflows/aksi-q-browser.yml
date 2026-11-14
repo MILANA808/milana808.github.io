@@ -24,9 +24,11 @@ jobs:
         with:
           node-version: "22"
       - name: Syntax check
-        run: node --check aksi-q-browser.js
+        run: |
+          node --check aksi-q-browser.js
+          node --check aksi-q-site-memory.js
       - name: Runtime conformance tests
         run: node --test tests/aksi-q-browser.test.cjs
       - name: Verify research page integration
         run: |
-          node -e "const fs=require('fs');const h=fs.readFileSync('research/index.html','utf8');if(!h.includes('/aksi-q-browser.js'))throw Error('Browser runtime script missing');for(const id of ['aksiQSource','aksiQRun','memoryKey','memoryValue','memorySave','memorySearch'])if(!h.includes('id=\"'+id+'\"'))throw Error('Missing UI control '+id);console.log('AKSI Q browser UI wiring passed');"
+          node -e "const fs=require('fs');const h=fs.readFileSync('research/index.html','utf8');if(!h.includes('/aksi-q-browser.js'))throw Error('Browser runtime script missing');for(const id of ['aksiQSource','aksiQRun','memoryKey','memoryValue','memorySave','memorySearch'])if(!h.includes('id=\"'+id+'\"'))throw Error('Missing UI control '+id);const home=fs.readFileSync('index.html','utf8');for(const script of ['/aksi-q-browser.js','/aksi-q-site-memory.js'])if(!home.includes(script))throw Error('Homepage memory integration missing '+script);console.log('AKSI Q browser UI wiring passed');"
