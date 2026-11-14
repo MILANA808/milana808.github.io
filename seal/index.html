@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="AKSI Seal — локальная проверка целостности файлов с SHA-256 и подписью ECDSA. Файлы не загружаются на сервер.">
+<title>AKSI Seal — проверка целостности файлов</title>
+<style>
+:root{color-scheme:dark;--bg:#101714;--panel:#18231e;--line:#34453c;--text:#eef6ef;--muted:#a6b6aa;--accent:#8de0b4;--bad:#ff9d9d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#23362b,#101714 55%);color:var(--text);font:16px/1.55 system-ui,-apple-system,sans-serif}
+main{max-width:860px;margin:0 auto;padding:32px 18px 64px}.brand{letter-spacing:.16em;color:var(--accent);font-size:12px;font-weight:700}
+h1{font-size:clamp(30px,6vw,48px);line-height:1.1;margin:12px 0}h2{font-size:20px;margin:0 0 14px}
+p{color:var(--muted)}.panel{background:#18231eea;border:1px solid var(--line);border-radius:18px;padding:22px;margin:18px 0}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.row>*{flex:1}.muted{font-size:13px;color:var(--muted)}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input[type=file],input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0f1713;color:var(--text)}
+button{border:1px solid #52725e;background:#244332;color:var(--text);padding:12px 16px;border-radius:11px;font-weight:650;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:transparent}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0d1511;border:1px solid var(--line);padding:14px;border-radius:10px;color:#dcebe0;font-size:12px}
+.status{padding:12px;border-radius:10px;background:#101914;color:var(--muted);margin-top:12px;min-height:44px}
+.status.ok{color:var(--accent)}.status.bad{color:var(--bad)}
+a{color:var(--accent)}.warning{border-left:3px solid #d7b16a;padding-left:12px}
+footer{margin-top:28px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<div class="brand">AKSI MATRIX / LOCAL TOOLS</div>
+<h1>AKSI Seal</h1>
+<p>Подпиши конкретный файл и проверь, менялся ли он после подписания. Всё выполняется в браузере: файл и приватный ключ не отправляются на сервер.</p>
+<div class="panel">
+<h2>1. Подписать файл</h2>
+<label for="signFile">Файл на этом устройстве</label>
+<input id="signFile" type="file">
+<div class="row" style="margin-top:14px">
+<button id="signButton" disabled>Создать квитанцию</button>
+<button id="rotateButton" class="secondary">Создать новый ключ</button>
+</div>
+<div id="signStatus" class="status" role="status">Выбери файл. Ключ будет храниться в IndexedDB этого браузера.</div>
+<pre id="receiptOutput" hidden></pre>
+<a id="downloadReceipt" hidden download="aksi-seal-receipt.json">Скачать квитанцию JSON</a>
+</div>
+<div class="panel">
+<h2>2. Проверить файл и квитанцию</h2>
+<label for="verifyFile">Исходный файл</label><input id="verifyFile" type="file">
+<label for="receiptFile">Квитанция AKSI Seal JSON</label><input id="receiptFile" type="file" accept="application/json,.json">
+<label for="expectedFingerprint">Ожидаемый отпечаток подписанта (необязательно)</label><input id="expectedFingerprint" type="text" placeholder="Вставь отпечаток, полученный отдельно">
+<button id="verifyButton" style="margin-top:14px" disabled>Проверить</button>
+<div id="verifyStatus" class="status" role="status">Выбери файл и квитанцию.</div>
+<pre id="verifyOutput" hidden></pre>
+</div>
+<div class="panel warning">
+<strong>Что доказывает проверка</strong>
+<p>Квитанция показывает, что файл соответствует подписанному SHA-256 и подпись соответствует включённому открытому ключу. Без отдельно полученного и сверенного отпечатка она не устанавливает личность подписанта. Это не юридическая электронная подпись, не доверенная метка времени и не защита от вредоносного кода на самом устройстве.</p>
+<p>Приватный ключ неизвлекаемый и хранится в IndexedDB. Если очистить данные сайта или потерять устройство, этот ключ может быть утрачен. Смена ключа не отменяет возможность проверить уже созданные квитанции.</p>
+</div>
+<p><a href="/">← Вернуться в AKSI MATRIX</a></p>
+<footer>AKSI Seal Browser v1 · ECDSA P-256 / SHA-256 · локальная обработка · без облачной загрузки</footer>
+</main>
+<script src="/aksi-crypto-provider.js"></script>
+<script src="/seal/aksi-seal-browser.js"></script>
+<script>
+(function(){
+ const $=id=>document.getElementById(id);
+ const KEY_ID="aksi-seal-browser-active-key";
+ function activeKey(){let id=localStorage.getItem(KEY_ID);if(!id){id="seal-"+(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2));localStorage.setItem(KEY_ID,id);}return id;}
+ function status(el,text,kind){el.textContent=text;el.className="status"+(kind?" "+kind:"");}
+ function download(text){const url=URL.createObjectURL(new Blob([text],{type:"application/json"}));$("downloadReceipt").href=url;$("downloadReceipt").hidden=false;}
+ $("signFile").addEventListener("change",()=>{$("signButton").disabled=!$("signFile").files.length;status($("signStatus"),$("signFile").files.length?"Файл выбран. Подписание выполняется локально.":"Выбери файл.");});
+ $("verifyFile").addEventListener("change",refreshVerify);$("receiptFile").addEventListener("change",refreshVerify);
+ function refreshVerify(){$("verifyButton").disabled=!($("verifyFile").files.length&&$("receiptFile").files.length);}
+ $("rotateButton").addEventListener("click",()=>{const id="seal-"+(crypto.randomUUID?crypto.randomUUID():Date.now()+"-"+Math.random().toString(16).slice(2));localStorage.setItem(KEY_ID,id);status($("signStatus"),"Создан новый идентификатор ключа. Новый ключ будет создан при следующем подписании.","ok");});
+ $("signButton").addEventListener("click",async()=>{
+  $("signButton").disabled=true;$("downloadReceipt").hidden=true;$("receiptOutput").hidden=true;
+  try{
+   if(!window.crypto||!crypto.subtle)throw new Error("Web Crypto недоступен. Открой страницу в безопасном контексте HTTPS.");
+   if(!window.AKSICryptoProvider)throw new Error("Защищённый провайдер ключей не загрузился.");
+   status($("signStatus"),"Считаю SHA-256 и подписываю файл на устройстве…");
+   const file=$("signFile").files[0],bytes=new Uint8Array(await file.arrayBuffer());
+   const receipt=await AKSIBrowserSeal.createReceipt({fileName:file.name,bytes,keyId:activeKey(),provider:AKSICryptoProvider});
+   const json=JSON.stringify(receipt,null,2);
+   $("receiptOutput").textContent=json;$("receiptOutput").hidden=false;download(json);
+   status($("signStatus"),"Готово. Квитанция создана; файл не покидал устройство. Отпечаток: "+receipt.signer_key_fingerprint,"ok");
+  }catch(error){status($("signStatus"),"Не удалось подписать файл: "+String(error&&error.message||error),"bad");}
+  finally{$("signButton").disabled=!$("signFile").files.length;}
+ });
+ $("verifyButton").addEventListener("click",async()=>{
+  $("verifyButton").disabled=true;$("verifyOutput").hidden=true;
+  try{
+   const file=$("verifyFile").files[0],receiptFile=$("receiptFile").files[0];
+   const [bytes,text]=await Promise.all([file.arrayBuffer(),receiptFile.text()]);
+   const receipt=JSON.parse(text);
+   const result=await AKSIBrowserSeal.verifyReceipt({bytes:new Uint8Array(bytes),receipt,expectedFingerprint:$("expectedFingerprint").value,provider:AKSICryptoProvider});
+   $("verifyOutput").textContent=JSON.stringify(result,null,2);$("verifyOutput").hidden=false;
+   status($("verifyStatus"),result.valid?(result.signer_trusted?"Подпись и файл проверены; отпечаток подписанта совпал.":"Файл и подпись корректны. Личность подписанта отдельно не подтверждена."):"Проверка не пройдена: "+result.errors.join(", " ),result.valid?"ok":"bad");
+  }catch(error){status($("verifyStatus"),"Не удалось проверить: "+String(error&&error.message||error),"bad");}
+  finally{refreshVerify();}
+ });
+})();
+</script>
+</body>
+</html>
