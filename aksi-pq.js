@@ -224,7 +224,7 @@
     var ecdhPubRaw = legacy ? unb64(legacy.ecdhPubRawB64) : await exportPub(cl.ecdh.publicKey, "ecdh");
     var ecdsaPubSpki = legacy ? unb64(legacy.ecdsaPubSpkiB64) : await exportPub(cl.ecdsa.publicKey, "ecdsa");
     var fp = await fingerprint(ecdhPubRaw);
-    var did = legacy && legacy.did ? legacy.did : "did:aksi:pq:" + fp;
+    var did = legacy && legacy.did ? legacy.did : "did:aksi:classical:" + fp;
     // PQ secret keys were previously stored as plaintext base64 in IndexedDB.
     // Disable persistence of that secret until an authenticated encrypted vault exists.
     var createdAt = legacy && legacy.createdAt ? legacy.createdAt : Date.now();
@@ -325,9 +325,9 @@
     return {
       version: VER, did: me.did,
       classical: "P-256 ECDH + ECDSA + AES-256-GCM + HKDF",
-      postQuantum: hasPq ? "ML-KEM-768 hybrid" : nobleOk ? "PQ lib loaded — refresh identity" : "classical-only",
+      postQuantum: hasPq ? "ML-KEM-768 hybrid" : "disabled: encrypted persistent secret-key vault not implemented",
       pqKeys: hasPq, noble: nobleOk, publicPack: publicPack(),
-      mission: "E2E · Resonance Seal · Dual-DID · server sees ciphertext only",
+      mission: "E2E · Classical ECDH/ECDSA · server sees ciphertext only; PQ mode disabled",
     };
   }
 
