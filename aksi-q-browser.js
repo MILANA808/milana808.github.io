@@ -445,11 +445,43 @@
       normalize: xs => { const n = Math.sqrt(xs.reduce((sum, value) => sum + (isComplex(value) ? cabs2(value) : value * value), 0)); if (!n) throw new AksiError("cannot normalize zero vector"); return xs.map(value => isComplex(value) ? cscale(value, 1 / n) : value / n); },
       tensor: (a, b) => { if (!Array.isArray(a) || !Array.isArray(b) || a.length * b.length > MAX_TENSOR) throw new AksiError("tensor exceeds the 65536-element limit"); return a.flatMap(value => b.map(other => isComplex(value) || isComplex(other) ? cmul(asComplex(value), asComplex(other)) : value * other)); },
       interfere: (a, b) => { if (a.length !== b.length || a.length > MAX_VECTOR) throw new AksiError("interfere requires equal-length vectors"); return a.map((value, i) => isComplex(value) || isComplex(b[i]) ? cadd(asComplex(value), asComplex(b[i])) : value + b[i]); },
-      probabilities, qstate, h, x, z, phase, rx, ry, rz, cnot, measure
+      probabilities, qstate, h, x, z, phase, rx, ry, rz, cnot, measure,
+      semantic_answer: query => {
+        if (root.AKSINativeLanguageCore && typeof root.AKSINativeLanguageCore.answer === "function") return root.AKSINativeLanguageCore.answer(query);
+        if (root.AKSISemanticReasoning && typeof root.AKSISemanticReasoning.answer === "function") return root.AKSISemanticReasoning.answer(query);
+        throw new AksiError("AKSI semantic answer modules are unavailable");
+      },
+      symbolic_infer: input => {
+        if (!root.AKSISymbolicInference || typeof root.AKSISymbolicInference.infer !== "function") throw new AksiError("AKSI symbolic inference module is unavailable");
+        return root.AKSISymbolicInference.infer(input);
+      }
     };
     this.concepts = new Map();
+    this.aliases = new Map();
+    this.ambiguousAliases = new Set();
     this.relations = [];
     this.memory = options.memory || new MemoryStore();
+    // Reuse the canonical AKSI concept graph when its source module is loaded.
+    const semantic = root.AKSISemanticReasoning;
+    if (semantic && Array.isArray(semantic.concepts) && typeof semantic.conceptInfo === "function") {
+      semantic.concepts.forEach(id => {
+        const info = semantic.conceptInfo(id);
+        if (!info || !info.definition) return;
+        const canonical = normalizeKey(info.id || id);
+        this.concepts.set(canonical, info.definition);
+        (info.parents || []).forEach(parent => {
+          const edge = [canonical, "is_a", normalizeKey(parent)];
+          if (!this.relations.some(item => JSON.stringify(item) === JSON.stringify(edge))) this.relations.push(edge);
+        });
+        (info.aliases || [id]).forEach(alias => {
+          const key = normalizeKey(alias);
+          if (this.concepts.has(key) && key !== canonical) return;
+          const existing = this.aliases.get(key);
+          if (existing && existing !== canonical) { this.aliases.delete(key); this.ambiguousAliases.add(key); }
+          else if (!this.ambiguousAliases.has(key)) this.aliases.set(key, canonical);
+        });
+      });
+    }
   }
   Runtime.prototype.expression = function (source) {
     if (source.length > MAX_LINE) throw new AksiError("expression exceeds the 4096-character limit");
@@ -457,8 +489,8 @@
   };
   Runtime.prototype.resolve = function (name) {
     const key = normalizeKey(name);
-    if (this.concepts.has(key)) return key;
-    return key;
+    if (this.concepts.has(key) || this.ambiguousAliases.has(key)) return key;
+    return this.aliases.get(key) || key;
   };
   Runtime.prototype.runLine = async function (line, lineNumber) {
     const source = line.trim();
