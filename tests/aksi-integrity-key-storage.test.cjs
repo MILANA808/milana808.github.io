@@ -24,6 +24,13 @@ test("shared provider persists a non-extractable private CryptoKey and fails clo
   assert.match(provider, /IndexedDB unavailable; refusing plaintext key fallback/);
 });
 
+test("rotated key identity survives reload through a non-secret active-key pointer", () => {
+  assert.match(html, /var LS_ACTIVE_KEY = "aksi_integrity_active_key_v1"/);
+  assert.match(html, /localStorage\.setItem\(LS_ACTIVE_KEY, keyId\)/);
+  assert.match(html, /localStorage\.getItem\(LS_ACTIVE_KEY\) \|\| "aksi-integrity-v1"/);
+  assert.match(html, /crypto\.getRandomValues\(new Uint8Array\(12\)\)/);
+});
+
 test("Integrity uses the provider key only for ECDSA-P256 signing", () => {
   assert.match(html, /name: "ECDSA", hash: "SHA-256"/);
   assert.doesNotMatch(html, /name: "Ed25519"/);
