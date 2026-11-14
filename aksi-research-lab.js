@@ -110,6 +110,7 @@ const api={
   $("receiptRun").disabled=!root.AKSICoreV3;
   window.addEventListener("error",e=>{const el=$("systemStatus");if(el)el.textContent="Ошибка модуля: "+String(e.message||"неизвестная ошибка");});
  }
+};
 const exported={...api};
 root.AKSIResearchLab=exported;
 if(typeof module==="object"&&module.exports)module.exports=exported;
