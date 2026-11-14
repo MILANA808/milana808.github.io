@@ -510,10 +510,22 @@ $('aksiClearMemory').addEventListener('click',async()=>{
   if(window.AKSI_SITE_MEMORY&&typeof window.AKSI_SITE_MEMORY.clear==='function')await window.AKSI_SITE_MEMORY.clear();
   else if(window.AKSI_Q_BROWSER&&window.AKSI_Q_BROWSER.MemoryStore){const memoryStore=new window.AKSI_Q_BROWSER.MemoryStore();await memoryStore.clear();}
   else throw new Error('Модуль IndexedDB-памяти не загружен; полная очистка не подтверждена.');
+  const storageChecks=[];
+  if(window.AKSI_DNA_TOPOLOGY&&typeof window.AKSI_DNA_TOPOLOGY.clearMemory==='function'){
+   const result=window.AKSI_DNA_TOPOLOGY.clearMemory();storageChecks.push({name:'native-generator',ok:!!(result&&result.ok&&result.persisted)});
+  }
+  if(window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.clearMemory==='function'){
+   const result=window.AKSI_UNIFIED_CORE.clearMemory();storageChecks.push({name:'unified-core',ok:!!(result&&result.ok&&result.persisted)});
+  }
+  if(window.AKSIKnowledgeBase&&typeof window.AKSIKnowledgeBase.clear==='function')storageChecks.push({name:'knowledge-base',ok:window.AKSIKnowledgeBase.clear()===true});
+  if(window.AKSIDialogueIntelligence&&typeof window.AKSIDialogueIntelligence.clearContext==='function')window.AKSIDialogueIntelligence.clearContext();
+  if(window.AKSISymbolicInference&&typeof window.AKSISymbolicInference.clearMemory==='function')window.AKSISymbolicInference.clearMemory();
+  const failed=storageChecks.filter(x=>!x.ok);
+  if(failed.length)throw new Error('Не удалось подтвердить очистку хранилищ: '+failed.map(x=>x.name).join(', '));
   state.history=[];state.memory={};state.evidencePassports=[];lastEvidencePassport=null;lastEvidenceExchange=null;
   window.AKSI_SITE_MEMORY_CONTEXT={};
-  if(window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.clearMemory)window.AKSI_UNIFIED_CORE.clearMemory();
-  persist();render();event('MEMORY','Chat history, IndexedDB notes and evidence passports cleared');
+  if(!persist())throw new Error('Браузер не подтвердил сохранение пустого состояния интерфейса.');
+  render();event('MEMORY','Chat history, IndexedDB, native generator, unified core, knowledge base and evidence passports cleared');
   if($('memoryList'))$('memoryList').textContent='Пока нет заметок.';
   if($('memoryCount'))$('memoryCount').textContent='0';
   $('chatStatus').textContent='История чата, заметки IndexedDB и паспорта очищены в этом браузере.';
