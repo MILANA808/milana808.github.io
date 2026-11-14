@@ -49,9 +49,12 @@ test("registered functions only; unknown names and injection are rejected", asyn
 test("runtime imports canonical semantic concepts and exposes AKSI symbolic inference", async () => {
   const r = new Runtime({ memory: new TestMemory() });
   assert.ok(r.concepts.size >= 20, "canonical AKSI concept graph should be loaded");
-  const result = await r.run('print symbolic_infer("логика: факт: снег белый; если снег белый, то снег отражает свет; следует ли снег отражает свет?")');
-  assert.equal(result[0].ok, true);
-  assert.equal(result[0].status, "proven");
+  assert.ok(r.relations.length >= 20, "canonical parent relations should be imported");
+  const result = await r.run('print semantic_answer("что такое доказательство?")\nprint symbolic_infer("логика: факт: снег белый; если снег белый, то снег отражает свет; следует ли снег отражает свет?")');
+  assert.equal(result[0].handled, true);
+  assert.match(result[0].text, /Доказательство/);
+  assert.equal(result[1].ok, true);
+  assert.equal(result[1].status, "proven");
 });
 
 test("concept definitions and explicit transitive is_a inference", async () => {
