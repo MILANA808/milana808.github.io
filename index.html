@@ -510,6 +510,14 @@ $('aksiClearMemory').addEventListener('click',async()=>{
   if(window.AKSI_SITE_MEMORY&&typeof window.AKSI_SITE_MEMORY.clear==='function')await window.AKSI_SITE_MEMORY.clear();
   else if(window.AKSI_Q_BROWSER&&window.AKSI_Q_BROWSER.MemoryStore){const memoryStore=new window.AKSI_Q_BROWSER.MemoryStore();await memoryStore.clear();}
   else throw new Error('Модуль IndexedDB-памяти не загружен; полная очистка не подтверждена.');
+  const requiredStores=[
+   ['native generator',window.AKSI_DNA_TOPOLOGY&&typeof window.AKSI_DNA_TOPOLOGY.clearMemory==='function'],
+   ['unified core',window.AKSI_UNIFIED_CORE&&typeof window.AKSI_UNIFIED_CORE.clearMemory==='function'],
+   ['knowledge base',window.AKSIKnowledgeBase&&typeof window.AKSIKnowledgeBase.clear==='function'],
+   ['dialogue context',window.AKSIDialogueIntelligence&&typeof window.AKSIDialogueIntelligence.clearContext==='function']
+  ];
+  const missingStores=requiredStores.filter(x=>!x[1]).map(x=>x[0]);
+  if(missingStores.length)throw new Error('Не загружены модули очистки: '+missingStores.join(', '));
   const storageChecks=[];
   if(window.AKSI_DNA_TOPOLOGY&&typeof window.AKSI_DNA_TOPOLOGY.clearMemory==='function'){
    const result=window.AKSI_DNA_TOPOLOGY.clearMemory();storageChecks.push({name:'native-generator',ok:!!(result&&result.ok&&result.persisted)});
