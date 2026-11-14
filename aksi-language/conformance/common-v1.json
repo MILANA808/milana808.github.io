@@ -1,0 +1,63 @@
+{
+  "schema": "AKSI-Q-CONFORMANCE/1",
+  "cases": [
+    {
+      "name": "arithmetic-precedence",
+      "program": "print 2 + 3 * 4\nprint 2 ** 3 ** 2\nprint -2 ** 2",
+      "expected": [
+        14,
+        512,
+        -4
+      ]
+    },
+    {
+      "name": "boolean-comparisons",
+      "program": "print not (2 > 3) and 4 >= 4\nprint 1 < 2 < 3",
+      "expected": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "vector-operations",
+      "program": "let v = vector(3, 4)\nprint norm(v)\nprint dot(v, v)",
+      "expected": [
+        5,
+        25
+      ]
+    },
+    {
+      "name": "concept-relations",
+      "program": "concept \"cat\" means \"mammal\"\nconcept \"mammal\" means \"animal\"\nrelate \"cat\" -> \"mammal\" as \"is_a\"\nrelate \"mammal\" -> \"animal\" as \"is_a\"\nask \"cat\"\ninfer \"cat\"",
+      "expected": [
+        "mammal; relations: is_a: mammal",
+        [
+          "mammal",
+          "animal"
+        ]
+      ]
+    },
+    {
+      "name": "hadamard-probabilities",
+      "program": "let state = h(qstate(1))\nprint probabilities(state)",
+      "expected": [
+        [
+          0.5,
+          0.5
+        ]
+      ]
+    },
+    {
+      "name": "bell-state-probabilities",
+      "program": "let zero = qstate(2)\nlet plus = h(zero, 0)\nlet bell = cnot(plus, 0, 1)\nprint probabilities(bell)",
+      "expected": [
+        [
+          0.5,
+          0,
+          0,
+          0.5
+        ]
+      ]
+    }
+  ]
+}
