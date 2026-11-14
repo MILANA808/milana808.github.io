@@ -37,7 +37,10 @@
   function loadSecrets() {
     try {
       var current = JSON.parse(sessionStorage.getItem(SECRETS_KEY) || "null");
-      if (current && typeof current === "object") return current;
+      if (current && typeof current === "object") {
+        localStorage.removeItem(LEGACY_SECRETS_KEY);
+        return current;
+      }
       var legacy = JSON.parse(localStorage.getItem(LEGACY_SECRETS_KEY) || "null");
       if (legacy && typeof legacy === "object") {
         sessionStorage.setItem(SECRETS_KEY, JSON.stringify(legacy));
