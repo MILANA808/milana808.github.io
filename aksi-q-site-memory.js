@@ -47,6 +47,7 @@
         try { state.memory[record.key] = JSON.parse(record.value); }
         catch (_) { state.memory[record.key] = record.value; }
       });
+      root.AKSI_SITE_MEMORY_CONTEXT = Object.assign({}, state.memory);
       const keys = Object.keys(state.memory);
       if (keys.length > 100) {
         const keep = new Set(records.slice(0, 100).map(record => record.key));
