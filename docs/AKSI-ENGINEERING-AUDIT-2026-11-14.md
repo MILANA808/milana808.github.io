@@ -10,11 +10,19 @@
 
 ### Объединено в main
 
-- PR #246 — безопасность ключей Integrity, честная маркировка CSPRNG и граница между историей чата и базой знаний.
-- PR #247 — документация приведена в соответствие с фактическим native-first поведением.
-- PR #246 прошёл 11 GitHub Actions workflow на исправленном head-коммите перед слиянием.
-- Merge commit PR #246: `4a4942b3808c180f6b63ac06df10d0921ce7e11f`.
-- Merge commit PR #247: `7c97d75edf4f7d370ed75003a2949d9b18c684a8`.
+- PR #241 — AKSI Q Python reference language v0.2.0, 19 tests passed; merged.
+- PR #242 — browser-native AKSI Q runtime and IndexedDB memory; merged.
+- PR #246 — Integrity key storage, honest CSPRNG labels, generated-history/knowledge separation; 11 workflows passed before merge.
+- PR #247 — capability documentation corrected to native-first behavior.
+- PR #253 — clear-memory action now clears IndexedDB, native generator feedback/history, unified-core memory, user knowledge-base facts, dialogue context and UI history; all 10 workflows passed.
+- PR #254 — shared Python/JavaScript conformance corpus (six deterministic cases); all eight workflows passed.
+- PR #256 — local Node.js AKSI Seal CLI (SHA-256 + Ed25519 receipts); all nine workflows passed.
+- PR #257 — browser AKSI Seal (SHA-256 + ECDSA P-256, non-extractable IndexedDB key); all nine workflows passed.
+- PR #258 — World Lab offline integrity checks; all eight workflows passed.
+- PR #259 — GitHub Actions updates: checkout v7, setup-node v7, github-script v9, configure-pages v6, upload-pages-artifact v5.
+- PR #260 — AKSI Seal added to main product navigation; all nine PR checks passed.
+- PR #248 — this repository/security audit snapshot; merged.
+- Latest main commit at time of update: `fb511dd4efbbd0e168a2dad0bfd78855bc7d86b2`. The Pages deployment for this exact commit is still running at the time of this audit update.
 
 ### Реальный статус ядра
 
@@ -54,20 +62,15 @@
 
 Не объединять репозитории массовым копированием. Для каждого кандидата перед переносом требуются: дерево файлов, лицензия, зависимости, default branch, история/ancestry, уникальные модули, тесты и проверка секретов. Истории репозиториев сохраняются. Частные данные и ключи не переносятся в публичный продукт.
 
-## 3. Открытые Pull Request
+## 3. Открытые Pull Request и консолидация
 
-На момент снимка в доступных репозиториях аккаунта оставалось **37 открытых Pull Request**. Часть относится к главному сайту, часть — к backend и отдельным экспериментам.
+После проверки дубликатов, устаревших веток и конфликтующих прототипов в главном репозитории остался один открытый PR: **#239 — tokenomics proposal**, переведённый в draft. Он не является утверждённой экономикой, выпущенным токеном или разрешением на продажу/фандрайзинг.
 
-Особенно важно отдельно разобрать:
-- #240 — AKSI Seal CLI и криптографическая квитанция;
-- #239 — tokenomics proposal; это предложение, не утверждённая экономика и не выпущенный токен;
-- #153 — Native Mind prototype;
-- #168, #169, #170 — Cognitive Core, wave-Bayesian intent router и geometric knowledge core;
-- #187 — Core Lab prototype;
-- backend #42 — Dynamic Cognitive Field prototype;
-- backend #22, #20, #18, #17 — разные поколения agent/backend automation.
+В главном репозитории закрыты как уже интегрированные, устаревшие или отдельные эксперименты PR #14, #11, #13, #42, #51, #56, #58, #48, #49, #50, #59, #121, #153, #156, #168, #169, #170, #177, #187, #240, #243, #244, #245, #249, #250, #252, #255 и другие заменённые ветки. Закрытие PR не удаляет исходные ветки или историю.
 
-Открытый PR не означает, что функция отсутствует в main: некоторые модули уже присутствуют в главном продукте, а соответствующие PR могут быть устаревшими или дублирующими. Перед каждым слиянием нужно сравнить текущий main с head branch и проверить CI.
+В backend закрыты устаревшие дублирующие PR #2, #17, #18, #20, #22 и экспериментальный #42. В репозиториях `milana_site`, `codex`, `aksi_apps`, `AKSI-TEST-1` и `glorious-potato` закрыты старые дублирующие UI/backend snapshots и несогласованные deployment/automation branches. Их код не копировался в production.
+
+Правило: один канонический публичный продукт (`milana808.github.io`) и один отдельный optional backend (`Milana-backend`). Эксперименты не становятся production только из-за наличия PR.
 
 ## 4. Оставшиеся риски и незакрытые задачи
 
@@ -84,6 +87,8 @@
 IndexedDB-память AKSI ограничена квотой браузера, относится к текущему origin и устройству, не синхронизируется между устройствами и не является шифрованным сейфом. Не сохранять пароли, seed-фразы и приватные ключи.
 
 ### Backend
+
+Live deployment blocker: GitHub Actions run [#43511696195](https://github.com/MILANA808/Milana-backend/actions/runs/43511696195) on 2026-11-13 timed out on all six attempts for `/health`, `/ready`, `/aksi/cluster/status` and `/api/core/runtime` at `https://aksi-backend.onrender.com`. This does not identify whether Render is suspended, the deploy failed, startup is blocked, or the URL/network is wrong. Tracking issue: [Milana-backend #55](https://github.com/MILANA808/Milana-backend/issues/55). Do not claim the live backend is online until the live smoke workflow passes.
 
 Backend-контур существует отдельно. Успешные тесты статического сайта не доказывают доступность production backend. Для постоянной идентичности серверной подписи требуется стабильный секретный ключ в хранилище секретов хостинга; ephemeral key не обеспечивает непрерывность идентичности.
 
