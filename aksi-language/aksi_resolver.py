@@ -122,7 +122,7 @@ class Resolver:
         # functions can refer to declarations regardless of source order.
         for wrapper in items:
             node = self.unwrap(wrapper)
-            if node.kind not in ("Function", "TypeDeclaration"):
+            if node.kind != "Function":
                 self.visit(node)
         for wrapper in items:
             node = self.unwrap(wrapper)
@@ -137,7 +137,7 @@ class Resolver:
         self.predeclare(statements)
         for wrapper in statements:
             node = self.unwrap(wrapper)
-            if node.kind not in ("Function", "TypeDeclaration"):
+            if node.kind != "Function":
                 self.visit(node)
         for wrapper in statements:
             node = self.unwrap(wrapper)
