@@ -20,8 +20,7 @@ No package installation is required.
 
 ## Run in the browser
 
-Open [AKSI Research Lab](https://milana808.github.io/research/) and use the
-existing AKSI Q editor. The browser interpreter has its own lexer and Pratt
+Open the isolated [AKSI Q Studio](https://milana808.github.io/aksi-q-studio/) to edit and execute declarative UI programs. The existing [AKSI Research Lab](https://milana808.github.io/research/) remains the expression-language and math workspace. The browser interpreter has its own lexer and Pratt
 expression parser, math and state-vector functions, explicit concept relations,
 resource limits, and a user-controlled IndexedDB memory profile. The browser
 profile supports `remember`, `recall`, `search` and `forget` statements.
