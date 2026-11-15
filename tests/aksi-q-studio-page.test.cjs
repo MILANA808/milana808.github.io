@@ -11,7 +11,7 @@ const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
 
 test("AKSI Q Studio is a real static route linked from the homepage", () => {
   assert.match(page, /<html lang="ru">/);
-  assert.match(page, /<script src="\.\.\/aksi-language\/aksi-ui\.js\?v=0\.3\.0"><\/script>/);
+  assert.match(page, /<script src="\.\.\/aksi-language\/aksi-ui\\.js\\?v=0\\.4\\.0"><\/script>/);
   assert.match(page, /id="source"/);
   assert.match(page, /id="preview"/);
   assert.match(home, /href="\/aksi-q-studio\/">⌘ AKSI Q/);
@@ -54,9 +54,13 @@ test("the actual embedded Studio program parses and renders with working local s
   };
   const root = render(ast, doc);
   const card = root.children[0];
-  const value = card.children.find(node => node.tag === "output");
+  const value = card.children.find(node => node.tag === "output" && node.textContent === "0");
+  const visitorInput = card.children.find(node => node.tag === "input");
   const increment = card.children.find(node => node.tag === "button" && node.textContent === "Добавить");
   assert.equal(value.textContent, "0");
+  assert.ok(visitorInput, "text input is rendered");
+  visitorInput.listeners.input({ target: { value: "Тест" } });
+  assert.equal(card.children.find(node => node.tag === "output" && node.textContent === "Тест").textContent, "Тест");
   increment.listeners.click();
   assert.equal(value.textContent, "1");
 
