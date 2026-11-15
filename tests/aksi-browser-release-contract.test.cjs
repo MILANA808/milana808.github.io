@@ -22,7 +22,7 @@ assert.ok(html.indexOf(knowledgeTag) < html.indexOf(evidenceTag), "knowledge bas
 assert.ok(html.indexOf(evidenceTag) < html.indexOf(routerTag), "claim evidence module must load before router");
 assert.ok(html.indexOf(routerTag) < html.indexOf("async function ask(q)"), "router must load before chat handler");
 assert.ok(html.indexOf(semanticTag) < html.indexOf("async function ask(q)"), "semantic engine must load before chat handler");
-assert.match(sw, /var CACHE = "aksi-shell-v306"/, "service worker cache must invalidate older shell");
+assert.match(sw, /var CACHE = "aksi-shell-v307"/, "service worker cache must invalidate older shell");
 assert.ok(sw.includes("/aksi-.*\\.js$/"), "JavaScript assets must use network-first strategy");
 
 const askStart = html.indexOf("async function ask(q)");
