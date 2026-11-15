@@ -84,7 +84,8 @@ node --test tests/aksi-ui-language.test.cjs tests/aksi-q-studio-page.test.cjs
 | `section { ... }` | Group UI nodes |
 | `text "..." ` | Render literal text |
 | `state "name" = 0` | Declare bounded page-local scalar state |
-| `value "name"` | Render a live binding to page state |\n| `input "Name" state "name"` | Bind a bounded text input to string state |
+| `value "name"` | Render a live binding to page state |
+| `input "Name" state "name"` | Bind a bounded text input to string state |
 | `button "..." action "id" state "name" add 1` | Add a finite number to a numeric state when clicked |
 | `button "..." action "id"` | Render a button wired to a named host action |
 | `when "state" equals true { ... }` | Render a block while a scalar state matches |
