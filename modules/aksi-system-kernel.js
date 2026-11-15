@@ -76,12 +76,42 @@
       };
     }
 
+    function orderedModules() {
+      const ordered = [];
+      const visited = new Set();
+      const visiting = new Set();
+      function visit(record) {
+        if (visited.has(record.id)) return;
+        if (visiting.has(record.id)) {
+          record.state = "failed";
+          record.error = { name: "DependencyCycle", message: "Dependency cycle includes " + record.id };
+          return;
+        }
+        visiting.add(record.id);
+        for (const dependencyId of record.dependencies) {
+          const dependency = modules.get(dependencyId);
+          if (!dependency) {
+            record.state = "failed";
+            record.error = { name: "MissingDependency", message: "Missing dependency: " + dependencyId };
+            continue;
+          }
+          visit(dependency);
+        }
+        visiting.delete(record.id);
+        visited.add(record.id);
+        ordered.push(record);
+      }
+      for (const record of modules.values()) visit(record);
+      return ordered;
+    }
+
     async function boot() {
       if (bootPromise) return bootPromise;
       bootPromise = (async () => {
         kernelState = "booting";
         emit("kernel.boot.started", { module_count: modules.size });
-        for (const record of modules.values()) {
+        for (const record of orderedModules()) {
+          if (record.state === "failed") { emit("module.failed", { id: record.id, error: record.error }); continue; }
           record.state = "initializing";
           try {
             const missing = record.dependencies.filter(id => !modules.has(id) || modules.get(id).state !== "available");
