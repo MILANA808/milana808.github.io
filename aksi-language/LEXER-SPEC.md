@@ -20,10 +20,11 @@ string contents and comments.
 ## Lexical rules
 
 - UTF-8 text is decoded by the caller.
-- Whitespace separates tokens; newlines are preserved by default.
+- Whitespace separates tokens; newlines are preserved by default as `NEWLINE` tokens whose value is an actual newline and whose span covers the source newline.
 - `#` begins a comment outside string literals.
 - Single- and double-quoted strings support documented escapes.
-- Numeric literals accept integer, decimal and exponent forms.
+- Numeric literals accept integer, decimal and exponent forms; malformed exponent suffixes are rejected instead of split into unrelated tokens.
+- The range operator `..` takes precedence over a trailing decimal point, so `1..3` is tokenized as `1`, `..`, `3`.
 - Operators use longest-match tokenization.
 - Unknown characters, malformed escapes, unterminated strings and raw
   newlines inside strings produce source-located errors.
