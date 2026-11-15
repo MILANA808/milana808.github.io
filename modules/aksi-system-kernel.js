@@ -47,6 +47,7 @@
     }
 
     function register(descriptor) {
+      if (kernelState !== "created") throw new Error("Module registration is closed after boot starts");
       if (!descriptor || typeof descriptor !== "object") throw new TypeError("Module descriptor is required");
       const id = String(descriptor.id || "").trim();
       const version = String(descriptor.version || "").trim();
@@ -183,6 +184,15 @@
       return results;
     }
 
+    function getTask(id) {
+      const task = tasks.get(String(id));
+      return task ? taskSnapshot(task) : null;
+    }
+
+    function listTasks() {
+      return [...tasks.values()].map(taskSnapshot);
+    }
+
     function getModule(id) {
       const record = modules.get(String(id));
       return record ? moduleSnapshot(record) : null;
@@ -316,7 +326,7 @@
       return status();
     }
 
-    const publicApi = Object.freeze({ register, boot, status, getModule, subscribe, runTask, cancelTask, checkHealth, shutdown });
+    const publicApi = Object.freeze({ register, boot, status, getModule, getTask, listTasks, subscribe, runTask, cancelTask, checkHealth, shutdown });
     return publicApi;
   }
 
