@@ -16,9 +16,9 @@ const source = {
 const candidates = api.prepareCandidates(claim, [{ title: "Reference", url: "https://example.org/reference", provider: "test", text: source.passage }]);
 assert.equal(candidates.status, "insufficient");
 assert.equal(candidates.candidates[0].review_status, "not_reviewed");
-assert.equal(candidates.candidates[0].retrieval, "unverified");
+assert.equal(candidates.candidates[0].retrieval, "unverified");\nassert.equal(candidates.schema, "aksi-claim-evidence-candidates/1.1");\nassert.equal(candidates.candidates[0].lexical_screen.label, "candidate_relevant");\nassert.equal(candidates.candidates[0].lexical_screen.is_probability, false);\nassert.equal(candidates.candidates[0].lexical_screen.is_entailment_check, false);\nassert.ok(candidates.candidates[0].lexical_screen.matched_terms.includes("вода"));
 assert.match(candidates.reason, /ещё не проверены/);
-assert.throws(() => api.prepareCandidates(claim, [{ url: "javascript:alert(1)", text: "x" }]), /HTTP/);
+assert.throws(() => api.prepareCandidates(claim, [{ url: "javascript:alert(1)", text: "x" }]), /HTTP/);\nconst unrelated = api.prepareCandidates(claim, [{ title: "Unrelated", url: "https://example.org/unrelated", text: "Сегодня в городе открылся новый музей современного искусства." }]);\nassert.equal(unrelated.candidates[0].lexical_screen.label, "low_overlap");\nassert.equal(unrelated.status, "insufficient", "lexical overlap must never upgrade evidence status");\nassert.equal(api.lexicalTokens("Ёлка и вода").includes("елка"), true);
 
 const supported = api.assess(claim, [source]);
 assert.equal(supported.status, "supported");
