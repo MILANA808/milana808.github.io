@@ -8,6 +8,7 @@ function fakeDocument() {
     return {
       tag, children: [], listeners: {}, dataset: {}, textContent: "", type: "",
       appendChild(child) { this.children.push(child); return child; },
+      replaceChildren(...children) { this.children = children; },
       addEventListener(name, fn) { this.listeners[name] = fn; }
     };
   }
@@ -85,4 +86,29 @@ test("parser enforces bounded nesting, node count and source length", () => {
 test("renderer refuses unparsed objects and invalid capabilities", () => {
   assert.throws(() => render({}, fakeDocument()), /parsed page AST/);
   assert.throws(() => render(parse('page "x" {}'), fakeDocument(), "not a function"), /onAction/);
+});
+
+test("typed when blocks render conditionally and react to local state changes", () => {
+  const ast = parse('page "conditional" { state "visible" = false when "visible" equals true { text "Now visible" } button "Show" action "show" state "visible" add 1 }');
+  const main = render(ast, fakeDocument());
+  const conditional = main.children[0];
+  const button = main.children[1];
+  assert.equal(conditional.children.length, 0);
+  button.listeners.click();
+  assert.equal(conditional.children.length, 1);
+  assert.equal(conditional.children[0].textContent, "Now visible");
+});
+
+test("when blocks validate state references and scalar types", () => {
+  assert.throws(() => parse('page "x" { when "missing" equals true { text "x" } }'), /undeclared state/);
+  assert.throws(() => parse('page "x" { state "enabled" = true when "enabled" equals 1 { text "x" } }'), /must match declared state type/);
+  assert.throws(() => parse('page "x" { state "name" = "A" when "name" equals "A" { text "x" } }'), /must match declared state type/);
+});
+
+test("when blocks can contain nested sections and are frozen in the AST", () => {
+  const ast = parse('page "x" { state "mode" = "ready" when "mode" equals "ready" { section { text "Ready" } } }');
+  assert.equal(ast.children[0].type, "when");
+  assert.ok(Object.isFrozen(ast.children[0]));
+  assert.ok(Object.isFrozen(ast.children[0].children));
+  assert.equal(ast.children[0].children[0].type, "section");
 });
