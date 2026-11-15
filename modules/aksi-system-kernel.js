@@ -123,7 +123,8 @@
         limits: {
           max_concurrent_tasks: config.maxConcurrentTasks,
           max_queued_tasks: config.maxQueuedTasks,
-          default_timeout_ms: config.defaultTimeoutMs
+          default_timeout_ms: config.defaultTimeoutMs,
+          max_task_history: config.maxTaskHistory
         },
         capabilities: [...new Set(moduleList.filter(item => item.state === "available").flatMap(item => item.capabilities))],
         generated_at: now()
