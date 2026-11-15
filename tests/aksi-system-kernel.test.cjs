@@ -8,11 +8,11 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   kernel.subscribe(event => events.push(event.type));
 
   assert.throws(() => kernel.register({ id: "bad", version: "1", init: true }), /init/);
-  assert.throws(() => kernel.register({ id: "memory.core", version: "2", init: async () => ({}) }), /already registered/);
 
   let healthy = true;
   kernel.register({ id: "reasoner.core", version: "0.1.0", dependencies: ["memory.core"], capabilities: ["reasoning.basic"], init: async () => ({ available: true }), health: async () => ({ ok: healthy }) });
   kernel.register({ id: "memory.core", version: "1.0.0", capabilities: ["memory.read"], init: async () => ({ available: true }) });
+  assert.throws(() => kernel.register({ id: "memory.core", version: "2", init: async () => ({}) }), /already registered/);
   await assert.rejects(kernel.runTask("before-boot", async () => "no"), error => error.code === "KERNEL_NOT_READY");
   const boot = await kernel.boot();
   assert.equal(boot.kernel.state, "ready");
