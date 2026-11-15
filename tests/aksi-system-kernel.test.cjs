@@ -7,11 +7,19 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   const events = [];
   kernel.subscribe(event => events.push(event.type));
 
+  let healthy = true;
+  kernel.register({ id: "reasoner.core", version: "0.1.0", dependencies: ["memory.core"], capabilities: ["reasoning.basic"], init: async () => ({ available: true }), health: async () => ({ ok: healthy }) });
   kernel.register({ id: "memory.core", version: "1.0.0", capabilities: ["memory.read"], init: async () => ({ available: true }) });
-  kernel.register({ id: "reasoner.core", version: "0.1.0", dependencies: ["memory.core"], capabilities: ["reasoning.basic"], init: async () => ({ available: true }), health: async () => ({ ok: true }) });
+  await assert.rejects(kernel.runTask("before-boot", async () => "no"), error => error.code === "KERNEL_NOT_READY");
   const boot = await kernel.boot();
   assert.equal(boot.kernel.state, "ready");
   assert.deepEqual(boot.capabilities.sort(), ["memory.read", "reasoning.basic"]);
+  assert.equal(kernel.getModule("reasoner.core").state, "available");
+  healthy = false;
+  await kernel.checkHealth();
+  assert.equal(kernel.getModule("reasoner.core").state, "degraded");
+  healthy = true;
+  await kernel.checkHealth();
   assert.equal(kernel.getModule("reasoner.core").state, "available");
   assert.equal((await kernel.boot()).kernel.state, "ready", "boot must be idempotent");
 
@@ -41,6 +49,12 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   assert.ok(events.includes("task.completed"));
   assert.ok(events.includes("task.failed"));
   assert.ok(events.includes("task.timed_out"));
+
+  const brokenDependencies = createKernel();
+  brokenDependencies.register({ id: "needs.missing", version: "1", dependencies: ["missing.core"], init: async () => ({}) });
+  const brokenStatus = await brokenDependencies.boot();
+  assert.equal(brokenStatus.kernel.state, "unavailable");
+  assert.equal(brokenDependencies.getModule("needs.missing").state, "failed");
 
   let disposed = false;
   const disposable = createKernel();
