@@ -10,7 +10,7 @@ function fakeDocument() {
     return {
       tag, children: [], listeners: {}, dataset: {}, textContent: "", type: "",
       appendChild(child) { this.children.push(child); return child; },
-      replaceChildren(...children) { this.children = children; },
+      replaceCount: 0,\n      replaceChildren(...children) { this.replaceCount += 1; this.children = children; },
       addEventListener(name, fn) { this.listeners[name] = fn; }
     };
   }
@@ -134,6 +134,36 @@ test("text inputs require declared string state and enforce text bounds", () => 
   assert.throws(() => parse('page "x" { state "count" = 0 input "Number" state "count" }'), /requires a declared string state/);
   const main = render(parse('page "x" { state "name" = "" input "Name" state "name" }'), fakeDocument());
   assert.throws(() => main.children[0].listeners.input({ target: { value: "x".repeat(limits.text + 1) } }), /text limit/);
+});
+
+test("nested conditional scopes release detached reactive subscriptions", () => {
+  const ast = parse('page "nested" { state "outer" = 0 state "inner" = 0 when "outer" equals 1 { when "inner" equals 1 { text "Nested" } } button "Show outer" action "outer" state "outer" add 1 button "Show inner" action "inner" state "inner" add 1 }');
+  const main = render(ast, fakeDocument());
+  const outer = main.children[0];
+  const outerButton = main.children[1];
+  const innerButton = main.children[2];
+  outerButton.listeners.click();
+  const inner = outer.children[0];
+  assert.ok(inner, "inner conditional is mounted");
+  const updatesBeforeHide = inner.replaceCount || 0;
+  outerButton.listeners.click();
+  assert.equal(outer.children.length, 0);
+  const updatesAfterHide = inner.replaceCount || 0;
+  innerButton.listeners.click();
+  assert.equal(inner.replaceCount || 0, updatesAfterHide);
+  assert.equal(updatesAfterHide, updatesBeforeHide);
+});
+
+test("rendered pages expose idempotent dispose and release live bindings", () => {
+  const ast = parse('page "dispose" { state "count" = 0 value "count" button "Add" action "add" state "count" add 1 }');
+  const main = render(ast, fakeDocument());
+  const output = main.children[0];
+  const button = main.children[1];
+  assert.equal(typeof main.dispose, "function");
+  main.dispose();
+  main.dispose();
+  button.listeners.click();
+  assert.equal(output.textContent, "0", "disposed page no longer retains or refreshes output nodes");
 });
 
 test("the documented homepage example is executable and combines input with conditionals", () => {
