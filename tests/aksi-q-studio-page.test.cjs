@@ -3,6 +3,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
+const { parse, render } = require("../aksi-language/aksi-ui.js");
 
 const root = path.join(__dirname, "..");
 const page = fs.readFileSync(path.join(root, "aksi-q-studio", "index.html"), "utf8");
@@ -34,4 +35,27 @@ test("Studio exposes compilation errors as text, not injected markup", () => {
   assert.match(page, /status\.textContent=message/);
   assert.match(page, /role="status"/);
   assert.match(page, /aria-live="polite"/);
+});
+
+test("the actual embedded Studio program parses and renders with working local state", () => {
+  const match = page.match(/<textarea id="source"[^>]*>([\\s\\S]*?)<\\/textarea>/);
+  assert.ok(match, "Studio source textarea exists");
+  const ast = parse(match[1]);
+  assert.equal(ast.name, "studio-demo");
+  const doc = {
+    createElement(tag) {
+      return {
+        tag, children: [], listeners: {}, dataset: {}, textContent: "", type: "",
+        appendChild(child) { this.children.push(child); return child; },
+        addEventListener(name, fn) { this.listeners[name] = fn; }
+      };
+    }
+  };
+  const root = render(ast, doc);
+  const card = root.children[0];
+  const value = card.children.find(node => node.tag === "output");
+  const increment = card.children.find(node => node.tag === "button" && node.textContent === "Добавить");
+  assert.equal(value.textContent, "0");
+  increment.listeners.click();
+  assert.equal(value.textContent, "1");
 });
