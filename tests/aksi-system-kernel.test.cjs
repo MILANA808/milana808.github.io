@@ -7,6 +7,9 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   const events = [];
   kernel.subscribe(event => events.push(event.type));
 
+  assert.throws(() => kernel.register({ id: "bad", version: "1", init: true }), /init/);
+  assert.throws(() => kernel.register({ id: "memory.core", version: "2", init: async () => ({}) }), /already registered/);
+
   let healthy = true;
   kernel.register({ id: "reasoner.core", version: "0.1.0", dependencies: ["memory.core"], capabilities: ["reasoning.basic"], init: async () => ({ available: true }), health: async () => ({ ok: healthy }) });
   kernel.register({ id: "memory.core", version: "1.0.0", capabilities: ["memory.read"], init: async () => ({ available: true }) });
@@ -23,9 +26,6 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   assert.equal(kernel.getModule("reasoner.core").state, "available");
   assert.equal((await kernel.boot()).kernel.state, "ready", "boot must be idempotent");
   assert.throws(() => kernel.register({ id: "late.module", version: "1", init: async () => ({}) }), /registration is closed/);
-
-  assert.throws(() => kernel.register({ id: "bad", version: "1", init: true }), /init/);
-  assert.throws(() => kernel.register({ id: "memory.core", version: "2", init: async () => ({}) }), /already registered/);
 
   const first = kernel.runTask("echo", async (input, context) => {
     context.emit("started", { safe: true });
