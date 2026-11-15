@@ -38,6 +38,8 @@ assert.match(html, /check\('Semantic reasoning'/, "diagnostics must expose seman
 assert.match(html, /check\('Weather command'/, "diagnostics must verify weather command parsing");
 assert.match(html, /серверный backend намеренно отключён/, "diagnostics must not report disabled backend as healthy");
 assert.ok(html.includes('id="runAnswerSelfTest"'), "UI must expose the local answer self-test");
+assert.match(html, /ОЦЕНКА ДОКАЗАТЕЛЬСТВ/, "web evidence panel must show explicit review state");
+assert.match(html, /НЕДОСТАТОЧНО ДАННЫХ/, "unreviewed web evidence must not be presented as verified");
 assert.match(html, /async function runAnswerSelfTest\(\)/, "local answer self-test must be implemented");
 const selfTestStart = html.indexOf("async function runAnswerSelfTest()");
 const selfTestEnd = html.indexOf("$('runAnswerSelfTest').addEventListener", selfTestStart);
