@@ -1,6 +1,6 @@
 # AKSI Q — full-site language migration plan
 
-**Status:** implementation plan and acceptance contract
+**Status:** phased implementation; first isolated browser route exists; full-site migration not complete
 **Target:** migrate the public AKSI MATRIX site from hand-written page logic to AKSI Q as the primary application language, without breaking the live site during transition.
 **Working branch:** aksi-q-site-rewrite
 
@@ -58,9 +58,25 @@ AKSI Q remains the source language. A small, auditable JavaScript host runtime m
 
 A slice is complete only when its AKSI Q source is the source of truth for the migrated behavior; the browser runtime executes it without dynamic code evaluation; supported constructs pass conformance tests; unit, security, accessibility, route, and browser interaction tests pass; no public route or essential feature regresses; and CI plus deployment are explicitly verified.
 
-## First implementation slice
+## Implemented slices (branch aksi-q-site-rewrite)
 
-Build and test the Q application-language foundation before changing the live homepage. Define a typed AST and structured blocks/functions, then add conformance fixtures and security limits. The next slice introduces declarative UI nodes and renders an isolated demo route. Only after that should the homepage be migrated.
+- Bounded declarative UI AST and safe DOM renderer.
+- Page-local scalar state, live value bindings, numeric button effects.
+- Typed reactive conditional blocks using `when "state" equals scalar { ... }`.
+- Bounded text inputs bound to declared string state.
+- Isolated `/aksi-q-studio/` route linked from the homepage in the working branch; its source is executed by the browser runtime.
+- CI coverage for UI parser/renderer, Studio route wiring and interactions, Python interpreter, examples, cross-runtime fixtures and quantum state-vector parity.
+
+These changes are still in a draft PR. They have not been merged or deployed to the public site. The actual public homepage remains on its existing implementation.
+
+## Next implementation slices
+
+1. Add repeatable lists, safe layout/style tokens, and accessible input/button semantics.
+2. Unify UI and expression profiles under a versioned module/runtime model with shared typed values and diagnostics.
+3. Add a permissioned route adapter and lifecycle/task model.
+4. Add a real-browser test harness before declaring route behavior verified in a browser.
+5. Migrate one existing low-risk route, compare behavior/accessibility/mobile/offline behavior, and keep rollback.
+6. Migrate the homepage only after route-level acceptance gates pass.
 
 ## Non-claims
 
