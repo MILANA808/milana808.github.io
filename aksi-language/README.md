@@ -28,13 +28,35 @@ Memory is local to the current browser and origin; export/import is provided
 for backups and transfer. Browser storage is quota-limited and is not infinite
 or cloud-synchronized.
 
-The unified front-end foundation now includes `aksi_lexer.py`: a bounded, source-spanned lexer with keyword/identifier/number/string/operator tokens, newline preservation, comments, decoded string escapes, and location-aware errors. Its contract is documented in `LEXER-SPEC.md`. It is intentionally not yet wired into the legacy Python expression parser or browser UI parser; the shared AST and parser migration remain future work. Lexer tests are included in the existing Python unittest discovery.
+The shared front-end foundation includes:
 
-The shared `conformance/common-v1.json` corpus is executed by both runtimes in
-CI and compares arithmetic, boolean expressions, vectors, concept relations
-and state-vector probabilities. The separate quantum differential test
-compares selected circuit amplitudes. This is a tested common subset, not full
-language parity.
+- `aksi_lexer.py`: bounded, source-spanned lexer with keyword/identifier/
+  number/string/operator tokens, newline preservation, comments, decoded
+  string escapes, and location-aware errors. See [LEXER-SPEC.md](LEXER-SPEC.md).
+- `aksi_frontend.py`: recursive-descent declaration parser plus Pratt
+  expression parser. It creates immutable, source-spanned AST nodes for
+  functions, bindings, blocks, control flow, algebraic type declarations,
+  calls, arrays, and member/index expressions. See [PARSER-SPEC.md](PARSER-SPEC.md).
+- `aksi_resolver.py`: first lexical name-resolution pass. It checks declaration
+  visibility, duplicate names, unknown names/types, mutability, and control-flow
+  context. See [RESOLVER-SPEC.md](RESOLVER-SPEC.md).
+- `aksi_typechecker.py`: initial primitive type-checking pass for literals,
+  annotated bindings, function boundaries, operators, conditions, arrays,
+  and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
+
+These are front-end analysis components, not yet one production execution
+pipeline. The legacy Python expression interpreter still uses
+`aksi_parser.py`; it does not execute the new declaration AST. The shared
+resolver and type checker must be run explicitly by tooling and have not yet
+been integrated into the legacy interpreter or browser runtime. The shared
+lexer is not yet the sole lexer for the separate browser UI profile.
+
+The shared `conformance/common-v1.json` corpus is executed by both legacy
+runtimes in CI and compares arithmetic, boolean expressions, vectors, concept
+relations and state-vector probabilities. The separate quantum differential
+test compares selected circuit amplitudes. This is a tested common subset,
+not full language parity. The new resolver/type-checker suites are separate
+Python tests and must pass their own CI run before being considered validated.
 
 ## Declarative UI profile v0.4
 
