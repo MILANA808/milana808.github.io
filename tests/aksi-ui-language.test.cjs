@@ -112,3 +112,24 @@ test("when blocks can contain nested sections and are frozen in the AST", () => 
   assert.ok(Object.isFrozen(ast.children[0].children));
   assert.equal(ast.children[0].children[0].type, "section");
 });
+
+test("text inputs update local string state and all bound values", () => {
+  const ast = parse('page "form" { state "name" = "" input "Введите имя" state "name" value "name" input "Повторите имя" state "name" }');
+  const main = render(ast, fakeDocument());
+  const first = main.children[0];
+  const output = main.children[1];
+  const second = main.children[2];
+  assert.equal(first.type, "text");
+  assert.equal(first.placeholder, "Введите имя");
+  assert.equal(first.ariaLabel, "Введите имя");
+  first.listeners.input({ target: { value: "Альфия" } });
+  assert.equal(output.textContent, "Альфия");
+  assert.equal(second.value, "Альфия");
+});
+
+test("text inputs require declared string state and enforce text bounds", () => {
+  assert.throws(() => parse('page "x" { input "Name" state "missing" }'), /undeclared state/);
+  assert.throws(() => parse('page "x" { state "count" = 0 input "Number" state "count" }'), /requires a declared string state/);
+  const main = render(parse('page "x" { state "name" = "" input "Name" state "name" }'), fakeDocument());
+  assert.throws(() => main.children[0].listeners.input({ target: { value: "x".repeat(limits.text + 1) } }), /text limit/);
+});
