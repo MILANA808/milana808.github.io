@@ -139,6 +139,7 @@
           const health = await record.health();
           record.lastHealth = { checked_at: now(), ok: !(health && health.ok === false), detail: health || null };
           if (!record.lastHealth.ok) record.state = "degraded";
+          else if (record.state === "degraded") { record.state = "available"; record.error = null; }
         } catch (error) {
           record.lastHealth = { checked_at: now(), ok: false, error: safeError(error) };
           record.state = "degraded";
@@ -168,6 +169,7 @@
     function runTask(type, handler, input, options) {
       const taskType = String(type || "").trim();
       if (!taskType || typeof handler !== "function") return Promise.reject(new TypeError("Task type and handler are required"));
+      if (kernelState !== "ready" && kernelState !== "degraded") return Promise.reject(Object.assign(new Error("Kernel is not ready to execute tasks"), { code: "KERNEL_NOT_READY" }));
       if (queue.length >= config.maxQueuedTasks && activeCount >= config.maxConcurrentTasks) {
         return Promise.reject(Object.assign(new Error("Task queue is full"), { code: "TASK_QUEUE_FULL" }));
       }
@@ -226,6 +228,7 @@
     }
 
     function pump() {
+      if (kernelState === "shutting_down" || kernelState === "stopped") return;
       while (activeCount < config.maxConcurrentTasks && queue.length) {
         const task = queue.shift();
         if (task.state !== "queued") continue;
