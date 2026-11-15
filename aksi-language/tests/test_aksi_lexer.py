@@ -39,6 +39,23 @@ class LexerTests(unittest.TestCase):
             lex("let x = @")
         self.assertEqual((caught.exception.span.line, caught.exception.span.column), (1, 9))
 
+
+    def test_newline_token_contains_a_real_newline_and_correct_span(self):
+        token = next(item for item in lex("a\\nb") if item.kind == "NEWLINE")
+        self.assertEqual(token.value, "\\n")
+        self.assertEqual((token.span.start, token.span.end), (1, 2))
+        self.assertEqual((token.span.line, token.span.column), (1, 2))
+        self.assertEqual((token.span.end_line, token.span.end_column), (2, 1))
+
+    def test_range_operator_is_not_swallowed_by_decimal_scanner(self):
+        values = [(item.kind, item.value) for item in lex("1..3")]
+        self.assertEqual(values[:3], [("NUMBER", "1"), ("OP", ".."), ("NUMBER", "3")])
+
+    def test_malformed_numeric_exponent_is_rejected(self):
+        for source in ("1e", "2.5e+", "7E-"):
+            with self.subTest(source=source), self.assertRaises(LexError):
+                lex(source)
+
     def test_newline_tokens_can_be_omitted(self):
         self.assertFalse(any(t.kind == "NEWLINE" for t in lex("a\nb", include_newlines=False)))
 
