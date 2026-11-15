@@ -102,7 +102,7 @@ test("typed when blocks render conditionally and react to local state changes", 
 test("when blocks validate state references and scalar types", () => {
   assert.throws(() => parse('page "x" { when "missing" equals true { text "x" } }'), /undeclared state/);
   assert.throws(() => parse('page "x" { state "enabled" = true when "enabled" equals 1 { text "x" } }'), /must match declared state type/);
-  assert.throws(() => parse('page "x" { state "name" = "A" when "name" equals "A" { text "x" } }'), /must match declared state type/);
+  assert.throws(() => parse('page "x" { state "name" = "A" when "name" equals null { text "x" } }'), /must match declared state type/);
 });
 
 test("when blocks can contain nested sections and are frozen in the AST", () => {
