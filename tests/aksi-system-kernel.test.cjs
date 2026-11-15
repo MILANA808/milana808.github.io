@@ -30,8 +30,11 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
     context.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
   }), null, { timeoutMs: 10 }), error => error.code === "TASK_TIMEOUT");
 
-  const blocked = kernel.createTaskDoesNotExist;
-  assert.equal(blocked, undefined);
+  const ignoredSignal = kernel.runTask("ignores-abort", () => new Promise(() => {}), null, { timeoutMs: 10 });
+  await assert.rejects(ignoredSignal, error => error.code === "TASK_TIMEOUT");
+  const afterTimeout = await kernel.runTask("after-timeout", async () => "slot-released");
+  assert.equal(afterTimeout, "slot-released", "timed-out handler must not permanently occupy a task slot");
+
   const eventsStatus = kernel.status();
   assert.equal(eventsStatus.tasks.running, 0);
   assert.ok(events.includes("kernel.boot.completed"));
