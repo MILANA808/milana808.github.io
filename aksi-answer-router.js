@@ -25,6 +25,23 @@
         return (i + 1) + ". " + title + (text ? "\n" + text : "") + (item.url ? "\nИсточник: " + item.url : "");
       }).join("\n\n");
   }
+  function evidenceCandidates(query, evidence) {
+    const checker = root.AKSIClaimEvidence;
+    if (!checker || typeof checker.prepareCandidates !== "function") return null;
+    try {
+      return checker.prepareCandidates(
+        { id: "query-" + Date.now().toString(36), text: String(query || "").slice(0, 4000) },
+        (evidence || []).map(item => ({
+          title: item.title,
+          url: item.url,
+          provider: item.provider,
+          text: item.text || item.snippet || item.summary
+        }))
+      );
+    } catch (error) {
+      return { status: "insufficient", reason: "Не удалось подготовить карточки источников.", candidates: [] };
+    }
+  }
   async function answer(query, options) {
     options = options || {};
     const raw = String(query == null ? "" : query).trim();
@@ -169,6 +186,7 @@
           handled: true, version: VERSION, route: useWeb ? "webllm+evidence" : "webllm",
           statusText: "Локальная языковая модель: " + (modelResult.model || "модель браузера") + (evidence.length ? " · источников: " + evidence.length : " · без веб-источников") + ". Факты не прошли независимую проверку.",
           text: modelResult.text.trim() + citations, evidence, model: modelResult.model || null,
+          evidenceReview: evidenceCandidates(q, evidence),
           proof: [{ type: "generation", model: modelResult.model || "browser-local", evidenceCount: evidence.length, independentlyVerified: false }]
         };
       }
@@ -188,6 +206,7 @@
         statusText: evidence.length ? "Поиск завершён · найденные материалы не являются автоматически проверенным ответом." : "Поиск не дал источников.",
         text: searchError && !evidence.length ? "Не удалось выполнить веб-поиск: " + searchError + "\nПроверь соединение или повтори запрос. Я не буду выдумывать результат." : sourcesText(evidence, q),
         evidence, searchError,
+        evidenceReview: evidenceCandidates(q, evidence),
         proof: evidence.map((x, i) => ({ type: "retrieved_source", index: i + 1, url: x.url || null, title: x.title || null }))
       };
     }
