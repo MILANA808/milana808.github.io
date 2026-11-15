@@ -11,7 +11,7 @@ const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
 
 test("AKSI Q Studio is a real static route linked from the homepage", () => {
   assert.match(page, /<html lang="ru">/);
-  assert.match(page, /<script src="\.\.\/aksi-language\/aksi-ui\\.js\\?v=0\\.3\\.0"><\/script>/);
+  assert.match(page, /<script src="\.\.\/aksi-language\/aksi-ui\.js\?v=0\.3\.0"><\/script>/);
   assert.match(page, /id="source"/);
   assert.match(page, /id="preview"/);
   assert.match(home, /href="\/aksi-q-studio\/">⌘ AKSI Q/);
@@ -47,6 +47,7 @@ test("the actual embedded Studio program parses and renders with working local s
       return {
         tag, children: [], listeners: {}, dataset: {}, textContent: "", type: "",
         appendChild(child) { this.children.push(child); return child; },
+        replaceChildren(...children) { this.children = children; },
         addEventListener(name, fn) { this.listeners[name] = fn; }
       };
     }
