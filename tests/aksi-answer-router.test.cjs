@@ -4,8 +4,9 @@ const router = require("../aksi-answer-router.js");
 async function run() {
   const root = globalThis;
   const previous = {};
-  for (const name of ["AKSIWeather","AKSISemanticReasoning","AKSICalculator","AKSISymbolicInference","AKSIKnowledgeBase","AKSI_INTERNET","AKSI_WEBLLM"]) previous[name] = root[name];
+  for (const name of ["AKSIClaimEvidence","AKSIWeather","AKSISemanticReasoning","AKSICalculator","AKSISymbolicInference","AKSIKnowledgeBase","AKSI_INTERNET","AKSI_WEBLLM"]) previous[name] = root[name];
   try {
+    root.AKSIClaimEvidence = require("../modules/claim-evidence.js");
     root.AKSIWeather = {
       detect: q => /погод/i.test(q) ? { handled: true } : null,
       answer: async q => ({ handled: true, text: "Погода для теста", data: { city: "Анапа" } })
@@ -56,10 +57,13 @@ async function run() {
     result = await router.answer("найди причины приливов");
     assert.equal(result.route, "web-evidence");
     assert.match(result.text, /Evidence snippet/);
+    assert.equal(result.evidenceReview.status, "insufficient");
+    assert.equal(result.evidenceReview.candidates[0].review_status, "not_reviewed");
     assert.match(result.text, /https:\/\/example.org/);
     root.AKSI_WEBLLM = { ready: () => true, complete: async (q, options) => ({ text: "Сводка по источнику.", model: "test-model", receivedSystem: options.system }) };
     result = await router.answer("объясни причины приливов", { useWeb: true });
     assert.equal(result.route, "webllm+evidence");
+    assert.equal(result.evidenceReview.status, "insufficient");
     assert.match(result.text, /Источники для проверки/);
     root.AKSISemanticReasoning = { answer: q => /^что такое флуксометр/i.test(q) ? { handled: true, status: "unknown_concept", text: "unknown concept" } : null };
     result = await router.answer("Что такое флуксометр?");
