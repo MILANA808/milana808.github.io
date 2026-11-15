@@ -13,6 +13,13 @@ const source = {
   relation: "supports"
 };
 
+const candidates = api.prepareCandidates(claim, [{ title: "Reference", url: "https://example.org/reference", provider: "test", text: source.passage }]);
+assert.equal(candidates.status, "insufficient");
+assert.equal(candidates.candidates[0].review_status, "not_reviewed");
+assert.equal(candidates.candidates[0].retrieval, "unverified");
+assert.match(candidates.reason, /ещё не проверены/);
+assert.throws(() => api.prepareCandidates(claim, [{ url: "javascript:alert(1)", text: "x" }]), /HTTP/);
+
 const supported = api.assess(claim, [source]);
 assert.equal(supported.status, "supported");
 assert.equal(supported.evidence[0].claim_id, "c1");
