@@ -18,8 +18,8 @@
   }
 
   function createKernel(options) {
-    const config = Object.assign({ maxConcurrentTasks: 4, maxQueuedTasks: 32, defaultTimeoutMs: 15000 }, options || {});
-    for (const key of ["maxConcurrentTasks", "maxQueuedTasks", "defaultTimeoutMs"]) {
+    const config = Object.assign({ maxConcurrentTasks: 4, maxQueuedTasks: 32, defaultTimeoutMs: 15000, maxTaskHistory: 200 }, options || {});
+    for (const key of ["maxConcurrentTasks", "maxQueuedTasks", "defaultTimeoutMs", "maxTaskHistory"]) {
       if (!Number.isInteger(config[key]) || config[key] < 1) throw new TypeError(key + " must be a positive integer");
     }
 
@@ -130,6 +130,27 @@
       };
     }
 
+    async function checkHealth() {
+      const results = [];
+      for (const record of modules.values()) {
+        if (record.state !== "available" || !record.health) continue;
+        try {
+          const health = await record.health();
+          record.lastHealth = { checked_at: now(), ok: !(health && health.ok === false), detail: health || null };
+          if (!record.lastHealth.ok) record.state = "degraded";
+        } catch (error) {
+          record.lastHealth = { checked_at: now(), ok: false, error: safeError(error) };
+          record.state = "degraded";
+        }
+        results.push(moduleSnapshot(record));
+        emit("module.health", { id: record.id, result: record.lastHealth });
+      }
+      const states = [...modules.values()].map(item => item.state);
+      kernelState = states.length && states.every(state => state === "available") ? "ready"
+        : states.some(state => state === "available" || state === "degraded") ? "degraded" : "unavailable";
+      return results;
+    }
+
     function getModule(id) {
       const record = modules.get(String(id));
       return record ? moduleSnapshot(record) : null;
@@ -183,6 +204,24 @@
         task.reject(Object.assign(new Error(value.message || state), { code: value.code || state.toUpperCase(), taskId: task.id }));
       }
       emit("task." + state, { id: task.id, type: task.type, error: task.error });
+      releaseSlot(task);
+      trimTaskHistory();
+    }
+
+    function releaseSlot(task) {
+      if (task.startedAt && !task.slotReleased) {
+        task.slotReleased = true;
+        activeCount = Math.max(0, activeCount - 1);
+        pump();
+      }
+    }
+
+    function trimTaskHistory() {
+      if (tasks.size <= config.maxTaskHistory) return;
+      for (const [id, task] of tasks) {
+        if (tasks.size <= config.maxTaskHistory) break;
+        if (["completed", "failed", "cancelled", "timed_out"].includes(task.state)) tasks.delete(id);
+      }
     }
 
     function pump() {
@@ -243,7 +282,7 @@
       return status();
     }
 
-    const publicApi = Object.freeze({ register, boot, status, getModule, subscribe, runTask, cancelTask, shutdown });
+    const publicApi = Object.freeze({ register, boot, status, getModule, subscribe, runTask, cancelTask, checkHealth, shutdown });
     return publicApi;
   }
 
