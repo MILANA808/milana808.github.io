@@ -165,7 +165,7 @@
     async function checkHealth() {
       const results = [];
       for (const record of modules.values()) {
-        if (record.state !== "available" || !record.health) continue;
+        if ((record.state !== "available" && record.state !== "degraded") || !record.health) continue;
         try {
           const health = await record.health();
           record.lastHealth = { checked_at: now(), ok: !(health && health.ok === false), detail: health || null };
