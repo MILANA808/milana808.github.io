@@ -109,6 +109,7 @@
         review_status: "not_reviewed"
       };
     }).filter(item => item.passage);
+    const screenedCandidates = screenCandidates(claim, candidates);
     return {
       schema: "aksi-claim-evidence-candidates/1.1",
       claim,
