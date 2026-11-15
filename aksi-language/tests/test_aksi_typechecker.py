@@ -53,6 +53,18 @@ class TypeCheckerTests(unittest.TestCase):
     def test_accepts_builtin_math_function(self):
         self.assertEqual(self.codes("let result: Float = sqrt(4.0)"), [])
 
+    def test_checks_unknown_function_parameter_type(self):
+        self.assertIn(
+            "E_UNKNOWN_TYPE",
+            self.codes("fn f(value: Missing) -> Int { return 1 }"),
+        )
+
+    def test_checks_top_level_expression_statements(self):
+        self.assertIn(
+            "E_OPERATOR_TYPE",
+            self.codes('"hello" - 1'),
+        )
+
     def test_rejects_non_module_input(self):
         with self.assertRaises(TypeError):
             check(parse("let value = 1").get("items")[0])
