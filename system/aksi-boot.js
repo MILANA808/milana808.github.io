@@ -51,6 +51,7 @@
       " · тайм-аут " + limits.default_timeout_ms + " мс · история до " + limits.max_task_history + "\n\n" +
       (moduleLines.length ? moduleLines.join("\n") : "Модули не зарегистрированы.") +
       (extra ? "\n\n" + extra : "") +
+      (recentEvents.length ? "\n\nПОСЛЕДНИЕ СОБЫТИЯ (без содержимого пользовательских запросов):\n" + recentEvents.slice(-8).join("\n") : "") +
       "\n\nГРАНИЦЫ: это runtime-ядро внутри браузера, не отдельная загрузочная ОС. Оно не управляет ОС устройства, драйверами или памятью вне вкладки.";
   }
 
