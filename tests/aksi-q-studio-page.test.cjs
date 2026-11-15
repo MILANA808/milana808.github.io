@@ -59,4 +59,13 @@ test("the actual embedded Studio program parses and renders with working local s
   assert.equal(value.textContent, "0");
   increment.listeners.click();
   assert.equal(value.textContent, "1");
+
+  const details = root.children[1];
+  const reveal = details.children.find(node => node.tag === "button" && node.textContent === "Показать детали языка");
+  const conditional = details.children.find(node => node.tag === "section" && node.children.length === 0);
+  assert.ok(reveal, "conditional demo action exists");
+  assert.ok(conditional, "conditional content starts hidden");
+  reveal.listeners.click();
+  assert.equal(conditional.children.length, 2);
+  assert.equal(conditional.children[0].textContent, "Условные блоки появляются после изменения состояния.");
 });
