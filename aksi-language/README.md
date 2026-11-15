@@ -58,7 +58,8 @@ The parser produces a typed page/section/text/value/button tree, with bounded
 state declarations and a restricted numeric `add` event effect. The renderer
 creates DOM nodes using `createElement` and `textContent`; it never interprets
 text as HTML. State-bound `value` nodes update when their declared button effect
-runs. A `when "state" equals scalar { ... }` block appears only while its\ncomparison is true and reacts to local state updates. Buttons can invoke only the host callback supplied by the application,
+runs. A `when "state" equals scalar { ... }` block appears only while its
+comparison is true and reacts to local state updates. Buttons can invoke only the host callback supplied by the application,
 with the action name declared in source. The language itself receives no
 arbitrary DOM, network, filesystem, or browser API access.
 
@@ -85,7 +86,8 @@ node --test tests/aksi-ui-language.test.cjs tests/aksi-q-studio-page.test.cjs
 | `state "name" = 0` | Declare bounded page-local scalar state |
 | `value "name"` | Render a live binding to page state |
 | `button "..." action "id" state "name" add 1` | Add a finite number to a numeric state when clicked |
-| `button "..." action "id"` | Render a button wired to a named host action |\n| `when "state" equals true { ... }` | Render a block while a scalar state matches |
+| `button "..." action "id"` | Render a button wired to a named host action |
+| `when "state" equals true { ... }` | Render a block while a scalar state matches |
 
 Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
 `interfere`, `probabilities`, `h`, `phase`, `measure`, `sqrt`,
@@ -96,11 +98,12 @@ Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
 - The mathematical expression runtime is currently line-oriented; blocks,
   user-defined functions, modules, static type checking, and compilation to
   native machine code are not yet present there.
-- The UI profile is a deliberately small separate grammar. It does not yet
-  provide conditional rendering, loops, styles, routing,
+- The UI profile is a deliberately small separate grammar. It supports typed
+  conditional blocks but does not yet provide loops, styles, routing,
   lifecycle hooks, or async tasks.
-- The current UI renderer is a library, not yet wired to the homepage or other
-  public routes. Existing HTML/CSS and JavaScript still drive the live site.
+- The UI renderer now drives the isolated `/aksi-q-studio/` demonstration route.
+  The production homepage and remaining public routes still use their existing
+  HTML/CSS and JavaScript; the site has not been fully migrated.
 - No arbitrary Python attribute access, imports, file access, network calls,
   or arbitrary DOM access are available to AKSI source programs.
 - The concept graph is explicit symbolic data generated from the canonical
@@ -113,9 +116,9 @@ Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
 
 ## Migration sequence
 
-1. Stabilize the declarative UI grammar and its security/resource tests.
-2. Add state and event semantics, then route/lifecycle primitives with explicit
-   host capabilities.
+1. Continue stabilizing the declarative UI grammar and its security/resource tests.
+2. Add structured state updates, inputs, lists and accessible interaction primitives,
+   then route/lifecycle primitives with explicit host capabilities.
 3. Unify UI and expression profiles under a versioned AKSI Q module/runtime
    model and shared conformance fixtures.
 4. Migrate one isolated route and verify accessibility, mobile behavior,
