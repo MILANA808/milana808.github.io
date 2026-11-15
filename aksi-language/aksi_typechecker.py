@@ -1,0 +1,316 @@
+"""Conservative expression type checker for the AKSI Q source-spanned AST.
+
+This pass checks primitive expression types and annotated function boundaries.
+It is not a complete soundness proof and does not execute programs.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+import re
+
+from aksi_frontend import Node
+
+
+NUMERIC = frozenset({"Int", "Float"})
+BUILTIN_VALUES = {"pi": "Float", "e": "Float"}
+BUILTIN_FUNCTIONS = {
+    "sqrt": (("Float",), "Float"),
+    "sin": (("Float",), "Float"),
+    "cos": (("Float",), "Float"),
+    "tan": (("Float",), "Float"),
+    "exp": (("Float",), "Float"),
+    "log": (("Float",), "Float"),
+    "abs": (("Any",), "Any"),
+    "sum": (("Any",), "Any"),
+    "len": (("Any",), "Int"),
+    "min": (("Any",), "Any"),
+    "max": (("Any",), "Any"),
+    "round": (("Float",), "Int"),
+    "complex": (("Any",), "Any"),
+    "print": (("Any",), "Unit"),
+}
+BUILTIN_TYPES = frozenset({"Int", "Float", "Bool", "String", "Unit", "Any"})
+
+
+@dataclass(frozen=True, slots=True)
+class TypeDiagnostic:
+    code: str
+    message: str
+    line: int
+    column: int
+
+
+@dataclass(frozen=True, slots=True)
+class FunctionType:
+    parameters: tuple[str, ...]
+    result: str
+
+
+class _Scope:
+    def __init__(self, parent: "_Scope | None" = None):
+        self.parent = parent
+        self.values: dict[str, str | FunctionType] = {}
+
+    def get(self, name: str):
+        scope = self
+        while scope is not None:
+            if name in scope.values:
+                return scope.values[name]
+            scope = scope.parent
+        return None
+
+    def put(self, name: str, value: str | FunctionType):
+        self.values[name] = value
+
+
+def _type_name(node: Node | None) -> str:
+    if node is None:
+        return "Unit"
+    if node.kind == "ArrayType":
+        return "[" + _type_name(node.get("item")) + "]"
+    if node.kind == "NamedType":
+        name = node.get("name")
+        args = node.get("args", ())
+        return name + ("<" + ",".join(_type_name(arg) for arg in args) + ">" if args else "")
+    return "Any"
+
+
+def _same_or_any(left: str, right: str) -> bool:
+    return left == right or "Any" in (left, right) or "Unknown" in (left, right)
+
+
+class TypeChecker:
+    def __init__(self):
+        self.diagnostics: list[TypeDiagnostic] = []
+        self.scope = _Scope()
+        self.functions: dict[str, FunctionType] = {}
+        self.current_return: str | None = None
+        self.custom_types: set[str] = set()
+
+    def error(self, code: str, message: str, node: Node):
+        self.diagnostics.append(TypeDiagnostic(
+            code, message, node.span.line, node.span.column
+        ))
+
+    @staticmethod
+    def unwrap(node: Node) -> Node:
+        while node.kind == "Public":
+            node = node.get("declaration")
+        return node
+
+    def collect(self, module: Node):
+        for wrapper in module.get("items", ()):
+            node = self.unwrap(wrapper)
+            if node.kind == "TypeDeclaration":
+                self.custom_types.add(node.get("name"))
+        for wrapper in module.get("items", ()):
+            node = self.unwrap(wrapper)
+            if node.kind == "Function":
+                signature = FunctionType(
+                    tuple(_type_name(annotation) for _, annotation in node.get("params", ())),
+                    _type_name(node.get("result_type")),
+                )
+                self.functions[node.get("name")] = signature
+                self.scope.put(node.get("name"), signature)
+        self.scope.put("pi", "Float")
+        self.scope.put("e", "Float")
+        for name, (params, result) in BUILTIN_FUNCTIONS.items():
+            self.scope.put(name, FunctionType(params, result))
+
+    def declared_type(self, name: str, node: Node) -> str:
+        base = name.split("<", 1)[0]
+        if base not in BUILTIN_TYPES and base not in self.custom_types:
+            self.error("E_UNKNOWN_TYPE", f"unknown type '{name}'", node)
+        return name
+
+    def check(self, module: Node) -> tuple[TypeDiagnostic, ...]:
+        if not isinstance(module, Node) or module.kind != "Module":
+            raise TypeError("check() expects a Module AST node")
+        self.collect(module)
+        for wrapper in module.get("items", ()):
+            node = self.unwrap(wrapper)
+            if node.kind == "Binding":
+                self.visit(node)
+        for wrapper in module.get("items", ()):
+            node = self.unwrap(wrapper)
+            if node.kind == "Function":
+                self.visit_function(node)
+        return tuple(self.diagnostics)
+
+    def visit_function(self, node: Node):
+        previous = self.scope
+        self.scope = _Scope(previous)
+        signature = self.functions[node.get("name")]
+        for (name, annotation), type_name in zip(node.get("params", ()), signature.parameters):
+            self.scope.put(name, type_name)
+        self.current_return = signature.result
+        self.visit_block(node.get("body"))
+        self.current_return = None
+        self.scope = previous
+
+    def visit_block(self, block: Node):
+        previous = self.scope
+        self.scope = _Scope(previous)
+        for statement in block.get("statements", ()):
+            self.visit(self.unwrap(statement))
+        self.scope = previous
+
+    def visit(self, node: Node | None) -> str:
+        if node is None:
+            return "Unit"
+        kind = node.kind
+        if kind == "Binding":
+            annotation = node.get("annotation")
+            expected = _type_name(annotation) if annotation is not None else None
+            if expected is not None:
+                self.declared_type(expected, annotation)
+            actual = self.visit(node.get("value")) if node.get("value") is not None else "Unknown"
+            if expected and not _same_or_any(expected, actual):
+                self.error("E_TYPE_MISMATCH",
+                           f"binding '{node.get('name')}' expects {expected}, got {actual}", node)
+            result = expected or actual
+            self.scope.put(node.get("name"), result)
+            return result
+        if kind == "Return":
+            actual = self.visit(node.get("value"))
+            if self.current_return is not None and not _same_or_any(self.current_return, actual):
+                self.error("E_RETURN_TYPE_MISMATCH",
+                           f"function returns {self.current_return}, got {actual}", node)
+            return "Never"
+        if kind == "If":
+            condition = self.visit(node.get("condition"))
+            if condition not in ("Bool", "Any", "Unknown"):
+                self.error("E_CONDITION_TYPE", f"if condition must be Bool, got {condition}", node)
+            self.visit_block(node.get("then"))
+            otherwise = node.get("otherwise")
+            if otherwise is not None:
+                if otherwise.kind == "Block":
+                    self.visit_block(otherwise)
+                else:
+                    self.visit(otherwise)
+            return "Unit"
+        if kind == "While":
+            condition = self.visit(node.get("condition"))
+            if condition not in ("Bool", "Any", "Unknown"):
+                self.error("E_CONDITION_TYPE", f"while condition must be Bool, got {condition}", node)
+            self.visit_block(node.get("body"))
+            return "Unit"
+        if kind == "Block":
+            self.visit_block(node)
+            return "Unit"
+        if kind == "ExpressionStatement":
+            return self.visit(node.get("expression"))
+        if kind == "Name":
+            name = node.get("value")
+            value = self.scope.get(name)
+            if isinstance(value, FunctionType):
+                return "Function"
+            return value if isinstance(value, str) else "Unknown"
+        if kind == "Number":
+            value = node.get("value")
+            return "Float" if any(ch in value.lower() for ch in (".", "e")) else "Int"
+        if kind == "String":
+            return "String"
+        if kind == "Literal":
+            value = node.get("value")
+            return "Bool" if isinstance(value, bool) else "Unit"
+        if kind == "Group":
+            return self.visit(node.get("value"))
+        if kind == "Array":
+            values = [self.visit(item) for item in node.get("items", ())]
+            if not values:
+                return "[Any]"
+            first = values[0]
+            for item in values[1:]:
+                if not _same_or_any(first, item):
+                    self.error("E_ARRAY_ELEMENT_MISMATCH",
+                               f"array elements must have one type, got {first} and {item}", node)
+                    return "[Any]"
+            return "[" + first + "]"
+        if kind == "Unary":
+            value = self.visit(node.get("value"))
+            operator = node.get("operator")
+            if operator in ("!", "not"):
+                if value not in ("Bool", "Any", "Unknown"):
+                    self.error("E_OPERATOR_TYPE", f"{operator} requires Bool, got {value}", node)
+                return "Bool"
+            if value not in NUMERIC and value not in ("Any", "Unknown"):
+                self.error("E_OPERATOR_TYPE", f"{operator} requires a number, got {value}", node)
+            return value
+        if kind == "Binary":
+            left, right = self.visit(node.get("left")), self.visit(node.get("right"))
+            operator = node.get("operator")
+            if operator in ("and", "or", "&&", "||"):
+                if left not in ("Bool", "Any", "Unknown") or right not in ("Bool", "Any", "Unknown"):
+                    self.error("E_OPERATOR_TYPE", f"{operator} requires Bool operands", node)
+                return "Bool"
+            if operator in ("==", "!=", "<", "<=", ">", ">=", "in"):
+                if operator != "in" and not _same_or_any(left, right):
+                    self.error("E_OPERATOR_TYPE", f"incompatible comparison: {left} and {right}", node)
+                return "Bool"
+            if operator == "+" and left == right == "String":
+                return "String"
+            if left not in NUMERIC and left not in ("Any", "Unknown"):
+                self.error("E_OPERATOR_TYPE", f"{operator} requires numeric operands, got {left}", node)
+            if right not in NUMERIC and right not in ("Any", "Unknown"):
+                self.error("E_OPERATOR_TYPE", f"{operator} requires numeric operands, got {right}", node)
+            return "Float" if "Float" in (left, right) or operator == "/" else "Int"
+        if kind == "Assignment":
+            left = node.get("left")
+            right_type = self.visit(node.get("right"))
+            if left.kind == "Name":
+                target = self.scope.get(left.get("value"))
+                if isinstance(target, str) and not _same_or_any(target, right_type):
+                    self.error("E_ASSIGNMENT_TYPE_MISMATCH",
+                               f"cannot assign {right_type} to {target}", node)
+                return target if isinstance(target, str) else "Unknown"
+            self.visit(left)
+            return "Unknown"
+        if kind == "Call":
+            callee = node.get("callee")
+            args = node.get("args", ())
+            if callee.kind == "Name":
+                name = callee.get("value")
+                signature = self.scope.get(name)
+                argument_types = [self.visit(arg) for arg in args]
+                if isinstance(signature, FunctionType):
+                    if len(argument_types) != len(signature.parameters):
+                        self.error("E_ARGUMENT_COUNT",
+                                   f"{name} expects {len(signature.parameters)} arguments, got {len(argument_types)}", node)
+                    for index, (actual, expected) in enumerate(zip(argument_types, signature.parameters)):
+                        if not _same_or_any(actual, expected):
+                            self.error("E_ARGUMENT_TYPE",
+                                       f"argument {index + 1} of {name} expects {expected}, got {actual}", args[index])
+                    return signature.result
+                return "Unknown"
+            self.visit(callee)
+            for arg in args:
+                self.visit(arg)
+            return "Unknown"
+        if kind == "Index":
+            target = self.visit(node.get("target"))
+            index = self.visit(node.get("index"))
+            if index not in ("Int", "Any", "Unknown"):
+                self.error("E_INDEX_TYPE", f"array index must be Int, got {index}", node)
+            if target.startswith("[") and target.endswith("]"):
+                return target[1:-1]
+            return "Unknown"
+        if kind == "Member":
+            self.visit(node.get("target"))
+            return "Unknown"
+        if kind == "TypeDeclaration":
+            for _, args in node.get("variants", ()):
+                for argument in args:
+                    self.declared_type(_type_name(argument), argument)
+            return "Unit"
+        if kind in ("Break", "Continue"):
+            return "Unit"
+        if kind == "Public":
+            return self.visit(node.get("declaration"))
+        self.error("E_UNSUPPORTED_AST_NODE", f"type checker does not support AST node '{kind}'", node)
+        return "Unknown"
+
+
+def check(module: Node) -> tuple[TypeDiagnostic, ...]:
+    """Return type diagnostics for a parsed module."""
+    return TypeChecker().check(module)
