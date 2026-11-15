@@ -1,13 +1,13 @@
-/* AKSI Q UI profile v0.1.0
- * Small declarative UI grammar and capability-limited DOM renderer.
+/* AKSI Q UI profile v0.2.0
+ * Bounded declarative UI grammar with local state and restricted event effects.
  * No eval, Function, HTML injection, implicit network or arbitrary DOM access.
  * © AKSI MATRIX
  */
 (function (root) {
   "use strict";
 
-  const VERSION = "0.1.0";
-  const LIMITS = Object.freeze({ source: 16384, nodes: 500, depth: 12, text: 2000 });
+  const VERSION = "0.2.0";
+  const LIMITS = Object.freeze({ source: 16384, nodes: 500, depth: 12, text: 2000, states: 64 });
 
   class AksiUIError extends Error {
     constructor(message, offset) {
@@ -22,7 +22,7 @@
       throw new AksiUIError("UI program must be text up to 16384 characters");
     }
     const tokens = [];
-    const pattern = /\s+|"(?:\\.|[^"\\])*"|[A-Za-z_][A-Za-z0-9_]*|[{}]/gy;
+    const pattern = /\s+|"(?:\\.|[^"\\])*"|-?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?|[A-Za-z_][A-Za-z0-9_]*|[{}=]/gy;
     let offset = 0;
     while (offset < source.length) {
       pattern.lastIndex = offset;
@@ -30,7 +30,9 @@
       if (!match) throw new AksiUIError("unexpected character", offset);
       offset = pattern.lastIndex;
       if (!/^\s+$/.test(match[0])) tokens.push({ value: match[0], offset: match.index });
-      if (tokens.length > LIMITS.nodes * 4 + 8) throw new AksiUIError("UI program has too many tokens", offset);
+      if (tokens.length > LIMITS.nodes * 6 + LIMITS.states * 3 + 8) {
+        throw new AksiUIError("UI program has too many tokens", offset);
+      }
     }
     tokens.push({ value: "<EOF>", offset });
     return tokens;
@@ -45,6 +47,8 @@
     const tokens = tokenize(source);
     let cursor = 0;
     let nodeCount = 0;
+    const states = [];
+    const stateNames = new Set();
     const peek = () => tokens[cursor].value;
     const take = () => tokens[cursor++];
     const expect = value => {
@@ -59,18 +63,53 @@
       if (value.length > LIMITS.text) throw new AksiUIError("text exceeds 2000 characters", token.offset);
       return value;
     };
+    const identifier = () => {
+      const token = take();
+      if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(token.value)) {
+        throw new AksiUIError("expected a state identifier", token.offset);
+      }
+      return token.value;
+    };
+    const scalar = () => {
+      const token = take();
+      if (token.value.startsWith('"')) return decode(token.value, token.offset);
+      if (token.value === "true") return true;
+      if (token.value === "false") return false;
+      if (token.value === "null") return null;
+      if (/^-?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?$/.test(token.value)) {
+        const value = Number(token.value);
+        if (!Number.isFinite(value)) throw new AksiUIError("state number must be finite", token.offset);
+        return value;
+      }
+      throw new AksiUIError("state initializer must be a string, finite number, boolean, or null", token.offset);
+    };
+
     function node(depth) {
       if (depth > LIMITS.depth) throw new AksiUIError("UI nesting exceeds depth limit");
       nodeCount += 1;
       if (nodeCount > LIMITS.nodes) throw new AksiUIError("UI node budget exceeded");
       const kind = take();
       if (kind.value === "text") return { type: "text", value: string() };
+      if (kind.value === "value") return { type: "value", state: string() };
       if (kind.value === "button") {
         const label = string();
         expect("action");
         const action = string();
         if (!action.trim()) throw new AksiUIError("button action name cannot be empty", kind.offset);
-        return { type: "button", label, action };
+        let effect = null;
+        if (peek() === "state") {
+          take();
+          const state = string();
+          expect("add");
+          const amountToken = take();
+          if (!/^-?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?$/.test(amountToken.value)) {
+            throw new AksiUIError("state add effect requires a finite numeric amount", amountToken.offset);
+          }
+          const amount = Number(amountToken.value);
+          if (!Number.isFinite(amount)) throw new AksiUIError("state add amount must be finite", amountToken.offset);
+          effect = { type: "add", state, amount };
+        }
+        return { type: "button", label, action, effect };
       }
       if (kind.value === "section") {
         expect("{");
@@ -92,15 +131,46 @@
     }
     expect("{");
     const children = [];
+    let hasUiNode = false;
     while (peek() !== "}") {
       if (peek() === "<EOF>") throw new AksiUIError("unterminated page", rootToken.offset);
-      children.push(node(1));
+      if (peek() === "state") {
+        if (hasUiNode) throw new AksiUIError("state declarations must appear before UI nodes", tokens[cursor].offset);
+        const stateToken = take();
+        if (states.length >= LIMITS.states) throw new AksiUIError("page state budget exceeded", stateToken.offset);
+        const stateName = string();
+        if (!/^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(stateName)) {
+          throw new AksiUIError("state name must be a simple identifier", stateToken.offset);
+        }
+        if (stateNames.has(stateName)) throw new AksiUIError("duplicate state: " + stateName, stateToken.offset);
+        expect("=");
+        states.push({ name: stateName, value: scalar() });
+        stateNames.add(stateName);
+      } else {
+        hasUiNode = true;
+        children.push(node(1));
+      }
     }
     expect("}");
     if (peek() !== "<EOF>") throw new AksiUIError("unexpected token: " + peek(), tokens[cursor].offset);
+
+    function validate(nodes) {
+      nodes.forEach(item => {
+        if (item.type === "value" && !stateNames.has(item.state)) {
+          throw new AksiUIError("value references undeclared state: " + item.state);
+        }
+        if (item.type === "button" && item.effect) {
+          const target = states.find(state => state.name === item.effect.state);
+          if (!target) throw new AksiUIError("button effect references undeclared state: " + item.effect.state);
+          if (typeof target.value !== "number") throw new AksiUIError("add effect requires numeric state: " + item.effect.state);
+        }
+        if (item.children) validate(item.children);
+      });
+    }
+    validate(children);
     return Object.freeze({
-      type: "page",
-      name,
+      type: "page", name,
+      states: Object.freeze(states.map(state => Object.freeze(state))),
       children: Object.freeze(children.map(freezeNode))
     });
   }
@@ -109,28 +179,54 @@
     if (node.children) {
       node.children = Object.freeze(node.children.map(freezeNode));
       Object.freeze(node);
+    } else if (node.effect) {
+      Object.freeze(node.effect);
+      Object.freeze(node);
     } else Object.freeze(node);
     return node;
   }
 
   function render(ast, doc, onAction) {
-    if (!ast || ast.type !== "page" || !Array.isArray(ast.children)) {
+    if (!ast || ast.type !== "page" || !Array.isArray(ast.children) || !Array.isArray(ast.states)) {
       throw new AksiUIError("render expects a parsed page AST");
     }
     if (!doc || typeof doc.createElement !== "function") throw new AksiUIError("a DOM document is required");
     if (onAction !== undefined && typeof onAction !== "function") throw new AksiUIError("onAction must be a function");
+    const state = new Map(ast.states.map(item => [item.name, item.value]));
+    const outputs = new Map();
+    function refresh(name) {
+      (outputs.get(name) || []).forEach(output => { output.textContent = String(state.get(name)); });
+    }
     function create(node) {
       if (node.type === "text") {
         const p = doc.createElement("p");
         p.textContent = node.value;
         return p;
       }
+      if (node.type === "value") {
+        const output = doc.createElement("output");
+        if (!outputs.has(node.state)) outputs.set(node.state, []);
+        outputs.get(node.state).push(output);
+        output.textContent = String(state.get(node.state));
+        output.dataset.aksiState = node.state;
+        return output;
+      }
       if (node.type === "button") {
         const button = doc.createElement("button");
         button.type = "button";
         button.textContent = node.label;
         button.addEventListener("click", () => {
-          if (onAction) onAction(node.action, Object.freeze({ page: ast.name, label: node.label }));
+          if (node.effect) {
+            const current = state.get(node.effect.state);
+            const next = current + node.effect.amount;
+            if (!Number.isFinite(next)) throw new AksiUIError("state update is not finite");
+            state.set(node.effect.state, next);
+            refresh(node.effect.state);
+          }
+          if (onAction) onAction(node.action, Object.freeze({
+            page: ast.name, label: node.label,
+            state: Object.freeze(Object.fromEntries(state))
+          }));
         });
         return button;
       }
