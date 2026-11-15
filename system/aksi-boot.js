@@ -32,6 +32,7 @@
     }
   });
   root.AKSIKernel = kernel;
+  const recentEvents = [];
 
   function render(status, extra) {
     const panel = root.document && root.document.getElementById("aksiKernelStatus");
@@ -54,7 +55,9 @@
   }
 
   kernel.subscribe(function (event) {
-    if (event.type === "task.failed" || event.type === "module.failed" || event.type === "module.health") render(kernel.status());
+    recentEvents.push(event.at.slice(11, 19) + " · " + event.type);
+    if (recentEvents.length > 20) recentEvents.shift();
+    render(kernel.status());
   });
   function start() {
     kernel.boot().then(status => render(status)).catch(error => render(kernel.status(), "Ошибка запуска: " + error.message));
