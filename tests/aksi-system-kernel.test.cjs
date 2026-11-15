@@ -22,6 +22,7 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   await kernel.checkHealth();
   assert.equal(kernel.getModule("reasoner.core").state, "available");
   assert.equal((await kernel.boot()).kernel.state, "ready", "boot must be idempotent");
+  assert.throws(() => kernel.register({ id: "late.module", version: "1", init: async () => ({}) }), /registration is closed/);
 
   assert.throws(() => kernel.register({ id: "bad", version: "1", init: true }), /init/);
   assert.throws(() => kernel.register({ id: "memory.core", version: "2", init: async () => ({}) }), /already registered/);
@@ -32,6 +33,9 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   }, "hello");
   const result = await first;
   assert.equal(result.echo, "hello");
+  assert.equal(kernel.listTasks().some(task => task.state === "completed"), true);
+  assert.equal(kernel.getTask("task-1").state, "completed");
+  assert.equal(kernel.getTask("missing-task"), null);
 
   await assert.rejects(kernel.runTask("broken", async () => { throw new Error("expected failure"); }), /expected failure/);
   await assert.rejects(kernel.runTask("slow", async (_input, context) => new Promise((resolve, reject) => {
