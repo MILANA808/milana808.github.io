@@ -129,7 +129,7 @@ class TypeChecker:
         self.collect(module)
         for wrapper in module.get("items", ()):
             node = self.unwrap(wrapper)
-            if node.kind == "Binding":
+            if node.kind != "Function":
                 self.visit(node)
         for wrapper in module.get("items", ()):
             node = self.unwrap(wrapper)
@@ -142,6 +142,7 @@ class TypeChecker:
         self.scope = _Scope(previous)
         signature = self.functions[node.get("name")]
         for (name, annotation), type_name in zip(node.get("params", ()), signature.parameters):
+            self.declared_type(type_name, annotation)
             self.scope.put(name, type_name)
         self.current_return = signature.result
         self.visit_block(node.get("body"))
