@@ -52,6 +52,37 @@
     };
   }
 
+  function prepareCandidates(claimInput, retrievedInput) {
+    const claim = validateClaim(claimInput);
+    if (!Array.isArray(retrievedInput)) throw new TypeError("Найденные материалы должны быть массивом.");
+    const candidates = retrievedInput.slice(0, 8).map((item, index) => {
+      if (!item || typeof item !== "object") throw new TypeError("Материал источника должен быть объектом.");
+      const url = clean(item.url, 2000);
+      if (!url || !/^https?:\\/\\//i.test(url)) throw new TypeError("У материала должна быть HTTP(S)-ссылка.");
+      const passage = clean(item.text || item.snippet || item.summary, 4000);
+      return {
+        candidate_id: claim.id + "-source-" + (index + 1),
+        claim_id: claim.id,
+        source: { title: clean(item.title, 300), url, provider: clean(item.provider, 80) || null },
+        passage,
+        retrieval: "unverified",
+        review_status: "not_reviewed"
+      };
+    }).filter(item => item.passage);
+    return {
+      schema: "aksi-claim-evidence-candidates/1.0",
+      claim,
+      status: "insufficient",
+      reason: "Найденные фрагменты ещё не проверены на логическую связь с утверждением.",
+      candidates,
+      limitations: [
+        "Поисковая релевантность и наличие ссылки не подтверждают истинность.",
+        "Автоматическое выделение атомарных утверждений и проверка соответствия фрагментов пока не реализованы.",
+        "Для статуса supported/contradicted/mixed требуется отдельная проверка точной цитаты."
+      ]
+    };
+  }
+
   function assess(claimInput, evidenceInput) {
     const claim = validateClaim(claimInput);
     if (!Array.isArray(evidenceInput)) throw new TypeError("Основания должны быть массивом.");
@@ -77,5 +108,5 @@
     };
   }
 
-  return { version: VERSION, assess, validateClaim };
+  return { version: VERSION, assess, prepareCandidates, validateClaim };
 });
