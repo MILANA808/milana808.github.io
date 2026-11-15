@@ -1,6 +1,8 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const { parse, render, AksiUIError, limits } = require("../aksi-language/aksi-ui.js");
 
 function fakeDocument() {
@@ -132,4 +134,20 @@ test("text inputs require declared string state and enforce text bounds", () => 
   assert.throws(() => parse('page "x" { state "count" = 0 input "Number" state "count" }'), /requires a declared string state/);
   const main = render(parse('page "x" { state "name" = "" input "Name" state "name" }'), fakeDocument());
   assert.throws(() => main.children[0].listeners.input({ target: { value: "x".repeat(limits.text + 1) } }), /text limit/);
+});
+
+test("the documented homepage example is executable and combines input with conditionals", () => {
+  const example = fs.readFileSync(path.join(__dirname, "../aksi-language/examples/homepage.aksiui"), "utf8");
+  const ast = parse(example);
+  const main = render(ast, fakeDocument());
+  const section = main.children[0];
+  const input = section.children.find(node => node.tag === "input");
+  const reveal = section.children.find(node => node.tag === "button");
+  const conditional = section.children.find(node => node.tag === "section");
+  assert.ok(input);
+  assert.ok(reveal);
+  assert.ok(conditional);
+  input.listeners.input({ target: { value: "AKSI" } });
+  reveal.listeners.click();
+  assert.equal(conditional.children[0].textContent, "Исследовательская лаборатория открыта.");
 });
