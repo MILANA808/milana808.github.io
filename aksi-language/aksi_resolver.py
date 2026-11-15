@@ -149,12 +149,15 @@ class Resolver:
         previous = self.scope
         self.scope = _Scope(previous)
         self.function_depth += 1
+        enclosing_loop_depth = self.loop_depth
+        self.loop_depth = 0
         for name, annotation in node.get("params", ()):
             self.resolve_type(annotation)
             self.declare(name, "parameter", node)
         self.resolve_type(node.get("result_type"))
         self.visit_block(node.get("body"))
         self.function_depth -= 1
+        self.loop_depth = enclosing_loop_depth
         self.scope = previous
 
     def visit(self, node: Node | None) -> None:
