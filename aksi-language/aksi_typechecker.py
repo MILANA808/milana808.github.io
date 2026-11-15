@@ -144,6 +144,8 @@ class TypeChecker:
         for (name, annotation), type_name in zip(node.get("params", ()), signature.parameters):
             self.declared_type(type_name, annotation)
             self.scope.put(name, type_name)
+        if node.get("result_type") is not None:
+            self.declared_type(signature.result, node.get("result_type"))
         self.current_return = signature.result
         self.visit_block(node.get("body"))
         self.current_return = None
@@ -246,7 +248,12 @@ class TypeChecker:
                     self.error("E_OPERATOR_TYPE", f"{operator} requires Bool operands", node)
                 return "Bool"
             if operator in ("==", "!=", "<", "<=", ">", ">=", "in"):
-                if operator != "in" and not _same_or_any(left, right):
+                if operator in ("<", "<=", ">", ">="):
+                    ordered = (left in NUMERIC and right in NUMERIC) or (left == right == "String")
+                    if not ordered and "Any" not in (left, right) and "Unknown" not in (left, right):
+                        self.error("E_OPERATOR_TYPE",
+                                   f"values of type {left} and {right} cannot be ordered", node)
+                elif operator != "in" and not _same_or_any(left, right):
                     self.error("E_OPERATOR_TYPE", f"incompatible comparison: {left} and {right}", node)
                 return "Bool"
             if operator == "+" and left == right == "String":
