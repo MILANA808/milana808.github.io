@@ -1,5 +1,5 @@
-/* AKSI SW v309 — network-first, purge v308 */
-var CACHE = "aksi-shell-v309";
+/* AKSI SW v310 — network-first, purge v309 */
+var CACHE = "aksi-shell-v310";
 var PRE = [
   "/",
   "/index.html",
