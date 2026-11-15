@@ -55,6 +55,12 @@ class ResolverTests(unittest.TestCase):
             ["E_RETURN_OUTSIDE_FUNCTION", "E_LOOP_CONTROL_OUTSIDE_LOOP"],
         )
 
+    def test_loop_control_does_not_leak_into_nested_function(self):
+        self.assertEqual(
+            self.codes("while true { fn nested() { break } }"),
+            ["E_LOOP_CONTROL_OUTSIDE_LOOP"],
+        )
+
     def test_resolves_declared_algebraic_type_and_constructor(self):
         self.assertEqual(
             self.codes("type Maybe = None | Some(Int)\n"
