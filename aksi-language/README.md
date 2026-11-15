@@ -4,7 +4,7 @@
 **Runtimes:** Python 3.10+ reference interpreter; browser-native JavaScript runtimes  
 **Mode:** local-first; no server, model API, WebLLM, or network required for language execution.
 
-AKSI Q is an evolving domain-specific language. The expression runtime supports deterministic mathematics, bounded state-vector simulation, and explicit concept relations. The UI-language profile adds a bounded declarative page grammar, local state, numeric event effects, typed conditional blocks, state-bound text inputs, and a capability-limited DOM renderer. It is not yet a general-purpose application language and does not replace the public site.
+AKSI Q is an evolving programming-language project. The current runtime is still a prototype/DSL; the proposed general-purpose design and roadmap are in [LANGUAGE_DESIGN.md](LANGUAGE_DESIGN.md). The expression runtime supports deterministic mathematics, bounded state-vector simulation, and explicit concept relations. The UI-language profile adds a bounded declarative page grammar, local state, numeric event effects, typed conditional blocks, state-bound text inputs, and a capability-limited DOM renderer. It is not yet a general-purpose application language and does not replace the public site.
 
 > Quantum operations in this version are classical state-vector simulations.
 > This is not quantum hardware and makes no quantum-advantage claim.
@@ -114,7 +114,7 @@ Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
   It is a classical simulator, not quantum hardware.
 - An `assert` checks a runtime condition; it is not a formal mathematical proof.
 
-## Migration sequence
+## General-purpose language direction\n\nThe target architecture, proposed syntax, type/effect model, compiler pipeline, security requirements, benchmark suite and staged acceptance gates are specified in [LANGUAGE_DESIGN.md](LANGUAGE_DESIGN.md). That RFC describes a target, not features already implemented.\n\n## Migration sequence
 
 1. Continue stabilizing the declarative UI grammar and its security/resource tests.
 2. Add structured state updates, inputs, lists and accessible interaction primitives,
