@@ -11,7 +11,7 @@ const home = fs.readFileSync(path.join(root, "index.html"), "utf8");
 
 test("AKSI Q Studio is a real static route linked from the homepage", () => {
   assert.match(page, /<html lang="ru">/);
-  assert.match(page, /<script src="\.\.\/aksi-language\/aksi-ui\\.js\\?v=0\\.4\\.0"><\/script>/);
+  assert.match(page, /<script src="\.\.\/aksi-language\/aksi-ui\.js\?v=0\.4\.0"><\/script>/);
   assert.match(page, /id="source"/);
   assert.match(page, /id="preview"/);
   assert.match(home, /href="\/aksi-q-studio\/">⌘ AKSI Q/);
