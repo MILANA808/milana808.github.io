@@ -1,6 +1,6 @@
 # AKSI Q — executable language prototype
 
-**Language version:** 0.3 browser expression runtime + 0.2 Python reference runtime + 0.1 declarative UI profile  
+**Language version:** 0.3 browser expression runtime + 0.2 Python reference runtime + 0.2 declarative UI profile  
 **Runtimes:** Python 3.10+ reference interpreter; browser-native JavaScript runtimes  
 **Mode:** local-first; no server, model API, WebLLM, or network required for language execution.
 
@@ -37,7 +37,7 @@ language parity.
 
 ## Declarative UI profile v0.1
 
-The first UI slice lives in `aksi-ui.js`, with a sample page at
+The UI profile v0.2 lives in `aksi-ui.js`, with a sample page at
 `examples/homepage.aksiui`. It is intentionally separate from the existing
 expression runtime until the language profiles can be unified without breaking
 the current editor or its saved programs.
@@ -54,9 +54,11 @@ page "home" {
 }
 ```
 
-The parser produces a typed page/section/text/button tree. The renderer creates
-DOM nodes using `createElement` and `textContent`; it never interprets text as
-HTML. Buttons can invoke only the host callback supplied by the application,
+The parser produces a typed page/section/text/value/button tree, with bounded
+state declarations and a restricted numeric `add` event effect. The renderer
+creates DOM nodes using `createElement` and `textContent`; it never interprets
+text as HTML. State-bound `value` nodes update when their declared button effect
+runs. Buttons can invoke only the host callback supplied by the application,
 with the action name declared in source. The language itself receives no
 arbitrary DOM, network, filesystem, or browser API access.
 
@@ -80,6 +82,9 @@ node --test tests/aksi-ui-language.test.cjs
 | `page "name" { ... }` | Declare a UI page in the separate UI profile |
 | `section { ... }` | Group UI nodes |
 | `text "..." ` | Render literal text |
+| `state "name" = 0` | Declare bounded page-local scalar state |
+| `value "name"` | Render a live binding to page state |
+| `button "..." action "id" state "name" add 1` | Add a finite number to a numeric state when clicked |
 | `button "..." action "id"` | Render a button wired to a named host action |
 
 Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
@@ -92,7 +97,7 @@ Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
   user-defined functions, modules, static type checking, and compilation to
   native machine code are not yet present there.
 - The UI profile is a deliberately small separate grammar. It does not yet
-  provide state declarations, conditional rendering, loops, styles, routing,
+  provide conditional rendering, loops, styles, routing,
   lifecycle hooks, or async tasks.
 - The current UI renderer is a library, not yet wired to the homepage or other
   public routes. Existing HTML/CSS and JavaScript still drive the live site.
