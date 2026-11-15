@@ -53,6 +53,18 @@ class TypeCheckerTests(unittest.TestCase):
     def test_accepts_builtin_math_function(self):
         self.assertEqual(self.codes("let result: Float = sqrt(4.0)"), [])
 
+    def test_checks_unknown_function_return_type(self):
+        self.assertIn(
+            "E_UNKNOWN_TYPE",
+            self.codes("fn f() -> Missing { return }"),
+        )
+
+    def test_rejects_ordering_boolean_values(self):
+        self.assertIn(
+            "E_OPERATOR_TYPE",
+            self.codes("let result = true < false"),
+        )
+
     def test_checks_unknown_function_parameter_type(self):
         self.assertIn(
             "E_UNKNOWN_TYPE",
