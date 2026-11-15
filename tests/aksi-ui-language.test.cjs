@@ -89,7 +89,7 @@ test("renderer refuses unparsed objects and invalid capabilities", () => {
 });
 
 test("typed when blocks render conditionally and react to local state changes", () => {
-  const ast = parse('page "conditional" { state "visible" = false when "visible" equals true { text "Now visible" } button "Show" action "show" state "visible" add 1 }');
+  const ast = parse('page "conditional" { state "visible" = 0 when "visible" equals 1 { text "Now visible" } button "Show" action "show" state "visible" add 1 }');
   const main = render(ast, fakeDocument());
   const conditional = main.children[0];
   const button = main.children[1];
