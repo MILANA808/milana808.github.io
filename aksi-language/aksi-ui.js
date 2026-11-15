@@ -1,4 +1,4 @@
-/* AKSI Q UI profile v0.3.0
+/* AKSI Q UI profile v0.4.0
  * Bounded declarative UI grammar with local state and restricted event effects.
  * No eval, Function, HTML injection, implicit network or arbitrary DOM access.
  * © AKSI MATRIX
@@ -6,7 +6,7 @@
 (function (root) {
   "use strict";
 
-  const VERSION = "0.3.0";
+  const VERSION = "0.4.0";
   const LIMITS = Object.freeze({ source: 16384, nodes: 500, depth: 12, text: 2000, states: 64 });
 
   class AksiUIError extends Error {
