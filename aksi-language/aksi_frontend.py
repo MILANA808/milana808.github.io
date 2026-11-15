@@ -96,7 +96,7 @@ class Parser:
     def finish_statement(self) -> None:
         if self.peek().kind == "NEWLINE" or self.at(";"):
             self.skip_newlines()
-        elif not self.at("}") and not self.at("EOF"):
+        elif not self.at("}") and self.peek().kind != "EOF":
             token = self.peek()
             raise ParseError("expected a newline or ';' between statements", token.span,
                              expected=("newline", ";", "}"))
@@ -111,7 +111,7 @@ class Parser:
             self.finish_statement()
             start = module_start.span
         items = []
-        while not self.at("EOF"):
+        while self.peek().kind != "EOF":
             items.append(self.parse_declaration())
             self.finish_statement()
         end = self.peek().span
@@ -247,7 +247,7 @@ class Parser:
         start = self.expect("{")
         self.skip_newlines()
         statements = []
-        while not self.at("}") and not self.at("EOF"):
+        while not self.at("}") and self.peek().kind != "EOF":
             statements.append(self.parse_declaration())
             self.finish_statement()
         end = self.expect("}")
