@@ -1,6 +1,7 @@
+import json
 import unittest
 
-from aksi_frontend import Node, ParseError, parse
+from aksi_frontend import Node, ParseError, parse, serialize_ast
 
 
 class FrontendParserTests(unittest.TestCase):
@@ -57,6 +58,21 @@ fn add(a: Int, b: Int) -> Int {
         tree = parse("let answer = 42")
         with self.assertRaises((AttributeError, TypeError)):
             tree.kind = "Changed"
+
+    def test_ast_serialization_has_versioned_schema_and_source_spans(self):
+        tree = parse("fn add(a: Int) -> Int { return a + 1 }")
+        serialized = serialize_ast(tree)
+        self.assertEqual(serialized["schema"], "AKSI-Q-AST/1")
+        self.assertEqual(serialized["root"]["kind"], "Module")
+        function = serialized["root"]["fields"]["items"][0]
+        self.assertEqual(function["kind"], "Function")
+        self.assertEqual(function["span"]["line"], 1)
+        self.assertEqual(function["fields"]["name"], "add")
+        self.assertEqual(json.loads(json.dumps(serialized)), serialized)
+
+    def test_ast_serialization_rejects_non_nodes(self):
+        with self.assertRaises(TypeError):
+            serialize_ast({"kind": "Module"})
 
 
 if __name__ == "__main__":
