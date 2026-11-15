@@ -44,6 +44,10 @@ assert.match(html, /лексический фильтр:/, "evidence panel must 
 assert.match(html, /покрытие терминов:/, "evidence panel must expose lexical coverage");
 assert.ok(html.includes("/docs/AKSI-OS-ARCHITECTURE.md"), "homepage must expose the open OS architecture");
 assert.ok(html.includes("/system/aksi-os-status.json"), "homepage must expose machine-readable system status");
+assert.ok(html.includes('id="aksiKernelStatus"'), "homepage must expose kernel runtime diagnostics");
+assert.ok(html.includes('/modules/aksi-system-kernel.js?v=1'), "homepage must load the kernel API");
+assert.ok(html.includes('/system/aksi-boot.js?v=1'), "homepage must load the kernel bootstrap");
+assert.match(sw, /aksi-shell-v310/);
 assert.match(html, /async function runAnswerSelfTest\(\)/, "local answer self-test must be implemented");
 const selfTestStart = html.indexOf("async function runAnswerSelfTest()");
 const selfTestEnd = html.indexOf("$('runAnswerSelfTest').addEventListener", selfTestStart);
