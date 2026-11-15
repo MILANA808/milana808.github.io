@@ -1,4 +1,4 @@
-/* AKSI Q UI profile v0.2.0
+/* AKSI Q UI profile v0.3.0
  * Bounded declarative UI grammar with local state and restricted event effects.
  * No eval, Function, HTML injection, implicit network or arbitrary DOM access.
  * © AKSI MATRIX
@@ -6,7 +6,7 @@
 (function (root) {
   "use strict";
 
-  const VERSION = "0.2.0";
+  const VERSION = "0.3.0";
   const LIMITS = Object.freeze({ source: 16384, nodes: 500, depth: 12, text: 2000, states: 64 });
 
   class AksiUIError extends Error {
@@ -111,6 +111,19 @@
         }
         return { type: "button", label, action, effect };
       }
+      if (kind.value === "when") {
+        const state = string();
+        expect("equals");
+        const expected = scalar();
+        expect("{");
+        const children = [];
+        while (peek() !== "}") {
+          if (peek() === "<EOF>") throw new AksiUIError("unterminated when block", kind.offset);
+          children.push(node(depth + 1));
+        }
+        expect("}");
+        return { type: "when", state, expected, children };
+      }
       if (kind.value === "section") {
         expect("{");
         const children = [];
@@ -156,8 +169,14 @@
 
     function validate(nodes) {
       nodes.forEach(item => {
-        if (item.type === "value" && !stateNames.has(item.state)) {
+        if ((item.type === "value" || item.type === "when") && !stateNames.has(item.state)) {
           throw new AksiUIError("value references undeclared state: " + item.state);
+        }
+        if (item.type === "when") {
+          const target = states.find(state => state.name === item.state);
+          if (!target || typeof target.value !== typeof item.expected || target.value === null && item.expected !== null) {
+            throw new AksiUIError("when comparison must match declared state type: " + item.state);
+          }
         }
         if (item.type === "button" && item.effect) {
           const target = states.find(state => state.name === item.effect.state);
@@ -194,8 +213,10 @@
     if (onAction !== undefined && typeof onAction !== "function") throw new AksiUIError("onAction must be a function");
     const state = new Map(ast.states.map(item => [item.name, item.value]));
     const outputs = new Map();
+    const conditions = new Map();
     function refresh(name) {
       (outputs.get(name) || []).forEach(output => { output.textContent = String(state.get(name)); });
+      (conditions.get(name) || []).forEach(update => update());
     }
     function create(node) {
       if (node.type === "text") {
@@ -229,6 +250,24 @@
           }));
         });
         return button;
+      }
+      if (node.type === "when") {
+        if (typeof doc.createElement("section").replaceChildren !== "function") {
+          throw new AksiUIError("DOM document must support replaceChildren for conditional UI");
+        }
+        const section = doc.createElement("section");
+        let visible = null;
+        const update = () => {
+          const nextVisible = Object.is(state.get(node.state), node.expected);
+          if (nextVisible === visible) return;
+          visible = nextVisible;
+          section.replaceChildren();
+          if (visible) node.children.forEach(child => section.appendChild(create(child)));
+        };
+        if (!conditions.has(node.state)) conditions.set(node.state, []);
+        conditions.get(node.state).push(update);
+        update();
+        return section;
       }
       if (node.type === "section") {
         const section = doc.createElement("section");
