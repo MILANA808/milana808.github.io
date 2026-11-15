@@ -1,103 +1,122 @@
 # AKSI Q — executable language prototype
 
-**Language version:** 0.3 browser profile + 0.2 Python reference runtime  
-**Runtimes:** Python 3.10+ reference interpreter; browser-native JavaScript interpreter  
-**Mode:** local-first; no server, model API, WebLLM, or network required for execution.
+**Language version:** 0.3 browser expression runtime + 0.2 Python reference runtime + 0.1 declarative UI profile  
+**Runtimes:** Python 3.10+ reference interpreter; browser-native JavaScript runtimes  
+**Mode:** local-first; no server, model API, WebLLM, or network required for language execution.
 
-AKSI Q is a small domain-specific language for deterministic mathematical work,
-small quantum-state simulations, and explicit concept relations. The interpreter
-uses its own lexer and Pratt expression parser. It never calls Python eval or
-exec and does not use Python AST for expression parsing.
+AKSI Q is an evolving domain-specific language. The expression runtime supports deterministic mathematics, bounded state-vector simulation, and explicit concept relations. The first UI-language slice adds a small declarative page grammar and a capability-limited DOM renderer. It is not yet a general-purpose application language and does not yet replace the public site.
 
 > Quantum operations in this version are classical state-vector simulations.
 > This is not quantum hardware and makes no quantum-advantage claim.
 
 ## Run the Python reference runtime
 
-\`\`\`bash
+```bash
 python aksi_q.py examples/first.aksi
 python -m unittest discover -s tests -v
-\`\`\`
+```
 
 No package installation is required.
-
 
 ## Run in the browser
 
 Open [AKSI Research Lab](https://milana808.github.io/research/) and use the
-AKSI Q editor. The browser interpreter has its own lexer and Pratt parser,
-math and state-vector functions, explicit concept relations, resource limits,
-and a user-controlled IndexedDB memory profile. The browser profile supports
-`remember`, `recall`, `search` and `forget` statements. Memory is local to the
-current browser and origin; export/import is provided for backups and transfer.
-Browser storage is quota-limited and is not infinite or cloud-synchronized.
+existing AKSI Q editor. The browser interpreter has its own lexer and Pratt
+expression parser, math and state-vector functions, explicit concept relations,
+resource limits, and a user-controlled IndexedDB memory profile. The browser
+profile supports `remember`, `recall`, `search` and `forget` statements.
+Memory is local to the current browser and origin; export/import is provided
+for backups and transfer. Browser storage is quota-limited and is not infinite
+or cloud-synchronized.
 
-The shared `conformance/common-v1.json` corpus is executed by both runtimes in CI and compares arithmetic, boolean expressions, vectors, concept relations and state-vector probabilities. The separate quantum differential test compares selected circuit amplitudes. This is a tested common subset, not full language parity: browser-only IndexedDB memory, seeded measurement details, edge cases and the complete grammar still require additional differential coverage.
+The shared `conformance/common-v1.json` corpus is executed by both runtimes in
+CI and compares arithmetic, boolean expressions, vectors, concept relations
+and state-vector probabilities. The separate quantum differential test
+compares selected circuit amplitudes. This is a tested common subset, not full
+language parity.
 
-## Language sample
+## Declarative UI profile v0.1
 
-\`\`\`aksi
-# ordinary deterministic mathematics
-let a = vector(3, 4)
-print norm(a)
-print dot(a, vector(3, 4))
+The first UI slice lives in `aksi-ui.js`, with a sample page at
+`examples/homepage.aksiui`. It is intentionally separate from the existing
+expression runtime until the language profiles can be unified without breaking
+the current editor or its saved programs.
 
-# one-qubit state-vector simulation
-let start = [1, 0]
-let balanced = h(start)
-print probabilities(balanced)
-print measure(balanced, shots=20, seed=7)
+Example:
 
-# two-qubit Bell state
-let register = qstate(2)
-let superposed = h(register, 0)
-let bell = cnot(superposed, 0, 1)
-print probabilities(bell)
+```aksiui
+page "home" {
+  section {
+    text "AKSI MATRIX"
+    text "Локальная рабочая среда"
+    button "Открыть рабочее пространство" action "open-workspace"
+  }
+}
+```
 
-# a tiny explicit concept graph
-concept "cat" means "a domesticated mammal"
-concept "mammal" means "a warm-blooded vertebrate"
-concept "animal" means "a living organism that can move"
-relate "cat" -> "mammal" as "is_a"
-relate "mammal" -> "animal" as "is_a"
-ask "cat"
-infer "cat"
-\`\`\`
+The parser produces a typed page/section/text/button tree. The renderer creates
+DOM nodes using `createElement` and `textContent`; it never interprets text as
+HTML. Buttons can invoke only the host callback supplied by the application,
+with the action name declared in source. The language itself receives no
+arbitrary DOM, network, filesystem, or browser API access.
+
+Run its tests with:
+
+```bash
+node --test tests/aksi-ui-language.test.cjs
+```
 
 ## Language reference
 
 | Form | Meaning |
 |---|---|
-| \`let name = expression\` | Bind a value |
-| \`print expression\` | Evaluate and display |
-| \`assert expression\` | Stop with an error unless true |
-| \`concept "x" means "definition"\` | Add an explicit concept |
-| \`relate "x" -> "y" as "is_a"\` | Add a typed relation |
-| \`ask "x"\` | Return the stored definition and outgoing relations |
-| \`infer "x"\` | Follow transitive \`is_a\` relations |
+| `let name = expression` | Bind a value |
+| `print expression` | Evaluate and display |
+| `assert expression` | Stop with an error unless true |
+| `concept "x" means "definition"` | Add an explicit concept |
+| `relate "x" -> "y" as "is_a"` | Add a typed relation |
+| `ask "x"` | Return the stored definition and outgoing relations |
+| `infer "x"` | Follow transitive `is_a` relations |
+| `page "name" { ... }` | Declare a UI page in the separate UI profile |
+| `section { ... }` | Group UI nodes |
+| `text "..." ` | Render literal text |
+| `button "..." action "id"` | Render a button wired to a named host action |
 
-Built-ins include \`vector\`, \`dot\`, \`norm\`, \`normalize\`, \`tensor\`,
-\`interfere\`, \`probabilities\`, \`h\`, \`phase\`, \`measure\`, \`sqrt\`,
-\`sin\`, \`cos\`, \`exp\`, \`log\`, \`complex\`, and common collection helpers.
+Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
+`interfere`, `probabilities`, `h`, `phase`, `measure`, `sqrt`,
+`sin`, `cos`, `exp`, `log`, `complex`, and common collection helpers.
 
 ## Design boundaries
 
-- No arbitrary Python attribute access, imports, file access, or network calls
-  are available to AKSI source programs.
-- The current parser is line-oriented; blocks, user-defined functions, modules,
-  static type checking, and compilation to native machine code are not yet present.
+- The mathematical expression runtime is currently line-oriented; blocks,
+  user-defined functions, modules, static type checking, and compilation to
+  native machine code are not yet present there.
+- The UI profile is a deliberately small separate grammar. It does not yet
+  provide state declarations, conditional rendering, loops, styles, routing,
+  lifecycle hooks, or async tasks.
+- The current UI renderer is a library, not yet wired to the homepage or other
+  public routes. Existing HTML/CSS and JavaScript still drive the live site.
+- No arbitrary Python attribute access, imports, file access, network calls,
+  or arbitrary DOM access are available to AKSI source programs.
 - The concept graph is explicit symbolic data generated from the canonical
   `aksi-semantic-reasoning.js` source; it is not open-domain natural-language
   understanding. Use `--knowledge data/semantic-graph.json` to load it.
 - The state-vector simulator supports up to 10 qubits with H/X/Z, phase and
   Rx/Ry/Rz rotations, CNOT, probability extraction and seeded measurement.
   It is a classical simulator, not quantum hardware.
-- An \`assert\` checks a runtime condition; it is not a formal mathematical proof.
+- An `assert` checks a runtime condition; it is not a formal mathematical proof.
 
-## Roadmap
+## Migration sequence
 
-1. Freeze grammar and add parser conformance tests.
-2. Add typed values and multi-qubit state-vector operations with strict size limits.
-3. Add a proof object format and deterministic replay.
-4. Complete Python/JavaScript conformance and differential quantum tests.
-5. Benchmark against equivalent Python/NumPy and established quantum simulators.
+1. Stabilize the declarative UI grammar and its security/resource tests.
+2. Add state and event semantics, then route/lifecycle primitives with explicit
+   host capabilities.
+3. Unify UI and expression profiles under a versioned AKSI Q module/runtime
+   model and shared conformance fixtures.
+4. Migrate one isolated route and verify accessibility, mobile behavior,
+   feature parity, offline behavior, and rollback.
+5. Migrate the homepage and remaining routes only after route-level acceptance.
+
+A UI language test passing does not mean the website has been rewritten.
+Every migrated page must actually be driven by AKSI Q source and pass its
+browser and regression checks before the old implementation is removed.
