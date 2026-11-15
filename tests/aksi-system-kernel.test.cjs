@@ -60,6 +60,19 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   assert.equal(brokenStatus.kernel.state, "unavailable");
   assert.equal(brokenDependencies.getModule("needs.missing").state, "failed");
 
+  const degradedInit = createKernel();
+  degradedInit.register({ id: "optional.adapter", version: "1", init: async () => ({ available: false, reason: "Missing browser API" }), health: async () => ({ ok: true }) });
+  await degradedInit.boot();
+  await degradedInit.checkHealth();
+  assert.equal(degradedInit.getModule("optional.adapter").state, "degraded", "health success must not hide incomplete initialization");
+
+  const cycle = createKernel();
+  cycle.register({ id: "cycle.alpha", version: "1", dependencies: ["cycle.beta"], init: async () => ({}) });
+  cycle.register({ id: "cycle.beta", version: "1", dependencies: ["cycle.alpha"], init: async () => ({}) });
+  const cycleStatus = await cycle.boot();
+  assert.notEqual(cycleStatus.kernel.state, "ready");
+  assert.ok(cycleStatus.modules.some(module => module.state === "failed"));
+
   let disposed = false;
   const disposable = createKernel();
   disposable.register({ id: "test.disposable", version: "1", init: async () => ({}), dispose: async () => { disposed = true; } });
