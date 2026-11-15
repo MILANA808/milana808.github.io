@@ -56,7 +56,7 @@ test("state updates are deterministic and support multiple bindings", () => {
   const ast = parse('page "counter" { state "n" = 4 value "n" section { value "n" button "Add two" action "add-two" state "n" add 2 } }');
   const main = render(ast, fakeDocument());
   const nested = main.children[1];
-  nested.children[2].listeners.click();
+  nested.children[1].listeners.click();
   assert.equal(main.children[0].textContent, "6");
   assert.equal(nested.children[0].textContent, "6");
 });
