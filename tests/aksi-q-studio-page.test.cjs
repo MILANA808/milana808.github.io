@@ -38,7 +38,7 @@ test("Studio exposes compilation errors as text, not injected markup", () => {
 });
 
 test("the actual embedded Studio program parses and renders with working local state", () => {
-  const match = page.match(/<textarea id="source"[^>]*>([\\s\\S]*?)<\\/textarea>/);
+  const match = page.match(/<textarea id="source"[^>]*>([\s\S]*?)<\/textarea>/);
   assert.ok(match, "Studio source textarea exists");
   const ast = parse(match[1]);
   assert.equal(ast.name, "studio-demo");
