@@ -1,14 +1,15 @@
-# AKSI Q declarative interface profile v0.2
+# AKSI Q declarative interface profile v0.4
 page "home" {
+  state "visitor" = ""
   state "research-open" = 0
   section {
     text "AKSI MATRIX"
     text "Локальная рабочая среда"
-    button "Переключить лабораторию" action "toggle-research" state "research-open" add 1
-    value "research-open"
-  }
-  section {
-    text "Исследовательская лаборатория"
-    button "Открыть лабораторию" action "open-research"
+    input "Как к тебе обращаться?" state "visitor"
+    value "visitor"
+    button "Показать исследовательскую лабораторию" action "toggle-research" state "research-open" add 1
+    when "research-open" equals 1 {
+      text "Исследовательская лаборатория открыта."
+    }
   }
 }
