@@ -344,7 +344,7 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
     $("aksiEvidence").style.display="block";
     const sourceLines=routed.evidence.map((x,i)=>"["+(i+1)+"] "+(x.title||"Источник")+" — "+(x.url||"")+"\n"+String(x.text||x.snippet||"").slice(0,280));
     const review=routed.evidenceReview;
-    const reviewText=review?"\n\nОЦЕНКА ДОКАЗАТЕЛЬСТВ: "+(review.status==="insufficient"?"НЕДОСТАТОЧНО ДАННЫХ":review.status.toUpperCase())+"\n"+review.reason+"\n"+(review.candidates||[]).map((x,i)=>(i+1)+". "+x.source.title+" · "+x.review_status+" · "+x.retrieval).join("\n")+"\nПоиск нашёл материалы, но их связь с утверждением ещё не проверена.": "";
+    const reviewText=review?"\n\nОЦЕНКА ДОКАЗАТЕЛЬСТВ: "+(review.status==="insufficient"?"НЕДОСТАТОЧНО ДАННЫХ":review.status.toUpperCase())+"\n"+review.reason+"\n"+(review.candidates||[]).map((x,i)=>(i+1)+". "+(x.source.title||"Источник")+" · "+x.review_status+" · "+x.retrieval+" · лексический фильтр: "+x.lexical_screen.label+" · покрытие терминов: "+Math.round(x.lexical_screen.coverage*100)+"% · совпало: "+x.lexical_screen.matched_terms.join(", ")).join("\n")+"\nПоиск нашёл материалы, но их связь с утверждением ещё не проверена.": "";
     $("aksiEvidence").textContent="МАТЕРИАЛЫ ИСТОЧНИКОВ (не автоматически проверенные факты):\n"+sourceLines.join("\n\n")+reviewText;
    }else if(routed.data&&routed.route==="weather"){
     $("aksiEvidence").style.display="block";
