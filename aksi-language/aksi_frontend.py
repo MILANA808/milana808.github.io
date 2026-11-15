@@ -23,6 +23,10 @@ class Node:
                 return value
         return default
 
+    def to_dict(self) -> dict[str, Any]:
+        """Return the versioned, JSON-compatible representation of this AST."""
+        return serialize_ast(self)
+
 
 class ParseError(ValueError):
     def __init__(self, message: str, span: Span, *, expected: tuple[str, ...] = ()):
@@ -322,6 +326,40 @@ class Parser:
                 left = self.node("Index", left.span, end.span, target=left, index=index)
             else:
                 return left
+
+
+def _serialize_value(value: Any) -> Any:
+    if isinstance(value, Node):
+        return {
+            "kind": value.kind,
+            "span": _serialize_value(value.span),
+            "fields": {name: _serialize_value(item) for name, item in value.fields},
+        }
+    if isinstance(value, Span):
+        return {
+            "start": value.start,
+            "end": value.end,
+            "line": value.line,
+            "column": value.column,
+            "end_line": value.end_line,
+            "end_column": value.end_column,
+        }
+    if isinstance(value, tuple):
+        return [_serialize_value(item) for item in value]
+    if isinstance(value, list):
+        return [_serialize_value(item) for item in value]
+    if isinstance(value, dict):
+        return {str(key): _serialize_value(item) for key, item in value.items()}
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    raise TypeError(f"Unsupported AST field value: {type(value).__name__}")
+
+
+def serialize_ast(node: Node) -> dict[str, Any]:
+    """Serialize an AST with a stable schema marker for conformance tooling."""
+    if not isinstance(node, Node):
+        raise TypeError("serialize_ast expects a Node")
+    return {"schema": "AKSI-Q-AST/1", "root": _serialize_value(node)}
 
 
 def parse(source: str) -> Node:
