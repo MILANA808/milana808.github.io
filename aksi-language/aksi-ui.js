@@ -95,6 +95,11 @@
       const kind = take();
       if (kind.value === "text") return { type: "text", value: string() };
       if (kind.value === "value") return { type: "value", state: string() };
+      if (kind.value === "input") {
+        const placeholder = string();
+        expect("state");
+        return { type: "input", placeholder, state: string() };
+      }
       if (kind.value === "button") {
         const label = string();
         expect("action");
@@ -173,8 +178,14 @@
 
     function validate(nodes) {
       nodes.forEach(item => {
-        if ((item.type === "value" || item.type === "when") && !stateNames.has(item.state)) {
+        if ((item.type === "value" || item.type === "input" || item.type === "when") && !stateNames.has(item.state)) {
           throw new AksiUIError("value references undeclared state: " + item.state);
+        }
+        if (item.type === "input") {
+          const target = states.find(state => state.name === item.state);
+          if (!target || typeof target.value !== "string") {
+            throw new AksiUIError("input requires a declared string state: " + item.state);
+          }
         }
         if (item.type === "when") {
           const target = states.find(state => state.name === item.state);
@@ -217,9 +228,11 @@
     if (onAction !== undefined && typeof onAction !== "function") throw new AksiUIError("onAction must be a function");
     const state = new Map(ast.states.map(item => [item.name, item.value]));
     const outputs = new Map();
+    const inputs = new Map();
     const conditions = new Map();
     function refresh(name) {
       (outputs.get(name) || []).forEach(output => { output.textContent = String(state.get(name)); });
+      (inputs.get(name) || []).forEach(input => { input.value = String(state.get(name)); });
       (conditions.get(name) || []).forEach(update => update());
     }
     function create(node) {
@@ -235,6 +248,25 @@
         output.textContent = String(state.get(node.state));
         output.dataset.aksiState = node.state;
         return output;
+      }
+      if (node.type === "input") {
+        const input = doc.createElement("input");
+        input.type = "text";
+        input.placeholder = node.placeholder;
+        input.ariaLabel = node.placeholder;
+        input.maxLength = LIMITS.text;
+        input.value = String(state.get(node.state));
+        if (!inputs.has(node.state)) inputs.set(node.state, []);
+        inputs.get(node.state).push(input);
+        input.addEventListener("input", event => {
+          const value = event && event.target ? event.target.value : input.value;
+          if (typeof value !== "string" || value.length > LIMITS.text) {
+            throw new AksiUIError("input value exceeds text limit");
+          }
+          state.set(node.state, value);
+          refresh(node.state);
+        });
+        return input;
       }
       if (node.type === "button") {
         const button = doc.createElement("button");
