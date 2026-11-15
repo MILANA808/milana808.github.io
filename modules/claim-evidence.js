@@ -58,7 +58,7 @@
     const candidates = retrievedInput.slice(0, 8).map((item, index) => {
       if (!item || typeof item !== "object") throw new TypeError("Материал источника должен быть объектом.");
       const url = clean(item.url, 2000);
-      if (!url || !/^https?:\\/\\//i.test(url)) throw new TypeError("У материала должна быть HTTP(S)-ссылка.");
+      if (!url || !/^https?:\/\//i.test(url)) throw new TypeError("У материала должна быть HTTP(S)-ссылка.");
       const passage = clean(item.text || item.snippet || item.summary, 4000);
       return {
         candidate_id: claim.id + "-source-" + (index + 1),
