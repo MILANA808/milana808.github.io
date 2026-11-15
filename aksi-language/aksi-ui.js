@@ -72,7 +72,11 @@
     };
     const scalar = () => {
       const token = take();
-      if (token.value.startsWith('"')) return decode(token.value, token.offset);
+      if (token.value.startsWith('"')) {
+        const value = decode(token.value, token.offset);
+        if (value.length > LIMITS.text) throw new AksiUIError("state string exceeds 2000 characters", token.offset);
+        return value;
+      }
       if (token.value === "true") return true;
       if (token.value === "false") return false;
       if (token.value === "null") return null;
@@ -252,10 +256,10 @@
         return button;
       }
       if (node.type === "when") {
-        if (typeof doc.createElement("section").replaceChildren !== "function") {
+        const section = doc.createElement("section");
+        if (typeof section.replaceChildren !== "function") {
           throw new AksiUIError("DOM document must support replaceChildren for conditional UI");
         }
-        const section = doc.createElement("section");
         let visible = null;
         const update = () => {
           const nextVisible = Object.is(state.get(node.state), node.expected);
