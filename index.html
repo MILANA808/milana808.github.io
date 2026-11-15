@@ -342,7 +342,10 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
    $("chatStatus").textContent=routed.statusText||("AKSI Answer Router · "+(routed.route||"обработано"));
    if(Array.isArray(routed.evidence)&&routed.evidence.length){
     $("aksiEvidence").style.display="block";
-    $("aksiEvidence").textContent="МАТЕРИАЛЫ ИСТОЧНИКОВ (не автоматически проверенные факты):\n"+routed.evidence.map((x,i)=>"["+(i+1)+"] "+(x.title||"Источник")+" — "+(x.url||"")+"\n"+String(x.text||x.snippet||"").slice(0,280)).join("\n\n");
+    const sourceLines=routed.evidence.map((x,i)=>"["+(i+1)+"] "+(x.title||"Источник")+" — "+(x.url||"")+"\n"+String(x.text||x.snippet||"").slice(0,280));
+    const review=routed.evidenceReview;
+    const reviewText=review?"\n\nОЦЕНКА ДОКАЗАТЕЛЬСТВ: "+(review.status==="insufficient"?"НЕДОСТАТОЧНО ДАННЫХ":review.status.toUpperCase())+"\n"+review.reason+"\n"+(review.candidates||[]).map((x,i)=>(i+1)+". "+x.source.title+" · "+x.review_status+" · "+x.retrieval).join("\n")+"\nПоиск нашёл материалы, но их связь с утверждением ещё не проверена.": "";
+    $("aksiEvidence").textContent="МАТЕРИАЛЫ ИСТОЧНИКОВ (не автоматически проверенные факты):\n"+sourceLines.join("\n\n")+reviewText;
    }else if(routed.data&&routed.route==="weather"){
     $("aksiEvidence").style.display="block";
     $("aksiEvidence").textContent="ИСТОЧНИК ПОГОДЫ: Open-Meteo\n"+routed.data.city+" · "+routed.data.time+" · "+routed.data.timezone;
