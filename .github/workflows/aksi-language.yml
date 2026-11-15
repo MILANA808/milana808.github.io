@@ -5,6 +5,7 @@ on:
     paths:
       - "aksi-language/**"
       - "tests/aksi-ui-language.test.cjs"
+      - "tests/aksi-q-studio-page.test.cjs"
       - ".github/workflows/aksi-language.yml"
   pull_request:
     paths:
@@ -22,8 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Test declarative AKSI Q UI profile
-        run: node --test tests/aksi-ui-language.test.cjs
+      - name: Test declarative AKSI Q UI profile and Studio route
+        run: node --test tests/aksi-ui-language.test.cjs tests/aksi-q-studio-page.test.cjs
       - name: Export canonical AKSI semantic graph
         working-directory: aksi-language
         run: node tools/export_semantics.cjs
