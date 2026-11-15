@@ -25,7 +25,7 @@ OPERATORS = (
 )
 SINGLE = frozenset("()[]{}.,:;?")
 SINGLE_OPERATORS = frozenset("+-*/%=<>!&|^~")
-NUMBER_RE = re.compile(r"(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?")
+NUMBER_RE = re.compile(r"(?:\d+\.(?!\.)\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?")
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
 
@@ -104,18 +104,20 @@ def lex(source: str, *, include_newlines: bool = True) -> list[Token]:
     column = 1
     length = len(source)
 
-    def span(start: int, end: int, start_line: int, start_col: int) -> Span:
-        end_line, end_col = start_line, start_col
-        for ch in source[start:end]:
-            if ch == "\n":
-                end_line += 1
-                end_col = 1
-            else:
-                end_col += 1
+    def span(start: int, end: int, start_line: int, start_col: int,
+             end_line: int | None = None, end_col: int | None = None) -> Span:
+        if end_line is None or end_col is None:
+            end_line, end_col = start_line, start_col
+            for ch in source[start:end]:
+                if ch == "\n":
+                    end_line += 1
+                    end_col = 1
+                else:
+                    end_col += 1
         return Span(start, end, start_line, start_col, end_line, end_col)
 
     def emit(kind: str, value: str, start: int, start_line: int, start_col: int) -> None:
-        tokens.append(Token(kind, value, span(start, i, start_line, start_col)))
+        tokens.append(Token(kind, value, span(start, i, start_line, start_col, line, column)))
         if len(tokens) > MAX_TOKENS:
             raise LexError("token budget exceeded", tokens[-1].span)
 
@@ -131,7 +133,7 @@ def lex(source: str, *, include_newlines: bool = True) -> list[Token]:
             line += 1
             column = 1
             if include_newlines:
-                emit("NEWLINE", "\\n", start, start_line, start_col)
+                emit("NEWLINE", "\n", start, start_line, start_col)
             continue
         if ch == "#":
             while i < length and source[i] != "\n":
@@ -169,6 +171,13 @@ def lex(source: str, *, include_newlines: bool = True) -> list[Token]:
         if number:
             i = number.end()
             column += i - start
+            if i < length and source[i] in "eE":
+                bad_end = i + 1
+                if bad_end < length and source[bad_end] in "+-":
+                    bad_end += 1
+                while bad_end < length and source[bad_end].isdigit():
+                    bad_end += 1
+                raise LexError("malformed numeric exponent", span(start, bad_end, start_line, start_col))
             emit("NUMBER", number.group(0), start, start_line, start_col)
             continue
 
