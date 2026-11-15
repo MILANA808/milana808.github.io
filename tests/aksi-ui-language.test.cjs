@@ -10,7 +10,8 @@ function fakeDocument() {
     return {
       tag, children: [], listeners: {}, dataset: {}, textContent: "", type: "",
       appendChild(child) { this.children.push(child); return child; },
-      replaceCount: 0,\n      replaceChildren(...children) { this.replaceCount += 1; this.children = children; },
+      replaceCount: 0,
+      replaceChildren(...children) { this.replaceCount += 1; this.children = children; },
       addEventListener(name, fn) { this.listeners[name] = fn; }
     };
   }
