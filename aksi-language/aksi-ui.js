@@ -226,16 +226,37 @@
     }
     if (!doc || typeof doc.createElement !== "function") throw new AksiUIError("a DOM document is required");
     if (onAction !== undefined && typeof onAction !== "function") throw new AksiUIError("onAction must be a function");
+
     const state = new Map(ast.states.map(item => [item.name, item.value]));
     const outputs = new Map();
     const inputs = new Map();
     const conditions = new Map();
-    function refresh(name) {
-      (outputs.get(name) || []).forEach(output => { output.textContent = String(state.get(name)); });
-      (inputs.get(name) || []).forEach(input => { input.value = String(state.get(name)); });
-      (conditions.get(name) || []).forEach(update => update());
+    let disposed = false;
+
+    function register(map, name, value, scope) {
+      if (!map.has(name)) map.set(name, []);
+      const entries = map.get(name);
+      entries.push(value);
+      scope.push(() => {
+        const index = entries.indexOf(value);
+        if (index !== -1) entries.splice(index, 1);
+        if (entries.length === 0) map.delete(name);
+      });
     }
-    function create(node) {
+
+    function disposeScope(scope) {
+      for (let index = scope.length - 1; index >= 0; index -= 1) scope[index]();
+      scope.length = 0;
+    }
+
+    function refresh(name) {
+      if (disposed) return;
+      (outputs.get(name) || []).slice().forEach(output => { output.textContent = String(state.get(name)); });
+      (inputs.get(name) || []).slice().forEach(input => { input.value = String(state.get(name)); });
+      (conditions.get(name) || []).slice().forEach(update => update());
+    }
+
+    function create(node, scope) {
       if (node.type === "text") {
         const p = doc.createElement("p");
         p.textContent = node.value;
@@ -243,8 +264,7 @@
       }
       if (node.type === "value") {
         const output = doc.createElement("output");
-        if (!outputs.has(node.state)) outputs.set(node.state, []);
-        outputs.get(node.state).push(output);
+        register(outputs, node.state, output, scope);
         output.textContent = String(state.get(node.state));
         output.dataset.aksiState = node.state;
         return output;
@@ -256,9 +276,9 @@
         input.ariaLabel = node.placeholder;
         input.maxLength = LIMITS.text;
         input.value = String(state.get(node.state));
-        if (!inputs.has(node.state)) inputs.set(node.state, []);
-        inputs.get(node.state).push(input);
+        register(inputs, node.state, input, scope);
         input.addEventListener("input", event => {
+          if (disposed) return;
           const value = event && event.target ? event.target.value : input.value;
           if (typeof value !== "string" || value.length > LIMITS.text) {
             throw new AksiUIError("input value exceeds text limit");
@@ -273,6 +293,7 @@
         button.type = "button";
         button.textContent = node.label;
         button.addEventListener("click", () => {
+          if (disposed) return;
           if (node.effect) {
             const current = state.get(node.effect.state);
             const next = current + node.effect.amount;
@@ -293,28 +314,42 @@
           throw new AksiUIError("DOM document must support replaceChildren for conditional UI");
         }
         let visible = null;
+        let childScope = [];
         const update = () => {
+          if (disposed) return;
           const nextVisible = Object.is(state.get(node.state), node.expected);
           if (nextVisible === visible) return;
           visible = nextVisible;
+          disposeScope(childScope);
+          childScope = [];
           section.replaceChildren();
-          if (visible) node.children.forEach(child => section.appendChild(create(child)));
+          if (visible) node.children.forEach(child => section.appendChild(create(child, childScope)));
         };
-        if (!conditions.has(node.state)) conditions.set(node.state, []);
-        conditions.get(node.state).push(update);
+        register(conditions, node.state, update, scope);
+        scope.push(() => {
+          disposeScope(childScope);
+          childScope = [];
+        });
         update();
         return section;
       }
       if (node.type === "section") {
         const section = doc.createElement("section");
-        node.children.forEach(child => section.appendChild(create(child)));
+        node.children.forEach(child => section.appendChild(create(child, scope)));
         return section;
       }
       throw new AksiUIError("unsupported AST node: " + node.type);
     }
+
+    const rootScope = [];
     const main = doc.createElement("main");
     main.dataset.aksiPage = ast.name;
-    ast.children.forEach(child => main.appendChild(create(child)));
+    ast.children.forEach(child => main.appendChild(create(child, rootScope)));
+    main.dispose = () => {
+      if (disposed) return;
+      disposed = true;
+      disposeScope(rootScope);
+    };
     return main;
   }
 
