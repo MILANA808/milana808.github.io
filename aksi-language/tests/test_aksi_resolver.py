@@ -24,7 +24,7 @@ class ResolverTests(unittest.TestCase):
         )
         self.assertEqual(
             [(item.line, item.column) for item in diagnostics],
-            [(1, 11), (1, 40)],
+            [(1, 11), (1, 36)],
         )
 
     def test_rejects_duplicate_declarations_in_one_scope(self):
@@ -65,6 +65,12 @@ class ResolverTests(unittest.TestCase):
     def test_unknown_type_inside_array_type_is_reported(self):
         self.assertEqual(
             self.codes("fn f(x: [Missing]) { return }"),
+            ["E_UNKNOWN_TYPE"],
+        )
+
+    def test_unknown_type_in_variant_payload_is_reported(self):
+        self.assertEqual(
+            self.codes("type Maybe = Some(Missing)"),
             ["E_UNKNOWN_TYPE"],
         )
 
