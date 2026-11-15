@@ -17,6 +17,13 @@
     return String(value == null ? "" : value).trim().slice(0, limit);
   }
 
+  function isHttpUrl(value) {
+    try {
+      const parsed = new URL(String(value));
+      return (parsed.protocol === "http:" || parsed.protocol === "https:") && Boolean(parsed.hostname) && !parsed.username && !parsed.password;
+    } catch (_) { return false; }
+  }
+
   function validateClaim(claim) {
     if (!claim || typeof claim !== "object") throw new TypeError("Требуется объект утверждения.");
     const id = clean(claim.id, 120);
@@ -38,7 +45,7 @@
     if (!passage || !quote || !passage.includes(quote)) {
       throw new TypeError("Цитата должна дословно присутствовать в сохранённом фрагменте.");
     }
-    if (!url || !/^https?:\/\//i.test(url)) throw new TypeError("Требуется HTTP(S)-ссылка на источник.");
+    if (!isHttpUrl(url)) throw new TypeError("Требуется корректная HTTP(S)-ссылка без логина и пароля.");
     if (!reviewer || !Number.isFinite(Date.parse(reviewedAt))) {
       throw new TypeError("Требуются reviewer и корректная дата ручной проверки.");
     }
@@ -89,7 +96,7 @@
           is_entailment_check: false
         }
       };
-    });
+    }).sort((a, b) => b.lexical_screen.coverage - a.lexical_screen.coverage || b.lexical_screen.jaccard - a.lexical_screen.jaccard);
   }
 
   function prepareCandidates(claimInput, retrievedInput) {
@@ -98,7 +105,7 @@
     const candidates = retrievedInput.slice(0, 8).map((item, index) => {
       if (!item || typeof item !== "object") throw new TypeError("Материал источника должен быть объектом.");
       const url = clean(item.url, 2000);
-      if (!url || !/^https?:\/\//i.test(url)) throw new TypeError("У материала должна быть HTTP(S)-ссылка.");
+      if (!isHttpUrl(url)) throw new TypeError("У материала должна быть корректная HTTP(S)-ссылка без логина и пароля.");
       const passage = clean(item.text || item.snippet || item.summary, 4000);
       return {
         candidate_id: claim.id + "-source-" + (index + 1),
@@ -150,5 +157,5 @@
     };
   }
 
-  return { version: VERSION, assess, prepareCandidates, validateClaim, lexicalTokens };
+  return { version: VERSION, assess, prepareCandidates, validateClaim, lexicalTokens, isHttpUrl };
 });
