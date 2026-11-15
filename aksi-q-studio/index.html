@@ -36,6 +36,7 @@ footer{max-width:1100px;margin:auto;padding:0 18px 30px;color:var(--muted);font-
 <p class="hint">Измени текст, подписи кнопок или начальное значение счётчика.</p>
 <textarea id="source" spellcheck="false" aria-label="Исходный код AKSI Q">page "studio-demo" {
   state "count" = 0
+  state "details" = 0
   section {
     text "Добро пожаловать в AKSI Q"
     text "Эта карточка и её поведение описаны на новом языке."
@@ -45,6 +46,11 @@ footer{max-width:1100px;margin:auto;padding:0 18px 30px;color:var(--muted);font-
   }
   section {
     text "Следующий шаг — перенос настоящих страниц AKSI MATRIX."
+    button "Показать детали языка" action "show-details" state "details" add 1
+    when "details" equals 1 {
+      text "Условные блоки появляются после изменения состояния."
+      text "Это уже реактивное поведение, описанное на AKSI Q."
+    }
     button "Открыть Research Lab" action "open-research"
     button "Открыть рабочую среду" action "open-workspace"
   }
@@ -59,8 +65,8 @@ footer{max-width:1100px;margin:auto;padding:0 18px 30px;color:var(--muted);font-
 </section>
 </div>
 </main>
-<footer>AKSI Q UI profile v0.2 · локальное исполнение · ограниченные возможности · без eval и выполнения HTML из исходного текста.</footer>
-<script src="../aksi-language/aksi-ui.js?v=0.2.0"></script>
+<footer>AKSI Q UI profile v0.3 · локальное исполнение · ограниченные возможности · без eval и выполнения HTML из исходного текста.</footer>
+<script src="../aksi-language/aksi-ui.js?v=0.3.0"></script>
 <script>
 (function(){
 "use strict";
