@@ -28,6 +28,8 @@ Memory is local to the current browser and origin; export/import is provided
 for backups and transfer. Browser storage is quota-limited and is not infinite
 or cloud-synchronized.
 
+The unified front-end foundation now includes `aksi_lexer.py`: a bounded, source-spanned lexer with keyword/identifier/number/string/operator tokens, newline preservation, comments, decoded string escapes, and location-aware errors. Its contract is documented in `LEXER-SPEC.md`. It is intentionally not yet wired into the legacy Python expression parser or browser UI parser; the shared AST and parser migration remain future work. Lexer tests are included in the existing Python unittest discovery.
+
 The shared `conformance/common-v1.json` corpus is executed by both runtimes in
 CI and compares arithmetic, boolean expressions, vectors, concept relations
 and state-vector probabilities. The separate quantum differential test
