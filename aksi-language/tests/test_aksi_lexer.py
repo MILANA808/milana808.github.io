@@ -41,8 +41,8 @@ class LexerTests(unittest.TestCase):
 
 
     def test_newline_token_contains_a_real_newline_and_correct_span(self):
-        token = next(item for item in lex("a\\nb") if item.kind == "NEWLINE")
-        self.assertEqual(token.value, "\\n")
+        token = next(item for item in lex("a\nb") if item.kind == "NEWLINE")
+        self.assertEqual(token.value, "\n")
         self.assertEqual((token.span.start, token.span.end), (1, 2))
         self.assertEqual((token.span.line, token.span.column), (1, 2))
         self.assertEqual((token.span.end_line, token.span.end_column), (2, 1))
