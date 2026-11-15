@@ -62,7 +62,7 @@
         init: descriptor.init,
         health: typeof descriptor.health === "function" ? descriptor.health : null,
         dispose: typeof descriptor.dispose === "function" ? descriptor.dispose : null,
-        state: "registered", error: null, initializedAt: null, lastHealth: null
+        state: "registered", error: null, initializedAt: null, lastHealth: null, initializationAvailable: false, healthDegraded: false
       };
       modules.set(id, record);
       emit("module.registered", { id, version, dependencies, capabilities });
@@ -119,9 +119,11 @@
             if (missing.length) throw new Error("Dependencies unavailable: " + missing.join(", "));
             const result = await record.init({ kernel: publicApi, emit });
             if (result && result.available === false) {
+              record.initializationAvailable = false;
               record.state = "degraded";
               record.error = result.reason ? { name: "Degraded", message: String(result.reason).slice(0, 500) } : null;
             } else {
+              record.initializationAvailable = true;
               record.state = "available";
               record.error = null;
             }
@@ -169,8 +171,10 @@
         try {
           const health = await record.health();
           record.lastHealth = { checked_at: now(), ok: !(health && health.ok === false), detail: health || null };
-          if (!record.lastHealth.ok) record.state = "degraded";
-          else if (record.state === "degraded") { record.state = "available"; record.error = null; }
+          if (!record.lastHealth.ok) { record.state = "degraded"; record.healthDegraded = true; }
+          else if (record.healthDegraded && record.initializationAvailable) {
+            record.state = "available"; record.error = null; record.healthDegraded = false;
+          }
         } catch (error) {
           record.lastHealth = { checked_at: now(), ok: false, error: safeError(error) };
           record.state = "degraded";
