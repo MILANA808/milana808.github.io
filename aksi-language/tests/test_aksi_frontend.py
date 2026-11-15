@@ -51,7 +51,7 @@ fn add(a: Int, b: Int) -> Int {
         with self.assertRaises(ParseError) as caught:
             parse("fn broken() {")
         self.assertEqual(caught.exception.span.line, 1)
-        self.assertEqual(caught.exception.span.column, 15)
+        self.assertEqual(caught.exception.span.column, 14)
 
     def test_ast_nodes_are_frozen(self):
         tree = parse("let answer = 42")
