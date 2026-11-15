@@ -4,10 +4,12 @@ on:
     branches: [main, aksi-language-v0.1]
     paths:
       - "aksi-language/**"
+      - "tests/aksi-ui-language.test.cjs"
       - ".github/workflows/aksi-language.yml"
   pull_request:
     paths:
       - "aksi-language/**"
+      - "tests/aksi-ui-language.test.cjs"
       - ".github/workflows/aksi-language.yml"
   workflow_dispatch:
 permissions:
@@ -20,6 +22,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Test declarative AKSI Q UI profile
+        run: node --test tests/aksi-ui-language.test.cjs
       - name: Export canonical AKSI semantic graph
         working-directory: aksi-language
         run: node tools/export_semantics.cjs
