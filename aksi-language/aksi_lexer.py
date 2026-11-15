@@ -23,7 +23,8 @@ OPERATORS = (
     "->", "=>", "==", "!=", "<=", ">=", "&&", "||", "::", "..",
     "+=", "-=", "*=", "/=", "**", "//",
 )
-SINGLE = frozenset("+-*/%=<>!()[]{}.,:;|&^~?")
+SINGLE = frozenset("()[]{}.,:;?")
+SINGLE_OPERATORS = frozenset("+-*/%=<>!&|^~")
 NUMBER_RE = re.compile(r"(?:\d+\.\d*|\.\d+|\d+)(?:[eE][+-]?\d+)?")
 IDENT_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 
@@ -186,6 +187,11 @@ def lex(source: str, *, include_newlines: bool = True) -> list[Token]:
             i += len(operator)
             column += len(operator)
             emit("OP", operator, start, start_line, start_col)
+            continue
+        if ch in SINGLE_OPERATORS:
+            i += 1
+            column += 1
+            emit("OP", ch, start, start_line, start_col)
             continue
         if ch in SINGLE:
             i += 1
