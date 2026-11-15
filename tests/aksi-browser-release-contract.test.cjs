@@ -8,7 +8,7 @@ const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 const inlineScript = html.match(/<script>\s*([\s\S]*?async function ask\(q\)[\s\S]*?)<\/script>/);
 
 const weatherTag = '<script src="/aksi-weather.js?v=2"></script>';
-const evidenceTag = '<script src="/modules/claim-evidence.js?v=1"></script>';
+const evidenceTag = '<script src="/modules/claim-evidence.js?v=2"></script>';
 const routerTag = '<script src="/aksi-answer-router.js?v=5"></script>';
 const semanticTag = '<script src="/aksi-semantic-reasoning.js?v=3"></script>';
 const knowledgeTag = '<script src="/aksi-knowledge-base.js?v=2"></script>';
@@ -22,7 +22,7 @@ assert.ok(html.indexOf(knowledgeTag) < html.indexOf(evidenceTag), "knowledge bas
 assert.ok(html.indexOf(evidenceTag) < html.indexOf(routerTag), "claim evidence module must load before router");
 assert.ok(html.indexOf(routerTag) < html.indexOf("async function ask(q)"), "router must load before chat handler");
 assert.ok(html.indexOf(semanticTag) < html.indexOf("async function ask(q)"), "semantic engine must load before chat handler");
-assert.match(sw, /var CACHE = "aksi-shell-v307"/, "service worker cache must invalidate older shell");
+assert.match(sw, /var CACHE = "aksi-shell-v309"/, "service worker cache must invalidate older shell");
 assert.ok(sw.includes("/aksi-.*\\.js$/"), "JavaScript assets must use network-first strategy");
 
 const askStart = html.indexOf("async function ask(q)");
@@ -40,6 +40,10 @@ assert.match(html, /серверный backend намеренно отключё
 assert.ok(html.includes('id="runAnswerSelfTest"'), "UI must expose the local answer self-test");
 assert.match(html, /ОЦЕНКА ДОКАЗАТЕЛЬСТВ/, "web evidence panel must show explicit review state");
 assert.match(html, /НЕДОСТАТОЧНО ДАННЫХ/, "unreviewed web evidence must not be presented as verified");
+assert.match(html, /лексический фильтр:/, "evidence panel must expose the screening method");
+assert.match(html, /покрытие терминов:/, "evidence panel must expose lexical coverage");
+assert.ok(html.includes("/docs/AKSI-OS-ARCHITECTURE.md"), "homepage must expose the open OS architecture");
+assert.ok(html.includes("/system/aksi-os-status.json"), "homepage must expose machine-readable system status");
 assert.match(html, /async function runAnswerSelfTest\(\)/, "local answer self-test must be implemented");
 const selfTestStart = html.indexOf("async function runAnswerSelfTest()");
 const selfTestEnd = html.indexOf("$('runAnswerSelfTest').addEventListener", selfTestStart);
