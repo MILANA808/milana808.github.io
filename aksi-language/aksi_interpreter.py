@@ -1,7 +1,8 @@
 """Bounded interpreter for the executable AKSI Q AST subset.
 
-This runtime is deliberately capability-free: no filesystem, network, process,
-reflection, dynamic imports, eval/exec, or ambient browser access.
+No host capability is available by default. Explicitly injected handlers are
+trusted host code; no ambient filesystem, network, process, or browser access
+is exposed by the language runtime itself.
 """
 from __future__ import annotations
 
@@ -43,6 +44,7 @@ class ExecutionResult:
     steps: int
     capabilities_used: tuple[str, ...] = ()
     capability_calls: int = 0
+    capability_trace: tuple[tuple[int, str, str], ...] = ()
 
 
 @dataclass(slots=True)
@@ -129,6 +131,7 @@ class Interpreter:
         self.global_scope = _Scope()
         self.capabilities = self._validate_capabilities({} if capabilities is None else capabilities)
         self.capabilities_used: list[str] = []
+        self.capability_trace: list[tuple[int, str, str]] = []
         self._install_builtins()
 
     @staticmethod
@@ -143,6 +146,22 @@ class Interpreter:
                 raise ValueError(f"capability '{name}' must be callable")
             validated[name] = handler
         return validated
+
+    def grant_capability(self, name: str, handler: Callable[..., Any]) -> None:
+        """Grant one capability; an existing grant cannot be silently replaced."""
+        validated = self._validate_capabilities({name: handler})
+        if name in self.capabilities:
+            raise ValueError(f"capability '{name}' is already granted")
+        self.capabilities[name] = validated[name]
+
+    def revoke_capability(self, name: str) -> bool:
+        """Revoke a grant immediately. Returns False when it was not granted."""
+        if not isinstance(name, str):
+            raise TypeError("capability name must be text")
+        return self.capabilities.pop(name, None) is not None
+
+    def _record_capability_event(self, name: str, status: str) -> None:
+        self.capability_trace.append((len(self.capability_trace) + 1, name, status))
 
     @classmethod
     def _validate_host_value(cls, value: Any, *, depth: int = 0) -> Any:
@@ -173,18 +192,28 @@ class Interpreter:
             raise AksiRuntimeError("host_call expects an argument array with at most 64 items")
         handler = self.capabilities.get(name)
         if handler is None:
+            self._record_capability_event(name, "denied")
             raise AksiRuntimeError(f"host capability denied: {name}")
         if self.capability_calls >= self.max_capability_calls:
+            self._record_capability_event(name, "limit_denied")
             raise AksiRuntimeError("host capability invocation limit exceeded")
         safe_args = self._validate_host_value(args)
         self.capability_calls += 1
+        self._record_capability_event(name, "invoked")
         try:
             result = handler(*deepcopy(safe_args))
         except Exception as exc:
+            self._record_capability_event(name, "failed")
             raise AksiRuntimeError(f"host capability '{name}' failed: {type(exc).__name__}") from exc
-        safe_result = self._validate_host_value(result)
+        try:
+            safe_result = self._validate_host_value(result)
+            checked_result = self._checked_value(safe_result)
+        except AksiRuntimeError:
+            self._record_capability_event(name, "rejected_result")
+            raise
         self.capabilities_used.append(name)
-        return self._checked_value(safe_result)
+        self._record_capability_event(name, "returned")
+        return checked_result
 
     def _install_builtins(self) -> None:
         def emit(value: Any = None) -> None:
@@ -534,7 +563,8 @@ class Interpreter:
         for declaration in module.get("items"):
             self._exec(declaration, self.global_scope)
         return ExecutionResult(tuple(self.values), tuple(self.output), self.steps,
-                               tuple(self.capabilities_used), self.capability_calls)
+                               tuple(self.capabilities_used), self.capability_calls,
+                               tuple(self.capability_trace))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -562,6 +592,10 @@ def main(argv: list[str] | None = None) -> int:
             "steps": result.steps,
             "capabilities_used": list(result.capabilities_used),
             "capability_calls": result.capability_calls,
+            "capability_trace": [
+                {"sequence": seq, "capability": name, "status": status}
+                for seq, name, status in result.capability_trace
+            ],
         }, ensure_ascii=False, indent=2))
     else:
         for item in result.output:
