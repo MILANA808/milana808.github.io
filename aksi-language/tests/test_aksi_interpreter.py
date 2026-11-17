@@ -116,6 +116,52 @@ class AksiAstInterpreterTests(unittest.TestCase):
         with self.assertRaisesRegex(AksiRuntimeError, "nesting depth limit"):
             Interpreter().run("print(" + nested + ")", analyze=False)
 
+    def test_host_capability_is_denied_by_default(self):
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability denied: clock.now"):
+            Interpreter().run('host_call("clock.now", [])')
+
+    def test_host_capability_requires_explicit_grant_and_records_use(self):
+        calls = []
+        def clock_now():
+            calls.append("called")
+            return 123
+        result = Interpreter(capabilities={"clock.now": clock_now}).run(
+            'let now: Any = host_call("clock.now", [])\\nprint(now)'
+        )
+        self.assertEqual(result.output, ("123",))
+        self.assertEqual(result.capabilities_used, ("clock.now",))
+        self.assertEqual(calls, ["called"])
+
+    def test_host_capability_rejects_unsafe_results(self):
+        with self.assertRaisesRegex(AksiRuntimeError, "only bounded scalar/list values"):
+            Interpreter(capabilities={"unsafe.object": lambda: object()}).run(
+                'host_call("unsafe.object", [])'
+            )
+
+    def test_host_capability_receives_a_copy_of_arguments(self):
+        def mutate(values):
+            values.append(3)
+            return values
+        result = Interpreter(capabilities={"list.mutate": mutate}).run(
+            'host_call("list.mutate", [[1, 2]])'
+        )
+        self.assertEqual(result.values, ([1, 2, 3],))
+
+    def test_host_capability_errors_do_not_leak_exception_details(self):
+        def broken():
+            raise RuntimeError("private host detail")
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability 'test.fail' failed: RuntimeError") as caught:
+            Interpreter(capabilities={"test.fail": broken}).run(
+                'host_call("test.fail", [])'
+            )
+        self.assertNotIn("private host detail", str(caught.exception))
+
+    def test_invalid_capability_registry_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "invalid capability identifier"):
+            Interpreter(capabilities={"../escape": lambda: None})
+        with self.assertRaisesRegex(ValueError, "must be callable"):
+            Interpreter(capabilities={"clock.now": "not callable"})
+
     def test_does_not_expose_python_dynamic_execution(self):
         with self.assertRaisesRegex(AksiRuntimeError, "unknown name"):
             Interpreter().run("eval(\"1 + 1\")")
