@@ -14,7 +14,7 @@ from aksi_frontend import Node, parse
 BUILTIN_TYPES = frozenset({"Int", "Float", "Bool", "String", "Unit", "Any"})
 DEFAULT_PRELUDE = frozenset({
     "print", "pi", "e", "sqrt", "sin", "cos", "tan", "exp", "log",
-    "abs", "sum", "len", "min", "max", "round", "complex", "vector",
+    "abs", "sum", "len", "min", "max", "round", "complex", "host_call", "vector",
     "dot", "norm", "normalize", "tensor", "interfere", "probabilities",
     "h", "phase", "qstate", "x", "z", "cnot", "rx", "ry", "rz", "measure",
 })
