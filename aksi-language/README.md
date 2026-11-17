@@ -49,8 +49,8 @@ The isolated Python AST interpreter prototype is now available as
 `aksi_interpreter.py`. It runs a bounded subset of the shared AST with
 functions, bindings, arithmetic/Boolean expressions, conditionals, loops,
 returns, arrays, and explicit output. Static analysis runs before execution.
-It has no filesystem/network/process/browser/FFI capabilities and rejects
-unsupported AST nodes. Its exact subset and limits are documented in
+It has no filesystem/network/process/browser/FFI capabilities, rejects
+unsupported AST nodes, and bounds captured output and retained results. Its exact subset and limits are documented in
 [INTERPRETER-SPEC.md](INTERPRETER-SPEC.md). It is not yet wired into the
 legacy `aksi_q.py` runtime or the browser product; the existing interpreter
 remains unchanged.
