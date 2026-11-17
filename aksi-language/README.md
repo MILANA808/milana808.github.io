@@ -44,6 +44,16 @@ The shared front-end foundation includes:
   annotated bindings, function boundaries, operators, conditions, arrays,
   and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
 
+The isolated Python AST interpreter prototype is now available as
+`aksi_interpreter.py`. It runs a bounded subset of the shared AST with
+functions, bindings, arithmetic/Boolean expressions, conditionals, loops,
+returns, arrays, and explicit output. Static analysis runs before execution.
+It has no filesystem/network/process/browser/FFI capabilities and rejects
+unsupported AST nodes. Its exact subset and limits are documented in
+[INTERPRETER-SPEC.md](INTERPRETER-SPEC.md). It is not yet wired into the
+legacy `aksi_q.py` runtime or the browser product; the existing interpreter
+remains unchanged.
+
 These are front-end analysis components, not yet one production execution
 pipeline. The legacy Python expression interpreter still uses
 `aksi_parser.py`; it does not execute the new declaration AST. The shared
