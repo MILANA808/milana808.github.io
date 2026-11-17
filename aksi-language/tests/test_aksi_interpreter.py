@@ -73,6 +73,13 @@ class AksiAstInterpreterTests(unittest.TestCase):
         with self.assertRaisesRegex(AksiRuntimeError, "result item limit"):
             Interpreter(max_result_items=1).run("1\n2")
 
+    def test_formats_function_values_without_exposing_closure(self):
+        result = Interpreter().run(
+            "fn greet(name: String) -> String { return name }\\n"
+            "print(greet)"
+        )
+        self.assertEqual(result.output, ("<function greet>",))
+
     def test_rejects_excessive_output_nesting(self):
         nested = "[" * 34 + "1" + "]" * 34
         with self.assertRaisesRegex(AksiRuntimeError, "nesting depth limit"):
