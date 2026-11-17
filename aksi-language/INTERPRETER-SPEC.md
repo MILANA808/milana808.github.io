@@ -11,7 +11,8 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 - Function declarations with positional parameters and lexical closures.
 - `let`, `const`, and initialized `mut` bindings.
 - `return`, `if` / `else`, `while`, `break`, and `continue`.
-- Expression statements and the `print(...)` host-free output builtin.
+- Expression statements, the `print(...)` host-free output builtin, and
+  `host_call(name, args)` for explicitly injected host capabilities.
 - Public declaration wrappers are unwrapped and executed.
 
 ## Supported expressions
@@ -22,6 +23,17 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 - Arithmetic, equality, ordered comparisons, membership, Boolean short-circuit
   operators, string concatenation, and array concatenation.
 - Name assignment, `+=`, and `-=` for mutable bindings.
+
+## Host capability boundary
+
+- Capabilities are injected by the embedding host as a mapping from stable IDs
+  to callables. No capability is available by default.
+- Arguments and results are restricted to bounded scalar/list data; arbitrary
+  Python objects and handles cannot cross the boundary. Arguments are copied
+  before calling host code.
+- Successful calls are listed in `ExecutionResult.capabilities_used`.
+- The host remains trusted: an injected callback can perform arbitrary host
+  actions. This mechanism is not an operating-system sandbox.
 
 ## Deliberately rejected / not implemented
 
