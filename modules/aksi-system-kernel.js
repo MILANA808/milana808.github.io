@@ -291,7 +291,12 @@
           result => finish(task, "completed", result),
           error => finish(task, "failed", safeError(error))
         ).finally(() => {
-          activeCount = Math.max(0, activeCount - 1);
+          // finish() may already have released this slot on timeout/cancel.
+          // Release exactly once so parallel tasks cannot oversubscribe the limit.
+          if (!task.slotReleased) {
+            task.slotReleased = true;
+            activeCount = Math.max(0, activeCount - 1);
+          }
           pump();
         });
       }
