@@ -167,7 +167,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
         calls = []
         interpreter = Interpreter()
         interpreter.grant_capability("clock.now", lambda: calls.append("called") or 42)
-        result = interpreter.run('host_call("clock.now", [])')
+            interpreter.run('host_call("clock.now", [])\nhost_call("clock.now", [])')
         self.assertEqual(result.values, (42,))
         self.assertTrue(interpreter.revoke_capability("clock.now"))
         self.assertFalse(interpreter.revoke_capability("clock.now"))
