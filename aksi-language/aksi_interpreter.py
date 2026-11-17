@@ -43,9 +43,10 @@ class _Binding:
     mutable: bool
 
 
-@dataclass(frozen=True, slots=True)
-class _Return:
-    value: Any
+class _Return(Exception):
+    def __init__(self, value: Any):
+        super().__init__(value)
+        self.value = value
 
 
 class _Break(Exception):
