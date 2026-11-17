@@ -21,7 +21,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
             "  if count == 2 { print(count) }\n"
             "  count += 1\n"
             "}\n"
-            "print count"
+            "print(count)"
         )
         self.assertEqual(result.output, ("2", "4"))
 
@@ -48,8 +48,9 @@ class AksiAstInterpreterTests(unittest.TestCase):
             "}\n"
             "print(descend(20))"
         )
-        with self.assertRaisesRegex(AksiRuntimeError, "call depth limit"):
+        with self.assertRaises(AksiRuntimeError) as caught:
             Interpreter(max_call_depth=5).run(source)
+        self.assertIn("call depth limit", str(caught.exception))
 
     def test_rejects_unimplemented_member_access(self):
         with self.assertRaisesRegex(AksiRuntimeError, "member access is not implemented"):
