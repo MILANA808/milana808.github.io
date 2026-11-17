@@ -29,6 +29,7 @@ MAX_INTEGER_BITS = 100_000
 MAX_OUTPUT_CHARS = 1_000_000
 MAX_OUTPUT_LINES = 10_000
 MAX_RESULT_ITEMS = 10_000
+MAX_CAPABILITY_CALLS = 128
 
 
 class AksiRuntimeError(RuntimeError):
@@ -41,6 +42,7 @@ class ExecutionResult:
     output: tuple[str, ...]
     steps: int
     capabilities_used: tuple[str, ...] = ()
+    capability_calls: int = 0
 
 
 @dataclass(slots=True)
@@ -105,9 +107,10 @@ class Interpreter:
                  max_output_chars: int = MAX_OUTPUT_CHARS,
                  max_output_lines: int = MAX_OUTPUT_LINES,
                  max_result_items: int = MAX_RESULT_ITEMS,
+                 max_capability_calls: int = MAX_CAPABILITY_CALLS,
                  capabilities: dict[str, Callable[..., Any]] | None = None):
         limits = (max_steps, max_call_depth, max_array_items, max_output_chars,
-                  max_output_lines, max_result_items)
+                  max_output_lines, max_result_items, max_capability_calls)
         if any(limit < 1 for limit in limits):
             raise ValueError("execution limits must be positive")
         self.max_steps = max_steps
@@ -116,6 +119,8 @@ class Interpreter:
         self.max_output_chars = max_output_chars
         self.max_output_lines = max_output_lines
         self.max_result_items = max_result_items
+        self.max_capability_calls = max_capability_calls
+        self.capability_calls = 0
         self.output_chars = 0
         self.steps = 0
         self.call_depth = 0
@@ -169,7 +174,10 @@ class Interpreter:
         handler = self.capabilities.get(name)
         if handler is None:
             raise AksiRuntimeError(f"host capability denied: {name}")
+        if self.capability_calls >= self.max_capability_calls:
+            raise AksiRuntimeError("host capability invocation limit exceeded")
         safe_args = self._validate_host_value(args)
+        self.capability_calls += 1
         try:
             result = handler(*deepcopy(safe_args))
         except Exception as exc:
@@ -526,7 +534,7 @@ class Interpreter:
         for declaration in module.get("items"):
             self._exec(declaration, self.global_scope)
         return ExecutionResult(tuple(self.values), tuple(self.output), self.steps,
-                               tuple(self.capabilities_used))
+                               tuple(self.capabilities_used), self.capability_calls)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -553,6 +561,7 @@ def main(argv: list[str] | None = None) -> int:
             "values": list(result.values),
             "steps": result.steps,
             "capabilities_used": list(result.capabilities_used),
+            "capability_calls": result.capability_calls,
         }, ensure_ascii=False, indent=2))
     else:
         for item in result.output:
