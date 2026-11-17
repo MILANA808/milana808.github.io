@@ -24,6 +24,9 @@ MAX_CALL_DEPTH = 64
 MAX_ARRAY_ITEMS = 10_000
 MAX_STRING_CHARS = 65_536
 MAX_INTEGER_BITS = 100_000
+MAX_OUTPUT_CHARS = 1_000_000
+MAX_OUTPUT_LINES = 10_000
+MAX_RESULT_ITEMS = 10_000
 
 
 class AksiRuntimeError(RuntimeError):
@@ -95,12 +98,21 @@ class Interpreter:
 
     def __init__(self, *, max_steps: int = MAX_STEPS,
                  max_call_depth: int = MAX_CALL_DEPTH,
-                 max_array_items: int = MAX_ARRAY_ITEMS):
-        if max_steps < 1 or max_call_depth < 1 or max_array_items < 1:
+                 max_array_items: int = MAX_ARRAY_ITEMS,
+                 max_output_chars: int = MAX_OUTPUT_CHARS,
+                 max_output_lines: int = MAX_OUTPUT_LINES,
+                 max_result_items: int = MAX_RESULT_ITEMS):
+        limits = (max_steps, max_call_depth, max_array_items, max_output_chars,
+                  max_output_lines, max_result_items)
+        if any(limit < 1 for limit in limits):
             raise ValueError("execution limits must be positive")
         self.max_steps = max_steps
         self.max_call_depth = max_call_depth
         self.max_array_items = max_array_items
+        self.max_output_chars = max_output_chars
+        self.max_output_lines = max_output_lines
+        self.max_result_items = max_result_items
+        self.output_chars = 0
         self.steps = 0
         self.call_depth = 0
         self.output: list[str] = []
@@ -110,7 +122,12 @@ class Interpreter:
 
     def _install_builtins(self) -> None:
         def emit(value: Any = None) -> None:
-            self.output.append(self._format(value))
+            if len(self.output) >= self.max_output_lines:
+                raise AksiRuntimeError("output line limit exceeded")
+            remaining = self.max_output_chars - self.output_chars
+            rendered = self._format(value, max_chars=remaining)
+            self.output.append(rendered)
+            self.output_chars += len(rendered)
             return None
 
         def checked_range(*args: Any) -> range:
@@ -157,14 +174,37 @@ class Interpreter:
             raise AksiRuntimeError(f"instruction budget exceeded{location}")
 
     @staticmethod
-    def _format(value: Any) -> str:
+    def _format(value: Any, *, max_chars: int = MAX_OUTPUT_CHARS,
+                depth: int = 0) -> str:
+        if max_chars < 0:
+            raise AksiRuntimeError("output character limit exceeded")
+        if depth > 32:
+            raise AksiRuntimeError("output nesting depth limit exceeded")
         if isinstance(value, bool):
-            return "true" if value else "false"
-        if value is None:
-            return "null"
-        if isinstance(value, list):
-            return "[" + ", ".join(Interpreter._format(x) for x in value) + "]"
-        return str(value)
+            rendered = "true" if value else "false"
+        elif value is None:
+            rendered = "null"
+        elif isinstance(value, list):
+            parts: list[str] = []
+            used = 2  # brackets
+            for item in value:
+                remaining = max_chars - used - (2 if parts else 0)
+                if remaining < 1:
+                    raise AksiRuntimeError("output character limit exceeded")
+                part = Interpreter._format(item, max_chars=remaining, depth=depth + 1)
+                parts.append(part)
+                used += len(part) + (2 if len(parts) > 1 else 0)
+            rendered = "[" + ", ".join(parts) + "]"
+        else:
+            rendered = str(value)
+        if len(rendered) > max_chars:
+            raise AksiRuntimeError("output character limit exceeded")
+        return rendered
+
+    def _append_result(self, value: Any) -> None:
+        if len(self.values) >= self.max_result_items:
+            raise AksiRuntimeError("expression result item limit exceeded")
+        self.values.append(self._checked_value(value))
 
     @staticmethod
     def _number(value: Any) -> bool:
@@ -380,7 +420,7 @@ class Interpreter:
         if kind == "ExpressionStatement":
             value = self._eval(get("expression"), scope)
             if value is not None:
-                self.values.append(value)
+                self._append_result(value)
             return value
         if kind == "If" or kind == "While":
             return self._eval(node, scope)
