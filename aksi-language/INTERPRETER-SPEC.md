@@ -44,6 +44,8 @@ Unsupported syntax fails explicitly; it is not silently ignored.
 - Array literal/operation size defaults to 10,000 elements.
 - Strings are capped at 65,536 characters; integer results at 100,000 bits.
 - Exponent magnitude is capped at 1,024.
+- Captured output is capped at 1,000,000 characters and 10,000 lines.
+- Retained expression results are capped at 10,000 items; formatted nesting is capped at 32 levels.
 - No `eval`, `exec`, import mechanism, filesystem, network, process, browser,
   or ambient host API is exposed by the interpreter.
 
@@ -66,7 +68,7 @@ not part of interpreter 0.1. For a minimal program, use:
 ```aksi
 fn add(x: Int, y: Int) -> Int { return x + y }
 let answer: Int = add(2, 3)
-print answer
+print(answer)
 ```
 
 Expected output: `5`.
