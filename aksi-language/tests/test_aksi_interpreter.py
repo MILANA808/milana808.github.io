@@ -75,7 +75,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
 
     def test_formats_function_values_without_exposing_closure(self):
         result = Interpreter().run(
-            "fn greet(name: String) -> String { return name }\\n"
+            "fn greet(name: String) -> String { return name }\n"
             "print(greet)"
         )
         self.assertEqual(result.output, ("<function greet>",))
