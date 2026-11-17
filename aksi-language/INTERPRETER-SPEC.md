@@ -32,6 +32,8 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
   Python objects and handles cannot cross the boundary. Arguments are copied
   before calling host code.
 - Successful calls are listed in `ExecutionResult.capabilities_used`.
+- Host capability attempts are capped at 128 per interpreter instance by default; failed attempts consume the same budget. Embedders may lower or raise the positive limit explicitly.
+- `ExecutionResult.capability_calls` reports attempted calls, while `capabilities_used` records successful calls.
 - The host remains trusted: an injected callback can perform arbitrary host
   actions. This mechanism is not an operating-system sandbox.
 
