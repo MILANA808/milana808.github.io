@@ -49,6 +49,7 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
 
   // A completed task must release exactly one slot, not two.
   const parallel = createKernel({ maxConcurrentTasks: 2, maxQueuedTasks: 4, defaultTimeoutMs: 1000 });
+  parallel.register({ id: "test.parallel", version: "1", init: async () => ({ available: true }) });
   await parallel.boot();
   const gates = [0, 1, 2].map(() => {
     let release;
