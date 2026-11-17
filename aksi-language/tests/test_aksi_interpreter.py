@@ -162,6 +162,44 @@ class AksiAstInterpreterTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must be callable"):
             Interpreter(capabilities={"clock.now": "not callable"})
 
+
+    def test_capability_can_be_granted_and_revoked(self):
+        calls = []
+        interpreter = Interpreter()
+        interpreter.grant_capability("clock.now", lambda: calls.append("called") or 42)
+        result = interpreter.run('host_call("clock.now", [])')
+        self.assertEqual(result.values, (42,))
+        self.assertTrue(interpreter.revoke_capability("clock.now"))
+        self.assertFalse(interpreter.revoke_capability("clock.now"))
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability denied: clock.now"):
+            interpreter.run('host_call("clock.now", [])')
+        self.assertEqual(calls, ["called"])
+
+    def test_revocation_during_execution_blocks_the_next_call(self):
+        interpreter = None
+        def revoke_then_return():
+            interpreter.revoke_capability("clock.now")
+            return 1
+        interpreter = Interpreter(capabilities={"clock.now": revoke_then_return})
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability denied: clock.now"):
+            interpreter.run('host_call("clock.now", [])\\nhost_call("clock.now", [])')
+        self.assertEqual(
+            interpreter.capability_trace,
+            [(1, "clock.now", "invoked"), (2, "clock.now", "returned"),
+             (3, "clock.now", "denied")],
+        )
+
+    def test_capability_trace_records_failure_without_exception_details(self):
+        def broken():
+            raise RuntimeError("private")
+        interpreter = Interpreter(capabilities={"test.fail": broken})
+        with self.assertRaises(AksiRuntimeError):
+            interpreter.run('host_call("test.fail", [])')
+        self.assertEqual(
+            interpreter.capability_trace,
+            [(1, "test.fail", "invoked"), (2, "test.fail", "failed")],
+        )
+
     def test_does_not_expose_python_dynamic_execution(self):
         with self.assertRaisesRegex(AksiRuntimeError, "unknown name"):
             Interpreter().run("eval(\"1 + 1\")")
