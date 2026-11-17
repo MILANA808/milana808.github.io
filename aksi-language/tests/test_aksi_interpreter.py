@@ -29,6 +29,37 @@ class AksiAstInterpreterTests(unittest.TestCase):
         result = Interpreter().run("1 + 2\nlet values = [3, 4]\nvalues[1]")
         self.assertEqual(result.values, (3, 4))
 
+    def test_break_and_continue_control_loop_execution(self):
+        source = (
+            "mut count = 0\\n"
+            "mut total = 0\\n"
+            "while count < 10 {\\n"
+            "  count += 1\\n"
+            "  if count == 3 { continue }\\n"
+            "  if count == 6 { break }\\n"
+            "  total += count\\n"
+            "}\\n"
+            "print(total)"
+        )
+        result = Interpreter().run(source)
+        self.assertEqual(result.output, ("12",))
+
+    def test_function_closure_reads_lexical_parent_scope(self):
+        source = (
+            "let base: Int = 4\\n"
+            "fn add_base(value: Int) -> Int { return base + value }\\n"
+            "print(add_base(3))"
+        )
+        self.assertEqual(Interpreter().run(source).output, ("7",))
+
+    def test_nested_block_binding_does_not_escape_scope(self):
+        source = (
+            "if true { let hidden: Int = 9 }\\n"
+            "print(hidden)"
+        )
+        with self.assertRaisesRegex(AksiRuntimeError, "static analysis failed"):
+            Interpreter().run(source)
+
     def test_static_analysis_runs_before_execution(self):
         with self.assertRaisesRegex(AksiRuntimeError, "static analysis failed"):
             Interpreter().run("let value: Int = \"not an integer\"")
