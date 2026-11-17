@@ -167,5 +167,36 @@ class AksiAstInterpreterTests(unittest.TestCase):
             Interpreter().run("eval(\"1 + 1\")")
 
 
+    def test_host_capability_invocation_budget_counts_attempts(self):
+        calls = []
+        def clock_now():
+            calls.append("called")
+            return 7
+        interpreter = Interpreter(
+            capabilities={"clock.now": clock_now},
+            max_capability_calls=1,
+        )
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability invocation limit exceeded"):
+            interpreter.run(
+                'host_call("clock.now", [])\nhost_call("clock.now", [])'
+            )
+        self.assertEqual(calls, ["called"])
+        self.assertEqual(interpreter.capability_calls, 1)
+
+    def test_failed_host_capability_attempt_consumes_budget(self):
+        def broken():
+            raise RuntimeError("private")
+        interpreter = Interpreter(
+            capabilities={"test.fail": broken},
+            max_capability_calls=1,
+        )
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability 'test.fail' failed"):
+            interpreter.run('host_call("test.fail", [])')
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability invocation limit exceeded"):
+            interpreter.run('host_call("test.fail", [])')
+        self.assertEqual(interpreter.capability_calls, 1)
+
+
+
 if __name__ == "__main__":
     unittest.main()
