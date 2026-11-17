@@ -65,13 +65,13 @@ class AksiAstInterpreterTests(unittest.TestCase):
             Interpreter(max_output_chars=4).run('print("12345")')
 
     def test_enforces_output_line_budget(self):
-        source = "print(1)\\nprint(2)\\nprint(3)"
+        source = "print(1)\nprint(2)\nprint(3)"
         with self.assertRaisesRegex(AksiRuntimeError, "output line limit"):
             Interpreter(max_output_lines=2).run(source)
 
     def test_enforces_expression_result_retention_budget(self):
         with self.assertRaisesRegex(AksiRuntimeError, "result item limit"):
-            Interpreter(max_result_items=1).run("1\\n2")
+            Interpreter(max_result_items=1).run("1\n2")
 
     def test_rejects_excessive_output_nesting(self):
         nested = "[" * 34 + "1" + "]" * 34
