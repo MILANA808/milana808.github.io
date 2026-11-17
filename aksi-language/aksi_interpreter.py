@@ -184,6 +184,8 @@ class Interpreter:
             rendered = "true" if value else "false"
         elif value is None:
             rendered = "null"
+        elif isinstance(value, _Function):
+            rendered = f"<function {value.name}>"
         elif isinstance(value, list):
             parts: list[str] = []
             used = 2  # brackets
