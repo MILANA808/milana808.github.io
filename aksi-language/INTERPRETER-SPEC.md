@@ -28,10 +28,17 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 
 - Capabilities are injected by the embedding host as a mapping from stable IDs
   to callables. No capability is available by default.
+- The host can grant a new capability or revoke an existing grant at runtime.
+  Revocation takes effect before the next host_call; duplicate grants are
+  rejected rather than silently replacing a handler.
+- A deterministic trace records invocation sequence and status without logging
+  arguments or returned data (invoked, returned, failed, denied, limit_denied,
+  rejected_result).
 - Arguments and results are restricted to bounded scalar/list data; arbitrary
   Python objects and handles cannot cross the boundary. Arguments are copied
   before calling host code.
-- Successful calls are listed in `ExecutionResult.capabilities_used`.
+- Successful calls are listed in `ExecutionResult.capabilities_used`; total
+  attempted calls and the capability trace are returned too.
 - Host capability attempts are capped at 128 per interpreter instance by default; failed attempts consume the same budget. Embedders may lower or raise the positive limit explicitly.
 - `ExecutionResult.capability_calls` reports attempted calls, while `capabilities_used` records successful calls.
 - The host remains trusted: an injected callback can perform arbitrary host
