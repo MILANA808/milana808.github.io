@@ -13,6 +13,7 @@ AKSI Q is an evolving programming-language project. The current runtime is still
 
 ```bash
 python aksi_q.py examples/first.aksi
+python aksi_interpreter.py examples/ast-interpreter.aksi
 python -m unittest discover -s tests -v
 ```
 
@@ -65,8 +66,7 @@ The shared `conformance/common-v1.json` corpus is executed by both legacy
 runtimes in CI and compares arithmetic, boolean expressions, vectors, concept
 relations and state-vector probabilities. The separate quantum differential
 test compares selected circuit amplitudes. This is a tested common subset,
-not full language parity. The new resolver/type-checker suites are separate
-Python tests and must pass their own CI run before being considered validated.
+not full language parity. The new resolver/type-checker/interpreter suites run in the AKSI Q language CI workflow. The isolated AST interpreter example is also executed there.
 
 ## Declarative UI profile v0.4
 
