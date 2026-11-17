@@ -77,7 +77,11 @@ def _type_name(node: Node | None) -> str:
 
 
 def _same_or_any(left: str, right: str) -> bool:
-    return left == right or "Any" in (left, right) or "Unknown" in (left, right)
+    if left == right or "Any" in (left, right) or "Unknown" in (left, right):
+        return True
+    if left.startswith("[") and left.endswith("]") and right.startswith("[") and right.endswith("]"):
+        return _same_or_any(left[1:-1], right[1:-1])
+    return False
 
 
 class TypeChecker:
