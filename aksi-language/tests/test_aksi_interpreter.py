@@ -8,7 +8,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
         result = Interpreter().run(
             "fn add(x: Int, y: Int) -> Int { return x + y }\n"
             "let answer: Int = add(2, 3)\n"
-            "print answer"
+            "print(answer)"
         )
         self.assertEqual(result.output, ("5",))
         self.assertEqual(result.values, ())
@@ -18,7 +18,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
         result = Interpreter().run(
             "mut count: Int = 0\n"
             "while count < 4 {\n"
-            "  if count == 2 { print count }\n"
+            "  if count == 2 { print(count) }\n"
             "  count += 1\n"
             "}\n"
             "print count"
@@ -26,7 +26,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
         self.assertEqual(result.output, ("2", "4"))
 
     def test_expression_statement_results_are_returned(self):
-        result = Interpreter().run("1 + 2\n[3, 4][1]")
+        result = Interpreter().run("1 + 2\nlet values = [3, 4]\nvalues[1]")
         self.assertEqual(result.values, (3, 4))
 
     def test_static_analysis_runs_before_execution(self):
@@ -46,7 +46,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
             "fn descend(n: Int) -> Int {\n"
             "  if n == 0 { return 0 } else { return descend(n - 1) }\n"
             "}\n"
-            "print descend(20)"
+            "print(descend(20))"
         )
         with self.assertRaisesRegex(AksiRuntimeError, "call depth limit"):
             Interpreter(max_call_depth=5).run(source)
