@@ -126,7 +126,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
             calls.append("called")
             return 123
         result = Interpreter(capabilities={"clock.now": clock_now}).run(
-            'let now: Any = host_call("clock.now", [])\\nprint(now)'
+            'let now: Any = host_call("clock.now", [])\nprint(now)'
         )
         self.assertEqual(result.output, ("123",))
         self.assertEqual(result.capabilities_used, ("clock.now",))
