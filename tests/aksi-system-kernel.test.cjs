@@ -47,6 +47,37 @@ const { createKernel, version } = require("../modules/aksi-system-kernel.js");
   const afterTimeout = await kernel.runTask("after-timeout", async () => "slot-released");
   assert.equal(afterTimeout, "slot-released", "timed-out handler must not permanently occupy a task slot");
 
+  // A completed task must release exactly one slot, not two.
+  const parallel = createKernel({ maxConcurrentTasks: 2, maxQueuedTasks: 4, defaultTimeoutMs: 1000 });
+  await parallel.boot();
+  const gates = [0, 1, 2].map(() => {
+    let release;
+    const promise = new Promise(resolve => { release = resolve; });
+    return { promise, release };
+  });
+  let activeWorkers = 0;
+  let maxActiveWorkers = 0;
+  const worker = gate => async () => {
+    activeWorkers++;
+    maxActiveWorkers = Math.max(maxActiveWorkers, activeWorkers);
+    await gate.promise;
+    activeWorkers--;
+    return "released";
+  };
+  const p1 = parallel.runTask("parallel-1", worker(gates[0]));
+  const p2 = parallel.runTask("parallel-2", worker(gates[1]));
+  const p3 = parallel.runTask("parallel-3", worker(gates[2]));
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(activeWorkers, 2, "only two workers may start initially");
+  gates[0].release();
+  await p1;
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(activeWorkers, 2, "third worker may start only after one slot is released");
+  assert.equal(maxActiveWorkers, 2, "active worker count must never exceed configured concurrency");
+  gates[1].release();
+  gates[2].release();
+  await Promise.all([p2, p3]);
+
   const eventsStatus = kernel.status();
   assert.equal(eventsStatus.tasks.running, 0);
   assert.ok(events.includes("kernel.boot.completed"));
