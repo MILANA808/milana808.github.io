@@ -76,7 +76,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
     def test_rejects_excessive_output_nesting(self):
         nested = "[" * 34 + "1" + "]" * 34
         with self.assertRaisesRegex(AksiRuntimeError, "nesting depth limit"):
-            Interpreter().run(nested, analyze=False)
+            Interpreter().run("print(" + nested + ")", analyze=False)
 
     def test_does_not_expose_python_dynamic_execution(self):
         with self.assertRaisesRegex(AksiRuntimeError, "unknown name"):
