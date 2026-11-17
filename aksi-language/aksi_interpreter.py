@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import argparse
+from copy import deepcopy
+import re
 import json
 import math
 from pathlib import Path
@@ -38,6 +40,7 @@ class ExecutionResult:
     values: tuple[Any, ...]
     output: tuple[str, ...]
     steps: int
+    capabilities_used: tuple[str, ...] = ()
 
 
 @dataclass(slots=True)
@@ -101,7 +104,8 @@ class Interpreter:
                  max_array_items: int = MAX_ARRAY_ITEMS,
                  max_output_chars: int = MAX_OUTPUT_CHARS,
                  max_output_lines: int = MAX_OUTPUT_LINES,
-                 max_result_items: int = MAX_RESULT_ITEMS):
+                 max_result_items: int = MAX_RESULT_ITEMS,
+                 capabilities: dict[str, Callable[..., Any]] | None = None):
         limits = (max_steps, max_call_depth, max_array_items, max_output_chars,
                   max_output_lines, max_result_items)
         if any(limit < 1 for limit in limits):
@@ -118,7 +122,49 @@ class Interpreter:
         self.output: list[str] = []
         self.values: list[Any] = []
         self.global_scope = _Scope()
+        self.capabilities = self._validate_capabilities(capabilities or {})
+        self.capabilities_used: list[str] = []
         self._install_builtins()
+
+    @staticmethod
+    def _validate_capabilities(capabilities: dict[str, Callable[..., Any]]) -> dict[str, Callable[..., Any]]:
+        if not isinstance(capabilities, dict) or len(capabilities) > 32:
+            raise ValueError("capabilities must be a dictionary with at most 32 entries")
+        validated: dict[str, Callable[..., Any]] = {}
+        for name, handler in capabilities.items():
+            if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_.-]{0,63}", name):
+                raise ValueError("invalid capability identifier")
+            if not callable(handler):
+                raise ValueError(f"capability '{name}' must be callable")
+            validated[name] = handler
+        return validated
+
+    @classmethod
+    def _validate_host_value(cls, value: Any, *, depth: int = 0) -> Any:
+        if depth > 16:
+            raise AksiRuntimeError("host capability value nesting limit exceeded")
+        if value is None or type(value) in (bool, int, float, str):
+            return cls._format(value, max_chars=MAX_STRING_CHARS) if isinstance(value, str) else value
+        if isinstance(value, list) and len(value) <= MAX_ARRAY_ITEMS:
+            return [cls._validate_host_value(item, depth=depth + 1) for item in value]
+        raise AksiRuntimeError("host capabilities accept and return only bounded scalar/list values")
+
+    def _host_call(self, name: Any, args: Any) -> Any:
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9_.-]{0,63}", name):
+            raise AksiRuntimeError("invalid host capability identifier")
+        if not isinstance(args, list) or len(args) > 64:
+            raise AksiRuntimeError("host_call expects an argument array with at most 64 items")
+        handler = self.capabilities.get(name)
+        if handler is None:
+            raise AksiRuntimeError(f"host capability denied: {name}")
+        safe_args = self._validate_host_value(args)
+        try:
+            result = handler(*deepcopy(safe_args))
+        except Exception as exc:
+            raise AksiRuntimeError(f"host capability '{name}' failed: {type(exc).__name__}") from exc
+        safe_result = self._validate_host_value(result)
+        self.capabilities_used.append(name)
+        return self._checked_value(safe_result)
 
     def _install_builtins(self) -> None:
         def emit(value: Any = None) -> None:
@@ -140,6 +186,7 @@ class Interpreter:
 
         builtins: dict[str, Callable[..., Any]] = {
             "print": emit,
+            "host_call": self._host_call,
             "assert": self._assert,
             "abs": abs,
             "min": min,
@@ -466,7 +513,8 @@ class Interpreter:
         module = parse(source)
         for declaration in module.get("items"):
             self._exec(declaration, self.global_scope)
-        return ExecutionResult(tuple(self.values), tuple(self.output), self.steps)
+        return ExecutionResult(tuple(self.values), tuple(self.output), self.steps,
+                               tuple(self.capabilities_used))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -492,6 +540,7 @@ def main(argv: list[str] | None = None) -> int:
             "output": list(result.output),
             "values": list(result.values),
             "steps": result.steps,
+            "capabilities_used": list(result.capabilities_used),
         }, ensure_ascii=False, indent=2))
     else:
         for item in result.output:
