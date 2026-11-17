@@ -28,6 +28,7 @@ BUILTIN_FUNCTIONS = {
     "round": (("Float",), "Int"),
     "complex": (("Any",), "Any"),
     "print": (("Any",), "Unit"),
+    "host_call": (("String", "[Any]"), "Any"),
 }
 BUILTIN_TYPES = frozenset({"Int", "Float", "Bool", "String", "Unit", "Any"})
 
