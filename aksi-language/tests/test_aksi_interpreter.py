@@ -167,7 +167,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
         calls = []
         interpreter = Interpreter()
         interpreter.grant_capability("clock.now", lambda: calls.append("called") or 42)
-            interpreter.run('host_call("clock.now", [])\nhost_call("clock.now", [])')
+        result = interpreter.run('host_call("clock.now", [])')
         self.assertEqual(result.values, (42,))
         self.assertTrue(interpreter.revoke_capability("clock.now"))
         self.assertFalse(interpreter.revoke_capability("clock.now"))
@@ -182,7 +182,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
             return 1
         interpreter = Interpreter(capabilities={"clock.now": revoke_then_return})
         with self.assertRaisesRegex(AksiRuntimeError, "host capability denied: clock.now"):
-            interpreter.run('host_call("clock.now", [])\\nhost_call("clock.now", [])')
+            interpreter.run('host_call("clock.now", [])\nhost_call("clock.now", [])')
         self.assertEqual(
             interpreter.capability_trace,
             [(1, "clock.now", "invoked"), (2, "clock.now", "returned"),
