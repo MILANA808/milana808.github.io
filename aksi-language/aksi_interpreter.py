@@ -122,7 +122,7 @@ class Interpreter:
         self.output: list[str] = []
         self.values: list[Any] = []
         self.global_scope = _Scope()
-        self.capabilities = self._validate_capabilities(capabilities or {})
+        self.capabilities = self._validate_capabilities({} if capabilities is None else capabilities)
         self.capabilities_used: list[str] = []
         self._install_builtins()
 
@@ -143,8 +143,20 @@ class Interpreter:
     def _validate_host_value(cls, value: Any, *, depth: int = 0) -> Any:
         if depth > 16:
             raise AksiRuntimeError("host capability value nesting limit exceeded")
-        if value is None or type(value) in (bool, int, float, str):
-            return cls._format(value, max_chars=MAX_STRING_CHARS) if isinstance(value, str) else value
+        if value is None or type(value) is bool:
+            return value
+        if type(value) is int:
+            if value.bit_length() > MAX_INTEGER_BITS:
+                raise AksiRuntimeError("host capability integer exceeds runtime size limit")
+            return value
+        if type(value) is float:
+            if not math.isfinite(value):
+                raise AksiRuntimeError("host capability returned a non-finite float")
+            return value
+        if isinstance(value, str):
+            if len(value) > MAX_STRING_CHARS:
+                raise AksiRuntimeError("host capability string exceeds runtime size limit")
+            return value
         if isinstance(value, list) and len(value) <= MAX_ARRAY_ITEMS:
             return [cls._validate_host_value(item, depth=depth + 1) for item in value]
         raise AksiRuntimeError("host capabilities accept and return only bounded scalar/list values")
