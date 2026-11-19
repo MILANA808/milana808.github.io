@@ -197,6 +197,32 @@ class AksiAstInterpreterTests(unittest.TestCase):
         self.assertEqual(calls, [1])
         self.assertEqual(interpreter.capability_call_counts["counter.read"], 1)
 
+
+    def test_strict_capability_mode_survives_revocation_and_requires_contracts(self):
+        from aksi_interpreter import CapabilitySpec
+        interpreter = Interpreter(
+            capabilities={
+                "clock.now": lambda: 1,
+                "counter.read": lambda: 2,
+            },
+            capability_specs={
+                "clock.now": CapabilitySpec((), "Int", ("read",)),
+                "counter.read": CapabilitySpec((), "Int", ("read",)),
+            },
+        )
+        self.assertTrue(interpreter.revoke_capability("clock.now"))
+        with self.assertRaisesRegex(AksiRuntimeError, "typed ABI contract missing"):
+            interpreter.run('host_call("clock.now", [])')
+        with self.assertRaisesRegex(ValueError, "requires an ABI contract"):
+            interpreter.grant_capability("clock.new", lambda: 3)
+        interpreter.grant_capability(
+            "clock.new", lambda: 3,
+            spec=CapabilitySpec((), "Int", ("read",)),
+        )
+        self.assertEqual(
+            interpreter.run('host_call("clock.new", [])').values, (3,)
+        )
+
     def test_typed_capability_registry_rejects_unknown_or_invalid_contracts(self):
         from aksi_interpreter import CapabilitySpec
         with self.assertRaisesRegex(ValueError, "unsupported ABI type"):
