@@ -11,7 +11,7 @@ from typing import Any
 from aksi_ir import IRModule, IRNode, validate_tir
 from aksi_interpreter import (
     AksiRuntimeError, ExecutionResult, Interpreter, _Break, _Continue,
-    _Function, _Scope, _VariantConstructor,
+    _Function, _Return, _Scope, _VariantConstructor,
 )
 
 
