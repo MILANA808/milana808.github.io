@@ -1,10 +1,10 @@
-"""AKSI Q compiler front-end: source -> static analysis -> typed IR."""
+"""AKSI Q compiler front-end: one AST -> analysis -> canonical TIR."""
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 import json
 
-from aksi_analyze import AnalysisResult, analyze_source
+from aksi_analyze import AnalysisResult, analyze_module
 from aksi_frontend import parse
 from aksi_ir import IRModule, lower
 
@@ -20,7 +20,7 @@ class CompileResult:
 
     def to_dict(self) -> dict:
         return {
-            "schema": "AKSI-Q-COMPILE/0.1",
+            "schema": "AKSI-Q-COMPILE/0.2",
             "ok": self.ok,
             "analysis": {
                 "schema": self.analysis.schema,
@@ -31,15 +31,16 @@ class CompileResult:
 
 
 def compile_source(source: str) -> CompileResult:
-    """Compile source through all current static passes into prototype TIR.
+    """Parse exactly once, analyze that AST, and lower the same tree to TIR.
 
-    No executable bytecode is emitted yet. Unknown expression types remain
-    explicit in the IR and are not silently treated as proven types.
+    The current TIR is a versioned prototype, not yet a complete executable
+    representation. Compilation stops before lowering when static passes fail.
     """
-    analysis = analyze_source(source)
+    module = parse(source)
+    analysis = analyze_module(module)
     if not analysis.ok:
         return CompileResult(analysis, None)
-    return CompileResult(analysis, lower(parse(source)))
+    return CompileResult(analysis, lower(module))
 
 
 def compile_json(source: str) -> str:
