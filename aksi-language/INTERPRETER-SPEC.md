@@ -10,9 +10,11 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 
 - Function declarations with positional parameters and lexical closures.
 - `let`, `const`, and initialized `mut` bindings.
-- `return`, `if` / `else`, `while`, `break`, and `continue`.
+- `return`, `if` / `else`, `while`, `for`, `break`, and `continue`.
+- Generic function declarations and calls; generic parameters are erased at runtime after static analysis.
 - Expression statements, the `print(...)` host-free output builtin, and
   `host_call(name, args)` for explicitly injected host capabilities.
+- Enum declarations register bounded variant constructors; block-bodied `match` supports wildcard, binding, literal, and simple tuple-constructor patterns.
 - Public declaration wrappers are unwrapped and executed.
 
 ## Supported expressions
@@ -59,8 +61,9 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 
 - Member access, imports, module loading, FFI, I/O, networking, processes,
   reflection, dynamic code execution, and arbitrary host capabilities.
-- Algebraic data type construction/pattern matching, `for`, async tasks,
-  generators, exceptions in source code, and bytecode/WASM compilation.
+- Struct construction, module loading/import execution, async tasks, generators,
+  source-level exception handling, and bytecode/WASM compilation.
+- Nested patterns, pattern guards, and compile-time exhaustive-match checking.
 - Uninitialized mutable bindings.
 - Assignment to array elements or object members.
 
