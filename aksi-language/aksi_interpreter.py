@@ -191,6 +191,10 @@ class Interpreter:
                 for effect in spec.effects
             ) or len(set(spec.effects)) != len(spec.effects):
                 raise ValueError(f"invalid effects for capability '{name}'")
+            if "pure" in spec.effects and len(spec.effects) > 1:
+                raise ValueError(
+                    f"pure effect cannot be combined with other effects for capability '{name}'"
+                )
             if type(spec.max_calls) is not int or spec.max_calls < 1:
                 raise ValueError(f"invalid call quota for capability '{name}'")
             validated[name] = spec
