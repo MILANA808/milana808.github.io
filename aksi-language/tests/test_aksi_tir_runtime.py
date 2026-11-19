@@ -42,7 +42,10 @@ class TIRRuntimeTests(unittest.TestCase):
         self.execute_both(
             "type Option = None | Some(Int)\n"
             "let value = Some(7)\n"
-            "match value { Some(number) => { print(number) } None => { print(0) } }"
+            "match value {\\n"
+            "  Some(number) => { print(number) }\\n"
+            "  None => { print(0) }\\n"
+            "}" 
         )
 
     def test_instruction_budget_is_enforced(self):
