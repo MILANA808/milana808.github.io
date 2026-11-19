@@ -6,6 +6,7 @@ syntax nodes. This module never evaluates programs or accesses host resources.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from hashlib import sha256
 from typing import Any
 
 from aksi_lexer import LexError, Span, Token, lex
@@ -16,6 +17,7 @@ class Node:
     kind: str
     span: Span
     fields: tuple[tuple[str, Any], ...]
+    node_id: str
 
     def get(self, name: str, default: Any = None) -> Any:
         for key, value in self.fields:
@@ -50,8 +52,10 @@ class Parser:
     }
     RIGHT_ASSOC = {"=", "+=", "-=", "**"}
 
-    def __init__(self, source: str):
+    def __init__(self, source: str, *, recover: bool = False):
         self.source = source
+        self.recover = recover
+        self.diagnostics: list[ParseError] = []
         try:
             self.tokens = lex(source)
         except LexError:
@@ -91,7 +95,8 @@ class Parser:
     @staticmethod
     def node(kind: str, start: Span, end: Span, **fields: Any) -> Node:
         span = Span(start.start, end.end, start.line, start.column, end.end_line, end.end_column)
-        return Node(kind, span, tuple(fields.items()))
+        identity = sha256(("AKSI-Q-AST/2:%s:%d:%d" % (kind, span.start, span.end)).encode("utf-8")).hexdigest()[:20]
+        return Node(kind, span, tuple(fields.items()), identity)
 
     def skip_newlines(self) -> None:
         while self.peek().kind == "NEWLINE" or self.at(";"):
@@ -116,10 +121,29 @@ class Parser:
             start = module_start.span
         items = []
         while self.peek().kind != "EOF":
-            items.append(self.parse_declaration())
-            self.finish_statement()
+            before = self.pos
+            try:
+                items.append(self.parse_declaration())
+                self.finish_statement()
+            except ParseError as error:
+                if not self.recover:
+                    raise
+                self.diagnostics.append(error)
+                items.append(self.recover_statement(error))
+            if self.pos == before and self.peek().kind != "EOF":
+                self.take()
         end = self.peek().span
         return self.node("Module", start, end, name=module, items=tuple(items))
+
+    def recover_statement(self, error: ParseError) -> Node:
+        """Skip malformed input to a statement boundary."""
+        start = self.peek().span
+        while self.peek().kind not in ("EOF", "NEWLINE") and not self.at(";") and not self.at("}"):
+            self.take()
+        end = self.peek().span
+        if self.peek().kind == "NEWLINE" or self.at(";"):
+            self.skip_newlines()
+        return self.node("Error", start, end, message=error.message, expected=error.expected)
 
     def parse_path(self) -> str:
         first = self.expect_kind("IDENT", "module name")
@@ -358,8 +382,17 @@ class Parser:
         self.skip_newlines()
         statements = []
         while not self.at("}") and self.peek().kind != "EOF":
-            statements.append(self.parse_declaration())
-            self.finish_statement()
+            before = self.pos
+            try:
+                statements.append(self.parse_declaration())
+                self.finish_statement()
+            except ParseError as error:
+                if not self.recover:
+                    raise
+                self.diagnostics.append(error)
+                statements.append(self.recover_statement(error))
+            if self.pos == before and not self.at("}") and self.peek().kind != "EOF":
+                self.take()
         end = self.expect("}")
         return self.node("Block", start.span, end.span, statements=tuple(statements))
 
@@ -438,6 +471,7 @@ def _serialize_value(value: Any) -> Any:
     if isinstance(value, Node):
         return {
             "kind": value.kind,
+            "id": value.node_id,
             "span": _serialize_value(value.span),
             "fields": {name: _serialize_value(item) for name, item in value.fields},
         }
@@ -465,9 +499,22 @@ def serialize_ast(node: Node) -> dict[str, Any]:
     """Serialize an AST with a stable schema marker for conformance tooling."""
     if not isinstance(node, Node):
         raise TypeError("serialize_ast expects a Node")
-    return {"schema": "AKSI-Q-AST/1", "root": _serialize_value(node)}
+    return {"schema": "AKSI-Q-AST/2", "root": _serialize_value(node)}
+
+
+@dataclass(frozen=True, slots=True)
+class ParseResult:
+    tree: Node
+    diagnostics: tuple[ParseError, ...]
 
 
 def parse(source: str) -> Node:
-    """Parse AKSI Q source into an immutable syntax tree."""
+    """Parse AKSI Q source strictly; raise the first syntax error."""
     return Parser(source).parse()
+
+
+def parse_recovering(source: str) -> ParseResult:
+    """Return a partial syntax tree and all recoverable syntax errors."""
+    parser = Parser(source, recover=True)
+    tree = parser.parse()
+    return ParseResult(tree, tuple(parser.diagnostics))
