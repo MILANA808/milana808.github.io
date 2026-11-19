@@ -53,8 +53,8 @@ class TypeCheckerTests(unittest.TestCase):
     def test_collection_builtins_have_precise_types(self):
         self.assertEqual(self.codes(
             "let total: Int = sum([1, 2, 3])\n"
-            "let smallest: String = min([\\"a\\", \\"b\\"])\n"
-            "let count: Int = len(\\"aksi\\")"
+            'let smallest: String = min(["a", "b"])\n'
+            'let count: Int = len("aksi)'
         ), [])
 
     def test_collection_builtins_reject_invalid_inputs(self):
