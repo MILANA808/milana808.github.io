@@ -75,5 +75,49 @@ fn add(a: Int, b: Int) -> Int {
             serialize_ast({"kind": "Module"})
 
 
+
+    def test_parses_generic_functions_structs_and_enum_payloads(self):
+        tree = parse("""struct Box<T> {
+    value: T
+}
+type Option<T> = None | Some(T)
+fn identity<T>(value: T) -> T { return value }
+""")
+        items = tree.get("items")
+        self.assertEqual(items[0].kind, "StructDeclaration")
+        self.assertEqual(items[0].get("type_params"), ("T",))
+        self.assertEqual(items[1].kind, "TypeDeclaration")
+        self.assertEqual(items[1].get("type_params"), ("T",))
+        self.assertEqual(items[2].get("type_params"), ("T",))
+
+    def test_parses_import_alias_and_for_loop(self):
+        tree = parse("""import std.math as math
+fn total(values: [Int]) {
+    for item in values {
+        print(item)
+    }
+}
+""")
+        self.assertEqual(tree.get("items")[0].kind, "Import")
+        self.assertEqual(tree.get("items")[0].get("alias"), "math")
+        loop = tree.get("items")[1].get("body").get("statements")[0]
+        self.assertEqual(loop.kind, "For")
+        self.assertEqual(loop.get("name"), "item")
+
+    def test_parses_match_with_constructor_and_wildcard_patterns(self):
+        tree = parse("""type Option = None | Some(Int)
+fn inspect(value: Option) {
+    match value {
+        Some(item) => { print(item) }
+        _ => { print(0) }
+    }
+}
+""")
+        match = tree.get("items")[1].get("body").get("statements")[0]
+        self.assertEqual(match.kind, "Match")
+        self.assertEqual(match.get("arms")[0][0].kind, "ConstructorPattern")
+        self.assertEqual(match.get("arms")[1][0].kind, "WildcardPattern")
+
+
 if __name__ == "__main__":
     unittest.main()
