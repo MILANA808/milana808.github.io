@@ -62,12 +62,13 @@ fn add(a: Int, b: Int) -> Int {
     def test_ast_serialization_has_versioned_schema_and_source_spans(self):
         tree = parse("fn add(a: Int) -> Int { return a + 1 }")
         serialized = serialize_ast(tree)
-        self.assertEqual(serialized["schema"], "AKSI-Q-AST/1")
+        self.assertEqual(serialized["schema"], "AKSI-Q-AST/2")
         self.assertEqual(serialized["root"]["kind"], "Module")
         function = serialized["root"]["fields"]["items"][0]
         self.assertEqual(function["kind"], "Function")
         self.assertEqual(function["span"]["line"], 1)
         self.assertEqual(function["fields"]["name"], "add")
+        self.assertRegex(function["id"], r"^[0-9a-f]{20}$")
         self.assertEqual(json.loads(json.dumps(serialized)), serialized)
 
     def test_ast_serialization_rejects_non_nodes(self):
@@ -118,6 +119,25 @@ fn inspect(value: Option) {
         self.assertEqual(match.get("arms")[0][0].kind, "ConstructorPattern")
         self.assertEqual(match.get("arms")[1][0].kind, "WildcardPattern")
 
+
+    def test_ast_ids_are_deterministic_for_same_source(self):
+        first = serialize_ast(parse("let value = 10"))
+        second = serialize_ast(parse("let value = 10"))
+        self.assertEqual(first, second)
+
+    def test_parser_recovers_and_reports_multiple_errors(self):
+        from aksi_frontend import parse_recovering
+        source = "let broken =\nlet good = 1\nfn also_broken(x Int) {}\nlet last = 2"
+        result = parse_recovering(source)
+        self.assertGreaterEqual(len(result.diagnostics), 2)
+        self.assertEqual(result.tree.kind, "Module")
+        self.assertTrue(any(node.kind == "Error" for node in result.tree.get("items")))
+        self.assertTrue(any(node.kind == "Binding" and node.get("name") == "last"
+                            for node in result.tree.get("items")))
+
+    def test_strict_parser_still_raises_first_error(self):
+        with self.assertRaises(ParseError):
+            parse("let broken =\nlet good = 1")
 
 if __name__ == "__main__":
     unittest.main()
