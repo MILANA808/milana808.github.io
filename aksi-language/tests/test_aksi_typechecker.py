@@ -50,6 +50,25 @@ class TypeCheckerTests(unittest.TestCase):
         self.assertIn("E_INDEX_TYPE",
                       self.codes("let values = [1, 2]\nlet item = values[true]"))
 
+    def test_collection_builtins_have_precise_types(self):
+        self.assertEqual(self.codes(
+            "let total: Int = sum([1, 2, 3])\n"
+            "let smallest: String = min([\\"a\\", \\"b\\"])\n"
+            "let count: Int = len(\\"aksi\\")"
+        ), [])
+
+    def test_collection_builtins_reject_invalid_inputs(self):
+        self.assertIn("E_BUILTIN_ARGUMENT_TYPE",
+                      self.codes('let total = sum(["one", "two"])'))
+        self.assertIn("E_BUILTIN_ARGUMENT_TYPE",
+                      self.codes("let count = len(42)"))
+
+    def test_dynamic_host_builtins_are_not_lowerable(self):
+        self.assertIn("E_UNSUPPORTED_DYNAMIC_BUILTIN",
+                      self.codes('let value = host_call("clock", [])'))
+        self.assertIn("E_UNSUPPORTED_DYNAMIC_BUILTIN",
+                      self.codes("let value = complex(1.0, 2.0)"))
+
     def test_accepts_builtin_math_function(self):
         self.assertEqual(self.codes("let result: Float = sqrt(4.0)"), [])
 
