@@ -10,7 +10,7 @@ import sys
 from aksi_frontend import Node, ParseError, parse
 from aksi_lexer import LexError
 from aksi_resolver import resolve
-from aksi_typechecker import check
+from aksi_typechecker import check_with_types
 from aksi_flowcheck import check as check_flow
 
 
@@ -27,6 +27,7 @@ class AnalysisDiagnostic:
 class AnalysisResult:
     schema: str
     diagnostics: tuple[AnalysisDiagnostic, ...]
+    inferred_types: tuple[tuple[str, str], ...] = ()
 
     @property
     def ok(self) -> bool:
@@ -38,12 +39,12 @@ def analyze_module(module: Node) -> AnalysisResult:
     if not isinstance(module, Node) or module.kind != "Module":
         raise TypeError("analyze_module() expects a Module AST node")
     resolved = resolve(module)
-    typed = check(module)
+    typed = check_with_types(module)
     flow = check_flow(module)
 
     combined: list[AnalysisDiagnostic] = []
     seen: set[tuple[str, int, int]] = set()
-    for stage, diagnostics in (("resolver", resolved), ("typechecker", typed), ("control_flow", flow)):
+    for stage, diagnostics in (("resolver", resolved), ("typechecker", typed.diagnostics), ("control_flow", flow)):
         for diagnostic in diagnostics:
             key = (diagnostic.code, diagnostic.line, diagnostic.column)
             if key in seen:
@@ -54,7 +55,7 @@ def analyze_module(module: Node) -> AnalysisResult:
                 diagnostic.line, diagnostic.column,
             ))
     combined.sort(key=lambda item: (item.line, item.column, item.stage, item.code))
-    return AnalysisResult("AKSI-Q-ANALYSIS/2", tuple(combined))
+    return AnalysisResult("AKSI-Q-ANALYSIS/3", tuple(combined), typed.node_types)
 
 
 def analyze_source(source: str) -> AnalysisResult:
@@ -78,6 +79,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({
             "schema": result.schema,
             "ok": result.ok,
+            "inferred_types": dict(result.inferred_types),
             "diagnostics": [asdict(item) for item in result.diagnostics],
         }, ensure_ascii=False, indent=2))
     else:
