@@ -30,10 +30,12 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
   to callables. No capability is available by default.
 - The host can grant a new capability or revoke an existing grant at runtime.
   Revocation takes effect before the next host_call; duplicate grants are
-  rejected rather than silently replacing a handler.
+  rejected rather than silently replacing a handler. Revocation clears that
+  grant's per-capability quota counter; a later explicit re-grant starts a
+  fresh quota for the new grant.
 - A deterministic trace records invocation sequence and status without logging
   arguments or returned data (invoked, returned, failed, denied, limit_denied,
-  rejected_result).
+  rejected_result, contract_denied, argument_denied, quota_denied).
 - Optional typed ABI contracts declare positional argument types, result type,
   effect labels, and a per-capability call quota. When a typed registry is
   supplied, every granted capability must have a contract and every call is
@@ -47,8 +49,11 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 - Host capability attempts are capped at 128 per interpreter instance by default; failed attempts consume the same budget. Embedders may lower or raise the positive limit explicitly.
 - `ExecutionResult.capability_calls` reports attempted calls, while `capabilities_used` records successful calls.
 - Effect labels are declarative metadata for host policy and audit; they do not
-  inspect or constrain callback internals. The host remains trusted: an injected
-  callback can perform arbitrary host actions. This is not an OS sandbox.
+  inspect or constrain callback internals. The `pure` label is exclusive and
+  cannot be combined with other effect labels. Per-capability quotas count
+  attempted invocations, including handler failures. The host remains trusted:
+  an injected callback can perform arbitrary host actions. This is not an OS
+  sandbox.
 
 ## Deliberately rejected / not implemented
 
