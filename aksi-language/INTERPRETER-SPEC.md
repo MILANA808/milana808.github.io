@@ -1,9 +1,9 @@
-# AKSI Q AST interpreter 0.1
+# AKSI Q AST and TIR interpreters 0.1
 
 ## Status
 
 This is an isolated, capability-free interpreter prototype for a deliberately
-small subset of the shared `AKSI-Q-AST/1` syntax tree. It is not yet a
+small subset of the shared `AKSI-Q-AST/2` syntax tree. It is not yet a
 replacement for `aksi_q.py`, the browser runtime, or the public website.
 
 ## Supported statements
@@ -108,6 +108,54 @@ print(answer)
 
 Expected output: `5`.
 
+## Native TIR evaluator 0.1
+
+`aksi_tir_runtime.py` adds a separate bounded evaluator for the currently
+executable TIR subset. It dispatches directly on `IRNode.op` and reads typed
+IR fields; it does not rebuild an AST or call the AST interpreter to execute
+the program.
+
+- Entry point: `TIRInterpreter().run(ir_module)`. The module is validated
+  with `validate_tir()` before execution.
+- The tested subset includes literals, names, arrays, arithmetic and Boolean
+  operators, indexing, built-in calls, functions/closures, bindings, returns,
+  conditionals, `while`/`for` loops, loop control, enum constructors,
+  constructor/binding/literal patterns, and output.
+- The TIR evaluator uses the same explicit execution limits and bounded value
+  helpers as the AST reference interpreter. The parity suite compares output
+  and retained values for representative programs.
+- `host_call` is deliberately absent from TIR execution. Host capabilities
+  remain an AST-interpreter feature until the compiler has a statically checked
+  TIR effect and ABI contract. Passing capabilities to `TIRInterpreter` is
+  rejected.
+- Member access, struct construction, imports/module loading, async execution,
+  bytecode and WASM remain unsupported. Unsupported TIR operations fail
+  explicitly.
+
+The TIR evaluator is a first executable milestone, not full language
+conformance or a production sandbox. The AST and TIR evaluators are separate
+implementations; their current parity tests cover only the listed test cases,
+not every program or every runtime edge case.
+
+Run the TIR parity suite with:
+
+```bash
+cd aksi-language
+python -m unittest discover -s tests -v
+```
+
+Example:
+
+```python
+from aksi_compile import compile_source
+from aksi_tir_runtime import TIRInterpreter
+
+compiled = compile_source("let answer: Int = 2 + 3\\nprint(answer)")
+if not compiled.ok:
+    raise RuntimeError(compiled.analysis.diagnostics)
+result = TIRInterpreter().run(compiled.ir)
+print(result.output)  # ('5',)
+```
 ## Integration gate
 
 Do not route production execution to this interpreter until:
