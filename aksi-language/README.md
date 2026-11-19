@@ -74,9 +74,9 @@ test compares selected circuit amplitudes. This is a tested common subset,
 not full language parity. The new resolver/type-checker/interpreter suites run in the AKSI Q language CI workflow. The isolated AST interpreter example is also executed there.
 
 
-## Compiler front-end milestone 0.1
+## Compiler front-end milestone 0.2
 
-The declaration front end now parses generic function/type parameters, struct declarations, generic enum payloads, import aliases, `for` loops, and block-bodied `match` arms with wildcard, literal, binding, and tuple-constructor patterns. Resolver/type-checker passes cover generic function calls, struct and enum type declarations, loop-variable scopes, and pattern bindings for this supported subset.
+The declaration front end parses generic function/type parameters, struct declarations, generic enum payloads, import aliases, `for` loops, and block-bodied `match` arms with wildcard, literal, binding, and tuple-constructor patterns. Resolver/type-checker passes cover the currently supported subset, including generic function calls, struct and enum declarations, loop-variable scopes, and pattern bindings. Generic built-in `abs<T>(T) -> T` preserves the argument type rather than widening the result to `Any`.
 
 Run the compiler pipeline with:
 
@@ -84,7 +84,7 @@ Run the compiler pipeline with:
 python -m unittest discover -s tests -v
 ```
 
-The `aksi_compile.compile_source()` API returns static diagnostics and, only when those passes accept the source, a source-mapped `AKSI-Q-TIR/0.1` representation. The IR explicitly marks expression types it cannot infer as `Unknown`. This is a compiler front-end and typed-IR prototype, not yet a complete optimizing compiler. The isolated AST interpreter now executes bounded `for` loops and enum constructors/pattern matching, and supports generic function declarations/calls at runtime (generic parameters are erased by this interpreter). Struct construction and import execution remain unsupported. Import aliases are parsed and introduced into lexical scope; module file loading, export validation, dependency resolution, and linking remain future work. Match exhaustiveness and constructor payload type inference also remain future work. The legacy expression runtime and browser runtime do not yet execute this declaration syntax.
+The `aksi_compile.compile_source()` API returns static diagnostics and, only when those passes accept the source, a source-mapped `AKSI-Q-TIR/0.2` representation. The lowerer consumes typechecker-produced types keyed by stable AST IDs and rejects unresolved `Unknown`/`Any` result nodes instead of inventing types. This is a typed structural IR prototype, not yet a canonical executable IR or optimizing compiler. The isolated AST interpreter now executes bounded `for` loops and enum constructors/pattern matching, and supports generic function declarations/calls at runtime (generic parameters are erased by this interpreter). Struct construction and import execution remain unsupported. Import aliases are parsed and introduced into lexical scope; module file loading, export validation, dependency resolution, and linking remain future work. Match exhaustiveness and constructor payload type inference also remain future work. The legacy expression runtime and browser runtime do not yet execute this declaration syntax.
 
 ## Declarative UI profile v0.4
 
