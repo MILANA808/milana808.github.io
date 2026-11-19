@@ -320,5 +320,36 @@ class AksiAstInterpreterTests(unittest.TestCase):
 
 
 
+
+    def test_executes_bounded_for_loop_over_array(self):
+        result = Interpreter().run(
+            "for item in [1, 2, 3] { print(item) }"
+        )
+        self.assertEqual(result.output, ("1", "2", "3"))
+
+    def test_executes_enum_constructor_and_match_binding(self):
+        result = Interpreter().run(
+            "type Option = None | Some(Int)\n"
+            "let value = Some(7)\n"
+            "match value {\n"
+            "  Some(number) => { print(number) }\n"
+            "  None => { print(0) }\n"
+            "}"
+        )
+        self.assertEqual(result.output, ("7",))
+
+    def test_match_reports_non_exhaustive_runtime_value(self):
+        with self.assertRaisesRegex(AksiRuntimeError, "non-exhaustive match"):
+            Interpreter().run(
+                "match 9 { 1 => { print(1) } }"
+            )
+
+    def test_for_loop_obeys_instruction_budget(self):
+        with self.assertRaisesRegex(AksiRuntimeError, "instruction budget exceeded"):
+            Interpreter(max_steps=8).run(
+                "for item in [1, 2, 3, 4] { print(item) }"
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
