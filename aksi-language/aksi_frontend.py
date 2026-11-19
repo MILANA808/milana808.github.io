@@ -136,6 +136,14 @@ class Parser:
             return self.node("Public", token.span, declaration.span, declaration=declaration)
         if token.value == "fn":
             return self.parse_function()
+        if token.value == "import":
+            return self.parse_import()
+        if token.value == "struct":
+            return self.parse_struct()
+        if token.value == "for":
+            return self.parse_for()
+        if token.value == "match":
+            return self.parse_match()
         if token.value in ("let", "const", "mut"):
             return self.parse_binding()
         if token.value == "return":
@@ -159,6 +167,102 @@ class Parser:
         expression = self.parse_expression()
         return self.node("ExpressionStatement", expression.span, expression.span, expression=expression)
 
+    def parse_import(self) -> Node:
+        start = self.expect("import")
+        path = self.parse_path()
+        alias = None
+        if self.accept("as"):
+            alias = self.expect_kind("IDENT", "import alias").value
+        return self.node("Import", start.span, self.tokens[self.pos - 1].span,
+                         path=path, alias=alias or path.split(".")[-1])
+
+    def parse_type_parameters(self) -> tuple[str, ...]:
+        if not self.accept("<"):
+            return ()
+        names = []
+        while True:
+            names.append(self.expect_kind("IDENT", "type parameter").value)
+            if not self.accept(","):
+                break
+        end = self.expect(">")
+        if len(set(names)) != len(names):
+            raise ParseError("duplicate type parameter", end.span)
+        return tuple(names)
+
+    def parse_struct(self) -> Node:
+        start = self.expect("struct")
+        name = self.expect_kind("IDENT", "struct name")
+        type_params = self.parse_type_parameters()
+        self.expect("{")
+        self.skip_newlines()
+        fields = []
+        while not self.at("}") and self.peek().kind != "EOF":
+            field = self.expect_kind("IDENT", "field name")
+            self.expect(":")
+            field_type = self.parse_type()
+            fields.append((field.value, field_type))
+            if self.at(",") or self.peek().kind == "NEWLINE":
+                self.skip_newlines()
+            elif not self.at("}"):
+                raise ParseError("expected a newline or ',' between fields",
+                                 self.peek().span, expected=("newline", ",", "}"))
+        end = self.expect("}")
+        return self.node("StructDeclaration", start.span, end.span,
+                         name=name.value, type_params=type_params, fields=tuple(fields))
+
+    def parse_for(self) -> Node:
+        start = self.expect("for")
+        name = self.expect_kind("IDENT", "loop variable")
+        self.expect("in")
+        iterable = self.parse_expression(5)
+        body = self.parse_block()
+        return self.node("For", start.span, body.span,
+                         name=name.value, iterable=iterable, body=body)
+
+    def parse_pattern(self) -> Node:
+        token = self.take()
+        if token.value == "_":
+            return self.node("WildcardPattern", token.span, token.span)
+        if token.kind == "NUMBER":
+            return self.node("NumberPattern", token.span, token.span, value=token.value)
+        if token.kind == "STRING":
+            return self.node("StringPattern", token.span, token.span, value=token.value)
+        if token.value in ("true", "false", "null"):
+            value = {"true": True, "false": False, "null": None}[token.value]
+            return self.node("LiteralPattern", token.span, token.span, value=value)
+        if token.kind == "IDENT":
+            if self.accept("("):
+                bindings = []
+                if not self.at(")"):
+                    while True:
+                        bindings.append(self.expect_kind("IDENT", "pattern binding").value)
+                        if not self.accept(","):
+                            break
+                end = self.expect(")")
+                return self.node("ConstructorPattern", token.span, end.span,
+                                 name=token.value, bindings=tuple(bindings))
+            return self.node("BindingPattern", token.span, token.span, name=token.value)
+        raise ParseError("expected a match pattern", token.span)
+
+    def parse_match(self) -> Node:
+        start = self.expect("match")
+        value = self.parse_expression()
+        self.expect("{")
+        self.skip_newlines()
+        arms = []
+        while not self.at("}") and self.peek().kind != "EOF":
+            pattern = self.parse_pattern()
+            self.expect("=>")
+            body = self.parse_block()
+            arms.append((pattern, body))
+            if self.at(",") or self.peek().kind == "NEWLINE":
+                self.skip_newlines()
+            elif not self.at("}"):
+                raise ParseError("expected a newline or ',' between match arms",
+                                 self.peek().span, expected=("newline", ",", "}"))
+        end = self.expect("}")
+        return self.node("Match", start.span, end.span, value=value, arms=tuple(arms))
+
     def parse_binding(self) -> Node:
         start = self.take()
         name = self.expect_kind("IDENT", "binding name")
@@ -176,6 +280,7 @@ class Parser:
     def parse_function(self) -> Node:
         start = self.expect("fn")
         name = self.expect_kind("IDENT", "function name")
+        type_params = self.parse_type_parameters()
         self.expect("(")
         params = []
         if not self.at(")"):
@@ -194,7 +299,7 @@ class Parser:
             result_type = self.parse_type()
         body = self.parse_block()
         return self.node("Function", start.span, body.span, name=name.value,
-                         params=tuple(params), result_type=result_type, body=body)
+                         params=tuple(params), type_params=type_params, result_type=result_type, body=body)
 
     def parse_type_alias(self) -> Node:
         start = self.expect("type")
