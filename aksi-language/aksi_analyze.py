@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import sys
 
-from aksi_frontend import ParseError, parse
+from aksi_frontend import Node, ParseError, parse
 from aksi_lexer import LexError
 from aksi_resolver import resolve
 from aksi_typechecker import check
@@ -33,13 +33,10 @@ class AnalysisResult:
         return not self.diagnostics
 
 
-def analyze_source(source: str) -> AnalysisResult:
-    """Parse, resolve names, then run the initial type checker.
-
-    Lexer/parser failures propagate as LexError/ParseError. A successful parse
-    returns deterministic diagnostics from name, type, and control-flow passes.
-    """
-    module = parse(source)
+def analyze_module(module: Node) -> AnalysisResult:
+    """Analyze an already-parsed module without reparsing source text."""
+    if not isinstance(module, Node) or module.kind != "Module":
+        raise TypeError("analyze_module() expects a Module AST node")
     resolved = resolve(module)
     typed = check(module)
     flow = check_flow(module)
@@ -57,7 +54,12 @@ def analyze_source(source: str) -> AnalysisResult:
                 diagnostic.line, diagnostic.column,
             ))
     combined.sort(key=lambda item: (item.line, item.column, item.stage, item.code))
-    return AnalysisResult("AKSI-Q-ANALYSIS/1", tuple(combined))
+    return AnalysisResult("AKSI-Q-ANALYSIS/2", tuple(combined))
+
+
+def analyze_source(source: str) -> AnalysisResult:
+    """Parse once, then resolve names, check types, and validate control flow."""
+    return analyze_module(parse(source))
 
 
 def main(argv: list[str] | None = None) -> int:
