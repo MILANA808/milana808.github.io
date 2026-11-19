@@ -12,12 +12,15 @@ class CompilerPipelineTests(unittest.TestCase):
         self.assertTrue(result.ok, result.analysis.diagnostics)
         payload = result.to_dict()
         self.assertEqual(payload["schema"], "AKSI-Q-COMPILE/0.2")
-        self.assertEqual(payload["analysis"]["schema"], "AKSI-Q-ANALYSIS/2")
+        self.assertEqual(payload["analysis"]["schema"], "AKSI-Q-ANALYSIS/3")
         ir = result.ir.to_dict()
-        self.assertEqual(ir["schema"], "AKSI-Q-TIR/0.1")
+        self.assertEqual(ir["schema"], "AKSI-Q-TIR/0.2")
         self.assertEqual(ir["nodes"][0]["op"], "Function")
-        self.assertEqual(ir["nodes"][0]["type"], "T")
+        self.assertEqual(ir["nodes"][0]["type"], "Function")
         self.assertEqual(ir["nodes"][0]["fields"]["type_parameters"], ["T"])
+        self.assertRegex(ir["nodes"][0]["id"], r"^[0-9a-f]{20}$")
+        self.assertEqual(ir["nodes"][0]["fields"]["body"]["type"], "Unit")
+        self.assertIn("inferred_types", payload["analysis"])
 
     def test_rejects_invalid_source_before_ir_generation(self):
         result = compile_source("let answer: Int = \"not an integer\"")
