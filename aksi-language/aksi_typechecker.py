@@ -362,9 +362,11 @@ class TypeChecker:
             self.visit(node.get("target"))
             return "Unknown"
         if kind == "TypeDeclaration":
+            self.type_parameters.append(set(node.get("type_params", ())))
             for _, args in node.get("variants", ()):
                 for argument in args:
                     self.declared_type(_type_name(argument), argument)
+            self.type_parameters.pop()
             return "Unit"
         if kind == "StructDeclaration":
             self.type_parameters.append(set(node.get("type_params", ())))
