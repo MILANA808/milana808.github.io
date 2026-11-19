@@ -25,6 +25,7 @@ class CompileResult:
             "analysis": {
                 "schema": self.analysis.schema,
                 "diagnostics": [asdict(item) for item in self.analysis.diagnostics],
+                "inferred_types": dict(self.analysis.inferred_types),
             },
             "ir": self.ir.to_dict() if self.ir is not None else None,
         }
