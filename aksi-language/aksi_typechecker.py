@@ -153,6 +153,7 @@ class TypeChecker:
         if not isinstance(module, Node) or module.kind != "Module":
             raise TypeError("check() expects a Module AST node")
         self.collect(module)
+        self.node_types[module.node_id] = "Module"
         for wrapper in module.get("items", ()):
             node = self.unwrap(wrapper)
             if node.kind != "Function":
@@ -175,6 +176,7 @@ class TypeChecker:
             self.declared_type(signature.result, node.get("result_type"))
         self.current_return = signature.result
         self.visit_block(node.get("body"))
+        self.node_types[node.node_id] = "Function"
         self.current_return = None
         self.type_parameters.pop()
         self.scope = previous
@@ -184,6 +186,7 @@ class TypeChecker:
         self.scope = _Scope(previous)
         for statement in block.get("statements", ()):
             self.visit(self.unwrap(statement))
+        self.node_types[block.node_id] = "Unit"
         self.scope = previous
 
     def bind_pattern(self, pattern: Node, value_type: str) -> None:
