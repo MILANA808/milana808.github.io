@@ -237,6 +237,16 @@ class AksiAstInterpreterTests(unittest.TestCase):
                 "missing.capability": CapabilitySpec((), "Unit")
             })
 
+    def test_pure_effect_cannot_be_combined_with_mutating_effects(self):
+        from aksi_interpreter import CapabilitySpec
+        with self.assertRaisesRegex(ValueError, "pure effect cannot be combined"):
+            Interpreter(
+                capabilities={"store.write": lambda: None},
+                capability_specs={
+                    "store.write": CapabilitySpec((), "Unit", ("pure", "write"))
+                },
+            )
+
     def test_capability_can_be_granted_and_revoked(self):
         calls = []
         interpreter = Interpreter()
