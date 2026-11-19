@@ -191,6 +191,8 @@ class TypeChecker:
         self.scope = previous
 
     def bind_pattern(self, pattern: Node, value_type: str) -> None:
+        # Patterns are typed structural operands in TIR, not value expressions.
+        self.node_types[pattern.node_id] = "Pattern"
         if pattern.kind == "BindingPattern":
             self.scope.put(pattern.get("name"), value_type)
         elif pattern.kind == "ConstructorPattern":
