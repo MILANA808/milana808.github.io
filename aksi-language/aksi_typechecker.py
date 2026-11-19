@@ -351,6 +351,8 @@ class TypeChecker:
             if callee.kind == "Name":
                 name = callee.get("value")
                 signature = self.scope.get(name)
+                if isinstance(signature, FunctionType):
+                    self.node_types[callee.node_id] = "Function"
                 argument_types = [self.visit(arg) for arg in args]
                 if isinstance(signature, FunctionType):
                     if len(argument_types) != len(signature.parameters):
