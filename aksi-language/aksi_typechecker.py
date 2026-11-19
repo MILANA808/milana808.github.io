@@ -340,10 +340,15 @@ class TypeChecker:
             right_type = self.visit(node.get("right"))
             if left.kind == "Name":
                 target = self.scope.get(left.get("value"))
-                if isinstance(target, str) and not _same_or_any(target, right_type):
-                    self.error("E_ASSIGNMENT_TYPE_MISMATCH",
-                               f"cannot assign {right_type} to {target}", node)
-                return target if isinstance(target, str) else "Unknown"
+                if isinstance(target, str):
+                    # The assignment target is a typed place/reference in TIR,
+                    # even though it is not visited as a value expression.
+                    self.node_types[left.node_id] = target
+                    if not _same_or_any(target, right_type):
+                        self.error("E_ASSIGNMENT_TYPE_MISMATCH",
+                                   f"cannot assign {right_type} to {target}", node)
+                    return target
+                return "Unknown"
             self.visit(left)
             return "Unknown"
         if kind == "Call":
