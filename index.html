@@ -343,6 +343,7 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
   const routeOptions={useWeb:$("aksiUseWeb").checked,history:routeHistory,system:routeSystem};
   const kernel=window.AKSIKernel;
   let routed;
+  let kernelRouteUsed=false;
   if(kernel&&typeof kernel.runTask==="function"){
    await kernel.boot();
    const routerModule=kernel.getModule("answer.router");
@@ -350,6 +351,7 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
     throw new Error("Модуль answer.router не прошёл инициализацию в AKSI System Kernel.");
    }
    routed=await kernel.runTask("answer.route",input=>answerRouter.answer(input.query,input.options),{query:q,options:routeOptions});
+   kernelRouteUsed=true;
    const task=kernel.listTasks().slice(-1)[0];
    $("chatStatus").textContent="AKSI System Kernel · задача "+(task?task.id:"выполнена")+" · маршрутизатор ответа";
   }else{
@@ -357,7 +359,7 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
    $("chatStatus").textContent="Резервный маршрут: AKSI System Kernel недоступно.";
   }
   if(routed&&routed.handled){
-   $("chatStatus").textContent=routed.statusText||("AKSI Answer Router · "+(routed.route||"обработано"));
+   $("chatStatus").textContent=(routed.statusText||("AKSI Answer Router · "+(routed.route||"обработано")))+(kernelRouteUsed?" · задача исполнена ядром":"");
    if(Array.isArray(routed.evidence)&&routed.evidence.length){
     $("aksiEvidence").style.display="block";
     const sourceLines=routed.evidence.map((x,i)=>"["+(i+1)+"] "+(x.title||"Источник")+" — "+(x.url||"")+"\n"+String(x.text||x.snippet||"").slice(0,280));
