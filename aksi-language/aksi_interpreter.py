@@ -102,6 +102,22 @@ class _Scope:
 
 
 @dataclass(frozen=True, slots=True)
+class _VariantValue:
+    name: str
+    payload: tuple[Any, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class _VariantConstructor:
+    name: str
+    arity: int
+
+    def __call__(self, *args: Any) -> _VariantValue:
+        if len(args) != self.arity:
+            raise AksiRuntimeError(f"variant {self.name} expects {self.arity} payload values, got {len(args)}")
+        return _VariantValue(self.name, tuple(args))
+
+@dataclass(frozen=True, slots=True)
 class _Function:
     name: str
     params: tuple[str, ...]
@@ -380,6 +396,10 @@ class Interpreter:
             rendered = "null"
         elif isinstance(value, _Function):
             rendered = f"<function {value.name}>"
+        elif isinstance(value, _VariantConstructor):
+            rendered = f"<variant {value.name}>"
+        elif isinstance(value, _VariantValue):
+            rendered = value.name + ("(" + ", ".join(str(item) for item in value.payload) + ")" if value.payload else "")
         elif isinstance(value, list):
             parts: list[str] = []
             used = 2  # brackets
