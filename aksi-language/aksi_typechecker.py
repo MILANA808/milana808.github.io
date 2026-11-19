@@ -362,7 +362,10 @@ class TypeChecker:
                                        f"argument {index + 1} of {name} expects {resolved_expected}, got {actual}", args[index])
                     resolved_result = signature.result
                     for parameter, actual in substitutions.items():
-                        resolved_result = resolved_result.replace("<" + parameter + ">", "<" + actual + ">")
+                        if resolved_result == parameter:
+                            resolved_result = actual
+                        else:
+                            resolved_result = resolved_result.replace("<" + parameter + ">", "<" + actual + ">")
                     return resolved_result
                 return "Unknown"
             self.visit(callee)
