@@ -41,7 +41,7 @@ def compile_source(source: str) -> CompileResult:
     analysis = analyze_module(module)
     if not analysis.ok:
         return CompileResult(analysis, None)
-    return CompileResult(analysis, lower(module))
+    return CompileResult(analysis, lower(module, dict(analysis.inferred_types)))
 
 
 def compile_json(source: str) -> str:
