@@ -35,18 +35,18 @@ The shared front-end foundation includes:
   number/string/operator tokens, newline preservation, comments, decoded
   string escapes, and location-aware errors. See [LEXER-SPEC.md](LEXER-SPEC.md).
 - `aksi_frontend.py`: recursive-descent declaration parser plus Pratt
-  expression parser. It creates immutable, source-spanned AST nodes for
+  expression parser. It creates immutable, source-spanned AST nodes with deterministic IDs, strict parsing, and a recovery mode for multiple diagnostics. It supports
   generic functions, structs, algebraic type declarations, imports, `for` loops,
   `match` arms, bindings, blocks, calls, arrays, and member/index expressions. See [PARSER-SPEC.md](PARSER-SPEC.md).
 - `aksi_resolver.py`: first lexical name-resolution pass. It checks declaration
   visibility, duplicate names, unknown names/types, mutability, and control-flow
   context. See [RESOLVER-SPEC.md](RESOLVER-SPEC.md).
-- `aksi_typechecker.py`: initial primitive type-checking pass for literals,
+- `aksi_typechecker.py`: primitive type-checking pass for literals,
   annotated bindings, function boundaries, operators, conditions, arrays,
   and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
 - `aksi_flowcheck.py`: conservative return-flow pass; rejects non-Unit functions that can reach the end without a return on every visible branch. See [FLOWCHECK-SPEC.md](FLOWCHECK-SPEC.md).
-- `aksi_ir.py`: source-mapped typed-IR prototype (`AKSI-Q-TIR/0.1`); known types are retained and unresolved expression types remain explicitly `Unknown`.
-- `aksi_compile.py`: compiler front-end entry point that runs parse, resolution, type and return-flow checks before producing TIR. It does not yet emit executable bytecode or machine code.
+- `aksi_ir.py`: typed structural IR (`AKSI-Q-TIR/0.2`) whose expression types are supplied by the typechecker via stable AST IDs; it rejects unresolved expression types instead of guessing them.
+- `aksi_compile.py`: single-parse compiler entry point that runs resolution, type and return-flow checks on one AST before lowering the same tree to TIR. It does not yet execute TIR or emit bytecode/machine code.
 
 The isolated Python AST interpreter prototype is now available as
 `aksi_interpreter.py`. It runs a bounded subset of the shared AST with
