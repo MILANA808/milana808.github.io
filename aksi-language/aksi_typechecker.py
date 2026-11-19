@@ -85,6 +85,63 @@ def _same_or_any(left: str, right: str) -> bool:
     return False
 
 
+def _split_type_arguments(type_name: str) -> tuple[str, tuple[str, ...]] | None:
+    if "<" not in type_name or not type_name.endswith(">"):
+        return None
+    base, body = type_name.split("<", 1)
+    body = body[:-1]
+    parts = []
+    depth = 0
+    start = 0
+    for index, char in enumerate(body):
+        if char in "<[":
+            depth += 1
+        elif char in ">]":
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append(body[start:index].strip())
+            start = index + 1
+    parts.append(body[start:].strip())
+    return base, tuple(parts)
+
+
+def _unify_type(template: str, actual: str, generic_names: set[str],
+                substitutions: dict[str, str]) -> bool:
+    if template in generic_names:
+        previous = substitutions.get(template)
+        if previous is None or previous in ("Any", "Unknown"):
+            substitutions[template] = actual
+            return True
+        return _same_or_any(previous, actual)
+    if template in ("Any", "Unknown") or actual in ("Any", "Unknown"):
+        return True
+    if template == actual:
+        return True
+    if template.startswith("[") and template.endswith("]") and actual.startswith("[") and actual.endswith("]"):
+        return _unify_type(template[1:-1], actual[1:-1], generic_names, substitutions)
+    template_generic = _split_type_arguments(template)
+    actual_generic = _split_type_arguments(actual)
+    if template_generic and actual_generic:
+        template_base, template_args = template_generic
+        actual_base, actual_args = actual_generic
+        return (template_base == actual_base and len(template_args) == len(actual_args)
+                and all(_unify_type(left, right, generic_names, substitutions)
+                        for left, right in zip(template_args, actual_args)))
+    return False
+
+
+def _substitute_type(type_name: str, substitutions: dict[str, str]) -> str:
+    if type_name in substitutions:
+        return substitutions[type_name]
+    if type_name.startswith("[") and type_name.endswith("]"):
+        return "[" + _substitute_type(type_name[1:-1], substitutions) + "]"
+    generic = _split_type_arguments(type_name)
+    if generic:
+        base, arguments = generic
+        return base + "<" + ",".join(_substitute_type(arg, substitutions) for arg in arguments) + ">"
+    return type_name
+
+
 class TypeChecker:
     def __init__(self):
         self.diagnostics: list[TypeDiagnostic] = []
@@ -196,23 +253,29 @@ class TypeChecker:
         if pattern.kind == "BindingPattern":
             name = pattern.get("name")
             constructor = self.scope.get(name)
-            # A bare, nullary enum constructor is a value pattern, not a
-            # catch-all binding. Other identifiers bind the scrutinee value.
-            if isinstance(constructor, FunctionType) and not constructor.parameters \
-                    and _same_or_any(constructor.result, value_type):
-                return
+            if isinstance(constructor, FunctionType) and not constructor.parameters:
+                substitutions: dict[str, str] = {}
+                if _unify_type(constructor.result, value_type,
+                               set(constructor.type_parameters), substitutions):
+                    return
             self.scope.put(name, value_type)
         elif pattern.kind == "ConstructorPattern":
             name = pattern.get("name")
             signature = self.scope.get(name)
             bindings = pattern.get("bindings", ())
             if isinstance(signature, FunctionType):
+                substitutions: dict[str, str] = {}
+                if not _unify_type(signature.result, value_type,
+                                   set(signature.type_parameters), substitutions):
+                    self.error("E_PATTERN_TYPE",
+                               f"constructor pattern {name} does not match value type {value_type}",
+                               pattern)
                 if len(bindings) != len(signature.parameters):
                     self.error("E_PATTERN_ARITY",
                                f"pattern {name} expects {len(signature.parameters)} bindings, got {len(bindings)}",
                                pattern)
                 for binding, payload_type in zip(bindings, signature.parameters):
-                    self.scope.put(binding, payload_type)
+                    self.scope.put(binding, _substitute_type(payload_type, substitutions))
             else:
                 for binding in bindings:
                     self.scope.put(binding, "Unknown")
@@ -416,28 +479,15 @@ class TypeChecker:
                     if len(argument_types) != len(signature.parameters):
                         self.error("E_ARGUMENT_COUNT",
                                    f"{name} expects {len(signature.parameters)} arguments, got {len(argument_types)}", node)
-                    substitutions = {}
+                    substitutions: dict[str, str] = {}
                     generic_names = set(signature.type_parameters)
-                    for actual, expected in zip(argument_types, signature.parameters):
-                        if expected in generic_names:
-                            previous_type = substitutions.get(expected)
-                            if previous_type is not None and not _same_or_any(previous_type, actual):
-                                self.error("E_GENERIC_TYPE_MISMATCH",
-                                           f"generic parameter {expected} receives incompatible types {previous_type} and {actual}", node)
-                            else:
-                                substitutions[expected] = actual
                     for index, (actual, expected) in enumerate(zip(argument_types, signature.parameters)):
-                        resolved_expected = substitutions.get(expected, expected)
-                        if expected not in generic_names and not _same_or_any(actual, resolved_expected):
-                            self.error("E_ARGUMENT_TYPE",
-                                       f"argument {index + 1} of {name} expects {resolved_expected}, got {actual}", args[index])
-                    resolved_result = signature.result
-                    for parameter, actual in substitutions.items():
-                        if resolved_result == parameter:
-                            resolved_result = actual
-                        else:
-                            resolved_result = resolved_result.replace("<" + parameter + ">", "<" + actual + ">")
-                    return resolved_result
+                        if not _unify_type(expected, actual, generic_names, substitutions):
+                            code = "E_GENERIC_TYPE_MISMATCH" if generic_names else "E_ARGUMENT_TYPE"
+                            self.error(code,
+                                       f"argument {index + 1} of {name} expects {expected}, got {actual}",
+                                       args[index])
+                    return _substitute_type(signature.result, substitutions)
                 return "Unknown"
             self.visit(callee)
             for arg in args:
