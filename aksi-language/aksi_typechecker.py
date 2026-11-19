@@ -93,6 +93,7 @@ class TypeChecker:
         self.current_return: str | None = None
         self.custom_types: set[str] = set()
         self.type_parameters: list[set[str]] = []
+        self.node_types: dict[str, str] = {}
 
     def error(self, code: str, message: str, node: Node):
         self.diagnostics.append(TypeDiagnostic(
@@ -193,6 +194,13 @@ class TypeChecker:
                 self.scope.put(name, "Unknown")
 
     def visit(self, node: Node | None) -> str:
+        if node is None:
+            return "Unit"
+        inferred = self._visit(node)
+        self.node_types[node.node_id] = inferred
+        return inferred
+
+    def _visit(self, node: Node | None) -> str:
         if node is None:
             return "Unit"
         kind = node.kind
@@ -406,6 +414,19 @@ class TypeChecker:
         return "Unknown"
 
 
+@dataclass(frozen=True, slots=True)
+class TypeCheckResult:
+    diagnostics: tuple[TypeDiagnostic, ...]
+    node_types: tuple[tuple[str, str], ...]
+
+
+def check_with_types(module: Node) -> TypeCheckResult:
+    """Return diagnostics and inferred types keyed by stable AST node identity."""
+    checker = TypeChecker()
+    diagnostics = checker.check(module)
+    return TypeCheckResult(diagnostics, tuple(sorted(checker.node_types.items())))
+
+
 def check(module: Node) -> tuple[TypeDiagnostic, ...]:
     """Return type diagnostics for a parsed module."""
-    return TypeChecker().check(module)
+    return check_with_types(module).diagnostics
