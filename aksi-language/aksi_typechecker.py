@@ -21,10 +21,10 @@ BUILTIN_FUNCTIONS = {
     "exp": (("Float",), "Float"),
     "log": (("Float",), "Float"),
     "abs": (("T",), "T"),
-    "sum": (("Any",), "Any"),
-    "len": (("Any",), "Int"),
-    "min": (("Any",), "Any"),
-    "max": (("Any",), "Any"),
+    "sum": (("[T]",), "T"),
+    "len": (("T",), "Int"),
+    "min": (("[T]",), "T"),
+    "max": (("[T]",), "T"),
     "round": (("Float",), "Int"),
     "complex": (("Any",), "Any"),
     "print": (("Any",), "Unit"),
@@ -356,6 +356,38 @@ class TypeChecker:
                     self.node_types[callee.node_id] = "Function"
                 argument_types = [self.visit(arg) for arg in args]
                 if isinstance(signature, FunctionType):
+                    if name in {"sum", "min", "max", "len"}:
+                        if len(argument_types) != 1:
+                            self.error("E_ARGUMENT_COUNT",
+                                       f"{name} expects exactly one argument, got {len(argument_types)}", node)
+                            return "Unknown"
+                        actual = argument_types[0]
+                        if name == "len":
+                            if actual == "String" or (actual.startswith("[") and actual.endswith("]")):
+                                return "Int"
+                            self.error("E_BUILTIN_ARGUMENT_TYPE",
+                                       f"len expects String or an array, got {actual}", args[0])
+                            return "Unknown"
+                        if not (actual.startswith("[") and actual.endswith("]")):
+                            self.error("E_BUILTIN_ARGUMENT_TYPE",
+                                       f"{name} expects an array, got {actual}", args[0])
+                            return "Unknown"
+                        item_type = actual[1:-1]
+                        if name == "sum" and item_type not in NUMERIC:
+                            self.error("E_BUILTIN_ARGUMENT_TYPE",
+                                       f"sum expects an array of numbers, got {actual}", args[0])
+                            return "Unknown"
+                        if name in {"min", "max"} and item_type not in NUMERIC | {"String"}:
+                            self.error("E_BUILTIN_ARGUMENT_TYPE",
+                                       f"{name} expects an array of numbers or strings, got {actual}", args[0])
+                            return "Unknown"
+                        return item_type
+                    if name in {"complex", "host_call"}:
+                        for arg in args:
+                            self.visit(arg)
+                        self.error("E_UNSUPPORTED_DYNAMIC_BUILTIN",
+                                   f"{name} has no statically typed TIR contract yet", node)
+                        return "Unknown"
                     if len(argument_types) != len(signature.parameters):
                         self.error("E_ARGUMENT_COUNT",
                                    f"{name} expects {len(signature.parameters)} arguments, got {len(argument_types)}", node)
