@@ -22,6 +22,18 @@ class CompilerPipelineTests(unittest.TestCase):
         self.assertEqual(ir["nodes"][0]["fields"]["body"]["type"], "Unit")
         self.assertIn("inferred_types", payload["analysis"])
 
+    def test_generic_abs_preserves_argument_type_in_tir(self):
+        result = compile_source("let magnitude: Int = abs(-7)")
+        self.assertTrue(result.ok, result.analysis.diagnostics)
+        call = result.ir.nodes[0].get("value")
+        self.assertEqual(call.op, "Call")
+        self.assertEqual(call.type_name, "Int")
+
+    def test_dynamic_member_type_is_rejected_before_ir_generation(self):
+        result = compile_source("let answer = record.value")
+        self.assertFalse(result.ok)
+        self.assertIsNone(result.ir)
+
     def test_rejects_invalid_source_before_ir_generation(self):
         result = compile_source("let answer: Int = \"not an integer\"")
         self.assertFalse(result.ok)
