@@ -17,7 +17,7 @@ KEYWORDS = frozenset({
     "module", "import", "type", "fn", "let", "mut", "const", "return",
     "if", "else", "match", "while", "for", "in", "break", "continue",
     "true", "false", "null", "and", "or", "not", "as", "pub", "use",
-    "ui", "page", "state", "capability", "task", "uses",
+    "ui", "page", "state", "capability", "task", "uses", "struct",
 })
 OPERATORS = (
     "->", "=>", "==", "!=", "<=", ">=", "&&", "||", "::", "..",
