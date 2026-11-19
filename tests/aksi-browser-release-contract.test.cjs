@@ -53,7 +53,7 @@ assert.ok(html.includes("/system/aksi-os-status.json"), "homepage must expose ma
 assert.ok(html.includes('id="aksiKernelStatus"'), "homepage must expose kernel runtime diagnostics");
 assert.ok(html.includes('/modules/aksi-system-kernel.js?v=1'), "homepage must load the kernel API");
 assert.ok(html.includes('/system/aksi-boot.js?v=1'), "homepage must load the kernel bootstrap");
-assert.match(sw, /var CACHE = "aksi-shell-v\\d+"/);
+assert.match(sw, /var CACHE = "aksi-shell-v(\d+)"/);
 assert.ok(html.indexOf('src="/aksi-answer-router.js?v=5"') < html.indexOf('src="/system/aksi-boot.js?v=1"'), "kernel boot must run after answer router loads");
 assert.match(html, /async function runAnswerSelfTest\(\)/, "local answer self-test must be implemented");
 const selfTestStart = html.indexOf("async function runAnswerSelfTest()");
