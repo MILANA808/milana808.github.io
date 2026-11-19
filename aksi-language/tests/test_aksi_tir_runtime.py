@@ -58,6 +58,17 @@ class TIRRuntimeTests(unittest.TestCase):
             "}"
         )
 
+    def test_executes_nested_generic_function_and_generic_enum_match(self):
+        self.execute_both(
+            "type Option<T> = None | Some(T)\n"
+            "fn first<T>(items: [T]) -> T { return items[0] }\n"
+            "let value: Option<Int> = Some(first([7, 8]))\n"
+            "match value {\n"
+            "  Some(number) => { print(number) }\n"
+            "  None => { print(0) }\n"
+            "}"
+        )
+
     def test_instruction_budget_is_enforced(self):
         compiled = compile_source("mut count: Int = 0\nwhile true { count += 1 }")
         self.assertTrue(compiled.ok, compiled.analysis.diagnostics)
