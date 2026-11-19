@@ -193,7 +193,9 @@ class AksiAstInterpreterTests(unittest.TestCase):
             },
         )
         with self.assertRaisesRegex(AksiRuntimeError, "call quota exceeded"):
+            interpreter.run(
                 'host_call("counter.read", [])\nhost_call("counter.read", [])'
+            )
         self.assertEqual(calls, [1])
         self.assertEqual(interpreter.capability_call_counts["counter.read"], 1)
 
