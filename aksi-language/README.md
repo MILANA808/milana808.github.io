@@ -46,6 +46,7 @@ The shared front-end foundation includes:
   and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
 - `aksi_flowcheck.py`: conservative return-flow pass; rejects non-Unit functions that can reach the end without a return on every visible branch. See [FLOWCHECK-SPEC.md](FLOWCHECK-SPEC.md).
 - `aksi_ir.py`: typed structural IR (`AKSI-Q-TIR/0.2`) whose expression types are supplied by the typechecker via stable AST IDs; it rejects unresolved expression types instead of guessing them.
+  The compiler also validates the emitted TIR schema, operation allowlist, stable node IDs, uniqueness, source spans, immutable fields and nested value types before returning a successful compile result. This is structural validation, not proof of semantic correctness or executable-runtime parity.
 - `aksi_compile.py`: single-parse compiler entry point that runs resolution, type and return-flow checks on one AST before lowering the same tree to TIR. It does not yet execute TIR or emit bytecode/machine code.
 
 The isolated Python AST interpreter prototype is now available as
