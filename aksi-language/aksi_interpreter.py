@@ -693,7 +693,12 @@ class Interpreter:
         if kind == "Block":
             return self._exec_block(node, _Scope(scope))
         if kind == "TypeDeclaration":
-            raise AksiRuntimeError("algebraic type declarations are not executable in runtime 0.1")
+            for variant_name, payload_types in get("variants", ()):
+                scope.define(variant_name, _VariantConstructor(variant_name, len(payload_types)), False)
+            return None
+        if kind in ("StructDeclaration", "Import"):
+            feature = "struct construction" if kind == "StructDeclaration" else "module loading"
+            raise AksiRuntimeError(f"{feature} is not implemented by this runtime")
         raise AksiRuntimeError(f"unsupported statement: {kind}")
 
     def _call(self, function: _Function, args: list[Any], call_node: Node) -> Any:
