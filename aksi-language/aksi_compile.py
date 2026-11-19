@@ -6,7 +6,7 @@ import json
 
 from aksi_analyze import AnalysisResult, analyze_module
 from aksi_frontend import parse
-from aksi_ir import IRModule, lower
+from aksi_ir import IRModule, lower, validate_tir
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,7 +41,9 @@ def compile_source(source: str) -> CompileResult:
     analysis = analyze_module(module)
     if not analysis.ok:
         return CompileResult(analysis, None)
-    return CompileResult(analysis, lower(module, dict(analysis.inferred_types)))
+    ir = lower(module, dict(analysis.inferred_types))
+    validate_tir(ir)
+    return CompileResult(analysis, ir)
 
 
 def compile_json(source: str) -> str:
