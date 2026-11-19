@@ -22,7 +22,10 @@ assert.ok(html.indexOf(knowledgeTag) < html.indexOf(evidenceTag), "knowledge bas
 assert.ok(html.indexOf(evidenceTag) < html.indexOf(routerTag), "claim evidence module must load before router");
 assert.ok(html.indexOf(routerTag) < html.indexOf("async function ask(q)"), "router must load before chat handler");
 assert.ok(html.indexOf(semanticTag) < html.indexOf("async function ask(q)"), "semantic engine must load before chat handler");
-const cacheVersion = sw.match(/var CACHE = "aksi-shell-v(\\d+)"/);\nassert.ok(cacheVersion, "service worker cache must declare a version");\nassert.match(sw, new RegExp("AKSI SW v" + cacheVersion[1]), "service worker header and cache version must agree");\nassert.ok(Number(cacheVersion[1]) > 311, "service worker cache must invalidate the v311 shell");
+const cacheVersion = sw.match(/var CACHE = "aksi-shell-v(\d+)"/);
+assert.ok(cacheVersion, "service worker cache must declare a version");
+assert.match(sw, new RegExp("AKSI SW v" + cacheVersion[1]), "service worker header and cache version must agree");
+assert.ok(Number(cacheVersion[1]) > 311, "service worker cache must invalidate the v311 shell");
 assert.ok(sw.includes("/aksi-.*\\.js$/"), "JavaScript assets must use network-first strategy");
 
 const askStart = html.indexOf("async function ask(q)");
