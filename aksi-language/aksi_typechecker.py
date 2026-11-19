@@ -45,6 +45,7 @@ class TypeDiagnostic:
 class FunctionType:
     parameters: tuple[str, ...]
     result: str
+    type_parameters: tuple[str, ...] = ()
 
 
 class _Scope:
@@ -91,6 +92,7 @@ class TypeChecker:
         self.functions: dict[str, FunctionType] = {}
         self.current_return: str | None = None
         self.custom_types: set[str] = set()
+        self.type_parameters: list[set[str]] = []
 
     def error(self, code: str, message: str, node: Node):
         self.diagnostics.append(TypeDiagnostic(
@@ -106,7 +108,7 @@ class TypeChecker:
     def collect(self, module: Node):
         for wrapper in module.get("items", ()):
             node = self.unwrap(wrapper)
-            if node.kind == "TypeDeclaration":
+            if node.kind in ("TypeDeclaration", "StructDeclaration"):
                 self.custom_types.add(node.get("name"))
         for wrapper in module.get("items", ()):
             node = self.unwrap(wrapper)
@@ -114,6 +116,7 @@ class TypeChecker:
                 signature = FunctionType(
                     tuple(_type_name(annotation) for _, annotation in node.get("params", ())),
                     _type_name(node.get("result_type")),
+                    tuple(node.get("type_params", ())),
                 )
                 self.functions[node.get("name")] = signature
                 self.scope.put(node.get("name"), signature)
@@ -124,7 +127,8 @@ class TypeChecker:
 
     def declared_type(self, name: str, node: Node) -> str:
         base = name.split("<", 1)[0]
-        if base not in BUILTIN_TYPES and base not in self.custom_types:
+        generic = any(base in parameters for parameters in self.type_parameters)
+        if base not in BUILTIN_TYPES and base not in self.custom_types and not generic:
             self.error("E_UNKNOWN_TYPE", f"unknown type '{name}'", node)
         return name
 
@@ -146,6 +150,7 @@ class TypeChecker:
         previous = self.scope
         self.scope = _Scope(previous)
         signature = self.functions[node.get("name")]
+        self.type_parameters.append(set(signature.type_parameters))
         for (name, annotation), type_name in zip(node.get("params", ()), signature.parameters):
             self.declared_type(type_name, annotation)
             self.scope.put(name, type_name)
@@ -154,6 +159,7 @@ class TypeChecker:
         self.current_return = signature.result
         self.visit_block(node.get("body"))
         self.current_return = None
+        self.type_parameters.pop()
         self.scope = previous
 
     def visit_block(self, block: Node):
@@ -162,6 +168,13 @@ class TypeChecker:
         for statement in block.get("statements", ()):
             self.visit(self.unwrap(statement))
         self.scope = previous
+
+    def bind_pattern(self, pattern: Node, value_type: str) -> None:
+        if pattern.kind == "BindingPattern":
+            self.scope.put(pattern.get("name"), value_type)
+        elif pattern.kind == "ConstructorPattern":
+            for name in pattern.get("bindings", ()):
+                self.scope.put(name, "Unknown")
 
     def visit(self, node: Node | None) -> str:
         if node is None:
@@ -202,6 +215,32 @@ class TypeChecker:
             if condition not in ("Bool", "Any", "Unknown"):
                 self.error("E_CONDITION_TYPE", f"while condition must be Bool, got {condition}", node)
             self.visit_block(node.get("body"))
+            return "Unit"
+        if kind == "For":
+            iterable_type = self.visit(node.get("iterable"))
+            if iterable_type.startswith("[") and iterable_type.endswith("]"):
+                item_type = iterable_type[1:-1]
+            elif iterable_type == "String":
+                item_type = "String"
+            elif iterable_type in ("Any", "Unknown"):
+                item_type = "Unknown"
+            else:
+                self.error("E_NOT_ITERABLE", f"value of type {iterable_type} is not iterable", node)
+                item_type = "Unknown"
+            previous = self.scope
+            self.scope = _Scope(previous)
+            self.scope.put(node.get("name"), item_type)
+            self.visit_block(node.get("body"))
+            self.scope = previous
+            return "Unit"
+        if kind == "Match":
+            self.visit(node.get("value"))
+            for pattern, body in node.get("arms", ()):
+                previous = self.scope
+                self.scope = _Scope(previous)
+                self.bind_pattern(pattern, "Unknown")
+                self.visit_block(body)
+                self.scope = previous
             return "Unit"
         if kind == "Block":
             self.visit_block(node)
@@ -290,11 +329,22 @@ class TypeChecker:
                     if len(argument_types) != len(signature.parameters):
                         self.error("E_ARGUMENT_COUNT",
                                    f"{name} expects {len(signature.parameters)} arguments, got {len(argument_types)}", node)
+                    substitutions = {}
+                    generic_names = set(signature.type_parameters)
+                    for actual, expected in zip(argument_types, signature.parameters):
+                        if expected in generic_names:
+                            previous_type = substitutions.get(expected)
+                            if previous_type is not None and not _same_or_any(previous_type, actual):
+                                self.error("E_GENERIC_TYPE_MISMATCH",
+                                           f"generic parameter {expected} receives incompatible types {previous_type} and {actual}", node)
+                            else:
+                                substitutions[expected] = actual
                     for index, (actual, expected) in enumerate(zip(argument_types, signature.parameters)):
-                        if not _same_or_any(actual, expected):
+                        resolved_expected = substitutions.get(expected, expected)
+                        if expected not in generic_names and not _same_or_any(actual, resolved_expected):
                             self.error("E_ARGUMENT_TYPE",
-                                       f"argument {index + 1} of {name} expects {expected}, got {actual}", args[index])
-                    return signature.result
+                                       f"argument {index + 1} of {name} expects {resolved_expected}, got {actual}", args[index])
+                    return substitutions.get(signature.result, signature.result)
                 return "Unknown"
             self.visit(callee)
             for arg in args:
@@ -315,6 +365,14 @@ class TypeChecker:
             for _, args in node.get("variants", ()):
                 for argument in args:
                     self.declared_type(_type_name(argument), argument)
+            return "Unit"
+        if kind == "StructDeclaration":
+            self.type_parameters.append(set(node.get("type_params", ())))
+            for _, field_type in node.get("fields", ()):
+                self.declared_type(_type_name(field_type), field_type)
+            self.type_parameters.pop()
+            return "Unit"
+        if kind == "Import":
             return "Unit"
         if kind in ("Break", "Continue"):
             return "Unit"
