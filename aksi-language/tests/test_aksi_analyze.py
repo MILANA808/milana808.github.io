@@ -1,7 +1,7 @@
 import unittest
 
-from aksi_analyze import analyze_source
-from aksi_frontend import ParseError
+from aksi_analyze import analyze_module, analyze_source
+from aksi_frontend import ParseError, parse
 
 
 class AnalyzePipelineTests(unittest.TestCase):
@@ -11,7 +11,17 @@ class AnalyzePipelineTests(unittest.TestCase):
             "let answer: Int = add(2, 3)"
         )
         self.assertTrue(result.ok, result.diagnostics)
-        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/1")
+        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/2")
+
+    def test_analyzes_existing_ast_without_reparsing(self):
+        module = parse("let answer: Int = 42")
+        result = analyze_module(module)
+        self.assertTrue(result.ok, result.diagnostics)
+        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/2")
+
+    def test_rejects_non_module_ast(self):
+        with self.assertRaises(TypeError):
+            analyze_module(parse("let answer = 1").get("items")[0])
 
     def test_combines_name_and_type_diagnostics(self):
         result = analyze_source(
@@ -58,8 +68,6 @@ class AnalyzePipelineTests(unittest.TestCase):
     def test_parser_errors_are_not_silently_swallowed(self):
         with self.assertRaises(ParseError):
             analyze_source("fn broken(")
-
-
 
     def test_generic_identity_function_infers_call_type(self):
         result = analyze_source(
