@@ -193,7 +193,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
             },
         )
         with self.assertRaisesRegex(AksiRuntimeError, "call quota exceeded"):
-            interpreter.run('host_call("counter.read", [])\\nhost_call("counter.read", [])')
+                'host_call("counter.read", [])\nhost_call("counter.read", [])'
         self.assertEqual(calls, [1])
         self.assertEqual(interpreter.capability_call_counts["counter.read"], 1)
 
@@ -211,7 +211,7 @@ class AksiAstInterpreterTests(unittest.TestCase):
             },
         )
         self.assertTrue(interpreter.revoke_capability("clock.now"))
-        with self.assertRaisesRegex(AksiRuntimeError, "typed ABI contract missing"):
+        with self.assertRaisesRegex(AksiRuntimeError, "host capability denied: clock.now"):
             interpreter.run('host_call("clock.now", [])')
         with self.assertRaisesRegex(ValueError, "requires an ABI contract"):
             interpreter.grant_capability("clock.new", lambda: 3)
