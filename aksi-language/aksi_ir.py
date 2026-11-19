@@ -108,7 +108,16 @@ def _lower_node(node: Node, inferred: Mapping[str, str]) -> IRNode:
         raise ValueError(
             f"cannot lower {node.kind} node {node.node_id}: type is not statically known"
         )
-    fields = tuple((key, _convert(value, inferred)) for key, value in node.fields)
+    if node.kind == "Function":
+        normalized = []
+        for key, value in node.fields:
+            target_key = "type_parameters" if key == "type_params" else (
+                "parameters" if key == "params" else key
+            )
+            normalized.append((target_key, _convert(value, inferred)))
+        fields = tuple(normalized)
+    else:
+        fields = tuple((key, _convert(value, inferred)) for key, value in node.fields)
     span = (node.span.line, node.span.column, node.span.end_line, node.span.end_column)
     return IRNode(node.node_id, node.kind, result_type, span, fields)
 
