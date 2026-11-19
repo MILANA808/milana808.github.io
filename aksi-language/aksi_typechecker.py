@@ -20,7 +20,7 @@ BUILTIN_FUNCTIONS = {
     "tan": (("Float",), "Float"),
     "exp": (("Float",), "Float"),
     "log": (("Float",), "Float"),
-    "abs": (("Any",), "Any"),
+    "abs": (("T",), "T"),
     "sum": (("Any",), "Any"),
     "len": (("Any",), "Int"),
     "min": (("Any",), "Any"),
@@ -134,7 +134,8 @@ class TypeChecker:
         self.scope.put("pi", "Float")
         self.scope.put("e", "Float")
         for name, (params, result) in BUILTIN_FUNCTIONS.items():
-            self.scope.put(name, FunctionType(params, result))
+            generic = ("T",) if name == "abs" else ()
+            self.scope.put(name, FunctionType(params, result, generic))
 
     def declared_type(self, name: str, node: Node) -> str:
         if node.kind == "ArrayType":
