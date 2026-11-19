@@ -63,11 +63,12 @@ class TypeCheckerTests(unittest.TestCase):
         self.assertIn("E_BUILTIN_ARGUMENT_TYPE",
                       self.codes("let count = len(42)"))
 
-    def test_dynamic_host_builtins_are_not_lowerable(self):
-        self.assertIn("E_UNSUPPORTED_DYNAMIC_BUILTIN",
-                      self.codes('let value = host_call("clock", [])'))
+    def test_dynamic_complex_builtin_is_rejected(self):
         self.assertIn("E_UNSUPPORTED_DYNAMIC_BUILTIN",
                       self.codes("let value = complex(1.0, 2.0)"))
+
+    def test_host_call_remains_available_to_the_ast_interpreter(self):
+        self.assertEqual(self.codes('let value = host_call("clock", [])'), [])
 
     def test_accepts_builtin_math_function(self):
         self.assertEqual(self.codes("let result: Float = sqrt(4.0)"), [])
