@@ -36,8 +36,8 @@ The shared front-end foundation includes:
   string escapes, and location-aware errors. See [LEXER-SPEC.md](LEXER-SPEC.md).
 - `aksi_frontend.py`: recursive-descent declaration parser plus Pratt
   expression parser. It creates immutable, source-spanned AST nodes for
-  functions, bindings, blocks, control flow, algebraic type declarations,
-  calls, arrays, and member/index expressions. See [PARSER-SPEC.md](PARSER-SPEC.md).
+  generic functions, structs, algebraic type declarations, imports, `for` loops,
+  `match` arms, bindings, blocks, calls, arrays, and member/index expressions. See [PARSER-SPEC.md](PARSER-SPEC.md).
 - `aksi_resolver.py`: first lexical name-resolution pass. It checks declaration
   visibility, duplicate names, unknown names/types, mutability, and control-flow
   context. See [RESOLVER-SPEC.md](RESOLVER-SPEC.md).
@@ -45,6 +45,8 @@ The shared front-end foundation includes:
   annotated bindings, function boundaries, operators, conditions, arrays,
   and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
 - `aksi_flowcheck.py`: conservative return-flow pass; rejects non-Unit functions that can reach the end without a return on every visible branch. See [FLOWCHECK-SPEC.md](FLOWCHECK-SPEC.md).
+- `aksi_ir.py`: source-mapped typed-IR prototype (`AKSI-Q-TIR/0.1`); known types are retained and unresolved expression types remain explicitly `Unknown`.
+- `aksi_compile.py`: compiler front-end entry point that runs parse, resolution, type and return-flow checks before producing TIR. It does not yet emit executable bytecode or machine code.
 
 The isolated Python AST interpreter prototype is now available as
 `aksi_interpreter.py`. It runs a bounded subset of the shared AST with
@@ -68,6 +70,19 @@ runtimes in CI and compares arithmetic, boolean expressions, vectors, concept
 relations and state-vector probabilities. The separate quantum differential
 test compares selected circuit amplitudes. This is a tested common subset,
 not full language parity. The new resolver/type-checker/interpreter suites run in the AKSI Q language CI workflow. The isolated AST interpreter example is also executed there.
+
+
+## Compiler front-end milestone 0.1
+
+The declaration front end now parses generic function/type parameters, struct declarations, generic enum payloads, import aliases, `for` loops, and block-bodied `match` arms with wildcard, literal, binding, and tuple-constructor patterns. Resolver/type-checker passes cover generic function calls, struct and enum type declarations, loop-variable scopes, and pattern bindings for this supported subset.
+
+Run the compiler pipeline with:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+The `aksi_compile.compile_source()` API returns static diagnostics and, only when those passes accept the source, a source-mapped `AKSI-Q-TIR/0.1` representation. The IR explicitly marks expression types it cannot infer as `Unknown`. This is a compiler front-end and typed-IR prototype, not yet a complete optimizing compiler. The new syntax is not yet executable in the legacy expression interpreter or browser runtime. Import aliases are parsed and introduced into lexical scope; module file loading, export validation, dependency resolution, and linking remain future work. Match exhaustiveness and constructor payload type inference also remain future work.
 
 ## Declarative UI profile v0.4
 
