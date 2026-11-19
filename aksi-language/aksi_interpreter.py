@@ -437,6 +437,32 @@ class Interpreter:
             raise AksiRuntimeError("non-finite floating-point result")
         return value
 
+    def _match_pattern(self, pattern: Node, value: Any, scope: _Scope) -> bool:
+        kind = pattern.kind
+        if kind == "WildcardPattern":
+            return True
+        if kind == "BindingPattern":
+            scope.define(pattern.get("name"), value, False)
+            return True
+        if kind == "NumberPattern":
+            raw = pattern.get("value")
+            expected = float(raw) if any(ch in raw.lower() for ch in (".", "e")) else int(raw)
+            return type(value) in (int, float) and value == expected
+        if kind == "StringPattern":
+            return isinstance(value, str) and value == pattern.get("value")
+        if kind == "LiteralPattern":
+            return value == pattern.get("value")
+        if kind == "ConstructorPattern":
+            if not isinstance(value, _VariantValue) or value.name != pattern.get("name"):
+                return False
+            bindings = pattern.get("bindings", ())
+            if len(bindings) != len(value.payload):
+                return False
+            for name, item in zip(bindings, value.payload):
+                scope.define(name, item, False)
+            return True
+        raise AksiRuntimeError(f"unsupported match pattern: {kind}")
+
     def _eval(self, node: Node, scope: _Scope) -> Any:
         self._tick(node)
         kind = node.kind
@@ -590,6 +616,30 @@ class Interpreter:
                 except _Break:
                     break
             return None
+        if kind == "For":
+            iterable = self._eval(get("iterable"), scope)
+            if not isinstance(iterable, (list, tuple, str, range)):
+                raise AksiRuntimeError("for loop requires an array, tuple, string, or range")
+            if len(iterable) > self.max_array_items:
+                raise AksiRuntimeError("for loop iterable exceeds the configured item limit")
+            for item in iterable:
+                self._tick(node)
+                local = _Scope(scope)
+                local.define(get("name"), self._checked_value(item), False)
+                try:
+                    self._exec_block(get("body"), local)
+                except _Continue:
+                    continue
+                except _Break:
+                    break
+            return None
+        if kind == "Match":
+            value = self._eval(get("value"), scope)
+            for pattern, body in get("arms"):
+                local = _Scope(scope)
+                if self._match_pattern(pattern, value, local):
+                    return self._exec_block(body, local)
+            raise AksiRuntimeError("non-exhaustive match: no pattern matched the value")
         if kind == "Call":
             raise AksiRuntimeError("invalid call node")
         if kind in ("Member",):
@@ -638,7 +688,7 @@ class Interpreter:
             if value is not None:
                 self._append_result(value)
             return value
-        if kind == "If" or kind == "While":
+        if kind in ("If", "While", "For", "Match"):
             return self._eval(node, scope)
         if kind == "Block":
             return self._exec_block(node, _Scope(scope))
