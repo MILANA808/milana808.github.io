@@ -60,5 +60,42 @@ class AnalyzePipelineTests(unittest.TestCase):
             analyze_source("fn broken(")
 
 
+
+    def test_generic_identity_function_infers_call_type(self):
+        result = analyze_source(
+            "fn identity<T>(value: T) -> T { return value }\n"
+            "let answer: Int = identity(42)"
+        )
+        self.assertTrue(result.ok, result.diagnostics)
+
+    def test_struct_and_generic_enum_declarations_resolve(self):
+        result = analyze_source(
+            "struct Box<T> { value: T }\n"
+            "type Option<T> = None | Some(T)\n"
+            "fn unwrap<T>(value: T) -> T { return value }"
+        )
+        self.assertTrue(result.ok, result.diagnostics)
+
+    def test_for_loop_binds_array_item_type(self):
+        result = analyze_source(
+            "fn show(values: [Int]) {\n"
+            "  for item in values { print(item) }\n"
+            "}"
+        )
+        self.assertTrue(result.ok, result.diagnostics)
+
+    def test_match_resolves_enum_constructors_and_bindings(self):
+        result = analyze_source(
+            "type Option = None | Some(Int)\n"
+            "fn show(value: Option) {\n"
+            "  match value {\n"
+            "    Some(item) => { print(item) }\n"
+            "    _ => { print(0) }\n"
+            "  }\n"
+            "}"
+        )
+        self.assertTrue(result.ok, result.diagnostics)
+
+
 if __name__ == "__main__":
     unittest.main()
