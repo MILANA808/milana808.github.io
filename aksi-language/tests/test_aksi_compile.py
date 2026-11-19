@@ -29,6 +29,23 @@ class CompilerPipelineTests(unittest.TestCase):
         self.assertEqual(call.op, "Call")
         self.assertEqual(call.type_name, "Int")
 
+    def test_collection_builtins_compile_with_precise_result_types(self):
+        for source, expected in (
+            ("let total: Int = sum([1, 2, 3])", "Int"),
+            ('let smallest: String = min(["a", "b"])', "String"),
+            ('let count: Int = len("aksi")', "Int"),
+        ):
+            with self.subTest(source=source):
+                result = compile_source(source)
+                self.assertTrue(result.ok, result.analysis.diagnostics)
+                self.assertEqual(result.ir.nodes[0].get("value").type_name, expected)
+
+    def test_dynamic_host_call_is_rejected_as_lowering_diagnostic(self):
+        result = compile_source('let value = host_call("clock", [])')
+        self.assertFalse(result.ok)
+        self.assertIsNone(result.ir)
+        self.assertIn("E_TIR_LOWERING", [item.code for item in result.analysis.diagnostics])
+
     def test_dynamic_member_type_is_rejected_before_ir_generation(self):
         result = compile_source("let answer = record.value")
         self.assertFalse(result.ok)
