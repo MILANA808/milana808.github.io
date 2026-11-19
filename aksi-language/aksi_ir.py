@@ -130,3 +130,74 @@ def lower(module: Node, inferred_types: Mapping[str, str]) -> IRModule:
         raise TypeError("lower() requires a node-id to type mapping from the typechecker")
     nodes = tuple(_lower_node(item, inferred_types) for item in module.get("items", ()))
     return IRModule("AKSI-Q-TIR/0.2", module.get("name"), nodes)
+
+
+_ALLOWED_OPS = {
+    "Module", "Public", "Function", "Binding", "Return", "Break", "Continue",
+    "ExpressionStatement", "If", "While", "For", "Match", "Block",
+    "TypeDeclaration", "StructDeclaration", "Import", "Name", "Number",
+    "String", "Literal", "Group", "Array", "Unary", "Binary", "Assignment",
+    "Call", "Index", "Member", "ArrayType", "NamedType", "WildcardPattern",
+    "NumberPattern", "StringPattern", "LiteralPattern", "BindingPattern",
+    "ConstructorPattern", "Error",
+}
+
+
+def validate_tir(module: IRModule) -> None:
+    """Validate the structural TIR contract before it leaves the compiler.
+
+    This checks representation integrity, not program semantics or execution.
+    """
+    if not isinstance(module, IRModule):
+        raise TypeError("validate_tir expects an IRModule")
+    if module.schema != "AKSI-Q-TIR/0.2":
+        raise ValueError(f"unsupported TIR schema: {module.schema!r}")
+    if module.name is not None and not isinstance(module.name, str):
+        raise ValueError("TIR module name must be text or null")
+    if not isinstance(module.nodes, tuple):
+        raise ValueError("TIR module nodes must be an immutable tuple")
+
+    seen: set[str] = set()
+
+    def visit(value: Any) -> None:
+        if isinstance(value, IRNode):
+            if value.op not in _ALLOWED_OPS:
+                raise ValueError(f"unsupported TIR operation: {value.op!r}")
+            if not isinstance(value.node_id, str) or len(value.node_id) != 20:
+                raise ValueError("TIR node ID must be a 20-character stable identifier")
+            if any(ch not in "0123456789abcdef" for ch in value.node_id):
+                raise ValueError("TIR node ID must be lowercase hexadecimal")
+            if value.node_id in seen:
+                raise ValueError(f"duplicate TIR node ID: {value.node_id}")
+            seen.add(value.node_id)
+            if not isinstance(value.type_name, str) or not value.type_name:
+                raise ValueError(f"TIR node {value.node_id} has no type")
+            if value.type_name in ("Unknown", "Any"):
+                raise ValueError(f"TIR node {value.node_id} has unresolved type {value.type_name}")
+            if (not isinstance(value.span, tuple) or len(value.span) != 4
+                    or any(type(part) is not int or part < 1 for part in value.span)):
+                raise ValueError(f"TIR node {value.node_id} has an invalid source span")
+            if not isinstance(value.fields, tuple):
+                raise ValueError(f"TIR node {value.node_id} fields must be immutable")
+            names = [name for name, _ in value.fields]
+            if any(not isinstance(name, str) or not name for name in names):
+                raise ValueError(f"TIR node {value.node_id} has an invalid field name")
+            if len(names) != len(set(names)):
+                raise ValueError(f"TIR node {value.node_id} has duplicate fields")
+            for _, child in value.fields:
+                visit(child)
+            return
+        if isinstance(value, (tuple, list)):
+            for child in value:
+                visit(child)
+            return
+        if isinstance(value, dict):
+            for child in value.values():
+                visit(child)
+            return
+        if value is None or type(value) in (str, int, float, bool):
+            return
+        raise ValueError(f"unsupported value in TIR: {type(value).__name__}")
+
+    for node in module.nodes:
+        visit(node)
