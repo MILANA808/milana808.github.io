@@ -126,10 +126,16 @@ class TypeChecker:
             self.scope.put(name, FunctionType(params, result))
 
     def declared_type(self, name: str, node: Node) -> str:
+        if node.kind == "ArrayType":
+            self.declared_type(_type_name(node.get("item")), node.get("item"))
+            return name
         base = name.split("<", 1)[0]
         generic = any(base in parameters for parameters in self.type_parameters)
         if base not in BUILTIN_TYPES and base not in self.custom_types and not generic:
             self.error("E_UNKNOWN_TYPE", f"unknown type '{name}'", node)
+        if node.kind == "NamedType":
+            for argument in node.get("args", ()):
+                self.declared_type(_type_name(argument), argument)
         return name
 
     def check(self, module: Node) -> tuple[TypeDiagnostic, ...]:
