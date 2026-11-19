@@ -304,6 +304,7 @@ class Parser:
     def parse_type_alias(self) -> Node:
         start = self.expect("type")
         name = self.expect_kind("IDENT", "type name")
+        type_params = self.parse_type_parameters()
         self.expect("=")
         variants = []
         while True:
@@ -320,7 +321,7 @@ class Parser:
             if not self.accept("|"):
                 break
         return self.node("TypeDeclaration", start.span, self.tokens[self.pos - 1].span,
-                         name=name.value, variants=tuple(variants))
+                         name=name.value, type_params=type_params, variants=tuple(variants))
 
     def parse_type(self) -> Node:
         start = self.peek()
