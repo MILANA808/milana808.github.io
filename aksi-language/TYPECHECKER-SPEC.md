@@ -25,6 +25,8 @@ rules; the type checker is responsible for type compatibility.
 - Annotated binding initializer compatibility.
 - Function argument count and annotated argument compatibility for known
   functions and the currently declared scalar built-ins.
+- Generic `abs<T>(T) -> T` signature: the argument type is preserved instead
+  of leaking `Any` into the inferred result.
 - Function return-value compatibility when a result type is declared or
   implied as `Unit`.
 - Numeric and Boolean unary/binary operator constraints.
@@ -40,9 +42,12 @@ Array types are represented as `[T]`. Declared algebraic type names are
 recognized as nominal names, but constructor typing and pattern matching are
 not implemented.
 
-`Any` and `Unknown` are permissive escape hatches in this prototype. Member
-access and unresolved/dynamic calls produce `Unknown` rather than pretending
-to know their result.
+`Any` and `Unknown` remain limited prototype escape hatches. They are not
+accepted as emitted TIR result types: unresolved names, member access and
+dynamic calls must be resolved or explicitly modelled before compilation.
+`abs` is generic over its argument type; other built-ins with provisional
+`Any` signatures remain unsuitable for TIR until their contracts are made
+precise.
 
 ## Limitations — do not interpret a clean result as proof of safety
 
