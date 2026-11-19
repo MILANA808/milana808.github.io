@@ -148,7 +148,7 @@ Built-ins include `vector`, `dot`, `norm`, `normalize`, `tensor`,
   It is a classical simulator, not quantum hardware.
 - An `assert` checks a runtime condition; it is not a formal mathematical proof.
 
-## General-purpose language direction\n\nThe target architecture, proposed syntax, type/effect model, compiler pipeline, security requirements, benchmark suite and staged acceptance gates are specified in [LANGUAGE_DESIGN.md](LANGUAGE_DESIGN.md). That RFC describes a target, not features already implemented.\n\n## Migration sequence
+## White paper\n\nThe evidence-based architecture, implemented/proposed feature boundary, security model, execution-receipt design, benchmark policy and staged roadmap are documented in [AKSI-Q-WHITE-PAPER.md](AKSI-Q-WHITE-PAPER.md). The paper deliberately distinguishes prototype behavior from future design goals.\n\n## General-purpose language direction\n\nThe target architecture, proposed syntax, type/effect model, compiler pipeline, security requirements, benchmark suite and staged acceptance gates are specified in [LANGUAGE_DESIGN.md](LANGUAGE_DESIGN.md). That RFC describes a target, not features already implemented.\n\n## Migration sequence
 
 1. Continue stabilizing the declarative UI grammar and its security/resource tests.
 2. Add structured state updates, inputs, lists and accessible interaction primitives,
