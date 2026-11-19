@@ -382,7 +382,7 @@ class TypeChecker:
                                        f"{name} expects an array of numbers or strings, got {actual}", args[0])
                             return "Unknown"
                         return item_type
-                    if name in {"complex", "host_call"}:
+                    if name == "complex":
                         for arg in args:
                             self.visit(arg)
                         self.error("E_UNSUPPORTED_DYNAMIC_BUILTIN",
