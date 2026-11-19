@@ -34,6 +34,11 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
 - A deterministic trace records invocation sequence and status without logging
   arguments or returned data (invoked, returned, failed, denied, limit_denied,
   rejected_result).
+- Optional typed ABI contracts declare positional argument types, result type,
+  effect labels, and a per-capability call quota. When a typed registry is
+  supplied, every granted capability must have a contract and every call is
+  checked at runtime. Supported ABI types: Any, Unit, Bool, Int, Float, Number,
+  String, and one-dimensional lists of those types.
 - Arguments and results are restricted to bounded scalar/list data; arbitrary
   Python objects and handles cannot cross the boundary. Arguments are copied
   before calling host code.
@@ -41,8 +46,9 @@ replacement for `aksi_q.py`, the browser runtime, or the public website.
   attempted calls and the capability trace are returned too.
 - Host capability attempts are capped at 128 per interpreter instance by default; failed attempts consume the same budget. Embedders may lower or raise the positive limit explicitly.
 - `ExecutionResult.capability_calls` reports attempted calls, while `capabilities_used` records successful calls.
-- The host remains trusted: an injected callback can perform arbitrary host
-  actions. This mechanism is not an operating-system sandbox.
+- Effect labels are declarative metadata for host policy and audit; they do not
+  inspect or constrain callback internals. The host remains trusted: an injected
+  callback can perform arbitrary host actions. This is not an OS sandbox.
 
 ## Deliberately rejected / not implemented
 
