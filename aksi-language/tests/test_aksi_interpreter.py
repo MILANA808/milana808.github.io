@@ -163,6 +163,52 @@ class AksiAstInterpreterTests(unittest.TestCase):
             Interpreter(capabilities={"clock.now": "not callable"})
 
 
+
+    def test_typed_capability_abi_checks_arguments_and_result(self):
+        from aksi_interpreter import CapabilitySpec
+        spec = CapabilitySpec(("Int",), "Int", ("read",), max_calls=2)
+        interpreter = Interpreter(
+            capabilities={"counter.read": lambda value: value + 1},
+            capability_specs={"counter.read": spec},
+        )
+        self.assertEqual(interpreter.run('host_call("counter.read", [4])').values, (5,))
+        with self.assertRaisesRegex(AksiRuntimeError, "argument type mismatch"):
+            Interpreter(
+                capabilities={"counter.read": lambda value: value},
+                capability_specs={"counter.read": spec},
+            ).run('host_call("counter.read", ["4"])')
+        with self.assertRaisesRegex(AksiRuntimeError, "result type mismatch"):
+            Interpreter(
+                capabilities={"counter.read": lambda value: str(value)},
+                capability_specs={"counter.read": spec},
+            ).run('host_call("counter.read", [4])')
+
+    def test_typed_capability_per_capability_quota_is_enforced(self):
+        from aksi_interpreter import CapabilitySpec
+        calls = []
+        interpreter = Interpreter(
+            capabilities={"counter.read": lambda: calls.append(1) or 1},
+            capability_specs={
+                "counter.read": CapabilitySpec((), "Int", ("read",), max_calls=1)
+            },
+        )
+        with self.assertRaisesRegex(AksiRuntimeError, "call quota exceeded"):
+            interpreter.run('host_call("counter.read", [])\\nhost_call("counter.read", [])')
+        self.assertEqual(calls, [1])
+        self.assertEqual(interpreter.capability_call_counts["counter.read"], 1)
+
+    def test_typed_capability_registry_rejects_unknown_or_invalid_contracts(self):
+        from aksi_interpreter import CapabilitySpec
+        with self.assertRaisesRegex(ValueError, "unsupported ABI type"):
+            Interpreter(
+                capabilities={"counter.read": lambda: 1},
+                capability_specs={"counter.read": CapabilitySpec((), "SecretHandle")},
+            )
+        with self.assertRaisesRegex(ValueError, "must describe a registered"):
+            Interpreter(capability_specs={
+                "missing.capability": CapabilitySpec((), "Unit")
+            })
+
     def test_capability_can_be_granted_and_revoked(self):
         calls = []
         interpreter = Interpreter()
