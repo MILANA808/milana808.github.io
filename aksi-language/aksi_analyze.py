@@ -11,6 +11,7 @@ from aksi_frontend import ParseError, parse
 from aksi_lexer import LexError
 from aksi_resolver import resolve
 from aksi_typechecker import check
+from aksi_flowcheck import check as check_flow
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,15 +37,16 @@ def analyze_source(source: str) -> AnalysisResult:
     """Parse, resolve names, then run the initial type checker.
 
     Lexer/parser failures propagate as LexError/ParseError. A successful parse
-    returns deterministic diagnostics from the two semantic-analysis passes.
+    returns deterministic diagnostics from name, type, and control-flow passes.
     """
     module = parse(source)
     resolved = resolve(module)
     typed = check(module)
+    flow = check_flow(module)
 
     combined: list[AnalysisDiagnostic] = []
     seen: set[tuple[str, int, int]] = set()
-    for stage, diagnostics in (("resolver", resolved), ("typechecker", typed)):
+    for stage, diagnostics in (("resolver", resolved), ("typechecker", typed), ("control_flow", flow)):
         for diagnostic in diagnostics:
             key = (diagnostic.code, diagnostic.line, diagnostic.column)
             if key in seen:
