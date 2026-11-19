@@ -11,13 +11,13 @@ class AnalyzePipelineTests(unittest.TestCase):
             "let answer: Int = add(2, 3)"
         )
         self.assertTrue(result.ok, result.diagnostics)
-        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/2")
+        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/3")
 
     def test_analyzes_existing_ast_without_reparsing(self):
         module = parse("let answer: Int = 42")
         result = analyze_module(module)
         self.assertTrue(result.ok, result.diagnostics)
-        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/2")
+        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/3")
 
     def test_rejects_non_module_ast(self):
         with self.assertRaises(TypeError):
