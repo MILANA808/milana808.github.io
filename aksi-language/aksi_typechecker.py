@@ -194,10 +194,28 @@ class TypeChecker:
         # Patterns are typed structural operands in TIR, not value expressions.
         self.node_types[pattern.node_id] = "Pattern"
         if pattern.kind == "BindingPattern":
-            self.scope.put(pattern.get("name"), value_type)
+            name = pattern.get("name")
+            constructor = self.scope.get(name)
+            # A bare, nullary enum constructor is a value pattern, not a
+            # catch-all binding. Other identifiers bind the scrutinee value.
+            if isinstance(constructor, FunctionType) and not constructor.parameters \
+                    and _same_or_any(constructor.result, value_type):
+                return
+            self.scope.put(name, value_type)
         elif pattern.kind == "ConstructorPattern":
-            for name in pattern.get("bindings", ()):
-                self.scope.put(name, "Unknown")
+            name = pattern.get("name")
+            signature = self.scope.get(name)
+            bindings = pattern.get("bindings", ())
+            if isinstance(signature, FunctionType):
+                if len(bindings) != len(signature.parameters):
+                    self.error("E_PATTERN_ARITY",
+                               f"pattern {name} expects {len(signature.parameters)} bindings, got {len(bindings)}",
+                               pattern)
+                for binding, payload_type in zip(bindings, signature.parameters):
+                    self.scope.put(binding, payload_type)
+            else:
+                for binding in bindings:
+                    self.scope.put(binding, "Unknown")
 
     def visit(self, node: Node | None) -> str:
         if node is None:
@@ -264,11 +282,11 @@ class TypeChecker:
             self.scope = previous
             return "Unit"
         if kind == "Match":
-            self.visit(node.get("value"))
+            value_type = self.visit(node.get("value"))
             for pattern, body in node.get("arms", ()):
                 previous = self.scope
                 self.scope = _Scope(previous)
-                self.bind_pattern(pattern, "Unknown")
+                self.bind_pattern(pattern, value_type)
                 self.visit_block(body)
                 self.scope = previous
             return "Unit"
