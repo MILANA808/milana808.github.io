@@ -50,8 +50,10 @@ The shared front-end foundation includes:
 
 The isolated Python AST interpreter prototype is now available as
 `aksi_interpreter.py`. It runs a bounded subset of the shared AST with
-functions, bindings, arithmetic/Boolean expressions, conditionals, loops,
-returns, arrays, and explicit output. Static analysis runs before execution.
+functions (including generic function syntax), bindings, arithmetic/Boolean
+expressions, conditionals, `while`/`for` loops, `break`/`continue`, enum
+constructors and block-bodied `match`, returns, arrays, and explicit output.
+Static analysis runs before execution.
 It has no filesystem/network/process/browser/FFI capabilities, rejects
 unsupported AST nodes, and bounds captured output and retained results. Its exact subset and limits are documented in
 [INTERPRETER-SPEC.md](INTERPRETER-SPEC.md). It is not yet wired into the
@@ -82,7 +84,7 @@ Run the compiler pipeline with:
 python -m unittest discover -s tests -v
 ```
 
-The `aksi_compile.compile_source()` API returns static diagnostics and, only when those passes accept the source, a source-mapped `AKSI-Q-TIR/0.1` representation. The IR explicitly marks expression types it cannot infer as `Unknown`. This is a compiler front-end and typed-IR prototype, not yet a complete optimizing compiler. The new syntax is not yet executable in the legacy expression interpreter or browser runtime. Import aliases are parsed and introduced into lexical scope; module file loading, export validation, dependency resolution, and linking remain future work. Match exhaustiveness and constructor payload type inference also remain future work.
+The `aksi_compile.compile_source()` API returns static diagnostics and, only when those passes accept the source, a source-mapped `AKSI-Q-TIR/0.1` representation. The IR explicitly marks expression types it cannot infer as `Unknown`. This is a compiler front-end and typed-IR prototype, not yet a complete optimizing compiler. The isolated AST interpreter now executes bounded `for` loops and enum constructors/pattern matching, and supports generic function declarations/calls at runtime (generic parameters are erased by this interpreter). Struct construction and import execution remain unsupported. Import aliases are parsed and introduced into lexical scope; module file loading, export validation, dependency resolution, and linking remain future work. Match exhaustiveness and constructor payload type inference also remain future work. The legacy expression runtime and browser runtime do not yet execute this declaration syntax.
 
 ## Declarative UI profile v0.4
 
