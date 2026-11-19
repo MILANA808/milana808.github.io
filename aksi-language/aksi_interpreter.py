@@ -38,6 +38,15 @@ class AksiRuntimeError(RuntimeError):
 
 
 @dataclass(frozen=True, slots=True)
+class CapabilitySpec:
+    """Host-declared ABI contract; effects are metadata, not a sandbox."""
+    parameters: tuple[str, ...]
+    result: str
+    effects: tuple[str, ...] = ()
+    max_calls: int = MAX_CAPABILITY_CALLS
+
+
+@dataclass(frozen=True, slots=True)
 class ExecutionResult:
     values: tuple[Any, ...]
     output: tuple[str, ...]
@@ -110,7 +119,8 @@ class Interpreter:
                  max_output_lines: int = MAX_OUTPUT_LINES,
                  max_result_items: int = MAX_RESULT_ITEMS,
                  max_capability_calls: int = MAX_CAPABILITY_CALLS,
-                 capabilities: dict[str, Callable[..., Any]] | None = None):
+                 capabilities: dict[str, Callable[..., Any]] | None = None,
+                 capability_specs: dict[str, CapabilitySpec] | None = None):
         limits = (max_steps, max_call_depth, max_array_items, max_output_chars,
                   max_output_lines, max_result_items, max_capability_calls)
         if any(limit < 1 for limit in limits):
@@ -130,6 +140,10 @@ class Interpreter:
         self.values: list[Any] = []
         self.global_scope = _Scope()
         self.capabilities = self._validate_capabilities({} if capabilities is None else capabilities)
+        self.capability_specs = self._validate_capability_specs(
+            {} if capability_specs is None else capability_specs, self.capabilities
+        )
+        self.capability_call_counts: dict[str, int] = {}
         self.capabilities_used: list[str] = []
         self.capability_trace: list[tuple[int, str, str]] = []
         self._install_builtins()
@@ -147,17 +161,67 @@ class Interpreter:
             validated[name] = handler
         return validated
 
+    @staticmethod
+    def _validate_capability_specs(
+        specs: dict[str, CapabilitySpec], capabilities: dict[str, Callable[..., Any]]
+    ) -> dict[str, CapabilitySpec]:
+        if not isinstance(specs, dict) or len(specs) > 32:
+            raise ValueError("capability_specs must be a dictionary with at most 32 entries")
+        allowed_types = {"Any", "Unit", "Bool", "Int", "Float", "Number", "String"}
+        allowed_effects = {"pure", "read", "write", "network", "process", "device"}
+        validated: dict[str, CapabilitySpec] = {}
+        for name, spec in specs.items():
+            if name not in capabilities or not isinstance(spec, CapabilitySpec):
+                raise ValueError("each capability spec must describe a registered capability")
+            types = (*spec.parameters, spec.result)
+            if not isinstance(spec.parameters, tuple) or len(spec.parameters) > 64:
+                raise ValueError(f"invalid parameter contract for capability '{name}'")
+            if any(not isinstance(item, str) or (
+                item not in allowed_types and not (
+                    item.startswith("[") and item.endswith("]")
+                    and item[1:-1] in allowed_types
+                )
+            ) for item in types):
+                raise ValueError(f"unsupported ABI type in capability '{name}'")
+            if not isinstance(spec.effects, tuple) or any(
+                effect not in allowed_effects for effect in spec.effects
+            ) or len(set(spec.effects)) != len(spec.effects):
+                raise ValueError(f"invalid effects for capability '{name}'")
+            if type(spec.max_calls) is not int or spec.max_calls < 1:
+                raise ValueError(f"invalid call quota for capability '{name}'")
+            validated[name] = spec
+        return validated
+
+    @staticmethod
+    def _matches_abi_type(value: Any, type_name: str) -> bool:
+        if type_name == "Any": return True
+        if type_name == "Unit": return value is None
+        if type_name == "Bool": return type(value) is bool
+        if type_name == "Int": return type(value) is int
+        if type_name == "Float": return type(value) is float
+        if type_name == "Number": return type(value) in (int, float)
+        if type_name == "String": return isinstance(value, str)
+        if type_name.startswith("[") and type_name.endswith("]"):
+            return isinstance(value, list) and all(
+                Interpreter._matches_abi_type(item, type_name[1:-1]) for item in value
+            )
+        return False
+
     def grant_capability(self, name: str, handler: Callable[..., Any]) -> None:
         """Grant one capability; an existing grant cannot be silently replaced."""
         validated = self._validate_capabilities({name: handler})
         if name in self.capabilities:
             raise ValueError(f"capability '{name}' is already granted")
+        if self.capability_specs and name not in self.capability_specs:
+            raise ValueError(f"capability '{name}' requires an ABI contract")
         self.capabilities[name] = validated[name]
 
     def revoke_capability(self, name: str) -> bool:
         """Revoke a grant immediately. Returns False when it was not granted."""
         if not isinstance(name, str):
             raise TypeError("capability name must be text")
+        self.capability_specs.pop(name, None)
+        self.capability_call_counts.pop(name, None)
         return self.capabilities.pop(name, None) is not None
 
     def _record_capability_event(self, name: str, status: str) -> None:
@@ -197,8 +261,24 @@ class Interpreter:
         if self.capability_calls >= self.max_capability_calls:
             self._record_capability_event(name, "limit_denied")
             raise AksiRuntimeError("host capability invocation limit exceeded")
+        spec = self.capability_specs.get(name)
+        if self.capability_specs and spec is None:
+            self._record_capability_event(name, "contract_denied")
+            raise AksiRuntimeError(f"typed ABI contract missing: {name}")
+        if spec is not None:
+            if len(args) != len(spec.parameters):
+                self._record_capability_event(name, "argument_denied")
+                raise AksiRuntimeError(f"capability '{name}' expects {len(spec.parameters)} arguments")
+            if any(not self._matches_abi_type(value, expected)
+                   for value, expected in zip(args, spec.parameters)):
+                self._record_capability_event(name, "argument_denied")
+                raise AksiRuntimeError(f"capability '{name}' argument type mismatch")
+            if self.capability_call_counts.get(name, 0) >= spec.max_calls:
+                self._record_capability_event(name, "quota_denied")
+                raise AksiRuntimeError(f"capability '{name}' call quota exceeded")
         safe_args = self._validate_host_value(args)
         self.capability_calls += 1
+        self.capability_call_counts[name] = self.capability_call_counts.get(name, 0) + 1
         self._record_capability_event(name, "invoked")
         try:
             result = handler(*deepcopy(safe_args))
@@ -207,6 +287,8 @@ class Interpreter:
             raise AksiRuntimeError(f"host capability '{name}' failed: {type(exc).__name__}") from exc
         try:
             safe_result = self._validate_host_value(result)
+            if spec is not None and not self._matches_abi_type(safe_result, spec.result):
+                raise AksiRuntimeError(f"capability '{name}' result type mismatch")
             checked_result = self._checked_value(safe_result)
         except AksiRuntimeError:
             self._record_capability_event(name, "rejected_result")
