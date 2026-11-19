@@ -54,7 +54,7 @@ class TypeCheckerTests(unittest.TestCase):
         self.assertEqual(self.codes(
             "let total: Int = sum([1, 2, 3])\n"
             'let smallest: String = min(["a", "b"])\n'
-            'let count: Int = len("aksi)'
+            'let count: Int = len("aksi")'
         ), [])
 
     def test_collection_builtins_reject_invalid_inputs(self):
