@@ -110,6 +110,16 @@ class TypeChecker:
             node = self.unwrap(wrapper)
             if node.kind in ("TypeDeclaration", "StructDeclaration"):
                 self.custom_types.add(node.get("name"))
+            if node.kind == "TypeDeclaration":
+                parameters = tuple(node.get("type_params", ()))
+                result_type = node.get("name")
+                if parameters:
+                    result_type += "<" + ",".join(parameters) + ">"
+                for variant_name, payload in node.get("variants", ()):
+                    self.scope.put(
+                        variant_name,
+                        FunctionType(tuple(_type_name(item) for item in payload), result_type, parameters),
+                    )
         for wrapper in module.get("items", ()):
             node = self.unwrap(wrapper)
             if node.kind == "Function":
@@ -350,7 +360,10 @@ class TypeChecker:
                         if expected not in generic_names and not _same_or_any(actual, resolved_expected):
                             self.error("E_ARGUMENT_TYPE",
                                        f"argument {index + 1} of {name} expects {resolved_expected}, got {actual}", args[index])
-                    return substitutions.get(signature.result, signature.result)
+                    resolved_result = signature.result
+                    for parameter, actual in substitutions.items():
+                        resolved_result = resolved_result.replace("<" + parameter + ">", "<" + actual + ">")
+                    return resolved_result
                 return "Unknown"
             self.visit(callee)
             for arg in args:
