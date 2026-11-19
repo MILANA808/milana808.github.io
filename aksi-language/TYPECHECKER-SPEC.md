@@ -27,6 +27,12 @@ rules; the type checker is responsible for type compatibility.
   functions and the currently declared scalar built-ins.
 - Generic `abs<T>(T) -> T` signature: the argument type is preserved instead
   of leaking `Any` into the inferred result.
+- Precise collection built-ins: `sum([T]) -> T` for numeric arrays,
+  `min([T]) -> T` / `max([T]) -> T` for numeric or string arrays, and
+  `len(String | [T]) -> Int`.
+- Dynamic `complex` calls are rejected until a stable static type contract exists.
+  `host_call` remains available to the isolated AST interpreter, but the compiler
+  refuses to lower its unresolved dynamic result into typed TIR.
 - Function return-value compatibility when a result type is declared or
   implied as `Unit`.
 - Numeric and Boolean unary/binary operator constraints.
@@ -43,11 +49,12 @@ recognized as nominal names, but constructor typing and pattern matching are
 not implemented.
 
 `Any` and `Unknown` remain limited prototype escape hatches. They are not
-accepted as emitted TIR result types: unresolved names, member access and
-dynamic calls must be resolved or explicitly modelled before compilation.
-`abs` is generic over its argument type; other built-ins with provisional
-`Any` signatures remain unsuitable for TIR until their contracts are made
-precise.
+accepted as emitted TIR result types. Unresolved names, member access and
+untyped dynamic calls are rejected by analysis or by the compiler's lowering
+boundary. `host_call` is intentionally still accepted by the isolated AST
+interpreter so its capability registry, ABI checks, quotas and revocation
+behavior remain testable; it is not yet lowerable to TIR because its result
+contract is dynamic.
 
 ## Limitations — do not interpret a clean result as proof of safety
 
