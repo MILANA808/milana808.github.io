@@ -69,6 +69,7 @@ class Resolver:
         self.loop_depth = 0
         self._declared_functions: set[int] = set()
         self._declared_types: set[int] = set()
+        self.type_parameters: list[set[str]] = []
 
     def error(self, code: str, message: str, node: Node) -> None:
         self.diagnostics.append(Diagnostic(
@@ -93,7 +94,7 @@ class Resolver:
             if node.kind == "Function":
                 self.declare(node.get("name"), "function", node)
                 self._declared_functions.add(id(node))
-            elif node.kind == "TypeDeclaration":
+            elif node.kind in ("TypeDeclaration", "StructDeclaration"):
                 name = node.get("name")
                 self.declare(name, "type", node)
                 self._declared_types.add(id(node))
@@ -108,7 +109,8 @@ class Resolver:
         elif node.kind == "NamedType":
             name = node.get("name")
             symbol = self.scope.lookup(name)
-            if name not in BUILTIN_TYPES and (symbol is None or symbol.kind != "type"):
+            generic = any(name in parameters for parameters in self.type_parameters)
+            if name not in BUILTIN_TYPES and not generic and (symbol is None or symbol.kind != "type"):
                 self.error("E_UNKNOWN_TYPE", f"unknown type '{name}'", node)
             for argument in node.get("args", ()):
                 self.resolve_type(argument)
@@ -151,14 +153,34 @@ class Resolver:
         self.function_depth += 1
         enclosing_loop_depth = self.loop_depth
         self.loop_depth = 0
+        parameters = set(node.get("type_params", ()))
+        self.type_parameters.append(parameters)
         for name, annotation in node.get("params", ()):
             self.resolve_type(annotation)
             self.declare(name, "parameter", node)
         self.resolve_type(node.get("result_type"))
         self.visit_block(node.get("body"))
+        self.type_parameters.pop()
         self.function_depth -= 1
         self.loop_depth = enclosing_loop_depth
         self.scope = previous
+
+    def visit_pattern(self, pattern: Node) -> None:
+        if pattern.kind == "BindingPattern":
+            name = pattern.get("name")
+            if name != "_":
+                self.declare(name, "pattern_binding", pattern)
+        elif pattern.kind == "ConstructorPattern":
+            name = pattern.get("name")
+            symbol = self.scope.lookup(name)
+            if symbol is None or symbol.kind != "constructor":
+                self.error("E_UNKNOWN_VARIANT", f"unknown variant '{name}'", pattern)
+            for binding in pattern.get("bindings", ()):
+                self.declare(binding, "pattern_binding", pattern)
+        elif pattern.kind in ("WildcardPattern", "NumberPattern", "StringPattern", "LiteralPattern"):
+            return
+        else:
+            self.error("E_UNSUPPORTED_PATTERN", f"unsupported pattern '{pattern.kind}'", pattern)
 
     def visit(self, node: Node | None) -> None:
         if node is None:
@@ -173,6 +195,17 @@ class Resolver:
             for _variant, args in node.get("variants", ()):
                 for argument in args:
                     self.resolve_type(argument)
+        elif kind == "StructDeclaration":
+            self.type_parameters.append(set(node.get("type_params", ())))
+            seen = set()
+            for field_name, field_type in node.get("fields", ()):
+                if field_name in seen:
+                    self.error("E_DUPLICATE_FIELD", f"duplicate struct field '{field_name}'", node)
+                seen.add(field_name)
+                self.resolve_type(field_type)
+            self.type_parameters.pop()
+        elif kind == "Import":
+            self.declare(node.get("alias"), "module", node)
         elif kind == "ExpressionStatement":
             self.visit(node.get("expression"))
         elif kind == "Return":
@@ -197,6 +230,23 @@ class Resolver:
             self.loop_depth += 1
             self.visit_block(node.get("body"))
             self.loop_depth -= 1
+        elif kind == "For":
+            self.visit(node.get("iterable"))
+            previous = self.scope
+            self.scope = _Scope(previous)
+            self.declare(node.get("name"), "loop_binding", node)
+            self.loop_depth += 1
+            self.visit_block(node.get("body"))
+            self.loop_depth -= 1
+            self.scope = previous
+        elif kind == "Match":
+            self.visit(node.get("value"))
+            for pattern, body in node.get("arms", ()):
+                previous = self.scope
+                self.scope = _Scope(previous)
+                self.visit_pattern(pattern)
+                self.visit_block(body)
+                self.scope = previous
         elif kind == "Block":
             self.visit_block(node)
         elif kind == "Name":
