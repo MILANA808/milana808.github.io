@@ -192,9 +192,11 @@ class Resolver:
             mode = node.get("mode")
             self.declare(node.get("name"), "binding", node, mutable=(mode == "mut"))
         elif kind == "TypeDeclaration":
+            self.type_parameters.append(set(node.get("type_params", ())))
             for _variant, args in node.get("variants", ()):
                 for argument in args:
                     self.resolve_type(argument)
+            self.type_parameters.pop()
         elif kind == "StructDeclaration":
             self.type_parameters.append(set(node.get("type_params", ())))
             seen = set()
