@@ -10,6 +10,9 @@ class CompilerPipelineTests(unittest.TestCase):
             "let answer: Int = identity(42)"
         )
         self.assertTrue(result.ok, result.analysis.diagnostics)
+        payload = result.to_dict()
+        self.assertEqual(payload["schema"], "AKSI-Q-COMPILE/0.2")
+        self.assertEqual(payload["analysis"]["schema"], "AKSI-Q-ANALYSIS/2")
         ir = result.ir.to_dict()
         self.assertEqual(ir["schema"], "AKSI-Q-TIR/0.1")
         self.assertEqual(ir["nodes"][0]["op"], "Function")
