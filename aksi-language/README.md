@@ -44,6 +44,7 @@ The shared front-end foundation includes:
 - `aksi_typechecker.py`: initial primitive type-checking pass for literals,
   annotated bindings, function boundaries, operators, conditions, arrays,
   and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
+- `aksi_flowcheck.py`: conservative return-flow pass; rejects non-Unit functions that can reach the end without a return on every visible branch. See [FLOWCHECK-SPEC.md](FLOWCHECK-SPEC.md).
 
 The isolated Python AST interpreter prototype is now available as
 `aksi_interpreter.py`. It runs a bounded subset of the shared AST with
