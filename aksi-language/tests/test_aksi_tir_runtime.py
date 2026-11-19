@@ -48,6 +48,16 @@ class TIRRuntimeTests(unittest.TestCase):
             "}"
         )
 
+    def test_matches_nullary_enum_constructor(self):
+        self.execute_both(
+            "type Option = None | Some(Int)\\n"
+            "let value = None()\\n"
+            "match value {\\n"
+            "  None => { print(0) }\\n"
+            "  Some(number) => { print(number) }\\n"
+            "}"
+        )
+
     def test_instruction_budget_is_enforced(self):
         compiled = compile_source("mut count: Int = 0\nwhile true { count += 1 }")
         self.assertTrue(compiled.ok, compiled.analysis.diagnostics)
