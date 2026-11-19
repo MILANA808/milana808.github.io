@@ -140,6 +140,7 @@ class Interpreter:
         self.values: list[Any] = []
         self.global_scope = _Scope()
         self.capabilities = self._validate_capabilities({} if capabilities is None else capabilities)
+        self._typed_capability_mode = capability_specs is not None
         self.capability_specs = self._validate_capability_specs(
             {} if capability_specs is None else capability_specs, self.capabilities
         )
@@ -173,9 +174,11 @@ class Interpreter:
         for name, spec in specs.items():
             if name not in capabilities or not isinstance(spec, CapabilitySpec):
                 raise ValueError("each capability spec must describe a registered capability")
-            types = (*spec.parameters, spec.result)
             if not isinstance(spec.parameters, tuple) or len(spec.parameters) > 64:
                 raise ValueError(f"invalid parameter contract for capability '{name}'")
+            if not isinstance(spec.result, str):
+                raise ValueError(f"invalid result contract for capability '{name}'")
+            types = (*spec.parameters, spec.result)
             if any(not isinstance(item, str) or (
                 item not in allowed_types and not (
                     item.startswith("[") and item.endswith("]")
@@ -184,7 +187,8 @@ class Interpreter:
             ) for item in types):
                 raise ValueError(f"unsupported ABI type in capability '{name}'")
             if not isinstance(spec.effects, tuple) or any(
-                effect not in allowed_effects for effect in spec.effects
+                not isinstance(effect, str) or effect not in allowed_effects
+                for effect in spec.effects
             ) or len(set(spec.effects)) != len(spec.effects):
                 raise ValueError(f"invalid effects for capability '{name}'")
             if type(spec.max_calls) is not int or spec.max_calls < 1:
@@ -207,13 +211,21 @@ class Interpreter:
             )
         return False
 
-    def grant_capability(self, name: str, handler: Callable[..., Any]) -> None:
-        """Grant one capability; an existing grant cannot be silently replaced."""
+    def grant_capability(
+        self, name: str, handler: Callable[..., Any], *,
+        spec: CapabilitySpec | None = None,
+    ) -> None:
+        """Grant one capability; strict registries require its typed ABI contract."""
         validated = self._validate_capabilities({name: handler})
         if name in self.capabilities:
             raise ValueError(f"capability '{name}' is already granted")
-        if self.capability_specs and name not in self.capability_specs:
-            raise ValueError(f"capability '{name}' requires an ABI contract")
+        if self._typed_capability_mode:
+            if spec is None:
+                raise ValueError(f"capability '{name}' requires an ABI contract")
+            checked = self._validate_capability_specs({name: spec}, {name: handler})
+            self.capability_specs[name] = checked[name]
+        elif spec is not None:
+            raise ValueError("cannot add a typed contract to a legacy capability registry")
         self.capabilities[name] = validated[name]
 
     def revoke_capability(self, name: str) -> bool:
@@ -262,7 +274,7 @@ class Interpreter:
             self._record_capability_event(name, "limit_denied")
             raise AksiRuntimeError("host capability invocation limit exceeded")
         spec = self.capability_specs.get(name)
-        if self.capability_specs and spec is None:
+        if self._typed_capability_mode and spec is None:
             self._record_capability_event(name, "contract_denied")
             raise AksiRuntimeError(f"typed ABI contract missing: {name}")
         if spec is not None:
