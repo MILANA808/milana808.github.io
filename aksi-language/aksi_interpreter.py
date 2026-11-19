@@ -442,7 +442,14 @@ class Interpreter:
         if kind == "WildcardPattern":
             return True
         if kind == "BindingPattern":
-            scope.define(pattern.get("name"), value, False)
+            name = pattern.get("name")
+            try:
+                constructor = scope.find(name).value
+            except AksiRuntimeError:
+                constructor = None
+            if isinstance(constructor, _VariantConstructor) and constructor.arity == 0:
+                return isinstance(value, _VariantValue) and value.name == name and not value.payload
+            scope.define(name, value, False)
             return True
         if kind == "NumberPattern":
             raw = pattern.get("value")
