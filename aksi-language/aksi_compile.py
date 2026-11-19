@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 
-from aksi_analyze import AnalysisResult, analyze_module
+from aksi_analyze import AnalysisDiagnostic, AnalysisResult, analyze_module
 from aksi_frontend import parse
 from aksi_ir import IRModule, lower, validate_tir
 
@@ -41,8 +41,18 @@ def compile_source(source: str) -> CompileResult:
     analysis = analyze_module(module)
     if not analysis.ok:
         return CompileResult(analysis, None)
-    ir = lower(module, dict(analysis.inferred_types))
-    validate_tir(ir)
+    try:
+        ir = lower(module, dict(analysis.inferred_types))
+        validate_tir(ir)
+    except (TypeError, ValueError) as exc:
+        diagnostic = AnalysisDiagnostic(
+            "lowering", "E_TIR_LOWERING", str(exc), 1, 1
+        )
+        failed = AnalysisResult(
+            analysis.schema, (*analysis.diagnostics, diagnostic),
+            analysis.inferred_types,
+        )
+        return CompileResult(failed, None)
     return CompileResult(analysis, ir)
 
 
