@@ -1,18 +1,19 @@
-"""Typed intermediate representation for the AKSI Q compiler prototype.
+"""Canonical typed intermediate representation for AKSI Q compiler foundation.
 
-The IR preserves source locations and carries explicit type annotations. Types
-that cannot yet be inferred are marked Unknown rather than guessed.
+TIR types are supplied by the typechecker and keyed by stable AST node IDs.
+The lowerer deliberately does not infer expression types from source syntax.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Mapping
 
 from aksi_frontend import Node
 
 
 @dataclass(frozen=True, slots=True)
 class IRNode:
+    node_id: str
     op: str
     type_name: str
     span: tuple[int, int, int, int]
@@ -26,6 +27,7 @@ class IRNode:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "id": self.node_id,
             "op": self.op,
             "type": self.type_name,
             "span": {
@@ -62,79 +64,60 @@ def _serialize(value: Any) -> Any:
     return value
 
 
-def _type_name(node: Node | None) -> str:
-    if node is None:
-        return "Unit"
+def _declared_type(node: Node) -> str:
     if node.kind == "ArrayType":
-        return "[" + _type_name(node.get("item")) + "]"
+        return "[" + _declared_type(node.get("item")) + "]"
     if node.kind == "NamedType":
         args = node.get("args", ())
-        suffix = "<" + ",".join(_type_name(arg) for arg in args) + ">" if args else ""
+        suffix = "<" + ",".join(_declared_type(arg) for arg in args) + ">" if args else ""
         return node.get("name") + suffix
-    return "Unknown"
+    raise TypeError(f"not a type-syntax node: {node.kind}")
 
 
-def _literal_type(node: Node) -> str:
-    if node.kind == "Number":
-        value = node.get("value")
-        return "Float" if any(ch in value.lower() for ch in (".", "e")) else "Int"
-    if node.kind == "String":
-        return "String"
-    if node.kind == "Literal":
-        value = node.get("value")
-        return "Bool" if isinstance(value, bool) else "Unit"
-    if node.kind == "Array":
-        items = node.get("items", ())
-        if not items:
-            return "[Unknown]"
-        types = {_literal_type(item) for item in items}
-        return "[" + (next(iter(types)) if len(types) == 1 else "Unknown") + "]"
-    return "Unknown"
+def _node_type(node: Node, inferred: Mapping[str, str]) -> str:
+    if node.kind in ("ArrayType", "NamedType"):
+        return _declared_type(node)
+    if node.kind == "Public":
+        declaration = node.get("declaration")
+        return _node_type(declaration, inferred)
+    if node.kind == "Module":
+        return "Module"
+    if node.kind in ("StructDeclaration", "TypeDeclaration", "Import", "Block",
+                     "Break", "Continue", "ExpressionStatement"):
+        return inferred.get(node.node_id, "Unit")
+    if node.kind == "Function":
+        return inferred.get(node.node_id, "Unknown")
+    return inferred.get(node.node_id, "Unknown")
 
 
-def _convert(value: Any) -> Any:
+def _convert(value: Any, inferred: Mapping[str, str]) -> Any:
     if isinstance(value, Node):
-        return _lower_node(value)
+        return _lower_node(value, inferred)
     if isinstance(value, tuple):
-        return tuple(_convert(item) for item in value)
+        return tuple(_convert(item, inferred) for item in value)
     if isinstance(value, list):
-        return tuple(_convert(item) for item in value)
+        return tuple(_convert(item, inferred) for item in value)
     return value
 
 
-def _lower_node(node: Node) -> IRNode:
+def _lower_node(node: Node, inferred: Mapping[str, str]) -> IRNode:
     if not isinstance(node, Node):
         raise TypeError("IR lowering expects AST nodes")
-    kind = node.kind
-    result_type = _literal_type(node)
-    if kind == "Function":
-        params = tuple((name, _type_name(annotation)) for name, annotation in node.get("params", ()))
-        result_type = _type_name(node.get("result_type"))
-        fields = (
-            ("name", node.get("name")),
-            ("type_parameters", tuple(node.get("type_params", ()))),
-            ("parameters", params),
-            ("body", _convert(node.get("body"))),
+    result_type = _node_type(node, inferred)
+    if result_type in ("Unknown", "Any") and node.kind not in ("TypeDeclaration", "StructDeclaration"):
+        raise ValueError(
+            f"cannot lower {node.kind} node {node.node_id}: type is not statically known"
         )
-    elif kind == "Binding":
-        annotation = node.get("annotation")
-        result_type = _type_name(annotation) if annotation is not None else (
-            _literal_type(node.get("value")) if node.get("value") is not None else "Unknown"
-        )
-        fields = tuple((key, _convert(value)) for key, value in node.fields)
-    elif kind == "Call":
-        fields = tuple((key, _convert(value)) for key, value in node.fields)
-    elif kind == "Module":
-        fields = tuple((key, _convert(value)) for key, value in node.fields if key != "items")
-    else:
-        fields = tuple((key, _convert(value)) for key, value in node.fields)
+    fields = tuple((key, _convert(value, inferred)) for key, value in node.fields)
     span = (node.span.line, node.span.column, node.span.end_line, node.span.end_column)
-    return IRNode(kind, result_type, span, fields)
+    return IRNode(node.node_id, node.kind, result_type, span, fields)
 
 
-def lower(module: Node) -> IRModule:
-    """Lower a parsed module to versioned IR; unknown types stay explicit."""
+def lower(module: Node, inferred_types: Mapping[str, str]) -> IRModule:
+    """Lower one analyzed AST using only typechecker-produced expression types."""
     if not isinstance(module, Node) or module.kind != "Module":
         raise TypeError("lower() expects a Module AST node")
-    nodes = tuple(_lower_node(item) for item in module.get("items", ()))
-    return IRModule("AKSI-Q-TIR/0.1", module.get("name"), nodes)
+    if not isinstance(inferred_types, Mapping):
+        raise TypeError("lower() requires a node-id to type mapping from the typechecker")
+    nodes = tuple(_lower_node(item, inferred_types) for item in module.get("items", ()))
+    return IRModule("AKSI-Q-TIR/0.2", module.get("name"), nodes)
