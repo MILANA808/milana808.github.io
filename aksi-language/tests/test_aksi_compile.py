@@ -42,6 +42,11 @@ class CompilerPipelineTests(unittest.TestCase):
                 self.assertTrue(result.ok, result.analysis.diagnostics)
                 self.assertEqual(result.ir.nodes[0].get("value").type_name, expected)
 
+    def test_tir_preserves_declared_function_effects(self):
+        result = compile_source('fn log() !{IO} { print("hello") }')
+        self.assertTrue(result.ok, result.analysis.diagnostics)
+        self.assertEqual(result.ir.nodes[0].get("declared_effects"), ("IO",))
+
     def test_dynamic_host_call_is_rejected_as_lowering_diagnostic(self):
         result = compile_source('let value = host_call("clock", [])')
         self.assertFalse(result.ok)
