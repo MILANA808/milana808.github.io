@@ -12,7 +12,7 @@ class CompilerPipelineTests(unittest.TestCase):
         self.assertTrue(result.ok, result.analysis.diagnostics)
         payload = result.to_dict()
         self.assertEqual(payload["schema"], "AKSI-Q-COMPILE/0.2")
-        self.assertEqual(payload["analysis"]["schema"], "AKSI-Q-ANALYSIS/3")
+        self.assertEqual(payload["analysis"]["schema"], "AKSI-Q-ANALYSIS/4")
         ir = result.ir.to_dict()
         self.assertEqual(ir["schema"], "AKSI-Q-TIR/0.2")
         self.assertEqual(ir["nodes"][0]["op"], "Function")
@@ -20,7 +20,7 @@ class CompilerPipelineTests(unittest.TestCase):
         self.assertEqual(ir["nodes"][0]["fields"]["type_parameters"], ["T"])
         self.assertRegex(ir["nodes"][0]["id"], r"^[0-9a-f]{20}$")
         self.assertEqual(ir["nodes"][0]["fields"]["body"]["type"], "Unit")
-        self.assertIn("inferred_types", payload["analysis"])
+        self.assertIn("inferred_types", payload["analysis"])\n        self.assertIn("effect_summaries", payload["analysis"])\n        self.assertIn("module_effects", payload["analysis"])
 
     def test_generic_abs_preserves_argument_type_in_tir(self):
         result = compile_source("let magnitude: Int = abs(-7)")
