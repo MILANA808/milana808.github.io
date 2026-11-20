@@ -11,13 +11,44 @@ class AnalyzePipelineTests(unittest.TestCase):
             "let answer: Int = add(2, 3)"
         )
         self.assertTrue(result.ok, result.diagnostics)
-        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/3")
+        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/4")
 
     def test_analyzes_existing_ast_without_reparsing(self):
         module = parse("let answer: Int = 42")
         result = analyze_module(module)
         self.assertTrue(result.ok, result.diagnostics)
-        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/3")
+        self.assertEqual(result.schema, "AKSI-Q-ANALYSIS/4")
+
+    def test_infers_direct_io_and_host_effects(self):
+        result = analyze_source(
+            'fn log() { print("hello") }\n'
+            'fn query() { host_call("clock", []) }'
+        )
+        self.assertEqual(dict(result.effect_summaries), {
+            "log": ("IO",),
+            "query": ("Host",),
+        })
+        self.assertEqual(result.module_effects, ())
+
+    def test_propagates_effects_through_calls_and_recursion(self):
+        result = analyze_source(
+            'fn leaf() { print("hello") }\n'
+            'fn middle() { leaf() }\n'
+            'fn recursive(flag: Bool) { if flag { recursive(false) } else { middle() } }\n'
+            'middle()'
+        )
+        self.assertEqual(dict(result.effect_summaries), {
+            "leaf": ("IO",),
+            "middle": ("IO",),
+            "recursive": ("IO",),
+        })
+        self.assertEqual(result.module_effects, ("IO",))
+
+    def test_marks_indirect_calls_as_unknown_effect(self):
+        result = analyze_source(
+            'fn invoke(callback: Any) { callback() }'
+        )
+        self.assertEqual(dict(result.effect_summaries)["invoke"], ("Unknown",))
 
     def test_rejects_non_module_ast(self):
         with self.assertRaises(TypeError):
