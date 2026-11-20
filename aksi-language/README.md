@@ -41,7 +41,7 @@ The shared front-end foundation includes:
 - `aksi_resolver.py`: first lexical name-resolution pass. It checks declaration
   visibility, duplicate names, unknown names/types, mutability, and control-flow
   context. See [RESOLVER-SPEC.md](RESOLVER-SPEC.md).
-- `aksi_typechecker.py`: primitive type-checking pass for literals,
+- `aksi_effects.py`: conservative effect inference for `IO` (`print`), `Host` (`host_call`), unknown indirect calls, and transitive user-function calls (including recursion). Effects are analysis metadata, not permission grants; runtime capability checks remain mandatory.\n- `aksi_typechecker.py`: primitive type-checking pass for literals,
   annotated bindings, function boundaries, operators, conditions, arrays,
   and known function calls. See [TYPECHECKER-SPEC.md](TYPECHECKER-SPEC.md).
 - `aksi_flowcheck.py`: conservative return-flow pass; rejects non-Unit functions that can reach the end without a return on every visible branch. See [FLOWCHECK-SPEC.md](FLOWCHECK-SPEC.md).
@@ -72,7 +72,7 @@ The shared `conformance/common-v1.json` corpus is executed by both legacy
 runtimes in CI and compares arithmetic, boolean expressions, vectors, concept
 relations and state-vector probabilities. The separate quantum differential
 test compares selected circuit amplitudes. This is a tested common subset,
-not full language parity. The new resolver/type-checker/interpreter suites run in the AKSI Q language CI workflow. The isolated AST interpreter example is also executed there.
+not full language parity. The new resolver/type-checker/effect-analysis/interpreter suites run in the AKSI Q language CI workflow. The isolated AST interpreter example is also executed there.
 
 
 ## Compiler front-end milestone 0.2
