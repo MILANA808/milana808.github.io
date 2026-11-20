@@ -25,8 +25,8 @@ Security, negative tests, resource limits, documentation, and honest capability 
 
 ## Current implementation boundary
 
-The first implementation slice exposes `analyze_module(module)` and routes compilation through one parsed AST, avoiding the former parse → analyze (parse again) → lower (parse again) sequence. The existing `AKSI-Q-TIR/0.1` remains a prototype: it is not yet the canonical, fully typed executable representation. The current type checker still has permissive `Any`/unknown behavior, and IR lowering still contains syntax-based type inference. Those are explicit Stage 1/2 work items, not solved by this decision record.
+The first implementation slice exposes `analyze_module(module)` and routes compilation through one parsed AST, avoiding the former parse → analyze (parse again) → lower (parse again) sequence. The compiler now emits structurally validated `AKSI-Q-TIR/0.2` using type facts keyed by stable AST IDs, and `aksi_tir_runtime.py` executes a bounded subset by dispatching directly on TIR operations. The TIR evaluator has automated parity tests against the bounded AST interpreter for the supported subset. This is meaningful executable progress, but it does not make TIR the complete canonical runtime yet: struct construction and module loading are unsupported, host capabilities are disabled in the TIR evaluator, the type system remains conservative/incomplete, and full browser/Python backend parity has not been established. `Any` and unknown types are rejected at lowering for unresolved expression nodes; the remaining type-system gaps must be closed explicitly rather than hidden by inference.
 
-## Merge and rollout policy
+## Merge and rollout status
 
-All work stays on `aksi-q-site-rewrite` and in draft PR #264 until reviewed. No merge to `main` and no public deployment are authorized by this plan.
+The compiler foundation implementation was merged from PR #264 into `main` on 2026-11-20. The published commit is `f3ac0ae8437514b91297d5cf6bbffe95c59b2993`; the GitHub Pages deployment and the associated required workflows completed successfully. This publication records the current prototype state, not completion of the seven-stage roadmap. Further architectural changes must continue to pass compiler, runtime, security, and browser regression checks before publication.
