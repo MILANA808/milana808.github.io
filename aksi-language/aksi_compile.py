@@ -26,6 +26,11 @@ class CompileResult:
                 "schema": self.analysis.schema,
                 "diagnostics": [asdict(item) for item in self.analysis.diagnostics],
                 "inferred_types": dict(self.analysis.inferred_types),
+                "effect_summaries": {
+                    name: list(effects)
+                    for name, effects in self.analysis.effect_summaries
+                },
+                "module_effects": list(self.analysis.module_effects),
             },
             "ir": self.ir.to_dict() if self.ir is not None else None,
         }
@@ -50,7 +55,8 @@ def compile_source(source: str) -> CompileResult:
         )
         failed = AnalysisResult(
             analysis.schema, (*analysis.diagnostics, diagnostic),
-            analysis.inferred_types,
+            analysis.inferred_types, analysis.effect_summaries,
+            analysis.module_effects,
         )
         return CompileResult(failed, None)
     return CompileResult(analysis, ir)
