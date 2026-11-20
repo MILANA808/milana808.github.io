@@ -28,6 +28,17 @@ class EffectResult:
     module_effects: tuple[str, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class EffectDiagnostic:
+    code: str
+    message: str
+    line: int
+    column: int
+
+
+KNOWN_EFFECTS = frozenset({"IO", "Host", "Unknown"})
+
+
 def _unwrap(node: Node) -> Node:
     while node.kind == "Public":
         node = node.get("declaration")
@@ -128,3 +139,36 @@ def infer_effects(module: Node) -> EffectResult:
         tuple((name, tuple(sorted(effects))) for name, effects in sorted(summaries.items())),
         tuple(sorted(module_effects)),
     )
+
+
+def check_effect_constraints(module: Node, result: EffectResult) -> tuple[EffectDiagnostic, ...]:
+    """Check declared function effect sets against inferred transitive effects.
+
+    An annotation is an upper bound, not a capability grant. Runtime host
+    authorization remains mandatory regardless of the annotation.
+    """
+    summaries = dict(result.function_effects)
+    diagnostics = []
+    for wrapper in module.get("items", ()):
+        function = _unwrap(wrapper)
+        if function.kind != "Function":
+            continue
+        declared = function.get("declared_effects")
+        if declared is None:
+            continue
+        allowed = set(declared)
+        for effect in sorted(allowed - KNOWN_EFFECTS):
+            diagnostics.append(EffectDiagnostic(
+                "E_UNKNOWN_EFFECT", f"unknown declared effect {effect!r}",
+                function.span.line, function.span.column,
+            ))
+        inferred = set(summaries.get(function.get("name"), ()))
+        forbidden = sorted(inferred - allowed)
+        if forbidden:
+            diagnostics.append(EffectDiagnostic(
+                "E_EFFECT_NOT_DECLARED",
+                "function performs effects not listed in its declaration: "
+                + ", ".join(forbidden),
+                function.span.line, function.span.column,
+            ))
+    return tuple(diagnostics)
