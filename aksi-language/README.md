@@ -49,30 +49,16 @@ The shared front-end foundation includes:
   The compiler also validates the emitted TIR schema, operation allowlist, stable node IDs, uniqueness, source spans, immutable fields and nested value types before returning a successful compile result. This is structural validation, not proof of semantic correctness or executable-runtime parity.
 - `aksi_compile.py`: single-parse compiler entry point that runs resolution, type and return-flow checks on one AST before lowering the same tree to TIR. It emits TIR but does not execute programs or emit bytecode/machine code. Use `aksi_tir_runtime.py` to execute the supported TIR subset.
 
-The isolated Python AST interpreter prototype is now available as
+The isolated Python AST interpreter prototype is available as
 `aksi_interpreter.py`. It runs a bounded subset of the shared AST with
 functions (including generic function syntax), bindings, arithmetic/Boolean
 expressions, conditionals, `while`/`for` loops, `break`/`continue`, enum
 constructors and block-bodied `match`, returns, arrays, and explicit output.
-Static analysis runs before execution.
-It has no filesystem/network/process/browser/FFI capabilities, rejects
-unsupported AST nodes, and bounds captured output and retained results. Its exact subset and limits are documented in
-[INTERPRETER-SPEC.md](INTERPRETER-SPEC.md). It is not yet wired into the
-legacy `aksi_q.py` runtime or the browser product; the existing interpreter
-remains unchanged.
+Static analysis runs before execution. It has no filesystem/network/process/browser/FFI capabilities, rejects unsupported AST nodes, and bounds captured output and retained results. Its exact subset and limits are documented in [INTERPRETER-SPEC.md](INTERPRETER-SPEC.md). It remains separate from the legacy expression runtime and browser expression runtime.
 
-These are front-end analysis components, not yet one production execution
-pipeline. The legacy Python expression interpreter still uses
-`aksi_parser.py`; it does not execute the new declaration AST. The shared
-resolver and type checker must be run explicitly by tooling and have not yet
-been integrated into the legacy interpreter or browser runtime. The shared
-lexer is not yet the sole lexer for the separate browser UI profile.
+The compiler pipeline integrates the shared parser, resolver, type checker, effect analysis, return-flow checks, typed TIR lowering, and structural validation. The bounded Python TIR evaluator executes a documented subset of that TIR directly. The legacy Python expression runtime (`aksi_q.py`) and browser expression runtime (`aksi-q-browser.js`) remain separate implementations; neither currently executes the declaration AST/TIR. The browser declarative UI profile also remains a separate grammar and runtime.
 
-The shared `conformance/common-v1.json` corpus is executed by both legacy
-runtimes in CI and compares arithmetic, boolean expressions, vectors, concept
-relations and state-vector probabilities. The separate quantum differential
-test compares selected circuit amplitudes. This is a tested common subset,
-not full language parity. The new resolver/type-checker/effect-analysis/interpreter suites run in the AKSI Q language CI workflow. The isolated AST interpreter example is also executed there.
+The shared `conformance/common-v1.json` corpus is executed by the legacy Python and browser expression runtimes in CI and compares arithmetic, Boolean expressions, vectors, concept relations, and state-vector probabilities. Separate tests compare selected quantum circuit amplitudes. Compiler and TIR evaluator tests additionally compare the supported TIR subset against the AST interpreter. These suites provide tested subsets, not full language parity.
 
 
 ## Compiler front-end milestone 0.2
