@@ -52,7 +52,7 @@ class AnalyzePipelineTests(unittest.TestCase):
 
     def test_accepts_declared_effects_including_transitive_calls(self):
         result = analyze_source(
-            'fn leaf() !{IO} { print("hello") }\\n'
+            'fn leaf() !{IO} { print("hello") }\n'
             'fn caller() !{IO} { leaf() }'
         )
         self.assertTrue(result.ok, result.diagnostics)
@@ -64,7 +64,7 @@ class AnalyzePipelineTests(unittest.TestCase):
 
     def test_rejects_transitive_host_effect_not_declared(self):
         result = analyze_source(
-            'fn access() { host_call("clock", []) }\\n'
+            'fn access() { host_call("clock", []) }\n'
             'fn wrapper() !{IO} { access() }'
         )
         self.assertIn("E_EFFECT_NOT_DECLARED", [item.code for item in result.diagnostics])
