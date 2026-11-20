@@ -12,6 +12,7 @@ from aksi_lexer import LexError
 from aksi_resolver import resolve
 from aksi_typechecker import check_with_types
 from aksi_flowcheck import check as check_flow
+from aksi_effects import infer_effects
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +29,8 @@ class AnalysisResult:
     schema: str
     diagnostics: tuple[AnalysisDiagnostic, ...]
     inferred_types: tuple[tuple[str, str], ...] = ()
+    effect_summaries: tuple[tuple[str, tuple[str, ...]], ...] = ()
+    module_effects: tuple[str, ...] = ()
 
     @property
     def ok(self) -> bool:
@@ -41,6 +44,7 @@ def analyze_module(module: Node) -> AnalysisResult:
     resolved = resolve(module)
     typed = check_with_types(module)
     flow = check_flow(module)
+    effects = infer_effects(module)
 
     combined: list[AnalysisDiagnostic] = []
     seen: set[tuple[str, int, int]] = set()
@@ -55,7 +59,10 @@ def analyze_module(module: Node) -> AnalysisResult:
                 diagnostic.line, diagnostic.column,
             ))
     combined.sort(key=lambda item: (item.line, item.column, item.stage, item.code))
-    return AnalysisResult("AKSI-Q-ANALYSIS/3", tuple(combined), typed.node_types)
+    return AnalysisResult(
+        "AKSI-Q-ANALYSIS/4", tuple(combined), typed.node_types,
+        effects.function_effects, effects.module_effects,
+    )
 
 
 def analyze_source(source: str) -> AnalysisResult:
@@ -80,6 +87,8 @@ def main(argv: list[str] | None = None) -> int:
             "schema": result.schema,
             "ok": result.ok,
             "inferred_types": dict(result.inferred_types),
+            "effect_summaries": {name: list(effects) for name, effects in result.effect_summaries},
+            "module_effects": list(result.module_effects),
             "diagnostics": [asdict(item) for item in result.diagnostics],
         }, ensure_ascii=False, indent=2))
     else:
