@@ -9,7 +9,7 @@ The parser is a syntax-only front end over the shared source-positioned lexer. I
 
 - Optional `module dotted.name` header.
 - Public declarations via `pub`.
-- Functions with typed parameters, optional generic parameters and return type.
+- Functions with typed parameters, optional generic parameters and return type.\n- Optional upper-bound effect declarations after the return type: `fn f() -> Int !{IO, Host} { ... }`; `!{}` declares a pure function.
 - `let`, `const`, and `mut` bindings.
 - `return`, `break`, `continue`, `if/else if/else`, `while`, and `for` blocks.
 - Struct declarations and algebraic type declarations with payload variants.
@@ -33,7 +33,7 @@ Lexical and strict syntax failures raise `LexError` or `ParseError` with source 
 ## Explicitly incomplete
 
 - Error recovery is statement-boundary based; it is not yet a full IDE-grade incremental parser.
-- Complete type/effect system and strict rejection of unresolved/unknown types.
+- Complete type/effect system and strict rejection of unresolved/unknown types. Effect declarations currently constrain only the inferred `IO`, `Host`, and `Unknown` effects.
 - Executable module loading and package resolution.
 - Canonical TIR execution semantics and a TIR evaluator.
 - Full Option/Result semantics, memory model, async semantics, bytecode, and WASM.
