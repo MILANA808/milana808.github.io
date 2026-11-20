@@ -1,6 +1,6 @@
 # AKSI Q type checker — draft 0.1
 
-The type checker consumes the immutable AST produced by `aksi_frontend.parse()`.
+The type checker consumes the immutable AST produced by `aksi_frontend.parse()`. The separate `aksi_effects.py` pass computes conservative effect summaries and is included in the unified analysis result.
 It is a conservative first-pass checker for primitive expression types and
 annotated function boundaries. It does not execute source code.
 
@@ -69,3 +69,25 @@ use.
 
 A clean result means only that this pass found no issue among the checks above.
 It does not prove that a program is executable, safe, or correct.
+
+
+## Effect inference (analysis metadata)
+
+`aksi_effects.infer_effects(module)` reports sorted effects for each
+module-level function and for top-level module statements. The current effect
+vocabulary is:
+
+- `IO`: calls to `print`.
+- `Host`: calls to `host_call`.
+- `Unknown`: indirect or unresolved callable expressions.
+
+Effects from direct user-function calls are propagated to a fixed point, so
+recursive call graphs receive transitive summaries. Known prelude math and
+collection functions and enum constructors are treated as pure.
+
+The unified analysis schema is `AKSI-Q-ANALYSIS/4` and exposes
+`effect_summaries` and `module_effects`. This is descriptive static
+metadata only: it does not grant or revoke capabilities, and does not replace
+runtime ABI validation, quotas, revocation, or host-side authorization. There
+is no source syntax yet for declaring or constraining effects, and indirect
+calls remain `Unknown`.
