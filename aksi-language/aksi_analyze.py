@@ -12,7 +12,7 @@ from aksi_lexer import LexError
 from aksi_resolver import resolve
 from aksi_typechecker import check_with_types
 from aksi_flowcheck import check as check_flow
-from aksi_effects import infer_effects
+from aksi_effects import infer_effects, check_effect_constraints
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,10 +45,12 @@ def analyze_module(module: Node) -> AnalysisResult:
     typed = check_with_types(module)
     flow = check_flow(module)
     effects = infer_effects(module)
+    effect_diagnostics = check_effect_constraints(module, effects)
 
     combined: list[AnalysisDiagnostic] = []
     seen: set[tuple[str, int, int]] = set()
-    for stage, diagnostics in (("resolver", resolved), ("typechecker", typed.diagnostics), ("control_flow", flow)):
+    for stage, diagnostics in (("resolver", resolved), ("typechecker", typed.diagnostics),
+                               ("control_flow", flow), ("effect_checker", effect_diagnostics)):
         for diagnostic in diagnostics:
             key = (diagnostic.code, diagnostic.line, diagnostic.column)
             if key in seen:
