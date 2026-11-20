@@ -50,6 +50,33 @@ class AnalyzePipelineTests(unittest.TestCase):
         )
         self.assertEqual(dict(result.effect_summaries)["invoke"], ("Unknown",))
 
+    def test_accepts_declared_effects_including_transitive_calls(self):
+        result = analyze_source(
+            'fn leaf() !{IO} { print("hello") }\\n'
+            'fn caller() !{IO} { leaf() }'
+        )
+        self.assertTrue(result.ok, result.diagnostics)
+        self.assertEqual(dict(result.effect_summaries)["caller"], ("IO",))
+
+    def test_rejects_effect_missing_from_declaration(self):
+        result = analyze_source('fn pure() !{} { print("not pure") }')
+        self.assertIn("E_EFFECT_NOT_DECLARED", [item.code for item in result.diagnostics])
+
+    def test_rejects_transitive_host_effect_not_declared(self):
+        result = analyze_source(
+            'fn access() { host_call("clock", []) }\\n'
+            'fn wrapper() !{IO} { access() }'
+        )
+        self.assertIn("E_EFFECT_NOT_DECLARED", [item.code for item in result.diagnostics])
+
+    def test_unknown_effect_name_is_diagnostic(self):
+        result = analyze_source('fn work() !{Network} { print("x") }')
+        self.assertIn("E_UNKNOWN_EFFECT", [item.code for item in result.diagnostics])
+
+    def test_unknown_indirect_effect_must_be_declared_explicitly(self):
+        result = analyze_source('fn invoke(callback: Any) !{IO} { callback() }')
+        self.assertIn("E_EFFECT_NOT_DECLARED", [item.code for item in result.diagnostics])
+
     def test_rejects_non_module_ast(self):
         with self.assertRaises(TypeError):
             analyze_module(parse("let answer = 1").get("items")[0])
