@@ -321,9 +321,23 @@ class Parser:
         result_type = None
         if self.accept("->"):
             result_type = self.parse_type()
+        declared_effects = None
+        if self.accept("!"):
+            self.expect("{")
+            effects = []
+            if not self.at("}"):
+                while True:
+                    effects.append(self.expect_kind("IDENT", "effect name").value)
+                    if not self.accept(","):
+                        break
+            self.expect("}")
+            if len(set(effects)) != len(effects):
+                raise ParseError("duplicate effect name", self.tokens[self.pos - 1].span)
+            declared_effects = tuple(effects)
         body = self.parse_block()
         return self.node("Function", start.span, body.span, name=name.value,
-                         params=tuple(params), type_params=type_params, result_type=result_type, body=body)
+                         params=tuple(params), type_params=type_params, result_type=result_type,
+                         declared_effects=declared_effects, body=body)
 
     def parse_type_alias(self) -> Node:
         start = self.expect("type")
