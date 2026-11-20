@@ -1,13 +1,18 @@
 name: AKSI Q language
 on:
   push:
-    branches: [main, aksi-language-v0.1]
+    branches: [main, aksi-language-v0.1, aksi-q-site-rewrite]
     paths:
       - "aksi-language/**"
+      - "tests/aksi-ui-language.test.cjs"
+      - "tests/aksi-q-studio-page.test.cjs"
       - ".github/workflows/aksi-language.yml"
   pull_request:
     paths:
       - "aksi-language/**"
+      - "aksi-q-studio/**"
+      - "tests/aksi-ui-language.test.cjs"
+      - "tests/aksi-q-studio-page.test.cjs"
       - ".github/workflows/aksi-language.yml"
   workflow_dispatch:
 permissions:
@@ -20,6 +25,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Test declarative AKSI Q UI profile and Studio route
+        run: node --test tests/aksi-ui-language.test.cjs tests/aksi-q-studio-page.test.cjs
       - name: Export canonical AKSI semantic graph
         working-directory: aksi-language
         run: node tools/export_semantics.cjs
@@ -29,6 +36,9 @@ jobs:
       - name: Run interpreter tests
         working-directory: aksi-language
         run: python -m unittest discover -s tests -v
+      - name: Run new AKSI Q AST interpreter example
+        working-directory: aksi-language
+        run: python aksi_interpreter.py examples/ast-interpreter.aksi
       - name: Run example programs
         working-directory: aksi-language
         run: |

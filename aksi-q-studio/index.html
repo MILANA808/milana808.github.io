@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#eee3d1">
+<meta name="description" content="AKSI Q Studio — локальная среда исполнения декларативного интерфейсного языка AKSI Q.">
+<title>AKSI Q Studio — язык интерфейса AKSI</title>
+<style>
+:root{color-scheme:light;--bg:#f2e8d9;--panel:#fffaf2;--ink:#35291f;--muted:#786858;--line:#cbb493;--accent:#815b38;--green:#55734d;--red:#a74f42}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0,#fffaf0,transparent 40%),linear-gradient(145deg,#f2e8d9,#e7d7c1);color:var(--ink);font:15px/1.55 system-ui,-apple-system,sans-serif}
+header{padding:16px max(18px,calc((100% - 1100px)/2));border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px;background:#f5ecdfd9;position:sticky;top:0}
+a{color:var(--accent)}.brand{font-weight:850;letter-spacing:.1em;text-decoration:none}.back{font-size:13px}
+main{max-width:1100px;margin:auto;padding:34px 18px 70px}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:var(--accent);font-weight:700}
+h1{font-size:clamp(34px,6vw,62px);line-height:1.02;margin:10px 0 12px;letter-spacing:-.04em}.lead{color:var(--muted);max-width:720px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}.panel{min-width:0;background:#fffaf2d9;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 12px 35px #6f4c2810}
+h2{font-size:18px;margin:0 0 12px}.hint{color:var(--muted);font-size:12px;margin:0 0 10px}
+textarea{display:block;width:100%;min-height:300px;resize:vertical;background:#2a241f;color:#fff4e5;border:1px solid #71583f;border-radius:12px;padding:14px;font:13px/1.65 ui-monospace,SFMono-Regular,monospace;tab-size:2}
+.controls{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}button{border:1px solid #a88b68;border-radius:11px;padding:10px 14px;background:#fff4e4;color:#473421;font:700 13px system-ui;cursor:pointer}button.primary{background:linear-gradient(115deg,#6e4b31,#b68a5a);color:#fffaf2;border-color:transparent}button:focus-visible,a:focus-visible,textarea:focus-visible{outline:3px solid #397b8b;outline-offset:3px}
+#preview{min-height:300px;border:1px dashed #c7ad8c;border-radius:12px;padding:16px;background:#fbf5eb}
+#preview main{padding:0;margin:0}#preview section{border:1px solid #e0d0b8;border-radius:12px;padding:14px;margin:0 0 12px;background:#fffaf2}#preview p{margin:6px 0 10px}#preview output{display:inline-block;min-width:36px;padding:3px 8px;border-radius:7px;background:#eee1ce;font-weight:800;color:#493622;margin:4px 0}#preview button{margin:6px 6px 6px 0}
+.status{font-size:12px;color:var(--muted);margin-top:12px;min-height:20px}.status.ok{color:var(--green)}.status.error{color:var(--red)}
+footer{max-width:1100px;margin:auto;padding:0 18px 30px;color:var(--muted);font-size:12px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}header{padding:13px 16px}main{padding-top:24px}textarea{min-height:240px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="/">AKSI MATRIX</a><a class="back" href="/">← На главную</a></header>
+<main>
+<div class="eyebrow">AKSI Q · declarative interface runtime</div>
+<h1>Язык, который<br>строит интерфейс</h1>
+<p class="lead">Это первая изолированная страница AKSI MATRIX, структура которой описана на AKSI Q. Измени программу, нажми «Собрать страницу» и проверь, как язык создаёт интерфейс и управляет локальным состоянием. Всё исполняется в браузере; сервер и внешняя AI-модель не нужны.</p>
+<div class="grid">
+<section class="panel" aria-labelledby="editor-title">
+<h2 id="editor-title">Программа AKSI Q</h2>
+<p class="hint">Измени текст, подписи кнопок или начальное значение счётчика.</p>
+<textarea id="source" spellcheck="false" aria-label="Исходный код AKSI Q">page "studio-demo" {
+  state "count" = 0
+  state "details" = 0
+  state "visitor" = ""
+  section {
+    text "Добро пожаловать в AKSI Q"
+    text "Эта карточка и её поведение описаны на новом языке."
+    input "Напиши своё имя" state "visitor"
+    value "visitor"
+    value "count"
+    button "Добавить" action "increment" state "count" add 1
+    button "Уменьшить" action "decrement" state "count" add -1
+  }
+  section {
+    text "Следующий шаг — перенос настоящих страниц AKSI MATRIX."
+    button "Показать детали языка" action "show-details" state "details" add 1
+    when "details" equals 1 {
+      text "Условные блоки появляются после изменения состояния."
+      text "Это уже реактивное поведение, описанное на AKSI Q."
+    }
+    button "Открыть Research Lab" action "open-research"
+    button "Открыть рабочую среду" action "open-workspace"
+  }
+}</textarea>
+<div class="controls"><button class="primary" id="compile" type="button">Собрать страницу</button><button id="reset" type="button">Вернуть пример</button></div>
+<div class="status" id="status" role="status" aria-live="polite">Загружаю AKSI Q runtime…</div>
+</section>
+<section class="panel" aria-labelledby="preview-title">
+<h2 id="preview-title">Результат исполнения</h2>
+<p class="hint">Нажимай кнопки в собранной странице — состояние изменяется самим runtime AKSI Q.</p>
+<div id="preview" aria-live="polite"><p>Здесь появится страница, собранная из программы AKSI Q.</p></div>
+</section>
+</div>
+</main>
+<footer>AKSI Q UI profile v0.4 · локальное исполнение · ограниченные возможности · без eval и выполнения HTML из исходного текста.</footer>
+<script src="../aksi-language/aksi-ui.js?v=0.4.0"></script>
+<script>
+(function(){
+"use strict";
+const source=document.getElementById("source");
+const preview=document.getElementById("preview");
+const status=document.getElementById("status");
+const compile=document.getElementById("compile");
+const reset=document.getElementById("reset");
+const initial=source.value;
+const actions=Object.freeze({
+ "open-research":"/research/",
+ "open-workspace":"/workspace/"
+});
+function report(message,kind){
+ status.textContent=message;
+ status.className="status"+(kind?" "+kind:"");
+}
+function build(){
+ try{
+  if(!window.AKSI_Q_UI) throw new Error("AKSI Q runtime не загрузился.");
+  const ast=window.AKSI_Q_UI.parse(source.value);
+  const page=window.AKSI_Q_UI.render(ast,document,function(action){
+   if(Object.prototype.hasOwnProperty.call(actions,action)){
+    window.location.assign(actions[action]);
+   }
+  });
+  preview.replaceChildren(page);
+  report("Готово: страница «"+ast.name+"» собрана из AKSI Q. Состояние работает локально.","ok");
+ }catch(error){
+  report((error&&error.message)?error.message:"Не удалось собрать программу.", "error");
+ }
+}
+compile.addEventListener("click",build);
+reset.addEventListener("click",function(){source.value=initial;build();});
+if(window.AKSI_Q_UI) build();
+else report("Ошибка: не удалось загрузить aksi-ui.js.", "error");
+})();
+</script>
+</body>
+</html>

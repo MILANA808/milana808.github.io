@@ -1,6 +1,6 @@
 # AKSI Q Language Specification — Draft 0.3
 
-**Status:** executable prototype specification; subject to change before 1.0.
+**Status:** experimental compiler-front-end specification; subject to change before 1.0.
 **Runtime targets:** Python 3.10+ reference interpreter (v0.2) and browser-native JavaScript runtime (v0.3 profile). **Encoding:** UTF-8.
 **File extension:** .aksi.
 
@@ -42,6 +42,72 @@ value. Assert stops execution with a source-located error if false.
 Concept stores an explicit definition. Relate stores an explicit typed edge.
 Ask retrieves a stored definition and outgoing relations. Infer follows
 transitive is_a edges only; it does not infer unstated facts or causes.
+
+
+## 3A. Declaration front-end syntax (experimental)
+
+The shared declaration parser additionally accepts the following forms. They
+are parsed into source-spanned AST nodes and checked by the resolver/type
+checker for the documented subset. They are not yet executable in the legacy
+expression runtime or browser runtime.
+
+    import std.math as math
+
+    struct Box<T> {
+        value: T
+    }
+
+    type Option<T> = None | Some(T)
+
+    fn identity<T>(value: T) -> T {
+        return value
+    }
+
+    for item in values {
+        print(item)
+    }
+
+    match option {
+        Some(value) => { print(value) }
+        None => { print(0) }
+        _ => { print("unknown") }
+    }
+
+Generic function calls infer simple type-variable substitutions from argument
+types. Generic constraints, bounds, higher-kinded types, trait/interface
+dispatch, and generic specialization are not implemented.
+
+Struct declarations validate field type references and duplicate field names.
+Struct construction, member typing, methods, layout, ownership, and runtime
+representation are not implemented.
+
+Enum declarations support generic payload type syntax. Constructor pattern
+names and pattern-bound identifiers are resolved. Constructor payload typing,
+nested patterns, guards, and exhaustive-match checking are not implemented.
+
+Import syntax records a module path and local alias in the AST. The current
+resolver introduces that alias into lexical scope; it does not yet load source
+files, validate exports, resolve dependency graphs, or link modules. An import
+must not be mistaken for a functioning package manager or module loader.
+
+For loops bind a local iteration name. The static checker recognizes arrays
+and strings as iterable and determines their element type. Runtime execution
+of this declaration syntax remains a separate integration milestone.
+
+## 3B. Typed intermediate representation (prototype)
+
+The aksi_compile.compile_source() API runs parsing, name resolution, initial
+type checking, and conservative return-flow analysis. On success it lowers the
+AST to AKSI-Q-TIR/0.1, a source-mapped intermediate representation.
+
+Every IR node carries an operation name, source span, and type field. Types
+known from syntax or the current lightweight inference are retained. Unknown
+expression types are represented as Unknown; the compiler does not invent a
+type to make a program appear checked.
+
+This TIR is an early compiler contract, not yet a fully typed SSA/CFG IR. It
+has no executable bytecode backend, optimizer, register allocator, or WASM
+emitter. The reference interpreter does not yet consume this TIR.
 
 ## 4. Value model
 

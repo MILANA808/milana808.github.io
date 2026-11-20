@@ -1,0 +1,61 @@
+{
+  "system": "AKSI MATRIX",
+  "release": "0.2.0-kernel-runtime-prototype",
+  "snapshot": "2026-11-16",
+  "classification": "browser-first intelligent environment prototype; not a standalone operating system",
+  "branch": "aksi-q-site-rewrite",
+  "pull_request": 264,
+  "layers": {
+    "presentation": "partial",
+    "system_api": "partial_browser_kernel_api",
+    "kernel_orchestrator": "browser_kernel_api_prototype",
+    "process_model": "bounded_async_task_queue_no_hard_isolation",
+    "memory": "partial_browser_local",
+    "compute": "partial_specialized_engines",
+    "knowledge_evidence": "partial_retrieval_not_semantic_verification",
+    "security": "partial_requires_end_to_end_audit",
+    "observability": "kernel_status_panel_and_event_api_partial",
+    "aksi_q": "early_prototype"
+  },
+  "current_evidence_filter": {
+    "version": "1.1.0",
+    "method": "normalized-token-overlap-v1",
+    "meaning": "candidate triage only; not entailment and not truth probability",
+    "evidence_status_on_retrieval": "insufficient"
+  },
+  "release_policy": {
+    "merge_to_main": false,
+    "public_site_deployed": false,
+    "requires_human_review": true
+  },
+  "kernel_runtime": {
+    "version": "0.1.0",
+    "implemented": [
+      "module_registry",
+      "dependency_ordering",
+      "missing_dependency_detection",
+      "boot_shutdown_lifecycle",
+      "health_checks",
+      "capability_registry",
+      "bounded_task_queue",
+      "concurrency_limit",
+      "timeout_abort_signal",
+      "task_cancellation",
+      "task_inspection",
+      "bounded_task_history",
+      "event_subscription"
+    ],
+    "registered_modules": [
+      "evidence.core",
+      "answer.router"
+    ],
+    "limits": {
+      "max_concurrent_tasks": 4,
+      "max_queued_tasks": 32,
+      "default_timeout_ms": 15000,
+      "max_task_history": 200
+    },
+    "hard_isolation": false,
+    "note": "AbortSignal is cooperative. A handler that ignores it cannot be forcibly terminated inside the same JavaScript execution context."
+  }
+}
