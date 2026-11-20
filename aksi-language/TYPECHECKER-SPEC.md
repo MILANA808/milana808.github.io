@@ -89,5 +89,9 @@ The unified analysis schema is `AKSI-Q-ANALYSIS/4` and exposes
 `effect_summaries` and `module_effects`. This is descriptive static
 metadata only: it does not grant or revoke capabilities, and does not replace
 runtime ABI validation, quotas, revocation, or host-side authorization. There
-is no source syntax yet for declaring or constraining effects, and indirect
-calls remain `Unknown`.
+Function declarations may add an upper-bound effect set after the optional return type,
+for example `fn read() !{Host} { ... }` or `fn pure() !{} { ... }`. The compiler
+rejects inferred effects outside the declared set (`E_EFFECT_NOT_DECLARED`) and
+unknown annotation names (`E_UNKNOWN_EFFECT`). `Unknown` must be listed explicitly
+when a function contains an indirect or unresolved call. An annotation is not a
+capability grant; runtime authorization remains mandatory.
