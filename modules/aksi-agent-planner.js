@@ -15,6 +15,10 @@
     if (prompt.length > 4000) throw new TypeError("Goal must not exceed 4000 characters");
     const q = prompt.replace(/^\s*(?:акси\s*[,!:]?\s*|команда\s*[-—:]\s*)/i, "").trim();
     const normalized = q.toLocaleLowerCase("ru").replace(/ё/g, "е");
+    if (/^(?:кто ты|что ты умеешь|расскажи о себе|опиши себя|самодиагностика|проведи самодиагностику|состояние системы|какие модули|какие возможности у тебя)/i.test(normalized)) return {
+      planner: VERSION, intent: "self-inspection",
+      steps: [{ id: "inspect-self", action: "self.inspect", input: { prompt: q } }]
+    };
     const expression = options && typeof options.mathExpression === "function"
       ? options.mathExpression(q) : null;
     if (expression) return {
