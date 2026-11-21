@@ -1,15 +1,19 @@
 name: AKSI Cognition Kernel
 on:
   push:
-    branches: [main, aksi-cognition-kernel-01]
+    branches: [main, aksi-cognition-kernel-01, aksi-language-claim-bridge-01]
     paths:
       - "aksi-evidence-kernel.js"
+      - "aksi-language-claim-bridge.js"
       - "tests/aksi-evidence-kernel.test.cjs"
+      - "tests/aksi-language-claim-bridge.test.cjs"
       - ".github/workflows/aksi-cognition-kernel.yml"
   pull_request:
     paths:
       - "aksi-evidence-kernel.js"
+      - "aksi-language-claim-bridge.js"
       - "tests/aksi-evidence-kernel.test.cjs"
+      - "tests/aksi-language-claim-bridge.test.cjs"
       - ".github/workflows/aksi-cognition-kernel.yml"
 permissions:
   contents: read
@@ -21,7 +25,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Syntax check
-        run: node --check aksi-evidence-kernel.js
+      - name: Syntax checks
+        run: |
+          node --check aksi-evidence-kernel.js
+          node --check aksi-language-claim-bridge.js
       - name: Evidence kernel tests
         run: node tests/aksi-evidence-kernel.test.cjs
+      - name: Language bridge tests
+        run: node tests/aksi-language-claim-bridge.test.cjs
