@@ -585,7 +585,7 @@ $('aksiClearMemory').addEventListener('click',async()=>{
   if(window.AKSIDialogueIntelligence&&typeof window.AKSIDialogueIntelligence.clearContext==='function')window.AKSIDialogueIntelligence.clearContext();
   if(window.AKSISymbolicInference&&typeof window.AKSISymbolicInference.clearMemory==='function')window.AKSISymbolicInference.clearMemory();
   const cognitionClear=cognitionRuntime.clear();
-  if(!cognitionClear.ok)throw new Error('Не удалось очистить долговременную базу утверждений AKSI: '+(cognitionClear.error||'ошибка хранилища'));
+  if(!cognitionClear.ok||!cognitionClear.persisted)throw new Error('Не удалось подтвердить удаление долговременной базы утверждений AKSI из хранилища браузера: '+(cognitionClear.error||'хранилище не подтвердило удаление'));
   const failed=storageChecks.filter(x=>!x.ok);
   if(failed.length)throw new Error('Не удалось подтвердить очистку хранилищ: '+failed.map(x=>x.name).join(', '));
   state.history=[];state.memory={};state.evidencePassports=[];lastEvidencePassport=null;lastEvidenceExchange=null;

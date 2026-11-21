@@ -31,4 +31,15 @@ assert.equal(cognition.status().claims, 0);
 cognition = cognitionApi.create({ storage, kernelApi: evidence, bridgeApi: bridge });
 assert.equal(cognition.status().claims, 0, "cleared claims do not return after runtime recreation");
 assert.deepEqual(volatile.clear(), { ok: true, persisted: false, claims: 0 });
+const failingStorage = {
+  getItem() { return null; },
+  setItem() {},
+  removeItem() { throw new Error("storage removal blocked"); }
+};
+const protectedRuntime = cognitionApi.create({ storage: failingStorage, kernelApi: evidence, bridgeApi: bridge });
+assert.equal(protectedRuntime.ingest("Луна — это спутник Земли").accepted, true);
+const failedClear = protectedRuntime.clear();
+assert.equal(failedClear.ok, false, "a storage removal failure must not be reported as success");
+assert.equal(failedClear.persisted, false);
+assert.equal(protectedRuntime.status().claims, 1, "runtime claims remain intact when durable deletion fails");
 console.log("AKSI integrated cognition tests: OK");
