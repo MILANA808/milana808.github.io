@@ -35,7 +35,7 @@
     if (/^(?:является ли|правда ли|верно ли|может ли)\b/i.test(body) || /[;,:]/.test(body)) {
       return { recognized: false, reason: "question_or_compound_statement" };
     }
-    const match = body.match(/^(.+?)\s+(не\s+является|является|[-—–]\s*это|это)\s+(.+)$/i);
+    const match = body.match(/^(.+?)\s+(не\s+является|не\s+являются|является|являются|[-—–]\s*это|это)\s+(.+)$/i);
     if (!match) return { recognized: false, reason: "unsupported_sentence_pattern" };
     const subject = cleanTerm(match[1]);
     const relation = match[2].toLowerCase().replace(/\s+/g, " ");
@@ -43,7 +43,7 @@
     if (!subject || !object || subject.toLowerCase() === object.toLowerCase()) {
       return { recognized: false, reason: "ambiguous_or_invalid_terms" };
     }
-    const truth = relation !== "не является";
+    const truth = !/^не\s+явля(?:ется|ются)$/.test(relation);
     return {
       recognized: true, version: VERSION,
       claim: { subject, predicate: "is_a", object, truth, kind,
