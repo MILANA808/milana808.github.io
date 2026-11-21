@@ -51,10 +51,21 @@
       agent.registerAction("math.calculate", {
         run: async function (input) {
           if (!root.AKSICalculator || typeof root.AKSICalculator.evaluate !== "function") throw new Error("Калькулятор AKSI недоступен.");
-          return root.AKSICalculator.evaluate(String(input && input.expression || ""));
+          const calculation = root.AKSICalculator.evaluate(String(input && input.expression || ""));
+          return {
+            handled: true,
+            version: "2.0.0",
+            route: "calculator",
+            statusText: calculation.ok ? "Вычисление выполнено детерминированным парсером." : "Выражение не удалось вычислить.",
+            text: calculation.ok
+              ? calculation.expression + " = " + calculation.formatted
+              : "Не удалось вычислить выражение: " + calculation.error,
+            calculation,
+            proof: calculation.ok ? [{ type: "calculation", expression: calculation.expression, value: calculation.value, method: "AKSICalculator" }] : []
+          };
         },
         verify: function (result) {
-          return { ok: Boolean(result && result.ok === true && Number.isFinite(result.value)), detail: "Проверены успешный статус и конечное числовое значение; это не доказывает корректность самого выражения пользователя." };
+          return { ok: Boolean(result && result.handled === true && result.calculation && result.calculation.ok === true && Number.isFinite(result.calculation.value) && typeof result.text === "string" && result.text.trim()), detail: "Проверены структура ответа, успешный статус и конечное числовое значение; это не доказывает корректность самого выражения пользователя." };
         }
       });
       agent.registerAction("knowledge.write", {
@@ -80,7 +91,18 @@
         run: async function (input) {
           const prompt = String(input && input.prompt || "");
           const result = root.AKSISemanticReasoning && root.AKSISemanticReasoning.answer(prompt);
-          return result || root.AKSIAnswerRouter.answer(prompt, input && input.options || {});
+          if (result && result.handled && !["unknown_concept", "unknown_relation"].includes(result.status)) {
+            return {
+              handled: true,
+              version: String(root.AKSISemanticReasoning.version || "unknown"),
+              route: "semantic-reasoning",
+              statusText: "Ответ по локальному графу понятий; основания указаны в тексте.",
+              text: result.text,
+              proof: result.proof || [],
+              semantic: result
+            };
+          }
+          return root.AKSIAnswerRouter.answer(prompt, input && input.options || {});
         },
         verify: function (result) {
           return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура вывода семантического модуля, не истинность определения или классификации." };
