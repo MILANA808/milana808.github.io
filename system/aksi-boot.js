@@ -42,7 +42,7 @@
       const agent = root.AKSIAgentOrchestrator.create({ kernel: kernel, maxSteps: 12 });
       agent.registerAction("answer.respond", {
         run: async function (input) {
-          return root.AKSIAnswerRouter.answer(String(input && input.prompt || ""));
+          return root.AKSIAnswerRouter.answer(String(input && input.prompt || ""), input && input.options || {});
         },
         verify: function (result) {
           return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура ответа маршрутизатора, не истинность его содержания." };

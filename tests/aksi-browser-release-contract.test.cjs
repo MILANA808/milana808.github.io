@@ -34,7 +34,9 @@ assert.ok(askStart >= 0 && askEnd > askStart, "chat and diagnostics functions mu
 assert.ok(inlineScript, "main inline application script must be present");
 assert.doesNotThrow(() => new vm.Script(inlineScript[1], { filename: "index-inline.js" }), "inline application script must parse without syntax errors");
 const ask = html.slice(askStart, askEnd);
-assert.ok(ask.includes('kernel.runTask("answer.route"'), "answer routing must execute as a bounded kernel task");
+assert.ok(ask.includes("agent.execute"), "main chat must route answers through the agent orchestrator");
+assert.ok(ask.includes('action:"answer.respond"'), "main chat must use the registered answer action");
+assert.ok(ask.includes('kernel.runTask("answer.route"'), "a bounded kernel fallback must remain available");
 assert.ok(ask.includes('kernel.getModule("answer.router")'), "answer routing must require an initialized kernel module");
 assert.ok(ask.includes('await kernel.boot()'), "chat must await kernel initialization before routing");
 assert.ok(ask.indexOf("answerRouter.answer(q") < ask.indexOf("AKSI_DNA_TOPOLOGY.generate"), "explicit answer router must run before fallback generator");

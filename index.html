@@ -381,10 +381,23 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
    if(!routerModule||!["available","degraded"].includes(routerModule.state)){
     throw new Error("Модуль answer.router не прошёл инициализацию в AKSI System Kernel.");
    }
-   routed=await kernel.runTask("answer.route",input=>answerRouter.answer(input.query,input.options),{query:q,options:routeOptions});
-   kernelRouteUsed=true;
-   const task=kernel.listTasks().slice(-1)[0];
-   $("chatStatus").textContent="AKSI System Kernel · задача "+(task?task.id:"выполнена")+" · маршрутизатор ответа";
+   const agent=window.AKSIAgent;
+   if(agent&&typeof agent.execute==="function"){
+    const plan=await agent.execute([{id:"route-answer",action:"answer.respond",input:{prompt:q,options:routeOptions}}]);
+    if(!plan||plan.status!=="completed"||!plan.results||!plan.results[0]||plan.results[0].status!=="completed"){
+     const detail=plan&&plan.results&&plan.results[0]&&(plan.results[0].error&&plan.results[0].error.message||plan.results[0].reason||plan.results[0].status);
+     throw new Error("План агента не завершён: "+(detail||"неизвестная причина"));
+    }
+    routed=plan.results[0].value;
+    kernelRouteUsed=true;
+    const task=kernel.listTasks().slice(-1)[0];
+    $("chatStatus").textContent="AKSI Agent · план "+plan.plan_id+" · задача "+(task?task.id:"выполнена")+" · шаги проверены";
+   }else{
+    routed=await kernel.runTask("answer.route",input=>answerRouter.answer(input.query,input.options),{query:q,options:routeOptions});
+    kernelRouteUsed=true;
+    const task=kernel.listTasks().slice(-1)[0];
+    $("chatStatus").textContent="AKSI System Kernel · задача "+(task?task.id:"выполнена")+" · резервный маршрутизатор";
+   }
   }else{
    routed=await answerRouter.answer(q,routeOptions);
    $("chatStatus").textContent="Резервный маршрут: AKSI System Kernel недоступно.";
