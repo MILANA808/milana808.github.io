@@ -21,7 +21,7 @@ assert.equal(cognition.status().claims, 2);
 cognition = cognitionApi.create({ storage, kernelApi: evidence, bridgeApi: bridge });
 assert.equal(cognition.status().claims, 2, "claims survive runtime recreation");
 assert.equal(cognition.answer("Является ли Кошки животными").status, "supported");
-cognition.ingest("Кошки не являются млекопитающими");
+cognition.ingest("Кошки не являются млекопитающие");
 assert.equal(cognition.answer("Является ли Кошки млекопитающие").status, "conflicted");
 const volatile = cognitionApi.create({ storage: null, kernelApi: evidence, bridgeApi: bridge });
 assert.equal(volatile.status().persistence, "memory-only");
