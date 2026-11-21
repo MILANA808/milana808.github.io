@@ -195,7 +195,8 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
 <script src="/aksi-weather.js?v=2"></script>
 <script src="/aksi-knowledge-base.js?v=2"></script>
 <script src="/modules/aksi-system-kernel.js?v=1"></script>
-<script src="/modules/aksi-agent-orchestrator.js?v=1"></script>
+<script src="/modules/aksi-agent-orchestrator.js?v=2"></script>
+<script src="/modules/aksi-agent-planner.js?v=1"></script>
 <script src="/modules/claim-evidence.js?v=2"></script>
 <script src="/aksi-answer-router.js?v=5"></script>
 <script src="/aksi-evidence-kernel.js?v=1"></script>
@@ -382,7 +383,18 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
     throw new Error("Модуль answer.router не прошёл инициализацию в AKSI System Kernel.");
    }
    const agent=window.AKSIAgent;
-   if(agent&&typeof agent.execute==="function"){
+   if(agent&&typeof agent.execute==="function"&&window.AKSIAgentPlanner&&typeof window.AKSIAgentPlanner.plan==="function"){
+    const goalPlan=window.AKSIAgentPlanner.plan(q,{mathExpression:answerRouter.mathExpression});
+    const plan=await agent.execute(goalPlan.steps);
+    if(!plan||plan.status!=="completed"||!plan.results||!plan.results[0]||plan.results[0].status!=="completed"){
+     const detail=plan&&plan.results&&plan.results[0]&&(plan.results[0].error&&plan.results[0].error.message||plan.results[0].reason||plan.results[0].status);
+     throw new Error("План агента ("+(goalPlan.intent||"unknown")+") не завершён: "+(detail||"неизвестная причина"));
+    }
+    routed=plan.results[0].value;
+    kernelRouteUsed=true;
+    const task=kernel.listTasks().slice(-1)[0];
+    $("chatStatus").textContent="AKSI Agent · цель "+goalPlan.intent+" · план "+plan.plan_id+" · шаги "+plan.completed_steps+"/"+plan.total_steps;
+   }else if(agent&&typeof agent.execute==="function"){
     const plan=await agent.execute([{id:"route-answer",action:"answer.respond",input:{prompt:q,options:routeOptions}}]);
     if(!plan||plan.status!=="completed"||!plan.results||!plan.results[0]||plan.results[0].status!=="completed"){
      const detail=plan&&plan.results&&plan.results[0]&&(plan.results[0].error&&plan.results[0].error.message||plan.results[0].reason||plan.results[0].status);
@@ -391,7 +403,7 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
     routed=plan.results[0].value;
     kernelRouteUsed=true;
     const task=kernel.listTasks().slice(-1)[0];
-    $("chatStatus").textContent="AKSI Agent · план "+plan.plan_id+" · задача "+(task?task.id:"выполнена")+" · шаги проверены";
+    $("chatStatus").textContent="AKSI Agent · резервный маршрут · план "+plan.plan_id;
    }else{
     routed=await kernel.runTask("answer.route",input=>answerRouter.answer(input.query,input.options),{query:q,options:routeOptions});
     kernelRouteUsed=true;
