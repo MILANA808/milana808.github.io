@@ -31,6 +31,30 @@
       return { ok: Boolean(root.AKSIAnswerRouter && typeof root.AKSIAnswerRouter.answer === "function") };
     }
   });
+  kernel.register({
+    id: "agent.orchestrator", version: String(root.AKSIAgentOrchestrator && root.AKSIAgentOrchestrator.version || "unknown"),
+    dependencies: ["answer.router"],
+    capabilities: ["agent.plan.execute", "agent.action.approval", "agent.step.verification"],
+    init: async function () {
+      if (!root.AKSIAgentOrchestrator || typeof root.AKSIAgentOrchestrator.create !== "function") {
+        return { available: false, reason: "Модуль планирования агента не загружен." };
+      }
+      const agent = root.AKSIAgentOrchestrator.create({ kernel: kernel, maxSteps: 12 });
+      agent.registerAction("answer.respond", {
+        run: async function (input) {
+          return root.AKSIAnswerRouter.answer(String(input && input.prompt || ""));
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура ответа маршрутизатора, не истинность его содержания." };
+        }
+      });
+      root.AKSIAgent = agent;
+      return { available: true };
+    },
+    health: async function () {
+      return { ok: Boolean(root.AKSIAgent && typeof root.AKSIAgent.execute === "function" && typeof root.AKSIAgent.status === "function") };
+    }
+  });
   root.AKSIKernel = kernel;
   const recentEvents = [];
 
