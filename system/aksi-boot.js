@@ -48,6 +48,44 @@
           return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура ответа маршрутизатора, не истинность его содержания." };
         }
       });
+      agent.registerAction("math.calculate", {
+        run: async function (input) {
+          if (!root.AKSICalculator || typeof root.AKSICalculator.evaluate !== "function") throw new Error("Калькулятор AKSI недоступен.");
+          return root.AKSICalculator.evaluate(String(input && input.expression || ""));
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.ok === true && Number.isFinite(result.value)), detail: "Проверены успешный статус и конечное числовое значение; это не доказывает корректность самого выражения пользователя." };
+        }
+      });
+      agent.registerAction("knowledge.write", {
+        requiresApproval: true,
+        run: async function (input) {
+          if (!root.AKSIKnowledgeBase || typeof root.AKSIKnowledgeBase.answer !== "function") throw new Error("Локальная база знаний недоступна.");
+          return root.AKSIKnowledgeBase.answer(String(input && input.prompt || ""));
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && ["fact_added", "already_known", "fact_session_only"].includes(result.status)), detail: "Проверен статус записи. Постоянное сохранение зависит от подтверждения браузерного хранилища." };
+        }
+      });
+      agent.registerAction("knowledge.read", {
+        run: async function (input) {
+          const result = root.AKSIKnowledgeBase && root.AKSIKnowledgeBase.answer(String(input && input.prompt || ""));
+          return result || root.AKSIAnswerRouter.answer(String(input && input.prompt || ""), input && input.options || {});
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура ответа локальной базы/резервного маршрутизатора, не истинность пользовательских записей." };
+        }
+      });
+      agent.registerAction("semantic.query", {
+        run: async function (input) {
+          const prompt = String(input && input.prompt || "");
+          const result = root.AKSISemanticReasoning && root.AKSISemanticReasoning.answer(prompt);
+          return result || root.AKSIAnswerRouter.answer(prompt, input && input.options || {});
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура вывода семантического модуля, не истинность определения или классификации." };
+        }
+      });
       root.AKSIAgent = agent;
       return { available: true };
     },
