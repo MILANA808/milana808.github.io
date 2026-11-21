@@ -98,7 +98,8 @@
       const input = String(text || "").normalize("NFKC").trim()
         .replace(/[?!.]+$/g, "").replace(/\s+/g, " ");
       const patterns = [
-        /^(?:является ли|верно ли что)\s+(.+?)\s+(?:это|является)\s+(.+)$/i,
+        /^является ли\s+(.+?)\s+(.+)$/i,
+        /^верно ли что\s+(.+?)\s+(?:это|является)\s+(.+)$/i,
         /^(.+?)\s+(?:это|является)\s+(.+)$/i
       ];
       for (const pattern of patterns) {
