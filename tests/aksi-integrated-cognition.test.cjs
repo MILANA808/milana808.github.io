@@ -22,7 +22,7 @@ cognition = cognitionApi.create({ storage, kernelApi: evidence, bridgeApi: bridg
 assert.equal(cognition.status().claims, 2, "claims survive runtime recreation");
 assert.equal(cognition.answer("Является ли Кошки животными").status, "supported");
 cognition.ingest("Кошки не являются млекопитающими");
-assert.equal(cognition.answer("Является ли Кошки млекопитающими").status, "conflicted");
+assert.equal(cognition.answer("Является ли Кошки млекопитающие").status, "conflicted");
 const volatile = cognitionApi.create({ storage: null, kernelApi: evidence, bridgeApi: bridge });
 assert.equal(volatile.status().persistence, "memory-only");
 console.log("AKSI integrated cognition tests: OK");
