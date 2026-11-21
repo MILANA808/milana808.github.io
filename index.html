@@ -342,8 +342,8 @@ if(cognition&&typeof cognition.create==="function"){
   const runtime=window.AKSI_COGNITION_RUNTIME||(window.AKSI_COGNITION_RUNTIME=cognition.create());
   const cleanClaim=q.replace(/^запомни\s+факт\s*[:：]\s*/i,"").trim();
   const isClaim=/^запомни\s+факт\s*[:：]/i.test(q);
-  const claimResult=runtime.ingest(cleanClaim);
   if(isClaim){
+   const claimResult=runtime.ingest(cleanClaim);
    if(claimResult.accepted){
     event("COGNITION","Stored user assertion "+claimResult.claim.id);
     return "Записала в долговременную базу AKSI: "+claimResult.claim.subject+" — это "+claimResult.claim.object+".\nИсточник: пользовательский ввод. Независимая проверка не выполнялась.\nХранилище: "+(claimResult.persisted?"локальное хранилище браузера":"только оперативная память (сохранение браузером недоступно)")+".";
