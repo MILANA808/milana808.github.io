@@ -11,7 +11,7 @@
     const term = String(value || "").normalize("NFKC").trim().replace(/\s+/g, " ");
     if (!term || term.length > 120 || /[.!?;,:]/.test(term)) return null;
     if (!/^[\p{L}\p{N}][\p{L}\p{N} _-]*$/u.test(term)) return null;
-    return term;
+    return term.toLocaleLowerCase("ru");
   }
   function parse(text) {
     if (typeof text !== "string") return { recognized: false, reason: "input_must_be_text" };
