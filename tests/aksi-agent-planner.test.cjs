@@ -9,6 +9,9 @@ assert.equal(planner.plan("сколько будет 2+2", { mathExpression }).s
 assert.equal(planner.plan("запомни факт: кошка — это животное").steps[0].action, "knowledge.write");
 assert.equal(planner.plan("что ты знаешь о кошке?").steps[0].action, "knowledge.read");
 assert.equal(planner.plan("что такое математика?").steps[0].action, "semantic.query");
+const routeOptions = { useWeb: true, history: [{ role: "user", content: "раньше" }], system: "контекст" };
+const routed = planner.plan("почему небо голубое?", { ...routeOptions, mathExpression });
+assert.deepEqual(routed.steps[0].input.options, routeOptions);
 assert.equal(planner.plan("почему небо голубое?").steps[0].action, "answer.respond");
 assert.throws(() => planner.plan(""), /non-empty/);
 assert.throws(() => planner.plan("x".repeat(4001)), /4000/);
