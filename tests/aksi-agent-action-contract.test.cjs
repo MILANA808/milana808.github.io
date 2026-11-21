@@ -25,6 +25,15 @@ const context = {
       };
     }
   },
+  AKSISelfModel: {
+    create() {
+      return {
+        version: "0.1.0",
+        inspect() { return { schema: "aksi-self-model/1.0", runtime: { state: "ready" }, modules: [], actions: [], limitations: [] }; },
+        describe() { return "AKSI MATRIX runtime self-inspection"; }
+      };
+    }
+  },
   AKSIAnswerRouter: {
     version: "2.0.0",
     async answer(prompt, options) {
@@ -54,6 +63,10 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   const agentModule = registered.get("agent.orchestrator");
   assert.ok(agentModule, "agent orchestrator module registered");
   await agentModule.init();
+  const self = await actions.get("self.inspect").run({});
+  assert.equal(self.selfModel.schema, "aksi-self-model/1.0");
+  assert.equal(actions.get("self.inspect").verify(self).ok, true);
+
   const math = await actions.get("math.calculate").run({ expression: "2+2" });
   assert.equal(math.handled, true);
   assert.equal(math.text, "2+2 = 4");
