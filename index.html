@@ -197,6 +197,9 @@ h1 span{background:linear-gradient(100deg,#fff 0%,#b8f5ff 28%,#72e8ff 52%,#b8a4f
 <script src="/modules/aksi-system-kernel.js?v=1"></script>
 <script src="/modules/claim-evidence.js?v=2"></script>
 <script src="/aksi-answer-router.js?v=5"></script>
+<script src="/aksi-evidence-kernel.js?v=1"></script>
+<script src="/aksi-language-claim-bridge.js?v=1"></script>
+<script src="/aksi-integrated-cognition.js?v=1"></script>
 <script src="/system/aksi-boot.js?v=1"></script>
 <script src="/aksi-cognitive-core.js"></script>
 <script src="/aksi-wave-bayesian-engine.js"></script>
@@ -333,6 +336,33 @@ async function backend(path,opts={}){throw Error('Автономный режи�
 async function ask(q){const n=normalize(q);if(!n)return;lastEvidenceSources=[];lastEvidenceProvider='aksi-native-core';lastEvidenceModel=null;let m=/^запомни\s+факт\s*[:：]/i.test(q)?null:q.match(/^запомни\s*[:：]?\s*(.+?)\s*[=:]\s*(.+)$/i);if(m){const k=m[1].trim(),v=m[2].trim();state.memory[k]=v;const saved=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.remember?window.AKSI_UNIFIED_CORE.remember(k,v):{ok:false};persist();render();event('MEMORY','Saved through unified core: '+k);return saved.ok?'Сохранила в единую локальную память: '+k+' = '+v:'Запись сохранена в памяти интерфейса, но ядро не подтвердило сохранение.';}
 if(/^(память|покажи память|что ты помнишь)$/.test(n)){const notes=window.AKSI_UNIFIED_CORE&&window.AKSI_UNIFIED_CORE.listNotes?window.AKSI_UNIFIED_CORE.listNotes():[];const merged=window.AKSI_SITE_MEMORY_CONTEXT||state.memory||{};notes.forEach(x=>{merged[x.key]=x.value;});const keys=Object.keys(merged);return keys.length?keys.map(k=>k+' = '+merged[k]).join('\n'):'Локальная память пока пуста.';}
 if(n==='статус системы'||n==='диагностика') {await diagnostics();return $('diagOutput').textContent;}
+const cognition=window.AKSIIntegratedCognition;
+if(cognition&&typeof cognition.create==="function"){
+ try{
+  const runtime=window.AKSI_COGNITION_RUNTIME||(window.AKSI_COGNITION_RUNTIME=cognition.create());
+  const cleanClaim=q.replace(/^запомни\s+факт\s*[:：]\s*/i,"").trim();
+  const isClaim=/^запомни\s+факт\s*[:：]/i.test(q);
+  const claimResult=runtime.ingest(cleanClaim);
+  if(isClaim){
+   if(claimResult.accepted){
+    event("COGNITION","Stored user assertion "+claimResult.claim.id);
+    return "Записала в долговременную базу AKSI: "+claimResult.claim.subject+" — это "+claimResult.claim.object+".\nИсточник: пользовательский ввод. Независимая проверка не выполнялась.\nХранилище: "+(claimResult.persisted?"локальное хранилище браузера":"только оперативная память (сохранение браузером недоступно)")+".";
+   }
+   if(claimResult.requiresReview)return claimResult.message;
+   return "Не добавила запись: формулировка не распознана безопасной грамматикой. Используй шаблон «запомни факт: X — это Y».";
+  }
+  const cognitiveAnswer=runtime.answer(q);
+  if(cognitiveAnswer.handled){
+   $("chatStatus").textContent="AKSI Integrated Cognition · "+cognitiveAnswer.status+" · записей: "+cognitiveAnswer.graphSize;
+   $("aksiEvidence").style.display="block";
+   $("aksiEvidence").textContent="ОСНОВАНИЯ СИМВОЛИЧЕСКОГО ВЫВОДА:\n"+cognitiveAnswer.proof.map(x=>x.id?x.id+" · "+(x.source||x.rule||"запись"):"правило "+x.rule).join("\n")+"\n\nПользовательские утверждения не являются независимой проверкой.";
+   return cognitiveAnswer.text;
+  }
+ }catch(cognitionError){
+  event("COGNITION_ERROR",String(cognitionError&&cognitionError.message||cognitionError).slice(0,200));
+ }
+}
+
 const answerRouter=window.AKSIAnswerRouter;
 if(answerRouter&&typeof answerRouter.answer==="function"){
  const rememberTurns=$("aksiRememberTurns").checked;
