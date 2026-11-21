@@ -105,7 +105,7 @@
       for (const pattern of patterns) {
         const match = input.match(pattern);
         if (match && match[1].trim() && match[2].trim()) {
-          return { subject: match[1].trim(), predicate: "is_a", object: match[2].trim() };
+          return { subject: match[1].trim().toLocaleLowerCase("ru"), predicate: "is_a", object: match[2].trim().toLocaleLowerCase("ru") };
         }
       }
       return null;
