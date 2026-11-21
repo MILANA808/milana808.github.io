@@ -83,6 +83,7 @@
         };
       }
       const stored = kernel.addClaim(Object.assign({}, parsed.claim, {
+        id: "aksi-user-" + (kernel.size + 1),
         subject: parsed.claim.subject.toLocaleLowerCase("ru"),
         object: parsed.claim.object.toLocaleLowerCase("ru")
       }));
