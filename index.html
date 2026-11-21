@@ -385,7 +385,7 @@ if(answerRouter&&typeof answerRouter.answer==="function"){
    const agent=window.AKSIAgent;
    if(agent&&typeof agent.execute==="function"&&window.AKSIAgentPlanner&&typeof window.AKSIAgentPlanner.plan==="function"){
     const goalPlan=window.AKSIAgentPlanner.plan(q,{mathExpression:answerRouter.mathExpression});
-    const plan=await agent.execute(goalPlan.steps);
+    const plan=await agent.execute(goalPlan.steps,{approve:async request=>request.action==="knowledge.write"&&window.confirm("Разрешить AKSI добавить пользовательское утверждение в локальную базу этого браузера? Это не подтверждает истинность утверждения." )});
     if(!plan||plan.status!=="completed"||!plan.results||!plan.results[0]||plan.results[0].status!=="completed"){
      const detail=plan&&plan.results&&plan.results[0]&&(plan.results[0].error&&plan.results[0].error.message||plan.results[0].reason||plan.results[0].status);
      throw new Error("План агента ("+(goalPlan.intent||"unknown")+") не завершён: "+(detail||"неизвестная причина"));
