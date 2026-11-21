@@ -21,8 +21,8 @@
     if (!bridgeApi || typeof bridgeApi.createBridge !== "function") {
       throw new Error("AKSI Language Claim Bridge is not loaded");
     }
-    const kernel = kernelApi.createEvidenceKernel({ maxClaims: MAX_PERSISTED });
-    const bridge = bridgeApi.createBridge(kernel);
+    let kernel = kernelApi.createEvidenceKernel({ maxClaims: MAX_PERSISTED });
+    let bridge = bridgeApi.createBridge(kernel);
     let persistence = "memory-only";
     let persistenceError = null;
 
@@ -146,6 +146,25 @@
       };
     }
 
+    function clear() {
+      let persisted = false;
+      if (storage && typeof storage.removeItem === "function") {
+        try {
+          storage.removeItem(STORAGE_KEY);
+          persisted = true;
+        } catch (error) {
+          persistence = "memory-only";
+          persistenceError = String(error && error.message || error);
+          return { ok: false, persisted: false, error: persistenceError };
+        }
+      }
+      kernel = kernelApi.createEvidenceKernel({ maxClaims: MAX_PERSISTED });
+      bridge = bridgeApi.createBridge(kernel);
+      persistence = persisted ? "local-storage" : "memory-only";
+      persistenceError = null;
+      return { ok: true, persisted, claims: kernel.size };
+    }
+
     function status() {
       return {
         version: VERSION, claims: kernel.size, persistence,
@@ -154,7 +173,7 @@
       };
     }
 
-    return Object.freeze({ version: VERSION, ingest, answer, status, snapshot: () => kernel.snapshot() });
+    return Object.freeze({ version: VERSION, ingest, answer, clear, status, snapshot: () => kernel.snapshot() });
   }
 
   const api = Object.freeze({ version: VERSION, create });
