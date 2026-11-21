@@ -7,6 +7,7 @@ class MemoryStorage {
   constructor() { this.data = new Map(); }
   getItem(key) { return this.data.has(key) ? this.data.get(key) : null; }
   setItem(key, value) { this.data.set(key, String(value)); }
+  removeItem(key) { this.data.delete(key); }
 }
 const storage = new MemoryStorage();
 let cognition = cognitionApi.create({ storage, kernelApi: evidence, bridgeApi: bridge });
@@ -25,4 +26,9 @@ cognition.ingest("Кошки не являются млекопитающие");
 assert.equal(cognition.answer("Является ли Кошки млекопитающие").status, "conflicted");
 const volatile = cognitionApi.create({ storage: null, kernelApi: evidence, bridgeApi: bridge });
 assert.equal(volatile.status().persistence, "memory-only");
+assert.deepEqual(cognition.clear(), { ok: true, persisted: true, claims: 0 });
+assert.equal(cognition.status().claims, 0);
+cognition = cognitionApi.create({ storage, kernelApi: evidence, bridgeApi: bridge });
+assert.equal(cognition.status().claims, 0, "cleared claims do not return after runtime recreation");
+assert.deepEqual(volatile.clear(), { ok: true, persisted: false, claims: 0 });
 console.log("AKSI integrated cognition tests: OK");
