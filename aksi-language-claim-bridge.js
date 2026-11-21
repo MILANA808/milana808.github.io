@@ -43,7 +43,7 @@
     if (!subject || !object || subject.toLowerCase() === object.toLowerCase()) {
       return { recognized: false, reason: "ambiguous_or_invalid_terms" };
     }
-    const truth = relation !== "не является";
+    const truth = !/^не\\s+явля(?:ется|ются)$/.test(relation);
     return {
       recognized: true, version: VERSION,
       claim: { subject, predicate: "is_a", object, truth, kind,
