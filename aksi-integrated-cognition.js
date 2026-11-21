@@ -73,25 +73,24 @@
     restore();
 
     function ingest(text) {
-      const result = bridge.ingest(text);
-      if (result.accepted) {
-        const durable = persist();
-        return {
-          accepted: true,
-          claim: result.stored,
-          count: kernel.size,
-          persisted: durable,
-          message: "Записала пользовательское утверждение. Это сохранённый ввод, а не независимо проверенный факт."
-        };
-      }
-      if (result.requiresReview) {
+      const parsed = bridge.parse(text);
+      if (!parsed.recognized) return { accepted: false, reason: parsed.reason || "not_recognized" };
+      if (parsed.requiresReview) {
         return {
           accepted: false,
           requiresReview: true,
           message: "Распознала гипотезу, но не добавила её в базу знаний автоматически."
         };
       }
-      return { accepted: false, reason: result.parsed && result.parsed.reason || "not_recognized" };
+      const stored = kernel.addClaim(Object.assign({}, parsed.claim, {
+        subject: parsed.claim.subject.toLocaleLowerCase("ru"),
+        object: parsed.claim.object.toLocaleLowerCase("ru")
+      }));
+      const durable = persist();
+      return {
+        accepted: true, claim: stored, count: kernel.size, persisted: durable,
+        message: "Записала пользовательское утверждение. Это сохранённый ввод, а не независимо проверенный факт."
+      };
     }
 
     function parseQuestion(text) {
