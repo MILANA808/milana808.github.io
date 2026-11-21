@@ -1,0 +1,35 @@
+name: AKSI Agent Orchestrator
+on:
+  push:
+    branches: [main]
+    paths:
+      - "modules/aksi-agent-orchestrator.js"
+      - "modules/aksi-system-kernel.js"
+      - "system/aksi-boot.js"
+      - "tests/aksi-agent-orchestrator.test.cjs"
+      - ".github/workflows/aksi-agent-orchestrator.yml"
+  pull_request:
+    paths:
+      - "modules/aksi-agent-orchestrator.js"
+      - "modules/aksi-system-kernel.js"
+      - "system/aksi-boot.js"
+      - "tests/aksi-agent-orchestrator.test.cjs"
+      - ".github/workflows/aksi-agent-orchestrator.yml"
+permissions:
+  contents: read
+jobs:
+  agent-orchestrator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax checks
+        run: |
+          node --check modules/aksi-agent-orchestrator.js
+          node --check system/aksi-boot.js
+      - name: Orchestrator tests
+        run: node tests/aksi-agent-orchestrator.test.cjs
+      - name: Kernel regression tests
+        run: node tests/aksi-system-kernel.test.cjs
