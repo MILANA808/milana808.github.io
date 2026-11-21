@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101426">
+<title>AKSI · Лаборатория познания</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1020;--panel:#151c31;--line:#2a3554;--text:#edf2ff;--muted:#aab6d3;--cyan:#75e5ed;--violet:#a99aff;--green:#6ee7b7;--red:#ff9b9b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#202c4c 0,transparent 42%),var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+main{width:min(960px,calc(100% - 32px));margin:42px auto 70px}a{color:var(--cyan)}.eyebrow{color:var(--cyan);letter-spacing:.16em;font-size:.76rem;text-transform:uppercase}
+h1{font-size:clamp(2rem,6vw,3.6rem);line-height:1.05;margin:.55rem 0 1rem}h2{font-size:1.2rem;margin:0 0 12px}.intro{max-width:760px;color:var(--muted)}
+.panel{background:linear-gradient(145deg,#18213a,#11182b);border:1px solid var(--line);border-radius:18px;padding:22px;margin:18px 0;box-shadow:0 14px 45px #0003}
+label{display:block;font-size:.9rem;color:var(--muted);margin:10px 0 6px}input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#0d1426;color:var(--text);font:inherit;outline:none}input:focus{border-color:var(--cyan)}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1 1 180px}
+button{border:1px solid #53618c;background:#263457;color:white;border-radius:10px;padding:11px 16px;font:inherit;cursor:pointer;margin:12px 8px 0 0}button.primary{background:linear-gradient(110deg,#247e91,#55449a);border-color:transparent}button:hover{filter:brightness(1.15)}
+.output{white-space:pre-wrap;overflow-wrap:anywhere;background:#0a1020;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:58px;color:#dce7ff}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--muted);font-size:.82rem}
+.status{font-weight:650}.supported{color:var(--green)}.refuted{color:var(--red)}.conflicted{color:#ffcf7b}.unknown{color:var(--muted)}
+small,.muted{color:var(--muted)}footer{margin-top:26px;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){main{margin-top:25px}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">AKSI MATRIX · COGNITION LAB 0.1</div>
+  <h1>Лаборатория познания</h1>
+  <p class="intro">Здесь можно проверить первый рабочий контур собственного символического ядра AKSI: фраза → структурированное утверждение → запись с происхождением → логический запрос → объяснение вывода.</p>
+  <div class="pills"><span class="pill">локально в браузере</span><span class="pill">без внешней модели</span><span class="pill">с объяснением</span><span class="pill">не универсальный интеллект</span></div>
+
+  <section class="panel">
+    <h2>1. Добавить утверждение</h2>
+    <label for="statement">Напиши простую фразу</label>
+    <input id="statement" value="Кошка — это животное." autocomplete="off">
+    <button class="primary" id="add">Разобрать и записать</button>
+    <button id="hypothesis">Проверить предположение</button>
+    <div id="parseOutput" class="output" aria-live="polite">Ожидаю фразу.</div>
+    <small>Поддерживаемая грамматика пока ограничена: «X — это Y», «X является Y», «X не является Y». Вопросы и сложные предложения система должна отклонять, а не угадывать.</small>
+  </section>
+
+  <section class="panel">
+    <h2>2. Проверить связь</h2>
+    <div class="row">
+      <div><label for="subject">Субъект</label><input id="subject" value="Кошка"></div>
+      <div><label for="object">Объект</label><input id="object" value="животное"></div>
+    </div>
+    <button class="primary" id="query">Проверить и объяснить</button>
+    <button id="demo">Загрузить демонстрационную цепочку</button>
+    <div id="queryStatus" class="status muted" aria-live="polite">Статус: неизвестно</div>
+    <div id="queryOutput" class="output">Пока нет запроса.</div>
+  </section>
+
+  <section class="panel">
+    <h2>3. Что находится в памяти ядра</h2>
+    <div class="row"><div class="pill" id="count">Записей: 0</div><div class="pill">Память существует только до перезагрузки этой страницы</div></div>
+    <pre id="records" class="output">Пока нет записей.</pre>
+    <button id="clear">Очистить память лаборатории</button>
+  </section>
+
+  <footer>
+    <p><strong>Границы честности.</strong> Это детерминированная демонстрационная система. Она не обладает общим пониманием языка, не проверяет истинность пользовательских утверждений во внешнем мире и не является сверхинтеллектом. «Подтверждено» означает только «есть подходящая запись или разрешённый логический вывод в этой локальной базе».</p>
+    <p><a href="/">← Вернуться в AKSI MATRIX</a></p>
+  </footer>
+</main>
+<script src="../aksi-evidence-kernel.js"></script>
+<script src="../aksi-language-claim-bridge.js"></script>
+<script>
+(() => {
+  "use strict";
+  const kernel = window.AKSIEvidenceKernel.createEvidenceKernel({maxClaims:500,maxInferenceDepth:16});
+  const bridge = window.AKSILanguageClaimBridge.createBridge(kernel);
+  const $ = id => document.getElementById(id);
+  const statusNames = {supported:"Поддерживается записями",refuted:"Есть опровергающая запись",conflicted:"Обнаружено противоречие",unknown:"В памяти нет такого знания"};
+  function renderRecords() {
+    const snap = kernel.snapshot();
+    $("count").textContent = "Записей: " + snap.claims.length;
+    $("records").textContent = snap.claims.length ? snap.claims.map(c =>
+      c.id + " · " + c.subject + (c.truth ? " — это " : " — не является ") + c.object +
+      "\n  тип: " + c.kind + " · источник: " + c.source
+    ).join("\n\n") : "Пока нет записей.";
+  }
+  function addStatement(text) {
+    const result = bridge.ingest(text);
+    if (result.accepted) {
+      $("parseOutput").textContent = result.parsed.explanation + "\n\nСтруктура: " +
+        result.stored.subject + " / " + result.stored.predicate + " / " + result.stored.object +
+        "\nПолярность: " + (result.stored.truth ? "положительная" : "отрицательная") +
+        "\nПроисхождение: " + result.stored.source + "\nID: " + result.stored.id;
+    } else if (result.requiresReview) {
+      $("parseOutput").textContent = result.parsed.explanation + "\n\nНе записано. Сначала требуется отдельное подтверждение предположения.";
+    } else {
+      $("parseOutput").textContent = "Воздерживаюсь от разбора.\nПричина: " + (result.parsed.reason || "неизвестная ошибка") +
+        "\n\nЯ не буду превращать непонятную фразу в выдуманный факт.";
+    }
+    renderRecords();
+  }
+  function ask() {
+    const subject = $("subject").value.trim();
+    const object = $("object").value.trim();
+    if (!subject || !object) return;
+    const result = kernel.explain({subject,predicate:"is_a",object});
+    $("queryStatus").className = "status " + result.status;
+    $("queryStatus").textContent = "Статус: " + statusNames[result.status];
+    $("queryOutput").textContent = result.conclusion + "\n\nЗаписи:\n" +
+      (result.evidence.length ? result.evidence.map(c => c.id + " · " + c.source + " · " + (c.truth ? "за" : "против")).join("\n") : "Нет прямых записей") +
+      "\n\nВыводы:\n" + (result.derivations.length ? result.derivations.map(d =>
+        d.rule + " · посылки: " + d.premises.join(" → ") + " · уверенность-перенос: " + d.confidence
+      ).join("\n") : "Допустимых выводов нет") +
+      "\n\nОграничения:\n• " + result.limitations.join("\n• ");
+  }
+  $("add").addEventListener("click",() => addStatement($("statement").value));
+  $("hypothesis").addEventListener("click",() => addStatement("Гипотеза: " + $("statement").value.replace(/[.!?]+$/g,"")));
+  $("query").addEventListener("click",ask);
+  $("demo").addEventListener("click",() => {
+    addStatement("Кошки — это млекопитающие.");
+    addStatement("Млекопитающие — это животные.");
+    $("subject").value = "Кошки";
+    $("object").value = "животные";
+    ask();
+  });
+  $("clear").addEventListener("click",() => {
+    // The kernel is intentionally immutable from the outside; reset this lab by reload.
+    location.reload();
+  });
+  renderRecords();
+})();
+</script>
+</body>
+</html>
