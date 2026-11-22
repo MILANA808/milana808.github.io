@@ -97,3 +97,14 @@ test('crypto consumers no longer write private JWKs to localStorage', () => {
   const seal = fs.readFileSync('aksi-seal.js', 'utf8');
   assert.doesNotMatch(seal, /PQ SEALED|Post-Quantum Hybrid/);
 });
+
+
+test('experimental PQ identity does not persist exportable private JWK or raw PQ secret material', () => {
+  const source = fs.readFileSync('aksi-pq.js', 'utf8');
+  assert.match(source, /importKey\(['"]jwk['"][\s\S]*?false,\s*\[['"]deriveBits['"]\]\)/);
+  assert.match(source, /importKey\(['"]jwk['"][\s\S]*?false,\s*\[['"]sign['"]\]\)/);
+  assert.doesNotMatch(source, /ecdhPrivJwk\s*:/);
+  assert.doesNotMatch(source, /ecdsaPrivJwk\s*:/);
+  assert.doesNotMatch(source, /secretKeyB64\s*:/);
+  assert.match(source, /pq:\s*null/);
+});
