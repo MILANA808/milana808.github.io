@@ -1,5 +1,7 @@
 # AKSI tokenomics — decision draft
 
+> The broader ecosystem design and illustrative allocation model are in [AKSI MATRIX Economy v1 (draft)](../AKSI-MATRIX-ECONOMY-V1-DRAFT.md). That proposal does not approve a production supply or authorize deployment.
+
 Status: **not approved; no production deployment**.
 
 ## Proposed utility
