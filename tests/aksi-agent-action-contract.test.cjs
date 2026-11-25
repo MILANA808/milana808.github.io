@@ -55,9 +55,6 @@ const context = {
     }
   },
   AKSIKnowledgeBase: {
-    auditGraph() {
-      return { schema: "aksi-ontology-audit/1.0", engine_version: "1.2.0", concept_count: 24, parent_definition_count: 17, issue_count: 0, issues: [] };
-    },
     answer(prompt) {
       if (prompt === "запомни факт: кот") return { handled: true, status: "invalid_fact", text: "Укажите субъект и проверяемое утверждение." };
       return prompt.startsWith("запомни факт:") ? { handled: true, status: "fact_added", text: "saved" } : null;
@@ -65,6 +62,9 @@ const context = {
   },
   AKSISemanticReasoning: {
     version: "1.2.0",
+    auditGraph() {
+      return { schema: "aksi-ontology-audit/1.0", engine_version: "1.2.0", concept_count: 24, parent_definition_count: 17, issue_count: 0, issues: [] };
+    },
     answer(prompt) {
       if (prompt.includes("неизвестное")) return { handled: true, status: "unknown_concept", text: "unknown", proof: [{ type: "unknown_concept" }] };
       if (prompt.includes("сравни математику с физикой")) return { handled: true, status: "compared", text: "Сравнение математики и физики по признакам базы.", proof: [{ type: "feature_comparison", concepts: ["математика", "физика"], shared: [], onlyA: [], onlyB: [] }] };
