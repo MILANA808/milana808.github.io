@@ -18,6 +18,8 @@
   function create(options) {
     const config = options || {};
     const kernel = config.kernel;
+    const reflection = config.reflection && typeof config.reflection.decide === "function"
+      ? config.reflection : null;
     const maxSteps = Number.isInteger(config.maxSteps) ? config.maxSteps : 12;
     if (!kernel || typeof kernel.runTask !== "function") throw new TypeError("A running AKSI kernel is required");
     if (!Number.isInteger(maxSteps) || maxSteps < 1 || maxSteps > 50) throw new TypeError("maxSteps must be an integer from 1 to 50");
@@ -35,7 +37,10 @@
         id: key,
         run: descriptor.run,
         verify: typeof descriptor.verify === "function" ? descriptor.verify : null,
-        requiresApproval: descriptor.requiresApproval === true
+        requiresApproval: descriptor.requiresApproval === true,
+        sideEffect: descriptor.sideEffect === true,
+        fallbackSafe: descriptor.fallbackSafe === true,
+        fallbackAction: typeof descriptor.fallbackAction === "string" ? descriptor.fallbackAction : null
       });
       actions.set(key, action);
       return { id: key, requires_approval: action.requiresApproval, verifiable: Boolean(action.verify) };
@@ -55,6 +60,18 @@
         ids.add(id);
         return Object.freeze({ id, action, input: step.input });
       });
+    }
+
+    async function invoke(action, input, context) {
+      const value = await action.run(input, context);
+      let verification = { status: "not_configured" };
+      if (action.verify) {
+        const checked = await action.verify(value, input, context);
+        const ok = checked === true || Boolean(checked && checked.ok === true);
+        verification = { status: ok ? "passed" : "failed", detail: checked && typeof checked === "object" ? checked.detail || null : null };
+        if (!ok) return { ok: false, status: "verification_failed", value, verification };
+      }
+      return { ok: true, value, verification };
     }
 
     async function execute(plan, options) {
@@ -99,25 +116,66 @@
               signal: taskContext.signal,
               emit: (name, detail) => taskContext.emit("step." + String(name), { plan_id: runId, step_id: step.id, detail: detail || null })
             });
-            const value = await action.run(step.input, context);
+            let outcome;
+            try {
+              outcome = await invoke(action, step.input, context);
+            } catch (error) {
+              outcome = { ok: false, status: "failed", error: safeError(error) };
+            }
             if (taskContext.signal.aborted) {
               results.push({ id: step.id, action: action.id, status: "cancelled" });
               state = "cancelled";
               break;
             }
-            let verification = { status: "not_configured" };
-            if (action.verify) {
-              const checked = await action.verify(value, step.input, context);
-              const ok = checked === true || Boolean(checked && checked.ok === true);
-              verification = { status: ok ? "passed" : "failed", detail: checked && typeof checked === "object" ? checked.detail || null : null };
-              if (!ok) {
-                results.push({ id: step.id, action: action.id, status: "verification_failed", value, verification });
-                state = "verification_failed";
-                break;
+            if (!outcome.ok) {
+              const failureCode = reflection && typeof reflection.classify === "function"
+                ? reflection.classify({ status: outcome.status })
+                : outcome.status === "verification_failed" ? "verification_failed" : "execution_error";
+              const fallback = action.fallbackAction ? actions.get(action.fallbackAction) : null;
+              const decision = reflection
+                ? reflection.decide({ failureCode, action, fallback, fallbackAttempted: false })
+                : { allowed: false, reason: "reflection_unavailable" };
+              if (decision.allowed && fallback) {
+                taskContext.emit("step.reflection", { plan_id: runId, step_id: step.id, failure_code: failureCode, fallback_action: fallback.id });
+                try {
+                  const fallbackOutcome = await invoke(fallback, step.input, context);
+                  if (fallbackOutcome.ok && !taskContext.signal.aborted) {
+                    results.push({
+                      id: step.id, action: fallback.id, requested_action: action.id,
+                      status: "completed", value: fallbackOutcome.value,
+                      verification: fallbackOutcome.verification,
+                      reflection: { failure_code: failureCode, fallback_action: fallback.id, attempts: 1 }
+                    });
+                    taskContext.emit("step.completed", { plan_id: runId, step_id: step.id, verification: fallbackOutcome.verification.status, fallback: true });
+                    continue;
+                  }
+                  results.push({
+                    id: step.id, action: action.id, status: taskContext.signal.aborted ? "cancelled" : (fallbackOutcome.status || "verification_failed"),
+                    value: outcome.value, error: outcome.error || null, verification: outcome.verification || null,
+                    reflection: { failure_code: failureCode, fallback_action: fallback.id, fallback_status: fallbackOutcome.status || "verification_failed", attempts: 1 }
+                  });
+                  state = taskContext.signal.aborted ? "cancelled" : (fallbackOutcome.status || "verification_failed");
+                  break;
+                } catch (fallbackError) {
+                  results.push({
+                    id: step.id, action: action.id, status: outcome.status,
+                    value: outcome.value, error: outcome.error || null, verification: outcome.verification || null,
+                    reflection: { failure_code: failureCode, fallback_action: fallback.id, fallback_status: "failed", fallback_error: safeError(fallbackError), attempts: 1 }
+                  });
+                  state = outcome.status;
+                  break;
+                }
               }
+              results.push({
+                id: step.id, action: action.id, status: outcome.status,
+                value: outcome.value, error: outcome.error || null, verification: outcome.verification || null,
+                reflection: { failure_code: failureCode, fallback_attempted: false, fallback_reason: decision.reason }
+              });
+              state = outcome.status;
+              break;
             }
-            results.push({ id: step.id, action: action.id, status: "completed", value, verification });
-            taskContext.emit("step.completed", { plan_id: runId, step_id: step.id, verification: verification.status });
+            results.push({ id: step.id, action: action.id, status: "completed", value: outcome.value, verification: outcome.verification });
+            taskContext.emit("step.completed", { plan_id: runId, step_id: step.id, verification: outcome.verification.status });
           } catch (error) {
             results.push({ id: step.id, action: action.id, status: "failed", error: safeError(error) });
             state = "failed";
@@ -149,7 +207,9 @@
         registered_actions: [...actions.values()].map(action => ({
           id: action.id,
           requires_approval: action.requiresApproval,
-          verifiable: Boolean(action.verify)
+          verifiable: Boolean(action.verify),
+          side_effect: action.sideEffect,
+          fallback_action: action.fallbackAction
         })),
         recent_plans: history.slice(-10).map(item => ({
           plan_id: item.plan_id,

@@ -2,6 +2,10 @@ name: AKSI deterministic goal planner
 on:
   pull_request:
     paths:
+      - "modules/aksi-agent-reflection.js"
+      - "modules/aksi-agent-orchestrator.js"
+      - "tests/aksi-agent-reflection.test.cjs"
+      - "tests/aksi-agent-orchestrator.test.cjs"
       - "modules/aksi-agent-planner.js"
       - "modules/aksi-self-model.js"
       - "tests/aksi-self-model.test.cjs"
@@ -13,6 +17,10 @@ on:
   push:
     branches: [main]
     paths:
+      - "modules/aksi-agent-reflection.js"
+      - "modules/aksi-agent-orchestrator.js"
+      - "tests/aksi-agent-reflection.test.cjs"
+      - "tests/aksi-agent-orchestrator.test.cjs"
       - "modules/aksi-agent-planner.js"
       - "modules/aksi-self-model.js"
       - "tests/aksi-self-model.test.cjs"
@@ -29,6 +37,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: node tests/aksi-agent-reflection.test.cjs
+      - run: node tests/aksi-agent-orchestrator.test.cjs
       - run: node tests/aksi-self-model.test.cjs
       - run: node tests/aksi-agent-planner.test.cjs
       - run: node tests/aksi-agent-action-contract.test.cjs

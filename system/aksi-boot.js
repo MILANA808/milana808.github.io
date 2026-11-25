@@ -39,7 +39,11 @@
       if (!root.AKSIAgentOrchestrator || typeof root.AKSIAgentOrchestrator.create !== "function") {
         return { available: false, reason: "Модуль планирования агента не загружен." };
       }
-      const agent = root.AKSIAgentOrchestrator.create({ kernel: kernel, maxSteps: 12 });
+      if (!root.AKSIAgentReflection || typeof root.AKSIAgentReflection.create !== "function") {
+        return { available: false, reason: "Модуль безопасной рефлексии агента не загружен." };
+      }
+      const reflection = root.AKSIAgentReflection.create();
+      const agent = root.AKSIAgentOrchestrator.create({ kernel: kernel, maxSteps: 12, reflection: reflection });
       agent.registerAction("answer.respond", {
         run: async function (input) {
           return root.AKSIAnswerRouter.answer(String(input && input.prompt || ""), input && input.options || {});
@@ -84,6 +88,8 @@
         }
       });
       agent.registerAction("knowledge.read", {
+        fallbackAction: "answer.respond",
+        fallbackSafe: true,
         run: async function (input) {
           const result = root.AKSIKnowledgeBase && root.AKSIKnowledgeBase.answer(String(input && input.prompt || ""));
           return result || root.AKSIAnswerRouter.answer(String(input && input.prompt || ""), input && input.options || {});
