@@ -33,11 +33,15 @@ const context = {
   },
   AKSICalculator: {
     evaluate(expression) {
+      if (expression === "2+") return { ok: false, expression, error: "Ожидалось число после знака +." };
       return { ok: true, expression, value: 4, formatted: "4" };
     }
   },
   AKSIKnowledgeBase: {
-    answer(prompt) { return prompt.startsWith("запомни факт:") ? { handled: true, status: "fact_added", text: "saved" } : null; }
+    answer(prompt) {
+      if (prompt === "запомни факт: кот") return { handled: true, status: "invalid_fact", text: "Укажите субъект и проверяемое утверждение." };
+      return prompt.startsWith("запомни факт:") ? { handled: true, status: "fact_added", text: "saved" } : null;
+    }
   },
   AKSISemanticReasoning: {
     version: "1.2.0",
@@ -58,6 +62,9 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   assert.equal(math.handled, true);
   assert.equal(math.text, "2+2 = 4");
   assert.equal(actions.get("math.calculate").verify(math).ok, true);
+  const invalidMath = await actions.get("math.calculate").run({ expression: "2+" });
+  assert.equal(invalidMath.calculation.ok, false);
+  assert.equal(actions.get("math.calculate").verify(invalidMath).ok, true);
 
   const semantic = actions.get("semantic.query");
   const known = await semantic.run({ prompt: "что такое математика?" });
@@ -73,6 +80,9 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   assert.equal(write.requiresApproval, true);
   assert.equal((await write.run({ prompt: "запомни факт: кошка — это животное" })).status, "fact_added");
   assert.equal(write.verify(await write.run({ prompt: "запомни факт: кошка — это животное" })).ok, true);
+  const invalidFact = await write.run({ prompt: "запомни факт: кот" });
+  assert.equal(invalidFact.status, "invalid_fact");
+  assert.equal(write.verify(invalidFact).ok, true);
 
   console.log("AKSI agent action contract tests: OK");
 })().catch(error => { console.error(error); process.exitCode = 1; });
