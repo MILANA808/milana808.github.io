@@ -25,11 +25,11 @@
       planner: VERSION, intent: "knowledge-write",
       steps: [{ id: "save-knowledge", action: "knowledge.write", input: { prompt: q } }]
     };
-    if (/^(?:является ли|относится ли|что у|что имеет|какие свойства у|из чего состоит|что входит в|что вызывает|какова причина|что связано с|связи для|что противоречит|что ты знаешь о|покажи факты о|факты о|что известно о)/i.test(normalized)) return {
+    if (/^(?:что ты знаешь о|покажи факты о|факты о|что известно о)/i.test(normalized)) return {
       planner: VERSION, intent: "knowledge-query",
       steps: [{ id: "query-knowledge", action: "knowledge.read", input: { prompt: q, options: options || {} } }]
     };
-    if (/^(?:что такое|что означает|объясни|расскажи|опиши|дай определение|определи|чем отличается|чем различаются|в чем разница между|сравни|является ли|верно ли что)/i.test(normalized)) return {
+    if (/^(?:что такое|что означает|объясни|расскажи|опиши|дай определение|определи|чем отличается|чем различаются|в чем разница между|сравни|является ли|относится ли|верно ли что)/i.test(normalized)) return {
       planner: VERSION, intent: "semantic-query",
       steps: [{ id: "query-semantics", action: "semantic.query", input: { prompt: q, options: options || {} } }]
     };
