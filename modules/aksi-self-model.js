@@ -51,7 +51,8 @@
         },
         modules,
         actions,
-        capabilities: [...new Set(modules.flatMap(item => item.capabilities))].sort(),
+        declared_capabilities: [...new Set(modules.flatMap(item => item.capabilities))].sort(),
+        capabilities: [...new Set(availableModules.flatMap(item => item.capabilities))].sort(),
         limitations: LIMITATIONS.slice()
       };
     }
