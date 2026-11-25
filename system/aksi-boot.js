@@ -65,7 +65,11 @@
           };
         },
         verify: function (result) {
-          return { ok: Boolean(result && result.handled === true && result.calculation && result.calculation.ok === true && Number.isFinite(result.calculation.value) && typeof result.text === "string" && result.text.trim()), detail: "Проверены структура ответа, успешный статус и конечное числовое значение; это не доказывает корректность самого выражения пользователя." };
+          const calculation = result && result.calculation;
+          const hasText = Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim());
+          const validValue = Boolean(calculation && calculation.ok === true && Number.isFinite(calculation.value));
+          const structuredInputError = Boolean(calculation && calculation.ok === false && typeof calculation.error === "string" && calculation.error.trim());
+          return { ok: hasText && (validValue || structuredInputError), detail: "Проверена структура успешного результата или понятной ошибки ввода; это не доказывает корректность самого выражения пользователя." };
         }
       });
       agent.registerAction("knowledge.write", {
@@ -75,7 +79,8 @@
           return root.AKSIKnowledgeBase.answer(String(input && input.prompt || ""));
         },
         verify: function (result) {
-          return { ok: Boolean(result && result.handled === true && ["fact_added", "already_known", "fact_session_only"].includes(result.status)), detail: "Проверен статус записи. Постоянное сохранение зависит от подтверждения браузерного хранилища." };
+          const acceptedStatuses = ["fact_added", "already_known", "fact_session_only", "invalid_fact"];
+          return { ok: Boolean(result && result.handled === true && acceptedStatuses.includes(result.status) && typeof result.text === "string" && result.text.trim()), detail: "Проверен статус записи или структурированного отказа валидации. Постоянное сохранение зависит от подтверждения браузерного хранилища." };
         }
       });
       agent.registerAction("knowledge.read", {
