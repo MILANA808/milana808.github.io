@@ -99,6 +99,10 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   const known = await semantic.run({ prompt: "что такое математика?" });
   assert.equal(known.route, "semantic-reasoning");
   assert.equal(semantic.verify(known, { prompt: "что такое математика?" }).ok, true);
+  assert.equal(semantic.verify({ ...known, handled: false }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
+  assert.equal(semantic.verify({ ...known, text: "Подменённый текст" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
+  assert.equal(semantic.verify({ ...known, proof: [{ type: "forged" }] }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
+  assert.equal(semantic.verify({ ...known, version: "9.9.9" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
 
   const unknown = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
   assert.equal(unknown.route, "semantic-reasoning");
