@@ -63,8 +63,16 @@ const context = {
   AKSISemanticReasoning: {
     version: "1.2.0",
     answer(prompt) {
-      return prompt.includes("неизвестное") ? { handled: true, status: "unknown_concept", text: "unknown" } :
-        { handled: true, status: "defined", text: "known definition", proof: [] };
+      return prompt.includes("неизвестное")
+        ? { handled: true, status: "unknown_concept", text: "unknown", proof: [{ type: "unknown_concept" }] }
+        : { handled: true, status: "defined", text: "known definition", proof: [{ type: "definition_lookup", concept: "математика" }] };
+    }
+  },
+  AKSISemanticProofValidator: {
+    validate(prompt, result, engine) {
+      const expected = engine.answer(prompt);
+      const ok = JSON.stringify(result) === JSON.stringify(expected);
+      return { ok, status: ok ? "recomputed" : "proof_mismatch", detail: "mock recomputation" };
     }
   }
 };
@@ -92,10 +100,11 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   assert.equal(known.route, "semantic-reasoning");
   assert.equal(semantic.verify(known).ok, true);
 
-  const fallback = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
-  assert.equal(fallback.route, "router");
-  assert.equal(fallback.options.useWeb, true);
-  assert.equal(semantic.verify(fallback).ok, true);
+  const unknown = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
+  assert.equal(unknown.route, "semantic-reasoning");
+  assert.equal(unknown.semantic.status, "unknown_concept");
+  assert.equal(unknown.text, "unknown");
+  assert.equal(semantic.verify(unknown, { prompt: "что такое неизвестное понятие?" }).ok, true);
 
   const write = actions.get("knowledge.write");
   assert.equal(write.requiresApproval, true);
