@@ -68,6 +68,14 @@ const context = {
       return { handled: true, status: "defined", text: "known definition", proof: [{ type: "definition_lookup", concept: "математика" }] };
     }
   },
+  AKSISemanticEvidenceLedger: {
+    create(prompt, semantic, engine) {
+      return { ok: true, ledger: { schema: "aksi-semantic-evidence-ledger/1.0", prompt, evidence: semantic.proof || [] } };
+    },
+    verify(prompt, semantic, ledger) {
+      return { ok: Boolean(ledger && ledger.schema === "aksi-semantic-evidence-ledger/1.0" && ledger.prompt === prompt), status: "ledger_recomputed", evidence_count: (ledger && ledger.evidence || []).length, detail: "mock ledger check" };
+    }
+  },
   AKSISemanticProofValidator: {
     stable(value) { return JSON.stringify(value); },
     validate(prompt, result, engine) {
@@ -100,6 +108,9 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   const known = await semantic.run({ prompt: "что такое математика?" });
   assert.equal(known.route, "semantic-reasoning");
   assert.equal(semantic.verify(known, { prompt: "что такое математика?" }).ok, true);
+  assert.equal(known.evidence.schema, "aksi-semantic-evidence-ledger/1.0");
+  const tamperedLedger = { ...known, evidence: { ...known.evidence, prompt: "подмена" } };
+  assert.equal(semantic.verify(tamperedLedger, { prompt: "что такое математика?" }).ok, false);
   assert.equal(semantic.verify({ ...known, handled: false }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
   assert.equal(semantic.verify({ ...known, text: "Подменённый текст" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
   assert.equal(semantic.verify({ ...known, proof: [{ type: "forged" }] }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");

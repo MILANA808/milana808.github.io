@@ -108,14 +108,20 @@
           if (!result || result.handled !== true) {
             throw new Error("Семантическое ядро не распознало форму запроса.");
           }
+          if (!root.AKSISemanticEvidenceLedger || typeof root.AKSISemanticEvidenceLedger.create !== "function") {
+            throw new Error("Реестр происхождения семантических оснований AKSI недоступен.");
+          }
+          const evidenceResult = root.AKSISemanticEvidenceLedger.create(prompt, result, root.AKSISemanticReasoning);
+          if (!evidenceResult.ok) throw new Error(evidenceResult.detail || "Не удалось построить реестр происхождения.");
           return {
             handled: true,
             version: String(root.AKSISemanticReasoning.version || "unknown"),
             route: "semantic-reasoning",
-            statusText: "Ответ локального семантического ядра. Неизвестные понятия и связи обозначаются явно.",
+            statusText: "Локальное семантическое ядро. Реестр показывает внутреннее происхождение оснований, а не независимую истинность.",
             text: result.text,
             proof: result.proof || [],
-            semantic: result
+            semantic: result,
+            evidence: evidenceResult.ledger
           };
         },
         verify: function (result, input) {
@@ -145,11 +151,24 @@
             semantic,
             root.AKSISemanticReasoning
           );
+          if (!checked.ok) {
+            return { ok: false, detail: checked.detail, proof_status: checked.status, proof_count: checked.proof_count || 0 };
+          }
+          if (!root.AKSISemanticEvidenceLedger || typeof root.AKSISemanticEvidenceLedger.verify !== "function") {
+            return { ok: false, detail: "Реестр происхождения семантических оснований недоступен.", proof_status: "ledger_unavailable", proof_count: checked.proof_count || 0 };
+          }
+          const evidenceCheck = root.AKSISemanticEvidenceLedger.verify(
+            input && input.prompt,
+            semantic,
+            result.evidence,
+            root.AKSISemanticReasoning
+          );
           return {
-            ok: checked.ok === true,
-            detail: checked.detail,
-            proof_status: checked.status,
-            proof_count: checked.proof_count || 0
+            ok: evidenceCheck.ok === true,
+            detail: checked.detail + " " + evidenceCheck.detail,
+            proof_status: evidenceCheck.status,
+            proof_count: checked.proof_count || 0,
+            evidence_count: evidenceCheck.evidence_count || 0
           };
         }
       });
