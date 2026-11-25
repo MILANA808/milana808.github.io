@@ -63,9 +63,9 @@ const context = {
   AKSISemanticReasoning: {
     version: "1.2.0",
     answer(prompt) {
-      return prompt.includes("неизвестное")
-        ? { handled: true, status: "unknown_concept", text: "unknown", proof: [{ type: "unknown_concept" }] }
-        : { handled: true, status: "defined", text: "known definition", proof: [{ type: "definition_lookup", concept: "математика" }] };
+      if (prompt.includes("неизвестное")) return { handled: true, status: "unknown_concept", text: "unknown", proof: [{ type: "unknown_concept" }] };
+      if (prompt.includes("сравни математику с физикой")) return { handled: true, status: "unsupported_form", text: "Я распознала запрос, но пока не поддерживаю такую форму семантического разбора.", proof: [{ type: "abstention", reason: "unsupported_semantic_form", engine: "AKSI semantic reasoning v1.2.0" }] };
+      return { handled: true, status: "defined", text: "known definition", proof: [{ type: "definition_lookup", concept: "математика" }] };
     }
   },
   AKSISemanticProofValidator: {
