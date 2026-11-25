@@ -64,7 +64,7 @@ const context = {
     version: "1.2.0",
     answer(prompt) {
       if (prompt.includes("неизвестное")) return { handled: true, status: "unknown_concept", text: "unknown", proof: [{ type: "unknown_concept" }] };
-      if (prompt.includes("сравни математику с физикой")) return { handled: true, status: "unsupported_form", text: "Я распознала запрос, но пока не поддерживаю такую форму семантического разбора.", proof: [{ type: "abstention", reason: "unsupported_semantic_form", engine: "AKSI semantic reasoning v1.2.0" }] };
+      if (prompt.includes("сравни математику с физикой")) return { handled: true, status: "compared", text: "Сравнение математики и физики по признакам базы.", proof: [{ type: "feature_comparison", concepts: ["математика", "физика"], shared: [], onlyA: [], onlyB: [] }] };
       return { handled: true, status: "defined", text: "known definition", proof: [{ type: "definition_lookup", concept: "математика" }] };
     }
   },
@@ -106,8 +106,8 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   assert.equal(semantic.verify({ ...known, version: "9.9.9" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
 
   const unsupported = await semantic.run({ prompt: "сравни математику с физикой" });
-  assert.equal(unsupported.semantic.status, "unsupported_form");
-  assert.match(unsupported.text, /не поддерживаю такую форму/);
+  assert.equal(unsupported.semantic.status, "compared");
+  assert.match(unsupported.text, /Сравнение математики/);
   assert.equal(semantic.verify(unsupported, { prompt: "сравни математику с физикой" }).ok, true);
 
   const unknown = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
