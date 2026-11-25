@@ -55,6 +55,9 @@ const context = {
     }
   },
   AKSIKnowledgeBase: {
+    auditGraph() {
+      return { schema: "aksi-ontology-audit/1.0", engine_version: "1.2.0", concept_count: 24, parent_definition_count: 17, issue_count: 0, issues: [] };
+    },
     answer(prompt) {
       if (prompt === "запомни факт: кот") return { handled: true, status: "invalid_fact", text: "Укажите субъект и проверяемое утверждение." };
       return prompt.startsWith("запомни факт:") ? { handled: true, status: "fact_added", text: "saved" } : null;
@@ -115,6 +118,15 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   assert.equal(unknown.semantic.status, "unknown_concept");
   assert.equal(unknown.text, "unknown");
   assert.equal(semantic.verify(unknown, { prompt: "что такое неизвестное понятие?" }).ok, true);
+
+  const auditAction = actions.get("semantic.audit");
+  assert.ok(auditAction, "semantic audit action registered");
+  const auditResult = await auditAction.run({});
+  assert.equal(auditResult.audit.schema, "aksi-ontology-audit/1.0");
+  assert.equal(auditResult.audit.issue_count, 0);
+  assert.equal(auditAction.verify(auditResult).ok, true);
+  assert.equal(auditAction.verify({ ...auditResult, audit: { ...auditResult.audit, issue_count: 1 } }).ok, false);
+  assert.match(auditResult.text, /не доказывает истинность определений/i);
 
   const write = actions.get("knowledge.write");
   assert.equal(write.requiresApproval, true);
