@@ -135,7 +135,7 @@
       const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
       return { handled: true, status: "defined", text: c.definition + "\n\nТип: " + c.kind + ".\nСвязи: " + c.parents.join(", ") + ".\nПризнаки: " + c.features.join("; ") + ".", proof: [{ type: "definition_lookup", concept: id, source: "AKSI built-in concept graph v" + VERSION }], concept: conceptInfo(id) };
     }
-    m = raw.match(/^\s*(?:чем отличается|чем различаются|в чем разница между|сравни)\s+(.+?)\s+(?:и|от)\s+(.+?)\s*[?!.]*\s*$/i);
+    m = raw.match(/^\s*(?:чем отличается|чем различаются|в чем разница между|сравни)\s+(.+?)\s+(?:и|от|с)\s+(.+?)\s*[?!.]*\s*$/i);
     if (m) {
       const a = resolve(m[1]), b = resolve(m[2]);
       if (!a || !b) return { handled: true, status: "unknown_concept", text: "Для сравнения нужны определения обоих понятий. Сейчас я не могу надёжно разобрать: «" + (!a ? m[1].trim() : m[2].trim()) + "».", proof: [] };
@@ -155,7 +155,7 @@
       const known = ancestors(child).has(parent) || (c.parents || []).includes(parent);
       return { handled: true, status: known ? "entailed" : "not_established", text: known ? "Да, по графу понятий «" + child + "» относится к «" + parent + "». Цепочка оснований: " + Array.from(ancestors(child)).join(" → ") + "." : "В текущем графе нет пути, подтверждающего, что «" + child + "» относится к «" + parent + "». Это означает «не установлено», а не автоматически «ложно».", proof: [{ type: known ? "graph_path" : "no_graph_path", subject: child, object: parent, path: Array.from(ancestors(child)) }] };
     }
-    return { handled: true, status: "unsupported_form", text: "Я распознала запрос, но пока не поддерживаю такую форму семантического разбора. Сейчас доступны определения понятий, сравнение двух понятий, если оно сформулировано как «чем отличается X от Y» или «сравни X и Y», и проверка отношений вида «является ли X частью Y». Я не буду заменять отсутствующий разбор догадкой.", proof: [{ type: "abstention", reason: "unsupported_semantic_form", engine: "AKSI semantic reasoning v" + VERSION }] };
+    return null;
   }
   function auditGraph() {
     const issues = [];
