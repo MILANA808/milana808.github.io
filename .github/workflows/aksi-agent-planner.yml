@@ -2,7 +2,8 @@ name: AKSI deterministic goal planner
 on:
   pull_request:
     paths:
-      - "modules/aksi-semantic-proof-validator.js"\n      - "tests/aksi-semantic-proof-validator.test.cjs"\n      - "modules/aksi-agent-reflection.js"
+      - "modules/aksi-semantic-proof-validator.js"
+      - "tests/aksi-semantic-proof-validator.test.cjs"\n      - "modules/aksi-agent-reflection.js"
       - "modules/aksi-agent-orchestrator.js"
       - "tests/aksi-agent-reflection.test.cjs"
       - "tests/aksi-agent-orchestrator.test.cjs"
@@ -17,6 +18,8 @@ on:
   push:
     branches: [main]
     paths:
+      - "modules/aksi-semantic-proof-validator.js"
+      - "tests/aksi-semantic-proof-validator.test.cjs"
       - "modules/aksi-agent-reflection.js"
       - "modules/aksi-agent-orchestrator.js"
       - "tests/aksi-agent-reflection.test.cjs"
@@ -37,7 +40,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node tests/aksi-semantic-proof-validator.test.cjs\n      - run: node tests/aksi-agent-reflection.test.cjs
+      - run: node tests/aksi-semantic-proof-validator.test.cjs
+      - run: node tests/aksi-agent-reflection.test.cjs
       - run: node tests/aksi-agent-orchestrator.test.cjs
       - run: node tests/aksi-self-model.test.cjs
       - run: node tests/aksi-agent-planner.test.cjs
