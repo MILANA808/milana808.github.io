@@ -153,6 +153,40 @@
           };
         }
       });
+      agent.registerAction("semantic.audit", {
+        run: async function () {
+          if (!root.AKSISemanticReasoning || typeof root.AKSISemanticReasoning.auditGraph !== "function") {
+            throw new Error("Аудит семантического графа недоступен.");
+          }
+          const audit = root.AKSISemanticReasoning.auditGraph();
+          return {
+            handled: true,
+            version: String(root.AKSISemanticReasoning.version || "unknown"),
+            route: "semantic-audit",
+            text: "Структурный аудит онтологии AKSI: " + audit.concept_count +
+              " понятий, " + audit.parent_definition_count + " категорий, " +
+              audit.issue_count + " обнаруженных структурных проблем. " +
+              "Аудит проверяет целостность графа, но не доказывает истинность определений.",
+            audit
+          };
+        },
+        verify: function (result) {
+          const audit = result && result.audit;
+          const valid = Boolean(
+            result && result.handled === true &&
+            result.route === "semantic-audit" &&
+            audit && audit.schema === "aksi-ontology-audit/1.0" &&
+            Number.isInteger(audit.concept_count) && audit.concept_count >= 0 &&
+            Number.isInteger(audit.parent_definition_count) && audit.parent_definition_count >= 0 &&
+            Array.isArray(audit.issues) && audit.issue_count === audit.issues.length &&
+            typeof result.text === "string" && result.text.trim()
+          );
+          return {
+            ok: valid,
+            detail: "Проверена структура и согласованность отчёта аудита; отсутствие структурных ошибок не подтверждает истинность знаний."
+          };
+        }
+      });
       if (!root.AKSISelfModel || typeof root.AKSISelfModel.create !== "function") throw new Error("AKSI self model is unavailable.");
       const selfModel = root.AKSISelfModel.create({
         getKernelStatus: function () { return kernel.status(); },
