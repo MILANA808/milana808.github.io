@@ -155,7 +155,7 @@
       const known = ancestors(child).has(parent) || (c.parents || []).includes(parent);
       return { handled: true, status: known ? "entailed" : "not_established", text: known ? "Да, по графу понятий «" + child + "» относится к «" + parent + "». Цепочка оснований: " + Array.from(ancestors(child)).join(" → ") + "." : "В текущем графе нет пути, подтверждающего, что «" + child + "» относится к «" + parent + "». Это означает «не установлено», а не автоматически «ложно».", proof: [{ type: known ? "graph_path" : "no_graph_path", subject: child, object: parent, path: Array.from(ancestors(child)) }] };
     }
-    return null;
+    return { handled: true, status: "unsupported_form", text: "Я распознала запрос, но пока не поддерживаю такую форму семантического разбора. Сейчас доступны определения понятий, сравнение двух понятий, если оно сформулировано как «чем отличается X от Y» или «сравни X и Y», и проверка отношений вида «является ли X частью Y». Я не буду заменять отсутствующий разбор догадкой.", proof: [{ type: "abstention", reason: "unsupported_semantic_form", engine: "AKSI semantic reasoning v" + VERSION }] };
   }
   function auditGraph() {
     const issues = [];
