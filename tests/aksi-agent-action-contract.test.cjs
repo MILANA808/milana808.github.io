@@ -69,6 +69,7 @@ const context = {
     }
   },
   AKSISemanticProofValidator: {
+    stable(value) { return JSON.stringify(value); },
     validate(prompt, result, engine) {
       const expected = engine.answer(prompt);
       const ok = JSON.stringify(result) === JSON.stringify(expected);
