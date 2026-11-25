@@ -113,6 +113,21 @@
           return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура вывода семантического модуля, не истинность определения или классификации." };
         }
       });
+      if (!root.AKSISelfModel || typeof root.AKSISelfModel.create !== "function") throw new Error("AKSI self model is unavailable.");
+      const selfModel = root.AKSISelfModel.create({
+        getKernelStatus: function () { return kernel.status(); },
+        getAgentStatus: function () { return agent.status(); }
+      });
+      agent.registerAction("self.inspect", {
+        run: async function () {
+          const report = selfModel.inspect();
+          return { handled: true, version: selfModel.version, route: "self-model", text: selfModel.describe(report), selfModel: report };
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && result.selfModel && result.selfModel.schema === "aksi-self-model/1.0" && typeof result.text === "string" && result.text.trim()), detail: "Проверено, что самоописание собрано из текущих статусов runtime и зарегистрированных действий; это не подтверждение сознания или истинности произвольных ответов." };
+        }
+      });
+      root.AKSISelfModelRuntime = selfModel;
       root.AKSIAgent = agent;
       return { available: true };
     },

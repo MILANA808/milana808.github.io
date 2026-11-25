@@ -11,6 +11,8 @@ assert.equal(planner.plan("что ты знаешь о кошке?").steps[0].ac
 assert.equal(planner.plan("Является ли математика наукой?").steps[0].action, "semantic.query");
 assert.equal(planner.plan("Относится ли кошка к животным?").steps[0].action, "semantic.query");
 assert.equal(planner.plan("что такое математика?").steps[0].action, "semantic.query");
+assert.equal(planner.plan("кто ты?").steps[0].action, "self.inspect");
+assert.equal(planner.plan("проведи самодиагностику").intent, "self-inspection");
 const routeOptions = { useWeb: true, history: [{ role: "user", content: "раньше" }], system: "контекст" };
 const routed = planner.plan("почему небо голубое?", { ...routeOptions, mathExpression });
 assert.equal(routed.steps[0].input.options.useWeb, true);
