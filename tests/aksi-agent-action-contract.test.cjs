@@ -105,6 +105,11 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   assert.equal(semantic.verify({ ...known, proof: [{ type: "forged" }] }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
   assert.equal(semantic.verify({ ...known, version: "9.9.9" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
 
+  const unsupported = await semantic.run({ prompt: "сравни математику с физикой" });
+  assert.equal(unsupported.semantic.status, "unsupported_form");
+  assert.match(unsupported.text, /не поддерживаю такую форму/);
+  assert.equal(semantic.verify(unsupported, { prompt: "сравни математику с физикой" }).ok, true);
+
   const unknown = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
   assert.equal(unknown.route, "semantic-reasoning");
   assert.equal(unknown.semantic.status, "unknown_concept");
