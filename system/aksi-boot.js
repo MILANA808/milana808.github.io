@@ -122,9 +122,27 @@
           if (!root.AKSISemanticProofValidator || typeof root.AKSISemanticProofValidator.validate !== "function") {
             return { ok: false, detail: "Независимый проверяющий модуль не загружен." };
           }
-          const checked = root.AKSISemanticProofValidator.validate(
+          const semantic = result && result.semantic;
+          const validator = root.AKSISemanticProofValidator;
+          const wrapperMatches = Boolean(
+            result && semantic && result.handled === semantic.handled &&
+            result.handled === true &&
+            result.route === "semantic-reasoning" &&
+            result.version === String(root.AKSISemanticReasoning.version || "unknown") &&
+            result.text === semantic.text &&
+            validator.stable(result.proof) === validator.stable(semantic.proof || [])
+          );
+          if (!wrapperMatches) {
+            return {
+              ok: false,
+              detail: "Внешняя оболочка ответа не совпадает с повторно проверяемым семантическим результатом.",
+              proof_status: "wrapper_mismatch",
+              proof_count: 0
+            };
+          }
+          const checked = validator.validate(
             input && input.prompt,
-            result && result.semantic,
+            semantic,
             root.AKSISemanticReasoning
           );
           return {
