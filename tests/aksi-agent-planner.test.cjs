@@ -8,6 +8,8 @@ assert.equal(planner.version, "0.2.0");
 assert.equal(planner.plan("сколько будет 2+2", { mathExpression }).steps[0].action, "math.calculate");
 assert.equal(planner.plan("запомни факт: кошка — это животное").steps[0].action, "knowledge.write");
 assert.equal(planner.plan("что ты знаешь о кошке?").steps[0].action, "knowledge.read");
+assert.equal(planner.plan("Является ли математика наукой?").steps[0].action, "semantic.query");
+assert.equal(planner.plan("Относится ли кошка к животным?").steps[0].action, "semantic.query");
 assert.equal(planner.plan("что такое математика?").steps[0].action, "semantic.query");
 const routeOptions = { useWeb: true, history: [{ role: "user", content: "раньше" }], system: "контекст" };
 const routed = planner.plan("почему небо голубое?", { ...routeOptions, mathExpression });
