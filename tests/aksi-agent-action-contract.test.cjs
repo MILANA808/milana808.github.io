@@ -98,7 +98,7 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   const semantic = actions.get("semantic.query");
   const known = await semantic.run({ prompt: "что такое математика?" });
   assert.equal(known.route, "semantic-reasoning");
-  assert.equal(semantic.verify(known).ok, true);
+  assert.equal(semantic.verify(known, { prompt: "что такое математика?" }).ok, true);
 
   const unknown = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
   assert.equal(unknown.route, "semantic-reasoning");
