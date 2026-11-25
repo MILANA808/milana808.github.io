@@ -101,22 +101,56 @@
       agent.registerAction("semantic.query", {
         run: async function (input) {
           const prompt = String(input && input.prompt || "");
-          const result = root.AKSISemanticReasoning && root.AKSISemanticReasoning.answer(prompt);
-          if (result && result.handled && !["unknown_concept", "unknown_relation"].includes(result.status)) {
+          if (!root.AKSISemanticReasoning || typeof root.AKSISemanticReasoning.answer !== "function") {
+            throw new Error("Семантическое ядро AKSI недоступно; ответ не будет подменён общим генератором.");
+          }
+          const result = root.AKSISemanticReasoning.answer(prompt);
+          if (!result || result.handled !== true) {
+            throw new Error("Семантическое ядро не распознало форму запроса.");
+          }
+          return {
+            handled: true,
+            version: String(root.AKSISemanticReasoning.version || "unknown"),
+            route: "semantic-reasoning",
+            statusText: "Ответ локального семантического ядра. Неизвестные понятия и связи обозначаются явно.",
+            text: result.text,
+            proof: result.proof || [],
+            semantic: result
+          };
+        },
+        verify: function (result, input) {
+          if (!root.AKSISemanticProofValidator || typeof root.AKSISemanticProofValidator.validate !== "function") {
+            return { ok: false, detail: "Независимый проверяющий модуль не загружен." };
+          }
+          const semantic = result && result.semantic;
+          const validator = root.AKSISemanticProofValidator;
+          const wrapperMatches = Boolean(
+            result && semantic && result.handled === semantic.handled &&
+            result.handled === true &&
+            result.route === "semantic-reasoning" &&
+            result.version === String(root.AKSISemanticReasoning.version || "unknown") &&
+            result.text === semantic.text &&
+            validator.stable(result.proof) === validator.stable(semantic.proof || [])
+          );
+          if (!wrapperMatches) {
             return {
-              handled: true,
-              version: String(root.AKSISemanticReasoning.version || "unknown"),
-              route: "semantic-reasoning",
-              statusText: "Ответ по локальному графу понятий; основания указаны в тексте.",
-              text: result.text,
-              proof: result.proof || [],
-              semantic: result
+              ok: false,
+              detail: "Внешняя оболочка ответа не совпадает с повторно проверяемым семантическим результатом.",
+              proof_status: "wrapper_mismatch",
+              proof_count: 0
             };
           }
-          return root.AKSIAnswerRouter.answer(prompt, input && input.options || {});
-        },
-        verify: function (result) {
-          return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура вывода семантического модуля, не истинность определения или классификации." };
+          const checked = validator.validate(
+            input && input.prompt,
+            semantic,
+            root.AKSISemanticReasoning
+          );
+          return {
+            ok: checked.ok === true,
+            detail: checked.detail,
+            proof_status: checked.status,
+            proof_count: checked.proof_count || 0
+          };
         }
       });
       if (!root.AKSISelfModel || typeof root.AKSISelfModel.create !== "function") throw new Error("AKSI self model is unavailable.");

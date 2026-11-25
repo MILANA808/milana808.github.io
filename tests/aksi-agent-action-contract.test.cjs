@@ -63,8 +63,17 @@ const context = {
   AKSISemanticReasoning: {
     version: "1.2.0",
     answer(prompt) {
-      return prompt.includes("неизвестное") ? { handled: true, status: "unknown_concept", text: "unknown" } :
-        { handled: true, status: "defined", text: "known definition", proof: [] };
+      if (prompt.includes("неизвестное")) return { handled: true, status: "unknown_concept", text: "unknown", proof: [{ type: "unknown_concept" }] };
+      if (prompt.includes("сравни математику с физикой")) return { handled: true, status: "compared", text: "Сравнение математики и физики по признакам базы.", proof: [{ type: "feature_comparison", concepts: ["математика", "физика"], shared: [], onlyA: [], onlyB: [] }] };
+      return { handled: true, status: "defined", text: "known definition", proof: [{ type: "definition_lookup", concept: "математика" }] };
+    }
+  },
+  AKSISemanticProofValidator: {
+    stable(value) { return JSON.stringify(value); },
+    validate(prompt, result, engine) {
+      const expected = engine.answer(prompt);
+      const ok = JSON.stringify(result) === JSON.stringify(expected);
+      return { ok, status: ok ? "recomputed" : "proof_mismatch", detail: "mock recomputation" };
     }
   }
 };
@@ -90,12 +99,22 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   const semantic = actions.get("semantic.query");
   const known = await semantic.run({ prompt: "что такое математика?" });
   assert.equal(known.route, "semantic-reasoning");
-  assert.equal(semantic.verify(known).ok, true);
+  assert.equal(semantic.verify(known, { prompt: "что такое математика?" }).ok, true);
+  assert.equal(semantic.verify({ ...known, handled: false }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
+  assert.equal(semantic.verify({ ...known, text: "Подменённый текст" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
+  assert.equal(semantic.verify({ ...known, proof: [{ type: "forged" }] }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
+  assert.equal(semantic.verify({ ...known, version: "9.9.9" }, { prompt: "что такое математика?" }).proof_status, "wrapper_mismatch");
 
-  const fallback = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
-  assert.equal(fallback.route, "router");
-  assert.equal(fallback.options.useWeb, true);
-  assert.equal(semantic.verify(fallback).ok, true);
+  const unsupported = await semantic.run({ prompt: "сравни математику с физикой" });
+  assert.equal(unsupported.semantic.status, "compared");
+  assert.match(unsupported.text, /Сравнение математики/);
+  assert.equal(semantic.verify(unsupported, { prompt: "сравни математику с физикой" }).ok, true);
+
+  const unknown = await semantic.run({ prompt: "что такое неизвестное понятие?", options: { useWeb: true } });
+  assert.equal(unknown.route, "semantic-reasoning");
+  assert.equal(unknown.semantic.status, "unknown_concept");
+  assert.equal(unknown.text, "unknown");
+  assert.equal(semantic.verify(unknown, { prompt: "что такое неизвестное понятие?" }).ok, true);
 
   const write = actions.get("knowledge.write");
   assert.equal(write.requiresApproval, true);

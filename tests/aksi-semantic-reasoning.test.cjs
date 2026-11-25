@@ -20,6 +20,9 @@ const comparison = ask('Чем отличается математика и ло
 assert.equal(comparison.proof[0].type, 'feature_comparison');
 assert.ok(comparison.proof[0].onlyA.length + comparison.proof[0].onlyB.length > 0);
 
+const naturalComparison = ask('Сравни математику с физикой', 'compared');
+assert.deepEqual(naturalComparison.proof[0].concepts, ['математика', 'физика']);
+
 const relation = ask('Является ли математика наукой?', 'entailed');
 assert.ok(relation.proof[0].path.includes('наука'));
 

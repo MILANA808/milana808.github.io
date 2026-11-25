@@ -11,7 +11,7 @@
     "логика": { aliases: ["логика"], kind: "метод рассуждения", definition: "Логика изучает правила корректного вывода: какие заключения следуют из заданных посылок.", parents: ["метод рассуждения"], features: ["посылки", "правила вывода", "заключения"] },
     "число": { aliases: ["число", "числа"], kind: "математический объект", definition: "Число — абстрактный объект, используемый для счёта, измерения и описания количественных отношений.", parents: ["математический объект"], features: ["количество", "порядок", "операции"] },
     "алгоритм": { aliases: ["алгоритм", "алгоритмы"], kind: "метод", definition: "Алгоритм — конечная, определённая последовательность шагов для решения задачи или вычисления результата.", parents: ["метод"], features: ["шаги", "правила", "результат"] },
-    "искусственный интеллект": { aliases: ["ии", "искусственный интеллект", "ai", "нейросеть", "нейронная сеть"], kind: "вычислительная система", definition: "Искусственный интеллект — система, выполняющая задачи вроде распознавания, прогнозирования, планирования или генерации ответов. Само название не гарантирует понимания или истинности ответов.", parents: ["вычислительная система"], features: ["обработка данных", "вывод или прогноз", "оценка результата"] },
+    "искусственный интеллект": { aliases: ["ии", "искусственный интеллект", "ai"], kind: "вычислительная система", definition: "Искусственный интеллект — система, выполняющая задачи вроде распознавания, прогнозирования, планирования или генерации ответов. Само название не гарантирует понимания или истинности ответов.", parents: ["вычислительная система"], features: ["обработка данных", "вывод или прогноз", "оценка результата"] },
     "языковая модель": { aliases: ["языковая модель", "большая языковая модель", "llm"], kind: "вычислительная модель", definition: "Языковая модель вычисляет вероятности языковых последовательностей и использует их для обработки или генерации текста. Без дополнительных механизмов это не гарантирует проверку фактов.", parents: ["вычислительная модель"], features: ["текст", "статистические закономерности", "генерация"] },
     "доказательство": { aliases: ["доказательство", "математическое доказательство"], kind: "обоснование", definition: "Доказательство — последовательность допустимых шагов, показывающая, что утверждение следует из аксиом, определений и ранее установленных результатов.", parents: ["обоснование"], features: ["посылки", "допустимые шаги", "заключение"] },
     "гипотеза": { aliases: ["гипотеза"], kind: "утверждение", definition: "Гипотеза — утверждение, которое рассматривают как возможное объяснение или предположение и которое ещё требует проверки.", parents: ["утверждение"], features: ["предположение", "проверка", "возможное опровержение"] },
@@ -55,7 +55,7 @@
   Object.keys(concepts).forEach(id => concepts[id].aliases.forEach(a => aliasToId.set(norm(a), id)));
   Object.keys(parentDefinitions).forEach(id => aliasToId.set(norm(id), id));
   [
-    ["наукой","наука"],["науки","наука"],["математикой","математика"],["математике","математика"],["математики","математика"],
+    ["наукой","наука"],["науки","наука"],["математикой","математика"],["математику","математика"],["математике","математика"],["математики","математика"],
     ["геометрии","геометрия"],["геометрию","геометрия"],["логики","логика"],["логике","логика"],
     ["числа","число"],["числом","число"],["алгоритма","алгоритм"],["алгоритмы","алгоритм"],
     ["доказательства","доказательство"],["гипотезы","гипотеза"],["факта","факт"],["вероятности","вероятность"],
@@ -135,7 +135,7 @@
       const c = concepts[id] || { kind: "категория", definition: parentDefinitions[id], parents: [], features: [] };
       return { handled: true, status: "defined", text: c.definition + "\n\nТип: " + c.kind + ".\nСвязи: " + c.parents.join(", ") + ".\nПризнаки: " + c.features.join("; ") + ".", proof: [{ type: "definition_lookup", concept: id, source: "AKSI built-in concept graph v" + VERSION }], concept: conceptInfo(id) };
     }
-    m = raw.match(/^\s*(?:чем отличается|чем различаются|в чем разница между|сравни)\s+(.+?)\s+(?:и|от)\s+(.+?)\s*[?!.]*\s*$/i);
+    m = raw.match(/^\s*(?:чем отличается|чем различаются|в чем разница между|сравни)\s+(.+?)\s+(?:и|от|с)\s+(.+?)\s*[?!.]*\s*$/i);
     if (m) {
       const a = resolve(m[1]), b = resolve(m[2]);
       if (!a || !b) return { handled: true, status: "unknown_concept", text: "Для сравнения нужны определения обоих понятий. Сейчас я не могу надёжно разобрать: «" + (!a ? m[1].trim() : m[2].trim()) + "».", proof: [] };
@@ -157,6 +157,95 @@
     }
     return null;
   }
-  root.AKSISemanticReasoning = { version: VERSION, answer, resolve, conceptInfo, explainRelation, concepts: Object.keys(concepts) };
+  function auditGraph() {
+    const issues = [];
+    const conceptIds = Object.keys(concepts);
+    const knownNodes = new Set(conceptIds.concat(Object.keys(parentDefinitions)));
+    const aliasTargets = new Map();
+    function addAlias(alias, id, source) {
+      const key = norm(alias);
+      if (!key) {
+        issues.push({ type: "empty_alias", id, source });
+        return;
+      }
+      if (!aliasTargets.has(key)) aliasTargets.set(key, new Map());
+      const targets = aliasTargets.get(key);
+      if (!targets.has(id)) targets.set(id, []);
+      targets.get(id).push(source);
+    }
+    conceptIds.forEach(id => {
+      const concept = concepts[id];
+      if (!concept || typeof concept !== "object" || typeof concept.definition !== "string" ||
+          !concept.definition.trim() || typeof concept.kind !== "string" ||
+          !Array.isArray(concept.parents) || !Array.isArray(concept.features) ||
+          !Array.isArray(concept.aliases)) {
+        issues.push({ type: "malformed_concept", id });
+        return;
+      }
+      concept.aliases.forEach(alias => addAlias(alias, id, "concept.aliases"));
+      concept.parents.forEach(parent => {
+        if (typeof parent !== "string" || !knownNodes.has(parent)) {
+          issues.push({ type: "dangling_parent", id, parent });
+        }
+      });
+    });
+    Object.keys(parentDefinitions).forEach(id => {
+      if (typeof parentDefinitions[id] !== "string" || !parentDefinitions[id].trim()) {
+        issues.push({ type: "malformed_parent_definition", id });
+      }
+      addAlias(id, id, "parentDefinitions");
+    });
+    const inflections = [
+      ["наукой","наука"],["науки","наука"],["математикой","математика"],["математику","математика"],["математике","математика"],["математики","математика"],
+      ["геометрии","геометрия"],["геометрию","геометрия"],["логики","логика"],["логике","логика"],
+      ["числа","число"],["числом","число"],["алгоритма","алгоритм"],["алгоритмы","алгоритм"],
+      ["доказательства","доказательство"],["гипотезы","гипотеза"],["факта","факт"],["вероятности","вероятность"],
+      ["компьютера","компьютер"],["компьютере","компьютер"],["языковой модели","языковая модель"],
+      ["языковую модель","языковая модель"],["искусственного интеллекта","искусственный интеллект"],
+      ["искусственным интеллектом","искусственный интеллект"],["программирования","программирование"],
+      ["программированием","программирование"],["программу","программа"],["программы","программа"],
+      ["данных","данные"],["данными","данные"],["информации","информация"],["информацией","информация"],
+      ["интернета","интернет"],["интернетом","интернет"],["физики","физика"],["физике","физика"],
+      ["биологии","биология"],["биологию","биология"],["химии","химия"],["химию","химия"],
+      ["энергии","энергия"],["энергией","энергия"],["квантового компьютера","квантовый компьютер"],
+      ["квантовом компьютере","квантовый компьютер"],["квантовым компьютером","квантовый компьютер"],
+      ["нейронной сети","нейронная сеть"],["нейросети","нейронная сеть"],["нейросетью","нейронная сеть"],
+      ["нейронной сетью","нейронная сеть"],["логикой","логика"],["логику","логика"],["физикой","физика"],
+      ["физику","физика"],["биологией","биология"],["алгоритмом","алгоритм"],["алгоритме","алгоритм"],
+      ["компьютером","компьютер"],["программой","программа"],["программе","программа"],
+      ["языковой моделью","языковая модель"]
+    ];
+    inflections.forEach(([alias, id]) => {
+      if (!knownNodes.has(id)) issues.push({ type: "dangling_alias_target", alias, id });
+      addAlias(alias, id, "inflection");
+    });
+    for (const [alias, targets] of aliasTargets) {
+      if (targets.size > 1) {
+        issues.push({ type: "alias_collision", alias, targets: Array.from(targets.keys()) });
+      }
+    }
+    const visiting = new Set(), visited = new Set();
+    function visit(id, trail) {
+      if (visiting.has(id)) {
+        issues.push({ type: "parent_cycle", cycle: trail.concat(id) });
+        return;
+      }
+      if (visited.has(id) || !concepts[id]) return;
+      visiting.add(id);
+      (concepts[id].parents || []).forEach(parent => visit(parent, trail.concat(id)));
+      visiting.delete(id);
+      visited.add(id);
+    }
+    conceptIds.forEach(id => visit(id, []));
+    return {
+      schema: "aksi-ontology-audit/1.0",
+      engine_version: VERSION,
+      concept_count: conceptIds.length,
+      parent_definition_count: Object.keys(parentDefinitions).length,
+      issue_count: issues.length,
+      issues
+    };
+  }
+  root.AKSISemanticReasoning = { version: VERSION, answer, resolve, conceptInfo, explainRelation, auditGraph, concepts: Object.keys(concepts) };
   if (typeof module === "object" && module.exports) module.exports = root.AKSISemanticReasoning;
 })(typeof window !== "undefined" ? window : globalThis);
