@@ -48,6 +48,71 @@
           return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура ответа маршрутизатора, не истинность его содержания." };
         }
       });
+      agent.registerAction("math.calculate", {
+        run: async function (input) {
+          if (!root.AKSICalculator || typeof root.AKSICalculator.evaluate !== "function") throw new Error("Калькулятор AKSI недоступен.");
+          const calculation = root.AKSICalculator.evaluate(String(input && input.expression || ""));
+          return {
+            handled: true,
+            version: "2.0.0",
+            route: "calculator",
+            statusText: calculation.ok ? "Вычисление выполнено детерминированным парсером." : "Выражение не удалось вычислить.",
+            text: calculation.ok
+              ? calculation.expression + " = " + calculation.formatted
+              : "Не удалось вычислить выражение: " + calculation.error,
+            calculation,
+            proof: calculation.ok ? [{ type: "calculation", expression: calculation.expression, value: calculation.value, method: "AKSICalculator" }] : []
+          };
+        },
+        verify: function (result) {
+          const calculation = result && result.calculation;
+          const hasText = Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim());
+          const validValue = Boolean(calculation && calculation.ok === true && Number.isFinite(calculation.value));
+          const structuredInputError = Boolean(calculation && calculation.ok === false && typeof calculation.error === "string" && calculation.error.trim());
+          return { ok: hasText && (validValue || structuredInputError), detail: "Проверена структура успешного результата или понятной ошибки ввода; это не доказывает корректность самого выражения пользователя." };
+        }
+      });
+      agent.registerAction("knowledge.write", {
+        requiresApproval: true,
+        run: async function (input) {
+          if (!root.AKSIKnowledgeBase || typeof root.AKSIKnowledgeBase.answer !== "function") throw new Error("Локальная база знаний недоступна.");
+          return root.AKSIKnowledgeBase.answer(String(input && input.prompt || ""));
+        },
+        verify: function (result) {
+          const acceptedStatuses = ["fact_added", "already_known", "fact_session_only", "invalid_fact"];
+          return { ok: Boolean(result && result.handled === true && acceptedStatuses.includes(result.status) && typeof result.text === "string" && result.text.trim()), detail: "Проверен статус записи или структурированного отказа валидации. Постоянное сохранение зависит от подтверждения браузерного хранилища." };
+        }
+      });
+      agent.registerAction("knowledge.read", {
+        run: async function (input) {
+          const result = root.AKSIKnowledgeBase && root.AKSIKnowledgeBase.answer(String(input && input.prompt || ""));
+          return result || root.AKSIAnswerRouter.answer(String(input && input.prompt || ""), input && input.options || {});
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура ответа локальной базы/резервного маршрутизатора, не истинность пользовательских записей." };
+        }
+      });
+      agent.registerAction("semantic.query", {
+        run: async function (input) {
+          const prompt = String(input && input.prompt || "");
+          const result = root.AKSISemanticReasoning && root.AKSISemanticReasoning.answer(prompt);
+          if (result && result.handled && !["unknown_concept", "unknown_relation"].includes(result.status)) {
+            return {
+              handled: true,
+              version: String(root.AKSISemanticReasoning.version || "unknown"),
+              route: "semantic-reasoning",
+              statusText: "Ответ по локальному графу понятий; основания указаны в тексте.",
+              text: result.text,
+              proof: result.proof || [],
+              semantic: result
+            };
+          }
+          return root.AKSIAnswerRouter.answer(prompt, input && input.options || {});
+        },
+        verify: function (result) {
+          return { ok: Boolean(result && result.handled === true && typeof result.text === "string" && result.text.trim()), detail: "Проверена структура вывода семантического модуля, не истинность определения или классификации." };
+        }
+      });
       root.AKSIAgent = agent;
       return { available: true };
     },
