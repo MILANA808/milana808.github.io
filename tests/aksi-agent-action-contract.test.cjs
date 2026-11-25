@@ -15,6 +15,14 @@ const context = {
   console,
   document: { readyState: "loading", addEventListener() {} },
   AKSISystemKernel: { createKernel: () => kernel },
+  AKSIAgentReflection: {
+    create() {
+      return {
+        classify(result) { return result && result.status === "verification_failed" ? "verification_failed" : "execution_error"; },
+        decide() { return { allowed: false, reason: "test_reflection_disabled" }; }
+      };
+    }
+  },
   AKSIAgentOrchestrator: {
     version: "test",
     create() {
@@ -92,6 +100,9 @@ vm.runInContext(fs.readFileSync("system/aksi-boot.js", "utf8"), context);
   const write = actions.get("knowledge.write");
   assert.equal(write.requiresApproval, true);
   assert.equal((await write.run({ prompt: "запомни факт: кошка — это животное" })).status, "fact_added");
+  const read = actions.get("knowledge.read");
+  assert.equal(read.fallbackAction, "answer.respond");
+  assert.equal(read.fallbackSafe, true);
   assert.equal(write.verify(await write.run({ prompt: "запомни факт: кошка — это животное" })).ok, true);
   const invalidFact = await write.run({ prompt: "запомни факт: кот" });
   assert.equal(invalidFact.status, "invalid_fact");
